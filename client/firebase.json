@@ -1,0 +1,45 @@
+{
+  "hosting": {
+    "public": "build/web",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [{ "source": "**", "destination": "/index.html" }]
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "vaca-esquizofrenica",
+          "appId": "1:224477049501:android:3f8600f3c93729ea725a74",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "vaca-esquizofrenica",
+          "appId": "1:224477049501:ios:1a54971227efa758725a74",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "vaca-esquizofrenica",
+          "appId": "1:224477049501:ios:1a54971227efa758725a74",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "vaca-esquizofrenica",
+          "configurations": {
+            "android": "1:224477049501:android:3f8600f3c93729ea725a74",
+            "ios": "1:224477049501:ios:1a54971227efa758725a74",
+            "macos": "1:224477049501:ios:1a54971227efa758725a74",
+            "web": "1:224477049501:web:6c8033dae4732945725a74"
+          }
+        }
+      }
+    }
+  }
+}
