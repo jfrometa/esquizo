@@ -1,0 +1,40 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    
+    {
+      "name": "Start Docker and Run Dart Package",
+      "type": "dart",
+      "request": "launch",
+      "program": "bin/main.dart", // Replace with your Dart entry point
+      "preLaunchTask": "Start Docker and Prisma Migrate",
+      "cwd": "${workspaceFolder}",
+      "args": []
+    }
+  ],
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Start Docker",
+        "type": "shell",
+        "command": "docker-compose up -d", // Assuming you have a docker-compose.yml in your project
+        "problemMatcher": [],
+        "group": "build"
+      },
+      {
+        "label": "Run Prisma Migrate",
+        "type": "shell",
+        "command": "pnpm prisma migrate dev", // Adjust based on your Prisma setup
+        "problemMatcher": [],
+        "group": "build"
+      },
+      {
+        "label": "Start Docker and Prisma Migrate",
+        "dependsOn": ["Start Docker", "Run Prisma Migrate"],
+        "dependsOrder": "sequence",
+        "problemMatcher": []
+      }
+    ]
+  }
+}

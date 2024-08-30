@@ -1,0 +1,32 @@
+version: '3.1'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgrespassword@db:5432/esquizo?schema=public"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    restart: always
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: esquizo
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "9900:8080"
+
+volumes:
+  db_data:

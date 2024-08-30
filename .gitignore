@@ -141,3 +141,17 @@ version
 # typescript
 *.tsbuildinfo 
  
+ # Files and directories created by pub
+*.dart_tool/
+*.packages
+*pubspec.lock
+
+# Files and directories created by dart_frog
+*build/
+*.dart_frog
+
+# Test related files
+*coverage/
+*.env
+
+*db_data/
