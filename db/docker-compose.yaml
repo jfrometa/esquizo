@@ -26,7 +26,7 @@ services:
       - "8080:8080"
     environment:
       - PORT=8080
-      - DATABASE_URL=postgresql://my_user:my_password@host.docker.internal:5432/my_database?schema=public
+      - DATABASE_URL=postgresql://my_user:my_password@my_database:5432/my_database?schema=public
     depends_on:
       my_database:
         condition: service_healthy
@@ -39,7 +39,7 @@ services:
     ports:
       - "5555:5555"
     environment:
-      - DATABASE_URL=postgresql://my_user:my_password@host.docker.internal:5432/my_database?schema=public
+      - DATABASE_URL=postgresql://my_user:my_password@my_database:5432/my_database?schema=public
     volumes:
       - .:/app
     depends_on:

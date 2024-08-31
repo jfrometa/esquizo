@@ -32,25 +32,25 @@ RUN dart pub global run dart_frog_cli:dart_frog build
 RUN dart pub get --offline
 RUN dart compile exe build/bin/server.dart -o build/bin/server
 
-# Build minimal serving image from AOT-compiled `/server` and required system
-# libraries and configuration files stored in `/runtime/` from the build stage.
+# Start with a minimal Debian-based image for the final stage
 FROM debian:buster-slim
 
-# Install any necessary dependencies for PostgreSQL communication
+# Install Node.js and any necessary dependencies for PostgreSQL communication
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq-dev \
     nodejs \
+    npm \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the AOT compiled server and runtime files from the build stage
 COPY --from=build /runtime/ /
 COPY --from=build /app/build/bin/server /app/bin/
 
-# Copy the wait-for-it script to the final image
+# Copy the wait-for-it script from the build stage
 COPY --from=build /usr/local/bin/wait-for-it.sh /usr/local/bin/wait-for-it.sh
 
 # Expose the port your Dart application will run on
 EXPOSE 8080
 
-# Start the server after the database is ready
+# Start the server after the database is ready and run prisma db push
 CMD ["wait-for-it.sh", "my_database:5432", "--", "sh", "-c", "npx prisma db push && /app/bin/server"]
