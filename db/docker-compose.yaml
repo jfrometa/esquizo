@@ -1,32 +1,43 @@
-version: '3.1'
-
+# docker-compose.dev.yml
+version: "3"
 services:
-  api:
-    build: .
+
+  # Launch the db first
+  my_database:
+    container_name: my_database
+    # [IMPORTANT] specify the host name so query engine can access the database referring to the host name
+    hostname: dartpostgres
+    image: postgres:16
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: myPassword123
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+  # Launch this after
+  my_dart_application:
+    container_name: my_dart_application
+    build:
+      dockerfile: ./Dockerfile
+      args:
+        # This is needed for the prisma cli at the build phase
+        # It's very important to use host name from the database container
+        # Otherwise the query engine might not be able to access it
+        - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}?schema=public"
     ports:
       - "8080:8080"
     environment:
-      DATABASE_URL: "postgresql://postgres:postgrespassword@db:5432/esquizo?schema=public"
-    depends_on:
-      - db
-
-  db:
-    image: postgres:16
-    ports:
-      - "5432:5432"
-    restart: always
-    volumes:
-      - db_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: esquizo
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgrespassword
-
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - "9900:8080"
-
-volumes:
-  db_data:
+      - PORT=8080
+      - postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}?schema=public"
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres', '-d', 'midshiftDB']
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      
+networks:
+  my_network:
+    external: true

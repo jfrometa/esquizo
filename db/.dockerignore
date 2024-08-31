@@ -1,4 +1,5 @@
 .dockerignore
+node_modules
 Dockerfile
 build/
 .dart_tool/
