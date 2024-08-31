@@ -1,43 +1,46 @@
-# docker-compose.dev.yml
 version: "3"
-services:
 
-  # Launch the db first
+services:
   my_database:
     container_name: my_database
-    # [IMPORTANT] specify the host name so query engine can access the database referring to the host name
-    hostname: dartpostgres
     image: postgres:16
     restart: unless-stopped
     ports:
-      - "3306:3306"
+      - "5432:5432"  # Expose the PostgreSQL port on the host
     environment:
-      MYSQL_ROOT_PASSWORD: myPassword123
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: my_database
+      POSTGRES_USER: my_user
+      POSTGRES_PASSWORD: my_password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U my_user -d my_database"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # Launch this after
   my_dart_application:
     container_name: my_dart_application
     build:
-      dockerfile: ./Dockerfile
-      args:
-        # This is needed for the prisma cli at the build phase
-        # It's very important to use host name from the database container
-        # Otherwise the query engine might not be able to access it
-        - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}?schema=public"
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     environment:
       - PORT=8080
-      - postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}?schema=public"
-    healthcheck:
-      test: ['CMD', 'pg_isready', '-U', 'postgres', '-d', 'midshiftDB']
-      interval: 5s
-      timeout: 10s
-      retries: 5
-      
-networks:
-  my_network:
-    external: true
+      - DATABASE_URL=postgresql://my_user:my_password@host.docker.internal:5432/my_database?schema=public
+    depends_on:
+      my_database:
+        condition: service_healthy
+
+  prisma_studio:
+    image: node:16
+    container_name: prisma_studio
+    working_dir: /app
+    command: npx prisma studio
+    ports:
+      - "5555:5555"
+    environment:
+      - DATABASE_URL=postgresql://my_user:my_password@host.docker.internal:5432/my_database?schema=public
+    volumes:
+      - .:/app
+    depends_on:
+      - my_database
