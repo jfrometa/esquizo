@@ -85,4 +85,3 @@ flutter:
   assets:
     # - assets/fonts/
     - assets/
-    - assets/key.json

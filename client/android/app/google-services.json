@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "224477049501",
+    "project_id": "vaca-esquizofrenica",
+    "storage_bucket": "vaca-esquizofrenica.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:224477049501:android:3f8600f3c93729ea725a74",
+        "android_client_info": {
+          "package_name": "com.example.starter_architecture_flutter_firebase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "224477049501-keo87lfoskidevsbheo9a7kpr6sbge9s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkG785ePnbgsaQSwQY9jUddiAd8f97KKA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "224477049501-keo87lfoskidevsbheo9a7kpr6sbge9s.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "224477049501-h4s4olc4nbas720a0e4vuj9mqrcn2gd8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.starterArchitectureFlutterFirebase"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
