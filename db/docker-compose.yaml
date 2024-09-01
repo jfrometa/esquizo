@@ -3,6 +3,7 @@ version: "3"
 services:
   my_database:
     container_name: my_database
+    hostname: my_database
     image: postgres:16
     restart: unless-stopped
     ports:

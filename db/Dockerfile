@@ -1,56 +1,78 @@
-# Use the official Dart SDK image as the build environment
 FROM dart:stable AS build
 
+# Download npm to work with prisma within the build phase involving Dart
+# We need it within "build" buildphase since the prisma cli needs Dart to be installed too to run "dart run orm"
+RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - &&\
+    apt-get install -y nodejs
+
+# Setting up the working directory of the container
 WORKDIR /app
 
-# Install Node.js (required for Prisma CLI)
-RUN apt-get update && apt-get install -y curl && \
-    curl -fsSL https://deb.nodesource.com/setup_16.x | bash - && \
-    apt-get install -y nodejs && \
-    rm -rf /var/lib/apt/lists/*
-
-# Install Prisma CLI globally
-RUN npm install -g prisma
-
-# Resolve app dependencies.
-COPY pubspec.* ./
+# Copying pubspec from the project (left side) into the working directory of the container
+COPY ./pubspec.* ./
 RUN dart pub get
 
-# Copy app source code and the wait-for-it script
+# Copy the project source code into the working directory
 COPY . .
-COPY scripts/wait-for-it.sh /usr/local/bin/wait-for-it.sh
-RUN chmod +x /usr/local/bin/wait-for-it.sh
 
-# Generate Prisma Client
+# Request DATABASE_URL as build-time environment variable because for prisma cli to read it
+ARG DATABASE_URL
+
+# Generate prisma-related files
+RUN npm install prisma
 RUN npx prisma generate
 
-# Generate a production build.
+# Following code is specific to a server framework that you are using
+# In the example below, it's dart frog
+# Generate other Dart classes
+
+# Dart frog build START
+RUN dart pub run build_runner build
+
+# Bundle the project
 RUN dart pub global activate dart_frog_cli
 RUN dart pub global run dart_frog_cli:dart_frog build
 
-# Ensure packages are still up-to-date if anything has changed.
+# Generate executable
 RUN dart pub get --offline
 RUN dart compile exe build/bin/server.dart -o build/bin/server
 
-# Start with a minimal Debian-based image for the final stage
-FROM debian:buster-slim
+# Dart frog build END
 
-# Install Node.js and any necessary dependencies for PostgreSQL communication
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    nodejs \
-    npm \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Configure runtime for prisma
+RUN FILES="libz.so libgcc_s.so libssl.so libcrypto.so"; \
+    for file in $FILES; do \
+    so="$(find / -name "${file}*" -print -quit)"; \
+    dir="$(dirname "$so")"; \
+    mkdir -p "/runtime${dir}"; \
+    cp "$so" "/runtime$so"; \
+    echo "Copied $so to /runtime${so}"; \
+    done
 
-# Copy the AOT compiled server and runtime files from the build stage
+FROM scratch
+
+# Copy runtime from previous build phase
 COPY --from=build /runtime/ /
+
+# Copy executable from the previous phase
 COPY --from=build /app/build/bin/server /app/bin/
 
-# Copy the wait-for-it script from the build stage
-COPY --from=build /usr/local/bin/wait-for-it.sh /usr/local/bin/wait-for-it.sh
+# [IMPORTANT] Copy executable the binary engine
+COPY --from=build /app/prisma/prisma-query-engine /app/bin/
 
-# Expose the port your Dart application will run on
-EXPOSE 8080
+# [IMPORTANT] Specify which directory to run the server from
+# It's important because prisma will need to discover the query engine referring to Directory.current
+# Running it inside /app/bin/ will make Directory.current return "/app/bin/" so it can discover the query engine placed in the same directory
+WORKDIR /app/bin/
 
-# Start the server after the database is ready and run prisma db push
-CMD ["wait-for-it.sh", "my_database:5432", "--", "sh", "-c", "npx prisma db push && /app/bin/server"]
+# "ARG DATABASE_URL" is a dynamic build-phase env variable
+# "ENV DATABASE_URL" is a environment variable for the container
+# By default it's empty but we will provide it within docker-compose
+ENV DATABASE_URL = ""
+
+# Server application port
+# Default is 8080
+ENV PORT = 8080
+
+# Execute the server executable
+CMD ["/app/bin/server"]

@@ -8,12 +8,14 @@ environment:
 
 # Add regular dependencies here.
 dependencies:
+  #docker-compose up --build -d
   dart_frog: ^1.1.0
   orm: ^5.0.4
   json_annotation: ^4.9.0
   # path: ^1.8.0
 
 dev_dependencies:
+  # export PATH="$PATH":"$HOME/.pub-cache/bin"
   #run build_runner build --delete-conflicting-outputs
   build_runner: ^2.4.12
   json_serializable: ^6.8.0
