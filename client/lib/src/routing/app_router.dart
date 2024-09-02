@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/chat/presentation/chat_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/prompt/presentation/prompt_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/recepies/presentation/saved_recipes_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/main_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_startup.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/data/firebase_auth_repository.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/custom_profile_screen.dart';
@@ -135,7 +136,7 @@ GoRouter goRouter(GoRouterRef ref) {
                 path: '/chat',
                 name: AppRoute.chat.name,
                 pageBuilder: (context, state) => const NoTransitionPage(
-                  child: ChatScreen(),
+                  child: MesaRedondaMainScreen(),
                 ),
               ),
             ],

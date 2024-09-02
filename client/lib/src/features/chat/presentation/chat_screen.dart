@@ -1,14 +1,11 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/chat/application/get_all_messages_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/chat/presentation/send_image_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/features/chat/presentation/widgets/messages_list.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/dialog_flow_cx/data/dialog_flow_client.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/app_theme.dart';
 import 'package:uuid/uuid.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
