@@ -69,7 +69,7 @@ class ScaffoldWithNavigationBar extends ConsumerWidget {
           NavigationDestination(
             icon: const Icon(Icons.work_outline),
             selectedIcon: const Icon(Icons.chat),
-            label: 'Chat'.hardcoded,
+            label: 'Home'.hardcoded,
           ),
           NavigationDestination(
             icon: const Icon(Icons.view_headline_outlined),
@@ -127,7 +127,7 @@ class ScaffoldWithNavigationRail extends StatelessWidget {
               NavigationRailDestination(
                 icon: const Icon(Icons.work_outline),
                 selectedIcon: const Icon(Icons.chat),
-                label: Text('Chat'.hardcoded),
+                label: Text('Home'.hardcoded),
               ),
               NavigationRailDestination(
                 icon: const Icon(Icons.work_outline),

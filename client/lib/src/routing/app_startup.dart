@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/constants/app_sizes.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/onboarding/data/onboarding_repository.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 part 'app_startup.g.dart';
+
+/// Firebase initialization provider
+final firebaseInitializationProvider = FutureProvider<FirebaseApp>((ref) async {
+  return await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform);
+});
+
+/// A state provider to track Firebase initialization status
+final isFirebaseInitializedProvider = StateProvider<bool>((ref) => false);
 
 // https://codewithandrea.com/articles/robust-app-initialization-riverpod/
 @Riverpod(keepAlive: true)
@@ -13,7 +24,13 @@ Future<void> appStartup(AppStartupRef ref) async {
     // ensure dependent providers are disposed as well
     ref.invalidate(onboardingRepositoryProvider);
   });
-  // await for all initialization code to be complete before returning
+
+  // Initialize Firebase
+  await ref.watch(firebaseInitializationProvider.future);
+  // Update the state of isFirebaseInitialized to true after Firebase is initialized
+  ref.read(isFirebaseInitializedProvider.notifier).state = true;
+
+  // Wait for all initialization code to be complete before returning
   await ref.watch(onboardingRepositoryProvider.future);
 }
 
@@ -25,6 +42,8 @@ class AppStartupWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appStartupState = ref.watch(appStartupProvider);
+    final isFirebaseInitialized = ref.watch(isFirebaseInitializedProvider);
+
     return appStartupState.when(
       data: (_) => onLoaded(context),
       loading: () => const AppStartupLoadingWidget(),

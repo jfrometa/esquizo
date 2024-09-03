@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/categories.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/trending.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/util_mesa_redonda/categories.dart';
@@ -7,6 +9,7 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/util_mesa
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/category_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/search_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/slide_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
 class Home extends StatelessWidget {
   const Home({super.key});
@@ -36,8 +39,8 @@ class Home extends StatelessWidget {
               buildCategoryList(context),
               const SizedBox(height: 20.0),
               buildCategoryRow('Friends', context),
-              const SizedBox(height: 10.0),
-              buildFriendsList(),
+              // const SizedBox(height: 10.0),
+              // buildFriendsList(),
               const SizedBox(height: 30.0),
             ],
           ),
@@ -46,145 +49,208 @@ class Home extends StatelessWidget {
     );
   }
 
-  buildRestaurantRow(String restaurant, BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        Text(
-          restaurant,
-          style: const TextStyle(
-            fontSize: 20.0,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        TextButton(
-          child: Text(
-            "See all (9)",
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.secondary,
+  Widget buildRestaurantRow(String restaurant, BuildContext context) {
+    return SizedBox(
+      height: 60.0,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: <Widget>[
+          Text(
+            restaurant,
+            style: const TextStyle(
+              fontSize: 20.0,
+              fontWeight: FontWeight.w800,
             ),
           ),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return Trending();
-                },
+          const SizedBox(width: 10.0),
+          TextButton(
+            child: Text(
+              "See all (9)",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.secondary,
               ),
-            );
-          },
-        ),
-      ],
+            ),
+            onPressed: () {
+              context.goNamed(AppRoute.trending.name);
+            },
+          ),
+        ],
+      ),
     );
   }
 
-  buildCategoryRow(String category, BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        Text(
-          category,
-          style: const TextStyle(
-            fontSize: 20.0,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        TextButton(
-          child: Text(
-            "See all (9)",
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.secondary,
+  Widget buildCategoryRow(String category, BuildContext context) {
+    return SizedBox(
+      height: 60.0,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: <Widget>[
+          Text(
+            category,
+            style: const TextStyle(
+              fontSize: 20.0,
+              fontWeight: FontWeight.w800,
             ),
           ),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return const Categories();
-                },
+          const SizedBox(width: 10.0),
+          TextButton(
+            child: Text(
+              "See all (9)",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.secondary,
               ),
-            );
-          },
-        ),
-      ],
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return const Categories();
+                  },
+                ),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 
-  buildSearchBar(BuildContext context) {
+  Widget buildSearchBar(BuildContext context) {
     return Container(
-        margin: const EdgeInsets.fromLTRB(10, 5, 10, 0), child: SearchCard());
+      margin: const EdgeInsets.fromLTRB(10, 5, 10, 0),
+      child: SearchCard(),
+    );
   }
 
-  buildCategoryList(BuildContext context) {
+  Widget buildCategoryList(BuildContext context) {
     return SizedBox(
       height: MediaQuery.of(context).size.height / 6,
-      child: ListView.builder(
-        primary: false,
-        scrollDirection: Axis.horizontal,
-        shrinkWrap: true,
-        itemCount: categories.length,
-        itemBuilder: (BuildContext context, int index) {
-          Map cat = categories[index];
+      child: Focus(
+        child: ListView.builder(
+          primary: false,
+          scrollDirection: Axis.horizontal,
+          shrinkWrap: true,
+          itemCount: categories.length,
+          itemBuilder: (BuildContext context, int index) {
+            Map cat = categories[index];
 
-          return CategoryItem(
-            cat: cat,
-          );
+            return CategoryItem(
+              cat: cat,
+            );
+          },
+        ),
+        onKeyEvent: (FocusNode node, KeyEvent event) {
+          if (event is KeyDownEvent) {
+            if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+              node.nextFocus();
+              return KeyEventResult.handled;
+            } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+              node.previousFocus();
+              return KeyEventResult.handled;
+            }
+          }
+          return KeyEventResult.ignored;
         },
       ),
     );
   }
 
-  buildRestaurantList(BuildContext context) {
-    return SizedBox(
-      height: MediaQuery.of(context).size.height / 2.4,
-      width: MediaQuery.of(context).size.width,
-      child: ListView.builder(
-        primary: false,
-        shrinkWrap: true,
-        scrollDirection: Axis.horizontal,
-        itemCount: restaurants.length,
-        itemBuilder: (BuildContext context, int index) {
-          Map restaurant = restaurants[index];
+  Widget buildRestaurantList(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Determine the number of items to show based on screen width
+        int crossAxisCount;
+        if (constraints.maxWidth >= 1200) {
+          crossAxisCount = 2; // Large screens
+        } else if (constraints.maxWidth >= 800) {
+          crossAxisCount = 2; // Tablets
+        } else {
+          crossAxisCount = 1; // Small screens
+        }
 
-          return Padding(
-            padding: const EdgeInsets.only(right: 10.0),
-            child: SlideItem(
-              img: restaurant["img"],
-              title: restaurant["title"],
-              address: restaurant["address"],
-              rating: restaurant["rating"],
-              key: const Key('sdfsdfsddfgsdfw23'),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  buildFriendsList() {
-    return SizedBox(
-      height: 50.0,
-      child: ListView.builder(
-        primary: false,
-        scrollDirection: Axis.horizontal,
-        shrinkWrap: true,
-        itemCount: friends.length,
-        itemBuilder: (BuildContext context, int index) {
-          String img = friends[index];
-
-          return Padding(
-            padding: const EdgeInsets.only(right: 5.0),
-            child: CircleAvatar(
-              backgroundImage: AssetImage(
-                img,
+        return SizedBox(
+          height: MediaQuery.of(context).size.height / 2.4,
+          width: MediaQuery.of(context).size.width,
+          child: Focus(
+            child: GridView.builder(
+              primary: false,
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              controller: ScrollController(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 1, // Always 1 row
+                childAspectRatio: constraints.maxWidth /
+                    (constraints.maxWidth >= 1200 ? 2.0 : 1 / crossAxisCount),
+                mainAxisSpacing: 10.0,
+                crossAxisSpacing: 10.0,
               ),
-              radius: 25.0,
+              itemCount: restaurants.length,
+              itemBuilder: (BuildContext context, int index) {
+                Map restaurant = restaurants[index];
+
+                return SlideItem(
+                  img: restaurant["img"],
+                  title: restaurant["title"],
+                  address: restaurant["address"],
+                  rating: restaurant["rating"],
+                  key: Key('restaurant_$index'),
+                );
+              },
             ),
-          );
-        },
-      ),
+            onKeyEvent: (FocusNode node, KeyEvent event) {
+              if (event is KeyDownEvent) {
+                if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+                  node.nextFocus();
+                  return KeyEventResult.handled;
+                } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+                  node.previousFocus();
+                  return KeyEventResult.handled;
+                }
+              }
+              return KeyEventResult.ignored;
+            },
+          ),
+        );
+      },
     );
   }
+  // Widget buildFriendsList() {
+  //   return SizedBox(
+  //     height: 50.0,
+  //     child: Focus(
+  //       child: ListView.builder(
+  //         primary: false,
+  //         scrollDirection: Axis.horizontal,
+  //         shrinkWrap: true,
+  //         itemCount: friends.length,
+  //         itemBuilder: (BuildContext context, int index) {
+  //           String img = friends[index];
+
+  //           return Padding(
+  //             padding: const EdgeInsets.only(right: 5.0),
+  //             child: CircleAvatar(
+  //               backgroundImage: AssetImage(
+  //                 img,
+  //               ),
+  //               radius: 25.0,
+  //             ),
+  //           );
+  //         },
+  //       ),
+  //       onKeyEvent: (FocusNode node, KeyEvent event) {
+  //         if (event is KeyDownEvent) {
+  //           if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+  //             node.nextFocus();
+  //             return KeyEventResult.handled;
+  //           } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+  //             node.previousFocus();
+  //             return KeyEventResult.handled;
+  //           }
+  //         }
+  //         return KeyEventResult.ignored;
+  //       },
+  //     ),
+  //   );
+  // }
 }

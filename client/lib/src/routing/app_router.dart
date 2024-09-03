@@ -3,7 +3,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/chat/presentation/chat_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/prompt/presentation/prompt_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/recepies/presentation/saved_recipes_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/home.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/main_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/trending.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_startup.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/data/firebase_auth_repository.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/custom_profile_screen.dart';
@@ -20,6 +22,7 @@ import 'package:starter_architecture_flutter_firebase/src/features/onboarding/pr
 import 'package:starter_architecture_flutter_firebase/src/routing/go_router_refresh_stream.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/not_found_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/scaffold_with_nested_navigation.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 part 'app_router.g.dart';
 
@@ -28,6 +31,8 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _chatNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'chat');
 final _jobsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'jobs');
 final _entriesNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'entries');
+final _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
+final _trendingNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'trending');
 final _accountNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'account');
 final _recepiesNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'recepies');
 final _promptNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'prompt');
@@ -46,12 +51,13 @@ enum AppRoute {
   profile,
   chat,
   prompt,
-  recepies
+  recepies,
+  trending,
+  home
 }
 
 @riverpod
 GoRouter goRouter(GoRouterRef ref) {
-  // rebuild GoRouter when app startup state changes
   final appStartupState = ref.watch(appStartupProvider);
   final authRepository = ref.watch(authRepositoryProvider);
 
@@ -59,35 +65,57 @@ GoRouter goRouter(GoRouterRef ref) {
     initialLocation: '/signIn',
     navigatorKey: _rootNavigatorKey,
     debugLogDiagnostics: true,
-    redirect: (context, state) {
+    redirect: (context, state) async {
+      // Ensure Firebase is initialized
+      // Access the real-time Firebase initialization status
+      final isFirebaseInitialized = ref.watch(isFirebaseInitializedProvider);
+
+      if (!isFirebaseInitialized) {
+        await Firebase.initializeApp();
+        // var t =  ref.watch(firebaseInitializationProvider);
+// firebaseInit.when(
+//         loading: () => const FirebaseLoadingScreen(),
+//         error: (error, stack) => FirebaseErrorScreen(
+//           error: error,
+//           onRetry: () => ref.refresh(firebaseInitializationProvider),
+//         ),
+//         data: (firebaseApp) {
+//           // FirebaseApp instance is now available
+//           return HomeScreen(firebaseApp: firebaseApp);
+//         },
+        // ref.read(appStartupProvider.notifier).setFirebaseInitialized();
+      }
+
       // If the app is still initializing, show the /startup route
       if (appStartupState.isLoading || appStartupState.hasError) {
         return '/startup';
       }
+
       final onboardingRepository =
           ref.read(onboardingRepositoryProvider).requireValue;
       final didCompleteOnboarding = onboardingRepository.isOnboardingComplete();
       final path = state.uri.path;
+
       if (!didCompleteOnboarding) {
-        // Always check state.subloc before returning a non-null route
-        // https://github.com/flutter/packages/blob/main/packages/go_router/example/lib/redirection.dart#L78
         if (path != '/onboarding') {
           return '/onboarding';
         }
         return null;
       }
+
       final isLoggedIn = authRepository.currentUser != null;
 
       if (isLoggedIn) {
         if (path.startsWith('/startup') ||
             path.startsWith('/onboarding') ||
             path.startsWith('/signIn')) {
-          return '/chat';
+          return '/home';
         }
       } else {
         if (path.startsWith('/startup') ||
             path.startsWith('/onboarding') ||
             path.startsWith('/jobs') ||
+            path.startsWith('/home') ||
             path.startsWith('/chat') ||
             path.startsWith('/entries') ||
             path.startsWith('/account')) {
@@ -102,8 +130,6 @@ GoRouter goRouter(GoRouterRef ref) {
         path: '/startup',
         pageBuilder: (context, state) => NoTransitionPage(
           child: AppStartupWidget(
-            // * This is just a placeholder
-            // * The loaded route will be managed by GoRouter on state change
             onLoaded: (_) => const SizedBox.shrink(),
           ),
         ),
@@ -122,22 +148,32 @@ GoRouter goRouter(GoRouterRef ref) {
           child: CustomSignInScreen(),
         ),
       ),
-      // Stateful navigation based on:
-      // https://github.com/flutter/packages/blob/main/packages/go_router/example/lib/stateful_shell_route.dart
       StatefulShellRoute.indexedStack(
         pageBuilder: (context, state, navigationShell) => NoTransitionPage(
           child: ScaffoldWithNestedNavigation(navigationShell: navigationShell),
         ),
         branches: [
           StatefulShellBranch(
-            navigatorKey: _chatNavigatorKey,
+            navigatorKey: _homeNavigatorKey,
             routes: [
               GoRoute(
-                path: '/chat',
-                name: AppRoute.chat.name,
+                path: '/home',
+                name: AppRoute.home.name,
                 pageBuilder: (context, state) => const NoTransitionPage(
-                  child: MesaRedondaMainScreen(),
+                  child: Home(),
                 ),
+                routes: [
+                  GoRoute(
+                    path: 'trending',
+                    name: AppRoute.trending.name,
+                    parentNavigatorKey: _homeNavigatorKey,
+                    pageBuilder: (context, state) {
+                      return const MaterialPage(
+                        child: Trending(),
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),
@@ -168,19 +204,6 @@ GoRouter goRouter(GoRouterRef ref) {
                     child: PromptScreen(
                   canScroll: true,
                 )),
-                // routes: [
-                //   GoRoute(
-                //     path: 'recepies',
-                //     name: AppRoute.recepies.name,
-                //     parentNavigatorKey: _recepiesNavigatorKey,
-                //      pageBuilder: (context, state) {
-                //   return const MaterialPage(
-                //     fullscreenDialog: false,
-                //     child: RecipeDialogScreen(),
-                //   );
-                // },
-                //   ),
-                // ],
               ),
             ],
           ),
@@ -263,18 +286,6 @@ GoRouter goRouter(GoRouterRef ref) {
               ),
             ],
           ),
-          // StatefulShellBranch(
-          //   navigatorKey: _entriesNavigatorKey,
-          //   routes: [
-          //     GoRoute(
-          //       path: '/entries',
-          //       name: AppRoute.entries.name,
-          //       pageBuilder: (context, state) => const NoTransitionPage(
-          //         child: EntriesScreen(),
-          //       ),
-          //     ),
-          //   ],
-          // ),
           StatefulShellBranch(
             navigatorKey: _accountNavigatorKey,
             routes: [
