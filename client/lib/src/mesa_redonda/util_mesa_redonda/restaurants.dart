@@ -1,4 +1,4 @@
-List restaurants = [
+List plans = [
   {
     "img": "assets/food1.jpeg",
     "title": "Happy Jones",

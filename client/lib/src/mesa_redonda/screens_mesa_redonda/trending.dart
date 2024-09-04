@@ -19,28 +19,31 @@ class Trending extends StatelessWidget {
           vertical: 0,
           horizontal: 10.0,
         ),
-        child: ListView(
+        child: Column(
           children: <Widget>[
             SearchCard(),
             const SizedBox(height: 10.0),
-            ListView.builder(
-              primary: false,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: restaurants.length,
-              itemBuilder: (BuildContext context, int index) {
-                Map restaurant = restaurants[index];
+            Expanded(
+              child: GridView.builder(
+                itemCount: plans.length,
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 450, // Maximum width of each grid item
+                  crossAxisSpacing: 10.0,
+                  mainAxisSpacing: 10.0,
+                ),
+                itemBuilder: (BuildContext context, int index) {
+                  Map restaurant = plans[index];
 
-                return TrendingItem(
-                  img: restaurant["img"],
-                  title: restaurant["title"],
-                  address: restaurant["address"],
-                  rating: restaurant["rating"],
-                  key: const Key("ff22134234"),
-                );
-              },
+                  return TrendingItem(
+                    img: restaurant["img"],
+                    title: restaurant["title"],
+                    address: restaurant["address"],
+                    rating: restaurant["rating"],
+                    key: Key('restaurant_$index'),
+                  );
+                },
+              ),
             ),
-            const SizedBox(height: 10.0),
           ],
         ),
       ),

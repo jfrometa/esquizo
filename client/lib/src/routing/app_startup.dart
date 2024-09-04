@@ -8,13 +8,20 @@ import 'package:firebase_core/firebase_core.dart';
 
 part 'app_startup.g.dart';
 
-/// Firebase initialization provider
+// Firebase initialization provider
 final firebaseInitializationProvider = FutureProvider<FirebaseApp>((ref) async {
-  return await Firebase.initializeApp(
+  if (Firebase.apps.isNotEmpty) {
+    return Firebase.apps[0];
+  }
+
+  final app = await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform);
+
+  ref.read(isFirebaseInitializedProvider.notifier).state = true;
+
+  return app;
 });
 
-/// A state provider to track Firebase initialization status
 final isFirebaseInitializedProvider = StateProvider<bool>((ref) => false);
 
 // https://codewithandrea.com/articles/robust-app-initialization-riverpod/
@@ -26,12 +33,10 @@ Future<void> appStartup(AppStartupRef ref) async {
   });
 
   // Initialize Firebase
-  await ref.watch(firebaseInitializationProvider.future);
-  // Update the state of isFirebaseInitialized to true after Firebase is initialized
-  ref.read(isFirebaseInitializedProvider.notifier).state = true;
+  await ref.read(firebaseInitializationProvider.future);
 
   // Wait for all initialization code to be complete before returning
-  await ref.watch(onboardingRepositoryProvider.future);
+  await ref.read(onboardingRepositoryProvider.future);
 }
 
 /// Widget class to manage asynchronous app initialization

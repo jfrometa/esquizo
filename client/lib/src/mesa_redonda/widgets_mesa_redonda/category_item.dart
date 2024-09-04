@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class CategoryItem extends StatelessWidget {
   final Map cat;
 
-  CategoryItem({required this.cat});
+  const CategoryItem({super.key, required this.cat});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class CategoryItem extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   // Add one stop for each color. Stops should increase from 0 to 1
-                  stops: [0.2, 0.7],
+                  stops: const [0.2, 0.7],
                   colors: [
                     cat['color1'],
                     cat['color2'],
@@ -41,14 +41,14 @@ class CategoryItem extends StatelessWidget {
                 height: MediaQuery.of(context).size.height / 6,
                 width: MediaQuery.of(context).size.height / 6,
                 padding: const EdgeInsets.all(1),
-                constraints: BoxConstraints(
+                constraints: const BoxConstraints(
                   minWidth: 20,
                   minHeight: 20,
                 ),
                 child: Center(
                   child: Text(
                     cat["name"],
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,

@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/chat/presentation/chat_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/prompt/presentation/prompt_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/recepies/presentation/saved_recipes_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/addToOrder/add_to_order_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/checkout.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/demoData.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/details/details_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/categories.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/home.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/main_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/trending.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_startup.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/data/firebase_auth_repository.dart';
@@ -36,6 +42,8 @@ final _trendingNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'trending');
 final _accountNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'account');
 final _recepiesNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'recepies');
 final _promptNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'prompt');
+final _detailsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'details');
+final _cartNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'cart');
 
 enum AppRoute {
   onboarding,
@@ -53,6 +61,12 @@ enum AppRoute {
   prompt,
   recepies,
   trending,
+  category,
+  details,
+  addToOrder,
+  cart,
+  checkout,
+  detailScreen,
   home
 }
 
@@ -60,6 +74,7 @@ enum AppRoute {
 GoRouter goRouter(GoRouterRef ref) {
   final appStartupState = ref.watch(appStartupProvider);
   final authRepository = ref.watch(authRepositoryProvider);
+  final isFirebaseInitialized = ref.watch(isFirebaseInitializedProvider);
 
   return GoRouter(
     initialLocation: '/signIn',
@@ -67,23 +82,14 @@ GoRouter goRouter(GoRouterRef ref) {
     debugLogDiagnostics: true,
     redirect: (context, state) async {
       // Ensure Firebase is initialized
-      // Access the real-time Firebase initialization status
-      final isFirebaseInitialized = ref.watch(isFirebaseInitializedProvider);
-
       if (!isFirebaseInitialized) {
-        await Firebase.initializeApp();
-        // var t =  ref.watch(firebaseInitializationProvider);
-// firebaseInit.when(
-//         loading: () => const FirebaseLoadingScreen(),
-//         error: (error, stack) => FirebaseErrorScreen(
-//           error: error,
-//           onRetry: () => ref.refresh(firebaseInitializationProvider),
-//         ),
-//         data: (firebaseApp) {
-//           // FirebaseApp instance is now available
-//           return HomeScreen(firebaseApp: firebaseApp);
-//         },
-        // ref.read(appStartupProvider.notifier).setFirebaseInitialized();
+        try {
+          await Firebase.initializeApp(
+              options: DefaultFirebaseOptions.currentPlatform);
+        } catch (e) {
+          print("Error initializing Firebase: $e"); // Log the error
+          return '/error'; // Redirect to error page
+        }
       }
 
       // If the app is still initializing, show the /startup route
@@ -172,6 +178,83 @@ GoRouter goRouter(GoRouterRef ref) {
                         child: Trending(),
                       );
                     },
+                  ),
+                  GoRoute(
+                    path: 'addToCart/:itemId', // Changed id to itemId
+                    name: AppRoute.addToOrder.name,
+                    pageBuilder: (context, state) {
+                      final itemId = state.pathParameters['itemId']!;
+                      return MaterialPage(
+                        // fullscreenDialog: true,
+                        child: AddToOrderScrreen(
+                          itemId: itemId,
+                        ),
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: 'category',
+                    name: AppRoute.category.name,
+                    pageBuilder: (context, state) {
+                      return const MaterialPage(
+                        child: Categories(),
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: 'details',
+                    name: AppRoute.details.name,
+                    pageBuilder: (context, state) {
+                      return const MaterialPage(
+                        child: DetailsScreen(),
+                      );
+                    },
+                    routes: [
+                      GoRoute(
+                        path:
+                            'addToOrder/:detailItemId', // Changed id to detailItemId
+                        name: AppRoute.detailScreen.name,
+                        pageBuilder: (context, state) {
+                          final detailItemId =
+                              state.pathParameters['detailItemId']!;
+                          return MaterialPage(
+                            // fullscreenDialog: true,
+                            child: AddToOrderScrreen(
+                              itemId: detailItemId,
+                            ),
+                          );
+                        },
+                        routes: [
+                          GoRoute(
+                            path:
+                                'cart/:cartItemId', // Changed id to cartItemId
+                            name: AppRoute.cart.name,
+                            pageBuilder: (context, state) {
+                              // final cartItemId = Math.random();
+                              return MaterialPage(
+                                // fullscreenDialog: true,
+                                child: CartScreen(
+                                  cartItems: cartItems, isAuthenticated: true,
+                                  // selectedItemId: cartItemId,
+                                ),
+                              );
+                            },
+                            routes: [
+                              GoRoute(
+                                path: 'checkout',
+                                name: AppRoute.checkout.name,
+                                pageBuilder: (context, state) {
+                                  return const MaterialPage(
+                                    // fullscreenDialog: true,
+                                    child: CheckoutScreen(),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ],
               ),

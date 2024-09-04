@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/categories.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/trending.dart';
+import 'package:starter_architecture_flutter_firebase/src/helpers/scroll_bahaviour.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/util_mesa_redonda/categories.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/util_mesa_redonda/friends.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/util_mesa_redonda/restaurants.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/category_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/search_card.dart';
@@ -28,19 +26,16 @@ class Home extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
           child: ListView(
             children: <Widget>[
+              const SizedBox(height: 30.0),
               buildSearchBar(context),
-              const SizedBox(height: 20.0),
-              buildRestaurantRow('Trending Restaurants', context),
-              const SizedBox(height: 10.0),
-              buildRestaurantList(context),
-              const SizedBox(height: 10.0),
-              buildCategoryRow('Category', context),
+              const SizedBox(height: 30.0),
+              buildCategoryRow('Servicios', context),
               const SizedBox(height: 10.0),
               buildCategoryList(context),
-              const SizedBox(height: 20.0),
-              buildCategoryRow('Friends', context),
-              // const SizedBox(height: 10.0),
-              // buildFriendsList(),
+              const SizedBox(height: 30.0),
+              buildRestaurantRow('Los Mas Populares', context),
+              const SizedBox(height: 10.0),
+              buildRestaurantList(context),
               const SizedBox(height: 30.0),
             ],
           ),
@@ -52,8 +47,8 @@ class Home extends StatelessWidget {
   Widget buildRestaurantRow(String restaurant, BuildContext context) {
     return SizedBox(
       height: 60.0,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Text(
             restaurant,
@@ -62,10 +57,9 @@ class Home extends StatelessWidget {
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(width: 10.0),
           TextButton(
             child: Text(
-              "See all (9)",
+              "Ver todos",
               style: TextStyle(
                 color: Theme.of(context).colorScheme.secondary,
               ),
@@ -82,8 +76,8 @@ class Home extends StatelessWidget {
   Widget buildCategoryRow(String category, BuildContext context) {
     return SizedBox(
       height: 60.0,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Text(
             category,
@@ -92,23 +86,15 @@ class Home extends StatelessWidget {
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(width: 10.0),
           TextButton(
             child: Text(
-              "See all (9)",
+              "Ver todos",
               style: TextStyle(
                 color: Theme.of(context).colorScheme.secondary,
               ),
             ),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return const Categories();
-                  },
-                ),
-              );
+              context.goNamed(AppRoute.category.name);
             },
           ),
         ],
@@ -127,18 +113,29 @@ class Home extends StatelessWidget {
     return SizedBox(
       height: MediaQuery.of(context).size.height / 6,
       child: Focus(
-        child: ListView.builder(
-          primary: false,
-          scrollDirection: Axis.horizontal,
-          shrinkWrap: true,
-          itemCount: categories.length,
-          itemBuilder: (BuildContext context, int index) {
-            Map cat = categories[index];
+        child: ScrollConfiguration(
+          behavior: CustomScrollBehavior(),
+          child: ListView.builder(
+            primary: false,
+            scrollDirection: Axis.horizontal,
+            shrinkWrap: true,
+            itemCount: categories.length,
+            itemBuilder: (BuildContext context, int index) {
+              Map cat = categories[index];
 
-            return CategoryItem(
-              cat: cat,
-            );
-          },
+              return GestureDetector(
+                onTap: () {
+                  context.goNamed(
+                    AppRoute.details.name,
+                    extra: cat,
+                  );
+                },
+                child: CategoryItem(
+                  cat: cat,
+                ),
+              );
+            },
+          ),
         ),
         onKeyEvent: (FocusNode node, KeyEvent event) {
           if (event is KeyDownEvent) {
@@ -159,44 +156,52 @@ class Home extends StatelessWidget {
   Widget buildRestaurantList(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Determine the number of items to show based on screen width
-        int crossAxisCount;
-        if (constraints.maxWidth >= 1200) {
-          crossAxisCount = 2; // Large screens
-        } else if (constraints.maxWidth >= 800) {
-          crossAxisCount = 2; // Tablets
-        } else {
-          crossAxisCount = 1; // Small screens
-        }
-
         return SizedBox(
           height: MediaQuery.of(context).size.height / 2.4,
           width: MediaQuery.of(context).size.width,
           child: Focus(
-            child: GridView.builder(
-              primary: false,
-              shrinkWrap: true,
-              scrollDirection: Axis.horizontal,
-              controller: ScrollController(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 1, // Always 1 row
-                childAspectRatio: constraints.maxWidth /
-                    (constraints.maxWidth >= 1200 ? 2.0 : 1 / crossAxisCount),
-                mainAxisSpacing: 10.0,
-                crossAxisSpacing: 10.0,
-              ),
-              itemCount: restaurants.length,
-              itemBuilder: (BuildContext context, int index) {
-                Map restaurant = restaurants[index];
+            child: ScrollConfiguration(
+              behavior: CustomScrollBehavior(),
+              child: GridView.builder(
+                primary: false,
+                shrinkWrap: true,
+                scrollDirection: Axis.horizontal,
+                controller: ScrollController(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 1, // Always 1 row
+                  childAspectRatio: constraints.maxWidth /
+                      ((constraints.maxWidth >= 1200
+                              ? 1200
+                              : constraints.maxWidth) /
+                          1),
+                  mainAxisSpacing: 10.0,
+                  crossAxisSpacing: 10.0,
+                ),
+                itemCount: plans.length,
+                itemBuilder: (BuildContext context, int index) {
+                  Map restaurant = plans[index];
 
-                return SlideItem(
-                  img: restaurant["img"],
-                  title: restaurant["title"],
-                  address: restaurant["address"],
-                  rating: restaurant["rating"],
-                  key: Key('restaurant_$index'),
-                );
-              },
+                  return GestureDetector(
+                    onTap: () {
+                      context.goNamed(
+                        AppRoute.addToOrder.name,
+                        pathParameters: {
+                          // "detailItemId": plans[index].toString(),
+                          "itemId": plans[index].toString(),
+                        },
+                        extra: restaurant,
+                      );
+                    },
+                    child: SlideItem(
+                      img: restaurant["img"],
+                      title: restaurant["title"],
+                      address: restaurant["address"],
+                      rating: restaurant["rating"],
+                      key: Key('restaurant_$index'),
+                    ),
+                  );
+                },
+              ),
             ),
             onKeyEvent: (FocusNode node, KeyEvent event) {
               if (event is KeyDownEvent) {
@@ -215,42 +220,4 @@ class Home extends StatelessWidget {
       },
     );
   }
-  // Widget buildFriendsList() {
-  //   return SizedBox(
-  //     height: 50.0,
-  //     child: Focus(
-  //       child: ListView.builder(
-  //         primary: false,
-  //         scrollDirection: Axis.horizontal,
-  //         shrinkWrap: true,
-  //         itemCount: friends.length,
-  //         itemBuilder: (BuildContext context, int index) {
-  //           String img = friends[index];
-
-  //           return Padding(
-  //             padding: const EdgeInsets.only(right: 5.0),
-  //             child: CircleAvatar(
-  //               backgroundImage: AssetImage(
-  //                 img,
-  //               ),
-  //               radius: 25.0,
-  //             ),
-  //           );
-  //         },
-  //       ),
-  //       onKeyEvent: (FocusNode node, KeyEvent event) {
-  //         if (event is KeyDownEvent) {
-  //           if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-  //             node.nextFocus();
-  //             return KeyEventResult.handled;
-  //           } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-  //             node.previousFocus();
-  //             return KeyEventResult.handled;
-  //           }
-  //         }
-  //         return KeyEventResult.ignored;
-  //       },
-  //     ),
-  //   );
-  // }
 }
