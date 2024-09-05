@@ -28,7 +28,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     location: 'us-central1',
   );
 
-  List<String> _messages = [];
+  final List<String> _messages = [];
 
   void _sendMessage() async {
     final message = _messageController.text;

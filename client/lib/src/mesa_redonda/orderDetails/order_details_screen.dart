@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/common_widgets/primary_button.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/constants.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/home.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
 class OrderDetailsScreen extends StatelessWidget {

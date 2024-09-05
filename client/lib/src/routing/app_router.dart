@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
-import 'package:starter_architecture_flutter_firebase/src/features/chat/presentation/chat_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/prompt/presentation/prompt_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/recepies/presentation/saved_recipes_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/addToOrder/add_to_order_screen.dart';
@@ -167,7 +166,7 @@ GoRouter goRouter(GoRouterRef ref) {
                 path: '/home',
                 name: AppRoute.home.name,
                 pageBuilder: (context, state) => const NoTransitionPage(
-                  child: MealPlansScreen(),
+                  child: Home(),
                 ),
                 routes: [
                   GoRoute(

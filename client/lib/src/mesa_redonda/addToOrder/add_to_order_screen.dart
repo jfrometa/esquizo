@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/constants.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/orderDetails/order_details_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
 import 'components/info.dart';

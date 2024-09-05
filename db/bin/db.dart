@@ -1,5 +1,4 @@
 import 'package:db/db.dart';
-import 'package:db/src/db_base.dart';
 
 final prisma = PrismaClient();
 

@@ -187,7 +187,7 @@ class MealPlanCard extends StatelessWidget {
               // Delivery Info
               Row(
                 children: [
-                  Icon(Icons.local_shipping, color: Colors.redAccent),
+                  const Icon(Icons.local_shipping, color: Colors.redAccent),
                   const SizedBox(width: 10),
                   Text(
                     'Delivery expenses will be added',

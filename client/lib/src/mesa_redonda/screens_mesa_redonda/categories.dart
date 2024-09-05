@@ -45,7 +45,7 @@ class CategoriesState extends State<Categories> {
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             // Add one stop for each color. Stops should increase from 0 to 1
-                            stops: [0.2, 0.7],
+                            stops: const [0.2, 0.7],
                             colors: [
                               cat['color1'],
                               cat['color2'],

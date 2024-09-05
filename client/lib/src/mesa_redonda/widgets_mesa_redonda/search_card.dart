@@ -1,48 +1,50 @@
 import 'package:flutter/material.dart';
 
 class SearchCard extends StatelessWidget {
-  final TextEditingController _searchControl = new TextEditingController();
+  final TextEditingController _searchControl = TextEditingController();
+
+  SearchCard({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 6.0,
       child: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.all(
             Radius.circular(5.0),
           ),
         ),
         child: TextField(
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 15.0,
             color: Colors.black,
           ),
           decoration: InputDecoration(
-            contentPadding: EdgeInsets.all(10.0),
+            contentPadding: const EdgeInsets.all(10.0),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(5.0),
-              borderSide: BorderSide(
+              borderSide: const BorderSide(
                 color: Colors.white,
               ),
             ),
             enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(
+              borderSide: const BorderSide(
                 color: Colors.white,
               ),
               borderRadius: BorderRadius.circular(5.0),
             ),
             hintText: "Search..",
-            prefixIcon: Icon(
+            prefixIcon: const Icon(
               Icons.search,
               color: Colors.black,
             ),
-            suffixIcon: Icon(
+            suffixIcon: const Icon(
               Icons.filter_list,
               color: Colors.black,
             ),
-            hintStyle: TextStyle(
+            hintStyle: const TextStyle(
               fontSize: 15.0,
               color: Colors.black,
             ),
