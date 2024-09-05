@@ -9,6 +9,7 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/checkout.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/demoData.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/details/details_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/plans/plans.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/categories.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/home.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/trending.dart';
@@ -166,7 +167,7 @@ GoRouter goRouter(GoRouterRef ref) {
                 path: '/home',
                 name: AppRoute.home.name,
                 pageBuilder: (context, state) => const NoTransitionPage(
-                  child: Home(),
+                  child: MealPlansScreen(),
                 ),
                 routes: [
                   GoRoute(
