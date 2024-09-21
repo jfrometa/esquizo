@@ -6,11 +6,11 @@ class SelectableTextFieldWithLinks extends StatefulWidget {
   const SelectableTextFieldWithLinks({super.key});
 
   @override
-  _SelectableTextFieldWithLinksState createState() =>
-      _SelectableTextFieldWithLinksState();
+  SelectableTextFieldWithLinksState createState() =>
+      SelectableTextFieldWithLinksState();
 }
 
-class _SelectableTextFieldWithLinksState
+class SelectableTextFieldWithLinksState
     extends State<SelectableTextFieldWithLinks> {
   final TextEditingController _controller = TextEditingController();
   final RegExp _urlRegExp = RegExp(r'((https?:\/\/)|(www\.))[^\s]+');

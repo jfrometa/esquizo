@@ -167,7 +167,7 @@ GoRouter goRouter(GoRouterRef ref) {
                 path: '/home',
                 name: AppRoute.home.name,
                 pageBuilder: (context, state) => const NoTransitionPage(
-                  child: MealPlansScreen(),
+                  child: Home(),
                 ),
                 routes: [
                   GoRoute(
