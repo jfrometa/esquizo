@@ -44,40 +44,41 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCn7T2ykod5kXw2DQBWT5-pXdbWQT4HGgo',
-    appId: '1:224477049501:web:6c8033dae4732945725a74',
-    messagingSenderId: '224477049501',
-    projectId: 'vaca-esquizofrenica',
-    authDomain: 'vaca-esquizofrenica.firebaseapp.com',
-    storageBucket: 'vaca-esquizofrenica.appspot.com',
-    measurementId: 'G-KCQYBCHG7D',
+    apiKey: 'AIzaSyC-bU7JfgNRx5ZOJqnmNHKuvya3pLnDJ8Q',
+    appId: '1:1087483483909:web:6d9daaef6a723b5841096c',
+    messagingSenderId: '1087483483909',
+    projectId: 'mesa-redonda-fb72e',
+    authDomain: 'mesa-redonda-fb72e.firebaseapp.com',
+    storageBucket: 'mesa-redonda-fb72e.appspot.com',
+    measurementId: 'G-YVBY00F5GE',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAkG785ePnbgsaQSwQY9jUddiAd8f97KKA',
-    appId: '1:224477049501:android:3f8600f3c93729ea725a74',
-    messagingSenderId: '224477049501',
-    projectId: 'vaca-esquizofrenica',
-    storageBucket: 'vaca-esquizofrenica.appspot.com',
+    apiKey: 'AIzaSyAM58a0ihCAmElW2o2Fo6AswHO37qKSDx0',
+    appId: '1:1087483483909:android:15fd3d76a6a0701141096c',
+    messagingSenderId: '1087483483909',
+    projectId: 'mesa-redonda-fb72e',
+    storageBucket: 'mesa-redonda-fb72e.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyC5cVvZYkGD0tK1-omgcfU77WfYRk8xfjs',
-    appId: '1:224477049501:ios:c25944142ede147c725a74',
-    messagingSenderId: '224477049501',
-    projectId: 'vaca-esquizofrenica',
-    storageBucket: 'vaca-esquizofrenica.appspot.com',
-    iosClientId: '224477049501-17ep345dsnbkg87e1ike0oatrt2rgaee.apps.googleusercontent.com',
+    apiKey: 'AIzaSyAlk83WpDsAWqaa4RqI4mxa5IYPiuZldek',
+    appId: '1:1087483483909:ios:ff1d60b319f1a19541096c',
+    messagingSenderId: '1087483483909',
+    projectId: 'mesa-redonda-fb72e',
+    storageBucket: 'mesa-redonda-fb72e.appspot.com',
+    iosClientId: '1087483483909-almct9101dohm84eatahds8h1hss51ud.apps.googleusercontent.com',
     iosBundleId: 'com.example.starterArchitectureFlutterFirebase1',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyC5cVvZYkGD0tK1-omgcfU77WfYRk8xfjs',
-    appId: '1:224477049501:ios:1a54971227efa758725a74',
-    messagingSenderId: '224477049501',
-    projectId: 'vaca-esquizofrenica',
-    storageBucket: 'vaca-esquizofrenica.appspot.com',
-    iosClientId: '224477049501-h4s4olc4nbas720a0e4vuj9mqrcn2gd8.apps.googleusercontent.com',
+    apiKey: 'AIzaSyAlk83WpDsAWqaa4RqI4mxa5IYPiuZldek',
+    appId: '1:1087483483909:ios:6a0634bc6d3c012441096c',
+    messagingSenderId: '1087483483909',
+    projectId: 'mesa-redonda-fb72e',
+    storageBucket: 'mesa-redonda-fb72e.appspot.com',
+    iosClientId: '1087483483909-ici1rplol63k3uul2tdtlc7s7bcfn467.apps.googleusercontent.com',
     iosBundleId: 'com.example.starterArchitectureFlutterFirebase',
   );
+
 }
