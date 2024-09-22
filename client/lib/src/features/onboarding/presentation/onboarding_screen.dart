@@ -1,158 +1,163 @@
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/common_widgets/primary_button.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/onboarding/presentation/onboarding_controller.dart';
-import 'package:starter_architecture_flutter_firebase/src/localization/string_hardcoded.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
-class OnboardingScreen extends ConsumerWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(onboardingControllerProvider);
-    final theme = Theme.of(context);
+  _OnboardingScreenState createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
+  final PageController _pageController = PageController(initialPage: 0);
+  int _currentPage = 0;
+
+  final List<Map<String, String>> _pages = [
+    {
+      'image': 'assets/whatsapp_greeting.png',
+      'title': 'Salúdanos por WhatsApp',
+      'body':
+          'Inicia la experiencia saludándonos por WhatsApp y elige el tipo de servicio que prefieras.'
+    },
+    {
+      'image': 'assets/menu_selection.png',
+      'title': 'Selecciona de Nuestro Menú',
+      'body':
+          'Elige tus platos favoritos y envíanos tu ubicación y detalles para la entrega.\n\nSi elegiste un plan de meal prep, selecciona los días y horario de entrega (12:00 pm o 1:00 pm).'
+    },
+    {
+      'image': 'assets/confirmation.png',
+      'title': 'Confirma tu Pedido y Disfruta',
+      'body':
+          'Recibe tu cotización, realiza el pago y envíanos tu correo para agregar tu pedido al calendario. Selecciona tu día de inicio.\n\n¡Buen ProVeCHO!'
+    },
+  ];
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFFF2EBC1), Color(0xFFD7EEB4)],
-              ),
-            ),
-          ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(32.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Unlock Culinary Creativity",
-                        style: theme.textTheme.headlineLarge,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 36),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.2,
-                        child: DefaultTextStyle(
-                          style: theme.textTheme.bodyLarge!,
-                          child: AnimatedTextKit(
-                            isRepeatingAnimation: false,
-                            animatedTexts: [
-                              TyperAnimatedText(
-                                  'Turn leftover ingredients into delicious meals with just a snap! Configure your dietary preferences, allergies, and favorite cuisines, and let our AI chef guide you to create unique and flavorful dishes. No more recipe hunting or food waste!'),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      // ElevatedButton(
-                      //   onPressed: () {
-                      //     Navigator.of(context)
-                      //         .pushReplacementNamed(RoutesNames.mealCreation);
-                      //   },
-                      //   child: Text(
-                      //     "Create Your Meal Now!",
-                      //     style: theme.textTheme.bodyLarge?.copyWith(
-                      //       fontWeight: FontWeight.bold,
-                      //     ),
-                      //   ),
-                      // ),
-                      PrimaryButton(
-                        text: 'Get Started'.hardcoded,
-                        isLoading: state.isLoading,
-                        onPressed: state.isLoading
-                            ? null
-                            : () async {
-                                await ref
-                                    .read(onboardingControllerProvider.notifier)
-                                    .completeOnboarding();
-                                if (context.mounted) {
-                                  // go to sign in page after completing onboarding
-                                  context.goNamed(AppRoute.signIn.name);
-                                }
-                              },
-                      ),
-                      const SizedBox(height: 16),
-                      const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: <Widget>[
-                          Text(
-                            "Powered by ",
-                            style: TextStyle(
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.normal,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          SizedBox(width: 4),
-                          // Image.asset(
-                          //   "assets/gemini-logo.png",
-                          //   scale: 10,
-                          // ),
-                        ],
-                      ),
-                    ],
-                  )
-                ],
-              ),
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        actions: [
+          TextButton(
+            onPressed: () {
+              _completeOnboarding(ref);
+            },
+            child: const Text(
+              'Saltar',
+              style: TextStyle(color: Colors.black),
             ),
           ),
         ],
       ),
-
-      // ResponsiveCenter(
-      //   maxContentWidth: 450,
-      //   padding: const EdgeInsets.all(16.0),
-      //   child: Column(
-      //     mainAxisAlignment: MainAxisAlignment.center,
-      //     crossAxisAlignment: CrossAxisAlignment.stretch,
-      //     children: [
-      //       Text(
-      //         'Track your time.\nBecause time counts.',
-      //         style: Theme.of(context).textTheme.headlineSmall,
-      //         textAlign: TextAlign.center,
-      //       ),
-      //       gapH16,
-      //       SvgPicture.asset(
-      //         'assets/time-tracking.svg',
-      //         width: 200,
-      //         height: 200,
-      //         semanticsLabel: 'Time tracking logo',
-      //       ),
-      //       gapH16,
-      //       PrimaryButton(
-      //         text: 'Get Started'.hardcoded,
-      //         isLoading: state.isLoading,
-      //         onPressed: state.isLoading
-      //             ? null
-      //             : () async {
-      //                 await ref
-      //                     .read(onboardingControllerProvider.notifier)
-      //                     .completeOnboarding();
-      //                 if (context.mounted) {
-      //                   // go to sign in page after completing onboarding
-      //                   context.goNamed(AppRoute.signIn.name);
-      //                 }
-      //               },
-      //       ),
-      //     ],
-      //   ),
-      // ),
+      body: Stack(
+        children: [
+          PageView.builder(
+            controller: _pageController,
+            onPageChanged: (int page) {
+              setState(() {
+                _currentPage = page;
+              });
+            },
+            itemCount: _pages.length,
+            itemBuilder: (context, index) {
+              return _buildPageContent(
+                image: _pages[index]['image']!,
+                title: _pages[index]['title']!,
+                body: _pages[index]['body']!,
+              );
+            },
+          ),
+          Positioned(
+            bottom: 20,
+            left: 20,
+            right: 20,
+            child: ElevatedButton(
+              onPressed: () {
+                if (_currentPage != _pages.length - 1) {
+                  _pageController.nextPage(
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.easeInOut,
+                  );
+                } else {
+                  _completeOnboarding(ref);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+                textStyle:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              child: Text(
+                _currentPage != _pages.length - 1 ? 'Siguiente' : 'Comenzar',
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 80,
+            left: 0,
+            right: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(_pages.length, (index) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  margin: const EdgeInsets.symmetric(horizontal: 5),
+                  height: 10,
+                  width: _currentPage == index ? 20 : 10,
+                  decoration: BoxDecoration(
+                    color: _currentPage == index
+                        ? Theme.of(context).primaryColor
+                        : Colors.grey,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ],
+      ),
     );
+  }
+
+  Widget _buildPageContent({
+    required String image,
+    required String title,
+    required String body,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(40),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Image.asset(image, height: 300),
+          const SizedBox(height: 20),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            body,
+            style: const TextStyle(fontSize: 18),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _completeOnboarding(WidgetRef ref) async {
+    await ref.read(onboardingControllerProvider.notifier).completeOnboarding();
+    if (context.mounted) {
+      context.goNamed(AppRoute.signIn.name);
+    }
   }
 }

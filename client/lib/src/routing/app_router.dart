@@ -65,6 +65,8 @@ enum AppRoute {
   details,
   addToOrder,
   cart,
+  homecart,
+  homecheckout,
   checkout,
   detailScreen,
   home
@@ -74,33 +76,22 @@ enum AppRoute {
 GoRouter goRouter(GoRouterRef ref) {
   final appStartupState = ref.watch(appStartupProvider);
   final authRepository = ref.watch(authRepositoryProvider);
-  final isFirebaseInitialized = ref.watch(isFirebaseInitializedProvider);
 
   return GoRouter(
     initialLocation: '/signIn',
     navigatorKey: _rootNavigatorKey,
     debugLogDiagnostics: true,
     redirect: (context, state) async {
-      // Ensure Firebase is initialized
-      if (!isFirebaseInitialized) {
-        try {
-          await Firebase.initializeApp(
-              options: DefaultFirebaseOptions.currentPlatform);
-        } catch (e) {
-          print("Error initializing Firebase: $e"); // Log the error
-          return '/error'; // Redirect to error page
-        }
-      }
-
       // If the app is still initializing, show the /startup route
       if (appStartupState.isLoading || appStartupState.hasError) {
         return '/startup';
       }
 
+      final path = state.uri.path;
+
       final onboardingRepository =
           ref.read(onboardingRepositoryProvider).requireValue;
       final didCompleteOnboarding = onboardingRepository.isOnboardingComplete();
-      final path = state.uri.path;
 
       if (!didCompleteOnboarding) {
         if (path != '/onboarding') {
@@ -261,16 +252,18 @@ GoRouter goRouter(GoRouterRef ref) {
             ],
           ),
           StatefulShellBranch(
-            navigatorKey: _recepiesNavigatorKey,
+            navigatorKey: _cartNavigatorKey,
             routes: [
               GoRoute(
-                path: '/recepies',
-                name: AppRoute.recepies.name,
+                path: '/homecart', // Changed id to cartItemId
+                name: AppRoute.homecart.name,
                 pageBuilder: (context, state) {
-                  return const MaterialPage(
-                    fullscreenDialog: false,
-                    child: SavedRecipesScreen(
-                      canScroll: true,
+                  // final cartItemId = Math.random();
+                  return MaterialPage(
+                    // fullscreenDialog: true,
+                    child: CartScreen(
+                      cartItems: cartItems, isAuthenticated: true,
+                      // selectedItemId: cartItemId,
                     ),
                   );
                 },
@@ -278,97 +271,113 @@ GoRouter goRouter(GoRouterRef ref) {
             ],
           ),
           StatefulShellBranch(
-            navigatorKey: _promptNavigatorKey,
+            navigatorKey: _detailsNavigatorKey,
             routes: [
               GoRoute(
-                path: '/prompt',
-                name: AppRoute.prompt.name,
-                pageBuilder: (context, state) => const NoTransitionPage(
-                    child: PromptScreen(
-                  canScroll: true,
-                )),
+                path: '/homecheckout',
+                name: AppRoute.homecheckout.name,
+                pageBuilder: (context, state) {
+                  return const MaterialPage(
+                    // fullscreenDialog: true,
+                    child: CheckoutScreen(),
+                  );
+                },
               ),
             ],
           ),
-          StatefulShellBranch(
-            navigatorKey: _jobsNavigatorKey,
-            routes: [
-              GoRoute(
-                path: '/jobs',
-                name: AppRoute.jobs.name,
-                pageBuilder: (context, state) => const NoTransitionPage(
-                  child: JobsScreen(),
-                ),
-                routes: [
-                  GoRoute(
-                    path: 'add',
-                    name: AppRoute.addJob.name,
-                    parentNavigatorKey: _jobsNavigatorKey,
-                    pageBuilder: (context, state) {
-                      return const MaterialPage(
-                        fullscreenDialog: true,
-                        child: EditJobScreen(),
-                      );
-                    },
-                  ),
-                  GoRoute(
-                    path: ':id',
-                    name: AppRoute.job.name,
-                    pageBuilder: (context, state) {
-                      final id = state.pathParameters['id']!;
-                      return MaterialPage(
-                        child: JobEntriesScreen(jobId: id),
-                      );
-                    },
-                    routes: [
-                      GoRoute(
-                        path: 'entries/add',
-                        name: AppRoute.addEntry.name,
-                        parentNavigatorKey: _jobsNavigatorKey,
-                        pageBuilder: (context, state) {
-                          final jobId = state.pathParameters['id']!;
-                          return MaterialPage(
-                            fullscreenDialog: true,
-                            child: EntryScreen(
-                              jobId: jobId,
-                            ),
-                          );
-                        },
-                      ),
-                      GoRoute(
-                        path: 'entries/:eid',
-                        name: AppRoute.entry.name,
-                        pageBuilder: (context, state) {
-                          final jobId = state.pathParameters['id']!;
-                          final entryId = state.pathParameters['eid']!;
-                          final entry = state.extra as Entry?;
-                          return MaterialPage(
-                            child: EntryScreen(
-                              jobId: jobId,
-                              entryId: entryId,
-                              entry: entry,
-                            ),
-                          );
-                        },
-                      ),
-                      GoRoute(
-                        path: 'edit',
-                        name: AppRoute.editJob.name,
-                        pageBuilder: (context, state) {
-                          final jobId = state.pathParameters['id'];
-                          final job = state.extra as Job?;
-                          return MaterialPage(
-                            fullscreenDialog: true,
-                            child: EditJobScreen(jobId: jobId, job: job),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
+          // StatefulShellBranch(
+          //   navigatorKey: _promptNavigatorKey,
+          //   routes: [
+          //     GoRoute(
+          //       path: '/prompt',
+          //       name: AppRoute.prompt.name,
+          //       pageBuilder: (context, state) => const NoTransitionPage(
+          //           child: PromptScreen(
+          //         canScroll: true,
+          //       )),
+          //     ),
+          //   ],
+          // ),
+          // StatefulShellBranch(
+          //   navigatorKey: _jobsNavigatorKey,
+          //   routes: [
+          //     GoRoute(
+          //       path: '/jobs',
+          //       name: AppRoute.jobs.name,
+          //       pageBuilder: (context, state) => const NoTransitionPage(
+          //         child: JobsScreen(),
+          //       ),
+          //       routes: [
+          //         GoRoute(
+          //           path: 'add',
+          //           name: AppRoute.addJob.name,
+          //           parentNavigatorKey: _jobsNavigatorKey,
+          //           pageBuilder: (context, state) {
+          //             return const MaterialPage(
+          //               fullscreenDialog: true,
+          //               child: EditJobScreen(),
+          //             );
+          //           },
+          //         ),
+          //         GoRoute(
+          //           path: ':id',
+          //           name: AppRoute.job.name,
+          //           pageBuilder: (context, state) {
+          //             final id = state.pathParameters['id']!;
+          //             return MaterialPage(
+          //               child: JobEntriesScreen(jobId: id),
+          //             );
+          //           },
+          //           routes: [
+          //             GoRoute(
+          //               path: 'entries/add',
+          //               name: AppRoute.addEntry.name,
+          //               parentNavigatorKey: _jobsNavigatorKey,
+          //               pageBuilder: (context, state) {
+          //                 final jobId = state.pathParameters['id']!;
+          //                 return MaterialPage(
+          //                   fullscreenDialog: true,
+          //                   child: EntryScreen(
+          //                     jobId: jobId,
+          //                   ),
+          //                 );
+          //               },
+          //             ),
+          //             GoRoute(
+          //               path: 'entries/:eid',
+          //               name: AppRoute.entry.name,
+          //               pageBuilder: (context, state) {
+          //                 final jobId = state.pathParameters['id']!;
+          //                 final entryId = state.pathParameters['eid']!;
+          //                 final entry = state.extra as Entry?;
+          //                 return MaterialPage(
+          //                   child: EntryScreen(
+          //                     jobId: jobId,
+          //                     entryId: entryId,
+          //                     entry: entry,
+          //                   ),
+          //                 );
+          //               },
+          //             ),
+          //             GoRoute(
+          //               path: 'edit',
+          //               name: AppRoute.editJob.name,
+          //               pageBuilder: (context, state) {
+          //                 final jobId = state.pathParameters['id'];
+          //                 final job = state.extra as Job?;
+          //                 return MaterialPage(
+          //                   fullscreenDialog: true,
+          //                   child: EditJobScreen(jobId: jobId, job: job),
+          //                 );
+          //               },
+          //             ),
+          //           ],
+          //         ),
+          //       ],
+          //     ),
+          //   ],
+          // ),
+
           StatefulShellBranch(
             navigatorKey: _accountNavigatorKey,
             routes: [

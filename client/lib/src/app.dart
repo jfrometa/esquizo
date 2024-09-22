@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:starter_architecture_flutter_firebase/src/features/authentication/data/firebase_auth_repository.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/app_theme.dart';
 
@@ -9,6 +10,12 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final goRouter = ref.watch(goRouterProvider);
+
+    // try {
+    //   ref.read(firebaseAuthProvider).signInAnonymously();
+    // } catch (e) {
+    //   print("signInAnonymously did fail");
+    // } finally {}
 
     return MaterialApp.router(
       routerConfig: goRouter,

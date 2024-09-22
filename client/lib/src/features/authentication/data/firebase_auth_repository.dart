@@ -10,8 +10,32 @@ class AuthRepository {
   Stream<User?> authStateChanges() => _auth.authStateChanges();
   User? get currentUser => _auth.currentUser;
 
-  Future<void> signInAnonymously() {
-    return _auth.signInAnonymously();
+  Future<void> signInAnonymously() async {
+    try {
+      await _auth.signInAnonymously();
+      print('Signed in anonymously as ${_auth.currentUser!.uid}');
+    } on FirebaseAuthException catch (e) {
+      print('Failed to sign in anonymously: ${e.code} - ${e.message}');
+    }
+  }
+
+  // Sign out
+  Future<void> signOut() async {
+    await _auth.signOut();
+  }
+
+  // Initialize authentication
+  Future<void> initialize() async {
+    // If the user is not signed in, sign in anonymously
+    if (_auth.currentUser == null) {
+      await signInAnonymously();
+    } else if (_auth.currentUser!.isAnonymous) {
+      // User is signed in anonymously
+      print('User is signed in anonymously: ${_auth.currentUser!.uid}');
+    } else {
+      // User is signed in with a non-anonymous account
+      print('User is signed in: ${_auth.currentUser!.uid}');
+    }
   }
 }
 

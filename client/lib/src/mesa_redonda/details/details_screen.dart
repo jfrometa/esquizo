@@ -10,6 +10,7 @@ class DetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // final detailItemId = context.extra as String;
     return Scaffold(
       appBar: AppBar(
         actions: const [],

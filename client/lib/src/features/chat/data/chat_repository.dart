@@ -72,7 +72,7 @@ class ChatRepository {
         // response = await model.generativeModel(model: model) //.generateContent([Content.text(promptText)]);
         var prompt = [Content.text(promptText)];
 
-      // To generate text output, call generateContent with the text input
+        // To generate text output, call generateContent with the text input
         response = await model.generateContent(prompt);
       } else {
         // convert it to Uint8List

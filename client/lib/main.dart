@@ -1,11 +1,13 @@
 import 'package:camera/camera.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/app.dart';
+import 'package:starter_architecture_flutter_firebase/src/features/authentication/data/firebase_auth_repository.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/prompt/presentation/widgets/image_input_widget.dart';
 import 'package:starter_architecture_flutter_firebase/src/localization/string_hardcoded.dart';
 // ignore:depend_on_referenced_packages
@@ -21,7 +23,12 @@ Future<void> main() async {
   // * https://docs.flutter.dev/testing/errors
   registerErrorHandlers();
   // * Initialize Firebase
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Create a ProviderContainer to read providers outside of the widget tree
+  final container = ProviderContainer();
+  await container.read(authRepositoryProvider).signInAnonymously();
 
   // * Entry point of the app
 
@@ -31,9 +38,12 @@ Future<void> main() async {
     camera = cameras.first;
   }
 
-  runApp(const ProviderScope(
-    child: MyApp(),
-  ));
+  runApp(
+    UncontrolledProviderScope(
+      container: container,
+      child: const MyApp(),
+    ),
+  );
 }
 
 void registerErrorHandlers() {

@@ -74,18 +74,18 @@ class ScaffoldWithNavigationBar extends ConsumerWidget {
           NavigationDestination(
             icon: const Icon(Icons.view_headline_outlined),
             selectedIcon: const Icon(Icons.view_headline),
-            label: 'Recepies'.hardcoded,
+            label: 'Cart'.hardcoded,
           ),
           NavigationDestination(
             icon: const Icon(Icons.view_headline_outlined),
             selectedIcon: const Icon(Icons.view_headline),
-            label: 'Prompt'.hardcoded,
+            label: 'Checkout'.hardcoded,
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.work_outline),
-            selectedIcon: const Icon(Icons.work),
-            label: 'Jobs'.hardcoded,
-          ),
+          // NavigationDestination(
+          //   icon: const Icon(Icons.work_outline),
+          //   selectedIcon: const Icon(Icons.work),
+          //   label: 'Jobs'.hardcoded,
+          // ),
           // NavigationDestination(
           //   icon: const Icon(Icons.view_headline_outlined),
           //   selectedIcon: const Icon(Icons.view_headline),
@@ -132,20 +132,20 @@ class ScaffoldWithNavigationRail extends StatelessWidget {
               NavigationRailDestination(
                 icon: const Icon(Icons.work_outline),
                 selectedIcon: const Icon(Icons.work),
-                label: Text('Recepies'.hardcoded),
+                label: Text('Cart'.hardcoded),
               ),
 
               NavigationRailDestination(
                 icon: const Icon(Icons.work_outline),
                 selectedIcon: const Icon(Icons.work),
-                label: Text('Prompt'.hardcoded),
+                label: Text('Checkout'.hardcoded),
               ),
 
-              NavigationRailDestination(
-                icon: const Icon(Icons.work_outline),
-                selectedIcon: const Icon(Icons.work),
-                label: Text('Jobs'.hardcoded),
-              ),
+              // NavigationRailDestination(
+              //   icon: const Icon(Icons.work_outline),
+              //   selectedIcon: const Icon(Icons.work),
+              //   label: Text('Jobs'.hardcoded),
+              // ),
 
               // NavigationRailDestination(
               //     icon: const Icon(Icons.view_headline_outlined),

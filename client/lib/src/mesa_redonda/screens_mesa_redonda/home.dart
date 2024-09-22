@@ -3,19 +3,38 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/helpers/scroll_bahaviour.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/util_mesa_redonda/categories.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/util_mesa_redonda/restaurants.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/util_mesa_redonda/restaurants.dart'; // Assuming this contains dishes data
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/category_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/search_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/slide_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
   const Home({super.key});
+
+  @override
+  _HomeState createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  String _searchQuery = '';
+  List _filteredDishes = plans; // Initialize with all dishes
+
+  void _updateSearchQuery(String query) {
+    setState(() {
+      _searchQuery = query;
+      _filteredDishes = plans.where((dish) {
+        final dishTitle = dish['title']?.toLowerCase() ?? '';
+        return dishTitle.contains(_searchQuery.toLowerCase());
+      }).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        // Dismiss keyboard when tapping outside
         FocusScopeNode currentFocus = FocusScope.of(context);
         if (!currentFocus.hasPrimaryFocus) {
           currentFocus.unfocus();
@@ -29,14 +48,20 @@ class Home extends StatelessWidget {
               const SizedBox(height: 30.0),
               buildSearchBar(context),
               const SizedBox(height: 30.0),
-              buildCategoryRow('Servicios', context),
-              const SizedBox(height: 10.0),
-              buildCategoryList(context),
-              const SizedBox(height: 30.0),
-              buildRestaurantRow('Los Mas Populares', context),
-              const SizedBox(height: 10.0),
-              buildRestaurantList(context),
-              const SizedBox(height: 30.0),
+              _searchQuery.isEmpty
+                  ? Column(
+                      children: [
+                        buildCategoryRow('Servicios', context),
+                        const SizedBox(height: 10.0),
+                        buildCategoryList(context),
+                        const SizedBox(height: 30.0),
+                        buildDishRow('Los Más Populares', context),
+                        const SizedBox(height: 10.0),
+                        buildDishList(context),
+                        const SizedBox(height: 30.0),
+                      ],
+                    )
+                  : buildSearchResults(),
             ],
           ),
         ),
@@ -44,31 +69,11 @@ class Home extends StatelessWidget {
     );
   }
 
-  Widget buildRestaurantRow(String restaurant, BuildContext context) {
-    return SizedBox(
-      height: 60.0,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Text(
-            restaurant,
-            style: const TextStyle(
-              fontSize: 20.0,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          TextButton(
-            child: Text(
-              "Ver todos",
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.secondary,
-              ),
-            ),
-            onPressed: () {
-              context.goNamed(AppRoute.trending.name);
-            },
-          ),
-        ],
+  Widget buildSearchBar(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(10, 5, 10, 0),
+      child: SearchCard(
+        onChanged: _updateSearchQuery,
       ),
     );
   }
@@ -81,10 +86,9 @@ class Home extends StatelessWidget {
         children: <Widget>[
           Text(
             category,
-            style: const TextStyle(
-              fontSize: 20.0,
-              fontWeight: FontWeight.w800,
-            ),
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           TextButton(
             child: Text(
@@ -99,13 +103,6 @@ class Home extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget buildSearchBar(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(10, 5, 10, 0),
-      child: SearchCard(),
     );
   }
 
@@ -153,11 +150,42 @@ class Home extends StatelessWidget {
     );
   }
 
-  Widget buildRestaurantList(BuildContext context) {
+  Widget buildDishRow(String title, BuildContext context) {
+    return SizedBox(
+      height: 60.0,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Text(
+            title,
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          TextButton(
+            child: Text(
+              "Ver todos",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.secondary,
+              ),
+            ),
+            onPressed: () {
+              context.goNamed(AppRoute.trending.name);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildDishList(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        double height = MediaQuery.of(context).size.height / 2.4;
+        height = height * 2 / 3; // Reduce by 1/3
+
         return SizedBox(
-          height: MediaQuery.of(context).size.height / 2.4,
+          height: height,
           width: MediaQuery.of(context).size.width,
           child: Focus(
             child: ScrollConfiguration(
@@ -179,25 +207,24 @@ class Home extends StatelessWidget {
                 ),
                 itemCount: plans.length,
                 itemBuilder: (BuildContext context, int index) {
-                  Map restaurant = plans[index];
+                  Map dish = plans[index];
 
                   return GestureDetector(
                     onTap: () {
                       context.goNamed(
                         AppRoute.addToOrder.name,
                         pathParameters: {
-                          // "detailItemId": plans[index].toString(),
                           "itemId": plans[index].toString(),
                         },
-                        extra: restaurant,
+                        extra: dish,
                       );
                     },
                     child: SlideItem(
-                      img: restaurant["img"],
-                      title: restaurant["title"],
-                      address: restaurant["address"],
-                      rating: restaurant["rating"],
-                      key: Key('restaurant_$index'),
+                      img: dish["img"],
+                      title: dish["title"],
+                      address: dish["address"],
+                      rating: dish["rating"],
+                      key: Key('dish_$index'),
                     ),
                   );
                 },
@@ -218,6 +245,80 @@ class Home extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget buildSearchResults() {
+    if (_filteredDishes.isEmpty) {
+      return Center(
+        child: Text(
+          'No se encontraron platos.',
+          style: Theme.of(context).textTheme.displayMedium,
+        ),
+      );
+    }
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: _filteredDishes.length,
+      itemBuilder: (context, index) {
+        final dish = _filteredDishes[index];
+        return buildDishItem(dish);
+      },
+    );
+  }
+
+  Widget buildDishItem(Map dish) {
+    return ListTile(
+      leading: Image.asset(
+        dish['img'],
+        width: 50,
+        height: 50,
+        fit: BoxFit.cover,
+      ),
+      title: Text(
+        dish['title'],
+        style: Theme.of(context).textTheme.displayMedium,
+      ),
+      subtitle: Text(
+        dish['address'] ?? '',
+        style: Theme.of(context).textTheme.bodyMedium,
+      ),
+      onTap: () {
+        context.goNamed(
+          AppRoute.addToOrder.name,
+          pathParameters: {
+            "itemId": dish.toString(),
+          },
+          extra: dish,
+        );
+      },
+    );
+  }
+}
+
+// widgets_mesa_redonda/search_card.dart
+class SearchCard extends StatelessWidget {
+  final ValueChanged<String> onChanged;
+
+  const SearchCard({super.key, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        hintText: 'Buscar platos...',
+        hintStyle: Theme.of(context)
+            .textTheme
+            .bodyMedium
+            ?.copyWith(color: Colors.grey),
+        prefixIcon:
+            Icon(Icons.search, color: Theme.of(context).iconTheme.color),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+      ),
     );
   }
 }
