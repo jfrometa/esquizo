@@ -23,7 +23,7 @@ class SlideItem extends StatefulWidget {
     required this.isSpicy,
     required this.foodType,
     bool? isMealPlan, // Make it nullable in the parameter list
-  }) : this.isMealPlan =
+  }) : isMealPlan =
             isMealPlan ?? false; // Default to false if not provided
 
   @override
@@ -33,12 +33,13 @@ class SlideItem extends StatefulWidget {
 class SlideItemState extends State<SlideItem> {
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    double cardWidth = 250.0; // Fixed width
-    double imageHeight = 150.0; // Fixed height
+    // double width = MediaQuery.of(context).size.width;
+    double cardWidth = MediaQuery.of(context).size.width; // Fixed width
+    double imageHeight = 175.0; // Fixed height
     return SizedBox(
       width: cardWidth,
       child: Card(
+         color: Colors.white, // Set the b
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12.0),
         ),
@@ -87,7 +88,7 @@ class SlideItemState extends State<SlideItem> {
                   ),
                 ),
                 // Meal Plan Indicator
-                if (widget.isMealPlan ?? false)
+                if (widget.isMealPlan)
                   Positioned(
                     bottom: 10,
                     left: 10,
@@ -100,101 +101,88 @@ class SlideItemState extends State<SlideItem> {
               ],
             ),
             // Information Section
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title and Rating
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Dish Title
-                      Expanded(
-                        child: Text(
-                          widget.title,
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineLarge
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                      ),
-                      // Rating
-                      const Row(
-                        children: [
-                          Icon(Icons.star,
-                              color: Colors.orangeAccent, size: 16),
-                          SizedBox(width: 4.0),
-                          // Text(
-                          //   '${widget.rating}',
-                          //   style: TextStyle(
-                          //     fontSize: 14.0,
-                          //     color: Colors.grey[800],
-                          //   ),
-                          // ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4.0),
-                  // Reviews Count
-                  // Text(
-                  //   '${widget.reviewsCount} reviews',
-                  //   style: TextStyle(
-                  //     fontSize: 12.0,
-                  //     color: Colors.grey[600],
-                  //   ),
-                  // ),
-                  const SizedBox(height: 8.0),
-                  // Description
-                  Text(
-                    widget.description,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 8.0),
-                  // Ingredients
-                  Text(
-                    'Ingredients: ${widget.ingredients.join(', ')}',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                  ),
-                  const SizedBox(height: 12.0),
-                  // Pricing and Order Button
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Pricing
-                      _buildPricing(),
-                      // Order Button
-                      ElevatedButton(
-                        onPressed: () {
-                          // Implement order action
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20.0, vertical: 12.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          textStyle: const TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title and Rating
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Dish Title
+                        Expanded(
+                          child: Text(
+                            widget.title,
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                         ),
-                        child: const Text(
-                          'Order Now',
-                          style: TextStyle(
-                            color: Colors.black,
+                        // Rating
+                        const Row(
+                          children: [
+                            Icon(Icons.star,
+                                color: Colors.orangeAccent, size: 16),
+                            SizedBox(width: 4.0),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8.0),
+                    // Description
+                    Text(
+                      widget.description,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8.0),
+                    // Ingredients
+                    Text(
+                      'Ingredients: ${widget.ingredients.join(', ')}',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.grey[600],
+                          ),
+                    ),
+                    const SizedBox(height: 12.0),
+                    // Pricing and Order Button
+                    const Spacer(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Pricing
+                        _buildPricing(),
+                        // Order Button
+                        ElevatedButton(
+                      
+                          onPressed: () {
+                            // Implement order action
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).primaryColorLight,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20.0, vertical: 12.0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          child: const Text(
+                            'Agregar al carrito',
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

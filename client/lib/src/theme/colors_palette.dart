@@ -84,10 +84,10 @@ class ColorsPalette {
       positiveAction: Color(0xFF863509), // contrast color for positive actions
       positiveActionSoft:
           Color(0xFFF3D2C0), // soft background for positive hints
-      primary7: Color(0xFF863509),
+      primary7:  Color.fromRGBO(134, 53, 9, 0.07),
       primary40: Color.fromRGBO(134, 53, 9, 0.4),
       primary70: Color.fromRGBO(134, 53, 9, 0.7),
-      primary: Color.fromRGBO(134, 53, 9, 0.07), // main brand color
+      primary: Color(0xFF863509), // main brand color
       secondary: Color(0xFFA7613B), // secondary brand color
       secondary40: Color.fromRGBO(167, 97, 59, 0.4),
       secondary70: Color.fromRGBO(167, 97, 59, 0.7),

@@ -9,7 +9,8 @@ class CheckoutScreen extends StatelessWidget {
     // Adjusted the scaffold to use SafeArea for better UX on devices with notches
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Secure checkout'),
+        title: const Text('Completar Orden'),
+        foregroundColor: Theme.of(context).colorScheme.primary,
         actions: [
           IconButton(
             icon: const Icon(Icons.shopping_cart),
@@ -54,7 +55,7 @@ class CheckoutScreen extends StatelessWidget {
                         const SizedBox(height: 16.0),
                         _buildCartItem(),
                         const SizedBox(height: 16.0),
-                        Spacer(),
+                        const Spacer(),
                         _buildOrderSummary(context),
                       ],
                     ),
@@ -176,7 +177,7 @@ class CheckoutScreen extends StatelessWidget {
             const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () async {
-                final String phoneNumber = '+18493590832'; // WhatsApp number
+                const String phoneNumber = '+18493590832'; // WhatsApp number
                 final String orderDetails = _generateOrderDetails();
                 final String whatsappUrlMobile =
                     'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
@@ -191,7 +192,7 @@ class CheckoutScreen extends StatelessWidget {
                     await launch(whatsappUrlWeb);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Could not open WhatsApp')),
+                      const SnackBar(content: Text('Could not open WhatsApp')),
                     );
                   }
                 }
@@ -237,10 +238,10 @@ class CheckoutScreen extends StatelessWidget {
 
   String _generateOrderDetails() {
     // Replace with actual data from your state or models
-    final String items =
+    const String items =
         '2X White LED Daytime Running Lights DRL Fog Lamp For Suzuki Vitara';
-    final String total = '\$211.23';
-    final String address =
+    const String total = '\$211.23';
+    const String address =
         '8260 NW 14TH ST APT X-42714, MIAMI, FL, 33191-1501, United States';
 
     return 'Order Details:\nItems: $items\nTotal: $total\nDeliver to: $address';

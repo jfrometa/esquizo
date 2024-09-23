@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/helpers/scroll_bahaviour.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/util_mesa_redonda/categories.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/util_mesa_redonda/restaurants.dart'; // Assuming this contains dishes data
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/category_item.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/search_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/slide_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
@@ -13,10 +13,10 @@ class Home extends StatefulWidget {
   const Home({super.key});
 
   @override
-  _HomeState createState() => _HomeState();
+  HomeState createState() => HomeState();
 }
 
-class _HomeState extends State<Home> {
+class HomeState extends State<Home> {
   String _searchQuery = '';
   List _filteredDishes = plans; // Initialize with all dishes
 
@@ -41,29 +41,49 @@ class _HomeState extends State<Home> {
         }
       },
       child: Scaffold(
-        body: Padding(
-          padding: const EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
-          child: ListView(
-            children: <Widget>[
-              const SizedBox(height: 30.0),
-              buildSearchBar(context),
-              const SizedBox(height: 30.0),
-              _searchQuery.isEmpty
-                  ? Column(
-                      children: [
-                        buildCategoryRow('Servicios', context),
-                        const SizedBox(height: 10.0),
-                        buildCategoryList(context),
-                        const SizedBox(height: 30.0),
-                        buildDishRow('Los Más Populares', context),
-                        const SizedBox(height: 10.0),
-                        buildDishList(context),
-                        const SizedBox(height: 30.0),
-                      ],
+        appBar: AppBar(
+          title: const Text("Mesa Redonda"),
+          backgroundColor: Colors.white,
+          foregroundColor: Theme.of(context).colorScheme.primary,
+          scrolledUnderElevation: 0.0,
+          actions: const [
+            // Consumer(builder: (context, ref, child) {
+            //   return IconButton(
+            //     onPressed: () {
+            //       // ref.read(authProvider).singout();
+            //     },
+            //     icon: const Icon(
+            //       Icons.logout,
+            //     ),
+            //   );
+            // }),
+          ],
+        ),
+        body: Column(
+          children: <Widget>[
+            const SizedBox(height: 10.0),
+            buildSearchBar(context),
+            const SizedBox(height: 10.0),
+            Expanded(
+              child: _searchQuery.isEmpty
+                  ? SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
+                      child: Column(
+                        children: [
+                          buildCategoryRow('Servicios', context),
+                          const SizedBox(height: 10.0),
+                          buildCategoryList(context),
+                          const SizedBox(height: 30.0),
+                          buildDishRow('Los Más Populares', context),
+                          const SizedBox(height: 10.0),
+                          buildDishList(context),
+                          const SizedBox(height: 30.0),
+                        ],
+                      ),
                     )
                   : buildSearchResults(),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -71,7 +91,7 @@ class _HomeState extends State<Home> {
 
   Widget buildSearchBar(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(10, 5, 10, 0),
+      margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
       child: SearchCard(
         onChanged: _updateSearchQuery,
       ),
@@ -108,12 +128,13 @@ class _HomeState extends State<Home> {
 
   Widget buildCategoryList(BuildContext context) {
     return SizedBox(
-      height: MediaQuery.of(context).size.height / 6,
+      height: 120,
       child: Focus(
         child: ScrollConfiguration(
           behavior: CustomScrollBehavior(),
           child: ListView.builder(
             primary: false,
+            padding: const EdgeInsets.symmetric(horizontal: 15.0),
             scrollDirection: Axis.horizontal,
             shrinkWrap: true,
             itemCount: categories.length,
@@ -179,7 +200,7 @@ class _HomeState extends State<Home> {
   }
 
   Widget buildDishList(BuildContext context) {
-    double height = MediaQuery.of(context).size.height / 2.4;
+    double height = 400 ;
 
     return SizedBox(
       height: height,
@@ -253,12 +274,36 @@ class _HomeState extends State<Home> {
       );
     }
     return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 10.0),
       itemCount: _filteredDishes.length,
       itemBuilder: (context, index) {
         final dish = _filteredDishes[index];
-        return buildDishItem(dish);
+        return GestureDetector(
+          onTap: () {
+            context.goNamed(
+              AppRoute.addToOrder.name,
+              pathParameters: {
+                "itemId": dish.toString(),
+              },
+              extra: dish,
+            );
+          },
+          child: Container(
+            height: 400,
+            margin: const EdgeInsets.symmetric(vertical: 5.0),
+            child: SlideItem(
+              img: dish["img"],
+              title: dish["title"],
+              description: dish["description"],
+              pricing: dish["pricing"],
+              offertPricing: dish["offertPricing"],
+              ingredients: dish["ingredients"],
+              isSpicy: dish["isSpicy"],
+              foodType: dish["foodType"],
+              key: Key('dish_$index'),
+            ),
+          ),
+        );
       },
     );
   }
@@ -276,7 +321,7 @@ class _HomeState extends State<Home> {
         style: Theme.of(context).textTheme.displayMedium,
       ),
       subtitle: Text(
-        dish['address'] ?? '',
+        dish['description'] ?? '',
         style: Theme.of(context).textTheme.bodyMedium,
       ),
       onTap: () {

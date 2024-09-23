@@ -17,19 +17,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   final List<Map<String, String>> _pages = [
     {
-      'image': 'assets/whatsapp_greeting.png',
+      'image': 'assets/gemini-logo.png',
       'title': 'Salúdanos por WhatsApp',
       'body':
           'Inicia la experiencia saludándonos por WhatsApp y elige el tipo de servicio que prefieras.'
     },
     {
-      'image': 'assets/menu_selection.png',
+      'image': 'assets/gemini-logo.png',
       'title': 'Selecciona de Nuestro Menú',
       'body':
           'Elige tus platos favoritos y envíanos tu ubicación y detalles para la entrega.\n\nSi elegiste un plan de meal prep, selecciona los días y horario de entrega (12:00 pm o 1:00 pm).'
     },
     {
-      'image': 'assets/confirmation.png',
+      'image': 'assets/gemini-logo.png',
       'title': 'Confirma tu Pedido y Disfruta',
       'body':
           'Recibe tu cotización, realiza el pago y envíanos tu correo para agregar tu pedido al calendario. Selecciona tu día de inicio.\n\n¡Buen ProVeCHO!'

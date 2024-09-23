@@ -21,9 +21,9 @@ class Trending extends StatelessWidget {
         ),
         child: Column(
           children: <Widget>[
-            SearchCard(
-              onChanged: (String value) {},
-            ),
+            // SearchCard(
+            //   onChanged: (String value) {},
+            // ),
             const SizedBox(height: 10.0),
             Expanded(
               child: GridView.builder(
@@ -36,11 +36,14 @@ class Trending extends StatelessWidget {
                 itemBuilder: (BuildContext context, int index) {
                   Map restaurant = plans[index];
 
-                  return TrendingItem(
+                  return DishItem(
                     img: restaurant["img"],
                     title: restaurant["title"],
-                    address: restaurant["address"],
-                    rating: restaurant["rating"],
+                    description: restaurant["description"],  // Use 'description' instead of 'address'
+                    pricing: restaurant["pricing"],          // Use 'pricing' for the price
+                    ingredients: restaurant["ingredients"],  // Ensure 'ingredients' is a list of strings
+                    isSpicy: restaurant["isSpicy"],          // Use 'isSpicy' boolean for spicy dishes
+                    foodType: restaurant["foodType"],        // Use 'foodType' (e.g., Vegan/Meat)
                     key: Key('restaurant_$index'),
                   );
                 },

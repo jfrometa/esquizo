@@ -15,8 +15,8 @@ class CategoryItem extends StatelessWidget {
           children: <Widget>[
             Image.asset(
               cat["img"],
-              height: MediaQuery.of(context).size.height / 6,
-              width: MediaQuery.of(context).size.height / 6,
+              height: 120,
+              width: 120,
               fit: BoxFit.cover,
             ),
             Container(
@@ -33,17 +33,17 @@ class CategoryItem extends StatelessWidget {
                   // stops: [0.0, 0.1],
                 ),
               ),
-              height: MediaQuery.of(context).size.height / 6,
-              width: MediaQuery.of(context).size.height / 6,
+              height: 120,
+              width: 120,
             ),
             Center(
               child: Container(
-                height: MediaQuery.of(context).size.height / 6,
-                width: MediaQuery.of(context).size.height / 6,
+                height: 120,
+                width: 120,
                 padding: const EdgeInsets.all(1),
                 constraints: const BoxConstraints(
-                  minWidth: 20,
-                  minHeight: 20,
+                  minWidth: 60,
+                  minHeight:60,
                 ),
                 child: Center(
                   child: Text(
