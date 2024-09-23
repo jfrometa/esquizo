@@ -185,9 +185,12 @@ class SlideItemState extends State<SlideItem> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        child: const Text('Order Now',style: TextStyle(
-      color: Colors.black,
-    ),
+                        child: const Text(
+                          'Order Now',
+                          style: TextStyle(
+                            color: Colors.black,
+                          ),
+                        ),
                       ),
                     ],
                   ),
