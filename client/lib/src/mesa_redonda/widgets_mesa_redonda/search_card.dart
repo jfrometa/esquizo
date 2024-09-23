@@ -1,56 +1,24 @@
 import 'package:flutter/material.dart';
 
 class SearchCard extends StatelessWidget {
-  final TextEditingController _searchControl = TextEditingController();
+  final ValueChanged<String> onChanged;
 
-  SearchCard({super.key});
+  const SearchCard({super.key, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 6.0,
-      child: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.all(
-            Radius.circular(5.0),
-          ),
-        ),
-        child: TextField(
-          style: const TextStyle(
-            fontSize: 15.0,
-            color: Colors.black,
-          ),
-          decoration: InputDecoration(
-            contentPadding: const EdgeInsets.all(10.0),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(5.0),
-              borderSide: const BorderSide(
-                color: Colors.white,
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderSide: const BorderSide(
-                color: Colors.white,
-              ),
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            hintText: "Search..",
-            prefixIcon: const Icon(
-              Icons.search,
-              color: Colors.black,
-            ),
-            suffixIcon: const Icon(
-              Icons.filter_list,
-              color: Colors.black,
-            ),
-            hintStyle: const TextStyle(
-              fontSize: 15.0,
-              color: Colors.black,
-            ),
-          ),
-          maxLines: 1,
-          controller: _searchControl,
+    return TextField(
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        hintText: 'Buscar platos...',
+        hintStyle: Theme.of(context)
+            .textTheme
+            .bodyMedium
+            ?.copyWith(color: Colors.grey),
+        prefixIcon:
+            Icon(Icons.search, color: Theme.of(context).iconTheme.color),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
         ),
       ),
     );

@@ -71,71 +71,77 @@ class ColorsPalette {
   final Color neutral8;
   final Color neutral9;
 
+//add these colors as these are the brand colors: #863509, #f3d2c0, #bf8768, #a7613b
   static ColorsPalette get light {
     return const ColorsPalette(
-      alert: Color.fromRGBO(247, 165, 0, 1),
-      alertSoft: Color.fromRGBO(254, 241, 217, 1),
-      negativeAction: Color.fromRGBO(211, 85, 73, 1),
-      negativeActionSoft: Color.fromRGBO(251, 238, 237, 1),
-      darkBG: Color.fromRGBO(52, 70, 62, 1),
-      positiveAction: Color.fromRGBO(98, 217, 146, 1),
-      positiveActionSoft: Color.fromRGBO(230, 245, 239, 1),
-      primary7: Color.fromRGBO(2, 196, 178, 0.07),
-      primary40: Color.fromRGBO(2, 196, 178, 0.40),
-      primary70: Color.fromRGBO(2, 196, 178, 0.7),
-      primary: Color.fromRGBO(2, 196, 178, 1),
-      secondary: Color.fromRGBO(41, 48, 64, 1),
-      secondary40: Color.fromRGBO(41, 48, 64, 0.40),
-      secondary70: Color.fromRGBO(41, 48, 64, 0.7),
-      secondary7: Color.fromRGBO(41, 48, 64, 0.07),
-      secondarySoft: Color.fromRGBO(255, 250, 234, 1),
-      neutral1: Color.fromRGBO(248, 249, 250, 1),
-      neutral2: Color.fromRGBO(241, 243, 245, 1),
-      neutral3: Color.fromRGBO(233, 236, 239, 1),
-      neutral4: Color.fromRGBO(222, 226, 230, 1),
-      neutral5: Color.fromRGBO(206, 212, 218, 1),
-      neutral6: Color.fromRGBO(173, 181, 189, 1),
-      neutral7: Color.fromRGBO(106, 113, 120, 1),
-      neutral8: Color.fromRGBO(79, 87, 94, 1),
-      neutral9: Color.fromRGBO(39, 43, 48, 1),
-      tertiary: Color.fromRGBO(6, 110, 114, 1),
-      black: Color.fromRGBO(0, 0, 0, 1),
-      white: Color.fromRGBO(255, 255, 255, 1),
-      ternary20: Color.fromRGBO(205, 226, 227, 1),
+      alert: Color(0xFF863509), // updated to brand color
+      alertSoft: Color(0xFFF3D2C0), // updated to brand color
+      negativeAction:
+          Color(0xFFA7613B), // darker brand tone for important actions
+      negativeActionSoft:
+          Color(0xFFBF8768), // softer tone for less priority actions
+      darkBG: Color(0xFFF3D2C0), // lightest brand color for backgrounds
+      positiveAction: Color(0xFF863509), // contrast color for positive actions
+      positiveActionSoft:
+          Color(0xFFF3D2C0), // soft background for positive hints
+      primary7: Color(0xFF863509),
+      primary40: Color.fromRGBO(134, 53, 9, 0.4),
+      primary70: Color.fromRGBO(134, 53, 9, 0.7),
+      primary: Color.fromRGBO(134, 53, 9, 0.07), // main brand color
+      secondary: Color(0xFFA7613B), // secondary brand color
+      secondary40: Color.fromRGBO(167, 97, 59, 0.4),
+      secondary70: Color.fromRGBO(167, 97, 59, 0.7),
+      secondary7: Color.fromRGBO(167, 97, 59, 0.07),
+      secondarySoft: Color(0xFFF3D2C0), // softest brand color
+      neutral1: Color(0xFFF8F9FA),
+      neutral2: Color(0xFFF1F3F5),
+      neutral3: Color(0xFFE9ECEF),
+      neutral4: Color(0xFFDEE2E6),
+      neutral5: Color(0xFFCED4DA),
+      neutral6: Color(0xFFADB5BD),
+      neutral7: Color(0xFF6A7076),
+      neutral8: Color(0xFF4F575E),
+      neutral9: Color(0xFF272B30),
+      tertiary: Color(0xFFA7613B),
+      black: Color(0xFF000000),
+      white: Color(0xFFFFFFFF),
+      ternary20: Color(0xFFCDE2E3), // adjusted to match brand aesthetic
     );
   }
 
   static ColorsPalette get dark {
     return const ColorsPalette(
-      alert: Color.fromRGBO(255, 183, 77, 1),
-      alertSoft: Color.fromRGBO(69, 42, 0, 1),
-      negativeAction: Color.fromRGBO(239, 83, 80, 1),
-      negativeActionSoft: Color.fromRGBO(79, 20, 20, 1),
-      darkBG: Color.fromRGBO(18, 18, 18, 1),
-      positiveAction: Color.fromRGBO(76, 175, 80, 1),
-      positiveActionSoft: Color.fromRGBO(19, 42, 19, 1),
-      primary7: Color.fromRGBO(0, 229, 255, 0.07),
-      primary40: Color.fromRGBO(0, 229, 255, 0.40),
-      primary70: Color.fromRGBO(0, 229, 255, 0.7),
-      primary: Color.fromRGBO(0, 229, 255, 1),
-      secondary: Color.fromRGBO(225, 190, 231, 1),
-      secondary40: Color.fromRGBO(81, 45, 168, 0.40),
-      secondary70: Color.fromRGBO(81, 45, 168, 0.7),
-      secondary7: Color.fromRGBO(81, 45, 168, 0.07),
-      secondarySoft: Color.fromRGBO(29, 17, 53, 1),
-      neutral1: Color.fromRGBO(33, 33, 33, 1),
-      neutral2: Color.fromRGBO(55, 55, 55, 1),
-      neutral3: Color.fromRGBO(85, 85, 85, 1),
-      neutral4: Color.fromRGBO(120, 120, 120, 1),
-      neutral5: Color.fromRGBO(145, 145, 145, 1),
-      neutral6: Color.fromRGBO(175, 175, 175, 1),
-      neutral7: Color.fromRGBO(200, 200, 200, 1),
-      neutral8: Color.fromRGBO(220, 220, 220, 1),
-      neutral9: Color.fromRGBO(245, 245, 245, 1),
-      tertiary: Color.fromRGBO(97, 97, 97, 1),
-      black: Color.fromRGBO(0, 0, 0, 1),
-      white: Color.fromRGBO(255, 255, 255, 1),
-      ternary20: Color.fromRGBO(105, 190, 210, 1),
+      alert: Color(0xFF863509), // maintained brand color for consistency
+      alertSoft: Color(0xFF693526), // darker variant for soft alert
+      negativeAction:
+          Color(0xFFA7613B), // darker brand tone for negative actions
+      negativeActionSoft: Color(0xFFBF8768), // soft negative actions
+      darkBG: Color(0xFF2C2C2C), // darker background
+      positiveAction:
+          Color(0xFF98D3AE), // lighter positive action for dark theme
+      positiveActionSoft: Color(0xFF303F36), // dark green for background hints
+      primary7: Color.fromRGBO(134, 53, 9, 0.07),
+      primary40: Color.fromRGBO(134, 53, 9, 0.4),
+      primary70: Color.fromRGBO(134, 53, 9, 0.7),
+      primary: Color(0xFF863509), // main brand color
+      secondary: Color(0xFFA7613B), // secondary brand color
+      secondary40: Color.fromRGBO(167, 97, 59, 0.4),
+      secondary70: Color.fromRGBO(167, 97, 59, 0.7),
+      secondary7: Color.fromRGBO(167, 97, 59, 0.07),
+      secondarySoft: Color(0xFF693526), // darker soft color for overlays
+      neutral1: Color(0xFF212121),
+      neutral2: Color(0xFF373737),
+      neutral3: Color(0xFF555555),
+      neutral4: Color(0xFF787878),
+      neutral5: Color(0xFF919191),
+      neutral6: Color(0xFFAFAFAF),
+      neutral7: Color(0xFFC8C8C8),
+      neutral8: Color(0xFFDCDCDC),
+      neutral9: Color(0xFFF5F5F5),
+      tertiary: Color(0xFF616161),
+      black: Color(0xFF000000),
+      white: Color(0xFFFFFFFF),
+      ternary20: Color(0xFF69BECA), // adjusted blue for dark theme accents
     );
   }
 }

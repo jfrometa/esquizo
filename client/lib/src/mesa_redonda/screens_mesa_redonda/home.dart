@@ -179,72 +179,67 @@ class _HomeState extends State<Home> {
   }
 
   Widget buildDishList(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        double height = MediaQuery.of(context).size.height / 2.4;
-        height = height * 2 / 3; // Reduce by 1/3
+    double height = MediaQuery.of(context).size.height / 2.4;
 
-        return SizedBox(
-          height: height,
-          width: MediaQuery.of(context).size.width,
-          child: Focus(
-            child: ScrollConfiguration(
-              behavior: CustomScrollBehavior(),
-              child: GridView.builder(
-                primary: false,
-                shrinkWrap: true,
-                scrollDirection: Axis.horizontal,
-                controller: ScrollController(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 1, // Always 1 row
-                  childAspectRatio: constraints.maxWidth /
-                      ((constraints.maxWidth >= 1200
-                              ? 1200
-                              : constraints.maxWidth) /
-                          1),
-                  mainAxisSpacing: 10.0,
-                  crossAxisSpacing: 10.0,
-                ),
-                itemCount: plans.length,
-                itemBuilder: (BuildContext context, int index) {
-                  Map dish = plans[index];
+    return SizedBox(
+      height: height,
+      child: Focus(
+        child: ScrollConfiguration(
+          behavior: CustomScrollBehavior(),
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: plans.length,
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            itemBuilder: (BuildContext context, int index) {
+              Map dish = plans[index];
 
-                  return GestureDetector(
-                    onTap: () {
-                      context.goNamed(
-                        AppRoute.addToOrder.name,
-                        pathParameters: {
-                          "itemId": plans[index].toString(),
-                        },
-                        extra: dish,
-                      );
+              return GestureDetector(
+                onTap: () {
+                  context.goNamed(
+                    AppRoute.addToOrder.name,
+                    pathParameters: {
+                      "itemId": plans[index].toString(),
                     },
+                    extra: dish,
+                  );
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: 300, // Set maximum width for the card
+                      minWidth: 250, // Optional: Set a minimum width
+                    ),
                     child: SlideItem(
                       img: dish["img"],
                       title: dish["title"],
-                      address: dish["address"],
-                      rating: dish["rating"],
+                      description: dish["description"],
+                      pricing: dish["pricing"],
+                      offertPricing: dish["offertPricing"],
+                      ingredients: dish["ingredients"],
+                      isSpicy: dish["isSpicy"],
+                      foodType: dish["foodType"],
                       key: Key('dish_$index'),
                     ),
-                  );
-                },
-              ),
-            ),
-            onKeyEvent: (FocusNode node, KeyEvent event) {
-              if (event is KeyDownEvent) {
-                if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-                  node.nextFocus();
-                  return KeyEventResult.handled;
-                } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-                  node.previousFocus();
-                  return KeyEventResult.handled;
-                }
-              }
-              return KeyEventResult.ignored;
+                  ),
+                ),
+              );
             },
           ),
-        );
-      },
+        ),
+        onKeyEvent: (FocusNode node, KeyEvent event) {
+          if (event is KeyDownEvent) {
+            if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+              node.nextFocus();
+              return KeyEventResult.handled;
+            } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+              node.previousFocus();
+              return KeyEventResult.handled;
+            }
+          }
+          return KeyEventResult.ignored;
+        },
+      ),
     );
   }
 

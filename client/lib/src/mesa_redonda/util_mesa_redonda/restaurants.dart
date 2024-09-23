@@ -1,56 +1,120 @@
 List plans = [
   {
-    "img": "assets/food1.jpeg",
-    "title": "Happy Jones",
-    "address": "1278 Loving Acres RoadKansas City, MO 64110",
-    "rating": "4.5"
+    "img": 'assets/food1.jpeg',
+    "title": 'La Bonita',
+    "description": 'Sandwich de queso de hoja, tocino, y spicy honey.',
+    "pricing": '400.00',
+    "ingredients": ['Queso de hoja', 'Tocino', 'Spicy honey'],
+    "isSpicy": true,
+    "foodType": 'Meat',
   },
   {
-    "img": "assets/food2.jpeg",
-    "title": "Uncle Boons",
-    "address": "1278 Loving Acres RoadKansas City, MO 64110",
-    "rating": "4.5"
+    "img": 'assets/food2.jpeg',
+    "title": 'Bosque Encantado',
+    "description":
+        'Sandwich de filete de res, crema de hongos, cebolla caramelizada, y queso provolone.',
+    "pricing": '555.00',
+    "ingredients": [
+      'Filete de res',
+      'Crema de hongos',
+      'Cebolla caramelizada',
+      'Queso provolone'
+    ],
+    "isSpicy": false,
+    "foodType": 'Meat',
   },
   {
-    "img": "assets/food3.jpeg",
-    "title": "Happy Jones",
-    "address": "1278 Loving Acres RoadKansas City, MO 64110",
-    "rating": "4.5"
+    "img": 'assets/food3.jpeg',
+    "title": 'El Granjero',
+    "description": 'Sandwich de pulled pork y coleslaw.',
+    "pricing": '475.00',
+    "ingredients": ['Pulled pork', 'Coleslaw'],
+    "isSpicy": false,
+    "foodType": 'Meat',
   },
   {
-    "img": "assets/food4.jpeg",
-    "title": "Uncle Boons",
-    "address": "1278 Loving Acres RoadKansas City, MO 64110",
-    "rating": "4.5"
+    "img": 'assets/food4.jpeg',
+    "title": 'El Americano',
+    "description":
+        'Sandwich de pechuga empanizada, spicy honey, y queso americano.',
+    "pricing": '500.00',
+    "ingredients": ['Pechuga empanizada', 'Spicy honey', 'Queso americano'],
+    "isSpicy": true,
+    "foodType": 'Meat',
   },
   {
-    "img": "assets/food5.jpeg",
-    "title": "Happy Jones",
-    "address": "1278 Loving Acres RoadKansas City, MO 64110",
-    "rating": "4.5"
+    "img": 'assets/food5.jpeg',
+    "title": 'Kapow',
+    "description": 'Sandwich de pechuga desmenuzada, crema de hongos y tocino.',
+    "pricing": '555.00',
+    "ingredients": ['Pechuga desmenuzada', 'Crema de hongos', 'Tocino'],
+    "isSpicy": false,
+    "foodType": 'Meat',
   },
   {
-    "img": "assets/food6.jpeg",
-    "title": "Happy Jones",
-    "address": "1278 Loving Acres RoadKansas City, MO 64110",
-    "rating": "4.5"
+    "img": 'assets/food6.jpeg',
+    "title": 'Verde',
+    "description": 'Arroz al pesto con pechuga a la plancha.',
+    "pricing": '575.00',
+    "ingredients": ['Arroz al pesto', 'Pechuga a la plancha'],
+    "isSpicy": false,
+    "foodType": 'Meat',
   },
   {
-    "img": "assets/food7.jpeg",
-    "title": "Happy Jones",
-    "address": "1278 Loving Acres RoadKansas City, MO 64110",
-    "rating": "4.5"
+    "img": 'assets/food7.jpeg',
+    "title": 'Asiatica',
+    "description": 'Arroz asiatico y flap meat.',
+    "pricing": '600.00',
+    "ingredients": ['Arroz asiatico', 'Flap meat'],
+    "isSpicy": false,
+    "foodType": 'Meat',
   },
   {
-    "img": "assets/food8.jpeg",
-    "title": "Happy Jones",
-    "address": "1278 Loving Acres RoadKansas City, MO 64110",
-    "rating": "4.5"
+    "img": 'assets/food1.jpeg',
+    "title": 'Clasica',
+    "description": 'Pechuga desmenuzada, arroz blanco, ensalada y aguacate.',
+    "pricing": '500.00',
+    "ingredients": [
+      'Pechuga desmenuzada',
+      'Arroz blanco',
+      'Ensalada',
+      'Aguacate'
+    ],
+    "isSpicy": false,
+    "foodType": 'Meat',
   },
   {
-    "img": "assets/food9.jpeg",
-    "title": "Happy Jones",
-    "address": "1278 Loving Acres RoadKansas City, MO 64110",
-    "rating": "4.5"
-  }
+    "img": 'assets/food2.jpeg',
+    "title": 'Mar y Tierra',
+    "description": 'Ensalada, pechuga, y camarones.',
+    "pricing": '600.00',
+    "ingredients": ['Ensalada', 'Pechuga', 'Camarones'],
+    "isSpicy": false,
+    "foodType": 'Meat',
+  },
+  {
+    "img": 'assets/food3.jpeg',
+    "title": 'Quisqueya',
+    "description":
+        'Res mechada al estilo dominicano, plátano maduro, arroz blanco y ensalada.',
+    "pricing": '575.00',
+    "ingredients": [
+      'Res mechada',
+      'Plátano maduro',
+      'Arroz blanco',
+      'Ensalada'
+    ],
+    "isSpicy": false,
+    "foodType": 'Meat',
+  },
+  {
+    "img": 'assets/food4.jpeg',
+    "title": 'Ensalada Camille',
+    "description":
+        'Mix de lechugas, flap meat, sweet potato, y queso parmesano.',
+    "pricing": '600.00',
+    "ingredients": ['Lechugas', 'Flap meat', 'Sweet potato', 'Queso parmesano'],
+    "isSpicy": false,
+    "foodType": 'Meat',
+  },
 ];

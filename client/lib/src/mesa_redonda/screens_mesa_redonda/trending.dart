@@ -21,7 +21,9 @@ class Trending extends StatelessWidget {
         ),
         child: Column(
           children: <Widget>[
-            SearchCard(),
+            SearchCard(
+              onChanged: (String value) {},
+            ),
             const SizedBox(height: 10.0),
             Expanded(
               child: GridView.builder(
