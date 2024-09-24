@@ -160,17 +160,17 @@ class ColorsPaletteRedonda {
     return ThemeData(
       brightness: Brightness.light,
       primaryColor: lightBrown,
-      scaffoldBackgroundColor: primary,
+      scaffoldBackgroundColor: lightBrown,
       appBarTheme: const AppBarTheme(
         color: Colors.white,
         foregroundColor: primary, // Ensures AppBar title is white
         elevation: 0,
       ),
       textTheme: const TextTheme(
-        displayLarge: TextStyle(color: Colors.white, fontSize: 34.0, fontWeight: FontWeight.bold),
+        displayLarge: TextStyle(color: Colors.white, fontSize: 34.0, ),
         displayMedium: TextStyle(color: Colors.white, fontSize: 28.0),
         displaySmall: TextStyle(color: Colors.white, fontSize: 24.0),
-        headlineLarge: TextStyle(color: Colors.white, fontSize: 20.0, fontWeight: FontWeight.bold),
+        headlineLarge: TextStyle(color: Colors.white, fontSize: 20.0),
         headlineMedium: TextStyle(color: Colors.white, fontSize: 16.0),
         headlineSmall: TextStyle(color: Colors.white, fontSize: 14.0),
         titleLarge: TextStyle(color: deepBrown, fontSize: 20.0, fontWeight: FontWeight.bold), // Titles on white backgrounds
