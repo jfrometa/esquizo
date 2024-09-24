@@ -88,8 +88,7 @@ class DropdownPopup<T> extends PopupRoute {
                                             .textStyles.headlineMedium
                                         : customAppTheme.textStyles.bodyLarge
                                             .copyWith(
-                                            color: customAppTheme
-                                                .colorsPalette.secondary70,
+                                            color: Colors.accents,
                                           ),
                                   ),
                                 ),

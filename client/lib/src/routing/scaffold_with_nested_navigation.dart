@@ -1,47 +1,27 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:starter_architecture_flutter_firebase/src/localization/string_hardcoded.dart';
-import 'package:starter_architecture_flutter_firebase/src/theme/app_theme.dart';
+import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
-// Stateful navigation based on:
-// https://github.com/flutter/packages/blob/main/packages/go_router/example/lib/stateful_shell_route.dart
 class ScaffoldWithNestedNavigation extends StatelessWidget {
   const ScaffoldWithNestedNavigation({
-    Key? key,
+    super.key,
     required this.navigationShell,
-  }) : super(key: key ?? const ValueKey('ScaffoldWithNestedNavigation'));
+  });
+
   final StatefulNavigationShell navigationShell;
 
   void _goBranch(int index) {
-    navigationShell.goBranch(
-      index,
-      // A common pattern when using bottom navigation bars is to support
-      // navigating to the initial location when tapping the item that is
-      // already active. This example demonstrates how to support this behavior,
-      // using the initialLocation parameter of goBranch.
-      initialLocation: index == navigationShell.currentIndex,
-    );
+    navigationShell.goBranch(index, initialLocation: index == navigationShell.currentIndex);
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
-    if (size.width < 450) {
-      return ScaffoldWithNavigationBar(
-        body: navigationShell,
-        currentIndex: navigationShell.currentIndex,
-        onDestinationSelected: _goBranch,
-      );
-    } else {
-      return ScaffoldWithNavigationRail(
-        body: navigationShell,
-        currentIndex: navigationShell.currentIndex,
-        onDestinationSelected: _goBranch,
-      );
-    }
+    final size = MediaQuery.of(context).size;
+    return size.width < 450
+        ? ScaffoldWithNavigationBar(body: navigationShell, currentIndex: navigationShell.currentIndex, onDestinationSelected: _goBranch)
+        : ScaffoldWithNavigationRail(body: navigationShell, currentIndex: navigationShell.currentIndex, onDestinationSelected: _goBranch);
   }
 }
 
@@ -52,56 +32,79 @@ class ScaffoldWithNavigationBar extends ConsumerWidget {
     required this.currentIndex,
     required this.onDestinationSelected,
   });
+
   final Widget body;
   final int currentIndex;
   final ValueChanged<int> onDestinationSelected;
 
   @override
-  Widget build(BuildContext context, ref) {
-    CustomAppTheme theme = ref.watch(appThemeProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: body,
-      bottomNavigationBar: NavigationBar(
-        backgroundColor: theme.colorsPalette.white,
-        selectedIndex: currentIndex,
-        destinations: [
-          // products
-          NavigationDestination(
-            icon: const Icon(Icons.work_outline),
-            selectedIcon: const Icon(Icons.chat),
-            label: 'Home'.hardcoded,
+      bottomNavigationBar: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          backgroundColor: Colors.white,
+          indicatorColor: ColorsPaletteRedonda.deepBrown,
+          labelTextStyle: WidgetStateProperty.resolveWith(
+            (Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
+                return const TextStyle(color: ColorsPaletteRedonda.deepBrown); // Selected label color
+              }
+              return const TextStyle(color: ColorsPaletteRedonda.lightBrown); // Unselected label color
+            },
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.view_headline_outlined),
-            selectedIcon: const Icon(Icons.view_headline),
-            label: 'Cart'.hardcoded,
+          iconTheme: WidgetStateProperty.resolveWith(
+            (Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
+                return const IconThemeData(color: Colors.white); // Selected icon color
+              }
+              return const IconThemeData(color: ColorsPaletteRedonda.primary); // Unselected icon color
+            },
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.view_headline_outlined),
-            selectedIcon: const Icon(Icons.view_headline),
-            label: 'Checkout'.hardcoded,
-          ),
-          // NavigationDestination(
-          //   icon: const Icon(Icons.work_outline),
-          //   selectedIcon: const Icon(Icons.work),
-          //   label: 'Jobs'.hardcoded,
-          // ),
-          // NavigationDestination(
-          //   icon: const Icon(Icons.view_headline_outlined),
-          //   selectedIcon: const Icon(Icons.view_headline),
-          //   label: 'Entries'.hardcoded,
-          // ),
-          NavigationDestination(
-            icon: const Icon(Icons.person_outline),
-            selectedIcon: const Icon(Icons.person),
-            label: 'Account'.hardcoded,
-          ),
-        ],
-        onDestinationSelected: onDestinationSelected,
+        ),
+        child: NavigationBar(
+          selectedIndex: currentIndex,
+          onDestinationSelected: onDestinationSelected,
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          destinations: List.generate(4, (index) => _buildDestination(index)),
+        ),
       ),
     );
   }
+
+  NavigationDestination _buildDestination(int index) {
+    IconData icon;
+    String label;
+    switch (index) {
+      case 0:
+        icon = Icons.home;
+        label = 'Home';
+        break;
+      case 1:
+        icon = Icons.shopping_cart;
+        label = 'Cart';
+        break;
+      case 2:
+        icon = Icons.checklist_rtl;
+        label = 'Checkout';
+        break;
+      case 3:
+        icon = Icons.account_circle;
+        label = 'Account';
+        break;
+      default:
+        icon = Icons.home;
+        label = 'Home';
+        break;
+    }
+
+    return NavigationDestination(
+      icon: Icon(icon),
+      label: label,
+    );
+  }
 }
+
 
 class ScaffoldWithNavigationRail extends StatelessWidget {
   const ScaffoldWithNavigationRail({
@@ -110,6 +113,7 @@ class ScaffoldWithNavigationRail extends StatelessWidget {
     required this.currentIndex,
     required this.onDestinationSelected,
   });
+
   final Widget body;
   final int currentIndex;
   final ValueChanged<int> onDestinationSelected;
@@ -120,52 +124,49 @@ class ScaffoldWithNavigationRail extends StatelessWidget {
       body: Row(
         children: [
           NavigationRail(
+            indicatorColor: ColorsPaletteRedonda.deepBrown,
+            backgroundColor: Colors.white,
             selectedIndex: currentIndex,
             onDestinationSelected: onDestinationSelected,
             labelType: NavigationRailLabelType.all,
-            destinations: <NavigationRailDestination>[
-              NavigationRailDestination(
-                icon: const Icon(Icons.work_outline),
-                selectedIcon: const Icon(Icons.chat),
-                label: Text('Home'.hardcoded),
-              ),
-              NavigationRailDestination(
-                icon: const Icon(Icons.work_outline),
-                selectedIcon: const Icon(Icons.work),
-                label: Text('Cart'.hardcoded),
-              ),
-
-              NavigationRailDestination(
-                icon: const Icon(Icons.work_outline),
-                selectedIcon: const Icon(Icons.work),
-                label: Text('Checkout'.hardcoded),
-              ),
-
-              // NavigationRailDestination(
-              //   icon: const Icon(Icons.work_outline),
-              //   selectedIcon: const Icon(Icons.work),
-              //   label: Text('Jobs'.hardcoded),
-              // ),
-
-              // NavigationRailDestination(
-              //     icon: const Icon(Icons.view_headline_outlined),
-              //     selectedIcon: const Icon(Icons.view_headline),
-              //     label: Text('Entries'.hardcoded),
-              //   ),
-              NavigationRailDestination(
-                icon: const Icon(Icons.person_outline),
-                selectedIcon: const Icon(Icons.person),
-                label: Text('Account'.hardcoded),
-              ),
-            ],
+            selectedIconTheme: const IconThemeData(color: Colors.white),
+            selectedLabelTextStyle: const TextStyle(color: ColorsPaletteRedonda.deepBrown),
+            unselectedIconTheme: const IconThemeData(color: ColorsPaletteRedonda.primary),
+            unselectedLabelTextStyle: const TextStyle(color: ColorsPaletteRedonda.lightBrown),
+            destinations: List.generate(4, (index) => _buildRailDestination(index)),
           ),
           const VerticalDivider(thickness: 1, width: 1),
-          // This is the main content.
-          Expanded(
-            child: body,
-          ),
+          Expanded(child: body),
         ],
       ),
     );
+  }
+
+  NavigationRailDestination _buildRailDestination(int index) {
+    IconData icon;
+    String label;
+    switch (index) {
+      case 0:
+        icon = Icons.home;
+        label = 'Home'.hardcoded;
+        break;
+      case 1:
+        icon = Icons.shopping_cart;
+        label = 'Cart'.hardcoded;
+        break;
+      case 2:
+        icon = Icons.checklist_rtl;
+        label = 'Checkout'.hardcoded;
+        break;
+      case 3:
+        icon = Icons.account_circle;
+        label = 'Account'.hardcoded;
+        break;
+      default:
+        icon = Icons.home;
+        label = 'Home'.hardcoded;
+        break;
+    }
+    return NavigationRailDestination(icon: Icon(icon), label: Text(label));
   }
 }

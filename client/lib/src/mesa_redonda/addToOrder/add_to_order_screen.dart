@@ -1,164 +1,125 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/constants.dart';
-import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/util_mesa_redonda/restaurants.dart';
+import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
-import 'components/info.dart';
-import 'components/required_section_title.dart';
-import 'components/rounded_checkedbox_list_tile.dart';
-
-class AddToOrderScrreen extends StatefulWidget {
-  const AddToOrderScrreen({super.key, required this.itemId});
-  final String itemId;
+class AddToOrderScreen extends StatefulWidget {
+  const AddToOrderScreen({super.key, required this.index});
+  final int index;  // Index passed from previous screen
 
   @override
-  State<AddToOrderScrreen> createState() => _AddToOrderScrreenState();
+  State<AddToOrderScreen> createState() => _AddToOrderScreenState();
 }
 
-class _AddToOrderScrreenState extends State<AddToOrderScrreen> {
-  // for demo we select 2nd one
-  int choiceOfTopCookie = 1;
+class _AddToOrderScreenState extends State<AddToOrderScreen> {
+  late final Map<String, dynamic> selectedItem;  // The selected item data
 
-  int choiceOfBottomCookie = 1;
-
-  int numOfItems = 1;
+  @override
+  void initState() {
+    super.initState();
+    selectedItem = plans[widget.index];  // Retrieve data based on index
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(100))),
-              backgroundColor: Colors.black.withOpacity(0.5),
-              padding: EdgeInsets.zero,
-            ),
-            child: const Icon(Icons.close, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
-          ),
+        elevation: 0,
+        title: Text(selectedItem['title'], style: const TextStyle(color: ColorsPaletteRedonda.primary)),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: ColorsPaletteRedonda.primary),
+          onPressed: () => Navigator.pop(context),
         ),
-      ),
-      body: SafeArea(
-        top: false,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Info(),
-              const SizedBox(height: defaultPadding),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: defaultPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const RequiredSectionTitle(title: "Choice of top Cookie"),
-                    const SizedBox(height: defaultPadding),
-                    ...List.generate(
-                      choiceOfTopCookies.length,
-                      (index) => RoundedCheckboxListTile(
-                        isActive: index == choiceOfTopCookie,
-                        text: choiceOfTopCookies[index],
-                        press: () {
-                          setState(() {
-                            choiceOfTopCookie = index;
-                          });
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: defaultPadding),
-                    const RequiredSectionTitle(
-                        title: "Choice of Bottom Cookie"),
-                    const SizedBox(height: defaultPadding),
-                    ...List.generate(
-                      choiceOfTopCookies.length,
-                      (index) => RoundedCheckboxListTile(
-                        isActive: index == choiceOfBottomCookie,
-                        text: choiceOfTopCookies[index],
-                        press: () {
-                          setState(() {
-                            choiceOfBottomCookie = index;
-                          });
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: defaultPadding),
-                    // // Num of item
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          height: 40,
-                          width: 40,
-                          child: ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                              shape: const CircleBorder(),
-                              padding: EdgeInsets.zero,
-                            ),
-                            child: const Icon(Icons.remove),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: defaultPadding),
-                          child: Text(numOfItems.toString().padLeft(2, "0"),
-                              style: Theme.of(context).textTheme.titleLarge),
-                        ),
-                        SizedBox(
-                          height: 40,
-                          width: 40,
-                          child: ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                              shape: const CircleBorder(),
-                              padding: EdgeInsets.zero,
-                            ),
-                            child: const Icon(Icons.add),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: defaultPadding),
-                    ElevatedButton(
-                      onPressed: () {
-                        Random random = Random();
-                        context.goNamed(
-                          AppRoute.cart.name,
-                          pathParameters: {
-                            "detailItemId":
-                                (random.nextInt(905) + 5510).toString(),
-                            "cartItemId": (random.nextInt(40) + 510).toString(),
-                          },
-                        );
-                      },
-                      child: const Text("Add to Order (\$11.98)"),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: defaultPadding)
-            ],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.shopping_cart, color: ColorsPaletteRedonda.primary),
+            onPressed: () {
+              // Handle cart action
+            },
           ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(
+              height: 350,  // Image max height
+              width: double.infinity,
+              child: Image.network(selectedItem['img'], fit: BoxFit.cover),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    selectedItem['title'],
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    "\$${selectedItem['pricing']}",
+                    style: const TextStyle(
+                      fontSize: 20,
+                      color: Colors.orange,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    selectedItem['description'],
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      FloatingActionButton(
+                        onPressed: () {
+                          setState(() {
+                            if (selectedItem['quantity'] > 1) {
+                              selectedItem['quantity']--;
+                            }
+                          });
+                        },
+                        backgroundColor: Colors.black,
+                        child: const Icon(Icons.remove, color: Colors.white),
+                      ),
+                      Text(
+                        selectedItem['quantity'].toString(),
+                        style: const TextStyle(fontSize: 24),
+                      ),
+                      FloatingActionButton(
+                        onPressed: () {
+                          setState(() {
+                            selectedItem['quantity']++;
+                          });
+                        },
+                        backgroundColor: Colors.black,
+                        child: const Icon(Icons.add, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Center(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white, backgroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+                      ),
+                      onPressed: () {
+                        // Handle add to cart
+                      },
+                      child: const Text("Add to Cart"),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
-
-  List<String> choiceOfTopCookies = [
-    "Choice of top Cookie",
-    "Cookies and Cream",
-    "Funfetti",
-    "M and M",
-    "Red Velvet",
-    "Peanut Butter",
-    "Snickerdoodle",
-    "White Chocolate Macadamia",
-  ];
 }

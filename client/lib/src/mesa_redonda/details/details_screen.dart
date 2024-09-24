@@ -93,7 +93,7 @@ class DetailsScreen extends StatelessWidget {
                             context.goNamed(
                               AppRoute.detailScreen.name,
                               pathParameters: {
-                                "detailItemId": item["name"].toString(),
+                                "detailItemId": index.toString(),
                               },
                             );
                           }, // Add empty function to press

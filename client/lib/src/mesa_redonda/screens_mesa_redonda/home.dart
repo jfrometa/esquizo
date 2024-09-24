@@ -43,8 +43,6 @@ class HomeState extends State<Home> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Mesa Redonda"),
-          backgroundColor: Colors.white,
-          foregroundColor: Theme.of(context).colorScheme.primary,
           scrolledUnderElevation: 0.0,
           actions: const [
             // Consumer(builder: (context, ref, child) {
@@ -60,6 +58,7 @@ class HomeState extends State<Home> {
           ],
         ),
         body: Column(
+          
           children: <Widget>[
             const SizedBox(height: 10.0),
             buildSearchBar(context),
@@ -67,6 +66,7 @@ class HomeState extends State<Home> {
             Expanded(
               child: _searchQuery.isEmpty
                   ? SingleChildScrollView(
+                    
                       padding: const EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
                       child: Column(
                         children: [
@@ -219,7 +219,7 @@ class HomeState extends State<Home> {
                   context.goNamed(
                     AppRoute.addToOrder.name,
                     pathParameters: {
-                      "itemId": plans[index].toString(),
+                      "itemId":  index.toString(),
                     },
                     extra: dish,
                   );

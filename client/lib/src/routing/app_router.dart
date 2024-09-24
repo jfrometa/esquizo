@@ -70,7 +70,6 @@ GoRouter goRouter(GoRouterRef ref) {
 
  final isFirebaseInitialized = ref.watch(isFirebaseInitializedProvider);
 
-
   return GoRouter(
     initialLocation: '/signIn',
     navigatorKey: _rootNavigatorKey,
@@ -78,7 +77,7 @@ GoRouter goRouter(GoRouterRef ref) {
     redirect: (context, state) async {
 
 
-   if (!isFirebaseInitialized) {
+      if (!isFirebaseInitialized) {
         try {
           await Firebase.initializeApp(
               options: DefaultFirebaseOptions.currentPlatform);
@@ -183,8 +182,8 @@ GoRouter goRouter(GoRouterRef ref) {
                       final itemId = state.pathParameters['itemId']!;
                       return MaterialPage(
                         // fullscreenDialog: true,
-                        child: AddToOrderScrreen(
-                          itemId: itemId,
+                        child: AddToOrderScreen(
+                          index: int.parse(itemId),
                         ),
                       );
                     },
@@ -216,8 +215,8 @@ GoRouter goRouter(GoRouterRef ref) {
                               state.pathParameters['detailItemId']!;
                           return MaterialPage(
                             // fullscreenDialog: true,
-                            child: AddToOrderScrreen(
-                              itemId: detailItemId,
+                            child: AddToOrderScreen(
+                              index: int.parse(detailItemId),
                             ),
                           );
                         },
