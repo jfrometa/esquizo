@@ -48,12 +48,12 @@ class CartItem extends StatelessWidget {
                   child: Image.asset(
                     img,
                     fit: BoxFit.cover,
-                    width: 80,
-                    height: 80,
+                    width: 100,
+                    height: 100,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        width: 80,
-                        height: 80,
+                        width: 100,
+                        height: 100,
                         color: Colors.grey[200],
                         child: const Icon(Icons.broken_image, size: 40),
                       );
@@ -69,7 +69,7 @@ class CartItem extends StatelessWidget {
                       Text(
                         title,
                         style: const TextStyle(
-                          fontSize: 20.0,
+                          fontSize: 18.0,
                           fontWeight: FontWeight.bold,
                           color: ColorsPaletteRedonda.primary,
                         ),
@@ -80,7 +80,7 @@ class CartItem extends StatelessWidget {
                       Text(
                         description,
                         style: const TextStyle(
-                          fontSize: 14.0,
+                          fontSize: 12.0,
                           color: Colors.black,
                         ),
                         maxLines: 2,
@@ -99,7 +99,7 @@ class CartItem extends StatelessWidget {
                   child: Text(
                     'Ingredients: ${ingredients.join(', ')}',
                     style: const TextStyle(
-                      fontSize: 14.0,
+                      fontSize: 12.0,
                       color: Colors.black,
                     ),
                     maxLines: 2,
@@ -150,7 +150,7 @@ class CartItem extends StatelessWidget {
                       quantity.toString(),
                       style: Theme.of(context).textTheme.displaySmall?.copyWith(
                             color: ColorsPaletteRedonda.primary,
-                            fontSize: 22,
+                            fontSize: 20,
                           ),
                     ),
                     IconButton(
@@ -165,7 +165,7 @@ class CartItem extends StatelessWidget {
                   '\$${(double.tryParse(pricing) ?? 0.0) * quantity}',
                   style: Theme.of(context).textTheme.displaySmall?.copyWith(
                         color: Colors.deepOrange,
-                        fontSize: 22,
+                        fontSize: 20,
                       ),
                 ),
               ],

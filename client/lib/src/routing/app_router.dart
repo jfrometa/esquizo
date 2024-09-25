@@ -280,9 +280,9 @@ GoRouter goRouter(GoRouterRef ref) {
                 path: '/homecheckout',
                 name: AppRoute.homecheckout.name,
                 pageBuilder: (context, state) {
-                  return const MaterialPage(
+                  return MaterialPage(
                     // fullscreenDialog: true,
-                    child: CheckoutScreen(),
+                    child: CheckoutScreen(cartItems: cartItems),
                   );
                 },
               ),

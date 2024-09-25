@@ -57,7 +57,7 @@ class CartScreenState extends State<CartScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tu Carrito'),
+        title: const Text('Carrito'),
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
