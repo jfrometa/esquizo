@@ -146,42 +146,48 @@ class ColorsPalette {
   }
 }
 
-
-
- 
 class ColorsPaletteRedonda {
   static const Color primary = Color(0xFF863509); // Main brand color
   static const Color lightBrown = Color(0xFFBF8768); // Lighter brown for AppBar
-  static const Color deepBrown = Color(0xFFA7613B); // Deeper brown for body backgrounds
-  static const Color softBrown = Color(0xFFF3D2C0); // Lightest brown for backgrounds
+  static const Color deepBrown =
+      Color(0xFFA7613B); // Deeper brown for body backgrounds
+  static const Color softBrown =
+      Color(0xFFF3D2C0); // Lightest brown for backgrounds
   static const Color white = Colors.white;
 
   static ThemeData get themeData {
     return ThemeData(
       brightness: Brightness.light,
       primaryColor: lightBrown,
-      scaffoldBackgroundColor: lightBrown,
+      scaffoldBackgroundColor: softBrown,
       appBarTheme: const AppBarTheme(
         color: Colors.white,
         foregroundColor: primary, // Ensures AppBar title is white
         elevation: 0,
       ),
       textTheme: const TextTheme(
-        displayLarge: TextStyle(color: Colors.white, fontSize: 34.0, ),
-        displayMedium: TextStyle(color: Colors.white, fontSize: 28.0),
-        displaySmall: TextStyle(color: Colors.white, fontSize: 24.0),
-        headlineLarge: TextStyle(color: Colors.white, fontSize: 20.0),
-        headlineMedium: TextStyle(color: Colors.white, fontSize: 16.0),
-        headlineSmall: TextStyle(color: Colors.white, fontSize: 14.0),
-        titleLarge: TextStyle(color: deepBrown, fontSize: 20.0, fontWeight: FontWeight.bold), // Titles on white backgrounds
+        displayLarge: TextStyle(
+          color: Colors.white,
+          fontSize: 34.0,
+        ),
+        displayMedium: TextStyle(color: lightBrown, fontSize: 28.0),
+        displaySmall: TextStyle(color: lightBrown, fontSize: 24.0),
+        headlineLarge: TextStyle(color: primary, fontSize: 20.0),
+        headlineMedium: TextStyle(color: primary, fontSize: 16.0),
+        headlineSmall: TextStyle(color: lightBrown, fontSize: 14.0),
+        titleLarge: TextStyle(
+            color: deepBrown,
+            fontSize: 20.0,
+            fontWeight: FontWeight.bold), // Titles on white backgrounds
         titleMedium: TextStyle(color: deepBrown, fontSize: 18.0),
         titleSmall: TextStyle(color: deepBrown, fontSize: 16.0),
         bodyLarge: TextStyle(color: Colors.white, fontSize: 16.0),
-        bodyMedium: TextStyle(color: Colors.white, fontSize: 14.0),
-        bodySmall: TextStyle(color: Colors.white, fontSize: 12.0),
-        labelLarge: TextStyle(color: Colors.white, fontSize: 14.0, fontWeight: FontWeight.bold),
-        labelMedium: TextStyle(color: Colors.white, fontSize: 12.0),
-        labelSmall: TextStyle(color: Colors.white, fontSize: 10.0),
+        bodyMedium: TextStyle(color: lightBrown, fontSize: 14.0),
+        bodySmall: TextStyle(color: lightBrown, fontSize: 12.0),
+        labelLarge: TextStyle(
+            color: Colors.white, fontSize: 14.0, fontWeight: FontWeight.bold),
+        labelMedium: TextStyle(color: lightBrown, fontSize: 12.0),
+        labelSmall: TextStyle(color: lightBrown, fontSize: 10.0),
       ),
       iconTheme: const IconThemeData(
         color: Colors.white, // Icons throughout the app
@@ -192,9 +198,12 @@ class ColorsPaletteRedonda {
       ),
       tabBarTheme: TabBarTheme(
         labelColor: Colors.white, // Active tab text color
-        unselectedLabelColor: Colors.white.withAlpha(140), // Inactive tab text color, slightly transparent
+        unselectedLabelColor: Colors.white
+            .withAlpha(140), // Inactive tab text color, slightly transparent
         indicator: const UnderlineTabIndicator(
-          borderSide: BorderSide(color: Colors.white, width: 2.0), // Underline tab indicator in white
+          borderSide: BorderSide(
+              color: Colors.white,
+              width: 2.0), // Underline tab indicator in white
         ),
       ),
       colorScheme: ColorScheme.fromSwatch().copyWith(

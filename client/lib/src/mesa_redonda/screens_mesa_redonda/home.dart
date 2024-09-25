@@ -59,7 +59,6 @@ class HomeState extends State<Home> {
           ],
         ),
         body: Column(
-          
           children: <Widget>[
             const SizedBox(height: 10.0),
             buildSearchBar(context),
@@ -67,7 +66,6 @@ class HomeState extends State<Home> {
             Expanded(
               child: _searchQuery.isEmpty
                   ? SingleChildScrollView(
-                    
                       padding: const EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
                       child: Column(
                         children: [
@@ -115,7 +113,7 @@ class HomeState extends State<Home> {
             child: Text(
               "Ver todos",
               style: TextStyle(
-                color: Theme.of(context).colorScheme.secondary,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
             onPressed: () {
@@ -188,7 +186,7 @@ class HomeState extends State<Home> {
             child: Text(
               "Ver todos",
               style: TextStyle(
-                color: Theme.of(context).colorScheme.secondary,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
             onPressed: () {
@@ -201,7 +199,7 @@ class HomeState extends State<Home> {
   }
 
   Widget buildDishList(BuildContext context) {
-    double height = 400 ;
+    double height = 400;
 
     return SizedBox(
       height: height,
@@ -220,7 +218,7 @@ class HomeState extends State<Home> {
                   context.goNamed(
                     AppRoute.addToOrder.name,
                     pathParameters: {
-                      "itemId":  index.toString(),
+                      "itemId": index.toString(),
                     },
                     extra: dish,
                   );
@@ -233,6 +231,7 @@ class HomeState extends State<Home> {
                       minWidth: 250, // Optional: Set a minimum width
                     ),
                     child: SlideItem(
+                      index: index,
                       img: dish["img"],
                       title: dish["title"],
                       description: dish["description"],
@@ -293,6 +292,7 @@ class HomeState extends State<Home> {
             height: 400,
             margin: const EdgeInsets.symmetric(vertical: 5.0),
             child: SlideItem(
+              index: index,
               img: dish["img"],
               title: dish["title"],
               description: dish["description"],
@@ -337,7 +337,7 @@ class HomeState extends State<Home> {
     );
   }
 }
- 
+
 class SearchCard extends StatelessWidget {
   final ValueChanged<String> onChanged;
 
@@ -348,35 +348,43 @@ class SearchCard extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), // Adjust padding as needed
+      padding: const EdgeInsets.symmetric(
+          horizontal: 16.0, vertical: 8.0), // Adjust padding as needed
       child: TextField(
         onChanged: onChanged,
         style: theme.textTheme.bodyMedium?.copyWith(
-          color: ColorsPaletteRedonda.deepBrown, // Apply deep brown to input text color
+          color: ColorsPaletteRedonda
+              .deepBrown, // Apply deep brown to input text color
         ),
         decoration: InputDecoration(
-          suffixIconColor: ColorsPaletteRedonda.lightBrown,
-          focusColor: ColorsPaletteRedonda.lightBrown,
+          suffixIconColor: ColorsPaletteRedonda.primary,
+          focusColor: ColorsPaletteRedonda.primary,
           hintText: 'Buscar platos...',
-          hintStyle: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey[500]), // Lighter brown for hints
-          prefixIcon: const Icon(Icons.search, color: ColorsPaletteRedonda.lightBrown),
+          hintStyle: theme.textTheme.bodyMedium
+              ?.copyWith(color: Colors.grey[500]), // Lighter brown for hints
+          prefixIcon:
+              const Icon(Icons.search, color: ColorsPaletteRedonda.primary),
           filled: true, // Optional: turn on filling behavior
-          fillColor: theme.inputDecorationTheme.fillColor, // Use fill color from the theme if specified
+          fillColor: theme.inputDecorationTheme
+              .fillColor, // Use fill color from the theme if specified
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12.0),
-            borderSide: BorderSide.none, // Typically borders are not visible until focused
+            borderSide: BorderSide
+                .none, // Typically borders are not visible until focused
           ),
-          enabledBorder: OutlineInputBorder( // Normal state border
+          enabledBorder: OutlineInputBorder(
+            // Normal state border
             borderRadius: BorderRadius.circular(12.0),
             borderSide: BorderSide(color: theme.dividerColor, width: 0.5),
           ),
-          focusedBorder: OutlineInputBorder( // Border when the TextField is focused
+          focusedBorder: OutlineInputBorder(
+            // Border when the TextField is focused
             borderRadius: BorderRadius.circular(12.0),
-            borderSide: BorderSide(color: theme.colorScheme.primary, width: 2.0),
+            borderSide:
+                BorderSide(color: theme.colorScheme.primary, width: 2.0),
           ),
         ),
       ),
     );
   }
 }
-

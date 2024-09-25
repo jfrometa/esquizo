@@ -13,15 +13,22 @@ class ScaffoldWithNestedNavigation extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
   void _goBranch(int index) {
-    navigationShell.goBranch(index, initialLocation: index == navigationShell.currentIndex);
+    navigationShell.goBranch(index,
+        initialLocation: index == navigationShell.currentIndex);
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return size.width < 450
-        ? ScaffoldWithNavigationBar(body: navigationShell, currentIndex: navigationShell.currentIndex, onDestinationSelected: _goBranch)
-        : ScaffoldWithNavigationRail(body: navigationShell, currentIndex: navigationShell.currentIndex, onDestinationSelected: _goBranch);
+        ? ScaffoldWithNavigationBar(
+            body: navigationShell,
+            currentIndex: navigationShell.currentIndex,
+            onDestinationSelected: _goBranch)
+        : ScaffoldWithNavigationRail(
+            body: navigationShell,
+            currentIndex: navigationShell.currentIndex,
+            onDestinationSelected: _goBranch);
   }
 }
 
@@ -44,21 +51,27 @@ class ScaffoldWithNavigationBar extends ConsumerWidget {
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
           backgroundColor: Colors.white,
-          indicatorColor: ColorsPaletteRedonda.deepBrown,
+          indicatorColor: ColorsPaletteRedonda.primary,
           labelTextStyle: WidgetStateProperty.resolveWith(
             (Set<WidgetState> states) {
               if (states.contains(WidgetState.selected)) {
-                return const TextStyle(color: ColorsPaletteRedonda.deepBrown); // Selected label color
+                return const TextStyle(
+                    color: ColorsPaletteRedonda.primary,
+                    fontWeight: FontWeight.bold); // Selected label color
               }
-              return const TextStyle(color: ColorsPaletteRedonda.lightBrown); // Unselected label color
+              return const TextStyle(
+                  color: ColorsPaletteRedonda.deepBrown,
+                  fontWeight: FontWeight.bold); // Unselected label color
             },
           ),
           iconTheme: WidgetStateProperty.resolveWith(
             (Set<WidgetState> states) {
               if (states.contains(WidgetState.selected)) {
-                return const IconThemeData(color: Colors.white); // Selected icon color
+                return const IconThemeData(
+                    color: Colors.white); // Selected icon color
               }
-              return const IconThemeData(color: ColorsPaletteRedonda.primary); // Unselected icon color
+              return const IconThemeData(
+                  color: ColorsPaletteRedonda.primary); // Unselected icon color
             },
           ),
         ),
@@ -105,7 +118,6 @@ class ScaffoldWithNavigationBar extends ConsumerWidget {
   }
 }
 
-
 class ScaffoldWithNavigationRail extends StatelessWidget {
   const ScaffoldWithNavigationRail({
     super.key,
@@ -124,16 +136,22 @@ class ScaffoldWithNavigationRail extends StatelessWidget {
       body: Row(
         children: [
           NavigationRail(
-            indicatorColor: ColorsPaletteRedonda.deepBrown,
+            indicatorColor: ColorsPaletteRedonda.primary,
             backgroundColor: Colors.white,
             selectedIndex: currentIndex,
             onDestinationSelected: onDestinationSelected,
             labelType: NavigationRailLabelType.all,
             selectedIconTheme: const IconThemeData(color: Colors.white),
-            selectedLabelTextStyle: const TextStyle(color: ColorsPaletteRedonda.deepBrown),
-            unselectedIconTheme: const IconThemeData(color: ColorsPaletteRedonda.primary),
-            unselectedLabelTextStyle: const TextStyle(color: ColorsPaletteRedonda.lightBrown),
-            destinations: List.generate(4, (index) => _buildRailDestination(index)),
+            selectedLabelTextStyle: const TextStyle(
+                color: ColorsPaletteRedonda.primary,
+                fontWeight: FontWeight.bold),
+            unselectedIconTheme:
+                const IconThemeData(color: ColorsPaletteRedonda.primary),
+            unselectedLabelTextStyle: const TextStyle(
+                color: ColorsPaletteRedonda.deepBrown,
+                fontWeight: FontWeight.bold),
+            destinations:
+                List.generate(4, (index) => _buildRailDestination(index)),
           ),
           const VerticalDivider(thickness: 1, width: 1),
           Expanded(child: body),

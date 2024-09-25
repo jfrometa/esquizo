@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class SlideItem extends StatefulWidget {
   final String img;
@@ -11,6 +14,7 @@ class SlideItem extends StatefulWidget {
   final String foodType; // Type of food: Vegan or Meat
   final bool
       isMealPlan; // Indicates if the dish is part of a meal plan, default is false
+  final int index;
 
   const SlideItem({
     super.key,
@@ -22,9 +26,9 @@ class SlideItem extends StatefulWidget {
     required this.ingredients,
     required this.isSpicy,
     required this.foodType,
-    bool? isMealPlan, // Make it nullable in the parameter list
-  }) : isMealPlan =
-            isMealPlan ?? false; // Default to false if not provided
+    bool? isMealPlan,
+    required this.index, // Make it nullable in the parameter list
+  }) : isMealPlan = isMealPlan ?? false; // Default to false if not provided
 
   @override
   SlideItemState createState() => SlideItemState();
@@ -39,7 +43,7 @@ class SlideItemState extends State<SlideItem> {
     return SizedBox(
       width: cardWidth,
       child: Card(
-         color: Colors.white, // Set the b
+        color: Colors.white, // Set the b
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12.0),
         ),
@@ -139,7 +143,7 @@ class SlideItemState extends State<SlideItem> {
                       widget.description,
                       style: Theme.of(context).textTheme.bodyMedium,
                       maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8.0),
                     // Ingredients
@@ -158,25 +162,56 @@ class SlideItemState extends State<SlideItem> {
                         // Pricing
                         _buildPricing(),
                         // Order Button
-                        ElevatedButton(
-                      
-                          onPressed: () {
-                            // Implement order action
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).primaryColorLight,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20.0, vertical: 12.0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
+                        // ElevatedButton(
+                        //   onPressed: () {
+                        //     // Implement order action
+                        //   },
+                        //   style: ElevatedButton.styleFrom(
+                        //     backgroundColor:
+                        //         Theme.of(context).primaryColorLight,
+                        //     padding: const EdgeInsets.symmetric(
+                        //         horizontal: 20.0, vertical: 12.0),
+                        //     shape: RoundedRectangleBorder(
+                        //       borderRadius: BorderRadius.circular(8.0),
+                        //     ),
+                        //     textStyle: const TextStyle(
+                        //       fontSize: 16.0,
+                        //       fontWeight: FontWeight.bold,
+                        //     ),
+                        //   ),
+                        //   child: const Text(
+                        //     'Agregar al carrito',
+                        //   ),
+                        // ),
+
+                        SizedBox(
+                          width: 150,
+                          // padding: const EdgeInsets.all(16.0),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              // Navigate to the checkout screen
+                              GoRouter.of(context).pushNamed(
+                                AppRoute.addToOrder.name,
+                                pathParameters: {
+                                  "itemId": widget.index.toString(),
+                                },
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: ColorsPaletteRedonda.primary,
+                              foregroundColor: ColorsPaletteRedonda.white,
+                              minimumSize: const Size(double.infinity, 42),
                             ),
-                            textStyle: const TextStyle(
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.bold,
+                            child: Text(
+                              'Agregar',
+                              style: TextStyle(
+                                fontSize: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.fontSize,
+                                // color: Theme.of(context).colorScheme.primary,
+                              ),
                             ),
-                          ),
-                          child: const Text(
-                            'Agregar al carrito',
                           ),
                         ),
                       ],

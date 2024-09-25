@@ -68,15 +68,13 @@ GoRouter goRouter(GoRouterRef ref) {
   final appStartupState = ref.watch(appStartupProvider);
   final authRepository = ref.watch(authRepositoryProvider);
 
- final isFirebaseInitialized = ref.watch(isFirebaseInitializedProvider);
+  final isFirebaseInitialized = ref.watch(isFirebaseInitializedProvider);
 
   return GoRouter(
     initialLocation: '/signIn',
     navigatorKey: _rootNavigatorKey,
     debugLogDiagnostics: true,
     redirect: (context, state) async {
-
-
       if (!isFirebaseInitialized) {
         try {
           await Firebase.initializeApp(
@@ -220,35 +218,35 @@ GoRouter goRouter(GoRouterRef ref) {
                             ),
                           );
                         },
-                        routes: [
-                          GoRoute(
-                            path:
-                                'cart/:cartItemId', // Changed id to cartItemId
-                            name: AppRoute.cart.name,
-                            pageBuilder: (context, state) {
-                              // final cartItemId = Math.random();
-                              return MaterialPage(
-                                // fullscreenDialog: true,
-                                child: CartScreen(
-                                  cartItems: cartItems, isAuthenticated: true,
-                                  // selectedItemId: cartItemId,
-                                ),
-                              );
-                            },
-                            routes: [
-                              GoRoute(
-                                path: 'checkout',
-                                name: AppRoute.checkout.name,
-                                pageBuilder: (context, state) {
-                                  return const MaterialPage(
-                                    // fullscreenDialog: true,
-                                    child: CheckoutScreen(),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ],
+                        // routes: [
+                        //   GoRoute(
+                        //     path:
+                        //         'cart/:cartItemId', // Changed id to cartItemId
+                        //     name: AppRoute.cart.name,
+                        //     pageBuilder: (context, state) {
+                        //       // final cartItemId = Math.random();
+                        //       return MaterialPage(
+                        //         // fullscreenDialog: true,
+                        //         child: CartScreen(
+                        //           cartItems: cartItems, isAuthenticated: true,
+                        //           // selectedItemId: cartItemId,
+                        //         ),
+                        //       );
+                        //     },
+                        //     routes: [
+                        //       GoRoute(
+                        //         path: 'checkout',
+                        //         name: AppRoute.checkout.name,
+                        //         pageBuilder: (context, state) {
+                        //           return const MaterialPage(
+                        //             // fullscreenDialog: true,
+                        //             child: CheckoutScreen(),
+                        //           );
+                        //         },
+                        //       ),
+                        //     ],
+                        //   ),
+                        // ],
                       ),
                     ],
                   ),

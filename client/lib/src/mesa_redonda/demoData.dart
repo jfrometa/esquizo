@@ -113,21 +113,33 @@ final Map<String, List<Map<String, dynamic>>> restaurantMenu = {
 
 final cartItems = [
   {
-    "img": "assets/food2.jpeg",
-    "title": "Item 1",
-    "address": "123 Main St",
-    "rating": "4.5",
+    "img": 'assets/food1.jpeg',
+    "title": 'La Bonita',
+    "description": 'Sandwich de queso de hoja, tocino, y spicy honey.',
+    "pricing": '400.00',
+    "ingredients": ['Queso de hoja', 'Tocino', 'Spicy honey'],
+    "isSpicy": true,
+    "foodType": 'Meat',
+    "quantity": 1,
     "price": 19.99,
     "isOffer": true,
-    "quantity": 2,
   },
   {
-    "img": "assets/food2.jpeg",
-    "title": "Item 2",
-    "address": "456 Maple Ave",
-    "rating": "4.2",
-    "price": 14.99,
-    "isOffer": false,
+    "img": 'assets/food2.jpeg',
+    "title": 'Bosque Encantado',
+    "description":
+        'Sandwich de filete de res, crema de hongos, cebolla caramelizada, y queso provolone.',
+    "pricing": '555.00',
+    "ingredients": [
+      'Filete de res',
+      'Crema de hongos',
+      'Cebolla caramelizada',
+      'Queso provolone'
+    ],
+    "isSpicy": false,
+    "foodType": 'Meat',
     "quantity": 1,
+    "price": 19.99,
+    "isOffer": true,
   },
 ];

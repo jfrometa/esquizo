@@ -10,12 +10,11 @@ class CheckoutScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Completar Orden'),
-        foregroundColor: Theme.of(context).colorScheme.primary,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_cart),
-            onPressed: () {},
-          ),
+        actions: const [
+          // IconButton(
+          //   icon: const Icon(Icons.shopping_cart),
+          //   onPressed: () {},
+          // ),
         ],
       ),
       body: SafeArea(
@@ -203,7 +202,6 @@ class CheckoutScreen extends StatelessWidget {
               ),
               child: const Text(
                 'Place your order',
-                style: TextStyle(color: Colors.black),
               ),
             ),
           ],
