@@ -10,7 +10,7 @@ class SpeechToTextScreen extends ConsumerWidget {
     // Watch the speech state using Riverpod
     final speechState = ref.watch(speechToTextNotifierProvider);
     final speechNotifier = ref.read(speechToTextNotifierProvider.notifier);
-    
+
     // Get screen height to calculate 35% of the screen height
     final double screenHeight = MediaQuery.of(context).size.height;
     final double maxHeight = screenHeight * 0.35; // 35% of the screen height
@@ -33,7 +33,8 @@ class SpeechToTextScreen extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.mic, size: 24, color: Colors.white),
+                        icon: const Icon(Icons.mic,
+                            size: 24, color: Colors.white),
                         label: const Text(
                           'Start Listening',
                           style: TextStyle(fontSize: 16),
@@ -53,7 +54,8 @@ class SpeechToTextScreen extends ConsumerWidget {
                             : null,
                       ),
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.stop, size: 24, color: Colors.white),
+                        icon: const Icon(Icons.stop,
+                            size: 24, color: Colors.white),
                         label: const Text(
                           'Stop Listening',
                           style: TextStyle(fontSize: 16),
@@ -109,7 +111,8 @@ class SpeechToTextScreen extends ConsumerWidget {
                         speechState.recognizedWords.isNotEmpty
                             ? speechState.recognizedWords
                             : 'No speech detected yet...',
-                        style: const TextStyle(fontSize: 18, color: Colors.black87),
+                        style: const TextStyle(
+                            fontSize: 18, color: Colors.black87),
                         scrollPhysics: const BouncingScrollPhysics(),
                       ),
                     ),

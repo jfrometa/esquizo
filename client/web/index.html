@@ -1,186 +1,139 @@
-<!DOCTYPE html><html><head>
-    <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <!-- Base href for serving the web app from different paths -->
+    <base href="$FLUTTER_BASE_HREF" />
 
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
-    <base href="$FLUTTER_BASE_HREF">
-
-    <meta charset="UTF-8">
-    <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-    <meta name="description" content="A new Flutter project.">
+    <meta charset="UTF-8" />
+    <meta content="IE=Edge" http-equiv="X-UA-Compatible" />
+    <meta
+      name="description"
+      content="Subscription a restaurante, almuerzos y Catering"
+    />
 
     <!-- iOS meta tags & icons -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="starter_architecture_flutter_firebase">
-    <link rel="apple-touch-icon" href="icons/Icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta
+      name="apple-mobile-web-app-title"
+      content="starter_architecture_flutter_firebase"
+    />
+    <link rel="apple-touch-icon" href="icons/Icon-192.png" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="icon" type="image/png" href="favicon.png" />
 
-    <title>starter_architecture_flutter_firebase</title>
-    <link rel="manifest" href="manifest.json">
-    <!-- https://material.io/resources/icons/?style=baseline -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+    <title>Mesa Redonda</title>
 
-    <!-- https://material.io/resources/icons/?style=outline -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Outlined" rel="stylesheet">
+    <!-- Manifest for PWA -->
+    <link rel="manifest" href="manifest.json" />
 
-    <!-- https://material.io/resources/icons/?style=round -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Round" rel="stylesheet">
+    <!-- Preconnect for external resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://www.gstatic.com" />
 
-    <!-- https://material.io/resources/icons/?style=sharp -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Sharp" rel="stylesheet">
+    <!-- Load Material Icons asynchronously -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Icons&family=Material+Icons+Outlined&family=Material+Icons+Round&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
+    />
 
-    <!-- https://material.io/resources/icons/?style=twotone -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Two+Tone" rel="stylesheet">
+    <!-- Viewport for responsiveness -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
 
-    <style>
-      df-messenger {
-        z-index: 999;
-        position: fixed;
-        bottom: 0;
-        right: 0;
-        top: 0;
-        width: 350px;
+    <!-- Splash Screen Styles -->
+    <style id="splash-screen-style">
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
       }
-    </style>
 
-    <script src="https://www.gstatic.com/firebasejs/9.8.4/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.8.4/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.8.4/firebase-firestore.js"></script>
-    <!-- <script>
-      const firebaseConfig = {
-        apiKey: 'AIzaSyCn7T2ykod5kXw2DQBWT5-pXdbWQT4HGgo',
-        authDomain: 'vaca-esquizofrenica.firebaseapp.com',
-        projectId: 'vaca-esquizofrenica',
-        storageBucket: 'vaca-esquizofrenica.appspot.com',
-        messagingSenderId: '224477049501',
-        appId: '1:224477049501:web:6c8033dae4732945725a74',
-        measurementId: 'G-KCQYBCHG7D',
-      };
-
-      firebase.initializeApp(firebaseConfig);
-    </script> -->
-    <style>
-      .loading {
+      body {
+        background-color: #ffffff;
+        background-image: url('splash/img/light-background.png');
+        background-size: cover;
+        background-position: center;
         display: flex;
         justify-content: center;
         align-items: center;
-        margin: 0;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        -ms-transform: translate(-50%, -50%);
-        transform: translate(-50%, -50%);
+        min-height: 100vh; /* Ensure it takes the full viewport height */
+        min-width: 100vw; /* Ensure it takes the full viewport width */
       }
 
-      .loader {
-        /* border and border-top should match the app theme */
-        border: 4px solid #ffffff;
-        border-top: 4px solid #3f51b5;
-        border-radius: 50%;
-        /* similar size to CircularProgressIndicator */
-        width: 35px;
-        height: 35px;
-        /* similar animation to CircularProgressIndicator */
-        animation: spin 1s linear infinite;
+      #splash {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ffffff;
+        z-index: 9999;
       }
 
-      @keyframes spin {
+      .logo {
+        width: 120px;
+        height: 120px;
+        object-fit: contain;
+        animation: pulse 1.5s ease-in-out infinite;
+        border-radius: 20px; /* Rounded corners */
+      }
+
+      /* Pulse animation */
+      @keyframes pulse {
         0% {
-          transform: rotate(0deg);
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
         }
         100% {
-          transform: rotate(360deg);
+          transform: scale(1);
         }
+      }
+
+      .fade-out {
+        opacity: 0;
+        transition: opacity 0.5s ease;
       }
     </style>
 
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+    <!-- Script to remove the splash screen after Flutter has fully loaded -->
+    <script id="splash-screen-script">
+      function removeSplashFromWeb() {
+        const splash = document.getElementById('splash');
+        if (splash) {
+          splash.classList.add('fade-out');
+          setTimeout(() => {
+            splash.remove();
+            document.body.style.background = 'transparent';
+          }, 500);
+        }
+      }
 
-    
-    
-    
-  
-  <style id="splash-screen-style">
-    html {
-      height: 100%
-    }
+      // Listen for when the app is fully loaded and trigger splash removal
+      window.addEventListener('flutter-first-frame', function () {
+        removeSplashFromWeb();
+      });
+    </script>
+  </head>
 
-    body {
-      margin: 0;
-      min-height: 100%;
-      background-color: #ffffff;
-      background-image: url("splash/img/light-background.png");
-      background-size: 100% 100%;
-    }
-
-    .center {
-      margin: 0;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      -ms-transform: translate(-50%, -50%);
-      transform: translate(-50%, -50%);
-    }
-
-    .contain {
-      display:block;
-      width:100%; height:100%;
-      object-fit: contain;
-    }
-
-    .stretch {
-      display:block;
-      width:100%; height:100%;
-    }
-
-    .cover {
-      display:block;
-      width:100%; height:100%;
-      object-fit: cover;
-    }
-
-    .bottom {
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      -ms-transform: translate(-50%, 0);
-      transform: translate(-50%, 0);
-    }
-
-    .bottomLeft {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-    }
-
-    .bottomRight {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-    }
-  </style>
-  <script id="splash-screen-script">
-    function removeSplashFromWeb() {
-      document.getElementById("splash")?.remove();
-      document.getElementById("splash-branding")?.remove();
-      document.body.style.background = "transparent";
-    }
-  </script>
-</head>
   <body>
-    <script src="flutter_bootstrap.js" async=""></script>
-  
+    <!-- Splash screen container -->
+    <div id="splash">
+      <img class="logo" src="splash/img/light-background.png" alt="App Logo" />
+    </div>
 
-</body></html>
+    <!-- Flutter bootstrap - Wait for app to be ready before removing splash -->
+    <script src="flutter_bootstrap.js" async></script>
+  </body>
+</html>

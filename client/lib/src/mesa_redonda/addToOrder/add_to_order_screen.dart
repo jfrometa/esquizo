@@ -47,8 +47,7 @@ class _AddToOrderScreenState extends State<AddToOrderScreen> {
                   SizedBox(
                     height: 300, // Image max height
                     width: double.infinity,
-                    child:
-                        Image.network(selectedItem['img'], fit: BoxFit.cover),
+                    child: Image.asset(selectedItem['img'], fit: BoxFit.cover),
                   ),
                   const SizedBox(height: 16),
                   Padding(
