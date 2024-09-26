@@ -12,8 +12,9 @@
     />
 
     <!-- iOS meta tags & icons -->
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <!-- <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" /> -->
     <meta
       name="apple-mobile-web-app-title"
       content="starter_architecture_flutter_firebase"
@@ -107,6 +108,12 @@
       }
     </style>
 
+    <script
+      async
+      defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAlk83WpDsAWqaa4RqI4mxa5IYPiuZldek"
+    ></script>
+
     <!-- Script to remove the splash screen after Flutter has fully loaded -->
     <script id="splash-screen-script">
       function removeSplashFromWeb() {
@@ -135,5 +142,6 @@
 
     <!-- Flutter bootstrap - Wait for app to be ready before removing splash -->
     <script src="flutter_bootstrap.js" async></script>
+    <script src="main.dart.js" type="application/javascript"></script>
   </body>
 </html>
