@@ -4,9 +4,11 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/addToOrder/add_to_order_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/cathering_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/checkout.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/demoData.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/details/details_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/plans/plans.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/categories.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/home.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/landing_page_home.dart';
@@ -61,7 +63,11 @@ enum AppRoute {
   homecheckout,
   checkout,
   detailScreen,
-  home
+  home,
+  mealPlan,
+  mealPlans,  // Added enum for Meal Plans
+  catering, 
+  caterings,  // Added enum for Catering
 }
 
 @riverpod
@@ -81,7 +87,7 @@ GoRouter goRouter(GoRouterRef ref) {
           await Firebase.initializeApp(
               options: DefaultFirebaseOptions.currentPlatform);
         } catch (e) {
-          print("Error initializing Firebase: $e"); // Log the error
+          debugPrint("Error initializing Firebase: $e"); // Log the error
           return '/error'; // Redirect to error page
         }
       }
@@ -160,11 +166,30 @@ GoRouter goRouter(GoRouterRef ref) {
               GoRoute(
                 path: '/home',
                 name: AppRoute.home.name,
-                pageBuilder: (context, state) => NoTransitionPage(
+                pageBuilder: (context, state) => const NoTransitionPage(
                   child: Home(),
                   // child: ResponsiveLandingPage(),
                 ),
                 routes: [
+                  GoRoute(
+                    path: 'mealPlan',
+                    name: AppRoute.mealPlan.name,
+                    pageBuilder: (context, state) {
+                      return const MaterialPage(
+                        child: MealPlansScreen(),  // You must have this screen
+                      );
+                    },
+                  ),
+                  // New Route for Catering
+                  GoRoute(
+                    path: 'caterings',
+                    name: AppRoute.caterings.name,
+                    pageBuilder: (context, state) {
+                      return const MaterialPage(
+                        child: CateringScreen(),  // You must have this screen
+                      );
+                    },
+                  ),
                   GoRoute(
                     path: 'trending',
                     name: AppRoute.trending.name,
@@ -196,6 +221,27 @@ GoRouter goRouter(GoRouterRef ref) {
                         child: Categories(),
                       );
                     },
+                    routes: [
+                      GoRoute(
+                      path: 'mealPlans',
+                      name: AppRoute.mealPlans.name,
+                      pageBuilder: (context, state) {
+                        return const MaterialPage(
+                          child: MealPlansScreen(),  // You must have this screen
+                        );
+                      },
+                      ),
+                      // New Route for Catering
+                      GoRoute(
+                        path: 'catering',
+                        name: AppRoute.catering.name,
+                        pageBuilder: (context, state) {
+                          return const MaterialPage(
+                            child: CateringScreen(),  // You must have this screen
+                          );
+                        },
+                      ),
+                    ]
                   ),
                   GoRoute(
                     path: 'details',
@@ -205,53 +251,9 @@ GoRouter goRouter(GoRouterRef ref) {
                         child: DetailsScreen(),
                       );
                     },
-                    routes: [
-                      GoRoute(
-                        path:
-                            'addToOrder/:detailItemId', // Changed id to detailItemId
-                        name: AppRoute.detailScreen.name,
-                        pageBuilder: (context, state) {
-                          final detailItemId =
-                              state.pathParameters['detailItemId']!;
-                          return MaterialPage(
-                            // fullscreenDialog: true,
-                            child: AddToOrderScreen(
-                              index: int.parse(detailItemId),
-                            ),
-                          );
-                        },
-                        // routes: [
-                        //   GoRoute(
-                        //     path:
-                        //         'cart/:cartItemId', // Changed id to cartItemId
-                        //     name: AppRoute.cart.name,
-                        //     pageBuilder: (context, state) {
-                        //       // final cartItemId = Math.random();
-                        //       return MaterialPage(
-                        //         // fullscreenDialog: true,
-                        //         child: CartScreen(
-                        //           cartItems: cartItems, isAuthenticated: true,
-                        //           // selectedItemId: cartItemId,
-                        //         ),
-                        //       );
-                        //     },
-                        //     routes: [
-                        //       GoRoute(
-                        //         path: 'checkout',
-                        //         name: AppRoute.checkout.name,
-                        //         pageBuilder: (context, state) {
-                        //           return const MaterialPage(
-                        //             // fullscreenDialog: true,
-                        //             child: CheckoutScreen(),
-                        //           );
-                        //         },
-                        //       ),
-                        //     ],
-                        //   ),
-                        // ],
-                      ),
-                    ],
-                  ),
+                 ),
+                
+                
                 ],
               ),
             ],
@@ -264,10 +266,9 @@ GoRouter goRouter(GoRouterRef ref) {
                 name: AppRoute.homecart.name,
                 pageBuilder: (context, state) {
                   // final cartItemId = Math.random();
-                  return MaterialPage(
+                  return const MaterialPage(
                     // fullscreenDialog: true,
-                    child: CartScreen(
-                      cartItems: cartItems, isAuthenticated: true,
+                    child: CartScreen(isAuthenticated: true,
                       // selectedItemId: cartItemId,
                     ),
                   );
@@ -282,9 +283,9 @@ GoRouter goRouter(GoRouterRef ref) {
                 path: '/homecheckout',
                 name: AppRoute.homecheckout.name,
                 pageBuilder: (context, state) {
-                  return MaterialPage(
+                  return const MaterialPage(
                     // fullscreenDialog: true,
-                    child: CheckoutScreen(cartItems: cartItems),
+                    child: CheckoutScreen(),
                   );
                 },
               ),

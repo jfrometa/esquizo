@@ -1,31 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/util_mesa_redonda/restaurants.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/ordering_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
-class AddToOrderScreen extends StatefulWidget {
+class AddToOrderScreen extends ConsumerStatefulWidget {
   const AddToOrderScreen({super.key, required this.index});
   final int index; // Index passed from the previous screen
 
   @override
-  State<AddToOrderScreen> createState() => _AddToOrderScreenState();
+  ConsumerState<AddToOrderScreen> createState() => _AddToOrderScreenState();
 }
 
-class _AddToOrderScreenState extends State<AddToOrderScreen> {
-  late final Map<String, dynamic> selectedItem; // The selected item data
+class _AddToOrderScreenState extends ConsumerState<AddToOrderScreen> {
+  late final Map<String, dynamic> selectedItem; // The selected dish
   int quantity = 1; // Default quantity set to 1
 
   @override
   void initState() {
     super.initState();
-    selectedItem = plans[widget.index]; // Retrieve data based on index
+    // Fetch the dish data from the dishProvider based on the index
+    selectedItem = ref.read(dishProvider)[widget.index];
   }
 
   @override
   Widget build(BuildContext context) {
+    // Fetch the current cart state to check for active subscriptions
+    final cartItems = ref.watch(cartProvider);
+    bool hasActiveSubscription = false;
+
+    // Check if any meal subscription is active and has remaining meals
+    for (var item in cartItems) {
+      if (item.isMealSubscription && item.remainingMeals > 0) {
+        hasActiveSubscription = true;
+        break;
+      }
+    }
+
     return Scaffold(
-      appBar: AppBar( 
+      appBar: AppBar(
         elevation: 3,
         forceMaterialTransparency: true,
         title: Text(
@@ -33,11 +48,8 @@ class _AddToOrderScreenState extends State<AddToOrderScreen> {
           style: const TextStyle(color: ColorsPaletteRedonda.primary),
         ),
         leading: IconButton(
-           style: IconButton.styleFrom(
-            elevation: 3,
-          ),
-          icon:
-              const Icon(Icons.arrow_back, color: ColorsPaletteRedonda.primary),
+          style: IconButton.styleFrom(elevation: 3),
+          icon: const Icon(Icons.arrow_back, color: ColorsPaletteRedonda.primary),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -116,7 +128,7 @@ class _AddToOrderScreenState extends State<AddToOrderScreen> {
                   ),
                   const SizedBox(height: 16),
                   const Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
                     child: Text(
                       "Ingredientes:",
                       style: TextStyle(
@@ -156,13 +168,8 @@ class _AddToOrderScreenState extends State<AddToOrderScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               IconButton(
-                 style: IconButton.styleFrom(
-                  elevation: 3,
-                ),
-                icon: const Icon(
-                  Icons.remove,
-                  color: ColorsPaletteRedonda.lightBrown,
-                ),
+                style: IconButton.styleFrom(elevation: 3),
+                icon: const Icon(Icons.remove, color: ColorsPaletteRedonda.lightBrown),
                 onPressed: () {
                   setState(() {
                     if (quantity > 1) {
@@ -177,10 +184,7 @@ class _AddToOrderScreenState extends State<AddToOrderScreen> {
                     fontSize: 24, color: ColorsPaletteRedonda.primary),
               ),
               IconButton(
-                icon: const Icon(
-                  Icons.add,
-                  color: ColorsPaletteRedonda.lightBrown,
-                ),
+                icon: const Icon(Icons.add, color: ColorsPaletteRedonda.lightBrown),
                 onPressed: () {
                   setState(() {
                     quantity++; // Increase quantity
@@ -194,7 +198,17 @@ class _AddToOrderScreenState extends State<AddToOrderScreen> {
             child: Container(
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
-                    onPressed: () {
+                onPressed: () {
+                  // Check if there is an active subscription
+                  if (hasActiveSubscription) {
+                    // Consume the meal from the subscription
+                    ref.read(cartProvider.notifier).consumeMeal(selectedItem['title']);
+                  } else {
+                    // Otherwise, add the item to the cart
+                    ref.read(cartProvider.notifier).addToCart(selectedItem, quantity);
+                  }
+
+                  // Navigate to the cart screen
                   GoRouter.of(context).goNamed(AppRoute.homecart.name);
                 },
                 style: ElevatedButton.styleFrom(
@@ -203,9 +217,8 @@ class _AddToOrderScreenState extends State<AddToOrderScreen> {
                   minimumSize: const Size(double.infinity, 56),
                 ),
                 child: Text(
-                  'Agregar al carrito',
+                  hasActiveSubscription ? 'Consumir del plan' : 'Agregar al carrito',
                   style: TextStyle(
-                    
                     fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
                     color: ColorsPaletteRedonda.white,
                   ),

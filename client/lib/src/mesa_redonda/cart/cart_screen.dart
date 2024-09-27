@@ -1,60 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
-import 'cart_item.dart'; // Import the CartItem widget here
+import 'cart_item_view.dart'; // Import the CartItem widget here 
 
-class CartScreen extends StatefulWidget {
-  final List<Map<String, dynamic>> cartItems;
+class CartScreen extends ConsumerWidget {
+  const CartScreen({super.key, required this.isAuthenticated});
   final bool isAuthenticated;
 
-  const CartScreen({
-    super.key,
-    required this.cartItems,
-    required this.isAuthenticated,
-  });
-
   @override
-  CartScreenState createState() => CartScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Access the cart items from the CartProvider
+    final cartItems = ref.watch(cartProvider);
 
-class CartScreenState extends State<CartScreen> {
-  late List<Map<String, dynamic>> _cartItems;
-  double _totalPrice = 0.0;
-
-  @override
-  void initState() {
-    super.initState();
-    _cartItems = widget.cartItems;
-    _calculateTotal();
-  }
-
-  void _calculateTotal() {
-    _totalPrice = _cartItems.fold(
-      0,
-      (sum, item) => sum + (item['price'] * item['quantity']),
+    // Calculate the total price for only regular dishes (exclude meal subscriptions)
+    double totalPrice = cartItems.fold(
+      0.0,
+      (sum, item) => item.isMealSubscription
+          ? sum // Skip meal subscriptions from the price calculation
+          : sum + (double.tryParse(item.pricing) ?? 0.0) * item.quantity,
     );
-  }
 
-  void _removeItem(int index) {
-    setState(() {
-      _cartItems[index]['quantity']--;
-      if (_cartItems[index]['quantity'] <= 0) {
-        _cartItems.removeAt(index);
-      }
-      _calculateTotal();
-    });
-  }
-
-  void _addItem(int index) {
-    setState(() {
-      _cartItems[index]['quantity']++;
-      _calculateTotal();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         forceMaterialTransparency: true,
@@ -69,28 +37,64 @@ class CartScreenState extends State<CartScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: ListView.builder(
-                    itemCount: _cartItems.length,
+                    itemCount: cartItems.length,
                     itemBuilder: (BuildContext context, int index) {
-                      final item = _cartItems[index];
+                      final item = cartItems[index];
 
-                      return CartItem(
-                        img: item['img'],
-                        title: item['title'],
-                        description: item['description'],
-                        pricing: item['pricing'].toString(),
-                        offertPricing: item['offertPricing'],
-                        ingredients: List<String>.from(item['ingredients']),
-                        isSpicy: item['isSpicy'],
-                        foodType: item['foodType'],
-                        quantity: item['quantity'],
-                        onRemove: () => _removeItem(index),
-                        onAdd: () => _addItem(index),
+                      // Check if the item is a meal subscription
+                      if (item.isMealSubscription) {
+                        return ListTile(
+                          leading: Image.asset(item.img),
+                          title: Text(item.title),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Remaining Meals: ${item.remainingMeals}',
+                              ),
+                              Text(
+                                'Expires on: ${item.expirationDate.toLocal().toString().split(' ')[0]}',
+                                style: const TextStyle(color: Colors.red),
+                              ),
+                            ],
+                          ),
+                          trailing: item.remainingMeals > 0
+                              ? ElevatedButton(
+                                  onPressed: () {
+                                    // Consume a meal from the subscription
+                                    ref
+                                        .read(cartProvider.notifier)
+                                        .consumeMeal(item.title);
+                                  },
+                                  child: const Text('Consume Meal'),
+                                )
+                              : null, // Disable button if no meals remain
+                        );
+                      }
+
+                      // Render regular dish items
+                      return CartItemView(
+                        img: item.img,
+                        title: item.title,
+                        description: item.description,
+                        pricing: item.pricing.toString(),
+                        offertPricing: item.offertPricing,
+                        ingredients: item.ingredients,
+                        isSpicy: item.isSpicy,
+                        foodType: item.foodType,
+                        quantity: item.quantity,
+                        onRemove: () {
+                          ref.read(cartProvider.notifier).decrementQuantity(item.title);
+                        },
+                        onAdd: () {
+                          ref.read(cartProvider.notifier).incrementQuantity(item.title);
+                        },
                       );
                     },
                   ),
                 ),
               ),
-              _buildTotalSection(),
+              _buildTotalSection(totalPrice, context),
               Container(
                 padding: const EdgeInsets.all(16.0),
                 child: ElevatedButton(
@@ -108,9 +112,7 @@ class CartScreenState extends State<CartScreen> {
                   child: Text(
                     'Realizar pedido',
                     style: TextStyle(
-                      fontSize:
-                          Theme.of(context).textTheme.titleMedium?.fontSize,
-                      
+                      fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
                     ),
                   ),
                 ),
@@ -122,20 +124,20 @@ class CartScreenState extends State<CartScreen> {
     );
   }
 
-  Widget _buildTotalSection() {
+  Widget _buildTotalSection(double totalPrice, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Text(
-            'Subtotal (${_cartItems.length} items): ',
+            'Subtotal (${totalPrice > 0 ? 'Items' : 'No Regular Items'}): ',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: const Color.fromARGB(255, 235, 66, 15),
                 ),
           ),
           Text(
-            '\$${_totalPrice.toStringAsFixed(2)}',
+            '\$${totalPrice.toStringAsFixed(2)}',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: ColorsPaletteRedonda.primary,
                 ),

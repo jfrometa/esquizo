@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/location/location_capture.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/location/location_capture_maps.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class CheckoutScreen extends StatefulWidget {
-  final List<Map<String, Object>> cartItems;
-
-  const CheckoutScreen({super.key, required this.cartItems});
+class CheckoutScreen extends ConsumerStatefulWidget {
+  const CheckoutScreen({super.key});
 
   @override
   _CheckoutScreenState createState() => _CheckoutScreenState();
 }
 
-class _CheckoutScreenState extends State<CheckoutScreen>
+class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
     with SingleTickerProviderStateMixin {
   final TextEditingController _locationController = TextEditingController();
   String? _location; // Human-readable address
@@ -107,6 +106,9 @@ class _CheckoutScreenState extends State<CheckoutScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Get the cart items from cartProvider
+    final cartItems = ref.watch(cartProvider);
+
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -162,8 +164,7 @@ class _CheckoutScreenState extends State<CheckoutScreen>
                                       borderSide: BorderSide(
                                         color: _isAddressValid
                                             ? Colors.grey.shade300
-                                            : Colors
-                                                .red, // Red border if invalid
+                                            : Colors.red, // Red border if invalid
                                         width: 1.0,
                                       ),
                                     ),
@@ -240,26 +241,33 @@ class _CheckoutScreenState extends State<CheckoutScreen>
                           const SizedBox(height: 16.0),
 
                           // Cart Items
-                          for (var cartItem in widget.cartItems)
-                            CartItem(
-                              img: cartItem['img'] as String,
-                              title: cartItem['title'] as String,
-                              description: cartItem['description'] as String,
-                              pricing: cartItem['pricing'] as String,
-                              ingredients:
-                                  cartItem['ingredients'] as List<String>,
-                              isSpicy: cartItem['isSpicy'] as bool,
-                              foodType: cartItem['foodType'] as String,
-                              quantity: cartItem['quantity'] as int,
-                              onRemove: () {},
-                              onAdd: () {},
+                          for (var cartItem in cartItems)
+                            CartItemView(
+                              img: cartItem.img,
+                              title: cartItem.title,
+                              description: cartItem.description,
+                              pricing: cartItem.pricing,
+                              ingredients: cartItem.ingredients,
+                              isSpicy: cartItem.isSpicy,
+                              foodType: cartItem.foodType,
+                              quantity: cartItem.quantity,
+                              onRemove: () {
+                                ref
+                                    .read(cartProvider.notifier)
+                                    .decrementQuantity(cartItem.title);
+                              },
+                              onAdd: () {
+                                ref
+                                    .read(cartProvider.notifier)
+                                    .incrementQuantity(cartItem.title);
+                              },
                             ),
                           const SizedBox(height: 16.0),
 
                           const Spacer(),
 
                           // Order Summary Card
-                          _buildOrderSummary(context),
+                          _buildOrderSummary(context, cartItems),
                         ],
                       ),
                     ),
@@ -299,17 +307,16 @@ class _CheckoutScreenState extends State<CheckoutScreen>
   }
 
   // Order Summary Widget
-  Widget _buildOrderSummary(BuildContext context) {
-    final int totalItems = widget.cartItems.fold<int>(
+  Widget _buildOrderSummary(BuildContext context, List<CartItem> cartItems) {
+    final int totalItems = cartItems.fold<int>(
       0,
-      (sum, item) => sum + (item['quantity'] as int),
+      (sum, item) => sum + item.quantity,
     );
-    final double totalPrice = widget.cartItems.fold<double>(
+    final double totalPrice = cartItems.fold<double>(
       0.0,
       (sum, item) =>
           sum +
-          ((double.tryParse(item['pricing'] as String) ?? 0.0) *
-              (item['quantity'] as int)),
+          ((double.tryParse(item.pricing) ?? 0.0) * item.quantity),
     );
     final double tax = totalPrice * _taxRate; // Calculate 6.7% tax
     final double orderTotal = totalPrice + _deliveryFee + tax;
@@ -349,7 +356,7 @@ class _CheckoutScreenState extends State<CheckoutScreen>
                   });
 
                   const String phoneNumber = '+18493590832';
-                  final String orderDetails = _generateOrderDetails();
+                  final String orderDetails = _generateOrderDetails(cartItems);
                   final String whatsappUrlMobile =
                       'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
                   final String whatsappUrlWeb =
@@ -420,14 +427,14 @@ class _CheckoutScreenState extends State<CheckoutScreen>
   }
 
   // Helper function to generate order details for WhatsApp
-  String _generateOrderDetails() {
+  String _generateOrderDetails(List<CartItem> cartItems) {
     final StringBuffer itemsBuffer = StringBuffer();
     double total = 0.0;
 
-    for (var item in widget.cartItems) {
-      final String title = item['title'] as String;
-      final int quantity = item['quantity'] as int;
-      final double price = item['price'] as double;
+    for (var item in cartItems) {
+      final String title = item.title;
+      final int quantity = item.quantity;
+      final double price = double.parse(item.pricing);
 
       total += price * quantity;
       itemsBuffer.writeln('$quantity x $title @ RD \$$price each');

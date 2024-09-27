@@ -12,9 +12,9 @@ class SlideItem extends StatefulWidget {
   final List<String> ingredients; // List of ingredients
   final bool isSpicy; // Indicates if the dish is spicy
   final String foodType; // Type of food: Vegan or Meat
-  final bool
-      isMealPlan; // Indicates if the dish is part of a meal plan, default is false
+  final bool isMealPlan; // Indicates if the dish is part of a meal plan, default is false
   final int index;
+  final Widget? actionButton; // Custom action button (e.g., Add to Cart)
 
   const SlideItem({
     super.key,
@@ -27,7 +27,8 @@ class SlideItem extends StatefulWidget {
     required this.isSpicy,
     required this.foodType,
     bool? isMealPlan,
-    required this.index, // Make it nullable in the parameter list
+    required this.index,
+    this.actionButton, // New parameter for the action button
   }) : isMealPlan = isMealPlan ?? false; // Default to false if not provided
 
   @override
@@ -37,13 +38,13 @@ class SlideItem extends StatefulWidget {
 class SlideItemState extends State<SlideItem> {
   @override
   Widget build(BuildContext context) {
-    // double width = MediaQuery.of(context).size.width;
-    double cardWidth = MediaQuery.of(context).size.width; // Fixed width
+    double cardWidth = MediaQuery.of(context).size.width * 0.75; // Adjust width
     double imageHeight = 175.0; // Fixed height
+
     return SizedBox(
       width: cardWidth,
       child: Card(
-        color: Colors.white, // Set the b
+        color: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12.0),
         ),
@@ -127,7 +128,7 @@ class SlideItemState extends State<SlideItem> {
                                 ),
                           ),
                         ),
-                        // Rating
+                        // Rating (Placeholder for now, customize as needed)
                         const Row(
                           children: [
                             Icon(Icons.star,
@@ -154,66 +155,44 @@ class SlideItemState extends State<SlideItem> {
                           ),
                     ),
                     const SizedBox(height: 12.0),
-                    // Pricing and Order Button
+                    // Pricing and Action Button
                     const Spacer(),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         // Pricing
                         _buildPricing(),
-                        // Order Button
-                        // ElevatedButton(
-                        //   onPressed: () {
-                        //     // Implement order action
-                        //   },
-                        //   style: ElevatedButton.styleFrom(
-                        //     backgroundColor:
-                        //         Theme.of(context).primaryColorLight,
-                        //     padding: const EdgeInsets.symmetric(
-                        //         horizontal: 20.0, vertical: 12.0),
-                        //     shape: RoundedRectangleBorder(
-                        //       borderRadius: BorderRadius.circular(8.0),
-                        //     ),
-                        //     textStyle: const TextStyle(
-                        //       fontSize: 16.0,
-                        //       fontWeight: FontWeight.bold,
-                        //     ),
-                        //   ),
-                        //   child: const Text(
-                        //     'Agregar al carrito',
-                        //   ),
-                        // ),
-
-                        SizedBox(
-                          width: 150,
-                          // padding: const EdgeInsets.all(16.0),
-                          child: ElevatedButton(
-                            onPressed: () {
-                              // Navigate to the checkout screen
-                              GoRouter.of(context).pushNamed(
-                                AppRoute.addToOrder.name,
-                                pathParameters: {
-                                  "itemId": widget.index.toString(),
+                        // Custom Action Button
+                        widget.actionButton ??
+                            SizedBox(
+                              width: 150,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  // Default behavior: Navigate to order screen
+                                  GoRouter.of(context).pushNamed(
+                                    AppRoute.addToOrder.name,
+                                    pathParameters: {
+                                      "itemId": widget.index.toString(),
+                                    },
+                                  );
                                 },
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: ColorsPaletteRedonda.primary,
-                              foregroundColor: ColorsPaletteRedonda.white,
-                              minimumSize: const Size(double.infinity, 42),
-                            ),
-                            child: Text(
-                              'Agregar',
-                              style: TextStyle(
-                                fontSize: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall
-                                    ?.fontSize,
-                                // color: Theme.of(context).colorScheme.primary,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      ColorsPaletteRedonda.primary,
+                                  foregroundColor: ColorsPaletteRedonda.white,
+                                  minimumSize: const Size(double.infinity, 42),
+                                ),
+                                child: Text(
+                                  'Agregar',
+                                  style: TextStyle(
+                                    fontSize: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall
+                                        ?.fontSize,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
                       ],
                     ),
                   ],
