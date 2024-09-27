@@ -19,19 +19,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   final List<Map<String, String>> _pages = [
     {
-      'image': 'onboarding_1.svg',
+      'image': 'assets/onboarding_1.svg',
       'title': 'Elige tu plato, plan de subscripcion o catering',
       'body':
           'Inicia la eligiendo el servicio que prefieres.'
     },
     {
-      'image': 'onboarding_2.svg',
+      'image': 'assets/onboarding_2.svg',
       'title': 'Selecciona de Nuestro Menú',
       'body':
           'Elige tus platos favoritos y envíanos tu ubicación y detalles para la entrega.'
     },
     {
-      'image': 'onboarding_3.svg',
+      'image': 'assets/onboarding_3.svg',
       'title': 'Confirma tu Pedido y Disfruta',
       'body':
           'Recibe tu cotización, realiza el pago. Selecciona tu día de inicio.\n\n¡Buen Provecho!'

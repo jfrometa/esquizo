@@ -60,7 +60,7 @@ class ScaffoldWithNavigationBar extends ConsumerWidget {
                     fontWeight: FontWeight.bold); // Selected label color
               }
               return const TextStyle(
-                  color: ColorsPaletteRedonda.deepBrown,
+                  color: ColorsPaletteRedonda.deepBrown1,
                   fontWeight: FontWeight.bold); // Unselected label color
             },
           ),
@@ -71,7 +71,7 @@ class ScaffoldWithNavigationBar extends ConsumerWidget {
                     color: Colors.white); // Selected icon color
               }
               return const IconThemeData(
-                  color: ColorsPaletteRedonda.primary); // Unselected icon color
+                  color: ColorsPaletteRedonda.deepBrown1); // Unselected icon color
             },
           ),
         ),
@@ -91,23 +91,23 @@ class ScaffoldWithNavigationBar extends ConsumerWidget {
     switch (index) {
       case 0:
         icon = Icons.home;
-        label = 'Home';
+        label = 'Inicio';
         break;
       case 1:
         icon = Icons.shopping_cart;
-        label = 'Cart';
+        label = 'Carrito';
         break;
       case 2:
         icon = Icons.checklist_rtl;
-        label = 'Checkout';
+        label = 'Confirmar';
         break;
       case 3:
         icon = Icons.account_circle;
-        label = 'Account';
+        label = 'Cuenta';
         break;
       default:
         icon = Icons.home;
-        label = 'Home';
+        label = 'Inicio';
         break;
     }
 
@@ -146,9 +146,9 @@ class ScaffoldWithNavigationRail extends StatelessWidget {
                 color: ColorsPaletteRedonda.primary,
                 fontWeight: FontWeight.bold),
             unselectedIconTheme:
-                const IconThemeData(color: ColorsPaletteRedonda.primary),
+                const IconThemeData(color: ColorsPaletteRedonda.deepBrown1),
             unselectedLabelTextStyle: const TextStyle(
-                color: ColorsPaletteRedonda.deepBrown,
+                color: ColorsPaletteRedonda.deepBrown1,
                 fontWeight: FontWeight.bold),
             destinations:
                 List.generate(4, (index) => _buildRailDestination(index)),
@@ -166,23 +166,23 @@ class ScaffoldWithNavigationRail extends StatelessWidget {
     switch (index) {
       case 0:
         icon = Icons.home;
-        label = 'Home'.hardcoded;
+        label = 'Inicio'.hardcoded;
         break;
       case 1:
         icon = Icons.shopping_cart;
-        label = 'Cart'.hardcoded;
+        label = 'Carrito'.hardcoded;
         break;
       case 2:
         icon = Icons.checklist_rtl;
-        label = 'Checkout'.hardcoded;
+        label = 'Confirmar'.hardcoded;
         break;
       case 3:
         icon = Icons.account_circle;
-        label = 'Account'.hardcoded;
+        label = 'Cuenta'.hardcoded;
         break;
       default:
         icon = Icons.home;
-        label = 'Home'.hardcoded;
+        label = 'Inicio'.hardcoded;
         break;
     }
     return NavigationRailDestination(icon: Icon(icon), label: Text(label));
