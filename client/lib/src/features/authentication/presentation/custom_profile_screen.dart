@@ -11,6 +11,8 @@ class CustomProfileScreen extends ConsumerWidget {
     final authProviders = ref.watch(authProvidersProvider);
     return ProfileScreen(
       appBar: AppBar(
+        forceMaterialTransparency: true, 
+        elevation: 3,
         title: const Text('Profile'),
       ),
       providers: authProviders,

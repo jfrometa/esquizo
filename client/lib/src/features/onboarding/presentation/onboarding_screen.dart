@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/onboarding/presentation/onboarding_controller.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -17,22 +19,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   final List<Map<String, String>> _pages = [
     {
-      'image': 'assets/gemini-logo.png',
-      'title': 'Salúdanos por WhatsApp',
+      'image': 'onboarding_1.svg',
+      'title': 'Elige tu plato, plan de subscripcion o catering',
       'body':
-          'Inicia la experiencia saludándonos por WhatsApp y elige el tipo de servicio que prefieras.'
+          'Inicia la eligiendo el servicio que prefieres.'
     },
     {
-      'image': 'assets/gemini-logo.png',
+      'image': 'onboarding_2.svg',
       'title': 'Selecciona de Nuestro Menú',
       'body':
-          'Elige tus platos favoritos y envíanos tu ubicación y detalles para la entrega.\n\nSi elegiste un plan de meal prep, selecciona los días y horario de entrega (12:00 pm o 1:00 pm).'
+          'Elige tus platos favoritos y envíanos tu ubicación y detalles para la entrega.'
     },
     {
-      'image': 'assets/gemini-logo.png',
+      'image': 'onboarding_3.svg',
       'title': 'Confirma tu Pedido y Disfruta',
       'body':
-          'Recibe tu cotización, realiza el pago y envíanos tu correo para agregar tu pedido al calendario. Selecciona tu día de inicio.\n\n¡Buen ProVeCHO!'
+          'Recibe tu cotización, realiza el pago. Selecciona tu día de inicio.\n\n¡Buen Provecho!'
     },
   ];
 
@@ -40,16 +42,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        elevation: 0,
         backgroundColor: Colors.transparent,
+        forceMaterialTransparency: true,
         actions: [
           TextButton(
+             style: TextButton.styleFrom(
+            elevation: 3,
+          ),
             onPressed: () {
               _completeOnboarding(ref);
             },
             child: const Text(
               'Saltar',
-              style: TextStyle(color: Colors.black),
+              style: TextStyle(color: ColorsPaletteRedonda.primary),
             ),
           ),
         ],
@@ -89,6 +94,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Colors.white,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
                 textStyle:
@@ -136,7 +142,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Image.asset(image, height: 300),
+          SvgPicture.asset(
+          image, // Path to your SVG file
+          width: 300,  // Set width and height as needed
+          height: 300,
+          semanticsLabel: 'Your SVG Image',
+        ),
           const SizedBox(height: 20),
           Text(
             title,
@@ -146,8 +157,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           const SizedBox(height: 10),
           Text(
             body,
-            style: const TextStyle(fontSize: 18),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: const Color.fromARGB(255, 202, 91, 17),
+                ),
             textAlign: TextAlign.center,
+            
           ),
         ],
       ),

@@ -15,6 +15,7 @@ class CustomSignInScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sign in'),
+        forceMaterialTransparency: true
       ),
       body: SignInScreen(
         providers: authProviders,
@@ -43,6 +44,9 @@ class SignInAnonymouslyFooter extends ConsumerWidget {
           ],
         ),
         TextButton(
+          style: TextButton.styleFrom(
+            elevation: 3,
+          ),
           onPressed: () {
             try {
               ref.read(firebaseAuthProvider).signInAnonymously();

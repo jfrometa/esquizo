@@ -9,6 +9,7 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/demoData.
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/details/details_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/categories.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/home.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/landing_page_home.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/trending.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_startup.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/data/firebase_auth_repository.dart';
@@ -159,8 +160,9 @@ GoRouter goRouter(GoRouterRef ref) {
               GoRoute(
                 path: '/home',
                 name: AppRoute.home.name,
-                pageBuilder: (context, state) => const NoTransitionPage(
+                pageBuilder: (context, state) => NoTransitionPage(
                   child: Home(),
+                  // child: ResponsiveLandingPage(),
                 ),
                 routes: [
                   GoRoute(

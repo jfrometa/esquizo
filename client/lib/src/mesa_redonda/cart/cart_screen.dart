@@ -57,6 +57,8 @@ class CartScreenState extends State<CartScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        forceMaterialTransparency: true,
+        elevation: 3,
         title: const Text('Carrito'),
       ),
       body: LayoutBuilder(
@@ -99,7 +101,8 @@ class CartScreenState extends State<CartScreen> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    foregroundColor: Theme.of(context).colorScheme.primary,
+                    backgroundColor: ColorsPaletteRedonda.primary,
+                    foregroundColor: ColorsPaletteRedonda.white,
                     minimumSize: const Size(double.infinity, 56),
                   ),
                   child: Text(
@@ -107,7 +110,7 @@ class CartScreenState extends State<CartScreen> {
                     style: TextStyle(
                       fontSize:
                           Theme.of(context).textTheme.titleMedium?.fontSize,
-                      color: ColorsPaletteRedonda.primary,
+                      
                     ),
                   ),
                 ),

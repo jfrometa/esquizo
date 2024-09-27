@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/util_mesa_redonda/restaurants.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/search_card.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/util_mesa_redonda/restaurants.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/trending_item.dart';
 
 class Trending extends StatelessWidget {
@@ -10,7 +9,8 @@ class Trending extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        elevation: 0.0,
+        forceMaterialTransparency: true,
+        elevation: 3.0,
         title: const Text("Nuestros Platos"),
         centerTitle: true,
       ),

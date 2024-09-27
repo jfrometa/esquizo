@@ -17,6 +17,7 @@ class SpeechToTextScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        forceMaterialTransparency: true,
         title: const Text('Speech to Text with Food Detection'),
         backgroundColor: Colors.deepPurpleAccent,
       ),

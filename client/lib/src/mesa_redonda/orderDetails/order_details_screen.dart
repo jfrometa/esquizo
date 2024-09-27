@@ -12,6 +12,7 @@ class OrderDetailsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Your Orders"),
+        forceMaterialTransparency: true,
       ),
       body: SingleChildScrollView(
         child: Padding(

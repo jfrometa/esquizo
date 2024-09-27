@@ -60,6 +60,8 @@ void registerErrorHandlers() {
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return Scaffold(
       appBar: AppBar(
+        forceMaterialTransparency: true, 
+        elevation: 3,
         backgroundColor: Colors.red,
         title: Text('An error occurred'.hardcoded),
       ),

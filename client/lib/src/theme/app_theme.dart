@@ -84,7 +84,8 @@ class AppTheme {
         focusColor: lightColorsPalette.secondary,
         colorScheme: lightColorScheme,
         appBarTheme: const AppBarTheme(
-          scrolledUnderElevation: 0.0,
+          scrolledUnderElevation: 1.0,
+          elevation: 3.0,
           // backgroundColor: Colors.white,
           iconTheme: IconThemeData(color: Colors.black),
           color: Colors.white,

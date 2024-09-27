@@ -66,7 +66,9 @@ class AppStartupLoadingWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        forceMaterialTransparency: true,
+      ),
       body: const Center(
         child: CircularProgressIndicator(),
       ),
@@ -83,7 +85,7 @@ class AppStartupErrorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(forceMaterialTransparency: true,),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,

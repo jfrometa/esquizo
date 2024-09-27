@@ -16,6 +16,7 @@ class Constants {
     primaryColor: lightPrimary,
     scaffoldBackgroundColor: lightBG,
     appBarTheme: AppBarTheme(
+      elevation: 3,
       toolbarTextStyle: TextTheme(
         titleLarge: TextStyle(
           color: darkBG,

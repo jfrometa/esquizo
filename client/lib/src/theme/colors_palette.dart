@@ -147,47 +147,56 @@ class ColorsPalette {
 }
 
 class ColorsPaletteRedonda {
-  static const Color primary = Color(0xFF863509); // Main brand color
+  static const Color primary1 = Color(0xFF863509); // Main brand color
   static const Color lightBrown = Color(0xFFBF8768); // Lighter brown for AppBar
   static const Color deepBrown =
       Color(0xFFA7613B); // Deeper brown for body backgrounds
   static const Color softBrown =
-      Color(0xFFF3D2C0); // Lightest brown for backgrounds
+      Color.fromARGB(255, 241, 227, 219); // Lightest brown for backgrounds
   static const Color white = Colors.white;
+
+ static const Color primary = Color(0xFF402e32); // Main brand color
+  static const Color lightBrown1 = Color(0xFFfff7f0); // Lighter brown for AppBar
+  static const Color deepBrown1 =
+      Color(0xFF694631); // Deeper brown for body backgrounds
+  static const Color background =
+      Color.fromARGB(255, 249, 245, 242); // Lightest brown for backgrounds
+  static const Color orange = Color(0xFFd87738);
+  
 
   static ThemeData get themeData {
     return ThemeData(
       brightness: Brightness.light,
-      primaryColor: lightBrown,
-      scaffoldBackgroundColor: softBrown,
+      primaryColor: primary,
+      scaffoldBackgroundColor: background,
       appBarTheme: const AppBarTheme(
         color: Colors.white,
         foregroundColor: primary, // Ensures AppBar title is white
-        elevation: 0,
+        elevation: 1,
       ),
       textTheme: const TextTheme(
         displayLarge: TextStyle(
           color: Colors.white,
           fontSize: 34.0,
         ),
-        displayMedium: TextStyle(color: lightBrown, fontSize: 28.0),
-        displaySmall: TextStyle(color: lightBrown, fontSize: 24.0),
+        displayMedium: TextStyle(color: deepBrown1, fontSize: 28.0),
+        displaySmall: TextStyle(color: deepBrown1, fontSize: 24.0),
         headlineLarge: TextStyle(color: primary, fontSize: 20.0),
         headlineMedium: TextStyle(color: primary, fontSize: 16.0),
-        headlineSmall: TextStyle(color: lightBrown, fontSize: 14.0),
+        headlineSmall: TextStyle(color: deepBrown1, fontSize: 14.0),
         titleLarge: TextStyle(
-            color: deepBrown,
+            color: primary,
             fontSize: 20.0,
             fontWeight: FontWeight.bold), // Titles on white backgrounds
-        titleMedium: TextStyle(color: deepBrown, fontSize: 18.0),
-        titleSmall: TextStyle(color: deepBrown, fontSize: 16.0),
+        titleMedium: TextStyle(color: primary, fontSize: 18.0),
+        titleSmall: TextStyle(color: primary, fontSize: 16.0),
         bodyLarge: TextStyle(color: Colors.white, fontSize: 16.0),
-        bodyMedium: TextStyle(color: lightBrown, fontSize: 14.0),
-        bodySmall: TextStyle(color: lightBrown, fontSize: 12.0),
+        bodyMedium: TextStyle(color: primary, fontSize: 14.0),
+        bodySmall: TextStyle(color: primary, fontSize: 12.0),
         labelLarge: TextStyle(
             color: Colors.white, fontSize: 14.0, fontWeight: FontWeight.bold),
-        labelMedium: TextStyle(color: lightBrown, fontSize: 12.0),
-        labelSmall: TextStyle(color: lightBrown, fontSize: 10.0),
+        labelMedium: TextStyle(color: deepBrown1, fontSize: 12.0),
+        labelSmall: TextStyle(color: deepBrown1, fontSize: 10.0),
       ),
       iconTheme: const IconThemeData(
         color: Colors.white, // Icons throughout the app
@@ -207,9 +216,9 @@ class ColorsPaletteRedonda {
         ),
       ),
       colorScheme: ColorScheme.fromSwatch().copyWith(
-        primary: lightBrown,
+        primary: primary,
         onPrimary: Colors.white,
-        secondary: softBrown,
+        secondary: deepBrown1,
         onSecondary: Colors.white,
         surface: deepBrown,
         onSurface: Colors.white,

@@ -13,6 +13,7 @@ class DetailsScreen extends StatelessWidget {
     // final detailItemId = context.extra as String;
     return Scaffold(
       appBar: AppBar(
+        forceMaterialTransparency: true,
         actions: const [],
       ),
       body: SafeArea(

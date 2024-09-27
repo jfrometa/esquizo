@@ -25,13 +25,17 @@ class _AddToOrderScreenState extends State<AddToOrderScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
+      appBar: AppBar( 
+        elevation: 3,
+        forceMaterialTransparency: true,
         title: Text(
           selectedItem['title'],
           style: const TextStyle(color: ColorsPaletteRedonda.primary),
         ),
         leading: IconButton(
+           style: IconButton.styleFrom(
+            elevation: 3,
+          ),
           icon:
               const Icon(Icons.arrow_back, color: ColorsPaletteRedonda.primary),
           onPressed: () => Navigator.pop(context),
@@ -152,6 +156,9 @@ class _AddToOrderScreenState extends State<AddToOrderScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               IconButton(
+                 style: IconButton.styleFrom(
+                  elevation: 3,
+                ),
                 icon: const Icon(
                   Icons.remove,
                   color: ColorsPaletteRedonda.lightBrown,
@@ -187,17 +194,20 @@ class _AddToOrderScreenState extends State<AddToOrderScreen> {
             child: Container(
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
-                onPressed: () {
+                    onPressed: () {
                   GoRouter.of(context).goNamed(AppRoute.homecart.name);
                 },
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: ColorsPaletteRedonda.primary,
+                  elevation: 3,
                   minimumSize: const Size(double.infinity, 56),
                 ),
                 child: Text(
                   'Agregar al carrito',
                   style: TextStyle(
+                    
                     fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
-                    color: ColorsPaletteRedonda.primary,
+                    color: ColorsPaletteRedonda.white,
                   ),
                 ),
               ),

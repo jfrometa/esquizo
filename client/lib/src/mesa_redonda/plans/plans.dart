@@ -240,6 +240,7 @@ class MealPlansScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        forceMaterialTransparency: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {

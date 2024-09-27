@@ -111,6 +111,7 @@ class _CheckoutScreenState extends State<CheckoutScreen>
       length: 3,
       child: Scaffold(
         appBar: AppBar(
+          forceMaterialTransparency: true,
           title: const Text('Completar Orden'),
         ),
         body: SafeArea(
@@ -171,8 +172,7 @@ class _CheckoutScreenState extends State<CheckoutScreen>
                                       borderSide: BorderSide(
                                         color: _isAddressValid
                                             ? ColorsPaletteRedonda.primary
-                                            : Colors
-                                                .red, // Red border if invalid
+                                            : const Color.fromARGB(255, 244, 45, 31), // Red border if invalid
                                         width: 2.0,
                                       ),
                                     ),
@@ -209,6 +209,8 @@ class _CheckoutScreenState extends State<CheckoutScreen>
                           const SizedBox(height: 8.0),
                           TabBar(
                             controller: _tabController,
+                            
+                            // dividerColor: ColorsPaletteRedonda.primary,
                             indicatorColor: ColorsPaletteRedonda.primary,
                             onTap: (index) {
                               setState(() {
@@ -289,7 +291,7 @@ class _CheckoutScreenState extends State<CheckoutScreen>
         style: TextStyle(
           color: _selectedPaymentMethod == index
               ? ColorsPaletteRedonda.primary
-              : ColorsPaletteRedonda.lightBrown,
+              : ColorsPaletteRedonda.orange,
           fontSize: 12,
         ),
       ),

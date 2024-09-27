@@ -13,9 +13,9 @@ class CategoriesState extends State<Categories> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        elevation: 0.0,
-        title: const Text('Categories'),
+        title: const Text('Categorias'),
         centerTitle: true,
+        forceMaterialTransparency: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(

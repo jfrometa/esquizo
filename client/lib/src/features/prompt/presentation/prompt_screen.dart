@@ -290,7 +290,7 @@ class _PromptScreenState extends ConsumerState<PromptScreen> {
                                 } else {
                                   final snackBar = SnackBar(
                                     /// need to set following properties for best effect of awesome_snackbar_content
-                                    elevation: 0,
+                               
                                     behavior: SnackBarBehavior.floating,
                                     backgroundColor: Colors.transparent,
                                     content: AwesomeSnackbarContent(

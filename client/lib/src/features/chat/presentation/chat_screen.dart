@@ -86,7 +86,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       appBar: AppBar(
         title: const Text("Gemini Chat"),
         backgroundColor: theme.colorsPalette.white,
-        scrolledUnderElevation: 0.0,
+        scrolledUnderElevation: 1.0,
+        forceMaterialTransparency: true,
         actions: [
           Consumer(builder: (context, ref, child) {
             return IconButton(
