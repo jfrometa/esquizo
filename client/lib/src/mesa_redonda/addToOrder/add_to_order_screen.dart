@@ -45,7 +45,6 @@ class _AddToOrderScreenState extends ConsumerState<AddToOrderScreen> {
         forceMaterialTransparency: true,
         title: Text(
           selectedItem['title'],
-          style: const TextStyle(color: ColorsPaletteRedonda.primary),
         ),
         leading: IconButton(
           style: IconButton.styleFrom(elevation: 3),
@@ -216,7 +215,7 @@ class _AddToOrderScreenState extends ConsumerState<AddToOrderScreen> {
                   }
 
                   // Navigate to the cart screen
-                  // GoRouter.of(context).goNamed(AppRoute.homecart.name);
+                  GoRouter.of(context).pop();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ColorsPaletteRedonda.primary,

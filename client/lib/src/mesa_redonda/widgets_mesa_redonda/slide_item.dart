@@ -12,7 +12,8 @@ class SlideItem extends StatefulWidget {
   final List<String> ingredients; // List of ingredients
   final bool isSpicy; // Indicates if the dish is spicy
   final String foodType; // Type of food: Vegan or Meat
-  final bool isMealPlan; // Indicates if the dish is part of a meal plan, default is false
+  final bool
+      isMealPlan; // Indicates if the dish is part of a meal plan, default is false
   final int index;
   final Widget? actionButton; // Custom action button (e.g., Add to Cart)
 
@@ -122,7 +123,7 @@ class SlideItemState extends State<SlideItem> {
                             widget.title,
                             style: Theme.of(context)
                                 .textTheme
-                                .headlineLarge
+                                .titleLarge
                                 ?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -177,8 +178,7 @@ class SlideItemState extends State<SlideItem> {
                                   );
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      ColorsPaletteRedonda.primary,
+                                  backgroundColor: ColorsPaletteRedonda.primary,
                                   foregroundColor: ColorsPaletteRedonda.white,
                                   minimumSize: const Size(double.infinity, 42),
                                 ),

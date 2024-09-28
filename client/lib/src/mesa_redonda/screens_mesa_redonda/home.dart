@@ -91,7 +91,7 @@ class HomeState extends ConsumerState<Home> {
         children: <Widget>[
           Text(
             category,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
           ),
@@ -137,8 +137,8 @@ class HomeState extends ConsumerState<Home> {
                   context.goNamed(AppRoute.caterings.name);
                 } else if (cat['name'] == 'Almuerzos') {
                   // Almuerzos stays the same, navigating to its usual screen
-                
-                   context.goNamed(
+
+                  context.goNamed(
                     AppRoute.details.name,
                     extra: cat,
                   );
@@ -179,7 +179,7 @@ class HomeState extends ConsumerState<Home> {
         children: <Widget>[
           Text(
             title,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
           ),
@@ -239,13 +239,16 @@ class HomeState extends ConsumerState<Home> {
                       description: dish["description"],
                       pricing: dish["pricing"],
                       offertPricing: dish["offertPricing"],
-                      ingredients: (dish["ingredients"] as List<dynamic>).cast<String>(),  // Ensure ingredients are a List<String>
+                      ingredients: (dish["ingredients"] as List<dynamic>).cast<
+                          String>(), // Ensure ingredients are a List<String>
                       isSpicy: dish["isSpicy"],
                       foodType: dish["foodType"],
                       actionButton: ElevatedButton(
                         onPressed: () {
                           // Add the dish directly to the cart
-                          ref.read(cartProvider.notifier).addToCart(dish.cast<String, dynamic>(), 1);  // Cast the dish to Map<String, dynamic>
+                          ref.read(cartProvider.notifier).addToCart(
+                              dish.cast<String, dynamic>(),
+                              1); // Cast the dish to Map<String, dynamic>
                         },
                         child: const Text('Agregar al carrito'),
                       ),
@@ -311,8 +314,9 @@ class HomeState extends ConsumerState<Home> {
               actionButton: ElevatedButton(
                 onPressed: () {
                   // Add the dish directly to the cart
-                  ref.read(cartProvider.notifier)
-                    .addToCart(dish.cast<String, dynamic>(), 1);  // Cast the dish to Map<String, dynamic>
+                  ref.read(cartProvider.notifier).addToCart(
+                      dish.cast<String, dynamic>(),
+                      1); // Cast the dish to Map<String, dynamic>
                 },
                 child: const Text('Agregar al carrito'),
               ),

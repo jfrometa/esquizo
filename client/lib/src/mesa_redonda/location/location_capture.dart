@@ -280,7 +280,7 @@ class LocationCaptureBottomSheetState
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorsPaletteRedonda.lightBrown,
+                    backgroundColor: ColorsPaletteRedonda.deepBrown1,
                     foregroundColor: Colors.white,
                   ),
                   child: const Text('Aceptar'),
@@ -331,7 +331,7 @@ class LocationCaptureBottomSheetState
             labelStyle: Theme.of(context)
                 .textTheme
                 .bodyMedium
-                ?.copyWith(color: ColorsPaletteRedonda.deepBrown),
+                ?.copyWith(color: ColorsPaletteRedonda.deepBrown1),
           ),
         ),
         const SizedBox(height: 10),
@@ -355,7 +355,7 @@ class LocationCaptureBottomSheetState
             labelStyle: Theme.of(context)
                 .textTheme
                 .bodyMedium
-                ?.copyWith(color: ColorsPaletteRedonda.deepBrown),
+                ?.copyWith(color: ColorsPaletteRedonda.deepBrown1),
           ),
         ),
         const SizedBox(height: 10),
@@ -379,7 +379,7 @@ class LocationCaptureBottomSheetState
             labelStyle: Theme.of(context)
                 .textTheme
                 .bodyMedium
-                ?.copyWith(color: ColorsPaletteRedonda.deepBrown),
+                ?.copyWith(color: ColorsPaletteRedonda.deepBrown1),
           ),
         ),
         const SizedBox(height: 10),
@@ -403,7 +403,7 @@ class LocationCaptureBottomSheetState
             labelStyle: Theme.of(context)
                 .textTheme
                 .bodyMedium
-                ?.copyWith(color: ColorsPaletteRedonda.deepBrown),
+                ?.copyWith(color: ColorsPaletteRedonda.deepBrown1),
           ),
         ),
       ],

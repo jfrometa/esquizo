@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item_view.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/location/location_capture.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
@@ -12,30 +14,38 @@ class CheckoutScreen extends ConsumerStatefulWidget {
   CheckoutScreenState createState() => CheckoutScreenState();
 }
 
-// Using SingleTickerProviderStateMixin to handle vsync
 class CheckoutScreenState extends ConsumerState<CheckoutScreen>
     with SingleTickerProviderStateMixin {
-  final TextEditingController _locationController = TextEditingController();
-  String? _location;
-  String? _latitude;
-  String? _longitude;
+  // Separate location controllers for each order type
+  final TextEditingController _cateringLocationController =
+      TextEditingController();
+  final TextEditingController _regularDishesLocationController =
+      TextEditingController();
+  final TextEditingController _mealSubscriptionLocationController =
+      TextEditingController();
+
   final TextEditingController _cateringDateController = TextEditingController();
   final TextEditingController _mealSubscriptionDateController =
       TextEditingController();
   final TextEditingController _cateringTimeController = TextEditingController();
   final TextEditingController _mealSubscriptionTimeController =
       TextEditingController();
+
   DateTime? _selectedCateringDate;
   DateTime? _selectedMealSubscriptionDate;
   TimeOfDay? _selectedCateringTime;
   TimeOfDay? _selectedMealSubscriptionTime;
-  bool _isAddressValid = true;
+
   final int _deliveryFee = 200;
   final double _taxRate = 0.067;
   late TabController _tabController;
-  int _selectedPaymentMethod = 0;
+  int _selectedPaymentMethod = 0; // Add a variable to track payment selection
   DateTime? _deliveryStartTime;
   DateTime? _deliveryEndTime;
+
+  List<CartItem> dishes = [];
+  List<CartItem> cateringItems = [];
+  List<CartItem> mealSubscriptions = [];
 
   final List<String> _paymentMethods = [
     'Transferencias',
@@ -43,11 +53,28 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
     'Cardnet'
   ];
 
+  // Address and Lat/Long variables for each order type
+  String? cateringAddress;
+  String? regularAddress;
+  String? mealSubscriptionAddress;
+
+  String? _cateringLatitude;
+  String? _cateringLongitude;
+
+  String? _mealSubscriptionLatitude;
+  String? _mealSubscriptionLongitude;
+
+  String? _regularDishesLatitude;
+  String? _regularDishesLongitude;
+
+  bool _isCateringAddressValid = true;
+  bool _isMealSubscriptionAddressValid = true;
+  bool _isRegularCateringAddressValid = true;
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(
-        length: 3, vsync: this); // vsync is now provided correctly
+    _tabController = TabController(length: 3, vsync: this);
     _setDeliveryTime();
   }
 
@@ -65,41 +92,301 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
     });
   }
 
-  // Printing selectTime function
-  Future<void> _selectTime(
-      BuildContext context, TextEditingController controller,
-      {required bool isCatering}) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: const TimeOfDay(hour: 9, minute: 0),
-    );
+  // Generate Google Maps link from lat/long
+  String _generateGoogleMapsLink(String latitude, String longitude) {
+    return 'https://maps.google.com/?q=$latitude,$longitude';
+  }
 
-    if (picked != null && picked.hour >= 9 && picked.hour <= 21) {
-      setState(() {
-        if (isCatering) {
-          _selectedCateringTime = picked;
-          controller.text = picked.format(context);
-        } else {
-          _selectedMealSubscriptionTime = picked;
-          controller.text = picked.format(context);
-        }
-      });
-      print(
-          'Selected time: ${picked.format(context)}'); // Print statement to display the selected time
+  // Method to show the bottom sheet and get the location for any order type
+  void _showLocationBottomSheet(BuildContext context,
+      TextEditingController controller, String orderType) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return LocationCaptureBottomSheet(
+          onLocationCaptured: (latitude, longitude, address) {
+            setState(() {
+              controller.text = address;
+              switch (orderType.toLowerCase()) {
+                case 'catering':
+                  cateringAddress = address;
+                  _cateringLatitude = latitude;
+                  _cateringLongitude = longitude;
+                  _isCateringAddressValid = true;
+                  break;
+                case 'regular':
+                  regularAddress = address;
+                  _regularDishesLatitude = latitude;
+                  _regularDishesLongitude = longitude;
+                  _isRegularCateringAddressValid = true;
+                  break;
+                case 'mealSubscription':
+                  mealSubscriptionAddress = address;
+                  _mealSubscriptionLatitude = latitude;
+                  _mealSubscriptionLongitude = longitude;
+                  _isMealSubscriptionAddressValid = true;
+                  break;
+              }
+            });
+          },
+        );
+      },
+    );
+  }
+
+  // Method to clear the location field for any order type
+  void _clearLocation(TextEditingController controller) {
+    setState(() {
+      controller.clear();
+    });
+  }
+
+  // Validation to check if all locations are provided
+  bool _validateFields(List<CartItem> cartItems) {
+    bool isValid = true;
+
+    final List<CartItem> dishes = cartItems
+        .where(
+            (item) => !item.isMealSubscription && item.foodType != 'Catering')
+        .toList();
+
+    final List<CartItem> cateringItems =
+        cartItems.where((item) => item.foodType == 'Catering').toList();
+
+    final List<CartItem> mealSubscriptions =
+        cartItems.where((item) => item.isMealSubscription).toList();
+
+    if (cateringItems.isNotEmpty) {
+      if (_cateringLocationController.text.isEmpty) {
+        setState(() {
+          _isCateringAddressValid = false;
+        });
+        isValid = false;
+      }
+    }
+
+    if (dishes.isNotEmpty) {
+      if (_regularDishesLocationController.text.isEmpty) {
+        setState(() {
+          _isRegularCateringAddressValid = false;
+        });
+        isValid = false;
+      }
+    }
+
+    if (mealSubscriptions.isNotEmpty) {
+      if (_mealSubscriptionLocationController.text.isEmpty) {
+        setState(() {
+          _isMealSubscriptionAddressValid = false;
+        });
+        isValid = false;
+      }
+    }
+
+    return isValid;
+  }
+
+  Future<void> _sendWhatsAppOrder(List<CartItem> cartItems) async {
+    if (_validateFields(cartItems)) {
+      const String phoneNumber = '+18493590832';
+      final String orderDetails = _generateOrderDetails(cartItems);
+      final String whatsappUrlMobile =
+          'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
+      final String whatsappUrlWeb =
+          'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
+
+      if (await canLaunchUrl(Uri.parse(whatsappUrlMobile))) {
+        await launchUrl(Uri.parse(whatsappUrlMobile));
+      } else if (await canLaunchUrl(Uri.parse(whatsappUrlWeb))) {
+        await launchUrl(Uri.parse(whatsappUrlWeb));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No pude abrir WhatsApp')),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please select a time between 9 AM and 9 PM'),
+          content: Text('Completa los campos requeridos.'),
           backgroundColor: Colors.red,
         ),
       );
     }
   }
 
+  String _formatTime(DateTime dateTime) {
+    return DateFormat.jm().format(dateTime); // e.g., 6:45 PM
+  }
+
+  Future<void> _selectDateTime(
+      BuildContext context, TextEditingController controller,
+      {required bool isCatering}) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 30)),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Theme.of(context).colorScheme.primary,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
+    );
+
+    if (pickedDate == null) {
+      debugPrint('Seleccion de fecha cancelada');
+      return;
+    }
+
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: const TimeOfDay(hour: 9, minute: 0),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Theme.of(context).colorScheme.primary,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
+    );
+
+    if (pickedTime == null) {
+      debugPrint('Seleccion de tiempo cancelada');
+      return;
+    }
+
+    final DateTime selectedDateTime = DateTime(
+      pickedDate.year,
+      pickedDate.month,
+      pickedDate.day,
+      pickedTime.hour,
+      pickedTime.minute,
+    );
+
+    setState(() {
+      final formattedDateTime =
+          DateFormat('yyyy-MM-dd – HH:mm').format(selectedDateTime);
+      controller.text = formattedDateTime;
+
+      if (isCatering) {
+        _selectedCateringDate = selectedDateTime;
+      } else {
+        _selectedMealSubscriptionDate = selectedDateTime;
+      }
+    });
+  }
+
+  // Helper function to generate order details for WhatsApp
+  String _generateOrderDetails(List<CartItem> cartItems) {
+    final StringBuffer cateringBuffer = StringBuffer();
+    final StringBuffer regularDishesBuffer = StringBuffer();
+    final StringBuffer mealSubscriptionBuffer = StringBuffer();
+    double total = 0.0;
+
+    for (var item in cartItems) {
+      final String title = item.title;
+      final int quantity = item.quantity;
+      final double price = double.parse(item.pricing);
+      total += price * quantity;
+
+      if (item.foodType == 'Catering') {
+        cateringBuffer.writeln('$quantity x $title @ RD \$$price each');
+      } else if (!item.isMealSubscription) {
+        regularDishesBuffer.writeln('$quantity x $title @ RD \$$price each');
+      } else {
+        mealSubscriptionBuffer.writeln('$quantity x $title @ RD \$$price each');
+      }
+    }
+
+    final double tax = total * _taxRate;
+    total += tax + _deliveryFee;
+
+    String cateringGoogleMapsLink =
+        _cateringLatitude != null && _cateringLongitude != null
+            ? _generateGoogleMapsLink(_cateringLatitude!, _cateringLongitude!)
+            : 'Not Available';
+
+    String regularDishesGoogleMapsLink =
+        _regularDishesLatitude != null && _regularDishesLongitude != null
+            ? _generateGoogleMapsLink(
+                _regularDishesLatitude!, _regularDishesLongitude!)
+            : 'Not Available';
+
+    String mealSubscriptionGoogleMapsLink =
+        _mealSubscriptionLatitude != null && _mealSubscriptionLongitude != null
+            ? _generateGoogleMapsLink(
+                _mealSubscriptionLatitude!, _mealSubscriptionLongitude!)
+            : 'Not Available';
+
+    final StringBuffer orderDetailsBuffer = StringBuffer();
+
+    orderDetailsBuffer.writeln('*Detalles de la Orden*:');
+
+    if (cateringBuffer.isNotEmpty) {
+      orderDetailsBuffer.writeln('''
+    *Catering*:
+    Ubicacion: ${cateringAddress ?? 'Not Provided'}
+    Google Maps: $cateringGoogleMapsLink
+    Fecha: ${_cateringDateController.text}
+    Hora: ${_cateringTimeController.text}
+    $cateringBuffer
+    ''');
+    }
+
+    if (regularDishesBuffer.isNotEmpty) {
+      orderDetailsBuffer.writeln('''
+    *Regular Dishes*:
+    Ubicacion: ${regularAddress ?? 'Not Provided'}
+    Google Maps: $regularDishesGoogleMapsLink
+    (Estimated delivery time: ${_formatTime(_deliveryStartTime!)} - ${_formatTime(_deliveryEndTime!)})
+    $regularDishesBuffer
+    ''');
+    }
+
+    if (mealSubscriptionBuffer.isNotEmpty) {
+      orderDetailsBuffer.writeln('''
+    *Meal Subscriptions*:
+    Ubicacion: ${mealSubscriptionAddress ?? 'Not Provided'}
+    Google Maps: $mealSubscriptionGoogleMapsLink
+    Fecha: ${_mealSubscriptionDateController.text}
+    Hora: ${_mealSubscriptionTimeController.text}
+    $mealSubscriptionBuffer
+    ''');
+    }
+
+    orderDetailsBuffer.writeln('''
+    *Metodo de Pago*: ${_paymentMethods[_selectedPaymentMethod]}
+    *Totales*:
+    Envio: RD \$$_deliveryFee
+    Impuestos: RD \$${tax.toStringAsFixed(2)}
+    Total: RD \$${total.toStringAsFixed(2)}
+  ''');
+
+    return orderDetailsBuffer.toString();
+  }
+
   @override
   Widget build(BuildContext context) {
     final cartItems = ref.watch(cartProvider);
-
     final dishes = cartItems
         .where(
             (item) => !item.isMealSubscription && item.foodType != 'Catering')
@@ -109,32 +396,33 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
     final mealSubscriptions =
         cartItems.where((item) => item.isMealSubscription).toList();
 
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-          forceMaterialTransparency: true,
-          title: const Text('Completar Orden'),
-        ),
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return SingleChildScrollView(
-                  child: ConstrainedBox(
-                    constraints:
-                        BoxConstraints(minHeight: constraints.maxHeight),
-                    child: IntrinsicHeight(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 16.0),
+    return Scaffold(
+      appBar: AppBar(
+        forceMaterialTransparency: true,
+        title: const Text('Completar Orden'),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 16.0),
 
-                          // Regular Dishes Section
-                          if (dishes.isNotEmpty)
-                            _buildSectionTitle(context,
-                                'Regular Dishes (Estimated 40-60 mins)'),
+                        // Regular Dishes Section
+                        if (dishes.isNotEmpty) ...[
+                          _buildSectionTitle(context, 'Platos'),
+                          _buildLocationField(
+                              context,
+                              _regularDishesLocationController,
+                              _isRegularCateringAddressValid,
+                              'regular'),
                           for (var item in dishes)
                             CartItemView(
                               img: item.img,
@@ -155,207 +443,188 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
                               peopleCount: 0,
                               sideRequest: '',
                             ),
-
-                          // Catering Section with Date/Time Picker
-                          if (cateringItems.isNotEmpty) ...[
-                            _buildSectionTitle(context, 'Catering Orders'),
-                            _buildDateTimePicker(
-                                context,
-                                _cateringDateController,
-                                _cateringTimeController,
-                                isCatering: true),
-                            for (var item in cateringItems)
-                              CartItemView(
-                                img: item.img,
-                                title: item.title,
-                                description: item.description,
-                                pricing: item.pricing,
-                                offertPricing: item.offertPricing,
-                                ingredients: item.ingredients,
-                                isSpicy: item.isSpicy,
-                                foodType: item.foodType,
-                                quantity: item.quantity,
-                                onRemove: () => ref
-                                    .read(cartProvider.notifier)
-                                    .decrementQuantity(item.title),
-                                onAdd: () => ref
-                                    .read(cartProvider.notifier)
-                                    .incrementQuantity(item.title),
-                                peopleCount: item.peopleCount,
-                                sideRequest: item.sideRequest,
-                              ),
-                          ],
-
-                          // Meal Subscription Section with Date/Time Picker
-                          if (mealSubscriptions.isNotEmpty) ...[
-                            _buildSectionTitle(context, 'Meal Subscriptions'),
-                            _buildDateTimePicker(
-                                context,
-                                _mealSubscriptionDateController,
-                                _mealSubscriptionTimeController,
-                                isCatering: false),
-                            for (var item in mealSubscriptions)
-                              CartItemView(
-                                img: item.img,
-                                title: item.title,
-                                description: item.description,
-                                pricing: item.pricing,
-                                offertPricing: item.offertPricing,
-                                ingredients: item.ingredients,
-                                isSpicy: item.isSpicy,
-                                foodType: item.foodType,
-                                quantity: item.quantity,
-                                onRemove: () => ref
-                                    .read(cartProvider.notifier)
-                                    .decrementQuantity(item.title),
-                                onAdd: () => ref
-                                    .read(cartProvider.notifier)
-                                    .incrementQuantity(item.title),
-                                peopleCount: 0,
-                                sideRequest: '',
-                              ),
-                          ],
-
-                          const Spacer(),
-                          _buildOrderSummary(cartItems),
                         ],
-                      ),
+
+                        // Catering Section with Date/Time Picker
+                        if (cateringItems.isNotEmpty) ...[
+                          _buildSectionTitle(context, 'Catering'),
+                          _buildLocationField(
+                              context,
+                              _cateringLocationController,
+                              _isCateringAddressValid,
+                              'catering'),
+                          _buildDateTimePicker(context, _cateringDateController,
+                              _cateringTimeController,
+                              isCatering: true),
+                          for (var item in cateringItems)
+                            CartItemView(
+                              img: item.img,
+                              title: item.title,
+                              description: item.description,
+                              pricing: item.pricing,
+                              offertPricing: item.offertPricing,
+                              ingredients: item.ingredients,
+                              isSpicy: item.isSpicy,
+                              foodType: item.foodType,
+                              quantity: item.quantity,
+                              onRemove: () => ref
+                                  .read(cartProvider.notifier)
+                                  .decrementCateringQuantity(item.title),
+                              onAdd: () => ref
+                                  .read(cartProvider.notifier)
+                                  .incrementCateringQuantity(item.title),
+                              peopleCount: item.peopleCount,
+                              sideRequest: item.sideRequest,
+                            ),
+                        ],
+
+                        // Meal Subscription Section with Date/Time Picker
+                        if (mealSubscriptions.isNotEmpty) ...[
+                          _buildSectionTitle(context, 'Subscripciones'),
+                          _buildLocationField(
+                              context,
+                              _mealSubscriptionLocationController,
+                              _isMealSubscriptionAddressValid,
+                              'mealSubscription'),
+                          _buildDateTimePicker(
+                              context,
+                              _mealSubscriptionDateController,
+                              _mealSubscriptionTimeController,
+                              isCatering: false),
+                          for (var item in mealSubscriptions)
+                            CartItemView(
+                              img: item.img,
+                              title: item.title,
+                              description: item.description,
+                              pricing: item.pricing,
+                              offertPricing: item.offertPricing,
+                              ingredients: item.ingredients,
+                              isSpicy: item.isSpicy,
+                              foodType: item.foodType,
+                              quantity: item.quantity,
+                              onRemove: () => ref
+                                  .read(cartProvider.notifier)
+                                  .decrementQuantity(item.title),
+                              onAdd: () => ref
+                                  .read(cartProvider.notifier)
+                                  .incrementQuantity(item.title),
+                              peopleCount: 0,
+                              sideRequest: '',
+                            ),
+                        ],
+
+                        // Payment Method Dropdown
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          child: DropdownButtonFormField<int>(
+                            dropdownColor: ColorsPaletteRedonda.white,
+                            value: _selectedPaymentMethod,
+                            items:
+                                List.generate(_paymentMethods.length, (index) {
+                              return DropdownMenuItem<int>(
+                                value: index,
+                                child: Text(
+                                  _paymentMethods[index],
+                                  style: const TextStyle(
+                                      color: ColorsPaletteRedonda.primary),
+                                ),
+                              );
+                            }),
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedPaymentMethod = value!;
+                              });
+                            },
+                            decoration: InputDecoration(
+                              labelText: 'Metodo de pago',
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                                borderSide: const BorderSide(
+                                  color: ColorsPaletteRedonda.primary,
+                                  width: 1.5,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const Spacer(),
+                        _buildOrderSummary(cartItems),
+
+                        ElevatedButton(
+                          onPressed: () => _sendWhatsAppOrder(cartItems),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: ColorsPaletteRedonda.primary,
+                            minimumSize: const Size(double.infinity, 48),
+                          ),
+                          child: Text(
+                            'Completar',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(color: Colors.white),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  Future<void> _selectDate(
-      BuildContext context, TextEditingController controller,
-      {required bool isCatering}) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(), // Default to current date
-      firstDate: DateTime.now(), // Only allow future dates
-      lastDate: DateTime.now()
-          .add(const Duration(days: 30)), // Allow up to 30 days in the future
-    );
-
-    if (picked != null) {
-      setState(() {
-        if (isCatering) {
-          _selectedCateringDate = picked;
-          controller.text = DateFormat('yyyy-MM-dd')
-              .format(picked); // Format the selected date
-        } else {
-          _selectedMealSubscriptionDate = picked;
-          controller.text = DateFormat('yyyy-MM-dd')
-              .format(picked); // Format the selected date
-        }
-      });
-      print(
-          'Selected date: ${DateFormat('yyyy-MM-dd').format(picked)}'); // Print selected date
-    } else {
-      print('Date selection was canceled.');
-    }
-  }
-
-  Future<void> _selectDateTime(
-      BuildContext context, TextEditingController controller,
-      {required bool isCatering}) async {
-    // First, select the date
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(), // Default to current date
-      firstDate: DateTime.now(), // Only allow future dates
-      lastDate: DateTime.now()
-          .add(const Duration(days: 30)), // Allow up to 30 days in the future
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: Theme.of(context)
-                  .colorScheme
-                  .primary, // Use primary color for header
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor: Theme.of(context)
-                    .colorScheme
-                    .primary, // Use primary color for text buttons
+  // Build the location field for any order type
+  Widget _buildLocationField(BuildContext context,
+      TextEditingController controller, bool isValid, String name) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: controller,
+              readOnly: true,
+              onTap: () => _showLocationBottomSheet(context, controller, name),
+              style: Theme.of(context).textTheme.labelLarge,
+              decoration: InputDecoration(
+                hintText: 'Ingrese Ubicación',
+                filled: true,
+                fillColor:
+                    ColorsPaletteRedonda.white, // Gray background when filled
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: const BorderSide(
+                    color: ColorsPaletteRedonda
+                        .deepBrown1, // Red border when not selected
+                    width: 1.0,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: const BorderSide(
+                    color: ColorsPaletteRedonda
+                        .primary, // Black border when focused
+                    width: 2.0,
+                  ),
+                ),
               ),
             ),
           ),
-          child: child ?? const SizedBox.shrink(),
-        );
-      },
+        ],
+      ),
     );
-
-    // If the date is not picked, cancel the process
-    if (pickedDate == null) {
-      print('Date selection was canceled.');
-      return;
-    }
-
-    // Then, select the time after the date is picked
-    final TimeOfDay? pickedTime = await showTimePicker(
-      context: context,
-      initialTime: const TimeOfDay(hour: 9, minute: 0), // Default time (9 AM)
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: Theme.of(context)
-                  .colorScheme
-                  .primary, // Use primary color for header
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor: Theme.of(context)
-                    .colorScheme
-                    .primary, // Use primary color for text buttons
-              ),
-            ),
-          ),
-          child: child ?? const SizedBox.shrink(),
-        );
-      },
-    );
-
-    if (pickedTime == null) {
-      print('Time selection was canceled.');
-      return;
-    }
-
-    // Combine the selected date and time into a single DateTime object
-    final DateTime selectedDateTime = DateTime(
-      pickedDate.year,
-      pickedDate.month,
-      pickedDate.day,
-      pickedTime.hour,
-      pickedTime.minute,
-    );
-
-    // Update the state and controller with the combined date and time
-    setState(() {
-      final formattedDateTime = DateFormat('yyyy-MM-dd – HH:mm')
-          .format(selectedDateTime); // Combine date and time in desired format
-      controller.text = formattedDateTime;
-      print(
-          'Selected date and time: $formattedDateTime'); // Print the selected date and time
-      if (isCatering) {
-        _selectedCateringDate = selectedDateTime;
-      } else {
-        _selectedMealSubscriptionDate = selectedDateTime;
-      }
-    });
   }
 
   Widget _buildDateTimePicker(
       BuildContext context,
-      TextEditingController dateTimeController,
-      TextEditingController mealSubscriptionTimeController,
+      TextEditingController dateController,
+      TextEditingController timeController,
       {required bool isCatering}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -364,8 +633,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
         children: [
           Text(
             isCatering
-                ? 'Select Catering Delivery Date & Time'
-                : 'Select Meal Subscription Date & Time',
+                ? 'Selecciona la fecha y hora de tu catering'
+                : 'Selecciona la fecha y hora de tu entrega',
             style: Theme.of(context)
                 .textTheme
                 .titleMedium
@@ -373,18 +642,36 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
           ),
           const SizedBox(height: 8.0),
           TextField(
-            controller: dateTimeController,
+            style: Theme.of(context).textTheme.labelLarge,
+            controller: dateController,
             readOnly: true,
-            onTap: () => _selectDateTime(context, dateTimeController,
+            onTap: () => _selectDateTime(context, dateController,
                 isCatering: isCatering),
             decoration: InputDecoration(
               hintText: isCatering
                   ? 'Select Catering Date & Time'
                   : 'Select Subscription Date & Time',
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+              filled: true,
+              fillColor:
+                  ColorsPaletteRedonda.white, // Gray background when filled
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: const BorderSide(
+                  color: ColorsPaletteRedonda
+                      .deepBrown1, // Red border when not selected
+                  width: 1.0,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: const BorderSide(
+                  color:
+                      ColorsPaletteRedonda.primary, // Black border when focused
+                  width: 2.0,
+                ),
+              ),
             ),
-          ),
+          )
         ],
       ),
     );
@@ -437,23 +724,6 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
             _buildOrderSummaryRow(
                 context, 'Order total', 'RD \$${orderTotal.toStringAsFixed(2)}',
                 isBold: true),
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () {
-                // Handle checkout button logic
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ColorsPaletteRedonda.primary,
-                minimumSize: const Size(double.infinity, 48),
-              ),
-              child: Text(
-                'Completar',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(color: Colors.white),
-              ),
-            ),
           ],
         ),
       ),

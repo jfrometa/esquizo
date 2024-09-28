@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class CateringScreen extends ConsumerWidget {
   const CateringScreen({super.key});
@@ -31,7 +32,7 @@ class CateringScreen extends ConsumerWidget {
           children: [
             const Text(
               'Selecciona',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             Expanded(
@@ -73,20 +74,33 @@ class CateringScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             TextFormField(
               controller: sideRequestController,
-              style: Theme.of(context)
-                  .textTheme
-                  .displaySmall
-                  ?.copyWith(color: Theme.of(context).colorScheme.primary),
+              style: Theme.of(context).textTheme.labelLarge,
+              maxLines: 5,
               decoration: InputDecoration(
-                hintStyle: Theme.of(context)
-                    .textTheme
-                    .displaySmall
-                    ?.copyWith(color: Theme.of(context).colorScheme.primary),
-                labelText: 'Additional Requests (Optional)',
-                hintText: 'Enter any side requests here...',
-                border: const OutlineInputBorder(),
+                labelText: 'Aditionales',
+                // labelStyle: Theme.of(context).textTheme,
+                hintText:
+                    'Arroz con fideos 20 personas, Pimientos rellenos 20 personas',
+                filled: true,
+                fillColor:
+                    ColorsPaletteRedonda.white, // Gray background when filled
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: const BorderSide(
+                    color: ColorsPaletteRedonda
+                        .deepBrown1, // Red border when not selected
+                    width: 1.0,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: const BorderSide(
+                    color: ColorsPaletteRedonda
+                        .primary, // Black border when focused
+                    width: 2.0,
+                  ),
+                ),
               ),
-              maxLines: 2,
             ),
             const SizedBox(height: 16),
             ElevatedButton(
@@ -115,10 +129,10 @@ class CateringItemCard extends StatefulWidget {
   });
 
   @override
-  _CateringItemCardState createState() => _CateringItemCardState();
+  CateringItemCardState createState() => CateringItemCardState();
 }
 
-class _CateringItemCardState extends State<CateringItemCard> {
+class CateringItemCardState extends State<CateringItemCard> {
   int selectedPeopleCount = 10;
   int quantity = 1;
 
@@ -145,6 +159,11 @@ class _CateringItemCardState extends State<CateringItemCard> {
                     '\$${widget.item.pricePerPerson.toStringAsFixed(2)} per person'),
                 DropdownButton<int>(
                   value: selectedPeopleCount,
+                  dropdownColor: ColorsPaletteRedonda.white,
+                  underline: Container(
+                    height: 0, // Removes the underline
+                    color: Colors.transparent,
+                  ),
                   items: const [
                     DropdownMenuItem(value: 10, child: Text('10 people')),
                     DropdownMenuItem(value: 50, child: Text('50 people')),
@@ -154,6 +173,9 @@ class _CateringItemCardState extends State<CateringItemCard> {
                     setState(() {
                       selectedPeopleCount = value ?? 10;
                     });
+
+                    // Ensure this is a separate statement
+                    FocusScope.of(context).unfocus();
                   },
                 ),
               ],

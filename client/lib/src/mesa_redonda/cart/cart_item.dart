@@ -99,13 +99,13 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
           foodType: 'Catering',
           quantity: 0,
           isOffer: false,
-          peopleCount: peopleCount, // Number of people for catering
-          sideRequest: sideRequest ?? '', // Optional side request
+          peopleCount: peopleCount,
+          sideRequest: sideRequest ?? '',
         ),
       );
 
       if (existingCatering.quantity > 0) {
-        // Update quantity and peopleCount for existing catering order
+        // Update existing catering order
         state = [
           for (final cartItem in state)
             if (cartItem.title == item['title'] &&
@@ -127,21 +127,22 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
         (cartItem) =>
             cartItem.title == item['title'] && cartItem.isMealSubscription,
         orElse: () => CartItem(
-            img: item['img'],
-            title: item['title'],
-            description: item['description'],
-            pricing: item['pricing'],
-            offertPricing: item['offertPricing'],
-            ingredients: List<String>.from(item['ingredients']),
-            isSpicy: item['isSpicy'],
-            foodType: item['foodType'],
-            quantity: 0,
-            isOffer: item.containsKey('offertPricing') &&
-                item['offertPricing'] != null,
-            isMealSubscription: true,
-            totalMeals: totalMeals,
-            remainingMeals: totalMeals,
-            peopleCount: item['peopleCount']),
+          img: item['img'],
+          title: item['title'],
+          description: item['description'],
+          pricing: item['pricing'],
+          offertPricing: item['offertPricing'],
+          ingredients: List<String>.from(item['ingredients']),
+          isSpicy: item['isSpicy'],
+          foodType: item['foodType'],
+          quantity: 0,
+          isOffer: item.containsKey('offertPricing') &&
+              item['offertPricing'] != null,
+          isMealSubscription: true,
+          totalMeals: totalMeals,
+          remainingMeals: totalMeals,
+          peopleCount: item['peopleCount'],
+        ),
       );
 
       if (existingPlan.remainingMeals > 0) {
@@ -194,33 +195,18 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
     ];
   }
 
-  // Decrement quantity of a catering item
+  // Decrement quantity of a catering item and remove if 0
   void decrementCateringQuantity(String title) {
     state = [
       for (final item in state)
-        if (item.title == title &&
-            item.foodType == 'Catering' &&
-            item.quantity > 1)
-          item.copyWith(quantity: item.quantity - 1)
-        else if (item.title == title &&
-            item.foodType == 'Catering' &&
-            item.quantity == 1)
-          ...state.where((item) =>
-              item.title != title) // Remove the item when quantity is 0
-        else
-          item,
-    ];
-  }
-
-  // Update people count of catering item
-  void updatePeopleCount(String title, int peopleCount) {
-    state = [
-      for (final item in state)
         if (item.title == title && item.foodType == 'Catering')
-          item.copyWith(peopleCount: peopleCount)
+          if (item.quantity > 1)
+            item.copyWith(quantity: item.quantity - 1)
+          else
+            null // Remove item if quantity is 0
         else
           item,
-    ];
+    ].whereType<CartItem>().toList(); // Ensure to filter out null values
   }
 
   // Increment quantity of a regular dish
@@ -236,24 +222,18 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
     ];
   }
 
-  // Decrement quantity of a regular dish
+  // Decrement quantity of a regular dish and remove if 0
   void decrementQuantity(String title) {
     state = [
       for (final item in state)
-        if (item.title == title &&
-            !item.isMealSubscription &&
-            item.quantity > 1 &&
-            item.foodType != 'Catering')
-          item.copyWith(quantity: item.quantity - 1)
-        else if (item.title == title &&
-            !item.isMealSubscription &&
-            item.quantity == 1 &&
-            item.foodType != 'Catering')
-          ...state.where((item) =>
-              item.title != title) // Remove the item when quantity is 0
+        if (item.title == title && !item.isMealSubscription)
+          if (item.quantity > 1)
+            item.copyWith(quantity: item.quantity - 1)
+          else
+            null // Remove item if quantity is 0
         else
           item,
-    ];
+    ].whereType<CartItem>().toList(); // Ensure to filter out null values
   }
 
   // Method to consume a meal from a meal subscription

@@ -155,66 +155,184 @@ class ColorsPaletteRedonda {
       Color.fromARGB(255, 241, 227, 219); // Lightest brown for backgrounds
   static const Color white = Colors.white;
 
- static const Color primary = Color(0xFF402e32); // Main brand color
-  static const Color lightBrown1 = Color(0xFFfff7f0); // Lighter brown for AppBar
+  static const Color primary = Color(0xFF402e32); // Main brand color
+  static const Color lightBrown1 =
+      Color(0xFFfff7f0); // Lighter brown for AppBar
   static const Color deepBrown1 =
       Color(0xFF694631); // Deeper brown for body backgrounds
   static const Color background =
       Color.fromARGB(255, 249, 245, 242); // Lightest brown for backgrounds
   static const Color orange = Color(0xFFd87738);
-  
 
   static ThemeData get themeData {
     return ThemeData(
       brightness: Brightness.light,
       primaryColor: primary,
       scaffoldBackgroundColor: background,
-      appBarTheme: const AppBarTheme(
+
+      // AppBar Theme
+      appBarTheme: AppBarTheme(
         color: Colors.white,
-        foregroundColor: primary, // Ensures AppBar title is white
-        elevation: 1,
+        elevation: 3,
+        titleTextStyle: ThemeData.light().textTheme.headlineMedium?.copyWith(
+              color: deepBrown1,
+              fontWeight: FontWeight.bold,
+            ), // Headline6 for AppBar title
+        iconTheme: const IconThemeData(color: primary),
       ),
-      textTheme: const TextTheme(
-        displayLarge: TextStyle(
-          color: Colors.white,
-          fontSize: 34.0,
-        ),
-        displayMedium: TextStyle(color: deepBrown1, fontSize: 28.0),
-        displaySmall: TextStyle(color: deepBrown1, fontSize: 24.0),
-        headlineLarge: TextStyle(color: primary, fontSize: 20.0),
-        headlineMedium: TextStyle(color: primary, fontSize: 16.0),
-        headlineSmall: TextStyle(color: deepBrown1, fontSize: 14.0),
-        titleLarge: TextStyle(
-            color: primary,
-            fontSize: 20.0,
-            fontWeight: FontWeight.bold), // Titles on white backgrounds
-        titleMedium: TextStyle(color: primary, fontSize: 18.0),
-        titleSmall: TextStyle(color: primary, fontSize: 16.0),
-        bodyLarge: TextStyle(color: Colors.white, fontSize: 16.0),
-        bodyMedium: TextStyle(color: primary, fontSize: 14.0),
-        bodySmall: TextStyle(color: primary, fontSize: 12.0),
-        labelLarge: TextStyle(
-            color: Colors.white, fontSize: 14.0, fontWeight: FontWeight.bold),
-        labelMedium: TextStyle(color: deepBrown1, fontSize: 12.0),
-        labelSmall: TextStyle(color: deepBrown1, fontSize: 10.0),
-      ),
-      iconTheme: const IconThemeData(
-        color: Colors.white, // Icons throughout the app
-      ),
-      buttonTheme: const ButtonThemeData(
-        buttonColor: primary, // Buttons use the primary brand color
+
+      // Text Theme for the whole app
+      textTheme: ThemeData.light().textTheme.copyWith(
+            // Display text styles for large headings
+            displayLarge: ThemeData.light().textTheme.displayLarge?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+            displayMedium: ThemeData.light().textTheme.displayMedium?.copyWith(
+                  color: deepBrown1,
+                  fontWeight: FontWeight.w600,
+                ),
+            displaySmall: ThemeData.light().textTheme.displaySmall?.copyWith(
+                  color: deepBrown1,
+                  fontWeight: FontWeight.w600,
+                ),
+
+            // Headline text styles for medium-large headings
+            headlineLarge: ThemeData.light().textTheme.headlineMedium?.copyWith(
+                  color: primary,
+                  fontWeight: FontWeight.bold,
+                ),
+            headlineMedium: ThemeData.light().textTheme.headlineSmall?.copyWith(
+                  color: primary,
+                  fontWeight: FontWeight.bold,
+                ),
+            headlineSmall: ThemeData.light().textTheme.titleLarge?.copyWith(
+                  color: deepBrown1,
+                  fontWeight: FontWeight.w600,
+                ),
+
+            // Titles on different surfaces (large, medium, small)
+            titleLarge: ThemeData.light().textTheme.titleMedium?.copyWith(
+                  color: primary,
+                  fontWeight: FontWeight.w700,
+                ),
+            titleMedium: ThemeData.light().textTheme.titleSmall?.copyWith(
+                  color: primary,
+                  fontWeight: FontWeight.w600,
+                ),
+            titleSmall: ThemeData.light().textTheme.bodySmall?.copyWith(
+                  color: primary,
+                  fontWeight: FontWeight.w500,
+                ),
+
+            // Body text styles for regular text
+            bodyLarge: ThemeData.light().textTheme.bodyLarge?.copyWith(
+                  color: primary,
+                  fontWeight: FontWeight.normal,
+                ),
+            bodyMedium: ThemeData.light().textTheme.bodyMedium?.copyWith(
+                  color: primary,
+                  fontWeight: FontWeight.normal,
+                ),
+            bodySmall: ThemeData.light().textTheme.labelSmall?.copyWith(
+                  color: primary,
+                  fontWeight: FontWeight.normal,
+                ),
+
+            // Labels and buttons
+            labelLarge: ThemeData.light().textTheme.labelLarge?.copyWith(
+                  color: primary,
+                  fontWeight: FontWeight.bold,
+                ),
+            labelMedium: ThemeData.light().textTheme.bodySmall?.copyWith(
+                  color: deepBrown1,
+                ),
+            labelSmall: ThemeData.light().textTheme.labelSmall?.copyWith(
+                  color: deepBrown1,
+                ),
+          ),
+
+      // Button Theme
+      buttonTheme: ButtonThemeData(
+        buttonColor: primary,
         textTheme: ButtonTextTheme.primary,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       ),
-      tabBarTheme: TabBarTheme(
-        labelColor: Colors.white, // Active tab text color
-        unselectedLabelColor: Colors.white
-            .withAlpha(140), // Inactive tab text color, slightly transparent
-        indicator: const UnderlineTabIndicator(
-          borderSide: BorderSide(
-              color: Colors.white,
-              width: 2.0), // Underline tab indicator in white
+
+      // Elevated Button Theme
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          foregroundColor: Colors.white,
+          backgroundColor: primary,
+          textStyle: ThemeData.light().textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
         ),
       ),
+
+      // Icon Theme
+      iconTheme: const IconThemeData(
+        color: primary,
+      ),
+
+      // TabBar Theme
+      tabBarTheme: TabBarTheme(
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.white.withAlpha(140),
+        labelStyle: ThemeData.light().textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+        unselectedLabelStyle: ThemeData.light().textTheme.labelLarge,
+        indicator: const UnderlineTabIndicator(
+          borderSide: BorderSide(color: Colors.white, width: 2.0),
+        ),
+      ),
+
+      // Bottom Navigation Bar Theme
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: white,
+        selectedItemColor: white,
+        unselectedItemColor: primary,
+        selectedLabelStyle: ThemeData.light().textTheme.bodySmall?.copyWith(
+              color: primary,
+              fontWeight: FontWeight.bold,
+            ),
+        unselectedLabelStyle: ThemeData.light().textTheme.bodySmall?.copyWith(
+              color: lightBrown,
+            ),
+        selectedIconTheme: const IconThemeData(color: white),
+        unselectedIconTheme: const IconThemeData(color: primary),
+      ),
+
+      // Floating Action Button Theme
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: primary,
+        foregroundColor: Colors.white,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+      ),
+
+      // Dialog Theme
+      dialogTheme: DialogTheme(
+        backgroundColor: Colors.white,
+        titleTextStyle: ThemeData.light().textTheme.titleLarge?.copyWith(
+              color: primary,
+              fontWeight: FontWeight.bold,
+            ),
+        contentTextStyle: ThemeData.light().textTheme.bodyMedium?.copyWith(
+              color: deepBrown1,
+            ),
+      ),
+
+      // Divider Theme
+      dividerTheme: const DividerThemeData(
+        color: deepBrown1,
+        thickness: 1,
+      ),
+
+      // Color Scheme
       colorScheme: ColorScheme.fromSwatch().copyWith(
         primary: primary,
         onPrimary: Colors.white,
@@ -224,15 +342,6 @@ class ColorsPaletteRedonda {
         onSurface: Colors.white,
         error: primary,
         onError: Colors.white,
-      ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: white,
-        selectedItemColor: white,
-        unselectedItemColor: primary,
-        selectedLabelStyle: TextStyle(color: primary),
-        unselectedLabelStyle: TextStyle(color: lightBrown),
-        selectedIconTheme: IconThemeData(color: white),
-        unselectedIconTheme: IconThemeData(color: primary),
       ),
     );
   }

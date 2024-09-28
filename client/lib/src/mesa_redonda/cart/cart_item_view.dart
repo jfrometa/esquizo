@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
+import 'package:intl/intl.dart';
 
 class CartItemView extends StatelessWidget {
   final String img;
@@ -173,8 +174,9 @@ class CartItemView extends StatelessWidget {
                   ],
                 ),
                 // Total Price
+
                 Text(
-                  '\$${(double.tryParse(pricing) ?? 0.0) * quantity}',
+                  '${NumberFormat.currency(locale: 'en_US', symbol: '\$').format((double.tryParse(pricing) ?? 0.0) * quantity)}',
                   style: Theme.of(context).textTheme.displaySmall?.copyWith(
                         color: Colors.deepOrange,
                         fontSize: 20,
