@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class CartItemView extends StatelessWidget {
@@ -13,7 +14,7 @@ class CartItemView extends StatelessWidget {
   final int quantity;
   final VoidCallback onRemove;
   final VoidCallback onAdd;
-  
+
   // Catering-specific fields
   final int peopleCount;
   final String sideRequest;
@@ -83,17 +84,19 @@ class CartItemView extends StatelessWidget {
                       const SizedBox(height: 4.0),
                       Text(
                         description,
-                        style: const TextStyle(fontSize: 12.0, color: Colors.black),
+                        style: const TextStyle(
+                            fontSize: 12.0, color: Colors.black),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4.0),
-                      if (foodType == 'Catering') 
+                      if (foodType == 'Catering')
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('People: $peopleCount'),
-                            if (sideRequest.isNotEmpty) Text('Side Request: $sideRequest'),
+                            if (sideRequest.isNotEmpty)
+                              Text('Side Request: $sideRequest'),
                           ],
                         ),
                     ],
@@ -101,7 +104,7 @@ class CartItemView extends StatelessWidget {
                 ),
               ],
             ),
-          const SizedBox(height: 8.0),
+            const SizedBox(height: 8.0),
             Row(
               children: [
                 Expanded(
@@ -179,7 +182,6 @@ class CartItemView extends StatelessWidget {
                 ),
               ],
             ),
-          
           ],
         ),
       ),

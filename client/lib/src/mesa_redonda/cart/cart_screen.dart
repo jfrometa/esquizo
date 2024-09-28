@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
-import 'cart_item_view.dart'; // Import the CartItem widget here 
+import 'cart_item_view.dart'; // Import the CartItem widget here
 
 class CartScreen extends ConsumerWidget {
   const CartScreen({super.key, required this.isAuthenticated});
@@ -83,11 +83,16 @@ class CartScreen extends ConsumerWidget {
                         isSpicy: item.isSpicy,
                         foodType: item.foodType,
                         quantity: item.quantity,
+                        peopleCount: item.peopleCount,
                         onRemove: () {
-                          ref.read(cartProvider.notifier).decrementQuantity(item.title);
+                          ref
+                              .read(cartProvider.notifier)
+                              .decrementQuantity(item.title);
                         },
                         onAdd: () {
-                          ref.read(cartProvider.notifier).incrementQuantity(item.title);
+                          ref
+                              .read(cartProvider.notifier)
+                              .incrementQuantity(item.title);
                         },
                       );
                     },
@@ -100,8 +105,8 @@ class CartScreen extends ConsumerWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     // Navigate to the checkout screen
-                    GoRouter.of(context).goNamed(
-                      AppRoute.homecheckout.name,
+                    GoRouter.of(context).pushNamed(
+                      AppRoute.checkout.name,
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -112,7 +117,8 @@ class CartScreen extends ConsumerWidget {
                   child: Text(
                     'Realizar pedido',
                     style: TextStyle(
-                      fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
+                      fontSize:
+                          Theme.of(context).textTheme.titleMedium?.fontSize,
                     ),
                   ),
                 ),

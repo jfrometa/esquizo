@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/localization/string_hardcoded.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class ScaffoldWithNestedNavigation extends StatelessWidget {
@@ -32,6 +33,11 @@ class ScaffoldWithNestedNavigation extends StatelessWidget {
   }
 }
 
+// Helper function to calculate total quantity
+int getTotalCartQuantity(List<CartItem> cartItems) {
+  return cartItems.fold(0, (total, item) => total + item.quantity);
+}
+
 class ScaffoldWithNavigationBar extends ConsumerWidget {
   const ScaffoldWithNavigationBar({
     super.key,
@@ -46,6 +52,10 @@ class ScaffoldWithNavigationBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Get the total quantity from cartProvider
+    final cartItems = ref.watch(cartProvider);
+    final totalQuantity = getTotalCartQuantity(cartItems);
+
     return Scaffold(
       body: body,
       bottomNavigationBar: NavigationBarTheme(
@@ -71,7 +81,8 @@ class ScaffoldWithNavigationBar extends ConsumerWidget {
                     color: Colors.white); // Selected icon color
               }
               return const IconThemeData(
-                  color: ColorsPaletteRedonda.deepBrown1); // Unselected icon color
+                  color:
+                      ColorsPaletteRedonda.deepBrown1); // Unselected icon color
             },
           ),
         ),
@@ -79,46 +90,78 @@ class ScaffoldWithNavigationBar extends ConsumerWidget {
           selectedIndex: currentIndex,
           onDestinationSelected: onDestinationSelected,
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-          destinations: List.generate(4, (index) => _buildDestination(index)),
+          destinations: List.generate(
+              4, (index) => _buildDestination(index, totalQuantity)),
         ),
       ),
     );
   }
 
-  NavigationDestination _buildDestination(int index) {
+  NavigationDestination _buildDestination(int index, int totalQuantity) {
     IconData icon;
     String label;
+    Widget iconWidget;
+
     switch (index) {
       case 0:
         icon = Icons.home;
         label = 'Inicio';
+        iconWidget = Icon(icon);
         break;
       case 1:
+        icon = Icons.restaurant_menu;
+        label = 'Menu';
+        iconWidget = Icon(icon);
+        break;
+
+      case 2:
         icon = Icons.shopping_cart;
         label = 'Carrito';
+        iconWidget = Stack(
+          clipBehavior:
+              Clip.none, // Ensures the badge is visible outside the icon bounds
+          children: [
+            Icon(icon), // Base cart icon
+            if (totalQuantity > 0)
+              Positioned(
+                top: -7, // Adjusts the vertical position of the badge
+                right: -9, // Adjusts the horizontal position of the badge
+                child: CircleAvatar(
+                  radius: 8,
+                  backgroundColor: Colors.red,
+                  child: Text(
+                    '$totalQuantity',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
         break;
-      case 2:
-        icon = Icons.checklist_rtl;
-        label = 'Confirmar';
-        break;
+
       case 3:
         icon = Icons.account_circle;
         label = 'Cuenta';
+        iconWidget = Icon(icon);
         break;
       default:
         icon = Icons.home;
         label = 'Inicio';
+        iconWidget = Icon(icon);
         break;
     }
 
     return NavigationDestination(
-      icon: Icon(icon),
+      icon: iconWidget,
       label: label,
     );
   }
 }
 
-class ScaffoldWithNavigationRail extends StatelessWidget {
+class ScaffoldWithNavigationRail extends ConsumerWidget {
   const ScaffoldWithNavigationRail({
     super.key,
     required this.body,
@@ -131,7 +174,11 @@ class ScaffoldWithNavigationRail extends StatelessWidget {
   final ValueChanged<int> onDestinationSelected;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Get the total quantity from cartProvider
+    final cartItems = ref.watch(cartProvider);
+    final totalQuantity = getTotalCartQuantity(cartItems);
+
     return Scaffold(
       body: Row(
         children: [
@@ -150,8 +197,8 @@ class ScaffoldWithNavigationRail extends StatelessWidget {
             unselectedLabelTextStyle: const TextStyle(
                 color: ColorsPaletteRedonda.deepBrown1,
                 fontWeight: FontWeight.bold),
-            destinations:
-                List.generate(4, (index) => _buildRailDestination(index)),
+            destinations: List.generate(
+                4, (index) => _buildRailDestination(index, totalQuantity)),
           ),
           const VerticalDivider(thickness: 1, width: 1),
           Expanded(child: body),
@@ -160,31 +207,67 @@ class ScaffoldWithNavigationRail extends StatelessWidget {
     );
   }
 
-  NavigationRailDestination _buildRailDestination(int index) {
+  // Updated destination to include badge for the cart icon
+  NavigationRailDestination _buildRailDestination(
+      int index, int totalQuantity) {
     IconData icon;
     String label;
+    Widget iconWidget;
+
     switch (index) {
       case 0:
         icon = Icons.home;
         label = 'Inicio'.hardcoded;
+        iconWidget = Icon(icon);
         break;
       case 1:
+        icon = Icons.restaurant_menu;
+        label = 'Menu'.hardcoded;
+        iconWidget = Icon(icon);
+        break;
+
+      case 2:
         icon = Icons.shopping_cart;
         label = 'Carrito'.hardcoded;
+        iconWidget = Stack(
+          clipBehavior:
+              Clip.none, // Ensures the badge is visible outside the icon bounds
+          children: [
+            Icon(
+              icon,
+            ), // Base cart icon
+            if (totalQuantity > 0)
+              Positioned(
+                top: -7, // Adjusts the vertical position of the badge
+                right: -9, // Adjusts the horizontal position of the badge
+                child: CircleAvatar(
+                  radius: 8,
+                  backgroundColor: Colors.red,
+                  child: Text(
+                    '$totalQuantity',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
         break;
-      case 2:
-        icon = Icons.checklist_rtl;
-        label = 'Confirmar'.hardcoded;
-        break;
+
       case 3:
         icon = Icons.account_circle;
         label = 'Cuenta'.hardcoded;
+        iconWidget = Icon(icon);
         break;
       default:
         icon = Icons.home;
         label = 'Inicio'.hardcoded;
+        iconWidget = Icon(icon);
         break;
     }
-    return NavigationRailDestination(icon: Icon(icon), label: Text(label));
+
+    return NavigationRailDestination(icon: iconWidget, label: Text(label));
   }
 }

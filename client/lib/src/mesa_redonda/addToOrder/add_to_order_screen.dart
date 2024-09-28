@@ -49,7 +49,8 @@ class _AddToOrderScreenState extends ConsumerState<AddToOrderScreen> {
         ),
         leading: IconButton(
           style: IconButton.styleFrom(elevation: 3),
-          icon: const Icon(Icons.arrow_back, color: ColorsPaletteRedonda.primary),
+          icon:
+              const Icon(Icons.arrow_back, color: ColorsPaletteRedonda.primary),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -169,7 +170,8 @@ class _AddToOrderScreenState extends ConsumerState<AddToOrderScreen> {
             children: [
               IconButton(
                 style: IconButton.styleFrom(elevation: 3),
-                icon: const Icon(Icons.remove, color: ColorsPaletteRedonda.lightBrown),
+                icon: const Icon(Icons.remove,
+                    color: ColorsPaletteRedonda.lightBrown),
                 onPressed: () {
                   setState(() {
                     if (quantity > 1) {
@@ -184,7 +186,8 @@ class _AddToOrderScreenState extends ConsumerState<AddToOrderScreen> {
                     fontSize: 24, color: ColorsPaletteRedonda.primary),
               ),
               IconButton(
-                icon: const Icon(Icons.add, color: ColorsPaletteRedonda.lightBrown),
+                icon: const Icon(Icons.add,
+                    color: ColorsPaletteRedonda.lightBrown),
                 onPressed: () {
                   setState(() {
                     quantity++; // Increase quantity
@@ -202,14 +205,18 @@ class _AddToOrderScreenState extends ConsumerState<AddToOrderScreen> {
                   // Check if there is an active subscription
                   if (hasActiveSubscription) {
                     // Consume the meal from the subscription
-                    ref.read(cartProvider.notifier).consumeMeal(selectedItem['title']);
+                    ref
+                        .read(cartProvider.notifier)
+                        .consumeMeal(selectedItem['title']);
                   } else {
                     // Otherwise, add the item to the cart
-                    ref.read(cartProvider.notifier).addToCart(selectedItem, quantity);
+                    ref
+                        .read(cartProvider.notifier)
+                        .addToCart(selectedItem, quantity);
                   }
 
                   // Navigate to the cart screen
-                  GoRouter.of(context).goNamed(AppRoute.homecart.name);
+                  // GoRouter.of(context).goNamed(AppRoute.homecart.name);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ColorsPaletteRedonda.primary,
@@ -217,7 +224,9 @@ class _AddToOrderScreenState extends ConsumerState<AddToOrderScreen> {
                   minimumSize: const Size(double.infinity, 56),
                 ),
                 child: Text(
-                  hasActiveSubscription ? 'Consumir del plan' : 'Agregar al carrito',
+                  hasActiveSubscription
+                      ? 'Consumir del plan'
+                      : 'Agregar al carrito',
                   style: TextStyle(
                     fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
                     color: ColorsPaletteRedonda.white,

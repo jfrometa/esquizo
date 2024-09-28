@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ResponsiveLandingPage extends StatelessWidget {
+class ResponsiveLandingPage extends ConsumerStatefulWidget {
+  const ResponsiveLandingPage({super.key});
+
   @override
+  ConsumerState<ResponsiveLandingPage> createState() => _ResponsiveLandingPageState();
+}
+
+class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
+@override
   Widget build(BuildContext context) {
     return Scaffold(
       body: LayoutBuilder(

@@ -20,7 +20,7 @@ class CartItem {
   final DateTime expirationDate;
 
   // Additional fields for catering
-  final int peopleCount;  // Number of people for catering
+  final int peopleCount; // Number of people for catering
   final String sideRequest; // Side requests for catering
 
   CartItem({
@@ -38,9 +38,10 @@ class CartItem {
     this.totalMeals = 0,
     this.remainingMeals = 0,
     DateTime? expirationDate,
-    this.peopleCount = 0,  // Default for non-catering items
-    this.sideRequest = '',  // Default empty for non-catering items
-  }) : expirationDate = expirationDate ?? DateTime.now().add(const Duration(days: 40));
+    this.peopleCount = 0, // Default for non-catering items
+    this.sideRequest = '', // Default empty for non-catering items
+  }) : expirationDate =
+            expirationDate ?? DateTime.now().add(const Duration(days: 40));
 
   CartItem copyWith({
     int? quantity,
@@ -68,21 +69,25 @@ class CartItem {
     );
   }
 }
+
 class CartNotifier extends StateNotifier<List<CartItem>> {
   CartNotifier() : super([]);
 
   // Add a dish, meal subscription, or catering to the cart
-  void addToCart(Map<String, dynamic> item, int quantity, {
+  void addToCart(
+    Map<String, dynamic> item,
+    int quantity, {
     bool isMealSubscription = false,
     int totalMeals = 0,
     bool isCatering = false,
-    int peopleCount = 0,  // Catering-specific
-    String? sideRequest,  // Catering-specific
+    int peopleCount = 0, // Catering-specific
+    String? sideRequest, // Catering-specific
   }) {
     if (isCatering) {
       // Handle Catering Orders
       final existingCatering = state.firstWhere(
-        (cartItem) => cartItem.title == item['title'] && cartItem.foodType == 'Catering',
+        (cartItem) =>
+            cartItem.title == item['title'] && cartItem.foodType == 'Catering',
         orElse: () => CartItem(
           img: item['img'],
           title: item['title'],
@@ -94,8 +99,8 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
           foodType: 'Catering',
           quantity: 0,
           isOffer: false,
-          peopleCount: peopleCount,  // Number of people for catering
-          sideRequest: sideRequest ?? '',  // Optional side request
+          peopleCount: peopleCount, // Number of people for catering
+          sideRequest: sideRequest ?? '', // Optional side request
         ),
       );
 
@@ -103,8 +108,12 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
         // Update quantity and peopleCount for existing catering order
         state = [
           for (final cartItem in state)
-            if (cartItem.title == item['title'] && cartItem.foodType == 'Catering')
-              cartItem.copyWith(quantity: cartItem.quantity + quantity, peopleCount: peopleCount, sideRequest: sideRequest)
+            if (cartItem.title == item['title'] &&
+                cartItem.foodType == 'Catering')
+              cartItem.copyWith(
+                  quantity: cartItem.quantity + quantity,
+                  peopleCount: peopleCount,
+                  sideRequest: sideRequest)
             else
               cartItem,
         ];
@@ -115,33 +124,36 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
     } else if (isMealSubscription) {
       // Handle Meal Subscriptions
       final existingPlan = state.firstWhere(
-        (cartItem) => cartItem.title == item['title'] && cartItem.isMealSubscription,
+        (cartItem) =>
+            cartItem.title == item['title'] && cartItem.isMealSubscription,
         orElse: () => CartItem(
-          img: item['img'],
-          title: item['title'],
-          description: item['description'],
-          pricing: item['pricing'],
-          offertPricing: item['offertPricing'],
-          ingredients: List<String>.from(item['ingredients']),
-          isSpicy: item['isSpicy'],
-          foodType: item['foodType'],
-          quantity: 0,
-          isOffer: item.containsKey('offertPricing') && item['offertPricing'] != null,
-          isMealSubscription: true,
-          totalMeals: totalMeals,
-          remainingMeals: totalMeals,
-        ),
+            img: item['img'],
+            title: item['title'],
+            description: item['description'],
+            pricing: item['pricing'],
+            offertPricing: item['offertPricing'],
+            ingredients: List<String>.from(item['ingredients']),
+            isSpicy: item['isSpicy'],
+            foodType: item['foodType'],
+            quantity: 0,
+            isOffer: item.containsKey('offertPricing') &&
+                item['offertPricing'] != null,
+            isMealSubscription: true,
+            totalMeals: totalMeals,
+            remainingMeals: totalMeals,
+            peopleCount: item['peopleCount']),
       );
 
       if (existingPlan.remainingMeals > 0) {
-        return;  // Don't allow duplicates for meal subscriptions
+        return; // Don't allow duplicates for meal subscriptions
       } else {
         state = [...state, existingPlan.copyWith(remainingMeals: totalMeals)];
       }
     } else {
       // Handle Regular Dish
       final existingDish = state.firstWhere(
-        (cartItem) => cartItem.title == item['title'] && !cartItem.isMealSubscription,
+        (cartItem) =>
+            cartItem.title == item['title'] && !cartItem.isMealSubscription,
         orElse: () => CartItem(
           img: item['img'],
           title: item['title'],
@@ -152,7 +164,8 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
           isSpicy: item['isSpicy'],
           foodType: item['foodType'],
           quantity: 0,
-          isOffer: item.containsKey('offertPricing') && item['offertPricing'] != null,
+          isOffer: item.containsKey('offertPricing') &&
+              item['offertPricing'] != null,
         ),
       );
 
@@ -185,10 +198,15 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
   void decrementCateringQuantity(String title) {
     state = [
       for (final item in state)
-        if (item.title == title && item.foodType == 'Catering' && item.quantity > 1)
+        if (item.title == title &&
+            item.foodType == 'Catering' &&
+            item.quantity > 1)
           item.copyWith(quantity: item.quantity - 1)
-        else if (item.title == title && item.foodType == 'Catering' && item.quantity == 1)
-          ...state.where((item) => item.title != title) // Remove the item when quantity is 0
+        else if (item.title == title &&
+            item.foodType == 'Catering' &&
+            item.quantity == 1)
+          ...state.where((item) =>
+              item.title != title) // Remove the item when quantity is 0
         else
           item,
     ];
@@ -209,7 +227,9 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
   void incrementQuantity(String title) {
     state = [
       for (final item in state)
-        if (item.title == title && !item.isMealSubscription && item.foodType != 'Catering')
+        if (item.title == title &&
+            !item.isMealSubscription &&
+            item.foodType != 'Catering')
           item.copyWith(quantity: item.quantity + 1)
         else
           item,
@@ -220,10 +240,17 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
   void decrementQuantity(String title) {
     state = [
       for (final item in state)
-        if (item.title == title && !item.isMealSubscription && item.quantity > 1 && item.foodType != 'Catering')
+        if (item.title == title &&
+            !item.isMealSubscription &&
+            item.quantity > 1 &&
+            item.foodType != 'Catering')
           item.copyWith(quantity: item.quantity - 1)
-        else if (item.title == title && !item.isMealSubscription && item.quantity == 1 && item.foodType != 'Catering')
-          ...state.where((item) => item.title != title) // Remove the item when quantity is 0
+        else if (item.title == title &&
+            !item.isMealSubscription &&
+            item.quantity == 1 &&
+            item.foodType != 'Catering')
+          ...state.where((item) =>
+              item.title != title) // Remove the item when quantity is 0
         else
           item,
     ];
@@ -234,7 +261,9 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
     final currentDateTime = DateTime.now();
     state = [
       for (final item in state)
-        if (item.title == title && item.isMealSubscription && currentDateTime.isBefore(item.expirationDate))
+        if (item.title == title &&
+            item.isMealSubscription &&
+            currentDateTime.isBefore(item.expirationDate))
           item.copyWith(remainingMeals: item.remainingMeals - 1)
         else
           item,
@@ -244,7 +273,11 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
   // Method to remove expired meal subscriptions
   void removeExpiredPlans() {
     final currentDateTime = DateTime.now();
-    state = state.where((item) => !item.isMealSubscription || currentDateTime.isBefore(item.expirationDate)).toList();
+    state = state
+        .where((item) =>
+            !item.isMealSubscription ||
+            currentDateTime.isBefore(item.expirationDate))
+        .toList();
   }
 }
 

@@ -20,7 +20,8 @@ class CateringScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Catering Menu'),
+        title: const Text('Catering'),
+        forceMaterialTransparency: true,
         elevation: 3,
       ),
       body: Padding(
@@ -29,7 +30,7 @@ class CateringScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Select Catering Options',
+              'Selecciona',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
@@ -48,12 +49,18 @@ class CateringScreen extends ConsumerWidget {
                         'img': item.img,
                         'title': item.title,
                         'description': item.description,
-                        'pricing': (item.pricePerPerson * peopleCount).toStringAsFixed(2),
+                        'pricing': (item.pricePerPerson * peopleCount)
+                            .toStringAsFixed(2),
                         'ingredients': item.ingredients,
-                        'isSpicy': false,  // Assuming catering items are not spicy
+                        'isSpicy':
+                            false, // Assuming catering items are not spicy
                         'foodType': 'Catering',
-                        'sideRequest': sideRequest,  // Add side request to the item
-                      }, quantity, isCatering: true, peopleCount: peopleCount, sideRequest: sideRequest);
+                        'sideRequest':
+                            sideRequest, // Add side request to the item
+                      }, quantity,
+                          isCatering: true,
+                          peopleCount: peopleCount,
+                          sideRequest: sideRequest);
 
                       // Clear the side request after adding to cart
                       sideRequestController.clear();
@@ -66,16 +73,19 @@ class CateringScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             TextFormField(
               controller: sideRequestController,
-              style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary),
+              style: Theme.of(context)
+                  .textTheme
+                  .displaySmall
+                  ?.copyWith(color: Theme.of(context).colorScheme.primary),
               decoration: InputDecoration(
-                hintStyle: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary),
+                hintStyle: Theme.of(context)
+                    .textTheme
+                    .displaySmall
+                    ?.copyWith(color: Theme.of(context).colorScheme.primary),
                 labelText: 'Additional Requests (Optional)',
                 hintText: 'Enter any side requests here...',
                 border: const OutlineInputBorder(),
               ),
-              
               maxLines: 2,
             ),
             const SizedBox(height: 16),
@@ -91,6 +101,7 @@ class CateringScreen extends ConsumerWidget {
     );
   }
 }
+
 class CateringItemCard extends StatefulWidget {
   final CateringItem item;
   final TextEditingController sideRequestController;
@@ -130,7 +141,8 @@ class _CateringItemCardState extends State<CateringItemCard> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('\$${widget.item.pricePerPerson.toStringAsFixed(2)} per person'),
+                Text(
+                    '\$${widget.item.pricePerPerson.toStringAsFixed(2)} per person'),
                 DropdownButton<int>(
                   value: selectedPeopleCount,
                   items: const [

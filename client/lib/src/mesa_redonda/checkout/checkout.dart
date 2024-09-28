@@ -3,29 +3,37 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item_view.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/location/location_capture.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
 
   @override
-  _CheckoutScreenState createState() => _CheckoutScreenState();
+  CheckoutScreenState createState() => CheckoutScreenState();
 }
 
-class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
+// Using SingleTickerProviderStateMixin to handle vsync
+class CheckoutScreenState extends ConsumerState<CheckoutScreen>
     with SingleTickerProviderStateMixin {
   final TextEditingController _locationController = TextEditingController();
-  String? _location; // Human-readable address
-  String? _latitude; // Latitude for Google Maps
-  String? _longitude; // Longitude for Google Maps
+  String? _location;
+  String? _latitude;
+  String? _longitude;
+  final TextEditingController _cateringDateController = TextEditingController();
+  final TextEditingController _mealSubscriptionDateController =
+      TextEditingController();
+  final TextEditingController _cateringTimeController = TextEditingController();
+  final TextEditingController _mealSubscriptionTimeController =
+      TextEditingController();
+  DateTime? _selectedCateringDate;
+  DateTime? _selectedMealSubscriptionDate;
+  TimeOfDay? _selectedCateringTime;
+  TimeOfDay? _selectedMealSubscriptionTime;
+  bool _isAddressValid = true;
+  final int _deliveryFee = 200;
+  final double _taxRate = 0.067;
   late TabController _tabController;
   int _selectedPaymentMethod = 0;
-
-  bool _isAddressValid = true; // Flag to track address validation
-  final int _deliveryFee = 200; // Fixed delivery fee in RD
-  final double _taxRate = 0.067; // 6.7% tax rate
   DateTime? _deliveryStartTime;
   DateTime? _deliveryEndTime;
 
@@ -38,7 +46,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(
+        length: 3, vsync: this); // vsync is now provided correctly
     _setDeliveryTime();
   }
 
@@ -56,58 +65,49 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
     });
   }
 
-  // Method to show the bottom sheet and get the location and address
-  void _showLocationBottomSheet(BuildContext context) {
-    showModalBottomSheet(
+  // Printing selectTime function
+  Future<void> _selectTime(
+      BuildContext context, TextEditingController controller,
+      {required bool isCatering}) async {
+    final TimeOfDay? picked = await showTimePicker(
       context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        return LocationCaptureBottomSheet(
-          onLocationCaptured: (latitude, longitude, address) {
-            setState(() {
-              _location = address;
-              _latitude = latitude;
-              _longitude = longitude;
-              _locationController.text = address;
-              _isAddressValid = true; // Reset validation on valid input
-            });
-          },
-        );
-      },
+      initialTime: const TimeOfDay(hour: 9, minute: 0),
     );
-  }
 
-  // Method to clear the location field
-  void _clearLocation() {
-    setState(() {
-      _location = null;
-      _latitude = null;
-      _longitude = null;
-      _locationController.clear();
-    });
-  }
-
-  // Helper function to format time in human-readable format
-  String _formatTime(DateTime dateTime) {
-    final format = DateFormat.jm(); // e.g., 6:45 PM
-    return format.format(dateTime);
-  }
-
-  // Validation to check if the address is provided
-  bool _validateFields() {
-    if (_location == null || _location!.isEmpty) {
+    if (picked != null && picked.hour >= 9 && picked.hour <= 21) {
       setState(() {
-        _isAddressValid = false;
+        if (isCatering) {
+          _selectedCateringTime = picked;
+          controller.text = picked.format(context);
+        } else {
+          _selectedMealSubscriptionTime = picked;
+          controller.text = picked.format(context);
+        }
       });
-      return false;
+      print(
+          'Selected time: ${picked.format(context)}'); // Print statement to display the selected time
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a time between 9 AM and 9 PM'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
-    return true;
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get the cart items from cartProvider
     final cartItems = ref.watch(cartProvider);
+
+    final dishes = cartItems
+        .where(
+            (item) => !item.isMealSubscription && item.foodType != 'Catering')
+        .toList();
+    final cateringItems =
+        cartItems.where((item) => item.foodType == 'Catering').toList();
+    final mealSubscriptions =
+        cartItems.where((item) => item.isMealSubscription).toList();
 
     return DefaultTabController(
       length: 3,
@@ -131,143 +131,93 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                         children: [
                           const SizedBox(height: 16.0),
 
-                          // Location Section with TextField and Edit Button
-                          _buildSectionTitle(context, 'Ubicacion'),
-                          const SizedBox(height: 8.0),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: _locationController,
-                                  readOnly: true,
-                                  onTap: () {
-                                    _showLocationBottomSheet(context);
-                                  },
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                          color:
-                                              ColorsPaletteRedonda.deepBrown),
-                                  decoration: InputDecoration(
-                                    hintText: 'Obten tu Ubicacion actual',
-                                    hintStyle: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                            color:
-                                                ColorsPaletteRedonda.deepBrown),
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      borderSide: BorderSide(
-                                        color: _isAddressValid
-                                            ? Colors.grey.shade300
-                                            : Colors.red, // Red border if invalid
-                                        width: 1.0,
-                                      ),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      borderSide: BorderSide(
-                                        color: _isAddressValid
-                                            ? ColorsPaletteRedonda.primary
-                                            : const Color.fromARGB(255, 244, 45, 31), // Red border if invalid
-                                        width: 2.0,
-                                      ),
-                                    ),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      vertical: 15.0,
-                                      horizontal: 10.0,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8.0),
-                              if (_location != null)
-                                TextButton(
-                                  onPressed: _clearLocation,
-                                  child: const Text('Editar'),
-                                ),
-                            ],
-                          ),
-                          if (!_isAddressValid) // Show error message if address is invalid
-                            const Padding(
-                              padding: EdgeInsets.only(top: 8.0),
-                              child: Text(
-                                'Por favor, ingrese una dirección válida',
-                                style: TextStyle(
-                                  color: Colors.red,
-                                  fontSize: 12.0,
-                                ),
-                              ),
-                            ),
-                          const SizedBox(height: 16.0),
-
-                          // Payment Section with TabBar
-                          _buildSectionTitle(context, 'Elige Método de Pago'),
-                          const SizedBox(height: 8.0),
-                          TabBar(
-                            controller: _tabController,
-                            
-                            // dividerColor: ColorsPaletteRedonda.primary,
-                            indicatorColor: ColorsPaletteRedonda.primary,
-                            onTap: (index) {
-                              setState(() {
-                                _selectedPaymentMethod = index;
-                              });
-                            },
-                            tabs: [
-                              _buildTab(context, 'Transferencias', 0),
-                              _buildTab(context, 'Cardnet WhatsApp', 1),
-                              _buildTab(context, 'Cardnet', 2),
-                            ],
-                          ),
-                          const SizedBox(height: 16.0),
-
-                          // Delivery Time Section
-                          _buildSectionTitle(
-                              context, 'Entrega estimada en 40 - 60 minutos'),
-                          const SizedBox(height: 8.0),
-                          Text(
-                            'Llegada estimada entre ${_formatTime(_deliveryStartTime!)} y ${_formatTime(_deliveryEndTime!)}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyLarge
-                                ?.copyWith(
-                                    color: ColorsPaletteRedonda.deepBrown),
-                          ),
-                          const SizedBox(height: 16.0),
-
-                          // Cart Items
-                          for (var cartItem in cartItems)
+                          // Regular Dishes Section
+                          if (dishes.isNotEmpty)
+                            _buildSectionTitle(context,
+                                'Regular Dishes (Estimated 40-60 mins)'),
+                          for (var item in dishes)
                             CartItemView(
-                              img: cartItem.img,
-                              title: cartItem.title,
-                              description: cartItem.description,
-                              pricing: cartItem.pricing,
-                              ingredients: cartItem.ingredients,
-                              isSpicy: cartItem.isSpicy,
-                              foodType: cartItem.foodType,
-                              quantity: cartItem.quantity,
-                              onRemove: () {
-                                ref
-                                    .read(cartProvider.notifier)
-                                    .decrementQuantity(cartItem.title);
-                              },
-                              onAdd: () {
-                                ref
-                                    .read(cartProvider.notifier)
-                                    .incrementQuantity(cartItem.title);
-                              },
+                              img: item.img,
+                              title: item.title,
+                              description: item.description,
+                              pricing: item.pricing,
+                              offertPricing: item.offertPricing,
+                              ingredients: item.ingredients,
+                              isSpicy: item.isSpicy,
+                              foodType: item.foodType,
+                              quantity: item.quantity,
+                              onRemove: () => ref
+                                  .read(cartProvider.notifier)
+                                  .decrementQuantity(item.title),
+                              onAdd: () => ref
+                                  .read(cartProvider.notifier)
+                                  .incrementQuantity(item.title),
+                              peopleCount: 0,
+                              sideRequest: '',
                             ),
-                          const SizedBox(height: 16.0),
+
+                          // Catering Section with Date/Time Picker
+                          if (cateringItems.isNotEmpty) ...[
+                            _buildSectionTitle(context, 'Catering Orders'),
+                            _buildDateTimePicker(
+                                context,
+                                _cateringDateController,
+                                _cateringTimeController,
+                                isCatering: true),
+                            for (var item in cateringItems)
+                              CartItemView(
+                                img: item.img,
+                                title: item.title,
+                                description: item.description,
+                                pricing: item.pricing,
+                                offertPricing: item.offertPricing,
+                                ingredients: item.ingredients,
+                                isSpicy: item.isSpicy,
+                                foodType: item.foodType,
+                                quantity: item.quantity,
+                                onRemove: () => ref
+                                    .read(cartProvider.notifier)
+                                    .decrementQuantity(item.title),
+                                onAdd: () => ref
+                                    .read(cartProvider.notifier)
+                                    .incrementQuantity(item.title),
+                                peopleCount: item.peopleCount,
+                                sideRequest: item.sideRequest,
+                              ),
+                          ],
+
+                          // Meal Subscription Section with Date/Time Picker
+                          if (mealSubscriptions.isNotEmpty) ...[
+                            _buildSectionTitle(context, 'Meal Subscriptions'),
+                            _buildDateTimePicker(
+                                context,
+                                _mealSubscriptionDateController,
+                                _mealSubscriptionTimeController,
+                                isCatering: false),
+                            for (var item in mealSubscriptions)
+                              CartItemView(
+                                img: item.img,
+                                title: item.title,
+                                description: item.description,
+                                pricing: item.pricing,
+                                offertPricing: item.offertPricing,
+                                ingredients: item.ingredients,
+                                isSpicy: item.isSpicy,
+                                foodType: item.foodType,
+                                quantity: item.quantity,
+                                onRemove: () => ref
+                                    .read(cartProvider.notifier)
+                                    .decrementQuantity(item.title),
+                                onAdd: () => ref
+                                    .read(cartProvider.notifier)
+                                    .incrementQuantity(item.title),
+                                peopleCount: 0,
+                                sideRequest: '',
+                              ),
+                          ],
 
                           const Spacer(),
-
-                          // Order Summary Card
-                          _buildOrderSummary(context, cartItems),
+                          _buildOrderSummary(cartItems),
                         ],
                       ),
                     ),
@@ -281,44 +231,186 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
     );
   }
 
-  // Section Title Widget
-  Widget _buildSectionTitle(BuildContext context, String title) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+  Future<void> _selectDate(
+      BuildContext context, TextEditingController controller,
+      {required bool isCatering}) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(), // Default to current date
+      firstDate: DateTime.now(), // Only allow future dates
+      lastDate: DateTime.now()
+          .add(const Duration(days: 30)), // Allow up to 30 days in the future
     );
+
+    if (picked != null) {
+      setState(() {
+        if (isCatering) {
+          _selectedCateringDate = picked;
+          controller.text = DateFormat('yyyy-MM-dd')
+              .format(picked); // Format the selected date
+        } else {
+          _selectedMealSubscriptionDate = picked;
+          controller.text = DateFormat('yyyy-MM-dd')
+              .format(picked); // Format the selected date
+        }
+      });
+      print(
+          'Selected date: ${DateFormat('yyyy-MM-dd').format(picked)}'); // Print selected date
+    } else {
+      print('Date selection was canceled.');
+    }
   }
 
-  // Helper to build each Tab
-  Widget _buildTab(BuildContext context, String label, int index) {
-    return Tab(
-      child: Text(
-        label,
-        style: TextStyle(
-          color: _selectedPaymentMethod == index
-              ? ColorsPaletteRedonda.primary
-              : ColorsPaletteRedonda.orange,
-          fontSize: 12,
-        ),
+  Future<void> _selectDateTime(
+      BuildContext context, TextEditingController controller,
+      {required bool isCatering}) async {
+    // First, select the date
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(), // Default to current date
+      firstDate: DateTime.now(), // Only allow future dates
+      lastDate: DateTime.now()
+          .add(const Duration(days: 30)), // Allow up to 30 days in the future
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Theme.of(context)
+                  .colorScheme
+                  .primary, // Use primary color for header
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context)
+                    .colorScheme
+                    .primary, // Use primary color for text buttons
+              ),
+            ),
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
+    );
+
+    // If the date is not picked, cancel the process
+    if (pickedDate == null) {
+      print('Date selection was canceled.');
+      return;
+    }
+
+    // Then, select the time after the date is picked
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: const TimeOfDay(hour: 9, minute: 0), // Default time (9 AM)
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Theme.of(context)
+                  .colorScheme
+                  .primary, // Use primary color for header
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context)
+                    .colorScheme
+                    .primary, // Use primary color for text buttons
+              ),
+            ),
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
+    );
+
+    if (pickedTime == null) {
+      print('Time selection was canceled.');
+      return;
+    }
+
+    // Combine the selected date and time into a single DateTime object
+    final DateTime selectedDateTime = DateTime(
+      pickedDate.year,
+      pickedDate.month,
+      pickedDate.day,
+      pickedTime.hour,
+      pickedTime.minute,
+    );
+
+    // Update the state and controller with the combined date and time
+    setState(() {
+      final formattedDateTime = DateFormat('yyyy-MM-dd – HH:mm')
+          .format(selectedDateTime); // Combine date and time in desired format
+      controller.text = formattedDateTime;
+      print(
+          'Selected date and time: $formattedDateTime'); // Print the selected date and time
+      if (isCatering) {
+        _selectedCateringDate = selectedDateTime;
+      } else {
+        _selectedMealSubscriptionDate = selectedDateTime;
+      }
+    });
+  }
+
+  Widget _buildDateTimePicker(
+      BuildContext context,
+      TextEditingController dateTimeController,
+      TextEditingController mealSubscriptionTimeController,
+      {required bool isCatering}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            isCatering
+                ? 'Select Catering Delivery Date & Time'
+                : 'Select Meal Subscription Date & Time',
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8.0),
+          TextField(
+            controller: dateTimeController,
+            readOnly: true,
+            onTap: () => _selectDateTime(context, dateTimeController,
+                isCatering: isCatering),
+            decoration: InputDecoration(
+              hintText: isCatering
+                  ? 'Select Catering Date & Time'
+                  : 'Select Subscription Date & Time',
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  // Order Summary Widget
-  Widget _buildOrderSummary(BuildContext context, List<CartItem> cartItems) {
-    final int totalItems = cartItems.fold<int>(
-      0,
-      (sum, item) => sum + item.quantity,
+  Widget _buildSectionTitle(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Text(
+        title,
+        style: Theme.of(context)
+            .textTheme
+            .titleLarge
+            ?.copyWith(fontWeight: FontWeight.bold),
+      ),
     );
+  }
+
+  Widget _buildOrderSummary(List<CartItem> cartItems) {
+    final int totalItems =
+        cartItems.fold<int>(0, (sum, item) => sum + item.quantity);
     final double totalPrice = cartItems.fold<double>(
-      0.0,
-      (sum, item) =>
-          sum +
-          ((double.tryParse(item.pricing) ?? 0.0) * item.quantity),
-    );
-    final double tax = totalPrice * _taxRate; // Calculate 6.7% tax
+        0.0,
+        (sum, item) =>
+            sum + ((double.tryParse(item.pricing) ?? 0.0) * item.quantity));
+    final double tax = totalPrice * _taxRate;
     final double orderTotal = totalPrice + _deliveryFee + tax;
 
     return Card(
@@ -346,42 +438,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
                 context, 'Order total', 'RD \$${orderTotal.toStringAsFixed(2)}',
                 isBold: true),
             const SizedBox(height: 16.0),
-
-            // Place Order Button
             ElevatedButton(
-              onPressed: () async {
-                if (_validateFields()) {
-                  setState(() {
-                    _setDeliveryTime(); // Update the delivery time
-                  });
-
-                  const String phoneNumber = '+18493590832';
-                  final String orderDetails = _generateOrderDetails(cartItems);
-                  final String whatsappUrlMobile =
-                      'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
-                  final String whatsappUrlWeb =
-                      'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
-                  if (await canLaunchUrl(Uri.parse(whatsappUrlMobile))) {
-                    await launchUrl(Uri.parse(whatsappUrlMobile));
-                  } else if (await canLaunchUrl(Uri.parse(whatsappUrlWeb))) {
-                    await launchUrl(Uri.parse(whatsappUrlWeb));
-                  } else {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Could not open WhatsApp')),
-                      );
-                    }
-                  }
-                } else {
-                  // Highlight missing fields, if any
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please fill in the required fields.'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
+              onPressed: () {
+                // Handle checkout button logic
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorsPaletteRedonda.primary,
@@ -389,9 +448,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
               ),
               child: Text(
                 'Completar',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
-                    ),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(color: Colors.white),
               ),
             ),
           ],
@@ -400,7 +460,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
     );
   }
 
-  // Order Summary Row Widget
   Widget _buildOrderSummaryRow(BuildContext context, String label, String value,
       {bool isBold = false}) {
     return Padding(
@@ -424,39 +483,5 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen>
         ],
       ),
     );
-  }
-
-  // Helper function to generate order details for WhatsApp
-  String _generateOrderDetails(List<CartItem> cartItems) {
-    final StringBuffer itemsBuffer = StringBuffer();
-    double total = 0.0;
-
-    for (var item in cartItems) {
-      final String title = item.title;
-      final int quantity = item.quantity;
-      final double price = double.parse(item.pricing);
-
-      total += price * quantity;
-      itemsBuffer.writeln('$quantity x $title @ RD \$$price each');
-    }
-
-    final double tax = total * _taxRate;
-    total += tax + _deliveryFee;
-
-    final String location = _location != null ? _location! : 'Unknown Address';
-    final String paymentMethod = _paymentMethods[_selectedPaymentMethod];
-
-    return '''
-      Detalles de la Orden:
-      Articulos:
-      $itemsBuffer
-      Envio: RD \$$_deliveryFee
-      Impuestos: RD \$${tax.toStringAsFixed(2)}
-      Total: RD \$${total.toStringAsFixed(2)}
-      Metodo de Pago: $paymentMethod
-      Estimated Delivery: ${_formatTime(_deliveryStartTime!)} - ${_formatTime(_deliveryEndTime!)}
-      Direccion: $location
-      Google Maps Location: ${_latitude ?? 'N/A'}, ${_longitude ?? 'N/A'}
-      ''';
   }
 }
