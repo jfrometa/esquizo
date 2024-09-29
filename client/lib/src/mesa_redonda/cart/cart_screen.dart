@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
@@ -104,10 +105,22 @@ class CartScreen extends ConsumerWidget {
                 padding: const EdgeInsets.all(16.0),
                 child: ElevatedButton(
                   onPressed: () {
-                    // Navigate to the checkout screen
-                    GoRouter.of(context).pushNamed(
-                      AppRoute.checkout.name,
-                    );
+                    // Check if the cart is empty
+                    if (cartItems.isEmpty) {
+                      // Show a Snackbar if the cart is empty
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                              'Debe agregar artículos al carrito antes de realizar el pedido.'),
+                          duration: Duration(seconds: 3), // Snackbar duration
+                        ),
+                      );
+                    } else {
+                      // Navigate to the checkout screen if cart has items
+                      GoRouter.of(context).pushNamed(
+                        AppRoute.checkout.name,
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: ColorsPaletteRedonda.primary,
@@ -122,7 +135,7 @@ class CartScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-              ),
+              )
             ],
           );
         },
@@ -143,7 +156,8 @@ class CartScreen extends ConsumerWidget {
                 ),
           ),
           Text(
-            '\$${totalPrice.toStringAsFixed(2)}',
+            NumberFormat.currency(symbol: '\$', decimalDigits: 2)
+                .format(totalPrice),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: ColorsPaletteRedonda.primary,
                 ),

@@ -648,9 +648,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
             onTap: () => _selectDateTime(context, dateController,
                 isCatering: isCatering),
             decoration: InputDecoration(
-              hintText: isCatering
-                  ? 'Select Catering Date & Time'
-                  : 'Select Subscription Date & Time',
+              hintText:
+                  isCatering ? '2024-11-23 - 13:00' : '2024-11-23 - 13:00',
               filled: true,
               fillColor:
                   ColorsPaletteRedonda.white, // Gray background when filled

@@ -59,6 +59,7 @@ enum AppRoute {
   category,
   details,
   addToOrder,
+  addDishToOrder,
   cart,
   homecart,
   homecheckout,
@@ -262,14 +263,28 @@ GoRouter goRouter(GoRouterRef ref) {
                         ),
                       ]),
                   GoRoute(
-                    path: 'detalles',
-                    name: AppRoute.details.name,
-                    pageBuilder: (context, state) {
-                      return const MaterialPage(
-                        child: DetailsScreen(),
-                      );
-                    },
-                  ),
+                      path: 'platos',
+                      name: AppRoute.details.name,
+                      pageBuilder: (context, state) {
+                        return const MaterialPage(
+                          child: DetailsScreen(),
+                        );
+                      },
+                      routes: [
+                        GoRoute(
+                          path: 'detalle/:dishId', // Changed id to itemId
+                          name: AppRoute.addDishToOrder.name,
+                          pageBuilder: (context, state) {
+                            final itemId = state.pathParameters['dishId']!;
+                            return MaterialPage(
+                              // fullscreenDialog: true,
+                              child: AddToOrderScreen(
+                                index: int.parse(itemId),
+                              ),
+                            );
+                          },
+                        ),
+                      ]),
                 ],
               ),
             ],

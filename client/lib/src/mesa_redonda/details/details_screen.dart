@@ -1,117 +1,174 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/components/cards/iteam_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/constants.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/demoData.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/ordering_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
-class DetailsScreen extends StatelessWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
+
+class DetailsScreen extends ConsumerStatefulWidget {
   const DetailsScreen({super.key});
 
   @override
+  ConsumerState<DetailsScreen> createState() => _DetailsScreenState();
+}
+
+class _DetailsScreenState extends ConsumerState<DetailsScreen> {
+  String selectedFoodType = 'All'; // Default filter to show all dishes
+
+  @override
   Widget build(BuildContext context) {
-    // final detailItemId = context.extra as String;
+    final dishes = ref.watch(dishProvider);
+    final filteredDishes = selectedFoodType == 'All'
+        ? dishes
+        : dishes.where((dish) => dish['foodType'] == selectedFoodType).toList();
+
     return Scaffold(
       appBar: AppBar(
+        title: const Text('Menu'),
         forceMaterialTransparency: true,
-        actions: const [],
+        // actions: [
+        //   Padding(
+        //     padding: const EdgeInsets.only(right: 12.0),
+        //     child: DropdownButton<String>(
+        //       value: selectedFoodType,
+        //       dropdownColor: ColorsPaletteRedonda.white,
+        //       underline: Container(
+        //         height: 0, // Removes the underline
+        //         color: Colors.transparent,
+        //       ),
+        //       items: <String>['All', 'Meat', 'Vegetarian'].map((String value) {
+        //         return DropdownMenuItem<String>(
+        //           value: value,
+        //           child: Text(
+        //             value,
+        //             style: const TextStyle(
+        //               fontSize: 16.0,
+        //               color: ColorsPaletteRedonda.primary,
+        //             ),
+        //           ),
+        //         );
+        //       }).toList(),
+        //       onChanged: (String? newValue) {
+        //         setState(() {
+        //           selectedFoodType = newValue ?? 'All';
+        //         });
+        //       },
+        //     ),
+        //   ),
+        // ],
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: restaurantMenu.keys.map((restaurantName) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Decorated restaurant name
-                  Container(
-                    margin: const EdgeInsets.symmetric(
-                      vertical: defaultPadding,
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: defaultPadding,
-                      vertical: defaultPadding / 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.restaurant,
-                          color: Colors.pink[200],
+      body: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: ListView.builder(
+          itemCount: filteredDishes.length,
+          itemBuilder: (context, index) {
+            final dish = filteredDishes[index];
+            return GestureDetector(
+              onTap: () {
+                // Navigate to the details screen
+                context.goNamed(
+                  AppRoute.addDishToOrder.name,
+                  pathParameters: {"dishId": index.toString()},
+                );
+              },
+              child: Card(
+                margin: const EdgeInsets.symmetric(vertical: 8.0),
+                elevation: 3.0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Dish Image
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12.0),
+                        child: Image.asset(
+                          dish['img'],
+                          width: double.infinity,
+                          height: 150.0,
+                          fit: BoxFit.cover,
                         ),
-                        const SizedBox(width: 18.0),
-                        Expanded(
-                          child: Text(
-                            restaurantName,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20.0,
-                                ),
+                      ),
+                      const SizedBox(height: 12),
+                      // Dish Title
+                      Text(
+                        dish['title'],
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: ColorsPaletteRedonda.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      // Description
+                      Text(
+                        dish['description'],
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black87,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 8),
+                      // Ingredients
+                      Text(
+                        'Ingredientes: ${dish['ingredients'].join(', ')}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.black54,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 12),
+                      // Price and Add to Cart Button
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Price
+                          Text(
+                            '\$${dish['pricing']}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: ColorsPaletteRedonda.primary,
+                            ),
                           ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.arrow_forward,
-                            color: Theme.of(context).primaryColor,
+                          // Add to Cart Button
+                          ElevatedButton(
+                            onPressed: () {
+                              // Add the dish directly to the cart
+                              ref.read(cartProvider.notifier).addToCart(
+                                    dish.cast<String, dynamic>(),
+                                    1,
+                                  );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 12.0, horizontal: 16.0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            child: const Text('Agregar al carrito'),
                           ),
-                          onPressed: () {
-                            // Handle navigation or any other logic when clicking the icon
-                          },
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ],
                   ),
-                  const SizedBox(
-                    height: 8.0,
-                  ),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: restaurantMenu[restaurantName]!.length,
-                    itemBuilder: (context, index) {
-                      final item = restaurantMenu[restaurantName]![index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: defaultPadding,
-                          vertical: defaultPadding / 2,
-                        ),
-                        child: ItemCard(
-                          title: item["name"] ?? "No Title",
-                          description: item["location"] ?? "No Location",
-                          image: item["image"] ?? "No Image",
-                          foodType: item["foodType"] ?? "No Food Type",
-                          price: 20, // Custom price handling here if needed
-                          priceRange:
-                              "\$ \$", // Custom price range handling here
-                          press: () {
-                            context.goNamed(
-                              AppRoute.detailScreen.name,
-                              pathParameters: {
-                                "detailItemId": index.toString(),
-                              },
-                            );
-                          }, // Add empty function to press
-                        ),
-                      );
-                    },
-                  ),
-                  // Divider(
-                  //   thickness: 1.5,
-                  //   color: Colors.grey.shade300,
-                  //   indent: defaultPadding,
-                  //   endIndent: defaultPadding,
-                  // ),
-                ],
-              );
-            }).toList(),
-          ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

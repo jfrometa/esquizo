@@ -10,6 +10,7 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_m
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/search_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/slide_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class Home extends ConsumerStatefulWidget {
   const Home({super.key});
@@ -61,7 +62,7 @@ class HomeState extends ConsumerState<Home> {
                           const SizedBox(height: 10.0),
                           buildCategoryList(context),
                           const SizedBox(height: 30.0),
-                          buildDishRow('Los Más Populares', context),
+                          buildDishRow(' Populares', context),
                           const SizedBox(height: 10.0),
                           buildDishList(context, _filteredDishes),
                           const SizedBox(height: 30.0),
@@ -91,15 +92,15 @@ class HomeState extends ConsumerState<Home> {
         children: <Widget>[
           Text(
             category,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
           ),
           TextButton(
-            child: Text(
+            child: const Text(
               "Ver todos",
               style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
+                color: ColorsPaletteRedonda.deepBrown1,
               ),
             ),
             onPressed: () {
@@ -179,15 +180,15 @@ class HomeState extends ConsumerState<Home> {
         children: <Widget>[
           Text(
             title,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
           ),
           TextButton(
-            child: Text(
+            child: const Text(
               "Ver todos",
               style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
+                color: ColorsPaletteRedonda.deepBrown1,
               ),
             ),
             onPressed: () {
