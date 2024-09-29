@@ -21,8 +21,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     {
       'image': 'assets/onboarding_1.svg',
       'title': 'Elige tu plato, plan de subscripcion o catering',
-      'body':
-          'Inicia la eligiendo el servicio que prefieres.'
+      'body': 'Inicia el servicio que prefieres.'
     },
     {
       'image': 'assets/onboarding_2.svg',
@@ -46,9 +45,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         forceMaterialTransparency: true,
         actions: [
           TextButton(
-             style: TextButton.styleFrom(
-            elevation: 3,
-          ),
+            style: TextButton.styleFrom(
+              elevation: 3,
+            ),
             onPressed: () {
               _completeOnboarding(ref);
             },
@@ -143,11 +142,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           SvgPicture.asset(
-          image, // Path to your SVG file
-          width: 300,  // Set width and height as needed
-          height: 300,
-          semanticsLabel: 'Your SVG Image',
-        ),
+            image, // Path to your SVG file
+            width: 300, // Set width and height as needed
+            height: 300,
+            semanticsLabel: 'Your SVG Image',
+          ),
           const SizedBox(height: 20),
           Text(
             title,
@@ -161,7 +160,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   color: const Color.fromARGB(255, 202, 91, 17),
                 ),
             textAlign: TextAlign.center,
-            
           ),
         ],
       ),

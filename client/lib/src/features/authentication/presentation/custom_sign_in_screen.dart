@@ -1,10 +1,8 @@
-import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/constants/app_sizes.dart';
-import 'package:starter_architecture_flutter_firebase/src/features/authentication/data/firebase_auth_repository.dart';
-
-import 'auth_providers.dart';
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
+import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/auth_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/sign_in_anonimously_footer.dart';
 
 class CustomSignInScreen extends ConsumerWidget {
   const CustomSignInScreen({super.key});
@@ -12,51 +10,22 @@ class CustomSignInScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authProviders = ref.watch(authProvidersProvider);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sign in'),
-        forceMaterialTransparency: true
+        title: const Text('Sign In'),
+        forceMaterialTransparency: true,
       ),
       body: SignInScreen(
         providers: authProviders,
+        actions: [
+          AuthStateChangeAction<SignedIn>((context, state) {
+            // Navigate to the profile screen after successful sign-in
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          }),
+        ],
         footerBuilder: (context, action) => const SignInAnonymouslyFooter(),
       ),
-    );
-  }
-}
-
-class SignInAnonymouslyFooter extends ConsumerWidget {
-  const SignInAnonymouslyFooter({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      children: [
-        gapH8,
-        const Row(
-          children: [
-            Expanded(child: Divider()),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: Sizes.p8),
-              child: Text('or'),
-            ),
-            Expanded(child: Divider()),
-          ],
-        ),
-        TextButton(
-          style: TextButton.styleFrom(
-            elevation: 3,
-          ),
-          onPressed: () {
-            try {
-              ref.read(firebaseAuthProvider).signInAnonymously();
-            } catch (e) {
-              print("signInAnonymously did fail");
-            } finally {}
-          },
-          child: const Text('Sign in anonymously'),
-        ),
-      ],
     );
   }
 }
