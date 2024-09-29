@@ -145,7 +145,7 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
         ),
       );
 
-      if (existingPlan.remainingMeals == 0) {
+      if (existingPlan.remainingMeals > 0) {
         return; // Don't allow duplicates for meal subscriptions
       } else {
         state = [...state, existingPlan.copyWith(remainingMeals: totalMeals)];

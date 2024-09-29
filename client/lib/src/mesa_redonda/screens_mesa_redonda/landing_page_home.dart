@@ -159,45 +159,58 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
 
   // Mobile Perks Section
   Widget buildPerksSectionMobile(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          '¿Por qué Elegirnos?',
-          style: Theme.of(context).textTheme.headlineLarge,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 20),
-        SizedBox(
-          width: 300,
-          height: 280,
-          child: ScrollConfiguration(
-            behavior: CustomScrollBehavior(),
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                buildPerkCard(
-                  context,
-                  'Ingredientes Frescos',
-                  'Utilizamos solo ingredientes orgánicos y frescos para garantizar el mejor sabor y nutrición.',
-                  Icons.eco,
-                ),
-                buildPerkCard(
-                  context,
-                  'Presentación Exquisita',
-                  'Nuestros platos no solo saben bien, sino que también se ven increíbles.',
-                  Icons.palette,
-                ),
-                buildPerkCard(
-                  context,
-                  'Servicio Personalizado',
-                  'Planes de catering y almuerzo adaptados a tus necesidades.',
-                  Icons.person,
-                ),
-              ],
+    final perks = [
+      {
+        'title': 'Ingredientes Frescos',
+        'description':
+            'Utilizamos solo ingredientes orgánicos y frescos para garantizar el mejor sabor y nutrición.',
+        'icon': Icons.eco,
+      },
+      {
+        'title': 'Presentación Exquisita',
+        'description':
+            'Nuestros platos no solo saben bien, sino que también se ven increíbles.',
+        'icon': Icons.palette,
+      },
+      {
+        'title': 'Servicio Personalizado',
+        'description':
+            'Planes de catering y almuerzo adaptados a tus necesidades.',
+        'icon': Icons.person,
+      },
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 30),
+      child: Column(
+        children: [
+          Text(
+            '¿Por qué Elegirnos?',
+            style: Theme.of(context).textTheme.headlineLarge,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            height: 240,
+            child: ScrollConfiguration(
+              behavior: CustomScrollBehavior(),
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.zero,
+                itemCount: perks.length,
+                itemBuilder: (context, index) {
+                  final perk = perks[index];
+                  final title = perk['title']! as String;
+                  final desc = perk['description']! as String;
+                  final icon = perk['icon']! as IconData;
+
+                  return buildPerkCard(context, title, desc, icon);
+                },
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
