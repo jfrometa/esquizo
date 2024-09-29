@@ -1,39 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 final mealPlansProvider = Provider<List<MealPlan>>((ref) {
   return [
     MealPlan(
-      title: "Basic",
-      price: "\$9.99 / month",
+      title: "Básico",
+      price: "\$9.99 / mes",
       features: [
-        "1 user",
-        "2 meals per day",
-        "Simple recipes",
-        "Email support"
+        "1 usuario",
+        "8 comidas", // Updated meal count
+        "Recetas simples",
+        "Soporte por correo",
       ],
     ),
     MealPlan(
-      title: "Standard",
-      price: "\$19.99 / month",
+      title: "Estándar",
+      price: "\$19.99 / mes",
       features: [
-        "2 users",
-        "3 meals per day",
-        "Advanced recipes",
-        "Priority support"
+        "2 usuarios",
+        "10 comidas", // Updated meal count
+        "Recetas avanzadas",
+        "Soporte prioritario",
       ],
-      isBestValue: true,
     ),
     MealPlan(
       title: "Premium",
-      price: "\$29.99 / month",
+      price: "\$29.99 / mes",
       features: [
-        "5 users",
-        "5 meals per day",
-        "Exclusive recipes",
-        "Personal coaching"
+        "5 usuarios",
+        "13 comidas", // Updated meal count
+        "Recetas exclusivas",
+        "Coaching personal",
       ],
+      isBestValue: true, // Marked as best value
     ),
   ];
 });
@@ -65,7 +64,7 @@ class MealPlanCard extends StatelessWidget {
       constraints: const BoxConstraints(
         minWidth: 300,
         maxWidth: 450,
-        maxHeight: 550, // Maximum height for the card
+        maxHeight: 550,
       ),
       child: Card(
         elevation: 6,
@@ -91,7 +90,7 @@ class MealPlanCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Text(
-                    'Best Value',
+                    'Mejor Valor',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -114,7 +113,7 @@ class MealPlanCard extends StatelessWidget {
                       style: theme.textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
-                        fontSize: 28, // Increased font size for title
+                        fontSize: 28,
                       ),
                     ),
                   ),
@@ -150,7 +149,7 @@ class MealPlanCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    'Features:',
+                    'Características:',
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: Colors.black87,
@@ -184,13 +183,12 @@ class MealPlanCard extends StatelessWidget {
                 }).toList(),
               ),
               const Spacer(),
-              // Delivery Info
               Row(
                 children: [
                   const Icon(Icons.local_shipping, color: Colors.redAccent),
                   const SizedBox(width: 10),
                   Text(
-                    'Delivery expenses will be added',
+                    'Gastos de envío se aplicarán',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: Colors.redAccent,
                     ),
@@ -199,23 +197,23 @@ class MealPlanCard extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               SizedBox(
-                width: double.infinity,
+                width: 150,
+                height: 48,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Handle button actions
+                    // Handle add to cart
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: mealPlan.isBestValue
                         ? Colors.green.shade700
                         : Colors.blueAccent,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                   ),
-                  child: Text(
-                    mealPlan.isBestValue ? 'Try for free' : 'Buy now',
-                    style: const TextStyle(
+                  child: const Text(
+                    'Agregar al carrito',
+                    style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -227,90 +225,6 @@ class MealPlanCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class MealPlansScreen extends ConsumerWidget {
-  const MealPlansScreen({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final mealPlans = ref.watch(mealPlansProvider);
-
-    return Scaffold(
-      appBar: AppBar(
-        forceMaterialTransparency: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            context.pop();
-          },
-        ),
-        title: const Text('Meal Plans'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_cart),
-            onPressed: () {
-              // Handle cart action
-            },
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 1200, // Set the max width for the grid or list
-              minWidth: 300, // Set a minimum width to prevent overflow issues
-            ),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                if (constraints.maxWidth > 600) {
-                  // Larger Screen Layout - GridView
-                  return _buildPlansGrid(context, mealPlans);
-                } else {
-                  // Smaller Screen Layout - ListView
-                  return _buildPlansList(context, mealPlans);
-                }
-              },
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPlansGrid(BuildContext context, List<MealPlan> mealPlans) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 450,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        childAspectRatio: 0.75,
-      ),
-      itemCount: mealPlans.length,
-      itemBuilder: (context, index) {
-        final mealPlan = mealPlans[index];
-        return MealPlanCard(mealPlan: mealPlan);
-      },
-    );
-  }
-
-  Widget _buildPlansList(BuildContext context, List<MealPlan> mealPlans) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: mealPlans.length,
-      itemBuilder: (context, index) {
-        final mealPlan = mealPlans[index];
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-          child: MealPlanCard(mealPlan: mealPlan),
-        );
-      },
     );
   }
 }

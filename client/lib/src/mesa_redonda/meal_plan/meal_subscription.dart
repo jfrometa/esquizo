@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/plans/plans.dart';
+import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 import '../cart/cart_item.dart';
 
@@ -21,16 +22,16 @@ class MealPlansScreen extends ConsumerWidget {
             context.pop();
           },
         ),
-        title: const Text('Meal Plans'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_cart),
-            onPressed: () {
-              // Navigate to cart screen (implement separately)
-              context.goNamed('homecart');  // Example: Navigate to the cart page
-            },
-          ),
-        ],
+        title: const Text('Subscripciones'),
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.shopping_cart),
+        //     onPressed: () {
+        //       // Navigate to cart screen (implement separately)
+        //       // context.goNamed('carrito'); // Example: Navigate to the cart page
+        //     },
+        //   ),
+        // ],
       ),
       body: SingleChildScrollView(
         child: Center(
@@ -89,59 +90,156 @@ class MealPlansScreen extends ConsumerWidget {
     );
   }
 }
+
+class MealPlanCard extends ConsumerWidget {
+  final MealPlan mealPlan;
+
+  const MealPlanCard({super.key, required this.mealPlan});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cart = ref.watch(cartProvider);
+    final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Meal Plans')),
-      body: ListView(
-        children: [
-          ListTile(
-            title: const Text('8 Meal Plan'),
-            subtitle: const Text('8 meals over 40 days'),
-            trailing: ElevatedButton(
-              onPressed: () {
-                final dish = {
-                  'img': 'assets/meal_plan_8.jpeg',
-                  'title': '8 Meal Plan',
-                  'description': '8 meals over 40 days',
-                  'pricing': '3500',
-                  'offertPricing': null,
-                  'ingredients': [],
-                  'isSpicy': false,
-                  'foodType': 'Subscription',
-                };
-
-                // Add meal plan to the cart
-                ref.read(cartProvider.notifier).addToCart(dish, 1, isMealSubscription: true, totalMeals: 8);
-              },
-              child: const Text('Subscribe'),
-            ),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        minWidth: 250,
+        maxWidth: 300,
+        maxHeight: 300,
+      ),
+      child: Card(
+        elevation: 3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          side: BorderSide(
+            color: mealPlan.isBestValue
+                ? ColorsPaletteRedonda.primary
+                : ColorsPaletteRedonda.softBrown,
+            width: mealPlan.isBestValue ? 2 : 1.0,
           ),
-          ListTile(
-            title: const Text('10 Meal Plan'),
-            subtitle: const Text('10 meals over 40 days'),
-            trailing: ElevatedButton(
-              onPressed: () {
-                final dish = {
-                  'img': 'assets/meal_plan_10.jpeg',
-                  'title': '10 Meal Plan',
-                  'description': '10 meals over 40 days',
-                  'pricing': '4500',
-                  'offertPricing': null,
-                  'ingredients': [],
-                  'isSpicy': false,
-                  'foodType': 'Subscription',
-                };
+        ),
+        color: mealPlan.isBestValue
+            ? ColorsPaletteRedonda.softBrown
+            : ColorsPaletteRedonda.white,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (mealPlan.isBestValue)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: ColorsPaletteRedonda.primary,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: const Text(
+                    'Mejor Valor',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 8),
+              Text(
+                mealPlan.title,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: ColorsPaletteRedonda.primary,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                mealPlan.price,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: ColorsPaletteRedonda.primary,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Divider(height: 1, color: Colors.grey),
+              const SizedBox(height: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: mealPlan.features.map((feature) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.check_circle,
+                          color: ColorsPaletteRedonda.primary,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            feature,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: ColorsPaletteRedonda.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+              const Spacer(),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    ref.read(cartProvider.notifier).addToCart(
+                      {
+                        'img': '',
+                        'title': mealPlan.title,
+                        'description': 'Plan de comidas',
+                        'pricing': mealPlan.price,
+                        'offertPricing': null,
+                        'ingredients': [],
+                        'isSpicy': false,
+                        'foodType': 'Meal Plan'
+                      },
+                      1,
+                      isMealSubscription: true,
+                      totalMeals: mealPlan.features.contains('13 comidas')
+                          ? 13
+                          : mealPlan.features.contains('10 comidas')
+                              ? 10
+                              : 8,
+                    );
 
-                // Add meal plan to the cart
-                ref.read(cartProvider.notifier).addToCart(dish, 1, isMealSubscription: true, totalMeals: 10);
-              },
-              child: const Text('Subscribe'),
-            ),
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${mealPlan.title} añadido al carrito'),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ColorsPaletteRedonda.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  child: const Text(
+                    'Agregar al carrito',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
+}

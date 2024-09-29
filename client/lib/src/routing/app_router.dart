@@ -8,6 +8,7 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/checkout.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/demoData.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/details/details_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_subscription.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/plans/plans.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/categories.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/home.dart';
@@ -244,9 +245,8 @@ GoRouter goRouter(GoRouterRef ref) {
                           path: 'subscripciones',
                           name: AppRoute.mealPlans.name,
                           pageBuilder: (context, state) {
-                            return const MaterialPage(
-                              child:
-                                  MealPlansScreen(), // You must have this screen
+                            return MaterialPage(
+                              child: const MealPlansScreen(), // You must have this screen
                             );
                           },
                         ),

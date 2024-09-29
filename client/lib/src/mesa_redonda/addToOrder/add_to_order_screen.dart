@@ -234,6 +234,7 @@ class _AddToOrderScreenState extends ConsumerState<AddToOrderScreen> {
               ),
             ),
           ),
+        
         ],
       ),
     );

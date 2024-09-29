@@ -127,21 +127,21 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
         (cartItem) =>
             cartItem.title == item['title'] && cartItem.isMealSubscription,
         orElse: () => CartItem(
-          img: item['img'],
-          title: item['title'],
-          description: item['description'],
-          pricing: item['pricing'],
-          offertPricing: item['offertPricing'],
-          ingredients: List<String>.from(item['ingredients']),
-          isSpicy: item['isSpicy'],
-          foodType: item['foodType'],
+          img: item['img'] ?? '',
+          title: item['title'] ?? '',
+          description: item['description'] ?? '',
+          pricing: item['pricing'] ?? '',
+          offertPricing: item['offertPricing'] ?? '',
+          ingredients: List<String>.from(item['ingredients']) ?? [],
+          isSpicy: item['isSpicy'] ?? false,
+          foodType: item['foodType'] ?? 'Subscripcion',
           quantity: 0,
           isOffer: item.containsKey('offertPricing') &&
               item['offertPricing'] != null,
           isMealSubscription: true,
           totalMeals: totalMeals,
           remainingMeals: totalMeals,
-          peopleCount: item['peopleCount'],
+          peopleCount: item['peopleCount'] ?? 1,
         ),
       );
 
