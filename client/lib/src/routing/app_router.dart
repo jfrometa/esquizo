@@ -8,6 +8,7 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/checkout.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/demoData.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/details/details_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_details.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_subscription.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/plans/plans.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/categories.dart';
@@ -66,6 +67,7 @@ enum AppRoute {
   homecheckout,
   checkout,
   detailScreen,
+  planDetails,
   home,
   mealPlan,
   mealPlans, // Added enum for Meal Plans
@@ -198,6 +200,16 @@ GoRouter goRouter(GoRouterRef ref) {
                         child: MealPlansScreen(), // You must have this screen
                       );
                     },
+                    routes: [
+                      GoRoute(
+                        name: AppRoute.planDetails.name,
+                        path: ':planId', // Include planId as a path parameter
+                        builder: (context, state) {
+                          final planId = state.pathParameters['planId']!;
+                          return PlanDetailsScreen(planId: planId);
+                        },
+                      ),
+                    ],
                   ),
                   // New Route for Catering
                   GoRoute(
@@ -245,8 +257,9 @@ GoRouter goRouter(GoRouterRef ref) {
                           path: 'subscripciones',
                           name: AppRoute.mealPlans.name,
                           pageBuilder: (context, state) {
-                            return MaterialPage(
-                              child: const MealPlansScreen(), // You must have this screen
+                            return const MaterialPage(
+                              child:
+                                  MealPlansScreen(), // You must have this screen
                             );
                           },
                         ),

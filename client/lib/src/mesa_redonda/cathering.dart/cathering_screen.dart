@@ -5,14 +5,20 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
-class CateringScreen extends ConsumerWidget {
-  const CateringScreen({super.key});
+class CateringScreen extends ConsumerStatefulWidget {
+  const CateringScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  _CateringScreenState createState() => _CateringScreenState();
+}
+
+class _CateringScreenState extends ConsumerState<CateringScreen> {
+  final TextEditingController sideRequestController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
     final cateringOptions = ref.watch(cateringProvider);
     final cartNotifier = ref.read(cartProvider.notifier);
-    final TextEditingController sideRequestController = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(
@@ -67,43 +73,51 @@ class CateringScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-            TextFormField(
-              controller: sideRequestController,
-              style: Theme.of(context).textTheme.labelLarge,
-              maxLines: 5,
-              decoration: InputDecoration(
-                labelText: 'Aditionales',
-                // labelStyle: Theme.of(context).textTheme,
-                hintText:
-                    'Arroz con fideos 20 personas, Pimientos rellenos 20 personas',
-                filled: true,
-                fillColor:
-                    ColorsPaletteRedonda.white, // Gray background when filled
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(
-                    color: ColorsPaletteRedonda
-                        .deepBrown1, // Red border when not selected
-                    width: 1.0,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(
-                    color: ColorsPaletteRedonda
-                        .primary, // Black border when focused
-                    width: 2.0,
-                  ),
-                ),
+            // Wrap the TextFormField in an ExpansionTile
+            ExpansionTile(
+              title: Text(
+                'Agregar Adicionales',
+                style: Theme.of(context).textTheme.titleMedium,
               ),
+              children: [
+                TextFormField(
+                  controller: sideRequestController,
+                  style: Theme.of(context).textTheme.labelLarge,
+                  maxLines: 10,
+                  decoration: InputDecoration(
+                    labelText: '',
+                    hintText:
+                        'Arroz con fideos 20 personas, Pimientos rellenos 20 personas',
+                    filled: true,
+                    fillColor: ColorsPaletteRedonda
+                        .white, // Gray background when filled
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: const BorderSide(
+                        color: ColorsPaletteRedonda
+                            .deepBrown1, // Border color when not selected
+                        width: 1.0,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: const BorderSide(
+                        color: ColorsPaletteRedonda
+                            .primary, // Border color when focused
+                        width: 2.0,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                context.pop();
-              },
-              child: const Text('Complete Order'),
-            ),
+            // ElevatedButton(
+            //   onPressed: () {
+            //     context.pop();
+            //   },
+            //   child: const Text('Completar Pedido'),
+            // ),
           ],
         ),
       ),
@@ -178,7 +192,7 @@ class CateringItemCardState extends State<CateringItemCard> {
                   children: [
                     // Price per person
                     Text(
-                        '\$${widget.item.pricePerPerson.toStringAsFixed(2)} per person'),
+                        '\$${widget.item.pricePerPerson.toStringAsFixed(2)} por persona'),
                     // Dropdown for selecting the number of people
                     DropdownButton<int>(
                       value: selectedPeopleCount,
@@ -188,19 +202,15 @@ class CateringItemCardState extends State<CateringItemCard> {
                         color: Colors.transparent,
                       ),
                       items: const [
+                        DropdownMenuItem(value: 10, child: Text('10 personas')),
+                        DropdownMenuItem(value: 50, child: Text('50 personas')),
                         DropdownMenuItem(
-                            value: 10, child: Text('10 people')),
-                        DropdownMenuItem(
-                            value: 50, child: Text('50 people')),
-                        DropdownMenuItem(
-                            value: 100, child: Text('100 people')),
+                            value: 100, child: Text('100 personas')),
                       ],
                       onChanged: (int? value) {
                         setState(() {
                           selectedPeopleCount = value ?? 10;
                         });
-
-                        // Ensure this is a separate statement
                         FocusScope.of(context).unfocus();
                       },
                     ),

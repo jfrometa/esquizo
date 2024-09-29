@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
-class SlideItem extends StatefulWidget {
+class SlideItem extends StatelessWidget {
   final String img;
   final String title;
   final String description;
@@ -12,13 +12,12 @@ class SlideItem extends StatefulWidget {
   final List<String> ingredients; // List of ingredients
   final bool isSpicy; // Indicates if the dish is spicy
   final String foodType; // Type of food: Vegan or Meat
-  final bool
-      isMealPlan; // Indicates if the dish is part of a meal plan, default is false
+  final bool isMealPlan; // Indicates if the dish is part of a meal plan
   final int index;
   final Widget? actionButton; // Custom action button (e.g., Add to Cart)
 
   const SlideItem({
-    super.key,
+    Key? key,
     required this.img,
     required this.title,
     required this.description,
@@ -27,23 +26,19 @@ class SlideItem extends StatefulWidget {
     required this.ingredients,
     required this.isSpicy,
     required this.foodType,
-    bool? isMealPlan,
+    this.isMealPlan = false,
     required this.index,
-    this.actionButton, // New parameter for the action button
-  }) : isMealPlan = isMealPlan ?? false; // Default to false if not provided
+    this.actionButton,
+  }) : super(key: key);
 
-  @override
-  SlideItemState createState() => SlideItemState();
-}
-
-class SlideItemState extends State<SlideItem> {
   @override
   Widget build(BuildContext context) {
-    double cardWidth = MediaQuery.of(context).size.width * 0.75; // Adjust width
+    double cardWidth = 300; // Fixed width for consistency
     double imageHeight = 175.0; // Fixed height
 
     return SizedBox(
       width: cardWidth,
+      height: 400, // Fixed height for the card
       child: Card(
         color: Colors.white,
         shape: RoundedRectangleBorder(
@@ -51,6 +46,7 @@ class SlideItemState extends State<SlideItem> {
         ),
         elevation: 4.0,
         child: Column(
+          mainAxisSize: MainAxisSize.max, // Fill the vertical space
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             // Image Section with Overlays
@@ -62,14 +58,14 @@ class SlideItemState extends State<SlideItem> {
                     top: Radius.circular(12.0),
                   ),
                   child: Image.asset(
-                    widget.img,
+                    img,
                     width: cardWidth,
                     height: imageHeight,
                     fit: BoxFit.cover,
                   ),
                 ),
                 // Spicy Indicator
-                if (widget.isSpicy)
+                if (isSpicy)
                   Positioned(
                     top: 10,
                     right: 10,
@@ -84,17 +80,17 @@ class SlideItemState extends State<SlideItem> {
                   top: 10,
                   left: 10,
                   child: _buildLabel(
-                    icon: widget.foodType.toLowerCase() == 'vegan'
+                    icon: foodType.toLowerCase() == 'vegan'
                         ? Icons.eco
                         : Icons.restaurant_menu,
-                    text: widget.foodType,
-                    color: widget.foodType.toLowerCase() == 'vegan'
+                    text: foodType,
+                    color: foodType.toLowerCase() == 'vegan'
                         ? Colors.green
                         : Colors.brown,
                   ),
                 ),
                 // Meal Plan Indicator
-                if (widget.isMealPlan)
+                if (isMealPlan)
                   Positioned(
                     bottom: 10,
                     left: 10,
@@ -111,6 +107,7 @@ class SlideItemState extends State<SlideItem> {
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Column(
+                  mainAxisSize: MainAxisSize.max, // Fill the available space
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Title and Rating
@@ -120,7 +117,7 @@ class SlideItemState extends State<SlideItem> {
                         // Dish Title
                         Expanded(
                           child: Text(
-                            widget.title,
+                            title,
                             style: Theme.of(context)
                                 .textTheme
                                 .titleLarge
@@ -129,20 +126,15 @@ class SlideItemState extends State<SlideItem> {
                                 ),
                           ),
                         ),
-                        // Rating (Placeholder for now, customize as needed)
-                        const Row(
-                          children: [
-                            Icon(Icons.star,
-                                color: Colors.orangeAccent, size: 16),
-                            SizedBox(width: 4.0),
-                          ],
-                        ),
+                        // Rating (Placeholder)
+                        const Icon(Icons.star,
+                            color: Colors.orangeAccent, size: 16),
                       ],
                     ),
                     const SizedBox(height: 8.0),
                     // Description
                     Text(
-                      widget.description,
+                      description,
                       style: Theme.of(context).textTheme.bodyMedium,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -150,46 +142,49 @@ class SlideItemState extends State<SlideItem> {
                     const SizedBox(height: 8.0),
                     // Ingredients
                     Text(
-                      'Ingredients: ${widget.ingredients.join(', ')}',
+                      'Ingredientes: ${ingredients.join(', ')}',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Colors.grey[600],
                           ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 12.0),
+                    // Spacer to push the content below to the bottom
+                    Expanded(child: Container()),
                     // Pricing and Action Button
-                    const Spacer(),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         // Pricing
                         _buildPricing(),
                         // Custom Action Button
-                        widget.actionButton ??
-                            SizedBox(
-                              width: 150,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  // Default behavior: Navigate to order screen
-                                  GoRouter.of(context).pushNamed(
-                                    AppRoute.addToOrder.name,
-                                    pathParameters: {
-                                      "itemId": widget.index.toString(),
-                                    },
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: ColorsPaletteRedonda.primary,
-                                  foregroundColor: ColorsPaletteRedonda.white,
-                                  minimumSize: const Size(double.infinity, 42),
+                        actionButton ??
+                            ElevatedButton(
+                              onPressed: () {
+                                // Default behavior: Navigate to order screen
+                                GoRouter.of(context).pushNamed(
+                                  AppRoute.addToOrder.name,
+                                  pathParameters: {
+                                    "itemId": index.toString(),
+                                  },
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: ColorsPaletteRedonda.primary,
+                                foregroundColor: ColorsPaletteRedonda.white,
+                                minimumSize: const Size(100, 42),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
                                 ),
-                                child: Text(
-                                  'Agregar',
-                                  style: TextStyle(
-                                    fontSize: Theme.of(context)
-                                        .textTheme
-                                        .titleSmall
-                                        ?.fontSize,
-                                  ),
+                              ),
+                              child: Text(
+                                'Agregar',
+                                style: TextStyle(
+                                  fontSize: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall
+                                      ?.fontSize,
                                 ),
                               ),
                             ),
@@ -206,8 +201,11 @@ class SlideItemState extends State<SlideItem> {
   }
 
   // Helper method to build labels (Spicy, Vegan/Meat, Meal Plan)
-  Widget _buildLabel(
-      {required IconData icon, required String text, required Color color}) {
+  Widget _buildLabel({
+    required IconData icon,
+    required String text,
+    required Color color,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       decoration: BoxDecoration(
@@ -233,11 +231,11 @@ class SlideItemState extends State<SlideItem> {
 
   // Helper method to build pricing section
   Widget _buildPricing() {
-    if (widget.offertPricing != null) {
+    if (offertPricing != null) {
       return Row(
         children: [
           Text(
-            '\$${widget.pricing}',
+            '\$$pricing',
             style: const TextStyle(
               color: Colors.grey,
               decoration: TextDecoration.lineThrough,
@@ -246,7 +244,7 @@ class SlideItemState extends State<SlideItem> {
           ),
           const SizedBox(width: 6.0),
           Text(
-            '\$${widget.offertPricing}',
+            '\$$offertPricing',
             style: const TextStyle(
               color: Colors.redAccent,
               fontWeight: FontWeight.bold,
@@ -257,7 +255,7 @@ class SlideItemState extends State<SlideItem> {
       );
     } else {
       return Text(
-        '\$${widget.pricing}',
+        '\$$pricing',
         style: const TextStyle(
           color: Colors.black,
           fontWeight: FontWeight.bold,

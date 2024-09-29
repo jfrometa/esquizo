@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/plans/plans.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 import '../cart/cart_item.dart';
@@ -91,153 +92,88 @@ class MealPlansScreen extends ConsumerWidget {
   }
 }
 
-class MealPlanCard extends ConsumerWidget {
+class MealPlanCard extends StatelessWidget {
   final MealPlan mealPlan;
 
   const MealPlanCard({super.key, required this.mealPlan});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-
-    return ConstrainedBox(
-      constraints: const BoxConstraints(
-        minWidth: 250,
-        maxWidth: 300,
-        maxHeight: 300,
-      ),
+  Widget build(BuildContext context) {
+    return Container(
+      width: 280,
+      margin: const EdgeInsets.symmetric(horizontal: 10),
       child: Card(
-        elevation: 3,
+        color: ColorsPaletteRedonda.softBrown,
+        elevation: 5,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0),
-          side: BorderSide(
-            color: mealPlan.isBestValue
-                ? ColorsPaletteRedonda.primary
-                : ColorsPaletteRedonda.softBrown,
-            width: mealPlan.isBestValue ? 2 : 1.0,
-          ),
+          borderRadius: BorderRadius.circular(12), // Rounded corners
         ),
-        color: mealPlan.isBestValue
-            ? ColorsPaletteRedonda.softBrown
-            : ColorsPaletteRedonda.white,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (mealPlan.isBestValue)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                  decoration: BoxDecoration(
-                    color: ColorsPaletteRedonda.primary,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: const Text(
-                    'Mejor Valor',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 8),
-              Text(
-                mealPlan.title,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: ColorsPaletteRedonda.primary,
-                ),
+        child: Column(
+          children: [
+            // Plan Image
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
               ),
-              const SizedBox(height: 6),
-              Text(
-                mealPlan.price,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: ColorsPaletteRedonda.primary,
-                  fontSize: 18,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Divider(height: 1, color: Colors.grey),
-              const SizedBox(height: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: mealPlan.features.map((feature) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2.0),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.check_circle,
-                          color: ColorsPaletteRedonda.primary,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            feature,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: ColorsPaletteRedonda.primary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
-              const Spacer(),
-              SizedBox(
+              child: Image.asset(
+                mealPlan.img,
+                height: 150,
                 width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    ref.read(cartProvider.notifier).addToCart(
-                      {
-                        'img': '',
-                        'title': mealPlan.title,
-                        'description': 'Plan de comidas',
-                        'pricing': mealPlan.price,
-                        'offertPricing': null,
-                        'ingredients': [],
-                        'isSpicy': false,
-                        'foodType': 'Meal Plan'
-                      },
-                      1,
-                      isMealSubscription: true,
-                      totalMeals: mealPlan.features.contains('13 comidas')
-                          ? 13
-                          : mealPlan.features.contains('10 comidas')
-                              ? 10
-                              : 8,
-                    );
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('${mealPlan.title} añadido al carrito'),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorsPaletteRedonda.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                  ),
-                  child: const Text(
-                    'Agregar al carrito',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
+                fit: BoxFit.cover,
               ),
-            ],
-          ),
+            ),
+            // Plan Information
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+              child: Column(
+                children: [
+                  Text(
+                    mealPlan.title,
+                    style: Theme.of(context).textTheme.titleLarge,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    mealPlan.description,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    mealPlan.price,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          color: ColorsPaletteRedonda.orange,
+                        ),
+                  ),
+                  const SizedBox(height: 15),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Navigate to the plan details screen
+                      GoRouter.of(context).goNamed(
+                        AppRoute.planDetails.name,
+                        pathParameters: {'planId': mealPlan.id},
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorsPaletteRedonda.primary,
+                      foregroundColor: ColorsPaletteRedonda.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                    ),
+                    child: Text(
+                      'Seleccionar Plan',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: ColorsPaletteRedonda.white,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
