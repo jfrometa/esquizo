@@ -39,6 +39,13 @@ class AuthRepository {
   }
 }
 
+
+
+// final authStateChangesProvider = StreamProvider<User?>((ref) {
+//   final firebaseAuth = ref.watch(firebaseAuthProvider);
+//   return firebaseAuth.authStateChanges();
+// });
+
 @Riverpod(keepAlive: true)
 FirebaseAuth firebaseAuth(FirebaseAuthRef ref) {
   return FirebaseAuth.instance;
