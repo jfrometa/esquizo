@@ -13,6 +13,7 @@ class AuthRepository {
   Future<void> signInAnonymously() async {
     try {
       await _auth.signInAnonymously();
+      FirebaseAuth.instance.setPersistence(Persistence.SESSION);
       print('Signed in anonymously as ${_auth.currentUser!.uid}');
     } on FirebaseAuthException catch (e) {
       print('Failed to sign in anonymously: ${e.code} - ${e.message}');
@@ -38,8 +39,6 @@ class AuthRepository {
     }
   }
 }
-
-
 
 // final authStateChangesProvider = StreamProvider<User?>((ref) {
 //   final firebaseAuth = ref.watch(firebaseAuthProvider);
