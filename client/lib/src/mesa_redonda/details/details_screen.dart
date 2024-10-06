@@ -20,47 +20,79 @@ class DetailsScreen extends ConsumerStatefulWidget {
 class _DetailsScreenState extends ConsumerState<DetailsScreen> {
   String selectedFoodType = 'All'; // Default filter to show all dishes
 
+// Stack(
+//           clipBehavior:
+//               Clip.none, // Ensures the badge is visible outside the icon bounds
+//           children: [
+//             Icon(
+//               icon,
+//             ), // Base cart icon
+//             if (totalQuantity > 0)
+//               Positioned(
+//                 top: -7, // Adjusts the vertical position of the badge
+//                 right: -9, // Adjusts the horizontal position of the badge
+//                 child: CircleAvatar(
+//                   radius: 8,
+//                   backgroundColor: Colors.red,
+//                   child: Text(
+//                     '$totalQuantity',
+//                     style: const TextStyle(
+//                       color: Colors.white,
+//                       fontSize: 12,
+//                     ),
+//                   ),
+//                 ),
+//               ),
+//           ],
+//         );
+
   @override
   Widget build(BuildContext context) {
     final dishes = ref.watch(dishProvider);
+    final cart = ref.watch(cartProvider);
     final filteredDishes = selectedFoodType == 'All'
         ? dishes
         : dishes.where((dish) => dish['foodType'] == selectedFoodType).toList();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Menu'),
+        title: const Text('Platos'),
         forceMaterialTransparency: true,
-        // actions: [
-        //   Padding(
-        //     padding: const EdgeInsets.only(right: 12.0),
-        //     child: DropdownButton<String>(
-        //       value: selectedFoodType,
-        //       dropdownColor: ColorsPaletteRedonda.white,
-        //       underline: Container(
-        //         height: 0, // Removes the underline
-        //         color: Colors.transparent,
-        //       ),
-        //       items: <String>['All', 'Meat', 'Vegetarian'].map((String value) {
-        //         return DropdownMenuItem<String>(
-        //           value: value,
-        //           child: Text(
-        //             value,
-        //             style: const TextStyle(
-        //               fontSize: 16.0,
-        //               color: ColorsPaletteRedonda.primary,
-        //             ),
-        //           ),
-        //         );
-        //       }).toList(),
-        //       onChanged: (String? newValue) {
-        //         setState(() {
-        //           selectedFoodType = newValue ?? 'All';
-        //         });
-        //       },
-        //     ),
-        //   ),
-        // ],
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Stack(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.shopping_cart),
+                  onPressed: () {
+                    // Navigate to the cart screen
+                    // context.push('/cart'); // Assuming the cart route is '/cart'
+                    context.goNamed(
+                      AppRoute.homecart.name,
+                    );
+                  },
+                ),
+                if (cart.isNotEmpty)
+                  Positioned(
+                    top: 0, // Adjusts the vertical position of the badge
+                    right: 0, // Adjusts the horizontal position of the badge
+                    child: CircleAvatar(
+                      radius: 8,
+                      backgroundColor: Colors.red,
+                      child: Text(
+                        '${cart.length}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),

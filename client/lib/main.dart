@@ -13,7 +13,9 @@ import 'package:starter_architecture_flutter_firebase/src/localization/string_ha
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:starter_architecture_flutter_firebase/src/util/device_info.dart';
 // import 'package:firebase_vertexai/firebase_vertexai.dart';
+import 'package:localstorage/localstorage.dart';
 
+late final ValueNotifier<int> notifier;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // turn off the # in the URLs on the web
@@ -22,6 +24,11 @@ Future<void> main() async {
   // * https://docs.flutter.dev/testing/errors
   registerErrorHandlers();
   // * Initialize Firebase
+  await initLocalStorage();
+  notifier = ValueNotifier(int.parse(localStorage.getItem('counter') ?? '0'));
+  notifier.addListener(() {
+    localStorage.setItem('counter', notifier.value.toString());
+  });
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
@@ -60,7 +67,7 @@ void registerErrorHandlers() {
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return Scaffold(
       appBar: AppBar(
-        forceMaterialTransparency: true, 
+        forceMaterialTransparency: true,
         elevation: 3,
         backgroundColor: Colors.red,
         title: Text('An error occurred'.hardcoded),

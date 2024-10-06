@@ -49,7 +49,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
 
   final List<String> _paymentMethods = [
     'Transferencias',
-    'Cardnet WhatsApp',
+    'Pagos por WhatsApp',
     'Cardnet'
   ];
 
@@ -90,6 +90,19 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
       _deliveryStartTime = now.add(const Duration(minutes: 40));
       _deliveryEndTime = now.add(const Duration(minutes: 60));
     });
+  }
+
+  String getPaymentMethodDescription(int selectedIndex) {
+    switch (selectedIndex) {
+      case 0:
+        return 'La transferencia es manual desde su cuenta bancaria a la nuestra.';
+      case 1:
+        return 'El pago por WhatsApp le llevará a WhatsApp para completar el pago.';
+      case 2:
+        return 'Con CARNET, puede pagar directamente con su tarjeta a través de la plataforma de transacciones CARNET.';
+      default:
+        return '';
+    }
   }
 
   // Generate Google Maps link from lat/long
@@ -514,42 +527,59 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
                         ],
 
                         // Payment Method Dropdown
+                        // Payment Method Dropdown
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          child: DropdownButtonFormField<int>(
-                            dropdownColor: ColorsPaletteRedonda.white,
-                            value: _selectedPaymentMethod,
-                            items:
-                                List.generate(_paymentMethods.length, (index) {
-                              return DropdownMenuItem<int>(
-                                value: index,
-                                child: Text(
-                                  _paymentMethods[index],
-                                  style: const TextStyle(
-                                      color: ColorsPaletteRedonda.primary),
-                                ),
-                              );
-                            }),
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedPaymentMethod = value!;
-                              });
-                            },
-                            decoration: InputDecoration(
-                              labelText: 'Metodo de pago',
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                                borderSide: const BorderSide(
-                                  color: ColorsPaletteRedonda.primary,
-                                  width: 1.5,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              DropdownButtonFormField<int>(
+                                dropdownColor: ColorsPaletteRedonda.white,
+                                value: _selectedPaymentMethod,
+                                items: List.generate(_paymentMethods.length,
+                                    (index) {
+                                  return DropdownMenuItem<int>(
+                                    value: index,
+                                    child: Text(
+                                      _paymentMethods[index],
+                                      style: const TextStyle(
+                                          color: ColorsPaletteRedonda.primary),
+                                    ),
+                                  );
+                                }),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedPaymentMethod = value!;
+                                  });
+                                },
+                                decoration: InputDecoration(
+                                  labelText: 'Método de pago',
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    borderSide: const BorderSide(
+                                      color: ColorsPaletteRedonda.primary,
+                                      width: 1.5,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                              const SizedBox(height: 8.0),
+                              Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Text(
+                                  getPaymentMethodDescription(
+                                      _selectedPaymentMethod),
+                                  style: const TextStyle(
+                                    color: Color.fromARGB(255, 231, 107, 24),
+                                    fontSize: 14.0,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-
                         const Spacer(),
                         _buildOrderSummary(cartItems),
 

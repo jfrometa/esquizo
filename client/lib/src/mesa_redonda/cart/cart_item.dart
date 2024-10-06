@@ -1,7 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Cart Item Model
+// Cart Item Model
 class CartItem {
+  final String id; // Added id field
   final String img;
   final String title;
   final String description;
@@ -20,10 +26,11 @@ class CartItem {
   final DateTime expirationDate;
 
   // Additional fields for catering
-  final int peopleCount; // Number of people for catering
-  final String sideRequest; // Side requests for catering
+  final int peopleCount;
+  final String sideRequest;
 
   CartItem({
+    required this.id, // Include id in constructor
     required this.img,
     required this.title,
     required this.description,
@@ -38,18 +45,20 @@ class CartItem {
     this.totalMeals = 0,
     this.remainingMeals = 0,
     DateTime? expirationDate,
-    this.peopleCount = 0, // Default for non-catering items
-    this.sideRequest = '', // Default empty for non-catering items
+    this.peopleCount = 0,
+    this.sideRequest = '',
   }) : expirationDate =
             expirationDate ?? DateTime.now().add(const Duration(days: 40));
 
   CartItem copyWith({
+    String? id,
     int? quantity,
     int? remainingMeals,
     int? peopleCount,
     String? sideRequest,
   }) {
     return CartItem(
+      id: id ?? this.id,
       img: img,
       title: title,
       description: description,
@@ -68,10 +77,99 @@ class CartItem {
       sideRequest: sideRequest ?? this.sideRequest,
     );
   }
+
+  // toJson method for serialization
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'img': img,
+      'title': title,
+      'description': description,
+      'pricing': pricing,
+      'offertPricing': offertPricing,
+      'ingredients': ingredients,
+      'isSpicy': isSpicy,
+      'foodType': foodType,
+      'quantity': quantity,
+      'isOffer': isOffer,
+      'isMealSubscription': isMealSubscription,
+      'totalMeals': totalMeals,
+      'remainingMeals': remainingMeals,
+      'expirationDate': expirationDate.toIso8601String(),
+      'peopleCount': peopleCount,
+      'sideRequest': sideRequest,
+    };
+  }
+
+  // fromJson factory constructor for deserialization
+  factory CartItem.fromJson(Map<String, dynamic> json) {
+    return CartItem(
+      id: json['id'] as String,
+      img: json['img'] as String,
+      title: json['title'] as String,
+      description: json['description'] as String,
+      pricing: json['pricing'] as String,
+      offertPricing: json['offertPricing'] as String?,
+      ingredients: List<String>.from(json['ingredients'] as List<dynamic>),
+      isSpicy: json['isSpicy'] as bool,
+      foodType: json['foodType'] as String,
+      quantity: json['quantity'] as int,
+      isOffer: json['isOffer'] as bool,
+      isMealSubscription: json['isMealSubscription'] as bool,
+      totalMeals: json['totalMeals'] as int,
+      remainingMeals: json['remainingMeals'] as int,
+      expirationDate: DateTime.parse(json['expirationDate'] as String),
+      peopleCount: json['peopleCount'] as int,
+      sideRequest: json['sideRequest'] as String,
+    );
+  }
+}
+
+// Serialization and Deserialization functions
+String serializeCart(List<CartItem> cartItems) {
+  return jsonEncode(cartItems.map((item) => item.toJson()).toList());
+}
+
+List<CartItem> deserializeCart(String jsonString) {
+  List<dynamic> jsonData = jsonDecode(jsonString);
+  return jsonData.map((item) => CartItem.fromJson(item)).toList();
 }
 
 class CartNotifier extends StateNotifier<List<CartItem>> {
-  CartNotifier() : super([]);
+  Timer? _saveDebounce;
+
+  CartNotifier() : super([]) {
+    _loadCart();
+  }
+
+  // Load cart from SharedPreferences
+  Future<void> _loadCart() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? serializedCart = prefs.getString('cart');
+    if (serializedCart != null) {
+      state = deserializeCart(serializedCart);
+    } else {
+      state = [];
+    }
+  }
+
+  // Save cart to SharedPreferences
+  Future<void> _saveCart() async {
+    final prefs = await SharedPreferences.getInstance();
+    String serializedCart = serializeCart(state);
+    await prefs.setString('cart', serializedCart);
+  }
+
+  // Override state setter to save cart whenever state changes
+  @override
+  set state(List<CartItem> value) {
+    super.state = value;
+    // Debounce the save operation to prevent excessive writes
+    if (_saveDebounce?.isActive ?? false) _saveDebounce!.cancel();
+    _saveDebounce = Timer(const Duration(milliseconds: 500), () {
+      _saveCart();
+    });
+  }
 
   // Add a dish, meal subscription, or catering to the cart
   void addToCart(
@@ -101,6 +199,7 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
           isOffer: false,
           peopleCount: peopleCount,
           sideRequest: sideRequest ?? '',
+          id: item['id'] ?? 'no id',
         ),
       );
 
@@ -123,10 +222,18 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
       }
     } else if (isMealSubscription) {
       // Handle Meal Subscriptions
-      final existingPlan = state.firstWhere(
+      // Handle Meal Subscriptions
+      final existingPlanIndex = state.indexWhere(
         (cartItem) =>
             cartItem.title == item['title'] && cartItem.isMealSubscription,
-        orElse: () => CartItem(
+      );
+
+      if (existingPlanIndex != -1) {
+        // Existing plan found, don't allow duplicates
+        return;
+      } else {
+        // No existing plan, add new meal subscription to cart
+        final newPlan = CartItem(
           img: item['img'] ?? '',
           title: item['title'] ?? '',
           description: item['description'] ?? '',
@@ -135,20 +242,16 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
           ingredients: List<String>.from(item['ingredients']) ?? [],
           isSpicy: item['isSpicy'] ?? false,
           foodType: item['foodType'] ?? 'Subscripcion',
-          quantity: 0,
+          quantity: 1,
           isOffer: item.containsKey('offertPricing') &&
               item['offertPricing'] != null,
           isMealSubscription: true,
           totalMeals: totalMeals,
           remainingMeals: totalMeals,
           peopleCount: item['peopleCount'] ?? 1,
-        ),
-      );
-
-      if (existingPlan.remainingMeals > 0) {
-        return; // Don't allow duplicates for meal subscriptions
-      } else {
-        state = [...state, existingPlan.copyWith(remainingMeals: totalMeals)];
+          id: item['id'] ?? 'no id',
+        );
+        state = [...state, newPlan];
       }
     } else {
       // Handle Regular Dish
@@ -167,6 +270,7 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
           quantity: 0,
           isOffer: item.containsKey('offertPricing') &&
               item['offertPricing'] != null,
+          id: item['id'] ?? 'no id',
         ),
       );
 
@@ -193,6 +297,10 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
         else
           item,
     ];
+  }
+
+  void removeFromCart(String id) {
+    state = state.where((item) => item.id != id).toList(); // Remove by id
   }
 
   // Decrement quantity of a catering item and remove if 0

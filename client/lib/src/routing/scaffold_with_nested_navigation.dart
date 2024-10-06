@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/localization/string_hardcoded.dart';
@@ -38,7 +39,7 @@ int getTotalCartQuantity(List<CartItem> cartItems) {
   return cartItems.fold(0, (total, item) => total + item.quantity);
 }
 
-class ScaffoldWithNavigationBar extends ConsumerWidget {
+class ScaffoldWithNavigationBar extends ConsumerStatefulWidget {
   const ScaffoldWithNavigationBar({
     super.key,
     required this.body,
@@ -51,47 +52,120 @@ class ScaffoldWithNavigationBar extends ConsumerWidget {
   final ValueChanged<int> onDestinationSelected;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  _ScaffoldWithNavigationBarState createState() =>
+      _ScaffoldWithNavigationBarState();
+}
+
+class _ScaffoldWithNavigationBarState
+    extends ConsumerState<ScaffoldWithNavigationBar> {
+  bool _isVisible = true; // Track visibility of the navigation bar
+  ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Add scroll listener to hide/show the navigation bar
+    _scrollController.addListener(() {
+      if (_scrollController.position.userScrollDirection ==
+          ScrollDirection.reverse) {
+        // Scrolling down, hide the navigation bar
+        if (_isVisible) {
+          setState(() {
+            _isVisible = false;
+          });
+        }
+      } else if (_scrollController.position.userScrollDirection ==
+          ScrollDirection.forward) {
+        // Scrolling up, show the navigation bar
+        if (!_isVisible) {
+          setState(() {
+            _isVisible = true;
+          });
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // Get the total quantity from cartProvider
     final cartItems = ref.watch(cartProvider);
     final totalQuantity = getTotalCartQuantity(cartItems);
 
     return Scaffold(
-      body: body,
-      bottomNavigationBar: NavigationBarTheme(
-        data: NavigationBarThemeData(
-          backgroundColor: Colors.white,
-          indicatorColor: ColorsPaletteRedonda.primary,
-          labelTextStyle: WidgetStateProperty.resolveWith(
-            (Set<WidgetState> states) {
-              if (states.contains(WidgetState.selected)) {
-                return const TextStyle(
-                    color: ColorsPaletteRedonda.primary,
-                    fontWeight: FontWeight.bold); // Selected label color
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (scrollNotification) {
+          if (scrollNotification is ScrollUpdateNotification) {
+            // Check scrolling direction and update visibility
+            if (scrollNotification.scrollDelta! > 0) {
+              // Scrolling down
+              if (_isVisible) {
+                setState(() {
+                  _isVisible = false;
+                });
               }
-              return const TextStyle(
-                  color: ColorsPaletteRedonda.deepBrown1,
-                  fontWeight: FontWeight.bold); // Unselected label color
-            },
-          ),
-          iconTheme: WidgetStateProperty.resolveWith(
-            (Set<WidgetState> states) {
-              if (states.contains(WidgetState.selected)) {
-                return const IconThemeData(
-                    color: Colors.white); // Selected icon color
+            } else if (scrollNotification.scrollDelta! < 0) {
+              // Scrolling up
+              if (!_isVisible) {
+                setState(() {
+                  _isVisible = true;
+                });
               }
-              return const IconThemeData(
-                  color:
-                      ColorsPaletteRedonda.deepBrown1); // Unselected icon color
-            },
-          ),
-        ),
-        child: NavigationBar(
-          selectedIndex: currentIndex,
-          onDestinationSelected: onDestinationSelected,
-          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-          destinations: List.generate(
-              4, (index) => _buildDestination(index, totalQuantity)),
+            }
+          }
+          return true;
+        },
+        child: widget.body,
+      ),
+      bottomNavigationBar: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        height: _isVisible ? 80.0 : 0.0, // Adjust height based on visibility
+        child: Wrap(
+          children: [
+            NavigationBarTheme(
+              data: NavigationBarThemeData(
+                backgroundColor: Colors.white,
+                indicatorColor: ColorsPaletteRedonda.primary,
+                labelTextStyle: WidgetStateProperty.resolveWith(
+                  (Set<WidgetState> states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return const TextStyle(
+                          color: ColorsPaletteRedonda.primary,
+                          fontWeight: FontWeight.bold); // Selected label color
+                    }
+                    return const TextStyle(
+                        color: ColorsPaletteRedonda.deepBrown1,
+                        fontWeight: FontWeight.bold); // Unselected label color
+                  },
+                ),
+                iconTheme: WidgetStateProperty.resolveWith(
+                  (Set<WidgetState> states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return const IconThemeData(
+                          color: Colors.white); // Selected icon color
+                    }
+                    return const IconThemeData(
+                        color: ColorsPaletteRedonda
+                            .deepBrown1); // Unselected icon color
+                  },
+                ),
+              ),
+              child: NavigationBar(
+                selectedIndex: widget.currentIndex,
+                onDestinationSelected: widget.onDestinationSelected,
+                labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+                destinations: List.generate(
+                    4, (index) => _buildDestination(index, totalQuantity)),
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -9,6 +9,20 @@ class PlanDetailsScreen extends ConsumerWidget {
 
   const PlanDetailsScreen({super.key, required this.planId});
 
+  String cleanPrice(String input) {
+    // Use RegExp to replace all non-digit and non-decimal characters
+    String cleaned = input.replaceAll(RegExp(r'[^\d.]'), '');
+
+    // If the cleaned string has more than one decimal, fix that
+    if (cleaned.contains('.')) {
+      // Split by the first decimal and join the first part with only the first decimal and the rest as numbers
+      List<String> parts = cleaned.split('.');
+      cleaned = '${parts[0]}.${parts.skip(1).join('')}';
+    }
+
+    return cleaned;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -17,6 +31,23 @@ class PlanDetailsScreen extends ConsumerWidget {
       (plan) => plan.id == planId,
       orElse: () => throw Exception('Plan not found'),
     );
+
+    IconData planIcon;
+    switch (mealPlan.id) {
+      case 'basico':
+        planIcon = Icons.emoji_food_beverage; // Represents basic plan
+        break;
+      case 'estandar':
+        planIcon = Icons.local_cafe; // Represents standard plan
+        break;
+      case 'premium':
+        planIcon = Icons.local_dining; // Represents premium plan
+        break;
+      default:
+        planIcon = Icons.fastfood;
+    }
+
+    // Plan Icon
 
     return Scaffold(
       appBar: AppBar(
@@ -27,11 +58,10 @@ class PlanDetailsScreen extends ConsumerWidget {
         child: Column(
           children: [
             // Plan Image
-            Image.asset(
-              mealPlan.img,
-              width: double.infinity,
-              height: 250,
-              fit: BoxFit.cover,
+            Icon(
+              planIcon,
+              size: 80,
+              color: ColorsPaletteRedonda.primary,
             ),
             const SizedBox(height: 16),
             // Plan Title and Price
@@ -115,10 +145,11 @@ class PlanDetailsScreen extends ConsumerWidget {
                         // Add meal plan to cart
                         ref.read(cartProvider.notifier).addToCart(
                           {
+                            'id': mealPlan.id,
                             'img': mealPlan.img,
                             'title': mealPlan.title,
                             'description': 'Plan de comidas',
-                            'pricing': mealPlan.price,
+                            'pricing': cleanPrice(mealPlan.price),
                             'offertPricing': null,
                             'ingredients': [],
                             'isSpicy': false,

@@ -13,10 +13,46 @@ class MealPlansScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mealPlans = ref.watch(mealPlansProvider);
+    final cart = ref.watch(cartProvider);
 
     return Scaffold(
       appBar: AppBar(
         forceMaterialTransparency: true,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Stack(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.shopping_cart),
+                  onPressed: () {
+                    // Navigate to the cart screen
+                    // context.push('/cart'); // Assuming the cart route is '/cart'
+                    context.goNamed(
+                      AppRoute.homecart.name,
+                    );
+                  },
+                ),
+                if (cart.isNotEmpty)
+                  Positioned(
+                    top: 0, // Adjusts the vertical position of the badge
+                    right: 0, // Adjusts the horizontal position of the badge
+                    child: CircleAvatar(
+                      radius: 8,
+                      backgroundColor: Colors.red,
+                      child: Text(
+                        '${cart.length}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -99,6 +135,21 @@ class MealPlanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    IconData planIcon;
+    switch (mealPlan.id) {
+      case 'basico':
+        planIcon = Icons.emoji_food_beverage; // Represents basic plan
+        break;
+      case 'estandar':
+        planIcon = Icons.local_cafe; // Represents standard plan
+        break;
+      case 'premium':
+        planIcon = Icons.local_dining; // Represents premium plan
+        break;
+      default:
+        planIcon = Icons.fastfood;
+    }
+
     return Container(
       width: 280,
       margin: const EdgeInsets.symmetric(horizontal: 10),
@@ -108,72 +159,73 @@ class MealPlanCard extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12), // Rounded corners
         ),
-        child: Column(
-          children: [
-            // Plan Image
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 28.0),
+          child: Column(
+            children: [
+              // Plan Image
+              // Plan Icon
+              Icon(
+                planIcon,
+                size: 80,
+                color: ColorsPaletteRedonda.primary,
               ),
-              child: Image.asset(
-                mealPlan.img,
-                height: 150,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
-            // Plan Information
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-              child: Column(
-                children: [
-                  Text(
-                    mealPlan.title,
-                    style: Theme.of(context).textTheme.titleLarge,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    mealPlan.description,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    mealPlan.price,
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: ColorsPaletteRedonda.orange,
+              // Plan Information
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
+                child: Column(
+                  children: [
+                    Text(
+                      mealPlan.title,
+                      style: Theme.of(context).textTheme.titleLarge,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      mealPlan.description,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      mealPlan.price,
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: ColorsPaletteRedonda.orange,
+                              ),
+                    ),
+                    const SizedBox(height: 15),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Navigate to the plan details screen
+                        GoRouter.of(context).goNamed(
+                          AppRoute.planDetails.name,
+                          pathParameters: {'planId': mealPlan.id},
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: ColorsPaletteRedonda.primary,
+                        foregroundColor: ColorsPaletteRedonda.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30.0),
                         ),
-                  ),
-                  const SizedBox(height: 15),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Navigate to the plan details screen
-                      GoRouter.of(context).goNamed(
-                        AppRoute.planDetails.name,
-                        pathParameters: {'planId': mealPlan.id},
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: ColorsPaletteRedonda.primary,
-                      foregroundColor: ColorsPaletteRedonda.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                      child: Text(
+                        'Seleccionar Plan',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: ColorsPaletteRedonda.white,
+                                ),
                       ),
                     ),
-                    child: Text(
-                      'Seleccionar Plan',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: ColorsPaletteRedonda.white,
-                          ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
