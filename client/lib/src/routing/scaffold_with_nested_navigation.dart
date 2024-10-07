@@ -104,14 +104,14 @@ class _ScaffoldWithNavigationBarState
         onNotification: (scrollNotification) {
           if (scrollNotification is ScrollUpdateNotification) {
             // Check scrolling direction and update visibility
-            if (scrollNotification.scrollDelta! > 0) {
+            if (scrollNotification.scrollDelta! > 10) {
               // Scrolling down
               if (_isVisible) {
                 setState(() {
                   _isVisible = false;
                 });
               }
-            } else if (scrollNotification.scrollDelta! < 0) {
+            } else if (scrollNotification.scrollDelta! < -1) {
               // Scrolling up
               if (!_isVisible) {
                 setState(() {
@@ -126,7 +126,7 @@ class _ScaffoldWithNavigationBarState
       ),
       bottomNavigationBar: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        height: _isVisible ? 80.0 : 0.0, // Adjust height based on visibility
+        height: _isVisible ? 70.0 : 0.0, // Adjust height based on visibility
         child: Wrap(
           children: [
             NavigationBarTheme(
