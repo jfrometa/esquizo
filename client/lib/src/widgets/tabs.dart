@@ -58,6 +58,7 @@ class _TabsState extends State<Tabs> {
                     widget.onTap != null ? widget.onTap!(index) : null,
                 labelColor: customAppTheme.colorsPalette.secondary,
                 labelStyle: customAppTheme.textStyles.labelMedium,
+                dividerColor: Colors.transparent,
                 labelPadding: const EdgeInsets.all(0),
                 unselectedLabelColor: customAppTheme.colorsPalette.neutral6,
                 indicator: BoxDecoration(

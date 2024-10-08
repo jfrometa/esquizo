@@ -91,6 +91,7 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
           ),
         ],
         bottom: TabBar(
+          dividerColor: Colors.transparent,
           enableFeedback: false,
           padding: const EdgeInsets.symmetric(horizontal: 18.0),
           controller: _tabController,

@@ -39,15 +39,15 @@ class OrderHistoryList extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Order #${order.orderNumber}',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        'Orden #${order.orderNumber}',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: ColorsPaletteRedonda.primary,
                         ),
                       ),
                       const SizedBox(height: 8.0),
                       Text(
-                        'Total Amount: \$${order.totalAmount.toStringAsFixed(2)}',
+                        'Monto total: \$${order.totalAmount.toStringAsFixed(2)}',
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const SizedBox(height: 8.0),
@@ -67,7 +67,7 @@ class OrderHistoryList extends ConsumerWidget {
                       ),
                       const SizedBox(height: 8.0),
                       Text(
-                        'Order Type: ${order.orderType}',
+                        'Tipo: ${order.orderType}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -78,16 +78,16 @@ class OrderHistoryList extends ConsumerWidget {
                           const Icon(Icons.payment, color: Colors.grey),
                           const SizedBox(width: 8.0),
                           Text(
-                            'Payment Method: ${order.paymentMethod}',
+                            'Metodo de pago: ${order.paymentMethod}',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
                       ),
                       const SizedBox(height: 8.0),
                       Text(
-                        'Payment Status: ${order.paymentStatus}',
+                        'Estatus de PAgo: ${order.paymentStatus}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: order.paymentStatus == 'Paid'
+                          color: order.paymentStatus == 'pagado'
                               ? Colors.green
                               : Colors.red,
                         ),
@@ -98,7 +98,7 @@ class OrderHistoryList extends ConsumerWidget {
                           const Icon(Icons.access_time, color: Colors.grey),
                           const SizedBox(width: 8.0),
                           Text(
-                            'Order Date: ${DateFormat.yMMMd().add_jm().format(order.timestamp.toDate())}',
+                            'Fecha de la orden: ${DateFormat.yMMMd().add_jm().format(order.timestamp.toDate())}',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],

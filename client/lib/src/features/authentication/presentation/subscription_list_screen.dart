@@ -26,16 +26,16 @@ Future<void> _confirmAndConsumeMeal(
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: const Text('Confirm Consumption'),
-      content: const Text('Do you want to consume a meal from your subscription?'),
+      title: const Text('Hacer Pedido'),
+      content: const Text('Estas seguro que deseas pedir un almuerzo de tu subscripcion?'),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(false),
-          child: const Text('Cancel'),
+          child: const Text('Cancelar'),
         ),
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(true),
-          child: const Text('Confirm'),
+          child: const Text('Confirmar'),
         ),
       ],
     ),
@@ -59,10 +59,10 @@ Future<void> _confirmAndConsumeMeal(
         message: 'You have successfully consumed a meal from your subscription!',
         subject: 'Meal Consumption Confirmation',
       );
-    } catch (e) {
+    } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to consume meal.'),
+        SnackBar(
+          content: Text('Failed to consume meal. $error'),
           backgroundColor: Colors.red,
         ),
       );
@@ -200,7 +200,7 @@ class SubscriptionsList extends ConsumerWidget {
                               const SizedBox(height: 10),
                               Text(
                                 'Total Price: ${NumberFormat.currency(locale: 'en_US', symbol: '\$').format(subscription.totalAmount)}',
-                                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                   color: ColorsPaletteRedonda.orange,
                                 ),
                               ),

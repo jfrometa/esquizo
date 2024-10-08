@@ -1,4 +1,5 @@
-import 'package:starter_architecture_flutter_firebase/helpers/responsive_widget.dart';
+
+import 'package:starter_architecture_flutter_firebase/src/helpers/responsive_widget.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,6 +37,7 @@ class _MainTabsState extends State<MainTabs> {
                     final double availableWidth =
                         ((constraints.maxWidth / widget.tabs.length) - 32) / 2;
                     return TabBar(
+                      dividerColor: Colors.transparent,
                       indicator: UnderlineTabIndicator(
                         borderSide: BorderSide(
                           color: widget.underlineColor ??
@@ -60,6 +62,7 @@ class _MainTabsState extends State<MainTabs> {
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       return TabBar(
+                        dividerColor: Colors.transparent,
                         isScrollable: true,
                         indicator: const BoxDecoration(
                           borderRadius: BorderRadius.only(
