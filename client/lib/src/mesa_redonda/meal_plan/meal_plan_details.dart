@@ -146,7 +146,7 @@ class PlanDetailsScreen extends ConsumerWidget {
                         ref.read(cartProvider.notifier).addToCart(
                           {
                             'id': mealPlan.id,
-                            'img': mealPlan.img,
+                            // 'img': mealPlan.img,
                             'title': mealPlan.title,
                             'description': 'Plan de comidas',
                             'pricing': cleanPrice(mealPlan.price),

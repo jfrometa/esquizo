@@ -5,6 +5,8 @@ import 'package:starter_architecture_flutter_firebase/src/constants/app_sizes.da
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/data/firebase_auth_repository.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/order_history_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/subscription_list_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
+
 
 class AuthenticatedProfileScreen extends ConsumerWidget {
   final User user;
@@ -14,10 +16,8 @@ class AuthenticatedProfileScreen extends ConsumerWidget {
   Future<void> _signOut(BuildContext context, WidgetRef ref) async {
     try {
       await ref.read(firebaseAuthProvider).signOut();
-      // Navigate back to the home screen or sign-in screen
       Navigator.of(context).popUntil((route) => route.isFirst);
     } catch (e) {
-      // Handle sign-out error
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error signing out. Please try again.')),
       );
@@ -26,92 +26,55 @@ class AuthenticatedProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Profile'),
-        forceMaterialTransparency: true,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Mi Perfil'),
+          forceMaterialTransparency: true,
+          
+        ),
+        body: Padding(
           padding: const EdgeInsets.all(Sizes.p16),
-          child: screenWidth > 600
-              ? Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(
+            children: [
+              _buildUserInfo(context),
+              const SizedBox(height: Sizes.p16),
+              const TabBar(
+                dividerColor: ColorsPaletteRedonda.primary,
+                indicatorColor: ColorsPaletteRedonda.primary,
+                enableFeedback: true,
+                tabs: [
+                  Tab(text: 'My Subscriptions'),
+                  Tab(text: 'Order History'),
+                ],
+              ),
+              const SizedBox(height: Sizes.p16),
+              const Expanded(
+                child: TabBarView(
                   children: [
-                    // Left Side
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildUserInfo(context),
-                          const SizedBox(height: Sizes.p24),
-                          const Text(
-                            'My Subscriptions',
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: Sizes.p12),
-                          const SubscriptionsList(),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: Sizes.p24),
-                    // Right Side
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Order History',
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: Sizes.p12),
-                          const OrderHistoryList(),
-                          const SizedBox(height: Sizes.p24),
-                          ElevatedButton(
-                            onPressed: () => _signOut(context, ref),
-                            child: const Text('Sign Out'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildUserInfo(context),
-                    const SizedBox(height: Sizes.p24),
-                    const Text(
-                      'My Subscriptions',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: Sizes.p12),
-                    const SubscriptionsList(),
-                    const SizedBox(height: Sizes.p24),
-                    const Text(
-                      'Order History',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: Sizes.p12),
-                    const OrderHistoryList(),
-                    const SizedBox(height: Sizes.p24),
-                    ElevatedButton(
-                      onPressed: () => _signOut(context, ref),
-                      child: const Text('Sign Out'),
-                    ),
+                    // Subscriptions List
+                    SubscriptionsList(),
+                    // Order History List
+                    OrderHistoryList(),
                   ],
                 ),
+              ),
+              ElevatedButton(
+                onPressed: () => _signOut(context, ref),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white, backgroundColor: Colors.redAccent,
+                ),
+                child: const Text('Sign Out'),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
+  // User information section
   Widget _buildUserInfo(BuildContext context) {
     return Row(
       children: [
@@ -124,9 +87,19 @@ class AuthenticatedProfileScreen extends ConsumerWidget {
         ),
         const SizedBox(width: Sizes.p16),
         Expanded(
-          child: Text(
-            user.displayName ?? user.email ?? 'User',
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                user.displayName ?? user.email ?? 'User',
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: Sizes.p8),
+              Text(
+                user.email ?? 'No email available',
+                style: const TextStyle(fontSize: 16),
+              ),
+            ],
           ),
         ),
       ],

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/constants/app_sizes.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/data/order_history_repository.dart';
+import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
+
+
 
 class OrderHistoryList extends ConsumerWidget {
   const OrderHistoryList({super.key});
@@ -13,7 +17,7 @@ class OrderHistoryList extends ConsumerWidget {
     return ordersAsync.when(
       data: (orders) {
         if (orders.isEmpty) {
-          return const Text('You have no order history.');
+          return const Text('No tienes historial de órdenes.');
         }
         return ListView.builder(
           shrinkWrap: true,
@@ -21,25 +25,94 @@ class OrderHistoryList extends ConsumerWidget {
           itemCount: orders.length,
           itemBuilder: (context, index) {
             final order = orders[index];
-            return Card(
-              margin: const EdgeInsets.symmetric(vertical: Sizes.p8),
-              child: ListTile(
-                title: Text('Order #${order.orderNumber}'),
-                subtitle:
-                    Text('Total: \$${order.totalAmount.toStringAsFixed(2)}'),
-                onTap: () {
-                  // Navigate to order details if needed
-                },
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              child: Card(
+                elevation: 4,
+                margin: const EdgeInsets.symmetric(vertical: Sizes.p8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Order #${order.orderNumber}',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: ColorsPaletteRedonda.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 8.0),
+                      Text(
+                        'Total Amount: \$${order.totalAmount.toStringAsFixed(2)}',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8.0),
+                      Row(
+                        children: [
+                          const Icon(Icons.location_on, color: Colors.grey),
+                          const SizedBox(width: 8.0),
+                          Expanded(
+                            child: Text(
+                              '${order.address}, Lat: ${order.latitude}, Long: ${order.longitude}',
+                              style: Theme.of(context).textTheme.bodySmall,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8.0),
+                      Text(
+                        'Order Type: ${order.orderType}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8.0),
+                      Row(
+                        children: [
+                          const Icon(Icons.payment, color: Colors.grey),
+                          const SizedBox(width: 8.0),
+                          Text(
+                            'Payment Method: ${order.paymentMethod}',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8.0),
+                      Text(
+                        'Payment Status: ${order.paymentStatus}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: order.paymentStatus == 'Paid'
+                              ? Colors.green
+                              : Colors.red,
+                        ),
+                      ),
+                      const SizedBox(height: 8.0),
+                      Row(
+                        children: [
+                          const Icon(Icons.access_time, color: Colors.grey),
+                          const SizedBox(width: 8.0),
+                          Text(
+                            'Order Date: ${DateFormat.yMMMd().add_jm().format(order.timestamp.toDate())}',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
             );
           },
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) {
-        // Handle error
-        return const Text('Failed to load order history.');
-      },
+      error: (error, stack) => const Text('Failed to load order history.'),
     );
   }
 }

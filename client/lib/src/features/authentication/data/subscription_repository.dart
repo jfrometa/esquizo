@@ -21,13 +21,18 @@ class SubscriptionsRepository {
   final _firestore = FirebaseFirestore.instance;
 
   Stream<List<Subscription>> getSubscriptions(String userId) {
-    return _firestore
-        .collection('subscriptions')
-        .where('userId', isEqualTo: userId)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => Subscription.fromFirestore(doc))
-            .toList());
+    try {
+      return _firestore
+          .collection('subscriptions')
+          .where('userId', isEqualTo: userId)
+          .snapshots()
+          .map((snapshot) => snapshot.docs
+              .map((doc) => Subscription.fromFirestore(doc))
+              .toList());
+    } catch (e) {
+      print('Error fetching subscriptions: $e');
+      return const Stream.empty();
+    }
   }
 
   Future<void> consumeMeal(String subscriptionId) async {

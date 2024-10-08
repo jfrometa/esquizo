@@ -217,7 +217,7 @@ class _MealSubscriptionItemViewState
         howItWorks: '',
         totalMeals: 0,
         mealsRemaining: '',
-        img: '',
+        // img: '',
         title: 'Plan desconocido',
         price: '',
         features: [],

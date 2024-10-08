@@ -1,18 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
-import 'package:starter_architecture_flutter_firebase/src/features/authentication/data/firebase_auth_repository.dart';
-import 'package:starter_architecture_flutter_firebase/src/features/authentication/domain/models.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/auth_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/link_account_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/sign_in_anonimously_footer.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 
-import 'auth_providers.dart';
-import 'link_account_screen.dart';
 
 class CustomSignInScreen extends ConsumerWidget {
   const CustomSignInScreen({super.key});

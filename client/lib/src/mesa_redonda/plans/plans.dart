@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final mealPlansProvider = Provider<List<MealPlan>>((ref) {
@@ -13,7 +12,7 @@ final mealPlansProvider = Provider<List<MealPlan>>((ref) {
       ],
       description:
           "Disfruta de 8 comidas deliciosas al mes con nuestro Plan Básico.",
-      img: 'assets/plan_basico.jpg',
+      // img: 'assets/plan_basico.jpg',
       longDescription:
           "El Plan Básico es perfecto para quienes quieren probar nuestro servicio. Recibe 8 comidas al mes de nuestro menú de recetas simples y deliciosas.",
       howItWorks:
@@ -31,7 +30,7 @@ final mealPlansProvider = Provider<List<MealPlan>>((ref) {
         "Soporte prioritario",
       ],
       description: "Obtén 10 comidas gourmet al mes con nuestro Plan Estándar.",
-      img: 'assets/plan_estandar.jpg',
+      // img: 'assets/plan_estandar.jpg',
       longDescription:
           "El Plan Estándar es ideal para quienes buscan variedad y recetas más elaboradas. Disfruta de 10 comidas al mes con soporte prioritario.",
       howItWorks:
@@ -50,7 +49,7 @@ final mealPlansProvider = Provider<List<MealPlan>>((ref) {
       ],
       description:
           "Disfruta de la experiencia completa con nuestro Plan Premium de 13 comidas al mes.",
-      img: 'assets/plan_premium.jpg',
+      // img: 'assets/plan_premium.jpg',
       longDescription:
           "El Plan Premium te ofrece acceso a recetas exclusivas y un servicio de coaching personal. Recibe 13 comidas al mes y disfruta de una experiencia gastronómica única.",
       howItWorks:
@@ -70,7 +69,7 @@ class MealPlan {
   final List<String> features;
   final bool isBestValue;
   final String description;
-  final String img;
+  // final String img;
   final String longDescription;
   final String howItWorks;
   final int totalMeals;
@@ -82,7 +81,7 @@ class MealPlan {
     required this.howItWorks,
     required this.totalMeals,
     required this.mealsRemaining,
-    required this.img,
+    // required this.img,
     required this.title,
     required this.price,
     required this.features,
