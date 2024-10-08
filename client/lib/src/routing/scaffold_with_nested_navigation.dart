@@ -58,34 +58,42 @@ class ScaffoldWithNavigationBar extends ConsumerStatefulWidget {
 
 class _ScaffoldWithNavigationBarState
     extends ConsumerState<ScaffoldWithNavigationBar> {
-  bool _isVisible = true; // Track visibility of the navigation bar
+  bool _isVisible = true;
   ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
 
-    // Add scroll listener to hide/show the navigation bar
+    // Add scroll listener to hide/show the navigation bar on all tabs except "Cuenta"
     _scrollController.addListener(() {
-      if (_scrollController.position.userScrollDirection ==
-          ScrollDirection.reverse) {
-        // Scrolling down, hide the navigation bar
-        if (_isVisible) {
-          setState(() {
-            _isVisible = false;
-          });
-        }
-      } else if (_scrollController.position.userScrollDirection ==
-          ScrollDirection.forward) {
-        // Scrolling up, show the navigation bar
-        if (!_isVisible) {
-          setState(() {
-            _isVisible = true;
-          });
+      if (widget.currentIndex != 3) {
+        if (_scrollController.position.userScrollDirection ==
+            ScrollDirection.reverse) {
+          if (_isVisible) {
+            setState(() {
+              _isVisible = false;
+            });
+          }
+        } else if (_scrollController.position.userScrollDirection ==
+            ScrollDirection.forward) {
+          if (!_isVisible) {
+            setState(() {
+              _isVisible = true;
+            });
+          }
         }
       }
     });
   }
+
+void _goBranch(int index) {
+  setState(() {
+    // Show the navigation bar when navigating, and keep it visible on "Cuenta" tab
+    _isVisible = index == 3 ? true : _isVisible;
+  });
+  widget.onDestinationSelected(index);
+}
 
   @override
   void dispose() {
@@ -95,24 +103,21 @@ class _ScaffoldWithNavigationBarState
 
   @override
   Widget build(BuildContext context) {
-    // Get the total quantity from cartProvider
     final cartItems = ref.watch(cartProvider);
     final totalQuantity = getTotalCartQuantity(cartItems);
 
     return Scaffold(
-      body: NotificationListener<ScrollNotification>(
+       body: NotificationListener<ScrollNotification>(
         onNotification: (scrollNotification) {
-          if (scrollNotification is ScrollUpdateNotification) {
-            // Check scrolling direction and update visibility
+          if (widget.currentIndex != 3 &&
+              scrollNotification is ScrollUpdateNotification) {
             if (scrollNotification.scrollDelta! > 10) {
-              // Scrolling down
               if (_isVisible) {
                 setState(() {
                   _isVisible = false;
                 });
               }
             } else if (scrollNotification.scrollDelta! < -1) {
-              // Scrolling up
               if (!_isVisible) {
                 setState(() {
                   _isVisible = true;
@@ -123,43 +128,39 @@ class _ScaffoldWithNavigationBarState
           return true;
         },
         child: widget.body,
+    
       ),
       bottomNavigationBar: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        height: _isVisible ? 70.0 : 0.0, // Adjust height based on visibility
+        height: _isVisible ? 70.0 : 0.0,
         child: Wrap(
           children: [
             NavigationBarTheme(
               data: NavigationBarThemeData(
                 backgroundColor: Colors.white,
                 indicatorColor: ColorsPaletteRedonda.primary,
-                labelTextStyle: WidgetStateProperty.resolveWith(
-                  (Set<WidgetState> states) {
-                    if (states.contains(WidgetState.selected)) {
-                      return const TextStyle(
-                          color: ColorsPaletteRedonda.primary,
-                          fontWeight: FontWeight.bold); // Selected label color
-                    }
+                labelTextStyle: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) {
                     return const TextStyle(
-                        color: ColorsPaletteRedonda.deepBrown1,
-                        fontWeight: FontWeight.bold); // Unselected label color
-                  },
-                ),
-                iconTheme: WidgetStateProperty.resolveWith(
-                  (Set<WidgetState> states) {
-                    if (states.contains(WidgetState.selected)) {
-                      return const IconThemeData(
-                          color: Colors.white); // Selected icon color
-                    }
-                    return const IconThemeData(
-                        color: ColorsPaletteRedonda
-                            .deepBrown1); // Unselected icon color
-                  },
-                ),
+                      color: ColorsPaletteRedonda.primary,
+                      fontWeight: FontWeight.bold,
+                    );
+                  }
+                  return const TextStyle(
+                    color: ColorsPaletteRedonda.deepBrown1,
+                    fontWeight: FontWeight.bold,
+                  );
+                }),
+                iconTheme: WidgetStateProperty.resolveWith((states) {
+                  return states.contains(WidgetState.selected)
+                      ? const IconThemeData(color: Colors.white)
+                      : const IconThemeData(
+                          color: ColorsPaletteRedonda.deepBrown1);
+                }),
               ),
               child: NavigationBar(
                 selectedIndex: widget.currentIndex,
-                onDestinationSelected: widget.onDestinationSelected,
+                onDestinationSelected: _goBranch,
                 labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
                 destinations: List.generate(
                     4, (index) => _buildDestination(index, totalQuantity)),
