@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -6,6 +7,8 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/location/location_capture.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 import 'package:url_launcher/url_launcher.dart';
+  import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
@@ -200,8 +203,70 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
     return isValid;
   }
 
+
+
+Future<void> _saveOrderToFirestore(List<CartItem> cartItems) async {
+  final userId = FirebaseAuth.instance.currentUser?.uid;
+
+  if (userId == null) {
+    throw Exception("User not signed in");
+  }
+
+  // Determine payment status based on payment method
+  final paymentMethod = _paymentMethods[_selectedPaymentMethod];
+  final paymentStatus = paymentMethod == 'Cardnet' ? 'Paid' : 'Pending';
+
+  // Separate items into orders and subscriptions
+  final orders = cartItems.where((item) => !item.isMealSubscription).toList();
+  final subscriptions = cartItems.where((item) => item.isMealSubscription).toList();
+
+  // Prepare Firestore instances
+  final firestore = FirebaseFirestore.instance;
+
+  // Save orders to the orders collection
+  for (var order in orders) {
+    final orderData = {
+      'userId': userId,
+      'orderType': order.foodType,
+      'location': {
+        'address': order.foodType == 'Catering' ? cateringAddress : regularAddress,
+        'latitude': order.foodType == 'Catering' ? _cateringLatitude : _regularDishesLatitude,
+        'longitude': order.foodType == 'Catering' ? _cateringLongitude : _regularDishesLongitude,
+      },
+      'items': [order.toJson()],
+      'paymentMethod': paymentMethod,
+      'paymentStatus': paymentStatus,
+      'timestamp': FieldValue.serverTimestamp(),
+    };
+    await firestore.collection('orders').add(orderData);
+  }
+
+  // Save subscriptions to the subscriptions collection
+  for (var subscription in subscriptions) {
+    final subscriptionData = {
+      'userId': userId,
+      'totalMeals': subscription.totalMeals,
+      'remainingMeals': subscription.remainingMeals,
+      'expirationDate': subscription.expirationDate.toIso8601String(),
+      'location': {
+        'address': mealSubscriptionAddress,
+        'latitude': _mealSubscriptionLatitude,
+        'longitude': _mealSubscriptionLongitude,
+      },
+      'paymentMethod': paymentMethod,
+      'paymentStatus': paymentStatus,
+      'timestamp': FieldValue.serverTimestamp(),
+    };
+    await firestore.collection('subscriptions').add(subscriptionData);
+  }
+}
+
   Future<void> _sendWhatsAppOrder(List<CartItem> cartItems) async {
     if (_validateFields(cartItems)) {
+
+      await _saveOrderToFirestore(cartItems);
+
+
       const String phoneNumber = '+18493590832';
       final String orderDetails = _generateOrderDetails(cartItems);
       final String whatsappUrlMobile =

@@ -1,7 +1,7 @@
 import 'package:starter_architecture_flutter_firebase/src/theme/app_theme.dart';
-import 'package:starter_architecture_flutter_firebase/widgets/input_field/selector_modal.dart';
-import 'package:starter_architecture_flutter_firebase/widgets/radio_button.dart';
+import 'package:starter_architecture_flutter_firebase/src/widgets/input_field/selector_modal.dart';
 import 'package:flutter/material.dart';
+import 'package:starter_architecture_flutter_firebase/src/widgets/radio_button.dart';
 
 class DropdownPopup<T> extends PopupRoute {
   DropdownPopup({
@@ -33,8 +33,7 @@ class DropdownPopup<T> extends PopupRoute {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
   ) {
-    double topOffset;
-    topOffset = topOffset;
+    double topOffset = 0.0; // Initialize topOffset with a default value
     if (topOffset + totalHeight >= MediaQuery.of(context).size.height) {
       topOffset = MediaQuery.of(context).size.height - totalHeight - 40;
     }
@@ -88,7 +87,7 @@ class DropdownPopup<T> extends PopupRoute {
                                             .textStyles.headlineMedium
                                         : customAppTheme.textStyles.bodyLarge
                                             .copyWith(
-                                            color: Colors.accents,
+                                            color: Colors.black,
                                           ),
                                   ),
                                 ),
