@@ -10,6 +10,17 @@ class AuthRepository {
   Stream<User?> authStateChanges() => _auth.authStateChanges();
   User? get currentUser => _auth.currentUser;
 
+  Future<void> forceRefreshAuthState() async {
+    try {
+      // Refreshes the current user, forcing a re-evaluation of auth state
+      await _auth.currentUser?.reload();
+      // Access currentUser again to trigger the auth state change
+      print("User state refreshed: ${_auth.currentUser?.uid}");
+    } on FirebaseAuthException catch (e) {
+      print('Error refreshing auth state: ${e.code} - ${e.message}');
+    }
+  }
+
   Future<void> signInAnonymously() async {
     try {
       await _auth.signInAnonymously();

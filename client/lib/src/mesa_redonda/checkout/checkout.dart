@@ -1,13 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/domain/models.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/location/location_capture.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
-import 'package:url_launcher/url_launcher.dart'; 
+import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
@@ -203,82 +205,88 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
     return isValid;
   }
 
-Future<void> _saveOrderToFirestore(List<CartItem> cartItems) async {
-  final userId = FirebaseAuth.instance.currentUser?.uid;
-  final email = FirebaseAuth.instance.currentUser?.email;
+  Future<void> _saveOrderToFirestore(List<CartItem> cartItems) async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    final email = FirebaseAuth.instance.currentUser?.email;
 
-  if (userId == null) {
-    throw Exception("User not signed in");
+    if (userId == null) {
+      throw Exception("User not signed in");
+    }
+
+    // Determine payment status based on payment method
+    final paymentMethod = _paymentMethods[_selectedPaymentMethod];
+    final paymentStatus = paymentMethod == 'Cardnet' ? 'pagado' : 'pendiente';
+
+    // Separate items into orders and subscriptions
+    final orders = cartItems.where((item) => !item.isMealSubscription).toList();
+    final subscriptions =
+        cartItems.where((item) => item.isMealSubscription).toList();
+
+    // Prepare Firestore instances
+    final firestore = FirebaseFirestore.instance;
+    final orderDate =
+        DateTime.now(); // Capture the current date and time as the order date
+
+    // Save orders to the orders collection
+    for (var order in orders) {
+      final orderNumber = OrderNumberGenerator.generateOrderNumber();
+      final orderData = {
+        'orderNumber': orderNumber,
+        'email': email,
+        'userId': userId,
+        'orderType': order.foodType,
+        'status': 'pendiente', // Set initial status to 'pendiente'
+        'orderDate': orderDate.toIso8601String(), // Save order date
+        'location': {
+          'address':
+              order.foodType == 'Catering' ? cateringAddress : regularAddress,
+          'latitude': order.foodType == 'Catering'
+              ? _cateringLatitude
+              : _regularDishesLatitude,
+          'longitude': order.foodType == 'Catering'
+              ? _cateringLongitude
+              : _regularDishesLongitude,
+        },
+        'items': [order.toJson()],
+        'paymentMethod': paymentMethod,
+        'paymentStatus': paymentStatus,
+        'totalAmount': double.parse(order.pricing) * order.quantity,
+        'timestamp': FieldValue.serverTimestamp(),
+      };
+      await firestore.collection('orders').add(orderData);
+    }
+
+    // Save subscriptions to the subscriptions collection
+    for (var subscription in subscriptions) {
+      final subscriptionOrderNumber =
+          OrderNumberGenerator.generateOrderNumber();
+      final subscriptionData = {
+        'orderNumber': subscriptionOrderNumber,
+        'email': email,
+        'userId': userId,
+        'planName': subscription.id,
+        'totalMeals': subscription.totalMeals,
+        'remainingMeals': subscription.remainingMeals,
+        'expirationDate': subscription.expirationDate.toIso8601String(),
+        'status': 'pendiente', // Set initial status to 'pendiente'
+        'orderDate': orderDate.toIso8601String(), // Save order date
+        'location': {
+          'address': mealSubscriptionAddress,
+          'latitude': _mealSubscriptionLatitude,
+          'longitude': _mealSubscriptionLongitude,
+        },
+        'paymentMethod': paymentMethod,
+        'paymentStatus': paymentStatus,
+        'totalAmount': double.parse(subscription.pricing),
+        'timestamp': FieldValue.serverTimestamp(),
+      };
+      await firestore.collection('subscriptions').add(subscriptionData);
+    }
   }
-
-  // Determine payment status based on payment method
-  final paymentMethod = _paymentMethods[_selectedPaymentMethod];
-  final paymentStatus = paymentMethod == 'Cardnet' ? 'pagado' : 'pendiente';
-
-  // Separate items into orders and subscriptions
-  final orders = cartItems.where((item) => !item.isMealSubscription).toList();
-  final subscriptions = cartItems.where((item) => item.isMealSubscription).toList();
-
-  // Prepare Firestore instances
-  final firestore = FirebaseFirestore.instance;
-  final orderDate = DateTime.now(); // Capture the current date and time as the order date
-
-  // Save orders to the orders collection
-  for (var order in orders) {
-    final orderNumber = OrderNumberGenerator.generateOrderNumber();
-    final orderData = {
-      'orderNumber': orderNumber,
-      'email': email,
-      'userId': userId,
-      'orderType': order.foodType,
-      'status': 'pendiente', // Set initial status to 'pendiente'
-      'orderDate': orderDate.toIso8601String(), // Save order date
-      'location': {
-        'address': order.foodType == 'Catering' ? cateringAddress : regularAddress,
-        'latitude': order.foodType == 'Catering' ? _cateringLatitude : _regularDishesLatitude,
-        'longitude': order.foodType == 'Catering' ? _cateringLongitude : _regularDishesLongitude,
-      },
-      'items': [order.toJson()],
-      'paymentMethod': paymentMethod,
-      'paymentStatus': paymentStatus,
-      'totalAmount': double.parse(order.pricing) * order.quantity,
-      'timestamp': FieldValue.serverTimestamp(),
-    };
-    await firestore.collection('orders').add(orderData);
-  }
-
-  // Save subscriptions to the subscriptions collection
-  for (var subscription in subscriptions) {
-    final subscriptionOrderNumber = OrderNumberGenerator.generateOrderNumber();
-    final subscriptionData = {
-      'orderNumber': subscriptionOrderNumber, 
-      'email': email,
-      'userId': userId,
-      'planName': subscription.id,
-      'totalMeals': subscription.totalMeals,
-      'remainingMeals': subscription.remainingMeals,
-      'expirationDate': subscription.expirationDate.toIso8601String(),
-      'status': 'pendiente', // Set initial status to 'pendiente'
-      'orderDate': orderDate.toIso8601String(), // Save order date
-      'location': {
-        'address': mealSubscriptionAddress,
-        'latitude': _mealSubscriptionLatitude,
-        'longitude': _mealSubscriptionLongitude,
-      },
-      'paymentMethod': paymentMethod,
-      'paymentStatus': paymentStatus,
-      'totalAmount': double.parse(subscription.pricing),
-      'timestamp': FieldValue.serverTimestamp(),
-    };
-    await firestore.collection('subscriptions').add(subscriptionData);
-  }
-}
 
   Future<void> _sendWhatsAppOrder(List<CartItem> cartItems) async {
     if (_validateFields(cartItems)) {
-
       await _saveOrderToFirestore(cartItems);
-
 
       const String phoneNumber = '+18493590832';
       final String orderDetails = _generateOrderDetails(cartItems);
@@ -289,8 +297,12 @@ Future<void> _saveOrderToFirestore(List<CartItem> cartItems) async {
 
       if (await canLaunchUrl(Uri.parse(whatsappUrlMobile))) {
         await launchUrl(Uri.parse(whatsappUrlMobile));
+        ref.read(cartProvider.notifier).clearCart();
+        GoRouter.of(context).goNamed(AppRoute.home.name);
       } else if (await canLaunchUrl(Uri.parse(whatsappUrlWeb))) {
         await launchUrl(Uri.parse(whatsappUrlWeb));
+        ref.read(cartProvider.notifier).clearCart();
+        GoRouter.of(context).goNamed(AppRoute.home.name);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('No pude abrir WhatsApp')),

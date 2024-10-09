@@ -5,8 +5,6 @@ import 'package:starter_architecture_flutter_firebase/src/constants/app_sizes.da
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/data/order_history_repository.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
-
-
 class OrderHistoryList extends ConsumerWidget {
   const OrderHistoryList({super.key});
 
@@ -24,9 +22,10 @@ class OrderHistoryList extends ConsumerWidget {
           physics: const NeverScrollableScrollPhysics(),
           itemCount: orders.length,
           itemBuilder: (context, index) {
-            final order = orders[index];
+            final order = orders.reversed.toList()[index];
             return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
               child: Card(
                 elevation: 4,
                 margin: const EdgeInsets.symmetric(vertical: Sizes.p8),
@@ -41,9 +40,9 @@ class OrderHistoryList extends ConsumerWidget {
                       Text(
                         'Orden #${order.orderNumber}',
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: ColorsPaletteRedonda.primary,
-                        ),
+                              fontWeight: FontWeight.bold,
+                              color: ColorsPaletteRedonda.primary,
+                            ),
                       ),
                       const SizedBox(height: 8.0),
                       Text(
@@ -69,8 +68,8 @@ class OrderHistoryList extends ConsumerWidget {
                       Text(
                         'Tipo: ${order.orderType}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       const SizedBox(height: 8.0),
                       Row(
@@ -87,10 +86,10 @@ class OrderHistoryList extends ConsumerWidget {
                       Text(
                         'Estatus de PAgo: ${order.paymentStatus}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: order.paymentStatus == 'pagado'
-                              ? Colors.green
-                              : Colors.red,
-                        ),
+                              color: order.paymentStatus == 'pagado'
+                                  ? Colors.green
+                                  : Colors.red,
+                            ),
                       ),
                       const SizedBox(height: 8.0),
                       Row(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:starter_architecture_flutter_firebase/src/features/authentication/data/firebase_auth_repository.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/auth_providers.dart';
 
 class CustomSignInScreen extends ConsumerStatefulWidget {
@@ -36,14 +37,31 @@ class _CustomSignInScreenState extends ConsumerState<CustomSignInScreen> {
         providers: authProviders,
         showPasswordVisibilityToggle: true,
         actions: [
-          AuthStateChangeAction<UserCreated>((context, state) {
-            print("User account created.");
-            Navigator.of(context).pop();
+          AuthStateChangeAction((context, state) {
+            final user = switch (state) {
+              SignedIn(user: final user) => user,
+              CredentialLinked(user: final user) => user,
+              UserCreated(credential: final cred) => cred.user,
+              _ => null,
+            };
+
+            switch (user) {
+              case User(emailVerified: true):
+                Navigator.pop(context);
+              case User(emailVerified: false, email: final String _):
+                final authRepo = ref.read(authRepositoryProvider);
+                authRepo.forceRefreshAuthState();
+                Navigator.of(context).pop();
+            }
           }),
-          AuthStateChangeAction<SignedIn>((context, state) {
-            print("User signed in.");
-            Navigator.of(context).pop();
-          }),
+          // AuthStateChangeAction<UserCreated>((context, state) {
+          //   print("User account created.");
+          //   Navigator.of(context).pop();
+          // }),
+          // AuthStateChangeAction<SignedIn>((context, state) {
+          //   print("User signed in.");
+          //   Navigator.of(context).pop();
+          // }),
         ],
         footerBuilder: (context, action) {
           return const Column(

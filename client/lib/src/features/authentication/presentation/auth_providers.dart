@@ -14,7 +14,7 @@ List<AuthProvider<AuthListener, AuthCredential>> authProviders(
   return [
     EmailAuthProvider(),
     // PhoneAuthProvider(),
-    GoogleProvider(clientId: GOOGLE_CLIENT_ID),
+    // GoogleProvider(clientId: GOOGLE_CLIENT_ID),
     // AppleProvider(),
   ];
 }

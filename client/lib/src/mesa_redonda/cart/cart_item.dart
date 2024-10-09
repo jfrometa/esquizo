@@ -288,6 +288,10 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
     }
   }
 
+  void clearCart() {
+    state = []; // Set state to an empty list to clear the cart
+  }
+
   // Increment quantity of a catering item
   void incrementCateringQuantity(String title) {
     state = [

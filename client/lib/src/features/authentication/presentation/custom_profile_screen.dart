@@ -7,11 +7,17 @@ import 'package:starter_architecture_flutter_firebase/src/features/authenticatio
 
 // custom_profile_screen.dart
 
-class CustomProfileScreen extends ConsumerWidget {
+class CustomProfileScreen extends ConsumerStatefulWidget {
   const CustomProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CustomProfileScreen> createState() =>
+      _CustomProfileScreenState();
+}
+
+class _CustomProfileScreenState extends ConsumerState<CustomProfileScreen> {
+  @override
+  Widget build(BuildContext context) {
     final authStateChanges = ref.watch(authStateChangesProvider);
     final authRepo = ref.read(authRepositoryProvider);
 
@@ -28,8 +34,11 @@ class CustomProfileScreen extends ConsumerWidget {
           return AnonymousProfileScreen(user: user);
         } else {
           // User is authenticated
+
           return AuthenticatedProfileScreen(user: user);
         }
+
+        setState(() {});
       },
       loading: () => const Scaffold(
         body: Center(child: CircularProgressIndicator()),
