@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-
 import 'custom_sign_in_screen.dart';
 
 class AnonymousProfileScreen extends StatelessWidget {
@@ -14,7 +13,7 @@ class AnonymousProfileScreen extends StatelessWidget {
     return Scaffold(
       // Optional: Hide the app bar if desired
       appBar: AppBar(
-        title: const Text('Welcome, Guest'),
+        title: const Text('Bienvenido!'),
         forceMaterialTransparency: true,
       ),
       body: Center(
@@ -24,7 +23,7 @@ class AnonymousProfileScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                'You are browsing as a guest.',
+                'Estas en la vista de invitados',
                 style: TextStyle(fontSize: 18),
                 textAlign: TextAlign.center,
               ),
@@ -39,7 +38,7 @@ class AnonymousProfileScreen extends StatelessWidget {
                     ),
                   );
                 },
-                child: const Text('Sign In or Create an Account'),
+                child: const Text('Registrate para crear una cuenta'),
               ),
             ],
           ),

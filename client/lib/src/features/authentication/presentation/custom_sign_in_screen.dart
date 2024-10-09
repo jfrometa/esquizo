@@ -1,46 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/auth_providers.dart';
-import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/link_account_screen.dart';
 
-
-class CustomSignInScreen extends ConsumerWidget {
+class CustomSignInScreen extends ConsumerStatefulWidget {
   const CustomSignInScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CustomSignInScreen> createState() => _CustomSignInScreenState();
+}
+
+class _CustomSignInScreenState extends ConsumerState<CustomSignInScreen> {
+  @override
+  Widget build(BuildContext context) {
     final authProviders = ref.watch(authProvidersProvider);
+
+    // Add FirebaseAuth listener for debugging
+    // FirebaseAuth.instance.authStateChanges().listen((user) {
+    //   if ((user?.isAnonymous ?? true)) {
+    //     print("User is signed in with UID: ${user?.uid}");
+    //     Navigator.of(context).pop(); // Pop the screen upon successful login
+    //   } else {
+    //     print("User is signed out.");
+    //   }
+    // });
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sign In'),
+        title: const Text('Registro'),
         forceMaterialTransparency: true,
       ),
       body: SignInScreen(
+        auth: FirebaseAuth.instance,
         providers: authProviders,
+        showPasswordVisibilityToggle: true,
         actions: [
-          AuthStateChangeAction<SignedIn>((context, state) {
-            // User signed in successfully; refresh the UI
-            Navigator.of(context).popUntil((route) => route.isFirst);
-          }),
           AuthStateChangeAction<UserCreated>((context, state) {
-            // Navigate to link account screen to link anonymous account
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => LinkAccountScreen(
-                  email: state.credential.user?.email ?? '',
-                ),
-              ),
-            );
+            print("User account created.");
+            Navigator.of(context).pop();
+          }),
+          AuthStateChangeAction<SignedIn>((context, state) {
+            print("User signed in.");
+            Navigator.of(context).pop();
           }),
         ],
         footerBuilder: (context, action) {
           return const Column(
             children: [
               SizedBox(height: 8),
-              Text('By signing in, you agree to our terms and conditions.'),
+              Text('Registrate para crear una cuenta'),
             ],
           );
         },

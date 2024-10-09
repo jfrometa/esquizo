@@ -13,10 +13,12 @@ class CustomProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authStateChanges = ref.watch(authStateChangesProvider);
+    final authRepo = ref.read(authRepositoryProvider);
 
     return authStateChanges.when(
       data: (user) {
         if (user == null) {
+          authRepo.signInAnonymously();
           // User is not signed in; this shouldn't happen as we sign in anonymously
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
