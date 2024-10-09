@@ -205,12 +205,14 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
     return isValid;
   }
 
-  Future<void> _saveOrderToFirestore(List<CartItem> cartItems) async {
+  Future<void> _saveOrderToFirestore(
+      List<CartItem> cartItems, Map<String, String>? contactInfo) async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
-    final email = FirebaseAuth.instance.currentUser?.email;
+    final email =
+        FirebaseAuth.instance.currentUser?.email ?? contactInfo?['email'];
 
-    if (userId == null) {
-      throw Exception("User not signed in");
+    if (userId == null && contactInfo == null) {
+      throw Exception("User not signed in and no contact info provided");
     }
 
     // Determine payment status based on payment method
@@ -222,21 +224,21 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
     final subscriptions =
         cartItems.where((item) => item.isMealSubscription).toList();
 
-    // Prepare Firestore instances
     final firestore = FirebaseFirestore.instance;
-    final orderDate =
-        DateTime.now(); // Capture the current date and time as the order date
+    final orderDate = DateTime.now();
 
-    // Save orders to the orders collection
+    // Save orders to Firestore
     for (var order in orders) {
       final orderNumber = OrderNumberGenerator.generateOrderNumber();
       final orderData = {
         'orderNumber': orderNumber,
         'email': email,
-        'userId': userId,
+        'userId': userId ?? 'anon',
+        'name': contactInfo?['name'],
+        'phone': contactInfo?['phone'],
         'orderType': order.foodType,
-        'status': 'pendiente', // Set initial status to 'pendiente'
-        'orderDate': orderDate.toIso8601String(), // Save order date
+        'status': 'pendiente',
+        'orderDate': orderDate.toIso8601String(),
         'location': {
           'address':
               order.foodType == 'Catering' ? cateringAddress : regularAddress,
@@ -256,20 +258,22 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
       await firestore.collection('orders').add(orderData);
     }
 
-    // Save subscriptions to the subscriptions collection
+    // Save subscriptions to Firestore
     for (var subscription in subscriptions) {
       final subscriptionOrderNumber =
           OrderNumberGenerator.generateOrderNumber();
       final subscriptionData = {
         'orderNumber': subscriptionOrderNumber,
         'email': email,
-        'userId': userId,
+        'userId': userId ?? 'anon',
+        'name': contactInfo?['name'],
+        'phone': contactInfo?['phone'],
         'planName': subscription.id,
         'totalMeals': subscription.totalMeals,
         'remainingMeals': subscription.remainingMeals,
         'expirationDate': subscription.expirationDate.toIso8601String(),
-        'status': 'pendiente', // Set initial status to 'pendiente'
-        'orderDate': orderDate.toIso8601String(), // Save order date
+        'status': 'pendiente',
+        'orderDate': orderDate.toIso8601String(),
         'location': {
           'address': mealSubscriptionAddress,
           'latitude': _mealSubscriptionLatitude,
@@ -284,36 +288,127 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
     }
   }
 
-  Future<void> _sendWhatsAppOrder(List<CartItem> cartItems) async {
-    if (_validateFields(cartItems)) {
-      await _saveOrderToFirestore(cartItems);
+  Future<Map<String, String>?> _checkAndPromptForContactInfo(
+      BuildContext context) async {
+    final currentUser = FirebaseAuth.instance.currentUser;
 
-      const String phoneNumber = '+18493590832';
-      final String orderDetails = _generateOrderDetails(cartItems);
-      final String whatsappUrlMobile =
-          'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
-      final String whatsappUrlWeb =
-          'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
+    // Check if the user is anonymous
+    if (currentUser == null || currentUser.isAnonymous) {
+      String? name, phone, email;
 
-      if (await canLaunchUrl(Uri.parse(whatsappUrlMobile))) {
-        await launchUrl(Uri.parse(whatsappUrlMobile));
-        ref.read(cartProvider.notifier).clearCart();
-        GoRouter.of(context).goNamed(AppRoute.home.name);
-      } else if (await canLaunchUrl(Uri.parse(whatsappUrlWeb))) {
-        await launchUrl(Uri.parse(whatsappUrlWeb));
-        ref.read(cartProvider.notifier).clearCart();
-        GoRouter.of(context).goNamed(AppRoute.home.name);
+      // Prompt for name, phone, and optional email
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Información de Contacto'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Por favor, proporcione su nombre, teléfono y correo electrónico (opcional) para continuar. Esto nos ayudará a mejorar nuestro servicio.',
+                style: TextStyle(fontSize: 14),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                decoration: const InputDecoration(
+                  labelText: 'Nombre',
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: (value) => name = value,
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                decoration: const InputDecoration(
+                  labelText: 'Teléfono',
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: (value) => phone = value,
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                decoration: const InputDecoration(
+                  labelText: 'Correo electrónico (opcional)',
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: (value) => email = value,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text('Continuar'),
+            ),
+          ],
+        ),
+      );
+
+      // If the user confirmed, return the details
+      if (confirmed == true) {
+        return {
+          'name': name ?? '',
+          'phone': phone ?? '',
+          'email': email ?? '', // Optional email
+        };
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No pude abrir WhatsApp')),
-        );
+        return null; // Return null if user cancels
       }
-    } else {
+    }
+
+    return {}; // Return empty map if signed in
+  }
+
+  Future<void> _processOrder(
+      BuildContext context, List<CartItem> cartItems) async {
+    final contactInfo = await _checkAndPromptForContactInfo(context);
+    if (contactInfo == null) return; // Exit if user cancels
+
+    try {
+      await _saveOrderToFirestore(cartItems, contactInfo);
+      await _sendWhatsAppOrder(cartItems, contactInfo);
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Completa los campos requeridos.'),
+          content: Text('Order placed successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error processing order: $error'),
           backgroundColor: Colors.red,
         ),
+      );
+    }
+  }
+
+  Future<void> _sendWhatsAppOrder(
+      List<CartItem> cartItems, Map<String, String>? contactInfo) async {
+    const String phoneNumber = '+18493590832';
+    final String orderNumber = OrderNumberGenerator.generateOrderNumber();
+    final String orderDetails =
+        _generateOrderDetails(cartItems, contactInfo, orderNumber);
+    final String whatsappUrlMobile =
+        'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
+    final String whatsappUrlWeb =
+        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
+
+    if (await canLaunchUrl(Uri.parse(whatsappUrlMobile))) {
+      await launchUrl(Uri.parse(whatsappUrlMobile));
+      ref.read(cartProvider.notifier).clearCart();
+      GoRouter.of(context).goNamed(AppRoute.home.name);
+    } else if (await canLaunchUrl(Uri.parse(whatsappUrlWeb))) {
+      await launchUrl(Uri.parse(whatsappUrlWeb));
+      ref.read(cartProvider.notifier).clearCart();
+      GoRouter.of(context).goNamed(AppRoute.home.name);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No pude abrir WhatsApp')),
       );
     }
   }
@@ -398,12 +493,30 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
     });
   }
 
-  // Helper function to generate order details for WhatsApp
-  String _generateOrderDetails(List<CartItem> cartItems) {
+  String _generateOrderDetails(List<CartItem> cartItems,
+      Map<String, String>? contactInfo, String orderNumber) {
+    final StringBuffer orderDetailsBuffer = StringBuffer();
+    double total = 0.0;
+
+    orderDetailsBuffer.writeln('*Detalles de la Orden*:');
+    orderDetailsBuffer.writeln('*Número de Orden*: $orderNumber');
+
+    if (contactInfo != null && contactInfo.isNotEmpty) {
+      orderDetailsBuffer.writeln('*Información de Contacto*:');
+      if (contactInfo['name']?.isNotEmpty ?? false) {
+        orderDetailsBuffer.writeln('Nombre: ${contactInfo['name']}');
+      }
+      if (contactInfo['phone']?.isNotEmpty ?? false) {
+        orderDetailsBuffer.writeln('Teléfono: ${contactInfo['phone']}');
+      }
+      if (contactInfo['email']?.isNotEmpty ?? false) {
+        orderDetailsBuffer.writeln('Email: ${contactInfo['email']}');
+      }
+    }
+
     final StringBuffer cateringBuffer = StringBuffer();
     final StringBuffer regularDishesBuffer = StringBuffer();
     final StringBuffer mealSubscriptionBuffer = StringBuffer();
-    double total = 0.0;
 
     for (var item in cartItems) {
       final String title = item.title;
@@ -423,63 +536,42 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
     final double tax = total * _taxRate;
     total += tax + _deliveryFee;
 
-    String cateringGoogleMapsLink =
-        _cateringLatitude != null && _cateringLongitude != null
-            ? _generateGoogleMapsLink(_cateringLatitude!, _cateringLongitude!)
-            : 'Not Available';
-
-    String regularDishesGoogleMapsLink =
-        _regularDishesLatitude != null && _regularDishesLongitude != null
-            ? _generateGoogleMapsLink(
-                _regularDishesLatitude!, _regularDishesLongitude!)
-            : 'Not Available';
-
-    String mealSubscriptionGoogleMapsLink =
-        _mealSubscriptionLatitude != null && _mealSubscriptionLongitude != null
-            ? _generateGoogleMapsLink(
-                _mealSubscriptionLatitude!, _mealSubscriptionLongitude!)
-            : 'Not Available';
-
-    final StringBuffer orderDetailsBuffer = StringBuffer();
-
-    orderDetailsBuffer.writeln('*Detalles de la Orden*:');
-
     if (cateringBuffer.isNotEmpty) {
       orderDetailsBuffer.writeln('''
-    *Catering*:
-    Ubicacion: ${cateringAddress ?? 'Not Provided'}
-    Google Maps: $cateringGoogleMapsLink
-    Fecha: ${_cateringDateController.text}
-    Hora: ${_cateringTimeController.text}
-    $cateringBuffer
+      *Catering*:
+      Ubicación: ${cateringAddress ?? 'No proporcionada'}
+      Google Maps: ${_generateGoogleMapsLink(_cateringLatitude!, _cateringLongitude!)}
+      Fecha: ${_cateringDateController.text}
+      Hora: ${_cateringTimeController.text}
+      $cateringBuffer
     ''');
     }
 
     if (regularDishesBuffer.isNotEmpty) {
       orderDetailsBuffer.writeln('''
-    *Regular Dishes*:
-    Ubicacion: ${regularAddress ?? 'Not Provided'}
-    Google Maps: $regularDishesGoogleMapsLink
-    (Estimated delivery time: ${_formatTime(_deliveryStartTime!)} - ${_formatTime(_deliveryEndTime!)})
-    $regularDishesBuffer
+      *Platos Regulares*:
+      Ubicación: ${regularAddress ?? 'No proporcionada'}
+      Google Maps: ${_generateGoogleMapsLink(_regularDishesLatitude!, _regularDishesLongitude!)}
+      (Tiempo estimado de entrega: ${_formatTime(_deliveryStartTime!)} - ${_formatTime(_deliveryEndTime!)})
+      $regularDishesBuffer
     ''');
     }
 
     if (mealSubscriptionBuffer.isNotEmpty) {
       orderDetailsBuffer.writeln('''
-    *Meal Subscriptions*:
-    Ubicacion: ${mealSubscriptionAddress ?? 'Not Provided'}
-    Google Maps: $mealSubscriptionGoogleMapsLink
-    Fecha: ${_mealSubscriptionDateController.text}
-    Hora: ${_mealSubscriptionTimeController.text}
-    $mealSubscriptionBuffer
+      *Suscripciones de Comidas*:
+      Ubicación: ${mealSubscriptionAddress ?? 'No proporcionada'}
+      Google Maps: ${_generateGoogleMapsLink(_mealSubscriptionLatitude!, _mealSubscriptionLongitude!)}
+      Fecha: ${_mealSubscriptionDateController.text}
+      Hora: ${_mealSubscriptionTimeController.text}
+      $mealSubscriptionBuffer
     ''');
     }
 
     orderDetailsBuffer.writeln('''
-    *Metodo de Pago*: ${_paymentMethods[_selectedPaymentMethod]}
+    *Método de Pago*: ${_paymentMethods[_selectedPaymentMethod]}
     *Totales*:
-    Envio: RD \$$_deliveryFee
+    Envío: RD \$$_deliveryFee
     Impuestos: RD \$${tax.toStringAsFixed(2)}
     Total: RD \$${total.toStringAsFixed(2)}
   ''');
@@ -674,7 +766,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
                         _buildOrderSummary(cartItems),
 
                         ElevatedButton(
-                          onPressed: () => _sendWhatsAppOrder(cartItems),
+                          onPressed: () => _processOrder(context, cartItems),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: ColorsPaletteRedonda.primary,
                             minimumSize: const Size(double.infinity, 48),
