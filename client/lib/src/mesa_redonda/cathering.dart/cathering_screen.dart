@@ -18,7 +18,6 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
   final TextEditingController sideRequestController = TextEditingController();
   late TabController _tabController;
 
-  // Group items by category
   Map<String, List<CateringItem>> groupCateringItemsByCategory(
       List<CateringItem> items) {
     Map<String, List<CateringItem>> categorizedItems = {};
@@ -41,13 +40,217 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
     super.dispose();
   }
 
+void _showCateringForm(BuildContext context, CateringItem item) {
+  showModalBottomSheet(
+    context: context,
+    isDismissible: true,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (context) {
+      String apetito = 'regular';
+      String preferencia = 'salado';
+      String alergias = '';
+      String eventType = '';
+      int peopleCount = 10;
+
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header with Dismiss Icon
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Catering Details',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close, color: ColorsPaletteRedonda.deepBrown1),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const Divider(),
+                // Apetito Dropdown with Title
+                const Text(
+                  'Nivel de Apetito',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  value: apetito,
+                  decoration: InputDecoration(
+                    labelText: 'Apetito',
+                    labelStyle: Theme.of(context).textTheme.bodySmall,
+                    border: OutlineInputBorder(),
+                    filled: true,
+                    fillColor: ColorsPaletteRedonda.white,
+                  ),
+                  items: [
+                    DropdownMenuItem(value: 'poco', child: Text('Poco')),
+                    DropdownMenuItem(value: 'regular', child: Text('Regular')),
+                    DropdownMenuItem(value: 'mucho', child: Text('Mucho')),
+                  ],
+                  onChanged: (value) => setState(() => apetito = value!),
+                ),
+                const SizedBox(height: 16),
+                // Allergies Input with Title
+                const Text(
+                  'Alergias',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8.0,
+                  children: [
+                    for (var allergy in alergias.split(',').where((a) => a.isNotEmpty))
+                      Chip(label: Text(allergy.trim())),
+                    ActionChip(
+                      avatar: Icon(Icons.add, color: ColorsPaletteRedonda.primary),
+                      label: Text('Agregar Alergias'),
+                      onPressed: () async {
+                        var result = await showDialog<String>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text('Nueva Alergia', style: Theme.of(context).textTheme.titleMedium),
+                            content: TextField(
+                              decoration: InputDecoration(
+                                hintText: 'Ingresa una alergia',
+                                border: OutlineInputBorder(),
+                              ),
+                              onChanged: (value) => alergias = value,
+                            ),
+                            actions: [
+                              TextButton(
+                                child: Text('Aceptar'),
+                                onPressed: () => Navigator.pop(context, alergias),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (result != null && result.isNotEmpty) {
+                          setState(() => alergias = '${alergias.isEmpty ? '' : '$alergias,'}$result');
+                        }
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                // Event Type Input with Title
+                const Text(
+                  'Tipo de Evento',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: 'Ej. Cumpleaños, Boda',
+                    labelStyle: Theme.of(context).textTheme.bodySmall,
+                    border: OutlineInputBorder(),
+                    filled: true,
+                    fillColor: ColorsPaletteRedonda.white,
+                  ),
+                  onChanged: (value) => setState(() => eventType = value),
+                ),
+                const SizedBox(height: 16),
+                // People Count Dropdown with Title
+                const Text(
+                  'Número de Personas',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<int>(
+                  value: peopleCount,
+                  decoration: InputDecoration(
+                    labelText: 'Número de Personas',
+                    labelStyle: Theme.of(context).textTheme.bodySmall,
+                    border: OutlineInputBorder(),
+                    filled: true,
+                    fillColor: ColorsPaletteRedonda.white,
+                  ),
+                  items: [
+                    for (var i = 10; i <= 50; i += 10)
+                      DropdownMenuItem(value: i, child: Text('$i personas')),
+                    for (var i = 100; i <= 500; i += 100)
+                      DropdownMenuItem(value: i, child: Text('$i personas')),
+                  ],
+                  onChanged: (value) => setState(() => peopleCount = value!),
+                ),
+                const SizedBox(height: 16),
+                // Preference Dropdown with Title
+                const Text(
+                  'Preferencia de Sabor',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  value: preferencia,
+                  decoration: InputDecoration(
+                    labelText: 'Preferencia',
+                    labelStyle: Theme.of(context).textTheme.bodySmall,
+                    border: OutlineInputBorder(),
+                    filled: true,
+                    fillColor: ColorsPaletteRedonda.white,
+                  ),
+                  items: [
+                    DropdownMenuItem(value: 'dulce', child: Text('Dulce')),
+                    DropdownMenuItem(value: 'salado', child: Text('Salado')),
+                  ],
+                  onChanged: (value) => setState(() => preferencia = value!),
+                ),
+                const SizedBox(height: 24),
+                // Confirm Button
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _addToCartWithForm(item, apetito, alergias, eventType,
+                          peopleCount, preferencia);
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Confirmar'),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
+
+  void _addToCartWithForm(CateringItem item, String apetito, String alergias,
+      String eventType, int peopleCount, String preferencia) {
+    ref.read(cartProvider.notifier).addToCart(
+      {
+        'img': item.img,
+        'title': item.title,
+        'description': item.description,
+        'pricing': (item.pricePerPerson * peopleCount).toStringAsFixed(2),
+        'ingredients': item.ingredients,
+        'apetito': apetito,
+        'alergias': alergias,
+        'eventType': eventType,
+        'peopleCount': peopleCount,
+        'preferencia': preferencia,
+      },
+      1,
+      isCatering: true,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final cateringOptions = ref.watch(cateringProvider);
     final cart = ref.watch(cartProvider);
-    final cartNotifier = ref.read(cartProvider.notifier);
-
-    // Group items by category
+    // final cartNotifier = ref.read(cartProvider.notifier);
     final categorizedItems = groupCateringItemsByCategory(cateringOptions);
 
     return Scaffold(
@@ -63,17 +266,13 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
                 IconButton(
                   icon: const Icon(Icons.shopping_cart),
                   onPressed: () {
-                    // Navigate to the cart screen
-                    // context.push('/cart'); // Assuming the cart route is '/cart'
-                    context.goNamed(
-                      AppRoute.homecart.name,
-                    );
+                    context.goNamed(AppRoute.homecart.name);
                   },
                 ),
                 if (cart.isNotEmpty)
                   Positioned(
-                    top: 0, // Adjusts the vertical position of the badge
-                    right: 0, // Adjusts the horizontal position of the badge
+                    top: 0,
+                    right: 0,
                     child: CircleAvatar(
                       radius: 8,
                       backgroundColor: Colors.red,
@@ -91,23 +290,8 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
           ),
         ],
         bottom: TabBar(
-          dividerColor: Colors.transparent,
-          enableFeedback: false,
-          padding: const EdgeInsets.symmetric(horizontal: 18.0),
           controller: _tabController,
           isScrollable: true,
-          // labelPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-          labelStyle: Theme.of(context).textTheme.titleSmall,
-          unselectedLabelStyle: Theme.of(context).textTheme.titleSmall,
-          labelColor: ColorsPaletteRedonda.white,
-          unselectedLabelColor: ColorsPaletteRedonda.deepBrown1,
-          indicatorSize: TabBarIndicatorSize.tab,
-
-          indicator: TabIndicator(
-            color: ColorsPaletteRedonda
-                .primary, // Background color of the selected tab
-            radius: 16.0, // Radius for rounded corners
-          ),
           tabs: categorizedItems.keys
               .map((category) => Tab(text: category))
               .toList(),
@@ -135,26 +319,7 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
                       return CateringItemCard(
                         item: item,
                         onAddToCart: (int peopleCount, int quantity) {
-                          final sideRequest = sideRequestController.text;
-
-                          cartNotifier.addToCart({
-                            'img': item.img,
-                            'title': item.title,
-                            'description': item.description,
-                            'pricing': (item.pricePerPerson * peopleCount)
-                                .toStringAsFixed(2),
-                            'ingredients': item.ingredients,
-                            'isSpicy':
-                                false, // Assuming catering items are not spicy
-                            'foodType': 'Catering',
-                            'sideRequest': sideRequest,
-                          }, quantity,
-                              isCatering: true,
-                              peopleCount: peopleCount,
-                              sideRequest: sideRequest);
-
-                          // Clear the side request after adding to cart
-                          sideRequestController.clear();
+                          _showCateringForm(context, item);
                         },
                         sideRequestController: sideRequestController,
                       );
@@ -163,47 +328,13 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
                 }).toList(),
               ),
             ),
-            const SizedBox(height: 16),
-            ExpansionTile(
-              title: Text(
-                'Agregar Adicionales',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              children: [
-                TextFormField(
-                  controller: sideRequestController,
-                  style: Theme.of(context).textTheme.labelLarge,
-                  maxLines: 10,
-                  decoration: InputDecoration(
-                    hintText:
-                        'Arroz con fideos 20 personas, Pimientos rellenos 20 personas',
-                    filled: true,
-                    fillColor: ColorsPaletteRedonda.white,
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: const BorderSide(
-                        color: ColorsPaletteRedonda.deepBrown1,
-                        width: 1.0,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: const BorderSide(
-                        color: ColorsPaletteRedonda.primary,
-                        width: 2.0,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
           ],
         ),
       ),
     );
   }
 }
+
 
 class CateringItemCard extends StatefulWidget {
   final CateringItem item;

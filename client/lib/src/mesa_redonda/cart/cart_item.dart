@@ -1,13 +1,14 @@
 import 'dart:async';
-
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:convert';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Cart Item Model
-// Cart Item Model
+// CartItem Model
 class CartItem {
-  final String id; // Added id field
+  final String id;
   final String img;
   final String title;
   final String description;
@@ -24,13 +25,20 @@ class CartItem {
   final int totalMeals;
   final int remainingMeals;
   final DateTime expirationDate;
-
+  final bool isMealPlanDish;
   // Additional fields for catering
   final int peopleCount;
   final String sideRequest;
 
+  //Catering
+  final String apetito;
+  final String alergias;
+  final String eventType;
+  final String preferencia;
+
   CartItem({
-    required this.id, // Include id in constructor
+    this.isMealPlanDish = false,
+    required this.id,
     required this.img,
     required this.title,
     required this.description,
@@ -41,40 +49,65 @@ class CartItem {
     required this.foodType,
     required this.quantity,
     required this.isOffer,
+     this.apetito = '',
+     this.alergias = '',
+     this.eventType = '',
+     this.preferencia = '',
     this.isMealSubscription = false,
     this.totalMeals = 0,
     this.remainingMeals = 0,
     DateTime? expirationDate,
     this.peopleCount = 0,
     this.sideRequest = '',
-  }) : expirationDate =
-            expirationDate ?? DateTime.now().add(const Duration(days: 40));
+    
+  }) : expirationDate = expirationDate ?? DateTime.now().add(const Duration(days: 40));
 
   CartItem copyWith({
+    String? apetito,
+    String? alergias,
+    String? eventType,
+    String? preferencia,
     String? id,
+    String? img,
+    String? title,
+    String? description,
+    String? pricing,
+    String? offertPricing,
+    List<String>? ingredients,
+    bool? isSpicy,
+    String? foodType,
     int? quantity,
+    bool? isOffer,
+    bool? isMealSubscription,
+    int? totalMeals,
     int? remainingMeals,
+    DateTime? expirationDate,
     int? peopleCount,
     String? sideRequest,
   }) {
     return CartItem(
       id: id ?? this.id,
-      img: img,
-      title: title,
-      description: description,
-      pricing: pricing,
-      offertPricing: offertPricing,
-      ingredients: ingredients,
-      isSpicy: isSpicy,
-      foodType: foodType,
+      img: img ?? this.img,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      pricing: pricing ?? this.pricing,
+      offertPricing: offertPricing ?? this.offertPricing,
+      ingredients: ingredients ?? this.ingredients,
+      isSpicy: isSpicy ?? this.isSpicy,
+      foodType: foodType ?? this.foodType,
       quantity: quantity ?? this.quantity,
-      isOffer: isOffer,
-      isMealSubscription: isMealSubscription,
-      totalMeals: totalMeals,
+      isOffer: isOffer ?? this.isOffer,
+      isMealSubscription: isMealSubscription ?? this.isMealSubscription,
+      totalMeals: totalMeals ?? this.totalMeals,
       remainingMeals: remainingMeals ?? this.remainingMeals,
-      expirationDate: expirationDate,
+      expirationDate: expirationDate ?? this.expirationDate,
       peopleCount: peopleCount ?? this.peopleCount,
       sideRequest: sideRequest ?? this.sideRequest,
+      // isMealPlanDish: isMealPlanDish ?? this.isMealPlanDish,
+      apetito: apetito ?? this.apetito,
+      alergias: alergias ?? this.alergias,
+      eventType: eventType ?? this.eventType,
+      preferencia: preferencia ?? this.preferencia,
     );
   }
 
@@ -98,6 +131,10 @@ class CartItem {
       'expirationDate': expirationDate.toIso8601String(),
       'peopleCount': peopleCount,
       'sideRequest': sideRequest,
+      'apetito': apetito,
+      'alergias': alergias,
+      'eventType': eventType,
+      'preferencia': preferencia,
     };
   }
 
@@ -178,15 +215,16 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
     bool isMealSubscription = false,
     int totalMeals = 0,
     bool isCatering = false,
-    int peopleCount = 0, // Catering-specific
-    String? sideRequest, // Catering-specific
+    int peopleCount = 0,
+    String? sideRequest,
+  
   }) {
     if (isCatering) {
       // Handle Catering Orders
       final existingCatering = state.firstWhere(
-        (cartItem) =>
-            cartItem.title == item['title'] && cartItem.foodType == 'Catering',
+        (cartItem) => cartItem.title == item['title'] && cartItem.foodType == 'Catering',
         orElse: () => CartItem(
+          id: item['id'] ?? 'no id',
           img: item['img'],
           title: item['title'],
           description: item['description'],
@@ -198,21 +236,43 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
           quantity: 0,
           isOffer: false,
           peopleCount: peopleCount,
-          sideRequest: sideRequest ?? '',
-          id: item['id'] ?? 'no id',
+          sideRequest: sideRequest ?? '', 
+          apetito: '',
         ),
       );
+
+ 
+    if (isCatering) {
+      final newItem = CartItem(
+        id: item['id'] ?? 'no id',
+        img: item['img'],
+        title: item['title'],
+        description: item['description'],
+        pricing: item['pricing'],
+        ingredients: List<String>.from(item['ingredients']),
+        isSpicy: false,
+        foodType: 'Catering',
+        quantity: quantity,
+        peopleCount: item['peopleCount'],
+        sideRequest: item['sideRequest'] ?? '',
+        apetito: item['apetito'] ?? 'regular',
+        alergias: item['alergias'] ?? '',
+        eventType: item['eventType'] ?? '',
+        preferencia: item['preferencia'] ?? 'salado', isOffer: false,
+      );
+      state = [...state, newItem];
+    
 
       if (existingCatering.quantity > 0) {
         // Update existing catering order
         state = [
           for (final cartItem in state)
-            if (cartItem.title == item['title'] &&
-                cartItem.foodType == 'Catering')
+            if (cartItem.title == item['title'] && cartItem.foodType == 'Catering')
               cartItem.copyWith(
-                  quantity: cartItem.quantity + quantity,
-                  peopleCount: peopleCount,
-                  sideRequest: sideRequest)
+                quantity: cartItem.quantity + quantity,
+                peopleCount: peopleCount,
+                sideRequest: sideRequest,
+              )
             else
               cartItem,
         ];
@@ -220,12 +280,11 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
         // Add new catering item to cart
         state = [...state, existingCatering.copyWith(quantity: quantity)];
       }
+  }
     } else if (isMealSubscription) {
       // Handle Meal Subscriptions
-      // Handle Meal Subscriptions
       final existingPlanIndex = state.indexWhere(
-        (cartItem) =>
-            cartItem.title == item['title'] && cartItem.isMealSubscription,
+        (cartItem) => cartItem.title == item['title'] && cartItem.isMealSubscription,
       );
 
       if (existingPlanIndex != -1) {
@@ -234,31 +293,30 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
       } else {
         // No existing plan, add new meal subscription to cart
         final newPlan = CartItem(
+          id: item['id'] ?? 'no id',
           img: item['img'] ?? '',
           title: item['title'] ?? '',
           description: item['description'] ?? '',
           pricing: item['pricing'] ?? '',
           offertPricing: item['offertPricing'] ?? '',
-          ingredients: List<String>.from(item['ingredients']) ?? [],
+          ingredients: List<String>.from(item['ingredients'] ?? []),
           isSpicy: item['isSpicy'] ?? false,
           foodType: item['foodType'] ?? 'Subscripcion',
           quantity: 1,
-          isOffer: item.containsKey('offertPricing') &&
-              item['offertPricing'] != null,
+          isOffer: item.containsKey('offertPricing') && item['offertPricing'] != null,
           isMealSubscription: true,
           totalMeals: totalMeals,
           remainingMeals: totalMeals,
           peopleCount: item['peopleCount'] ?? 1,
-          id: item['id'] ?? 'no id',
         );
         state = [...state, newPlan];
       }
     } else {
       // Handle Regular Dish
       final existingDish = state.firstWhere(
-        (cartItem) =>
-            cartItem.title == item['title'] && !cartItem.isMealSubscription,
+        (cartItem) => cartItem.title == item['title'] && !cartItem.isMealSubscription,
         orElse: () => CartItem(
+          id: item['id'] ?? 'no id',
           img: item['img'],
           title: item['title'],
           description: item['description'],
@@ -268,9 +326,7 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
           isSpicy: item['isSpicy'],
           foodType: item['foodType'],
           quantity: 0,
-          isOffer: item.containsKey('offertPricing') &&
-              item['offertPricing'] != null,
-          id: item['id'] ?? 'no id',
+          isOffer: item.containsKey('offertPricing') && item['offertPricing'] != null,
         ),
       );
 
@@ -289,8 +345,43 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
   }
 
   void clearCart() {
-    state = []; // Set state to an empty list to clear the cart
+    state = [];
   }
+
+  void addMealPlanDishToCart(Map<String, dynamic> item, int quantity) {
+  final existingDish = state.firstWhere(
+    (cartItem) =>
+        cartItem.title == item['title'] && cartItem.isMealPlanDish,
+    orElse: () => CartItem(
+      // Initialize with item details
+      id: item['id'] ?? 'no id',
+      img: item['img'],
+      title: item['title'],
+      description: item['description'],
+      pricing: item['pricing'],
+      offertPricing: item['offertPricing'],
+      ingredients: List<String>.from(item['ingredients']),
+      isSpicy: item['isSpicy'],
+      foodType: item['foodType'],
+      quantity: 0,
+      isOffer: item.containsKey('offertPricing') &&
+          item['offertPricing'] != null,
+      isMealPlanDish: true,
+    ),
+  );
+
+  if (existingDish.quantity > 0) {
+    state = [
+      for (final cartItem in state)
+        if (cartItem.title == item['title'] && cartItem.isMealPlanDish)
+          cartItem.copyWith(quantity: cartItem.quantity + quantity)
+        else
+          cartItem,
+    ];
+  } else {
+    state = [...state, existingDish.copyWith(quantity: quantity)];
+  }
+}
 
   // Increment quantity of a catering item
   void incrementCateringQuantity(String title) {
@@ -303,9 +394,35 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
     ];
   }
 
-  void removeFromCart(String id) {
-    state = state.where((item) => item.id != id).toList(); // Remove by id
+  void confirmMealPlanConsumption(
+    CartItem mealPlan, List<CartItem> mealPlanDishes, String address) {
+  final currentDateTime = DateTime.now();
+
+  // Update the meal plan's remaining meals
+  int totalDishes = mealPlanDishes.fold(0, (sum, item) => sum + item.quantity);
+  if (mealPlan.remainingMeals >= totalDishes) {
+    state = [
+      for (final item in state)
+        if (item.id == mealPlan.id &&
+            item.isMealSubscription &&
+            currentDateTime.isBefore(item.expirationDate))
+          item.copyWith(remainingMeals: item.remainingMeals - totalDishes)
+        else
+          item,
+    ];
+
+    // Record consumption for each dish
+    for (final dish in mealPlanDishes) {
+      _recordMealToFirebase(mealPlan, dish, address);
+    }
+
+    // Remove consumed dishes from cart
+    state = state.where((item) => !mealPlanDishes.contains(item)).toList();
+  } else {
+    // Handle insufficient meals
+    throw Exception('Not enough meals remaining in the meal plan.');
   }
+}
 
   // Decrement quantity of a catering item and remove if 0
   void decrementCateringQuantity(String title) {
@@ -315,19 +432,17 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
           if (item.quantity > 1)
             item.copyWith(quantity: item.quantity - 1)
           else
-            null // Remove item if quantity is 0
+            null
         else
           item,
-    ].whereType<CartItem>().toList(); // Ensure to filter out null values
+    ].whereType<CartItem>().toList();
   }
 
   // Increment quantity of a regular dish
   void incrementQuantity(String title) {
     state = [
       for (final item in state)
-        if (item.title == title &&
-            !item.isMealSubscription &&
-            item.foodType != 'Catering')
+        if (item.title == title && !item.isMealSubscription && item.foodType != 'Catering')
           item.copyWith(quantity: item.quantity + 1)
         else
           item,
@@ -342,14 +457,13 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
           if (item.quantity > 1)
             item.copyWith(quantity: item.quantity - 1)
           else
-            null // Remove item if quantity is 0
+            null
         else
           item,
-    ].whereType<CartItem>().toList(); // Ensure to filter out null values
+    ].whereType<CartItem>().toList();
   }
 
-  // Method to consume a meal from a meal subscription
-  void consumeMeal(String title) {
+    void consumeMeal(String title) {
     final currentDateTime = DateTime.now();
     state = [
       for (final item in state)
@@ -362,14 +476,72 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
     ];
   }
 
-  // Method to remove expired meal subscriptions
+  // Update meal plan when a meal is consumed
+  void updateMealPlan(String mealPlanTitle, CartItem dish, String regularAddress) {
+    final currentDateTime = DateTime.now();
+
+    // Update the meal plan's remaining meals
+    state = [
+      for (final item in state)
+        if (item.title == mealPlanTitle && item.isMealSubscription && item.remainingMeals > 0 && currentDateTime.isBefore(item.expirationDate))
+          item.copyWith(remainingMeals: item.remainingMeals - 1)
+        else
+          item,
+    ];
+
+    // Get the updated meal plan
+    final mealPlan = state.firstWhere((item) => item.title == mealPlanTitle && item.isMealSubscription);
+
+    // Record the meal consumption details in Firebase
+    _recordMealToFirebase(mealPlan, dish, regularAddress);
+  }
+
+  Future<void> _recordMealToFirebase(CartItem mealPlan, CartItem dish, String regularAddress) async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) return;
+
+    final firestore = FirebaseFirestore.instance;
+    final consumptionRecord = {
+      'title': dish.title,
+      'description': dish.description,
+      'pricing': dish.pricing,
+      'address': {
+        'dishLocation': regularAddress,
+      },
+      'remainingMeals': mealPlan.remainingMeals,
+      'consumedAt': FieldValue.serverTimestamp(),
+      'ingredients': dish.ingredients,
+      'isSpicy': dish.isSpicy,
+      'quantity': dish.quantity,
+      'peopleCount': dish.peopleCount,
+      'sideRequest': dish.sideRequest,
+    };
+
+    try {
+      await firestore
+          .collection('users')
+          .doc(userId)
+          .collection('mealPlans')
+          .doc(mealPlan.id)
+          .collection('consumptions')
+          .add(consumptionRecord);
+    } catch (e) {
+      print('Failed to record to Firebase: $e');
+      // Implement retry logic or user notification if necessary
+    }
+  }
+
+  // Remove expired meal plans
   void removeExpiredPlans() {
     final currentDateTime = DateTime.now();
     state = state
-        .where((item) =>
-            !item.isMealSubscription ||
-            currentDateTime.isBefore(item.expirationDate))
+        .where((item) => !item.isMealSubscription || currentDateTime.isBefore(item.expirationDate))
         .toList();
+  }
+
+  // Remove item from cart by id
+  void removeFromCart(String id) {
+    state = state.where((item) => item.id != id).toList();
   }
 }
 

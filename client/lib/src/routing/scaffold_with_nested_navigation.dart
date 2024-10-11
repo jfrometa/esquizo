@@ -107,66 +107,36 @@ void _goBranch(int index) {
     final totalQuantity = getTotalCartQuantity(cartItems);
 
     return Scaffold(
-       body: NotificationListener<ScrollNotification>(
-        onNotification: (scrollNotification) {
-          if (widget.currentIndex != 3 &&
-              scrollNotification is ScrollUpdateNotification) {
-            if (scrollNotification.scrollDelta! > 10) {
-              if (_isVisible) {
-                setState(() {
-                  _isVisible = false;
-                });
-              }
-            } else if (scrollNotification.scrollDelta! < -1) {
-              if (!_isVisible) {
-                setState(() {
-                  _isVisible = true;
-                });
-              }
+       body: widget.body,
+      bottomNavigationBar: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          backgroundColor: Colors.white,
+          indicatorColor: ColorsPaletteRedonda.primary,
+          labelTextStyle: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return const TextStyle(
+                color: ColorsPaletteRedonda.primary,
+                fontWeight: FontWeight.bold,
+              );
             }
-          }
-          return true;
-        },
-        child: widget.body,
-    
-      ),
-      bottomNavigationBar: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        height: _isVisible ? 70.0 : 0.0,
-        child: Wrap(
-          children: [
-            NavigationBarTheme(
-              data: NavigationBarThemeData(
-                backgroundColor: Colors.white,
-                indicatorColor: ColorsPaletteRedonda.primary,
-                labelTextStyle: WidgetStateProperty.resolveWith((states) {
-                  if (states.contains(WidgetState.selected)) {
-                    return const TextStyle(
-                      color: ColorsPaletteRedonda.primary,
-                      fontWeight: FontWeight.bold,
-                    );
-                  }
-                  return const TextStyle(
-                    color: ColorsPaletteRedonda.deepBrown1,
-                    fontWeight: FontWeight.bold,
-                  );
-                }),
-                iconTheme: WidgetStateProperty.resolveWith((states) {
-                  return states.contains(WidgetState.selected)
-                      ? const IconThemeData(color: Colors.white)
-                      : const IconThemeData(
-                          color: ColorsPaletteRedonda.deepBrown1);
-                }),
-              ),
-              child: NavigationBar(
-                selectedIndex: widget.currentIndex,
-                onDestinationSelected: _goBranch,
-                labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-                destinations: List.generate(
-                    4, (index) => _buildDestination(index, totalQuantity)),
-              ),
-            ),
-          ],
+            return const TextStyle(
+              color: ColorsPaletteRedonda.deepBrown1,
+              fontWeight: FontWeight.bold,
+            );
+          }),
+          iconTheme: WidgetStateProperty.resolveWith((states) {
+            return states.contains(WidgetState.selected)
+                ? const IconThemeData(color: Colors.white)
+                : const IconThemeData(
+                    color: ColorsPaletteRedonda.deepBrown1);
+          }),
+        ),
+        child: NavigationBar(
+          selectedIndex: widget.currentIndex,
+          onDestinationSelected: _goBranch,
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          destinations: List.generate(
+              4, (index) => _buildDestination(index, totalQuantity)),
         ),
       ),
     );

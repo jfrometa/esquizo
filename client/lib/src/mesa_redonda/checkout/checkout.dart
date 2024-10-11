@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/domain/models.dart';
+import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/custom_sign_in_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/location/location_capture.dart';
@@ -288,104 +289,238 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
     }
   }
 
-  Future<Map<String, String>?> _checkAndPromptForContactInfo(
-      BuildContext context) async {
-    final currentUser = FirebaseAuth.instance.currentUser;
+Future<Map<String, String>?> _checkAndPromptForContactInfo(BuildContext context) async {
+  final currentUser = FirebaseAuth.instance.currentUser;
 
-    // Check if the user is anonymous
-    if (currentUser == null || currentUser.isAnonymous) {
-      String? name, phone, email;
+  if (currentUser == null || currentUser.isAnonymous) {
+    String? name, phone, email;
+    bool showSignInScreen = false; // Flag to control whether to show SignIn
 
-      // Prompt for name, phone, and optional email
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('Información de Contacto'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Por favor, proporcione su nombre, teléfono y correo electrónico (opcional) para continuar. Esto nos ayudará a mejorar nuestro servicio.',
-                style: TextStyle(fontSize: 14),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Nombre',
-                  border: OutlineInputBorder(),
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            if (showSignInScreen) {
+              return AlertDialog(
+                title: const Text('Registro'),
+                content: SizedBox(
+                  height: 400,
+                  width: 400,
+                  child: CustomSignInScreen(),
                 ),
-                onChanged: (value) => name = value,
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Teléfono',
-                  border: OutlineInputBorder(),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                    },
+                    child: const Text('Cancelar'),
+                  ),
+                ],
+              );
+            } else {
+              return AlertDialog(
+                title: const Text('Información de Contacto'),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Proporcione su nombre, teléfono y correo opcional o registrese.',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      decoration: const InputDecoration(
+                        labelText: 'Nombre',
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (value) => name = value,
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      decoration: const InputDecoration(
+                        labelText: 'Teléfono',
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (value) => phone = value,
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      decoration: const InputDecoration(
+                        labelText: 'Correo electrónico (opcional)',
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (value) => email = value,
+                    ),
+                  ],
                 ),
-                onChanged: (value) => phone = value,
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Correo electrónico (opcional)',
-                  border: OutlineInputBorder(),
-                ),
-                onChanged: (value) => email = value,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text('Continuar'),
-            ),
-          ],
-        ),
-      );
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        showSignInScreen = true; // Switch to SignIn
+                      });
+                    },
+                    child: const Text('Registrarse'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(false),
+                    child: const Text('Cancelar'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(true),
+                    child: const Text('Continuar'),
+                  ),
+                ],
+              );
+            }
+          },
+        );
+      },
+    );
 
-      // If the user confirmed, return the details
-      if (confirmed == true) {
-        return {
-          'name': name ?? '',
-          'phone': phone ?? '',
-          'email': email ?? '', // Optional email
-        };
-      } else {
-        return null; // Return null if user cancels
-      }
+    if (!showSignInScreen) {
+      return {
+        'name': name ?? '',
+        'phone': phone ?? '',
+        'email': email ?? '',
+      };
     }
-
-    return {}; // Return empty map if signed in
   }
 
-  Future<void> _processOrder(
-      BuildContext context, List<CartItem> cartItems) async {
+  return {}; // Return empty map if user is already signed in
+}
+
+// In CheckoutScreen
+Future<void> _processOrder(BuildContext context, List<CartItem> cartItems) async {
     final contactInfo = await _checkAndPromptForContactInfo(context);
     if (contactInfo == null) return; // Exit if user cancels
 
-    try {
-      await _saveOrderToFirestore(cartItems, contactInfo);
-      await _sendWhatsAppOrder(cartItems, contactInfo);
+    final mealPlanItem = cartItems.firstWhere(
+      (item) => item.isMealSubscription,
+      orElse: () => {} as CartItem,
+    );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Order placed successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error processing order: $error'),
-          backgroundColor: Colors.red,
-        ),
-      );
+    // Check if meal plan is available and discount eligible
+    if (mealPlanItem != null && mealPlanItem.remainingMeals > 0) {
+        for (var item in cartItems) {
+            if (!item.isMealSubscription && item.foodType != 'Catering') {
+                ref.read(cartProvider.notifier).consumeMeal(item.title);
+                // Trigger in-app notification
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text(
+                            'Consumed a meal from your plan for ${item.title}'),
+                        backgroundColor: Colors.green,
+                    ),
+                );
+                // Save meal consumption to Firebase
+                await _recordMealConsumption(mealPlanItem.id, item);
+            }
+        }
+    } else {
+        // Prompt to buy a new plan
+        _promptToBuyAnotherPlan(context);
+        return; // Exit if no meal plan available or no remaining meals
     }
-  }
+
+    // Proceed with original order saving logic
+    try {
+        await _saveOrderToFirestore(cartItems, contactInfo);
+        await _sendWhatsAppOrder(cartItems, contactInfo);
+    } catch (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text('Error processing order: $error'),
+                backgroundColor: Colors.red,
+            ),
+        );
+    }
+}
+
+
+
+// Save the meal plan only, without consumption
+Future<void> _saveMealPlanOnly(CartItem mealPlan) async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) return;
+
+    final firestore = FirebaseFirestore.instance;
+    final mealPlanData = {
+        'title': mealPlan.title,
+        'description': mealPlan.description,
+        'totalMeals': mealPlan.totalMeals,
+        'remainingMeals': mealPlan.remainingMeals,
+        'expirationDate': mealPlan.expirationDate.toIso8601String(),
+        'addedAt': FieldValue.serverTimestamp(),
+    };
+
+    try {
+        await firestore
+            .collection('users')
+            .doc(userId)
+            .collection('mealPlans')
+            .doc(mealPlan.id)
+            .set(mealPlanData);
+    } catch (e) {
+        print('Failed to save meal plan: $e');
+        // Implement error handling as needed
+    }
+}
+
+// Add method to prompt for new meal plan
+void _promptToBuyAnotherPlan(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+            return AlertDialog(
+                title: Text('Plan Renewal Required'),
+                content: Text('Your meal plan is out of meals. Would you like to buy another plan?'),
+                actions: <Widget>[
+                    TextButton(
+                        child: Text('Yes'),
+                        onPressed: () {
+                            Navigator.of(context).pop();
+                            // Navigate to meal plan purchasing flow
+                        },
+                    ),
+                    TextButton(
+                        child: Text('No'),
+                        onPressed: () {
+                            Navigator.of(context).pop();
+                        },
+                    ),
+                ],
+            );
+        },
+    );
+}
+
+// Record meal consumption to Firebase
+Future<void> _recordMealConsumption(String mealPlanId, CartItem dish) async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) return; // Ensure user is authenticated
+
+    final firestore = FirebaseFirestore.instance;
+    final consumptionData = {
+        'dishTitle': dish.title,
+        'consumedAt': FieldValue.serverTimestamp(),
+        'details': dish.toJson(),
+    };
+
+    try {
+        await firestore
+            .collection('users')
+            .doc(userId)
+            .collection('mealPlans')
+            .doc(mealPlanId)
+            .collection('consumptions')
+            .add(consumptionData);
+    } catch (e) {
+        // Retry and notify user if failure
+        print('Failed to record consumption: $e');
+    }
+}
 
   Future<void> _sendWhatsAppOrder(
       List<CartItem> cartItems, Map<String, String>? contactInfo) async {

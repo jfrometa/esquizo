@@ -85,7 +85,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
 
     // Lasagna
     CateringItem(
-      category: 'Lasagna',
+      category: 'Pastas',
       title: 'Lasagna de Res o Pollo',
       description: 'Lasagna clásica de res o pollo para 6/8 personas.',
       pricePerPerson: 3500.00,
@@ -93,7 +93,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       ingredients: ['Pasta', 'Carne de res o pollo', 'Queso', 'Tomate'],
     ),
     CateringItem(
-      category: 'Lasagna',
+      category: 'Pastas',
       title: 'Lasagna 4 Quesos Trufada',
       description: 'Lasagna de cuatro quesos con trufa, para 6/8 personas.',
       pricePerPerson: 3800.00,
@@ -101,7 +101,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       ingredients: ['Queso trufado', 'Queso mozzarella', 'Trufa', 'Pasta'],
     ),
     CateringItem(
-      category: 'Lasagna',
+      category: 'Pastas',
       title: 'Lasagna Ropa Vieja',
       description: 'Lasagna con carne de res mechada, para 6/8 personas.',
       pricePerPerson: 3500.00,

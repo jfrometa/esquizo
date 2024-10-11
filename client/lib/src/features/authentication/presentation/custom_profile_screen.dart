@@ -4,6 +4,7 @@ import 'package:starter_architecture_flutter_firebase/src/features/authenticatio
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/anonimus_profile_screen.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/authenticated_profile_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/custom_sign_in_screen.dart';
 
 // custom_profile_screen.dart
 
@@ -31,7 +32,7 @@ class _CustomProfileScreenState extends ConsumerState<CustomProfileScreen> {
           );
         } else if (user.isAnonymous) {
           // User is anonymous
-          return AnonymousProfileScreen(user: user);
+          return CustomSignInScreen();
         } else {
           // User is authenticated
 
