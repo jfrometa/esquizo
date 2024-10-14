@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class CateringScreen extends ConsumerStatefulWidget {
-  const CateringScreen({super.key});
+  const CateringScreen({Key? key}) : super(key: key);
 
   @override
   _CateringScreenState createState() => _CateringScreenState();
@@ -40,35 +42,45 @@ class _CateringScreenState extends ConsumerState<CateringScreen>
     super.dispose();
   }
 
-void _showCateringForm(BuildContext context, CateringItem item) {
-  showModalBottomSheet(
-    context: context,
-    isDismissible: true,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-    ),
-    builder: (context) {
-      String apetito = 'regular';
-      String preferencia = 'salado';
-      String alergias = '';
-      String eventType = '';
-      int peopleCount = 10;
+  void _showCateringForm(BuildContext context) {
+    String apetito = 'regular';
+    String preferencia = 'salado';
+    String eventType = '';
+    int peopleCount = 10;
+    String adicionales = '';
+    List<String> alergiasList = [];
 
-      return StatefulBuilder(
-        builder: (context, setState) {
-          return Padding(
-            padding: const EdgeInsets.all(20.0),
+    void addAllergy(String value) {
+      if (value.isNotEmpty) {
+        value = value.toLowerCase().trim();
+        if (!alergiasList.contains(value)) {
+          setState(() => alergiasList.add(value));
+        }
+      }
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        String? newAllergy = '';
+
+        return Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header with Dismiss Icon
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       'Catering Details',
-                      style: Theme.of(context).textTheme.titleMedium,
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     IconButton(
                       icon: Icon(Icons.close, color: ColorsPaletteRedonda.deepBrown1),
@@ -77,22 +89,18 @@ void _showCateringForm(BuildContext context, CateringItem item) {
                   ],
                 ),
                 const Divider(),
-                // Apetito Dropdown with Title
-                const Text(
-                  'Nivel de Apetito',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+                const Text('Nivel de Apetito', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
                   value: apetito,
                   decoration: InputDecoration(
                     labelText: 'Apetito',
                     labelStyle: Theme.of(context).textTheme.bodySmall,
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     filled: true,
                     fillColor: ColorsPaletteRedonda.white,
                   ),
-                  items: [
+                  items: const [
                     DropdownMenuItem(value: 'poco', child: Text('Poco')),
                     DropdownMenuItem(value: 'regular', child: Text('Regular')),
                     DropdownMenuItem(value: 'mucho', child: Text('Mucho')),
@@ -100,77 +108,81 @@ void _showCateringForm(BuildContext context, CateringItem item) {
                   onChanged: (value) => setState(() => apetito = value!),
                 ),
                 const SizedBox(height: 16),
-                // Allergies Input with Title
-                const Text(
-                  'Alergias',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+                const Text('Alergias', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8.0,
                   children: [
-                    for (var allergy in alergias.split(',').where((a) => a.isNotEmpty))
-                      Chip(label: Text(allergy.trim())),
-                    ActionChip(
-                      avatar: Icon(Icons.add, color: ColorsPaletteRedonda.primary),
-                      label: Text('Agregar Alergias'),
-                      onPressed: () async {
-                        var result = await showDialog<String>(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text('Nueva Alergia', style: Theme.of(context).textTheme.titleMedium),
-                            content: TextField(
-                              decoration: InputDecoration(
-                                hintText: 'Ingresa una alergia',
-                                border: OutlineInputBorder(),
+                    for (var allergy in alergiasList)
+                      Chip(
+                        label: Text(allergy),
+                        onDeleted: () {
+                          setState(() => alergiasList.remove(allergy));
+                        },
+                      ),
+                    if (alergiasList.length < 10)
+                      ActionChip(
+                        avatar: Icon(Icons.add, color: ColorsPaletteRedonda.primary),
+                        label: const Text('Agregar Alergia'),
+                        onPressed: () async {
+                          newAllergy = await showDialog<String>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text(
+                                'Nueva Alergia',
+                                style: Theme.of(context).textTheme.headlineSmall,
                               ),
-                              onChanged: (value) => alergias = value,
+                              content: TextField(
+                                onChanged: (value) => newAllergy = value,
+                                onSubmitted: (value) {
+                                  addAllergy(value);
+                                  Navigator.pop(context, value);
+                                },
+                                decoration: const InputDecoration(
+                                  hintText: 'Ingresa una alergia',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    addAllergy(newAllergy ?? '');
+                                    Navigator.pop(context, newAllergy);
+                                  },
+                                  child: const Text('Aceptar'),
+                                ),
+                              ],
                             ),
-                            actions: [
-                              TextButton(
-                                child: Text('Aceptar'),
-                                onPressed: () => Navigator.pop(context, alergias),
-                              ),
-                            ],
-                          ),
-                        );
-                        if (result != null && result.isNotEmpty) {
-                          setState(() => alergias = '${alergias.isEmpty ? '' : '$alergias,'}$result');
-                        }
-                      },
-                    ),
+                          );
+                          if (newAllergy != null) {
+                            addAllergy(newAllergy!);
+                          }
+                        },
+                      ),
                   ],
                 ),
                 const SizedBox(height: 16),
-                // Event Type Input with Title
-                const Text(
-                  'Tipo de Evento',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+                const Text('Tipo de Evento', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 TextField(
                   decoration: InputDecoration(
                     labelText: 'Ej. Cumpleaños, Boda',
                     labelStyle: Theme.of(context).textTheme.bodySmall,
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     filled: true,
                     fillColor: ColorsPaletteRedonda.white,
                   ),
                   onChanged: (value) => setState(() => eventType = value),
                 ),
                 const SizedBox(height: 16),
-                // People Count Dropdown with Title
-                const Text(
-                  'Número de Personas',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+                const Text('Número de Personas', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<int>(
                   value: peopleCount,
                   decoration: InputDecoration(
                     labelText: 'Número de Personas',
                     labelStyle: Theme.of(context).textTheme.bodySmall,
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     filled: true,
                     fillColor: ColorsPaletteRedonda.white,
                   ),
@@ -183,34 +195,67 @@ void _showCateringForm(BuildContext context, CateringItem item) {
                   onChanged: (value) => setState(() => peopleCount = value!),
                 ),
                 const SizedBox(height: 16),
-                // Preference Dropdown with Title
-                const Text(
-                  'Preferencia de Sabor',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+                const Text('Preferencia de Sabor', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
                   value: preferencia,
                   decoration: InputDecoration(
                     labelText: 'Preferencia',
                     labelStyle: Theme.of(context).textTheme.bodySmall,
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     filled: true,
                     fillColor: ColorsPaletteRedonda.white,
                   ),
-                  items: [
+                  items: const [
                     DropdownMenuItem(value: 'dulce', child: Text('Dulce')),
                     DropdownMenuItem(value: 'salado', child: Text('Salado')),
                   ],
                   onChanged: (value) => setState(() => preferencia = value!),
                 ),
+                const SizedBox(height: 16),
+                ExpansionTile(
+                  title: Text('Agregar Adicionales', style: Theme.of(context).textTheme.titleMedium),
+                  children: [
+                    TextFormField(
+                      controller: sideRequestController,
+                      style: Theme.of(context).textTheme.labelLarge,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        hintText: 'Ej. Arroz con fideos 20 personas',
+                        filled: true,
+                        fillColor: ColorsPaletteRedonda.white,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: const BorderSide(
+                            color: ColorsPaletteRedonda.deepBrown1,
+                            width: 1.0,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: const BorderSide(
+                            color: ColorsPaletteRedonda.primary,
+                            width: 2.0,
+                          ),
+                        ),
+                      ),
+                      onChanged: (value) => setState(() => adicionales = value),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
                 const SizedBox(height: 24),
-                // Confirm Button
                 Center(
                   child: ElevatedButton(
                     onPressed: () {
-                      _addToCartWithForm(item, apetito, alergias, eventType,
-                          peopleCount, preferencia);
+                      _addToCartWithForm(
+                        apetito, 
+                        alergiasList.join(','), 
+                        eventType,
+                        peopleCount, 
+                        preferencia, 
+                        adicionales
+                      );
                       Navigator.pop(context);
                     },
                     child: const Text('Confirmar'),
@@ -218,46 +263,65 @@ void _showCateringForm(BuildContext context, CateringItem item) {
                 ),
               ],
             ),
-          );
-        },
-      );
-    },
-  );
-}
-
-
-  void _addToCartWithForm(CateringItem item, String apetito, String alergias,
-      String eventType, int peopleCount, String preferencia) {
-    ref.read(cartProvider.notifier).addToCart(
-      {
-        'img': item.img,
-        'title': item.title,
-        'description': item.description,
-        'pricing': (item.pricePerPerson * peopleCount).toStringAsFixed(2),
-        'ingredients': item.ingredients,
-        'apetito': apetito,
-        'alergias': alergias,
-        'eventType': eventType,
-        'peopleCount': peopleCount,
-        'preferencia': preferencia,
+          ),
+        );
       },
-      1,
-      isCatering: true,
     );
+  }
+
+  void _addToCartWithForm(
+      String apetito,
+      String alergias,
+      String eventType,
+      int peopleCount,
+      String preferencia,
+      String adicionales,
+    ) {
+    final cateringOrder = ref.read(cateringOrderProvider);
+    if (cateringOrder.isNotEmpty) {
+      final totalPrice = cateringOrder.fold(
+        0.0,
+        (sum, item) => sum + item.totalPrice,
+      );
+
+      final combinedIngredients = cateringOrder
+          .expand((orderItem) => orderItem.combinedIngredients)
+          .toList();
+
+      final newOrderItem = CartItem(
+        id: 'catering_${DateTime.now().millisecondsSinceEpoch}',
+        img: cateringOrder[0].img,
+        title: 'Catering Order',
+        description: 'Catering order for $peopleCount people',
+        pricing: totalPrice.toStringAsFixed(2),
+        ingredients: combinedIngredients,
+        isSpicy: false,
+        foodType: 'Catering',
+        quantity: 1,
+        isOffer: false,
+        peopleCount: peopleCount,
+        sideRequest: adicionales,
+        apetito: apetito,
+        alergias: alergias,
+        eventType: eventType,
+        preferencia: preferencia,
+      );
+
+      ref.read(cartProvider.notifier).addToCart(newOrderItem.toJson(), 1);
+      ref.read(cateringOrderProvider.notifier).clearCateringOrder();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final cateringOptions = ref.watch(cateringProvider);
     final cart = ref.watch(cartProvider);
-    // final cartNotifier = ref.read(cartProvider.notifier);
+    final cateringOrder = ref.watch(cateringOrderProvider);
     final categorizedItems = groupCateringItemsByCategory(cateringOptions);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Catering'),
-        forceMaterialTransparency: true,
-        elevation: 3,
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -269,7 +333,7 @@ void _showCateringForm(BuildContext context, CateringItem item) {
                     context.goNamed(AppRoute.homecart.name);
                   },
                 ),
-                if (cart.isNotEmpty)
+                if (cateringOrder.isNotEmpty || cart.isNotEmpty)
                   Positioned(
                     top: 0,
                     right: 0,
@@ -277,11 +341,8 @@ void _showCateringForm(BuildContext context, CateringItem item) {
                       radius: 8,
                       backgroundColor: Colors.red,
                       child: Text(
-                        '${cart.length}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                        ),
+                        '${cart.length + cateringOrder.length}',
+                        style: const TextStyle(color: Colors.white, fontSize: 10),
                       ),
                     ),
                   ),
@@ -292,6 +353,15 @@ void _showCateringForm(BuildContext context, CateringItem item) {
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
+          labelStyle: Theme.of(context).textTheme.titleSmall,
+          unselectedLabelStyle: Theme.of(context).textTheme.titleSmall,
+          labelColor: ColorsPaletteRedonda.white,
+          unselectedLabelColor: ColorsPaletteRedonda.deepBrown1,
+          indicatorSize: TabBarIndicatorSize.tab,
+          indicator: TabIndicator(
+            color: ColorsPaletteRedonda.primary,
+            radius: 16.0,
+          ),
           tabs: categorizedItems.keys
               .map((category) => Tab(text: category))
               .toList(),
@@ -302,10 +372,12 @@ void _showCateringForm(BuildContext context, CateringItem item) {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Construye tu Buffete',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    )),
+            Text(
+              'Construye tu Buffete',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
             const SizedBox(height: 16),
             Expanded(
               child: TabBarView(
@@ -319,7 +391,13 @@ void _showCateringForm(BuildContext context, CateringItem item) {
                       return CateringItemCard(
                         item: item,
                         onAddToCart: (int peopleCount, int quantity) {
-                          _showCateringForm(context, item);
+                          ref.read(cateringOrderProvider.notifier)
+                              .addCateringItem(CateringDish(
+                                title: item.title,
+                                peopleCount: peopleCount,
+                                pricePerPerson: item.pricePerPerson,
+                                ingredients: item.ingredients,
+                              ));
                         },
                         sideRequestController: sideRequestController,
                       );
@@ -328,191 +406,24 @@ void _showCateringForm(BuildContext context, CateringItem item) {
                 }).toList(),
               ),
             ),
+            if (cateringOrder.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(vertical: 15.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  onPressed: () => _showCateringForm(context),
+                  child: const Text('Completar Pedido de Catering'),
+                ),
+              ),
           ],
         ),
       ),
-    );
-  }
-}
-
-
-class CateringItemCard extends StatefulWidget {
-  final CateringItem item;
-  final TextEditingController sideRequestController;
-  final void Function(int peopleCount, int quantity) onAddToCart;
-
-  const CateringItemCard({
-    required this.item,
-    required this.onAddToCart,
-    required this.sideRequestController,
-    super.key,
-  });
-
-  @override
-  CateringItemCardState createState() => CateringItemCardState();
-}
-
-class CateringItemCardState extends State<CateringItemCard> {
-  int selectedPeopleCount = 10;
-  int quantity = 1;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0)),
-            child: Image.asset(
-              widget.item.img,
-              height: 150,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  height: 150,
-                  width: double.infinity,
-                  color: Colors.grey[200],
-                  child: const Icon(Icons.broken_image, size: 50),
-                );
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 12),
-                Text(
-                  widget.item.title,
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Text(widget.item.description),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                        '\$${widget.item.pricePerPerson.toStringAsFixed(2)} por persona'),
-                    DropdownButton<int>(
-                      value: selectedPeopleCount,
-                      dropdownColor: ColorsPaletteRedonda.white,
-                      underline: Container(
-                        height: 0,
-                        color: Colors.transparent,
-                      ),
-                      items: const [
-                        DropdownMenuItem(value: 10, child: Text('10 personas')),
-                        DropdownMenuItem(value: 50, child: Text('50 personas')),
-                        DropdownMenuItem(
-                            value: 100, child: Text('100 personas')),
-                      ],
-                      onChanged: (int? value) {
-                        setState(() {
-                          selectedPeopleCount = value ?? 10;
-                        });
-                        FocusScope.of(context).unfocus();
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.remove),
-                          onPressed: () {
-                            if (quantity > 1) {
-                              setState(() {
-                                quantity--;
-                              });
-                            }
-                          },
-                        ),
-                        Text('$quantity'),
-                        IconButton(
-                          icon: const Icon(Icons.add),
-                          onPressed: () {
-                            setState(() {
-                              quantity++;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        widget.onAddToCart(selectedPeopleCount, quantity);
-                      },
-                      child: const Text('Agregar al carrito'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class TabIndicator extends Decoration {
-  final BoxPainter _painter;
-
-  TabIndicator({required Color color, required double radius})
-      : _painter = _TabIndicatorPainter(color, radius);
-
-  @override
-  BoxPainter createBoxPainter([VoidCallback? onChanged]) => _painter;
-}
-
-class _TabIndicatorPainter extends BoxPainter {
-  final Paint _paint;
-  final double radius;
-
-  _TabIndicatorPainter(Color color, this.radius)
-      : _paint = Paint()
-          ..color = color
-          ..style = PaintingStyle.fill;
-
-  @override
-  void paint(Canvas canvas, Offset offset, ImageConfiguration cfg) {
-    final Rect rect = _indicatorRectFor(cfg, offset);
-    final RRect rRect = RRect.fromRectAndRadius(rect, Radius.circular(radius));
-    canvas.drawRRect(rRect, _paint);
-  }
-
-  Rect _indicatorRectFor(ImageConfiguration cfg, Offset offset) {
-    final double height = cfg.size?.height ?? 0.0;
-    final double width = cfg.size?.width ?? 0.0;
-
-    // Define the desired height of the indicator
-    const double indicatorHeight = 32.0; // Adjust as needed
-    // Define horizontal padding
-    const double horizontalPadding = 8.0; // Adjust to match labelPadding
-
-    // Calculate top position to center the indicator vertically
-    final double top = offset.dy + (height - indicatorHeight) / 2;
-
-    // Calculate left position
-    final double left = offset.dx + horizontalPadding;
-
-    // Create the rectangle for the indicator
-    return Rect.fromLTWH(
-      left,
-      top,
-      width - 2 * horizontalPadding,
-      indicatorHeight,
     );
   }
 }
