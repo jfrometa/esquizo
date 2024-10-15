@@ -4,7 +4,7 @@ import 'package:starter_architecture_flutter_firebase/src/constants/app_sizes.da
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/data/firebase_auth_repository.dart';
  
 class SignInAnonymouslyFooter extends ConsumerWidget {
-  const SignInAnonymouslyFooter({Key? key}) : super(key: key);
+  const SignInAnonymouslyFooter({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
