@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_card.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_item.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
@@ -19,17 +19,8 @@ class CateringScreenState extends ConsumerState<CateringScreen>
     with SingleTickerProviderStateMixin {
   final TextEditingController sideRequestController = TextEditingController();
   late TabController _tabController;
-
-  List<String> alergiasList = []; // Moved here
-
-   Map<String, List<CateringItem>> groupCateringItemsByCategory(
-      List<CateringItem> items) {
-    Map<String, List<CateringItem>> categorizedItems = {};
-    for (var item in items) {
-      categorizedItems.putIfAbsent(item.category, () => []).add(item);
-    }
-    return categorizedItems;
-  }
+  List<String> alergiasList = [];
+  String? newAllergy = '';
 
   @override
   void initState() {
@@ -44,20 +35,15 @@ class CateringScreenState extends ConsumerState<CateringScreen>
     super.dispose();
   }
 
-// Function to display catering form and manage temporary allergies
   void _showCateringForm(BuildContext context) {
     String apetito = 'regular';
     String preferencia = 'salado';
     String eventType = '';
-    int peopleCount = 10;
     String adicionales = '';
 
     void addAllergy(String value, StateSetter setModalState) {
-      if (value.isNotEmpty) {
-        value = value.toLowerCase().trim();
-        if (!alergiasList.contains(value)) {
-          setModalState(() => alergiasList.add(value));
-        }
+      if (value.isNotEmpty && !alergiasList.contains(value)) {
+        setModalState(() => alergiasList.add(value));
       }
     }
 
@@ -68,8 +54,6 @@ class CateringScreenState extends ConsumerState<CateringScreen>
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
-        String? newAllergy = '';
-
         return Padding(
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -136,7 +120,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                                 color: ColorsPaletteRedonda.primary),
                             label: const Text('Agregar Alergia'),
                             onPressed: () async {
-                              newAllergy = await showDialog<String>(
+                               newAllergy = await showDialog<String>(
                                 context: context,
                                 builder: (context) => AlertDialog(
                                   title: const Text('Nueva Alergia'),
@@ -169,101 +153,76 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                           ),
                       ],
                     ),
-                    
-                const SizedBox(height: 16),
-                const Text('Tipo de Evento',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Ej. Cumpleaños, Boda',
-                    labelStyle: Theme.of(context).textTheme.bodySmall,
-                    border: const OutlineInputBorder(),
-                    filled: true,
-                    fillColor: ColorsPaletteRedonda.white,
-                  ),
-                  onChanged: (value) => setState(() => eventType = value),
-                ),
-                const SizedBox(height: 16),
-                const Text('Número de Personas',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<int>(
-                  value: peopleCount,
-                  decoration: InputDecoration(
-                    labelText: 'Número de Personas',
-                    labelStyle: Theme.of(context).textTheme.bodySmall,
-                    border: const OutlineInputBorder(),
-                    filled: true,
-                    fillColor: ColorsPaletteRedonda.white,
-                  ),
-                  items: [
-                    for (var i = 10; i <= 50; i += 10)
-                      DropdownMenuItem(value: i, child: Text('$i personas')),
-                    for (var i = 100; i <= 500; i += 100)
-                      DropdownMenuItem(value: i, child: Text('$i personas')),
-                  ],
-                  onChanged: (value) => setState(() => peopleCount = value!),
-                ),
-                const SizedBox(height: 16),
-                const Text('Preferencia de Sabor',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  value: preferencia,
-                  decoration: InputDecoration(
-                    labelText: 'Preferencia',
-                    labelStyle: Theme.of(context).textTheme.bodySmall,
-                    border: const OutlineInputBorder(),
-                    filled: true,
-                    fillColor: ColorsPaletteRedonda.white,
-                  ),
-                  items: const [
-                    DropdownMenuItem(value: 'dulce', child: Text('Dulce')),
-                    DropdownMenuItem(value: 'salado', child: Text('Salado')),
-                  ],
-                  onChanged: (value) => setState(() => preferencia = value!),
-                ),
-                const SizedBox(height: 16),
-                ExpansionTile(
-                  title: Text('Agregar Adicionales',
-                      style: Theme.of(context).textTheme.titleMedium),
-                  children: [
-                    TextFormField(
-                      controller: sideRequestController,
-                      style: Theme.of(context).textTheme.labelLarge,
-                      maxLines: 3,
+                    const SizedBox(height: 16),
+                    const Text('Tipo de Evento', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    TextField(
                       decoration: InputDecoration(
-                        hintText: 'Ej. Arroz con fideos 20 personas',
+                        labelText: 'Ej. Cumpleaños, Boda',
+                        labelStyle: Theme.of(context).textTheme.bodySmall,
+                        border: const OutlineInputBorder(),
                         filled: true,
                         fillColor: ColorsPaletteRedonda.white,
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: const BorderSide(
-                            color: ColorsPaletteRedonda.deepBrown1,
-                            width: 1.0,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: const BorderSide(
-                            color: ColorsPaletteRedonda.primary,
-                            width: 2.0,
-                          ),
-                        ),
                       ),
-                      onChanged: (value) => setState(() => adicionales = value),
+                      onChanged: (value) => setModalState(() => eventType = value),
                     ),
                     const SizedBox(height: 16),
-                  ],
-                ),
-                const SizedBox(height: 24),
+                    const Text('Preferencia de Sabor', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: preferencia,
+                      decoration: InputDecoration(
+                        labelText: 'Preferencia',
+                        border: const OutlineInputBorder(),
+                        filled: true,
+                        fillColor: ColorsPaletteRedonda.white,
+                      ),
+                      items: const [
+                        DropdownMenuItem(value: 'dulce', child: Text('Dulce')),
+                        DropdownMenuItem(value: 'salado', child: Text('Salado')),
+                      ],
+                      onChanged: (value) => setModalState(() => preferencia = value!),
+                    ),
+                    const SizedBox(height: 16),
+                    ExpansionTile(
+                      title: Text('Agregar Adicionales',
+                          style: Theme.of(context).textTheme.titleMedium),
+                      children: [
+                        TextFormField(
+                          controller: sideRequestController,
+                          style: Theme.of(context).textTheme.labelLarge,
+                          maxLines: 3,
+                          decoration: InputDecoration(
+                            hintText: 'Ej. Arroz con fideos 20 personas',
+                            filled: true,
+                            fillColor: ColorsPaletteRedonda.white,
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                              borderSide: const BorderSide(
+                                color: ColorsPaletteRedonda.deepBrown1,
+                                width: 1.0,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                              borderSide: const BorderSide(
+                                color: ColorsPaletteRedonda.primary,
+                                width: 2.0,
+                              ),
+                            ),
+                          ),
+                          onChanged: (value) => setModalState(() => adicionales = value),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 24),
                     Center(
                       child: ElevatedButton(
                         onPressed: () {
-                          _addToCartWithForm(apetito, alergiasList.join(','), eventType, peopleCount, preferencia, adicionales);
-                          alergiasList.clear(); // Clear allergies after submitting the order
+                          _finalizeAndAddToCart(
+                            apetito, alergiasList.join(','),
+                            eventType, preferencia, adicionales);
+                          alergiasList.clear();
                           Navigator.pop(context);
                         },
                         child: const Text('Confirmar'),
@@ -279,55 +238,59 @@ class CateringScreenState extends ConsumerState<CateringScreen>
     );
   }
 
-  // Adding the catering order to the cart
-  void _addToCartWithForm(
-    String apetito,
-    String alergias,
-    String eventType,
-    int peopleCount,
-    String preferencia,
-    String adicionales,
+  void _finalizeAndAddToCart(
+    String apetito, String alergias,
+    String eventType, String preferencia, String adicionales
   ) {
-    final cateringOrder = ref.read(cateringOrderProvider);
-    if (cateringOrder.isNotEmpty) {
-      final totalPrice = cateringOrder.fold(
-        0.0,
-        (sum, item) => sum + item.totalPrice,
-      );
+    final cateringOrderProviderNotifier = ref.read(cateringOrderProvider.notifier);
+    cateringOrderProviderNotifier.finalizeCateringOrder(
+      title: 'Catering Order',
+      img: 'assets/image.png',
+      description: 'Catering Order for Event',
+      apetito: apetito,
+      alergias: alergias,
+      eventType: eventType,
+      preferencia: preferencia,
+      adicionales: adicionales,
+    );
 
-      final combinedIngredients = cateringOrder
-          .expand((orderItem) => orderItem.combinedIngredients)
-          .toList();
+    final cateringOrderItems = ref.read(cateringOrderProvider);
+    final cateringOrder = cateringOrderItems.last;
 
-      final newOrderItem = CartItem(
-        id: 'catering_${DateTime.now().millisecondsSinceEpoch}',
-        img: cateringOrder[0].img,
-        title: 'Catering Order',
-        description: 'Catering order for $peopleCount people',
-        pricing: totalPrice.toStringAsFixed(2),
-        ingredients: combinedIngredients,
-        isSpicy: false,
-        foodType: 'Catering',
-        quantity: 1,
-        isOffer: false,
-        peopleCount: peopleCount,
-        sideRequest: adicionales,
-        apetito: apetito,
-        alergias: alergias,
-        eventType: eventType,
-        preferencia: preferencia,
-      );
+    final newCartItem = CartItem(
+      id: 'catering_${DateTime.now().millisecondsSinceEpoch}',
+      img: cateringOrder.img,
+      title: cateringOrder.title,
+      description: cateringOrder.description,
+      pricing: cateringOrder.totalPrice.toStringAsFixed(2),
+      ingredients: cateringOrder.combinedIngredients,
+      isSpicy: false,
+      foodType: 'Catering',
+      quantity: 1,
+      isOffer: false,
+      peopleCount: cateringOrder.dishes.fold(0, (sum, dish) => sum + dish.peopleCount),
+      sideRequest: adicionales,
+      apetito: apetito,
+      alergias: alergias,
+      eventType: eventType,
+      preferencia: preferencia,
+    );
 
-      ref.read(cartProvider.notifier).addToCart(newOrderItem.toJson(), 1);
-      ref.read(cateringOrderProvider.notifier).clearCateringOrder();
-    }
+    ref.read(cartProvider.notifier).addToCart(newCartItem.toJson(), 1);
+    cateringOrderProviderNotifier.clearCateringOrder();
   }
 
+    Map<String, List<CateringItem>> groupCateringItemsByCategory(List<CateringItem> items) {
+    Map<String, List<CateringItem>> categorizedItems = {};
+    for (var item in items) {
+      categorizedItems.putIfAbsent(item.category, () => []).add(item);
+    }
+    return categorizedItems;
+  }
 
   @override
   Widget build(BuildContext context) {
     final cateringOptions = ref.watch(cateringProvider);
-    final cart = ref.watch(cartProvider);
     final cateringOrder = ref.watch(cateringOrderProvider);
     final categorizedItems = groupCateringItemsByCategory(cateringOptions);
 
@@ -345,7 +308,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                     context.goNamed(AppRoute.homecart.name);
                   },
                 ),
-                if (cateringOrder.isNotEmpty || cart.isNotEmpty)
+                if (cateringOrder.isNotEmpty)
                   Positioned(
                     top: 0,
                     right: 0,
@@ -353,9 +316,8 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                       radius: 8,
                       backgroundColor: Colors.red,
                       child: Text(
-                        '${cart.length + cateringOrder.length}',
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 10),
+                        '${cateringOrder.length}',
+                        style: const TextStyle(color: Colors.white, fontSize: 10),
                       ),
                     ),
                   ),
@@ -403,12 +365,12 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                       final item = items[index];
                       return CateringItemCard(
                         item: item,
-                        onAddToCart: (int peopleCount, int quantity) {
+                        onAddToCart: (int quantity) {
                           ref
                               .read(cateringOrderProvider.notifier)
                               .addCateringItem(CateringDish(
                                 title: item.title,
-                                peopleCount: peopleCount,
+                                peopleCount: 10,
                                 pricePerPerson: item.pricePerPerson,
                                 ingredients: item.ingredients,
                               ));
@@ -420,17 +382,9 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                 }).toList(),
               ),
             ),
-            // if (cateringOrder.isNotEmpty)
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  padding: const EdgeInsets.symmetric(vertical: 15.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                ),
                 onPressed: () => _showCateringForm(context),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,

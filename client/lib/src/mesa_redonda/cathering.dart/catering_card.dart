@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_item.dart';
-import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
-
 
 class CateringItemCard extends StatefulWidget {
   final CateringItem item;
   final TextEditingController sideRequestController;
-  final void Function(int peopleCount, int quantity) onAddToCart;
+  final void Function(int quantity) onAddToCart;
 
   const CateringItemCard({
     required this.item,
@@ -20,7 +18,6 @@ class CateringItemCard extends StatefulWidget {
 }
 
 class CateringItemCardState extends State<CateringItemCard> {
-  int selectedPeopleCount = 10;
   int quantity = 1;
 
   @override
@@ -62,33 +59,8 @@ class CateringItemCardState extends State<CateringItemCard> {
                 const SizedBox(height: 8),
                 Text(widget.item.description),
                 const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                        '\$${widget.item.pricePerPerson.toStringAsFixed(2)} por persona'),
-                    DropdownButton<int>(
-                      value: selectedPeopleCount,
-                      dropdownColor: ColorsPaletteRedonda.white,
-                      underline: Container(
-                        height: 0,
-                        color: Colors.transparent,
-                      ),
-                      items: const [
-                        DropdownMenuItem(value: 10, child: Text('10 personas')),
-                        DropdownMenuItem(value: 50, child: Text('50 personas')),
-                        DropdownMenuItem(
-                            value: 100, child: Text('100 personas')),
-                      ],
-                      onChanged: (int? value) {
-                        setState(() {
-                          selectedPeopleCount = value ?? 10;
-                        });
-                        FocusScope.of(context).unfocus();
-                      },
-                    ),
-                  ],
-                ),
+                Text(
+                    '\$${widget.item.pricePerPerson.toStringAsFixed(2)} por persona'),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -118,7 +90,7 @@ class CateringItemCardState extends State<CateringItemCard> {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        widget.onAddToCart(selectedPeopleCount, quantity);
+                        widget.onAddToCart(quantity);
                       },
                       child: const Text('Agregar al carrito'),
                     ),
