@@ -92,7 +92,7 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
 
   // Hero Section
   Widget buildHeroSection(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
       height: 400,
       // decoration: BoxDecoration(

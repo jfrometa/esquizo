@@ -20,7 +20,9 @@ class CateringScreenState extends ConsumerState<CateringScreen>
   final TextEditingController sideRequestController = TextEditingController();
   late TabController _tabController;
 
-  Map<String, List<CateringItem>> groupCateringItemsByCategory(
+  List<String> alergiasList = []; // Moved here
+
+   Map<String, List<CateringItem>> groupCateringItemsByCategory(
       List<CateringItem> items) {
     Map<String, List<CateringItem>> categorizedItems = {};
     for (var item in items) {
@@ -42,19 +44,19 @@ class CateringScreenState extends ConsumerState<CateringScreen>
     super.dispose();
   }
 
+// Function to display catering form and manage temporary allergies
   void _showCateringForm(BuildContext context) {
     String apetito = 'regular';
     String preferencia = 'salado';
     String eventType = '';
     int peopleCount = 10;
     String adicionales = '';
-    List<String> alergiasList = [];
 
-    void addAllergy(String value) {
+    void addAllergy(String value, StateSetter setModalState) {
       if (value.isNotEmpty) {
         value = value.toLowerCase().trim();
         if (!alergiasList.contains(value)) {
-          setState(() => alergiasList.add(value));
+          setModalState(() => alergiasList.add(value));
         }
       }
     }
@@ -69,103 +71,105 @@ class CateringScreenState extends ConsumerState<CateringScreen>
         String? newAllergy = '';
 
         return Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 20.0,
+            right: 20.0,
+            top: 20.0,
+          ),
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setModalState) {
+              return SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Catering Details',
-                      style: Theme.of(context).textTheme.headlineSmall,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Catering Details',
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.close,
+                              color: ColorsPaletteRedonda.deepBrown1),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      icon: Icon(Icons.close,
-                          color: ColorsPaletteRedonda.deepBrown1),
-                      onPressed: () => Navigator.pop(context),
+                    const Divider(),
+                    const Text('Nivel de Apetito',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: apetito,
+                      decoration: InputDecoration(
+                        labelText: 'Apetito',
+                        border: const OutlineInputBorder(),
+                        filled: true,
+                        fillColor: ColorsPaletteRedonda.white,
+                      ),
+                      items: const [
+                        DropdownMenuItem(value: 'poco', child: Text('Poco')),
+                        DropdownMenuItem(value: 'regular', child: Text('Regular')),
+                        DropdownMenuItem(value: 'mucho', child: Text('Mucho')),
+                      ],
+                      onChanged: (value) => setModalState(() => apetito = value!),
                     ),
-                  ],
-                ),
-                const Divider(),
-                const Text('Nivel de Apetito',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  value: apetito,
-                  decoration: InputDecoration(
-                    labelText: 'Apetito',
-                    labelStyle: Theme.of(context).textTheme.bodySmall,
-                    border: const OutlineInputBorder(),
-                    filled: true,
-                    fillColor: ColorsPaletteRedonda.white,
-                  ),
-                  items: const [
-                    DropdownMenuItem(value: 'poco', child: Text('Poco')),
-                    DropdownMenuItem(value: 'regular', child: Text('Regular')),
-                    DropdownMenuItem(value: 'mucho', child: Text('Mucho')),
-                  ],
-                  onChanged: (value) => setState(() => apetito = value!),
-                ),
-                const SizedBox(height: 16),
-                const Text('Alergias',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8.0,
-                  children: [
-                    for (var allergy in alergiasList)
-                      Chip(
-                        label: Text(allergy),
-                        onDeleted: () {
-                          setState(() => alergiasList.remove(allergy));
-                        },
-                      ),
-                    if (alergiasList.length < 10)
-                      ActionChip(
-                        avatar: Icon(Icons.add,
-                            color: ColorsPaletteRedonda.primary),
-                        label: const Text('Agregar Alergia'),
-                        onPressed: () async {
-                          newAllergy = await showDialog<String>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text(
-                                'Nueva Alergia',
-                                style:
-                                    Theme.of(context).textTheme.headlineSmall,
-                              ),
-                              content: TextField(
-                                onChanged: (value) => newAllergy = value,
-                                onSubmitted: (value) {
-                                  addAllergy(value);
-                                  Navigator.pop(context, value);
-                                },
-                                decoration: const InputDecoration(
-                                  hintText: 'Ingresa una alergia',
-                                  border: OutlineInputBorder(),
+                    const SizedBox(height: 16),
+                    const Text('Alergias', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8.0,
+                      children: [
+                        for (var allergy in alergiasList)
+                          Chip(
+                            label: Text(allergy),
+                            onDeleted: () {
+                              setModalState(() => alergiasList.remove(allergy));
+                            },
+                          ),
+                        if (alergiasList.length < 10)
+                          ActionChip(
+                            avatar: Icon(Icons.add,
+                                color: ColorsPaletteRedonda.primary),
+                            label: const Text('Agregar Alergia'),
+                            onPressed: () async {
+                              newAllergy = await showDialog<String>(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Nueva Alergia'),
+                                  content: TextField(
+                                    onChanged: (value) => newAllergy = value,
+                                    onSubmitted: (value) {
+                                      addAllergy(value, setModalState);
+                                      Navigator.pop(context, value);
+                                    },
+                                    decoration: const InputDecoration(
+                                      hintText: 'Ingresa una alergia',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        addAllergy(newAllergy ?? '', setModalState);
+                                        Navigator.pop(context, newAllergy);
+                                      },
+                                      child: const Text('Aceptar'),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    addAllergy(newAllergy ?? '');
-                                    Navigator.pop(context, newAllergy);
-                                  },
-                                  child: const Text('Aceptar'),
-                                ),
-                              ],
-                            ),
-                          );
-                          if (newAllergy != null) {
-                            addAllergy(newAllergy!);
-                          }
-                        },
-                      ),
-                  ],
-                ),
+                              );
+                              if (newAllergy != null) {
+                                addAllergy(newAllergy!, setModalState);
+                              }
+                            },
+                          ),
+                      ],
+                    ),
+                    
                 const SizedBox(height: 16),
                 const Text('Tipo de Evento',
                     style: TextStyle(fontWeight: FontWeight.bold)),
@@ -254,24 +258,28 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                   ],
                 ),
                 const SizedBox(height: 24),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _addToCartWithForm(apetito, alergiasList.join(','),
-                          eventType, peopleCount, preferencia, adicionales);
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Confirmar'),
-                  ),
+                    const SizedBox(height: 24),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _addToCartWithForm(apetito, alergiasList.join(','), eventType, peopleCount, preferencia, adicionales);
+                          alergiasList.clear(); // Clear allergies after submitting the order
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Confirmar'),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           ),
         );
       },
     );
   }
 
+  // Adding the catering order to the cart
   void _addToCartWithForm(
     String apetito,
     String alergias,
@@ -314,6 +322,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
       ref.read(cateringOrderProvider.notifier).clearCateringOrder();
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

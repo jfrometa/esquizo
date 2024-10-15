@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AddressInputDialog extends StatefulWidget {
+  const AddressInputDialog({super.key});
+
   @override
   _AddressInputDialogState createState() => _AddressInputDialogState();
 }

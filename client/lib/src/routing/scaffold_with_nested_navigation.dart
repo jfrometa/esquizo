@@ -59,7 +59,7 @@ class ScaffoldWithNavigationBar extends ConsumerStatefulWidget {
 class _ScaffoldWithNavigationBarState
     extends ConsumerState<ScaffoldWithNavigationBar> {
   bool _isVisible = true;
-  ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {

@@ -27,7 +27,7 @@ class SignInAnonymouslyFooter extends ConsumerWidget {
               await ref.read(firebaseAuthProvider).signInAnonymously();
               // Navigate to the profile screen
               Navigator.of(context).popUntil((route) => route.isFirst);
-            } on Exception catch (e) {
+            } on Exception {
               // Handle anonymous sign-in error
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Failed to sign in anonymously.')),

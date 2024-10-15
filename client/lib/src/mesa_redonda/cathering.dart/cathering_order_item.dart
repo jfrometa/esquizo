@@ -53,7 +53,7 @@ class CateringOrderNotifier extends StateNotifier<List<CateringOrderItem>> {
   CateringOrderNotifier() : super([]);
 
   // Temporary storage for dishes before completing the order with form details
-  List<CateringDish> _pendingDishes = [];
+  final List<CateringDish> _pendingDishes = [];
 
   // Adds a dish to the pending list
   void addCateringItem(CateringDish dish) {

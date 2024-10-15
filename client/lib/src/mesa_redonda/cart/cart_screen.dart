@@ -289,7 +289,7 @@ class _MealSubscriptionItemViewState
               const SizedBox(height: 8),
               // Plan Price
               Text(
-                'Precio: \$${cleanedPrice}',
+                'Precio: \$$cleanedPrice',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: ColorsPaletteRedonda.primary,

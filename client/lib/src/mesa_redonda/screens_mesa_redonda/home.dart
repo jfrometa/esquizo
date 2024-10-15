@@ -26,7 +26,7 @@ class HomeState extends ConsumerState<Home> {
   Widget build(BuildContext context) {
     // Get the list of dishes from the dishProvider
     final dishes = ref.watch(dishProvider);
-    final _filteredDishes = _searchQuery.isEmpty
+    final filteredDishes = _searchQuery.isEmpty
         ? dishes
         : dishes.where((dish) {
             final dishTitle = dish['title']?.toLowerCase() ?? '';
@@ -64,12 +64,12 @@ class HomeState extends ConsumerState<Home> {
                           const SizedBox(height: 30.0),
                           buildDishRow(' Populares', context),
                           const SizedBox(height: 10.0),
-                          buildDishList(context, _filteredDishes),
+                          buildDishList(context, filteredDishes),
                           const SizedBox(height: 30.0),
                         ],
                       ),
                     )
-                  : buildSearchResults(_filteredDishes),
+                  : buildSearchResults(filteredDishes),
             ),
           ],
         ),

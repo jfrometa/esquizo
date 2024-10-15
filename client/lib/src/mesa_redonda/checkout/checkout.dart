@@ -37,8 +37,6 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
   final TextEditingController _mealSubscriptionTimeController =
       TextEditingController();
 
-  DateTime? _selectedCateringDate;
-  DateTime? _selectedMealSubscriptionDate;
   TimeOfDay? _selectedCateringTime;
   TimeOfDay? _selectedMealSubscriptionTime;
 
@@ -402,7 +400,7 @@ Future<void> _processOrder(BuildContext context, List<CartItem> cartItems) async
     );
 
     // Check if meal plan is available and discount eligible
-    if (mealPlanItem != null && mealPlanItem.remainingMeals > 0) {
+    if (mealPlanItem.remainingMeals > 0) {
         for (var item in cartItems) {
             if (!item.isMealSubscription && item.foodType != 'Catering') {
                 ref.read(cartProvider.notifier).consumeMeal(item.title);
@@ -621,9 +619,7 @@ Future<void> _recordMealConsumption(String mealPlanId, CartItem dish) async {
       controller.text = formattedDateTime;
 
       if (isCatering) {
-        _selectedCateringDate = selectedDateTime;
       } else {
-        _selectedMealSubscriptionDate = selectedDateTime;
       }
     });
   }

@@ -17,7 +17,7 @@ class SlideItem extends StatelessWidget {
   final Widget? actionButton; // Custom action button (e.g., Add to Cart)
 
   const SlideItem({
-    Key? key,
+    super.key,
     required this.img,
     required this.title,
     required this.description,
@@ -29,7 +29,7 @@ class SlideItem extends StatelessWidget {
     this.isMealPlan = false,
     required this.index,
     this.actionButton,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

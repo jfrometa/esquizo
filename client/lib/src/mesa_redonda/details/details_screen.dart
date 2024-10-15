@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/components/cards/iteam_card.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/constants.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/demoData.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/ordering_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
