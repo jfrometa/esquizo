@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_card.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_item.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_order_details.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
+
 
 class CateringScreen extends ConsumerStatefulWidget {
   const CateringScreen({super.key});
@@ -83,8 +85,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                       ],
                     ),
                     const Divider(),
-                    const Text('Nivel de Apetito',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text('Nivel de Apetito', style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       value: apetito,
@@ -116,11 +117,10 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                           ),
                         if (alergiasList.length < 10)
                           ActionChip(
-                            avatar: Icon(Icons.add,
-                                color: ColorsPaletteRedonda.primary),
+                            avatar: Icon(Icons.add, color: ColorsPaletteRedonda.primary),
                             label: const Text('Agregar Alergia'),
                             onPressed: () async {
-                               newAllergy = await showDialog<String>(
+                              newAllergy = await showDialog<String>(
                                 context: context,
                                 builder: (context) => AlertDialog(
                                   title: const Text('Nueva Alergia'),
@@ -280,7 +280,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
     cateringOrderProviderNotifier.clearCateringOrder();
   }
 
-    Map<String, List<CateringItem>> groupCateringItemsByCategory(List<CateringItem> items) {
+  Map<String, List<CateringItem>> groupCateringItemsByCategory(List<CateringItem> items) {
     Map<String, List<CateringItem>> categorizedItems = {};
     for (var item in items) {
       categorizedItems.putIfAbsent(item.category, () => []).add(item);
@@ -304,8 +304,11 @@ class CateringScreenState extends ConsumerState<CateringScreen>
               children: [
                 IconButton(
                   icon: const Icon(Icons.shopping_cart),
-                  onPressed: () {
-                    context.goNamed(AppRoute.homecart.name);
+                 onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const CateringOrderDetailsScreen()),
+                    );
                   },
                 ),
                 if (cateringOrder.isNotEmpty)
@@ -316,7 +319,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                       radius: 8,
                       backgroundColor: Colors.red,
                       child: Text(
-                        '${cateringOrder.length}',
+                        '${cateringOrder.fold<int>(0, (sum, order) => sum + order.dishes.length)}',
                         style: const TextStyle(color: Colors.white, fontSize: 10),
                       ),
                     ),
