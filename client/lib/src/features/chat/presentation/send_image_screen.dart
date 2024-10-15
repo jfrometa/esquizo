@@ -100,15 +100,16 @@ class _SendImageScreenState extends ConsumerState<SendImageScreen> {
                           ),
                         )
                       : !kIsWeb
-                          ? Image.file(
-                              File(image.path),
-                              fit: BoxFit.cover
-                            )
-                          :  CachedNetworkImage(
+                          ? Image.file(File(image.path), fit: BoxFit.cover)
+                          : CachedNetworkImage(
                               imageUrl: image.path,
-                              placeholder: (context, url) => const CircularProgressIndicator(),
-                              errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.red,),
-                              ) ,
+                              placeholder: (context, url) =>
+                                  const CircularProgressIndicator(),
+                              errorWidget: (context, url, error) => const Icon(
+                                Icons.error,
+                                color: Colors.red,
+                              ),
+                            ),
                 ),
               ],
             ),
@@ -182,7 +183,7 @@ class _SendImageScreenState extends ConsumerState<SendImageScreen> {
                         setState(() => isLoading = false);
                         ref.read(imageProvider.notifier).state = null;
 
-                        if(mounted) {
+                        if (mounted) {
                           Navigator.of(context).pop();
                         }
                       },

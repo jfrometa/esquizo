@@ -41,7 +41,7 @@ class ToastMessage {
                     ),
                     child: Text(
                       message,
-                      style: customAppTheme.textStyles.smallBody
+                      style: customAppTheme.textStyles.bodySmall
                           .copyWith(color: customAppTheme.colorsPalette.white),
                     ),
                   ),
