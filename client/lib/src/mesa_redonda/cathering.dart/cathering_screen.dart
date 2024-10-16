@@ -4,11 +4,16 @@ import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_item.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_order_details.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_order_details.dart' as orderDetails;
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
+// Import the new screen
 
+final cateringItemCountProvider = Provider<int>((ref) {
+  final cateringOrders = ref.watch(cateringOrderProvider);
+  return cateringOrders.fold<int>(0, (sum, order) => sum + order.dishes.length);
+});
 
 class CateringScreen extends ConsumerStatefulWidget {
   const CateringScreen({super.key});
@@ -27,7 +32,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
+    _tabController = TabController(length: 6, vsync: this); // Adjust length based on number of categories
   }
 
   @override
@@ -120,12 +125,12 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                             avatar: Icon(Icons.add, color: ColorsPaletteRedonda.primary),
                             label: const Text('Agregar Alergia'),
                             onPressed: () async {
-                              newAllergy = await showDialog<String>(
+                              final newAllergy = await showDialog<String>(
                                 context: context,
                                 builder: (context) => AlertDialog(
                                   title: const Text('Nueva Alergia'),
                                   content: TextField(
-                                    onChanged: (value) => newAllergy = value,
+                                    onChanged: (value) => value,
                                     onSubmitted: (value) {
                                       addAllergy(value, setModalState);
                                       Navigator.pop(context, value);
@@ -138,8 +143,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                                   actions: [
                                     TextButton(
                                       onPressed: () {
-                                        addAllergy(newAllergy ?? '', setModalState);
-                                        Navigator.pop(context, newAllergy);
+                                        Navigator.pop(context);
                                       },
                                       child: const Text('Aceptar'),
                                     ),
@@ -147,7 +151,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                                 ),
                               );
                               if (newAllergy != null) {
-                                addAllergy(newAllergy!, setModalState);
+                                addAllergy(newAllergy, setModalState);
                               }
                             },
                           ),
@@ -220,8 +224,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                       child: ElevatedButton(
                         onPressed: () {
                           _finalizeAndAddToCart(
-                            apetito, alergiasList.join(','),
-                            eventType, preferencia, adicionales);
+                            ref, apetito, alergiasList.join(','), eventType, preferencia, adicionales);
                           alergiasList.clear();
                           Navigator.pop(context);
                         },
@@ -239,7 +242,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
   }
 
   void _finalizeAndAddToCart(
-    String apetito, String alergias,
+    WidgetRef ref, String apetito, String alergias,
     String eventType, String preferencia, String adicionales
   ) {
     final cateringOrderProviderNotifier = ref.read(cateringOrderProvider.notifier);
@@ -253,31 +256,6 @@ class CateringScreenState extends ConsumerState<CateringScreen>
       preferencia: preferencia,
       adicionales: adicionales,
     );
-
-    final cateringOrderItems = ref.read(cateringOrderProvider);
-    final cateringOrder = cateringOrderItems.last;
-
-    final newCartItem = CartItem(
-      id: 'catering_${DateTime.now().millisecondsSinceEpoch}',
-      img: cateringOrder.img,
-      title: cateringOrder.title,
-      description: cateringOrder.description,
-      pricing: cateringOrder.totalPrice.toStringAsFixed(2),
-      ingredients: cateringOrder.combinedIngredients,
-      isSpicy: false,
-      foodType: 'Catering',
-      quantity: 1,
-      isOffer: false,
-      peopleCount: cateringOrder.dishes.fold(0, (sum, dish) => sum + dish.peopleCount),
-      sideRequest: adicionales,
-      apetito: apetito,
-      alergias: alergias,
-      eventType: eventType,
-      preferencia: preferencia,
-    );
-
-    ref.read(cartProvider.notifier).addToCart(newCartItem.toJson(), 1);
-    cateringOrderProviderNotifier.clearCateringOrder();
   }
 
   Map<String, List<CateringItem>> groupCateringItemsByCategory(List<CateringItem> items) {
@@ -291,7 +269,6 @@ class CateringScreenState extends ConsumerState<CateringScreen>
   @override
   Widget build(BuildContext context) {
     final cateringOptions = ref.watch(cateringProvider);
-    final cateringOrder = ref.watch(cateringOrderProvider);
     final categorizedItems = groupCateringItemsByCategory(cateringOptions);
 
     return Scaffold(
@@ -304,26 +281,32 @@ class CateringScreenState extends ConsumerState<CateringScreen>
               children: [
                 IconButton(
                   icon: const Icon(Icons.shopping_cart),
-                 onPressed: () {
+                  onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const CateringOrderDetailsScreen()),
+                      MaterialPageRoute(builder: (_) => const orderDetails.CateringOrderDetailsScreen()),
                     );
                   },
                 ),
-                if (cateringOrder.isNotEmpty)
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: CircleAvatar(
-                      radius: 8,
-                      backgroundColor: Colors.red,
-                      child: Text(
-                        '${cateringOrder.fold<int>(0, (sum, order) => sum + order.dishes.length)}',
-                        style: const TextStyle(color: Colors.white, fontSize: 10),
-                      ),
-                    ),
-                  ),
+                Consumer(
+                  builder: (context, ref, child) {
+                    final cateringItemCount = ref.watch(cateringItemCountProvider);
+                    return cateringItemCount > 0
+                        ? Positioned(
+                            top: 0,
+                            right: 0,
+                            child: CircleAvatar(
+                              radius: 8,
+                              backgroundColor: Colors.red,
+                              child: Text(
+                                '$cateringItemCount',
+                                style: const TextStyle(color: Colors.white, fontSize: 10),
+                              ),
+                            ),
+                          )
+                        : const SizedBox.shrink();
+                  },
+                ),
               ],
             ),
           ),

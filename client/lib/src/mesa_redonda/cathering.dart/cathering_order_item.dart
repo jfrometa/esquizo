@@ -1,4 +1,7 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Model representing an individual dish within the catering order
 class CateringDish {
@@ -13,11 +16,27 @@ class CateringDish {
     required this.pricePerPerson,
     required this.ingredients,
   });
+
+  Map<String, dynamic> toJson() => {
+        'title': title,
+        'peopleCount': peopleCount,
+        'pricePerPerson': pricePerPerson,
+        'ingredients': ingredients,
+      };
+
+  factory CateringDish.fromJson(Map<String, dynamic> json) {
+    return CateringDish(
+      title: json['title'],
+      peopleCount: json['peopleCount'],
+      pricePerPerson: json['pricePerPerson'],
+      ingredients: List<String>.from(json['ingredients']),
+    );
+  }
 }
 
-// Model for the overall catering order, including form data and total price calculation
+// Model for the overall catering order
 class CateringOrderItem {
-  final String title; 
+  final String title;
   final String img;
   final String description;
   final List<CateringDish> dishes;
@@ -46,21 +65,77 @@ class CateringOrderItem {
   // Combines all ingredients from all dishes into a single list for display
   List<String> get combinedIngredients =>
       dishes.expand((dish) => dish.ingredients).toList();
+
+  Map<String, dynamic> toJson() => {
+        'title': title,
+        'img': img,
+        'description': description,
+        'dishes': dishes.map((dish) => dish.toJson()).toList(),
+        'apetito': apetito,
+        'alergias': alergias,
+        'eventType': eventType,
+        'preferencia': preferencia,
+        'adicionales': adicionales,
+      };
+
+  factory CateringOrderItem.fromJson(Map<String, dynamic> json) {
+    return CateringOrderItem(
+      title: json['title'],
+      img: json['img'],
+      description: json['description'],
+      dishes: (json['dishes'] as List)
+          .map((dish) => CateringDish.fromJson(dish))
+          .toList(),
+      apetito: json['apetito'],
+      alergias: json['alergias'],
+      eventType: json['eventType'],
+      preferencia: json['preferencia'],
+      adicionales: json['adicionales'],
+    );
+  }
 }
 
-// State notifier for managing temporary catering orders
+// State notifier for managing catering orders with persistence
 class CateringOrderNotifier extends StateNotifier<List<CateringOrderItem>> {
-  CateringOrderNotifier() : super([]);
-
-  // Temporary storage for dishes before completing the order with form details
+  Timer? _saveDebounce;
+ // Temporary storage for dishes before completing the order with form details
   final List<CateringDish> _pendingDishes = [];
+  
+  CateringOrderNotifier() : super([]) {
+    _loadCateringOrders();
+  }
 
-  // Adds a dish to the pending list
+  // Load catering orders from SharedPreferences
+  Future<void> _loadCateringOrders() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? serializedOrders = prefs.getString('cateringOrders');
+    if (serializedOrders != null) {
+      state = deserializeCateringOrders(serializedOrders);
+    }
+  }
+
+  // Save catering orders to SharedPreferences
+  Future<void> _saveCateringOrders() async {
+    final prefs = await SharedPreferences.getInstance();
+    String serializedOrders = serializeCateringOrders(state);
+    await prefs.setString('cateringOrders', serializedOrders);
+  }
+
+  @override
+  set state(List<CateringOrderItem> value) {
+    super.state = value;
+    if (_saveDebounce?.isActive ?? false) _saveDebounce!.cancel();
+    _saveDebounce = Timer(const Duration(milliseconds: 500), () {
+      _saveCateringOrders();
+    });
+  }
+
+  // Add a new dish to the pending list
   void addCateringItem(CateringDish dish) {
     _pendingDishes.add(dish);
   }
 
-  // Completes the catering order with form data and finalizes it
+  // Complete the catering order with form data and save it
   void finalizeCateringOrder({
     required String title,
     required String img,
@@ -73,6 +148,7 @@ class CateringOrderNotifier extends StateNotifier<List<CateringOrderItem>> {
   }) {
     if (_pendingDishes.isNotEmpty) {
       final newOrder = CateringOrderItem(
+        title: title,
         img: img,
         description: description,
         dishes: List.from(_pendingDishes),
@@ -81,22 +157,39 @@ class CateringOrderNotifier extends StateNotifier<List<CateringOrderItem>> {
         eventType: eventType,
         preferencia: preferencia,
         adicionales: adicionales,
-         title: title,
       );
 
       state = [...state, newOrder];
-      _pendingDishes.clear(); // Clear pending dishes after finalizing the order
+      _pendingDishes.clear();
     }
   }
 
-  // Clears all orders in the temporary list
+  // Clear all orders
   void clearCateringOrder() {
     state = [];
-    _pendingDishes.clear(); // Also clear pending dishes to reset fully
+    _pendingDishes.clear();
+  }
+
+  // Remove a specific order from the catering list by index
+  void removeFromCart(int index) {
+    if (index >= 0 && index < state.length) {
+      state = [...state]..removeAt(index);
+    }
   }
 }
 
-// Provider for accessing the CateringOrderNotifier
+// Serialization and Deserialization for CateringOrderItems
+String serializeCateringOrders(List<CateringOrderItem> orders) {
+  return jsonEncode(orders.map((order) => order.toJson()).toList());
+}
+
+List<CateringOrderItem> deserializeCateringOrders(String jsonString) {
+  List<dynamic> jsonData = jsonDecode(jsonString);
+  return jsonData
+      .map((order) => CateringOrderItem.fromJson(order))
+      .toList();
+}
+
 final cateringOrderProvider =
     StateNotifierProvider<CateringOrderNotifier, List<CateringOrderItem>>((ref) {
   return CateringOrderNotifier();

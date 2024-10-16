@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 import '../plans/plans.dart'; // Import your MealPlan model
-import '../cart/cart_item.dart'; // Import your cart provider
 
 class PlanDetailsScreen extends ConsumerWidget {
   final String planId;
@@ -10,16 +10,11 @@ class PlanDetailsScreen extends ConsumerWidget {
   const PlanDetailsScreen({super.key, required this.planId});
 
   String cleanPrice(String input) {
-    // Use RegExp to replace all non-digit and non-decimal characters
     String cleaned = input.replaceAll(RegExp(r'[^\d.]'), '');
-
-    // If the cleaned string has more than one decimal, fix that
     if (cleaned.contains('.')) {
-      // Split by the first decimal and join the first part with only the first decimal and the rest as numbers
       List<String> parts = cleaned.split('.');
       cleaned = '${parts[0]}.${parts.skip(1).join('')}';
     }
-
     return cleaned;
   }
 
@@ -35,19 +30,17 @@ class PlanDetailsScreen extends ConsumerWidget {
     IconData planIcon;
     switch (mealPlan.id) {
       case 'basico':
-        planIcon = Icons.emoji_food_beverage; // Represents basic plan
+        planIcon = Icons.emoji_food_beverage;
         break;
       case 'estandar':
-        planIcon = Icons.local_cafe; // Represents standard plan
+        planIcon = Icons.local_cafe;
         break;
       case 'premium':
-        planIcon = Icons.local_dining; // Represents premium plan
+        planIcon = Icons.local_dining;
         break;
       default:
         planIcon = Icons.fastfood;
     }
-
-    // Plan Icon
 
     return Scaffold(
       appBar: AppBar(
@@ -57,14 +50,12 @@ class PlanDetailsScreen extends ConsumerWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Plan Image
             Icon(
               planIcon,
               size: 80,
               color: ColorsPaletteRedonda.primary,
             ),
             const SizedBox(height: 16),
-            // Plan Title and Price
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
@@ -85,13 +76,11 @@ class PlanDetailsScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Plan Description
                   Text(
                     mealPlan.longDescription,
                     style: theme.textTheme.bodyLarge,
                   ),
                   const SizedBox(height: 16),
-                  // How It Works Section
                   Text(
                     '¿Cómo funciona?',
                     style: theme.textTheme.titleLarge?.copyWith(
@@ -104,7 +93,6 @@ class PlanDetailsScreen extends ConsumerWidget {
                     style: theme.textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 16),
-                  // Features List
                   Text(
                     'Características:',
                     style: theme.textTheme.titleLarge?.copyWith(
@@ -137,33 +125,29 @@ class PlanDetailsScreen extends ConsumerWidget {
                     }).toList(),
                   ),
                   const SizedBox(height: 24),
-                  // Add to Cart Button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        // Add meal plan to cart
-                        ref.read(cartProvider.notifier).addToCart(
+                        // Add meal plan to meal orders
+                        ref.read(mealOrderProvider.notifier).addMealSubscription(
                           {
                             'id': mealPlan.id,
-                            // 'img': mealPlan.img,
+                            'img': '', // Provide image path if available
                             'title': mealPlan.title,
                             'description': 'Plan de comidas',
                             'pricing': cleanPrice(mealPlan.price),
-                            'offertPricing': null,
-                            'ingredients': [],
+                            'ingredients': <String>[], // Ensure this is an empty List<String>
                             'isSpicy': false,
                             'foodType': 'Meal Plan',
+                            'quantity': 1,
                           },
-                          1,
-                          isMealSubscription: true,
-                          totalMeals: mealPlan.totalMeals,
+                          mealPlan.totalMeals,
                         );
 
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content:
-                                Text('${mealPlan.title} añadido al carrito'),
+                            content: Text('${mealPlan.title} añadido al carrito'),
                           ),
                         );
                       },
