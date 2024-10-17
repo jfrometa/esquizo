@@ -14,7 +14,6 @@ class CartItemView extends StatelessWidget {
   final int quantity;
   final VoidCallback onRemove;
   final VoidCallback onAdd;
-  final VoidCallback onRemoveFromCart; // New callback for trash icon
 
   // Catering-specific fields
   final int peopleCount;
@@ -33,85 +32,10 @@ class CartItemView extends StatelessWidget {
     required this.quantity,
     required this.onRemove,
     required this.onAdd,
-    required this.onRemoveFromCart, // Initialize new callback
     this.peopleCount = 0,
     this.sideRequest = '',
   });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      elevation: 2.0,
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Row for image, title, and delete icon
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Title and Details
-                Expanded(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8.0),
-                        child: Image.asset(
-                          img,
-                          fit: BoxFit.cover,
-                          width: 100,
-                          height: 100,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              width: 100,
-                              height: 100,
-                              color: Colors.grey[200],
-                              child: const Icon(Icons.broken_image, size: 40),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              title,
-                              style: const TextStyle(
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.bold,
-                                color: ColorsPaletteRedonda.primary,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4.0),
-                            Text(
-                              description,
-                              style: const TextStyle(
-                                fontSize: 12.0,
-                                color: Colors.black,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Trash icon to remove the item
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: onRemoveFromCart,
-                ),
-              ],
-            ),
+  
 
   @override
   Widget build(BuildContext context) {
