@@ -45,7 +45,9 @@ class CartScreenState extends ConsumerState<CartScreen>
     print('Cart Items: ${cartItems.length}');
     print('Catering Items: ${cateringItems.length}');
     print('Meal Subscription Items: ${mealItems.length}');
-    mealItems.forEach((item) => print('Meal Item: ${item.title}, Quantity: ${item.quantity}'));
+    for (var item in mealItems) {
+      print('Meal Item: ${item.title}, Quantity: ${item.quantity}');
+    }
 
     final totalPrice = _calculateTotalPrice(cartItems, cateringItems, mealItems);
 
@@ -121,7 +123,7 @@ class CartScreenState extends ConsumerState<CartScreen>
         return CateringCartItemView(
           order: item,
           onRemoveFromCart: () {
-            print('Removing catering item: ${item}');
+            print('Removing catering item: $item');
             ref.read(cateringOrderProvider.notifier).removeFromCart(index);
           },
         );

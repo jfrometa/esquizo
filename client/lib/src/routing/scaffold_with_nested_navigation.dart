@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/localization/string_hardcoded.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/cathering_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_cart.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/plans/plans.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class ScaffoldWithNestedNavigation extends StatelessWidget {
@@ -35,9 +38,18 @@ class ScaffoldWithNestedNavigation extends StatelessWidget {
 }
 
 // Helper function to calculate total quantity
-int getTotalCartQuantity(List<CartItem> cartItems) {
-  return cartItems.fold(0, (total, item) => total + item.quantity);
+// int getTotalCartQuantity(List<CartItem> cartItems) {
+//   return cartItems.fold(0, (total, item) => total + item.quantity);
+// }
+
+
+// Helper function to calculate total quantity from multiple providers
+int getTotalQuantity(List<CartItem> cartItems, List<CartItem> mealItems, int cateringCount) {
+  final cartTotal = cartItems.fold(0, (total, item) => total + item.quantity);
+  final mealTotal = mealItems.length;
+  return cartTotal + mealTotal + cateringCount;
 }
+
 
 class ScaffoldWithNavigationBar extends ConsumerStatefulWidget {
   const ScaffoldWithNavigationBar({
@@ -104,7 +116,15 @@ void _goBranch(int index) {
   @override
   Widget build(BuildContext context) {
     final cartItems = ref.watch(cartProvider);
-    final totalQuantity = getTotalCartQuantity(cartItems);
+    // final totalQuantity = getTotalCartQuantity(cartItems);
+
+    final mealItems = ref.watch(mealOrderProvider);
+    print('ITEMS: ${mealItems.length}');
+    final cateringCount = ref.watch(cateringItemCountProvider);
+
+    // Calculating the total quantity
+    final totalQuantity = getTotalQuantity(cartItems, mealItems, cateringCount);
+
 
     return Scaffold(
        body: widget.body,
@@ -221,8 +241,14 @@ class ScaffoldWithNavigationRail extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Get the total quantity from cartProvider
-    final cartItems = ref.watch(cartProvider);
-    final totalQuantity = getTotalCartQuantity(cartItems);
+       final cartItems = ref.watch(cartProvider);
+    // final totalQuantity = getTotalCartQuantity(cartItems);
+
+    final mealItems = ref.watch(mealOrderProvider);
+    final cateringCount = ref.watch(cateringItemCountProvider);
+
+    // Calculating the total quantity
+    final totalQuantity = getTotalQuantity(cartItems, mealItems, cateringCount);
 
     return Scaffold(
       body: Row(

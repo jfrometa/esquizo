@@ -80,14 +80,14 @@ class MealSubscriptionItemView extends StatelessWidget {
                         color: ColorsPaletteRedonda.primary,
                       ),
                 ),
-                ElevatedButton(
-                  onPressed: onConsumeMeal,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorsPaletteRedonda.primary,
-                    minimumSize: const Size(120, 36),
-                  ),
-                  child: const Text('Consumir comida'),
-                ),
+                // ElevatedButton(
+                //   onPressed: onConsumeMeal,
+                //   style: ElevatedButton.styleFrom(
+                //     backgroundColor: ColorsPaletteRedonda.primary,
+                //     minimumSize: const Size(120, 36),
+                //   ),
+                //   child: const Text('Ordenar'),
+                // ),
               ],
             ),
           ],
