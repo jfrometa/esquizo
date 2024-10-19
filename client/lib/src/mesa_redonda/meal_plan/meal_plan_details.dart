@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 import '../plans/plans.dart'; // Import your MealPlan model
@@ -130,14 +131,17 @@ class PlanDetailsScreen extends ConsumerWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         // Add meal plan to meal orders
-                        ref.read(mealOrderProvider.notifier).addMealSubscription(
+                        ref
+                            .read(mealOrderProvider.notifier)
+                            .addMealSubscription(
                           {
                             'id': mealPlan.id,
                             'img': '', // Provide image path if available
                             'title': mealPlan.title,
                             'description': 'Plan de comidas',
                             'pricing': cleanPrice(mealPlan.price),
-                            'ingredients': <String>[], // Ensure this is an empty List<String>
+                            'ingredients':
+                                <String>[], // Ensure this is an empty List<String>
                             'isSpicy': false,
                             'foodType': 'Meal Plan',
                             'quantity': 1,
@@ -147,9 +151,13 @@ class PlanDetailsScreen extends ConsumerWidget {
 
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('${mealPlan.title} añadido al carrito'),
+                            content:
+                                Text('${mealPlan.title} añadido al carrito'),
                           ),
                         );
+
+                        GoRouter.of(context).pop();
+                        GoRouter.of(context).pop();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: ColorsPaletteRedonda.primary,

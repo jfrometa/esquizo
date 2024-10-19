@@ -8,7 +8,6 @@ import 'package:starter_architecture_flutter_firebase/src/features/authenticatio
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/catering_cart_item_view.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/location/location_capture.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
@@ -499,32 +498,32 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
     final contactInfo = await _checkAndPromptForContactInfo(context);
     if (contactInfo == null) return; // Exit if user cancels
 
-    // final mealPlanItem = cartItems.firstWhere(
-    //   (item) => item.isMealSubscription,
-    //   orElse: () => {} as CartItem,
-    // );
+    final mealPlanItem = cartItems.firstWhere(
+      (item) => item.isMealSubscription,
+      orElse: () => {} as CartItem,
+    );
 
     // Check if meal plan is available and discount eligible
-    // if (mealPlanItem.remainingMeals > 0) {
-    //   for (var item in cartItems) {
-    //     if (!item.isMealSubscription && item.foodType != 'Catering') {
-    //       ref.read(cartProvider.notifier).consumeMeal(item.title);
-    //       // Trigger in-app notification
-    //       ScaffoldMessenger.of(context).showSnackBar(
-    //         SnackBar(
-    //           content: Text('Consumed a meal from your plan for ${item.title}'),
-    //           backgroundColor: Colors.green,
-    //         ),
-    //       );
-    //       // Save meal consumption to Firebase
-    //       await _recordMealConsumption(mealPlanItem.id, item);
-    //     }
-    //   }
-    // } else {
-    //   // Prompt to buy a new plan
-    //   _promptToBuyAnotherPlan(context);
-    //   return; // Exit if no meal plan available or no remaining meals
-    // }
+    if (mealPlanItem.remainingMeals > 0) {
+      for (var item in cartItems) {
+        if (!item.isMealSubscription && item.foodType != 'Catering') {
+          ref.read(cartProvider.notifier).consumeMeal(item.title);
+          // Trigger in-app notification
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Consumed a meal from your plan for ${item.title}'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          // Save meal consumption to Firebase
+          await _recordMealConsumption(mealPlanItem.id, item);
+        }
+      }
+    } else {
+      // Prompt to buy a new plan
+      _promptToBuyAnotherPlan(context);
+      return; // Exit if no meal plan available or no remaining meals
+    }
 
     // Proceed with original order saving logic
     try {

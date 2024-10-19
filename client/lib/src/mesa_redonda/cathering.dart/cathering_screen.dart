@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_item.dart';
@@ -9,7 +10,7 @@ import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.d
 
 final cateringItemCountProvider = Provider<int>((ref) {
   final cateringOrder = ref.watch(cateringOrderProvider);
-  return cateringOrder?.dishes.length ?? 0;
+  return (cateringOrder?.dishes.length ?? 0) > 0 ? 1 : 0;
 });
 
 class CateringScreen extends ConsumerStatefulWidget {
@@ -26,10 +27,14 @@ class CateringScreenState extends ConsumerState<CateringScreen>
   List<String> alergiasList = [];
   String? newAllergy = '';
 
+  late ScrollController _scrollController;
+  bool _isTabBarVisible = true;
+
   @override
   void initState() {
     super.initState();
-    // Initialize _tabController in didChangeDependencies
+    _scrollController = ScrollController();
+    _scrollController.addListener(_scrollListener);
   }
 
   @override
@@ -43,25 +48,55 @@ class CateringScreenState extends ConsumerState<CateringScreen>
     );
   }
 
+  void _scrollListener() {
+    if (_scrollController.position.userScrollDirection ==
+        ScrollDirection.reverse) {
+      if (_isTabBarVisible) {
+        setState(() {
+          _isTabBarVisible = false; // Hide TabBar when scrolling down
+        });
+      }
+    } else if (_scrollController.position.userScrollDirection ==
+        ScrollDirection.forward) {
+      if (!_isTabBarVisible) {
+        setState(() {
+          _isTabBarVisible = true; // Show TabBar when scrolling up
+        });
+      }
+    }
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
     sideRequestController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
-  void _showCateringForm(BuildContext context) {
-    String apetito = 'regular';
-    String preferencia = 'salado';
-    String eventType = '';
-    String adicionales = '';
+  void _showCateringForm(BuildContext context, WidgetRef ref) {
+    // Retrieve the current catering order from the provider
+    final cateringOrder = ref.read(cateringOrderProvider);
 
+    // Set initial values, using provider values if available
+    String apetito = cateringOrder?.apetito ?? 'regular';
+    String preferencia = cateringOrder?.preferencia ?? 'salado';
+    String eventType = cateringOrder?.eventType ?? '';
+    String adicionales = cateringOrder?.adicionales ?? '';
+    int? cantidadPersonas = cateringOrder?.cantidadPersonas;
+    List<String> alergiasList = cateringOrder?.alergias.split(',') ?? [];
+
+    // TextController for custom number of persons
+    TextEditingController customPersonasController = TextEditingController();
+
+    // Helper function to add allergies
     void addAllergy(String value, StateSetter setModalState) {
       if (value.isNotEmpty && !alergiasList.contains(value)) {
         setModalState(() => alergiasList.add(value));
       }
     }
 
+    // Show the modal form
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -119,6 +154,85 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                           setModalState(() => apetito = value!),
                     ),
                     const SizedBox(height: 16),
+                    const Text('Cantidad de Personas',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<int>(
+                      value: (cantidadPersonas != null &&
+                              [
+                                10,
+                                20,
+                                30,
+                                40,
+                                50,
+                                100,
+                                200,
+                                300,
+                                400,
+                                500,
+                                1000,
+                                2000,
+                                5000,
+                                10000
+                              ].contains(cantidadPersonas))
+                          ? cantidadPersonas
+                          : null,
+                      decoration: InputDecoration(
+                        labelText: 'Cantidad de Personas',
+                        border: const OutlineInputBorder(),
+                        filled: true,
+                        fillColor: ColorsPaletteRedonda.white,
+                      ),
+                      items: [
+                        for (var number in [
+                          10,
+                          20,
+                          30,
+                          40,
+                          50,
+                          100,
+                          200,
+                          300,
+                          400,
+                          500,
+                          1000,
+                          2000,
+                          5000,
+                          10000
+                        ])
+                          DropdownMenuItem(
+                              value: number, child: Text('$number personas')),
+                        const DropdownMenuItem(
+                            value: -1, child: Text('Custom')),
+                      ],
+                      onChanged: (value) {
+                        if (value == -1) {
+                          setModalState(() {
+                            cantidadPersonas = null; // Custom field
+                          });
+                        } else {
+                          setModalState(() {
+                            cantidadPersonas = value ?? 10;
+                          });
+                        }
+                      },
+                    ),
+                    if (cantidadPersonas == null)
+                      TextField(
+                        controller: customPersonasController,
+                        decoration: const InputDecoration(
+                          labelText: 'Cantidad de Personas Personalizada',
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          final customValue = int.tryParse(value);
+                          if (customValue != null) {
+                            setModalState(() => cantidadPersonas = customValue);
+                          }
+                        },
+                      ),
+                    const SizedBox(height: 16),
                     const Text('Alergias',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
@@ -175,6 +289,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     TextField(
+                      controller: TextEditingController(text: eventType),
                       decoration: InputDecoration(
                         labelText: 'Ej. Cumpleaños, Boda',
                         labelStyle: Theme.of(context).textTheme.bodySmall,
@@ -211,7 +326,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                           style: Theme.of(context).textTheme.titleMedium),
                       children: [
                         TextFormField(
-                          controller: sideRequestController,
+                          controller: TextEditingController(text: adicionales),
                           style: Theme.of(context).textTheme.labelLarge,
                           maxLines: 3,
                           decoration: InputDecoration(
@@ -221,16 +336,14 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8.0),
                               borderSide: const BorderSide(
-                                color: ColorsPaletteRedonda.deepBrown1,
-                                width: 1.0,
-                              ),
+                                  color: ColorsPaletteRedonda.deepBrown1,
+                                  width: 1.0),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8.0),
                               borderSide: const BorderSide(
-                                color: ColorsPaletteRedonda.primary,
-                                width: 2.0,
-                              ),
+                                  color: ColorsPaletteRedonda.primary,
+                                  width: 2.0),
                             ),
                           ),
                           onChanged: (value) =>
@@ -240,21 +353,33 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                     ),
                     const SizedBox(height: 24),
                     Center(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _finalizeAndAddToCart(
-                              ref,
-                              apetito,
-                              alergiasList.join(','),
-                              eventType,
-                              preferencia,
-                              adicionales);
-                          alergiasList.clear();
-                          Navigator.pop(context);
-                        },
-                        child: const Text('Confirmar'),
+                      child: SizedBox(
+                        height: 38,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            _finalizeAndAddToCart(
+                                ref,
+                                apetito,
+                                alergiasList.join(','),
+                                eventType,
+                                preferencia,
+                                adicionales,
+                                cantidadPersonas ?? 10);
+                            alergiasList.clear();
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content:
+                                    Text('Se agregó el Catering al carrito'),
+                              ),
+                            );
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Confirmar Detalles de la Orden'),
+                        ),
                       ),
                     ),
+                    const SizedBox(height: 24),
                   ],
                 ),
               );
@@ -265,19 +390,26 @@ class CateringScreenState extends ConsumerState<CateringScreen>
     );
   }
 
-  void _finalizeAndAddToCart(WidgetRef ref, String apetito, String alergias,
-      String eventType, String preferencia, String adicionales) {
+  void _finalizeAndAddToCart(
+      WidgetRef ref,
+      String apetito,
+      String alergias,
+      String eventType,
+      String preferencia,
+      String adicionales,
+      int cantidadPersonas) {
     final cateringOrderProviderNotifier =
         ref.read(cateringOrderProvider.notifier);
     cateringOrderProviderNotifier.finalizeCateringOrder(
-      title: 'Catering Order',
+      title: 'Orden de Catering',
       img: 'assets/image.png',
-      description: 'Catering Order for Event',
+      description: eventType.isEmpty ? 'Catering' : eventType,
       apetito: apetito,
       alergias: alergias,
       eventType: eventType,
       preferencia: preferencia,
       adicionales: adicionales,
+      cantidadPersonas: cantidadPersonas,
     );
   }
 
@@ -296,10 +428,13 @@ class CateringScreenState extends ConsumerState<CateringScreen>
   Widget build(BuildContext context) {
     final cateringOptions = ref.watch(cateringProvider);
     final categorizedItems = groupCateringItemsByCategory(cateringOptions);
+    // Inside the build method where the button is rendered
+    final cateringItemCount = ref.watch(cateringItemCountProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Catering'),
+        forceMaterialTransparency: true,
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -316,44 +451,45 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                     );
                   },
                 ),
-                Consumer(
-                  builder: (context, ref, child) {
-                    final cateringItemCount =
-                        ref.watch(cateringItemCountProvider);
-                    return cateringItemCount > 0
-                        ? Positioned(
-                            top: 0,
-                            right: 0,
-                            child: CircleAvatar(
-                              radius: 8,
-                              backgroundColor: Colors.red,
-                              child: Text(
-                                '$cateringItemCount',
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 10),
-                              ),
-                            ),
-                          )
-                        : const SizedBox.shrink();
-                  },
-                ),
+                cateringItemCount > 0
+                    ? Positioned(
+                        top: 0,
+                        right: 0,
+                        child: CircleAvatar(
+                          radius: 8,
+                          backgroundColor: Colors.red,
+                          child: Text(
+                            '$cateringItemCount',
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 10),
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink()
               ],
             ),
           ),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          labelStyle: Theme.of(context).textTheme.titleSmall,
-          unselectedLabelStyle: Theme.of(context).textTheme.titleSmall,
-          labelColor: ColorsPaletteRedonda.white,
-          unselectedLabelColor: ColorsPaletteRedonda.deepBrown1,
-          indicatorSize: TabBarIndicatorSize.tab,
-          indicator: const UnderlineTabIndicator(),
-          tabs: categorizedItems.keys
-              .map((category) => Tab(text: category))
-              .toList(),
-        ),
+        bottom: _isTabBarVisible
+            ? TabBar(
+                controller: _tabController,
+                dividerColor: Colors.transparent,
+                isScrollable: true,
+                labelStyle: Theme.of(context).textTheme.titleSmall,
+                unselectedLabelStyle: Theme.of(context).textTheme.titleSmall,
+                labelColor: ColorsPaletteRedonda.white,
+                unselectedLabelColor: ColorsPaletteRedonda.deepBrown1,
+                indicatorSize: TabBarIndicatorSize.tab,
+                indicator: TabIndicator(
+                  color: ColorsPaletteRedonda
+                      .primary, // Background color of the selected tab
+                  radius: 16.0, // Radius for rounded corners
+                ),
+                tabs: categorizedItems.keys
+                    .map((category) => Tab(text: category))
+                    .toList(),
+              )
+            : null,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -368,47 +504,69 @@ class CateringScreenState extends ConsumerState<CateringScreen>
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: categorizedItems.keys.map((category) {
-                  final items = categorizedItems[category]!;
-                  return ListView.builder(
-                    itemCount: items.length,
-                    itemBuilder: (context, index) {
-                      final item = items[index];
-                      return CateringItemCard(
-                        item: item,
-                        onAddToCart: (int quantity) {
-                          ref
-                              .read(cateringOrderProvider.notifier)
-                              .addCateringItem(
-                                CateringDish(
-                                  title: item.title,
-                                  peopleCount: quantity,
-                                  pricePerPerson: item.pricePerPerson,
-                                  ingredients: item.ingredients,
-                                ),
-                              );
-                        },
-                        sideRequestController: sideRequestController,
-                      );
-                    },
-                  );
-                }).toList(),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton(
-                onPressed: () => _showCateringForm(context),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('Completar Pedido de Catering'),
-                  ],
+              child: NotificationListener<UserScrollNotification>(
+                onNotification: (notification) {
+                  if (notification.direction == ScrollDirection.reverse &&
+                      _isTabBarVisible) {
+                    setState(() {
+                      _isTabBarVisible = false;
+                    });
+                  } else if (notification.direction ==
+                          ScrollDirection.forward &&
+                      !_isTabBarVisible) {
+                    setState(() {
+                      _isTabBarVisible = true;
+                    });
+                  }
+                  return true;
+                },
+                child: TabBarView(
+                  controller: _tabController,
+                  children: categorizedItems.keys.map((category) {
+                    final items = categorizedItems[category]!;
+                    return ListView.builder(
+                      controller: _scrollController,
+                      itemCount: items.length,
+                      itemBuilder: (context, index) {
+                        final item = items[index];
+                        return CateringItemCard(
+                          item: item,
+                          onAddToCart: (int quantity) {
+                            ref
+                                .read(cateringOrderProvider.notifier)
+                                .addCateringItem(
+                                  CateringDish(
+                                    title: item.title,
+                                    peopleCount: quantity,
+                                    pricePerPerson: item.pricePerPerson,
+                                    ingredients: item.ingredients,
+                                  ),
+                                );
+                          },
+                          sideRequestController: sideRequestController,
+                        );
+                      },
+                    );
+                  }).toList(),
                 ),
               ),
             ),
+            if (cateringItemCount > 0) // Conditionally render the button
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: SizedBox(
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () => _showCateringForm(context, ref),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text('Completar Catering'),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

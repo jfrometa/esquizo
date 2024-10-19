@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/catering_cart_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/meal_subscription_item_view.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
@@ -28,11 +29,11 @@ class CartScreenState extends ConsumerState<CartScreen>
     super.initState();
     _tabController = TabController(length: 3, vsync: this); // Three tabs
     // Add listener to track the current tab index
-    _tabController.addListener(() {
-      setState(() {
-        // Update the state whenever the tab changes
-      });
-    });
+    // _tabController.addListener(() {
+    //   setState(() {
+    //     // Update the state whenever the tab changes
+    //   });
+    // });
   }
 
   @override
@@ -78,13 +79,23 @@ class CartScreenState extends ConsumerState<CartScreen>
         title: const Text('Carrito'),
         bottom: TabBar(
           controller: _tabController,
+          isScrollable: true,
+          labelStyle: Theme.of(context).textTheme.titleSmall,
+          unselectedLabelStyle: Theme.of(context).textTheme.titleSmall,
+          labelColor: ColorsPaletteRedonda.white,
+          unselectedLabelColor: ColorsPaletteRedonda.deepBrown1,
+          indicatorSize: TabBarIndicatorSize.tab,
+          dividerColor: Colors.transparent,
+          indicator: TabIndicator(
+            color: ColorsPaletteRedonda
+                .primary, // Background color of the selected tab
+            radius: 16.0, // Radius for rounded corners
+          ),
           tabs: const [
             Tab(text: 'Subscripciones'),
             Tab(text: 'Catering'),
             Tab(text: 'Platos'),
           ],
-          labelColor: ColorsPaletteRedonda.primary,
-          unselectedLabelColor: Colors.grey,
         ),
       ),
       body: Column(

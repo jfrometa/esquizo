@@ -19,7 +19,8 @@ class AuthenticatedProfileScreen extends ConsumerStatefulWidget {
       _AuthenticatedProfileScreenState();
 }
 
-class _AuthenticatedProfileScreenState extends ConsumerState<AuthenticatedProfileScreen> {
+class _AuthenticatedProfileScreenState
+    extends ConsumerState<AuthenticatedProfileScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _isTabBarVisible = true;
 
@@ -30,10 +31,12 @@ class _AuthenticatedProfileScreenState extends ConsumerState<AuthenticatedProfil
   }
 
   void _scrollListener() {
-    if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
+    if (_scrollController.position.userScrollDirection ==
+        ScrollDirection.reverse) {
       // Hide TabBar when scrolling down
       if (_isTabBarVisible) setState(() => _isTabBarVisible = false);
-    } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
+    } else if (_scrollController.position.userScrollDirection ==
+        ScrollDirection.forward) {
       // Show TabBar when scrolling up
       if (!_isTabBarVisible) setState(() => _isTabBarVisible = true);
     }
@@ -70,26 +73,47 @@ class _AuthenticatedProfileScreenState extends ConsumerState<AuthenticatedProfil
           children: [
             _buildUserInfo(context),
             AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              height: _isTabBarVisible ? 48.0 : 0.0,
+              duration:
+                  const Duration(milliseconds: 300), // Smoother transition
+              curve: Curves.easeInOut, // Smooth curve for better animation
+              height: _isTabBarVisible
+                  ? 56.0
+                  : 0.0, // Increased height for better spacing
               child: _isTabBarVisible
-                  ?  TabBar(
-                      dividerColor: Colors.transparent,
-                    indicatorColor: ColorsPaletteRedonda.primary,
-                    isScrollable: true,
-                    labelStyle: Theme.of(context).textTheme.titleSmall,
-                    unselectedLabelStyle: Theme.of(context).textTheme.titleSmall,
-                    labelColor: ColorsPaletteRedonda.white,
-                    unselectedLabelColor: ColorsPaletteRedonda.deepBrown1,
-                    indicatorSize: TabBarIndicatorSize.tab,
-                    indicator: TabIndicator(
-                      color: ColorsPaletteRedonda.primary, // Background color of the selected tab
-                      radius: 16.0, // Radius for rounded corners
-                    ),
-                      tabs: const [
-                        Tab(text: 'Mis Subscripciones'),
-                        Tab(text: 'Historial de Ordenes'),
-                      ],
+                  ? Material(
+                      elevation:
+                          4.0, // Slight elevation to provide depth and shadow
+                      shadowColor:
+                          ColorsPaletteRedonda.deepBrown1, // Subtle shadow
+                      child: TabBar(
+                        dividerColor:
+                            Colors.transparent, // No divider between tabs
+                        indicatorColor: ColorsPaletteRedonda
+                            .primary, // Your provided primary color
+                        isScrollable: true,
+                        labelStyle:
+                            Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight
+                                      .w600, // Material 3 recommended weight for labels
+                                ),
+                        unselectedLabelStyle:
+                            Theme.of(context).textTheme.titleSmall,
+
+                        labelColor: ColorsPaletteRedonda
+                            .white, // Selected tab label color
+                        unselectedLabelColor: ColorsPaletteRedonda
+                            .deepBrown1, // Unselected tab label color
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        indicator: TabIndicator(
+                          color: ColorsPaletteRedonda
+                              .primary, // Background color for selected tab
+                          radius: 16.0, // Smooth rounded corners for M3 design
+                        ),
+                        tabs: const [
+                          Tab(text: 'Mis Subscripciones'),
+                          Tab(text: 'Historial de Ordenes'),
+                        ],
+                      ),
                     )
                   : null,
             ),
@@ -134,10 +158,12 @@ class _AuthenticatedProfileScreenState extends ConsumerState<AuthenticatedProfil
           child: CircleAvatar(
             backgroundColor: ColorsPaletteRedonda.primary,
             radius: 40,
-            backgroundImage:
-                widget.user.photoURL != null ? NetworkImage(widget.user.photoURL!) : null,
-            child:
-                widget.user.photoURL == null ? const Icon(Icons.person, size: 40) : null,
+            backgroundImage: widget.user.photoURL != null
+                ? NetworkImage(widget.user.photoURL!)
+                : null,
+            child: widget.user.photoURL == null
+                ? const Icon(Icons.person, size: 40)
+                : null,
           ),
         ),
         const SizedBox(width: Sizes.p16),
@@ -147,7 +173,8 @@ class _AuthenticatedProfileScreenState extends ConsumerState<AuthenticatedProfil
             children: [
               Text(
                 widget.user.displayName ?? widget.user.email ?? 'User',
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: Sizes.p8),
               Text(

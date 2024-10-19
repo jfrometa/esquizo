@@ -136,9 +136,9 @@ class _TabIndicatorPainter extends BoxPainter {
     final double width = cfg.size?.width ?? 0.0;
 
     // Define the desired height of the indicator
-    const double indicatorHeight = 32.0; // Adjust as needed
+    const double indicatorHeight = 38.0; // Adjust as needed
     // Define horizontal padding
-    const double horizontalPadding = 8.0; // Adjust to match labelPadding
+    const double horizontalPadding = 1.0; // Adjust to match labelPadding
 
     // Calculate top position to center the indicator vertically
     final double top = offset.dy + (height - indicatorHeight) / 2;

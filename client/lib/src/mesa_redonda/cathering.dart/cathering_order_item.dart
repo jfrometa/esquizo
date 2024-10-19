@@ -49,7 +49,6 @@ class CateringDish {
   }
 }
 
-// Model for the overall catering order
 class CateringOrderItem {
   final String title;
   final String img;
@@ -60,6 +59,7 @@ class CateringOrderItem {
   final String eventType;
   final String preferencia;
   final String adicionales;
+  final int cantidadPersonas; // Add cantidadPersonas field
 
   CateringOrderItem({
     required this.title,
@@ -71,6 +71,7 @@ class CateringOrderItem {
     required this.eventType,
     required this.preferencia,
     required this.adicionales,
+    required this.cantidadPersonas, // Initialize in the constructor
   });
 
   // Calculates the total price for all dishes in the order
@@ -80,31 +81,6 @@ class CateringOrderItem {
   // Combines all ingredients from all dishes into a single list for display
   List<String> get combinedIngredients =>
       dishes.expand((dish) => dish.ingredients).toList();
-
-  // Add the copyWith method
-  CateringOrderItem copyWith({
-    String? title,
-    String? img,
-    String? description,
-    List<CateringDish>? dishes,
-    String? apetito,
-    String? alergias,
-    String? eventType,
-    String? preferencia,
-    String? adicionales,
-  }) {
-    return CateringOrderItem(
-      title: title ?? this.title,
-      img: img ?? this.img,
-      description: description ?? this.description,
-      dishes: dishes ?? this.dishes,
-      apetito: apetito ?? this.apetito,
-      alergias: alergias ?? this.alergias,
-      eventType: eventType ?? this.eventType,
-      preferencia: preferencia ?? this.preferencia,
-      adicionales: adicionales ?? this.adicionales,
-    );
-  }
 
   Map<String, dynamic> toJson() => {
         'title': title,
@@ -116,6 +92,8 @@ class CateringOrderItem {
         'eventType': eventType,
         'preferencia': preferencia,
         'adicionales': adicionales,
+        'cantidadPersonas':
+            cantidadPersonas, // Include cantidadPersonas in JSON
       };
 
   factory CateringOrderItem.fromJson(Map<String, dynamic> json) {
@@ -131,10 +109,40 @@ class CateringOrderItem {
       eventType: json['eventType'],
       preferencia: json['preferencia'],
       adicionales: json['adicionales'],
+      cantidadPersonas:
+          json['cantidadPersonas'] ?? 10, // Default if not present
+    );
+  }
+
+  // Add the copyWith method to include cantidadPersonas
+  CateringOrderItem copyWith({
+    String? title,
+    String? img,
+    String? description,
+    List<CateringDish>? dishes,
+    String? apetito,
+    String? alergias,
+    String? eventType,
+    String? preferencia,
+    String? adicionales,
+    int? cantidadPersonas,
+  }) {
+    return CateringOrderItem(
+      title: title ?? this.title,
+      img: img ?? this.img,
+      description: description ?? this.description,
+      dishes: dishes ?? this.dishes,
+      apetito: apetito ?? this.apetito,
+      alergias: alergias ?? this.alergias,
+      eventType: eventType ?? this.eventType,
+      preferencia: preferencia ?? this.preferencia,
+      adicionales: adicionales ?? this.adicionales,
+      cantidadPersonas: cantidadPersonas ?? this.cantidadPersonas,
     );
   }
 }
 
+// State notifier for managing catering orders with persistence
 // State notifier for managing catering orders with persistence
 class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
   Timer? _saveDebounce;
@@ -185,6 +193,7 @@ class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
         eventType: '',
         preferencia: '',
         adicionales: '',
+        cantidadPersonas: 0,
       );
     } else {
       // Add to existing order
@@ -194,8 +203,8 @@ class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
     }
   }
 
-  // Update the order details
-  void finalizeCateringOrder({
+  // Update the order detailsvoid
+  finalizeCateringOrder({
     required String title,
     required String img,
     required String description,
@@ -204,6 +213,7 @@ class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
     required String eventType,
     required String preferencia,
     required String adicionales,
+    required int cantidadPersonas, // Add cantidadPersonas
   }) {
     if (state != null) {
       state = state!.copyWith(
@@ -215,6 +225,19 @@ class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
         eventType: eventType,
         preferencia: preferencia,
         adicionales: adicionales,
+        cantidadPersonas: cantidadPersonas, // Update cantidadPersonas
+      );
+    }
+  }
+
+  // Update a specific dish by index
+  void updateDish(int index, CateringDish updatedDish) {
+    if (state != null && index >= 0 && index < state!.dishes.length) {
+      final updatedDishes = List<CateringDish>.from(state!.dishes);
+      updatedDishes[index] = updatedDish; // Update dish at the specified index
+
+      state = state!.copyWith(
+        dishes: updatedDishes,
       );
     }
   }
@@ -227,8 +250,11 @@ class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
   // Remove a specific dish from the order by index
   void removeFromCart(int index) {
     if (state != null && index >= 0 && index < state!.dishes.length) {
+      final updatedDishes = List<CateringDish>.from(state!.dishes)
+        ..removeAt(index); // Remove dish at the specified index
+
       state = state!.copyWith(
-        dishes: [],
+        dishes: updatedDishes,
       );
     }
   }

@@ -279,6 +279,7 @@ class ColorsPaletteRedonda {
 
       // TabBar Theme
       tabBarTheme: TabBarTheme(
+        dividerColor: Colors.transparent,
         labelColor: Colors.white,
         unselectedLabelColor: Colors.white.withAlpha(140),
         labelStyle: ThemeData.light().textTheme.labelLarge?.copyWith(
