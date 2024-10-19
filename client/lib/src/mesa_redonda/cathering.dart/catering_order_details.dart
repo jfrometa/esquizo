@@ -14,16 +14,36 @@ class CateringOrderDetailsScreenState
     extends ConsumerState<CateringOrderDetailsScreen> {
   bool isEditing = false;
 
+  // Temporary variables to store changes before applying
+  late String tempApetito;
+  late String tempAlergias;
+  late String tempEventType;
+  late String tempPreferencia;
+  late String tempAdicionales;
+  late int tempCantidadPersonas;
+
+  @override
+  void initState() {
+    super.initState();
+    final cateringOrders = ref.read(cateringOrderProvider)!;
+
+    // Initialize temporary values with the existing order values
+    tempApetito = cateringOrders.apetito;
+    tempAlergias = cateringOrders.alergias;
+    tempEventType = cateringOrders.eventType;
+    tempPreferencia = cateringOrders.preferencia;
+    tempAdicionales = cateringOrders.adicionales;
+    tempCantidadPersonas = cateringOrders.cantidadPersonas ?? 10;
+  }
+
   @override
   Widget build(BuildContext context) {
     final CateringOrderItem cateringOrders = ref.watch(cateringOrderProvider)!;
-
-    final bool isNotWithoutDishes = (cateringOrders.dishes.isNotEmpty);
+    final bool isNotWithoutDishes = cateringOrders.dishes.isNotEmpty;
     final orders = cateringOrders.dishes.asMap().entries.map((entry) {
-      int index = entry.key; // This is the index
-      var dish = entry.value; // This is the dish
+      int index = entry.key;
+      var dish = entry.value;
 
-      // You can now use the
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 4.0),
         child: Row(
@@ -59,166 +79,140 @@ class CateringOrderDetailsScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Catering Order Details'),
+        title: const Text('Detalles de la Orden'),
         actions: [
           IconButton(
             icon: Icon(isEditing ? Icons.check : Icons.edit),
             onPressed: () {
+              if (isEditing) {
+                // Save changes to the provider only when the checkmark is hit
+                ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(
+                      title: cateringOrders.title,
+                      img: cateringOrders.img,
+                      cantidadPersonas: tempCantidadPersonas, // Updated value
+                      apetito: tempApetito, // Updated value
+                      alergias: tempAlergias, // Updated value
+                      eventType: tempEventType, // Updated value
+                      preferencia: tempPreferencia, // Updated value
+                      adicionales: tempAdicionales, // Updated value
+                      description: cateringOrders.description,
+                    );
+              }
+
               setState(() {
                 isEditing = !isEditing; // Toggle edit mode
               });
             },
           ),
+          if (isEditing)
+            IconButton(
+              icon: const Icon(Icons.cancel),
+              onPressed: () {
+                // Cancel editing, revert values, and pop the screen
+                setState(() {
+                  tempApetito = cateringOrders.apetito;
+                  tempAlergias = cateringOrders.alergias;
+                  tempEventType = cateringOrders.eventType;
+                  tempPreferencia = cateringOrders.preferencia;
+                  tempAdicionales = cateringOrders.adicionales;
+                  tempCantidadPersonas =
+                      cateringOrders.cantidadPersonas; // Revert values
+                  isEditing = false;
+                });
+              },
+            ),
         ],
       ),
-      body: isNotWithoutDishes
-          ? Card(
-              margin: const EdgeInsets.all(8.0),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Orden de Catering',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    _buildEditableTextField(
-                      'Cantidad de Personas',
-                      cateringOrders.cantidadPersonas.toString(),
-                      (newValue) {
-                        int? updatedValue = int.tryParse(newValue);
-                        if (updatedValue != null) {
-                          ref
-                              .read(cateringOrderProvider.notifier)
-                              .finalizeCateringOrder(
-                                title: cateringOrders.title,
-                                img: cateringOrders.img,
-                                cantidadPersonas: updatedValue, // Updated value
-                                apetito: cateringOrders.apetito,
-                                alergias: cateringOrders.alergias,
-                                eventType: cateringOrders.eventType,
-                                preferencia: cateringOrders.preferencia,
-                                adicionales: cateringOrders.adicionales,
-                                description: cateringOrders.description,
-                              );
-                        }
-                      },
-                    ),
-                    _buildEditableTextField(
-                      'Apetito',
-                      cateringOrders.apetito,
-                      (newValue) {
-                        ref
-                            .read(cateringOrderProvider.notifier)
-                            .finalizeCateringOrder(
-                              title: cateringOrders.title,
-                              img: cateringOrders.img,
-                              cantidadPersonas: cateringOrders.cantidadPersonas,
-                              apetito: newValue, // Updated value
-                              alergias: cateringOrders.alergias,
-                              eventType: cateringOrders.eventType,
-                              preferencia: cateringOrders.preferencia,
-                              adicionales: cateringOrders.adicionales,
-                              description: cateringOrders.description,
-                            );
-                      },
-                    ),
-                    _buildEditableTextField(
-                      'Alergias',
-                      cateringOrders.alergias,
-                      (newValue) {
-                        ref
-                            .read(cateringOrderProvider.notifier)
-                            .finalizeCateringOrder(
-                              title: cateringOrders.title,
-                              img: cateringOrders.img,
-                              cantidadPersonas: cateringOrders.cantidadPersonas,
-                              apetito: cateringOrders.apetito,
-                              alergias: newValue, // Updated value
-                              eventType: cateringOrders.eventType,
-                              preferencia: cateringOrders.preferencia,
-                              adicionales: cateringOrders.adicionales,
-                              description: cateringOrders.description,
-                            );
-                      },
-                    ),
-                    _buildEditableTextField(
-                      'Evento',
-                      cateringOrders.eventType,
-                      (newValue) {
-                        ref
-                            .read(cateringOrderProvider.notifier)
-                            .finalizeCateringOrder(
-                              title: cateringOrders.title,
-                              img: cateringOrders.img,
-                              cantidadPersonas: cateringOrders.cantidadPersonas,
-                              apetito: cateringOrders.apetito,
-                              alergias: cateringOrders.alergias,
-                              eventType: newValue, // Updated value
-                              preferencia: cateringOrders.preferencia,
-                              adicionales: cateringOrders.adicionales,
-                              description: cateringOrders.description,
-                            );
-                      },
-                    ),
-                    _buildEditableTextField(
-                      'Preferencia',
-                      cateringOrders.preferencia,
-                      (newValue) {
-                        ref
-                            .read(cateringOrderProvider.notifier)
-                            .finalizeCateringOrder(
-                              title: cateringOrders.title,
-                              img: cateringOrders.img,
-                              cantidadPersonas: cateringOrders.cantidadPersonas,
-                              apetito: cateringOrders.apetito,
-                              alergias: cateringOrders.alergias,
-                              eventType: cateringOrders.eventType,
-                              preferencia: newValue, // Updated value
-                              adicionales: cateringOrders.adicionales,
-                              description: cateringOrders.description,
-                            );
-                      },
-                    ),
-                    _buildEditableTextField(
-                      'Adicionales',
-                      cateringOrders.adicionales,
-                      (newValue) {
-                        ref
-                            .read(cateringOrderProvider.notifier)
-                            .finalizeCateringOrder(
-                              title: cateringOrders.title,
-                              img: cateringOrders.img,
-                              cantidadPersonas: cateringOrders.cantidadPersonas,
-                              apetito: cateringOrders.apetito,
-                              alergias: cateringOrders.alergias,
-                              eventType: cateringOrders.eventType,
-                              preferencia: cateringOrders.preferencia,
-                              adicionales: newValue, // Updated value
-                              description: cateringOrders.description,
-                            );
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    const Text('Items:',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                    SingleChildScrollView(
-                      child: Column(
-                        children: [...orders],
+      body: SingleChildScrollView(
+        child: isNotWithoutDishes
+            ? Card(
+                margin: const EdgeInsets.all(8.0),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Orden de Catering',
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      _buildEditableTextField(
+                        'Cantidad de Personas',
+                        tempCantidadPersonas.toString(),
+                        (newValue) {
+                          int? updatedValue = int.tryParse(newValue);
+                          if (updatedValue != null) {
+                            setState(() {
+                              tempCantidadPersonas = updatedValue;
+                            });
+                          }
+                        },
                       ),
-                    ),
-                    const Divider(),
-                    Text(
-                        'Total Order Price: \$${cateringOrders.totalPrice.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                  ],
+                      _buildEditableTextField(
+                        'Apetito',
+                        tempApetito,
+                        (newValue) {
+                          setState(() {
+                            tempApetito = newValue;
+                          });
+                        },
+                      ),
+                      _buildEditableTextField(
+                        'Alergias',
+                        tempAlergias,
+                        (newValue) {
+                          setState(() {
+                            tempAlergias = newValue;
+                          });
+                        },
+                      ),
+                      _buildEditableTextField(
+                        'Evento',
+                        tempEventType,
+                        (newValue) {
+                          setState(() {
+                            tempEventType = newValue;
+                          });
+                        },
+                      ),
+                      _buildEditableTextField(
+                        'Preferencia',
+                        tempPreferencia,
+                        (newValue) {
+                          setState(() {
+                            tempPreferencia = newValue;
+                          });
+                        },
+                      ),
+                      _buildEditableTextField(
+                        'Adicionales',
+                        tempAdicionales,
+                        (newValue) {
+                          setState(() {
+                            tempAdicionales = newValue;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      const Text('Items:',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      SingleChildScrollView(
+                        child: Column(
+                          children: [...orders],
+                        ),
+                      ),
+                      const Divider(),
+                      Text(
+                          'Total Order Price: \$${cateringOrders.totalPrice.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
                 ),
-              ),
-            )
-          : const Center(child: Text('No catering orders available')),
+              )
+            : const Center(child: Text('No catering orders available')),
+      ),
     );
   }
 
@@ -233,7 +227,7 @@ class CateringOrderDetailsScreenState
                 Expanded(
                   child: TextFormField(
                     initialValue: value,
-                    onChanged: onChanged, // Trigger callback to update order
+                    onChanged: onChanged, // Temporarily update the value
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       contentPadding:
@@ -272,7 +266,6 @@ class CateringOrderDetailsScreenState
           TextButton(
             onPressed: () {
               setState(() {
-                // Update dish peopleCount
                 ref.read(cateringOrderProvider.notifier).addCateringItem(
                     dish.copyWith(peopleCount: int.parse(updatedPeopleCount)));
               });

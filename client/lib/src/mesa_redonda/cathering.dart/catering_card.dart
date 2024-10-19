@@ -105,6 +105,25 @@ class CateringItemCardState extends State<CateringItemCard> {
   }
 }
 
+class TabUtils {
+  // A static method to calculate the maximum tab width
+  static double calculateMaxTabWidth(
+      BuildContext context, List<String> tabTitles) {
+    double maxWidth = 0.0;
+    for (var title in tabTitles) {
+      final TextPainter textPainter = TextPainter(
+        text: TextSpan(
+            text: title, style: Theme.of(context).textTheme.bodyMedium),
+        maxLines: 1,
+        textDirection: TextDirection.ltr,
+      )..layout();
+
+      maxWidth = maxWidth < textPainter.width ? textPainter.width : maxWidth;
+    }
+    return maxWidth + 8.0; // Add padding if necessary
+  }
+}
+
 class TabIndicator extends Decoration {
   final BoxPainter _painter;
 
@@ -133,24 +152,23 @@ class _TabIndicatorPainter extends BoxPainter {
 
   Rect _indicatorRectFor(ImageConfiguration cfg, Offset offset) {
     final double height = cfg.size?.height ?? 0.0;
-    final double width = cfg.size?.width ?? 0.0;
+
+    // Calculate maximum tab width based on the largest tab
+    final double maxTabWidth = 120.0; // Example of a pre-calculated max width
 
     // Define the desired height of the indicator
     const double indicatorHeight = 38.0; // Adjust as needed
     // Define horizontal padding
-    const double horizontalPadding = 1.0; // Adjust to match labelPadding
+    // const double horizontalPadding = 16.0; // Adjust as needed
 
     // Calculate top position to center the indicator vertically
     final double top = offset.dy + (height - indicatorHeight) / 2;
 
-    // Calculate left position
-    final double left = offset.dx + horizontalPadding;
-
-    // Create the rectangle for the indicator
+    // Create the rectangle for the indicator with fixed width (maxTabWidth)
     return Rect.fromLTWH(
-      left,
+      offset.dx + (cfg.size!.width - maxTabWidth) / 2, // Center the indicator
       top,
-      width - 2 * horizontalPadding,
+      maxTabWidth,
       indicatorHeight,
     );
   }

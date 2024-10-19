@@ -55,6 +55,13 @@ class _AuthenticatedProfileScreenState
 
   @override
   Widget build(BuildContext context) {
+    const tabTitles = [
+      'Mis Subscripciones',
+      'Historial de Ordenes',
+    ];
+    final double maxTabWidth =
+        TabUtils.calculateMaxTabWidth(context, tabTitles);
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -109,10 +116,14 @@ class _AuthenticatedProfileScreenState
                               .primary, // Background color for selected tab
                           radius: 16.0, // Smooth rounded corners for M3 design
                         ),
-                        tabs: const [
-                          Tab(text: 'Mis Subscripciones'),
-                          Tab(text: 'Historial de Ordenes'),
-                        ],
+
+                        tabs: tabTitles.map((title) {
+                          return Container(
+                            width: maxTabWidth, // Set fixed width for each tab
+                            alignment: Alignment.center,
+                            child: Tab(text: title),
+                          );
+                        }).toList(),
                       ),
                     )
                   : null,

@@ -5,10 +5,13 @@ import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/localization/string_hardcoded.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/cathering_order_item.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/cathering_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_cart.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/plans/plans.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
+
+final cateringItemCountProvider = StateProvider<int>((ref) {
+  final cateringOrder = ref.watch(cateringOrderProvider);
+  return (cateringOrder?.dishes.length ?? 0) > 0 ? 1 : 0;
+});
 
 class ScaffoldWithNestedNavigation extends StatelessWidget {
   const ScaffoldWithNestedNavigation({
@@ -64,11 +67,11 @@ class ScaffoldWithNavigationBar extends ConsumerStatefulWidget {
   final ValueChanged<int> onDestinationSelected;
 
   @override
-  _ScaffoldWithNavigationBarState createState() =>
-      _ScaffoldWithNavigationBarState();
+  ScaffoldWithNavigationBarState createState() =>
+      ScaffoldWithNavigationBarState();
 }
 
-class _ScaffoldWithNavigationBarState
+class ScaffoldWithNavigationBarState
     extends ConsumerState<ScaffoldWithNavigationBar> {
   bool _isVisible = true;
   final ScrollController _scrollController = ScrollController();
@@ -119,7 +122,6 @@ class _ScaffoldWithNavigationBarState
     // final totalQuantity = getTotalCartQuantity(cartItems);
 
     final mealItems = ref.watch(mealOrderProvider);
-    print('ITEMS: ${mealItems.length}');
     final cateringCount = ref.watch(cateringItemCountProvider);
 
     // Calculating the total quantity

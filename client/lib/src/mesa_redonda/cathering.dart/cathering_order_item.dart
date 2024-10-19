@@ -193,7 +193,7 @@ class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
         eventType: '',
         preferencia: '',
         adicionales: '',
-        cantidadPersonas: 0,
+        cantidadPersonas: 10,
       );
     } else {
       // Add to existing order
