@@ -50,10 +50,12 @@ class CateringCartItemView extends StatelessWidget {
             Text(order.description),
             const SizedBox(height: 8),
             Text('Apetito: ${order.apetito}'),
-            Text('Alergias: ${order.alergias.isNotEmpty ? order.alergias : "Ninguna"}'),
+            Text(
+                'Alergias: ${order.alergias.isNotEmpty ? order.alergias : "Ninguna"}'),
             Text('Evento: ${order.eventType}'),
             Text('Preferencia: ${order.preferencia}'),
-            if (order.adicionales.isNotEmpty) Text('Adicionales: ${order.adicionales}'),
+            if (order.adicionales.isNotEmpty)
+              Text('Adicionales: ${order.adicionales}'),
             const SizedBox(height: 16),
             // Order items
             Text(
@@ -61,24 +63,33 @@ class CateringCartItemView extends StatelessWidget {
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            ...order.dishes.map((dish) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '${dish.title} - ${dish.peopleCount} personas',
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ),
-                      Text(
-                        '\$${(dish.peopleCount * dish.pricePerPerson).toStringAsFixed(2)}',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                )),
+            SizedBox(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    ...order.dishes.map((dish) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  '${dish.title} - ${dish.peopleCount} personas',
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                              ),
+                              Text(
+                                '\$${(dish.peopleCount * dish.pricePerPerson).toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        )),
+                  ],
+                ),
+              ),
+            ),
             const Divider(),
             // Total order price
             Row(

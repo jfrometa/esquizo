@@ -7,6 +7,9 @@ import 'package:starter_architecture_flutter_firebase/src/features/authenticatio
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/custom_sign_in_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item_view.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/catering_cart_item_view.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/location/location_capture.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
@@ -14,6 +17,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
+  // final List<dynamic> items; // Add this to pass the current tab's items
+
   const CheckoutScreen({super.key});
 
   @override
@@ -22,7 +27,6 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 
 class CheckoutScreenState extends ConsumerState<CheckoutScreen>
     with SingleTickerProviderStateMixin {
-  // Separate location controllers for each order type
   final TextEditingController _cateringLocationController =
       TextEditingController();
   final TextEditingController _regularDishesLocationController =
@@ -43,7 +47,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
   final int _deliveryFee = 200;
   final double _taxRate = 0.067;
   late TabController _tabController;
-  int _selectedPaymentMethod = 0; // Add a variable to track payment selection
+  int _selectedPaymentMethod = 0;
   DateTime? _deliveryStartTime;
   DateTime? _deliveryEndTime;
 
@@ -57,7 +61,6 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
     'Cardnet'
   ];
 
-  // Address and Lat/Long variables for each order type
   String? cateringAddress;
   String? regularAddress;
   String? mealSubscriptionAddress;
@@ -287,238 +290,108 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen>
     }
   }
 
-Future<Map<String, String>?> _checkAndPromptForContactInfo(BuildContext context) async {
-  final currentUser = FirebaseAuth.instance.currentUser;
+  Future<Map<String, String>?> _checkAndPromptForContactInfo(
+      BuildContext context) async {
+    final currentUser = FirebaseAuth.instance.currentUser;
 
-  if (currentUser == null || currentUser.isAnonymous) {
-    String? name, phone, email;
-    bool showSignInScreen = false; // Flag to control whether to show SignIn
+    if (currentUser == null || currentUser.isAnonymous) {
+      String? name, phone, email;
+      bool showSignInScreen = false; // Flag to control whether to show SignIn
 
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setState) {
-            if (showSignInScreen) {
-              return AlertDialog(
-                title: const Text('Registro'),
-                content: SizedBox(
-                  height: 400,
-                  width: 400,
-                  child: CustomSignInScreen(),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(ctx).pop();
-                    },
-                    child: const Text('Cancelar'),
+      await showDialog<void>(
+        context: context,
+        builder: (ctx) {
+          return StatefulBuilder(
+            builder: (ctx, setState) {
+              if (showSignInScreen) {
+                return AlertDialog(
+                  title: const Text('Registro'),
+                  content: SizedBox(
+                    height: 400,
+                    width: 400,
+                    child: CustomSignInScreen(),
                   ),
-                ],
-              );
-            } else {
-              return AlertDialog(
-                title: const Text('Información de Contacto'),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      'Proporcione su nombre, teléfono y correo opcional o registrese.',
-                      style: TextStyle(fontSize: 14),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      decoration: const InputDecoration(
-                        labelText: 'Nombre',
-                        border: OutlineInputBorder(),
-                      ),
-                      onChanged: (value) => name = value,
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      decoration: const InputDecoration(
-                        labelText: 'Teléfono',
-                        border: OutlineInputBorder(),
-                      ),
-                      onChanged: (value) => phone = value,
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      decoration: const InputDecoration(
-                        labelText: 'Correo electrónico (opcional)',
-                        border: OutlineInputBorder(),
-                      ),
-                      onChanged: (value) => email = value,
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                      },
+                      child: const Text('Cancelar'),
                     ),
                   ],
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        showSignInScreen = true; // Switch to SignIn
-                      });
-                    },
-                    child: const Text('Registrarse'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(false),
-                    child: const Text('Cancelar'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(true),
-                    child: const Text('Continuar'),
-                  ),
-                ],
-              );
-            }
-          },
-        );
-      },
-    );
-
-    if (!showSignInScreen) {
-      return {
-        'name': name ?? '',
-        'phone': phone ?? '',
-        'email': email ?? '',
-      };
-    }
-  }
-
-  return {}; // Return empty map if user is already signed in
-}
-
-// In CheckoutScreen
-Future<void> _processOrder(BuildContext context, List<CartItem> cartItems) async {
-    final contactInfo = await _checkAndPromptForContactInfo(context);
-    if (contactInfo == null) return; // Exit if user cancels
-
-    final mealPlanItem = cartItems.firstWhere(
-      (item) => item.isMealSubscription,
-      orElse: () => {} as CartItem,
-    );
-
-    // Check if meal plan is available and discount eligible
-    if (mealPlanItem.remainingMeals > 0) {
-        for (var item in cartItems) {
-            if (!item.isMealSubscription && item.foodType != 'Catering') {
-                ref.read(cartProvider.notifier).consumeMeal(item.title);
-                // Trigger in-app notification
-                ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                        content: Text(
-                            'Consumed a meal from your plan for ${item.title}'),
-                        backgroundColor: Colors.green,
-                    ),
                 );
-                // Save meal consumption to Firebase
-                await _recordMealConsumption(mealPlanItem.id, item);
-            }
-        }
-    } else {
-        // Prompt to buy a new plan
-        _promptToBuyAnotherPlan(context);
-        return; // Exit if no meal plan available or no remaining meals
-    }
-
-    // Proceed with original order saving logic
-    try {
-        await _saveOrderToFirestore(cartItems, contactInfo);
-        await _sendWhatsAppOrder(cartItems, contactInfo);
-    } catch (error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text('Error processing order: $error'),
-                backgroundColor: Colors.red,
-            ),
-        );
-    }
-}
-
-
-
-// Save the meal plan only, without consumption
-Future<void> _saveMealPlanOnly(CartItem mealPlan) async {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId == null) return;
-
-    final firestore = FirebaseFirestore.instance;
-    final mealPlanData = {
-        'title': mealPlan.title,
-        'description': mealPlan.description,
-        'totalMeals': mealPlan.totalMeals,
-        'remainingMeals': mealPlan.remainingMeals,
-        'expirationDate': mealPlan.expirationDate.toIso8601String(),
-        'addedAt': FieldValue.serverTimestamp(),
-    };
-
-    try {
-        await firestore
-            .collection('users')
-            .doc(userId)
-            .collection('mealPlans')
-            .doc(mealPlan.id)
-            .set(mealPlanData);
-    } catch (e) {
-        print('Failed to save meal plan: $e');
-        // Implement error handling as needed
-    }
-}
-
-// Add method to prompt for new meal plan
-void _promptToBuyAnotherPlan(BuildContext context) {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-            return AlertDialog(
-                title: Text('Plan Renewal Required'),
-                content: Text('Your meal plan is out of meals. Would you like to buy another plan?'),
-                actions: <Widget>[
+              } else {
+                return AlertDialog(
+                  title: const Text('Información de Contacto'),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Proporcione su nombre, teléfono y correo opcional o registrese.',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        decoration: const InputDecoration(
+                          labelText: 'Nombre',
+                          border: OutlineInputBorder(),
+                        ),
+                        onChanged: (value) => name = value,
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        decoration: const InputDecoration(
+                          labelText: 'Teléfono',
+                          border: OutlineInputBorder(),
+                        ),
+                        onChanged: (value) => phone = value,
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        decoration: const InputDecoration(
+                          labelText: 'Correo electrónico (opcional)',
+                          border: OutlineInputBorder(),
+                        ),
+                        onChanged: (value) => email = value,
+                      ),
+                    ],
+                  ),
+                  actions: [
                     TextButton(
-                        child: Text('Yes'),
-                        onPressed: () {
-                            Navigator.of(context).pop();
-                            // Navigate to meal plan purchasing flow
-                        },
+                      onPressed: () {
+                        setState(() {
+                          showSignInScreen = true; // Switch to SignIn
+                        });
+                      },
+                      child: const Text('Registrarse'),
                     ),
                     TextButton(
-                        child: Text('No'),
-                        onPressed: () {
-                            Navigator.of(context).pop();
-                        },
+                      onPressed: () => Navigator.of(ctx).pop(false),
+                      child: const Text('Cancelar'),
                     ),
-                ],
-            );
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop(true),
+                      child: const Text('Continuar'),
+                    ),
+                  ],
+                );
+              }
+            },
+          );
         },
-    );
-}
+      );
 
-// Record meal consumption to Firebase
-Future<void> _recordMealConsumption(String mealPlanId, CartItem dish) async {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId == null) return; // Ensure user is authenticated
-
-    final firestore = FirebaseFirestore.instance;
-    final consumptionData = {
-        'dishTitle': dish.title,
-        'consumedAt': FieldValue.serverTimestamp(),
-        'details': dish.toJson(),
-    };
-
-    try {
-        await firestore
-            .collection('users')
-            .doc(userId)
-            .collection('mealPlans')
-            .doc(mealPlanId)
-            .collection('consumptions')
-            .add(consumptionData);
-    } catch (e) {
-        // Retry and notify user if failure
-        print('Failed to record consumption: $e');
+      if (!showSignInScreen) {
+        return {
+          'name': name ?? '',
+          'phone': phone ?? '',
+          'email': email ?? '',
+        };
+      }
     }
-}
+
+    return {}; // Return empty map if user is already signed in
+  }
 
   Future<void> _sendWhatsAppOrder(
       List<CartItem> cartItems, Map<String, String>? contactInfo) async {
@@ -617,11 +490,109 @@ Future<void> _recordMealConsumption(String mealPlanId, CartItem dish) async {
       final formattedDateTime =
           DateFormat('yyyy-MM-dd – HH:mm').format(selectedDateTime);
       controller.text = formattedDateTime;
-
-      if (isCatering) {
-      } else {
-      }
     });
+  }
+
+// In CheckoutScreen
+  Future<void> _processOrder(
+      BuildContext context, List<CartItem> cartItems) async {
+    final contactInfo = await _checkAndPromptForContactInfo(context);
+    if (contactInfo == null) return; // Exit if user cancels
+
+    // final mealPlanItem = cartItems.firstWhere(
+    //   (item) => item.isMealSubscription,
+    //   orElse: () => {} as CartItem,
+    // );
+
+    // Check if meal plan is available and discount eligible
+    // if (mealPlanItem.remainingMeals > 0) {
+    //   for (var item in cartItems) {
+    //     if (!item.isMealSubscription && item.foodType != 'Catering') {
+    //       ref.read(cartProvider.notifier).consumeMeal(item.title);
+    //       // Trigger in-app notification
+    //       ScaffoldMessenger.of(context).showSnackBar(
+    //         SnackBar(
+    //           content: Text('Consumed a meal from your plan for ${item.title}'),
+    //           backgroundColor: Colors.green,
+    //         ),
+    //       );
+    //       // Save meal consumption to Firebase
+    //       await _recordMealConsumption(mealPlanItem.id, item);
+    //     }
+    //   }
+    // } else {
+    //   // Prompt to buy a new plan
+    //   _promptToBuyAnotherPlan(context);
+    //   return; // Exit if no meal plan available or no remaining meals
+    // }
+
+    // Proceed with original order saving logic
+    try {
+      await _saveOrderToFirestore(cartItems, contactInfo);
+      await _sendWhatsAppOrder(cartItems, contactInfo);
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error processing order: $error'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+// Add method to prompt for new meal plan
+  void _promptToBuyAnotherPlan(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Plan Renewal Required'),
+          content: Text(
+              'Your meal plan is out of meals. Would you like to buy another plan?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Yes'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Navigate to meal plan purchasing flow
+              },
+            ),
+            TextButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+// Record meal consumption to Firebase
+  Future<void> _recordMealConsumption(String mealPlanId, CartItem dish) async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) return; // Ensure user is authenticated
+
+    final firestore = FirebaseFirestore.instance;
+    final consumptionData = {
+      'dishTitle': dish.title,
+      'consumedAt': FieldValue.serverTimestamp(),
+      'details': dish.toJson(),
+    };
+
+    try {
+      await firestore
+          .collection('users')
+          .doc(userId)
+          .collection('mealPlans')
+          .doc(mealPlanId)
+          .collection('consumptions')
+          .add(consumptionData);
+    } catch (e) {
+      // Retry and notify user if failure
+      print('Failed to record consumption: $e');
+    }
   }
 
   String _generateOrderDetails(List<CartItem> cartItems,
@@ -712,13 +683,16 @@ Future<void> _recordMealConsumption(String mealPlanId, CartItem dish) async {
 
   @override
   Widget build(BuildContext context) {
-    final cartItems = ref.watch(cartProvider);
+    final List<CartItem> cartItems = ref.watch(
+        cartProvider); // This contains the regular dishes and meal subscriptions
+    final cateringOrder = ref.watch(
+        cateringOrderProvider); // Fetch the catering order from the provider
+
+    // Separate regular dishes and meal subscriptions
     final dishes = cartItems
         .where(
             (item) => !item.isMealSubscription && item.foodType != 'Catering')
         .toList();
-    final cateringItems =
-        cartItems.where((item) => item.foodType == 'Catering').toList();
     final mealSubscriptions =
         cartItems.where((item) => item.isMealSubscription).toList();
 
@@ -745,10 +719,11 @@ Future<void> _recordMealConsumption(String mealPlanId, CartItem dish) async {
                         if (dishes.isNotEmpty) ...[
                           _buildSectionTitle(context, 'Platos'),
                           _buildLocationField(
-                              context,
-                              _regularDishesLocationController,
-                              _isRegularCateringAddressValid,
-                              'regular'),
+                            context,
+                            _regularDishesLocationController,
+                            _isRegularCateringAddressValid,
+                            'regular',
+                          ),
                           for (var item in dishes)
                             CartItemView(
                               img: item.img,
@@ -771,52 +746,45 @@ Future<void> _recordMealConsumption(String mealPlanId, CartItem dish) async {
                             ),
                         ],
 
-                        // Catering Section with Date/Time Picker
-                        if (cateringItems.isNotEmpty) ...[
+                        // Catering Section
+                        if (cateringOrder != null) ...[
                           _buildSectionTitle(context, 'Catering'),
                           _buildLocationField(
-                              context,
-                              _cateringLocationController,
-                              _isCateringAddressValid,
-                              'catering'),
-                          _buildDateTimePicker(context, _cateringDateController,
-                              _cateringTimeController,
-                              isCatering: true),
-                          for (var item in cateringItems)
-                            CartItemView(
-                              img: item.img,
-                              title: item.title,
-                              description: item.description,
-                              pricing: item.pricing,
-                              offertPricing: item.offertPricing,
-                              ingredients: item.ingredients,
-                              isSpicy: item.isSpicy,
-                              foodType: item.foodType,
-                              quantity: item.quantity,
-                              onRemove: () => ref
-                                  .read(cartProvider.notifier)
-                                  .decrementCateringQuantity(item.title),
-                              onAdd: () => ref
-                                  .read(cartProvider.notifier)
-                                  .incrementCateringQuantity(item.title),
-                              peopleCount: item.peopleCount,
-                              sideRequest: item.sideRequest,
-                            ),
+                            context,
+                            _cateringLocationController,
+                            _isCateringAddressValid,
+                            'catering',
+                          ),
+                          _buildDateTimePicker(
+                            context,
+                            _cateringDateController,
+                            _cateringTimeController,
+                            isCatering: true,
+                          ),
+                          // Render CateringCartItemView for catering orders
+                          CateringCartItemView(
+                            order: cateringOrder,
+                            onRemoveFromCart: () => ref
+                                .read(cateringOrderProvider.notifier)
+                                .clearCateringOrder(),
+                          ),
                         ],
 
-                        // Meal Subscription Section with Date/Time Picker
+                        // Meal Subscription Section
                         if (mealSubscriptions.isNotEmpty) ...[
                           _buildSectionTitle(context, 'Subscripciones'),
                           _buildLocationField(
-                              context,
-                              _mealSubscriptionLocationController,
-                              _isMealSubscriptionAddressValid,
-                              'mealSubscription'),
+                            context,
+                            _mealSubscriptionLocationController,
+                            _isMealSubscriptionAddressValid,
+                            'mealSubscription',
+                          ),
                           _buildDateTimePicker(
-                              context,
-                              _mealSubscriptionDateController,
-                              _mealSubscriptionTimeController,
-                              isCatering: false),
+                            context,
+                            _mealSubscriptionDateController,
+                            _mealSubscriptionTimeController,
+                            isCatering: false,
+                          ),
                           for (var item in mealSubscriptions)
                             CartItemView(
                               img: item.img,
@@ -839,63 +807,8 @@ Future<void> _recordMealConsumption(String mealPlanId, CartItem dish) async {
                             ),
                         ],
 
-                        // Payment Method Dropdown
-                        // Payment Method Dropdown
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              DropdownButtonFormField<int>(
-                                dropdownColor: ColorsPaletteRedonda.white,
-                                value: _selectedPaymentMethod,
-                                items: List.generate(_paymentMethods.length,
-                                    (index) {
-                                  return DropdownMenuItem<int>(
-                                    value: index,
-                                    child: Text(
-                                      _paymentMethods[index],
-                                      style: const TextStyle(
-                                          color: ColorsPaletteRedonda.primary),
-                                    ),
-                                  );
-                                }),
-                                onChanged: (value) {
-                                  setState(() {
-                                    _selectedPaymentMethod = value!;
-                                  });
-                                },
-                                decoration: InputDecoration(
-                                  labelText: 'Método de pago',
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    borderSide: const BorderSide(
-                                      color: ColorsPaletteRedonda.primary,
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 8.0),
-                              Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Text(
-                                  getPaymentMethodDescription(
-                                      _selectedPaymentMethod),
-                                  style: const TextStyle(
-                                    color: Color.fromARGB(255, 231, 107, 24),
-                                    fontSize: 14.0,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                         const Spacer(),
                         _buildOrderSummary(cartItems),
-
                         ElevatedButton(
                           onPressed: () => _processOrder(context, cartItems),
                           style: ElevatedButton.styleFrom(
@@ -922,7 +835,6 @@ Future<void> _recordMealConsumption(String mealPlanId, CartItem dish) async {
     );
   }
 
-  // Build the location field for any order type
   Widget _buildLocationField(BuildContext context,
       TextEditingController controller, bool isValid, String name) {
     return Padding(
@@ -938,21 +850,18 @@ Future<void> _recordMealConsumption(String mealPlanId, CartItem dish) async {
               decoration: InputDecoration(
                 hintText: 'Ingrese Ubicación',
                 filled: true,
-                fillColor:
-                    ColorsPaletteRedonda.white, // Gray background when filled
+                fillColor: ColorsPaletteRedonda.white,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                   borderSide: const BorderSide(
-                    color: ColorsPaletteRedonda
-                        .deepBrown1, // Red border when not selected
+                    color: ColorsPaletteRedonda.deepBrown1,
                     width: 1.0,
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                   borderSide: const BorderSide(
-                    color: ColorsPaletteRedonda
-                        .primary, // Black border when focused
+                    color: ColorsPaletteRedonda.primary,
                     width: 2.0,
                   ),
                 ),
@@ -994,21 +903,18 @@ Future<void> _recordMealConsumption(String mealPlanId, CartItem dish) async {
               hintText:
                   isCatering ? '2024-11-23 - 13:00' : '2024-11-23 - 13:00',
               filled: true,
-              fillColor:
-                  ColorsPaletteRedonda.white, // Gray background when filled
+              fillColor: ColorsPaletteRedonda.white,
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
                 borderSide: const BorderSide(
-                  color: ColorsPaletteRedonda
-                      .deepBrown1, // Red border when not selected
+                  color: ColorsPaletteRedonda.deepBrown1,
                   width: 1.0,
                 ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
                 borderSide: const BorderSide(
-                  color:
-                      ColorsPaletteRedonda.primary, // Black border when focused
+                  color: ColorsPaletteRedonda.primary,
                   width: 2.0,
                 ),
               ),

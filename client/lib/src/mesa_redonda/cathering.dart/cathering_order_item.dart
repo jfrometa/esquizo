@@ -17,6 +17,21 @@ class CateringDish {
     required this.ingredients,
   });
 
+  // Add the copyWith method
+  CateringDish copyWith({
+    String? title,
+    int? peopleCount,
+    double? pricePerPerson,
+    List<String>? ingredients,
+  }) {
+    return CateringDish(
+      title: title ?? this.title,
+      peopleCount: peopleCount ?? this.peopleCount,
+      pricePerPerson: pricePerPerson ?? this.pricePerPerson,
+      ingredients: ingredients ?? this.ingredients,
+    );
+  }
+
   Map<String, dynamic> toJson() => {
         'title': title,
         'peopleCount': peopleCount,
@@ -66,6 +81,31 @@ class CateringOrderItem {
   List<String> get combinedIngredients =>
       dishes.expand((dish) => dish.ingredients).toList();
 
+  // Add the copyWith method
+  CateringOrderItem copyWith({
+    String? title,
+    String? img,
+    String? description,
+    List<CateringDish>? dishes,
+    String? apetito,
+    String? alergias,
+    String? eventType,
+    String? preferencia,
+    String? adicionales,
+  }) {
+    return CateringOrderItem(
+      title: title ?? this.title,
+      img: img ?? this.img,
+      description: description ?? this.description,
+      dishes: dishes ?? this.dishes,
+      apetito: apetito ?? this.apetito,
+      alergias: alergias ?? this.alergias,
+      eventType: eventType ?? this.eventType,
+      preferencia: preferencia ?? this.preferencia,
+      adicionales: adicionales ?? this.adicionales,
+    );
+  }
+
   Map<String, dynamic> toJson() => {
         'title': title,
         'img': img,
@@ -96,46 +136,65 @@ class CateringOrderItem {
 }
 
 // State notifier for managing catering orders with persistence
-class CateringOrderNotifier extends StateNotifier<List<CateringOrderItem>> {
+class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
   Timer? _saveDebounce;
- // Temporary storage for dishes before completing the order with form details
-  final List<CateringDish> _pendingDishes = [];
-  
-  CateringOrderNotifier() : super([]) {
-    _loadCateringOrders();
+
+  CateringOrderNotifier() : super(null) {
+    _loadCateringOrder();
   }
 
-  // Load catering orders from SharedPreferences
-  Future<void> _loadCateringOrders() async {
+  // Load catering order from SharedPreferences
+  Future<void> _loadCateringOrder() async {
     final prefs = await SharedPreferences.getInstance();
-    String? serializedOrders = prefs.getString('cateringOrders');
-    if (serializedOrders != null) {
-      state = deserializeCateringOrders(serializedOrders);
+    String? serializedOrder = prefs.getString('cateringOrder');
+    if (serializedOrder != null) {
+      state = CateringOrderItem.fromJson(jsonDecode(serializedOrder));
     }
   }
 
-  // Save catering orders to SharedPreferences
-  Future<void> _saveCateringOrders() async {
+  // Save catering order to SharedPreferences
+  Future<void> _saveCateringOrder() async {
     final prefs = await SharedPreferences.getInstance();
-    String serializedOrders = serializeCateringOrders(state);
-    await prefs.setString('cateringOrders', serializedOrders);
+    if (state != null) {
+      await prefs.setString('cateringOrder', jsonEncode(state!.toJson()));
+    } else {
+      await prefs.remove('cateringOrder');
+    }
   }
 
   @override
-  set state(List<CateringOrderItem> value) {
+  set state(CateringOrderItem? value) {
     super.state = value;
     if (_saveDebounce?.isActive ?? false) _saveDebounce!.cancel();
     _saveDebounce = Timer(const Duration(milliseconds: 500), () {
-      _saveCateringOrders();
+      _saveCateringOrder();
     });
   }
 
-  // Add a new dish to the pending list
+  // Add a new dish to the active order
   void addCateringItem(CateringDish dish) {
-    _pendingDishes.add(dish);
+    if (state == null) {
+      // Create a new order with default values
+      state = CateringOrderItem(
+        title: '',
+        img: '',
+        description: '',
+        dishes: [dish],
+        apetito: '',
+        alergias: '',
+        eventType: '',
+        preferencia: '',
+        adicionales: '',
+      );
+    } else {
+      // Add to existing order
+      state = state!.copyWith(
+        dishes: [...state!.dishes, dish],
+      );
+    }
   }
 
-  // Complete the catering order with form data and save it
+  // Update the order details
   void finalizeCateringOrder({
     required String title,
     required String img,
@@ -146,38 +205,39 @@ class CateringOrderNotifier extends StateNotifier<List<CateringOrderItem>> {
     required String preferencia,
     required String adicionales,
   }) {
-    if (_pendingDishes.isNotEmpty) {
-      final newOrder = CateringOrderItem(
+    if (state != null) {
+      state = state!.copyWith(
         title: title,
         img: img,
         description: description,
-        dishes: List.from(_pendingDishes),
         apetito: apetito,
         alergias: alergias,
         eventType: eventType,
         preferencia: preferencia,
         adicionales: adicionales,
       );
-
-      state = [...state, newOrder];
-      _pendingDishes.clear();
     }
   }
 
-  // Clear all orders
+  // Clear the active order
   void clearCateringOrder() {
-    state = [];
-    _pendingDishes.clear();
+    state = null;
   }
 
-  // Remove a specific order from the catering list by index
+  // Remove a specific dish from the order by index
   void removeFromCart(int index) {
-    if (index >= 0 && index < state.length) {
-      state = [...state]..removeAt(index);
+    if (state != null && index >= 0 && index < state!.dishes.length) {
+      state = state!.copyWith(
+        dishes: [],
+      );
     }
   }
 }
 
+final cateringOrderProvider =
+    StateNotifierProvider<CateringOrderNotifier, CateringOrderItem?>((ref) {
+  return CateringOrderNotifier();
+});
 // Serialization and Deserialization for CateringOrderItems
 String serializeCateringOrders(List<CateringOrderItem> orders) {
   return jsonEncode(orders.map((order) => order.toJson()).toList());
@@ -185,12 +245,5 @@ String serializeCateringOrders(List<CateringOrderItem> orders) {
 
 List<CateringOrderItem> deserializeCateringOrders(String jsonString) {
   List<dynamic> jsonData = jsonDecode(jsonString);
-  return jsonData
-      .map((order) => CateringOrderItem.fromJson(order))
-      .toList();
+  return jsonData.map((order) => CateringOrderItem.fromJson(order)).toList();
 }
-
-final cateringOrderProvider =
-    StateNotifierProvider<CateringOrderNotifier, List<CateringOrderItem>>((ref) {
-  return CateringOrderNotifier();
-});

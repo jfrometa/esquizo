@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_item.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_order_details.dart' as orderDetails;
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_order_details.dart'
+    as orderDetails;
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
-// Import the new screen
 
 final cateringItemCountProvider = Provider<int>((ref) {
-  final cateringOrders = ref.watch(cateringOrderProvider);
-  return cateringOrders.fold<int>(0, (sum, order) => sum + order.dishes.length);
+  final cateringOrder = ref.watch(cateringOrderProvider);
+  return cateringOrder?.dishes.length ?? 0;
 });
 
 class CateringScreen extends ConsumerStatefulWidget {
@@ -29,7 +29,18 @@ class CateringScreenState extends ConsumerState<CateringScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this); // Adjust length based on number of categories
+    // Initialize _tabController in didChangeDependencies
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final cateringOptions = ref.watch(cateringProvider);
+    final categorizedItems = groupCateringItemsByCategory(cateringOptions);
+    _tabController = TabController(
+      length: categorizedItems.keys.length,
+      vsync: this,
+    );
   }
 
   @override
@@ -87,7 +98,8 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                       ],
                     ),
                     const Divider(),
-                    const Text('Nivel de Apetito', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text('Nivel de Apetito',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       value: apetito,
@@ -99,13 +111,16 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                       ),
                       items: const [
                         DropdownMenuItem(value: 'poco', child: Text('Poco')),
-                        DropdownMenuItem(value: 'regular', child: Text('Regular')),
+                        DropdownMenuItem(
+                            value: 'regular', child: Text('Regular')),
                         DropdownMenuItem(value: 'mucho', child: Text('Mucho')),
                       ],
-                      onChanged: (value) => setModalState(() => apetito = value!),
+                      onChanged: (value) =>
+                          setModalState(() => apetito = value!),
                     ),
                     const SizedBox(height: 16),
-                    const Text('Alergias', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text('Alergias',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8.0,
@@ -119,7 +134,8 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                           ),
                         if (alergiasList.length < 10)
                           ActionChip(
-                            avatar: Icon(Icons.add, color: ColorsPaletteRedonda.primary),
+                            avatar: Icon(Icons.add,
+                                color: ColorsPaletteRedonda.primary),
                             label: const Text('Agregar Alergia'),
                             onPressed: () async {
                               final newAllergy = await showDialog<String>(
@@ -155,7 +171,8 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                       ],
                     ),
                     const SizedBox(height: 16),
-                    const Text('Tipo de Evento', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text('Tipo de Evento',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     TextField(
                       decoration: InputDecoration(
@@ -165,10 +182,12 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                         filled: true,
                         fillColor: ColorsPaletteRedonda.white,
                       ),
-                      onChanged: (value) => setModalState(() => eventType = value),
+                      onChanged: (value) =>
+                          setModalState(() => eventType = value),
                     ),
                     const SizedBox(height: 16),
-                    const Text('Preferencia de Sabor', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text('Preferencia de Sabor',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       value: preferencia,
@@ -180,9 +199,11 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                       ),
                       items: const [
                         DropdownMenuItem(value: 'dulce', child: Text('Dulce')),
-                        DropdownMenuItem(value: 'salado', child: Text('Salado')),
+                        DropdownMenuItem(
+                            value: 'salado', child: Text('Salado')),
                       ],
-                      onChanged: (value) => setModalState(() => preferencia = value!),
+                      onChanged: (value) =>
+                          setModalState(() => preferencia = value!),
                     ),
                     const SizedBox(height: 16),
                     ExpansionTile(
@@ -212,7 +233,8 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                               ),
                             ),
                           ),
-                          onChanged: (value) => setModalState(() => adicionales = value),
+                          onChanged: (value) =>
+                              setModalState(() => adicionales = value),
                         ),
                       ],
                     ),
@@ -221,7 +243,12 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                       child: ElevatedButton(
                         onPressed: () {
                           _finalizeAndAddToCart(
-                            ref, apetito, alergiasList.join(','), eventType, preferencia, adicionales);
+                              ref,
+                              apetito,
+                              alergiasList.join(','),
+                              eventType,
+                              preferencia,
+                              adicionales);
                           alergiasList.clear();
                           Navigator.pop(context);
                         },
@@ -238,11 +265,10 @@ class CateringScreenState extends ConsumerState<CateringScreen>
     );
   }
 
-  void _finalizeAndAddToCart(
-    WidgetRef ref, String apetito, String alergias,
-    String eventType, String preferencia, String adicionales
-  ) {
-    final cateringOrderProviderNotifier = ref.read(cateringOrderProvider.notifier);
+  void _finalizeAndAddToCart(WidgetRef ref, String apetito, String alergias,
+      String eventType, String preferencia, String adicionales) {
+    final cateringOrderProviderNotifier =
+        ref.read(cateringOrderProvider.notifier);
     cateringOrderProviderNotifier.finalizeCateringOrder(
       title: 'Catering Order',
       img: 'assets/image.png',
@@ -255,10 +281,13 @@ class CateringScreenState extends ConsumerState<CateringScreen>
     );
   }
 
-  Map<String, List<CateringItem>> groupCateringItemsByCategory(List<CateringItem> items) {
+  Map<String, List<CateringItem>> groupCateringItemsByCategory(
+      List<CateringItem> items) {
     Map<String, List<CateringItem>> categorizedItems = {};
     for (var item in items) {
-      categorizedItems.putIfAbsent(item.category, () => []).add(item);
+      String category =
+          item.category.isNotEmpty ? item.category : 'Uncategorized';
+      categorizedItems.putIfAbsent(category, () => []).add(item);
     }
     return categorizedItems;
   }
@@ -277,17 +306,20 @@ class CateringScreenState extends ConsumerState<CateringScreen>
             child: Stack(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.shopping_cart),
+                  icon: const Icon(Icons.library_books),
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const orderDetails.CateringOrderDetailsScreen()),
+                      MaterialPageRoute(
+                          builder: (_) =>
+                              const orderDetails.CateringOrderDetailsScreen()),
                     );
                   },
                 ),
                 Consumer(
                   builder: (context, ref, child) {
-                    final cateringItemCount = ref.watch(cateringItemCountProvider);
+                    final cateringItemCount =
+                        ref.watch(cateringItemCountProvider);
                     return cateringItemCount > 0
                         ? Positioned(
                             top: 0,
@@ -297,7 +329,8 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                               backgroundColor: Colors.red,
                               child: Text(
                                 '$cateringItemCount',
-                                style: const TextStyle(color: Colors.white, fontSize: 10),
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 10),
                               ),
                             ),
                           )
@@ -316,10 +349,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
           labelColor: ColorsPaletteRedonda.white,
           unselectedLabelColor: ColorsPaletteRedonda.deepBrown1,
           indicatorSize: TabBarIndicatorSize.tab,
-          indicator: TabIndicator(
-            color: ColorsPaletteRedonda.primary,
-            radius: 16.0,
-          ),
+          indicator: const UnderlineTabIndicator(),
           tabs: categorizedItems.keys
               .map((category) => Tab(text: category))
               .toList(),
@@ -351,12 +381,14 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                         onAddToCart: (int quantity) {
                           ref
                               .read(cateringOrderProvider.notifier)
-                              .addCateringItem(CateringDish(
-                                title: item.title,
-                                peopleCount: 10,
-                                pricePerPerson: item.pricePerPerson,
-                                ingredients: item.ingredients,
-                              ));
+                              .addCateringItem(
+                                CateringDish(
+                                  title: item.title,
+                                  peopleCount: quantity,
+                                  pricePerPerson: item.pricePerPerson,
+                                  ingredients: item.ingredients,
+                                ),
+                              );
                         },
                         sideRequestController: sideRequestController,
                       );

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/localization/string_hardcoded.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/cathering_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/plans/plans.dart';
@@ -42,14 +43,13 @@ class ScaffoldWithNestedNavigation extends StatelessWidget {
 //   return cartItems.fold(0, (total, item) => total + item.quantity);
 // }
 
-
 // Helper function to calculate total quantity from multiple providers
-int getTotalQuantity(List<CartItem> cartItems, List<CartItem> mealItems, int cateringCount) {
+int getTotalQuantity(
+    List<CartItem> cartItems, List<CartItem> mealItems, int cateringCount) {
   final cartTotal = cartItems.fold(0, (total, item) => total + item.quantity);
   final mealTotal = mealItems.length;
   return cartTotal + mealTotal + cateringCount;
 }
-
 
 class ScaffoldWithNavigationBar extends ConsumerStatefulWidget {
   const ScaffoldWithNavigationBar({
@@ -99,13 +99,13 @@ class _ScaffoldWithNavigationBarState
     });
   }
 
-void _goBranch(int index) {
-  setState(() {
-    // Show the navigation bar when navigating, and keep it visible on "Cuenta" tab
-    _isVisible = index == 3 ? true : _isVisible;
-  });
-  widget.onDestinationSelected(index);
-}
+  void _goBranch(int index) {
+    setState(() {
+      // Show the navigation bar when navigating, and keep it visible on "Cuenta" tab
+      _isVisible = index == 3 ? true : _isVisible;
+    });
+    widget.onDestinationSelected(index);
+  }
 
   @override
   void dispose() {
@@ -125,9 +125,8 @@ void _goBranch(int index) {
     // Calculating the total quantity
     final totalQuantity = getTotalQuantity(cartItems, mealItems, cateringCount);
 
-
     return Scaffold(
-       body: widget.body,
+      body: widget.body,
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
           backgroundColor: Colors.white,
@@ -147,8 +146,7 @@ void _goBranch(int index) {
           iconTheme: WidgetStateProperty.resolveWith((states) {
             return states.contains(WidgetState.selected)
                 ? const IconThemeData(color: Colors.white)
-                : const IconThemeData(
-                    color: ColorsPaletteRedonda.deepBrown1);
+                : const IconThemeData(color: ColorsPaletteRedonda.deepBrown1);
           }),
         ),
         child: NavigationBar(
@@ -241,11 +239,11 @@ class ScaffoldWithNavigationRail extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Get the total quantity from cartProvider
-       final cartItems = ref.watch(cartProvider);
+    final cartItems = ref.watch(cartProvider);
     // final totalQuantity = getTotalCartQuantity(cartItems);
 
     final mealItems = ref.watch(mealOrderProvider);
-    final cateringCount = ref.watch(cateringItemCountProvider);
+    final cateringCount = ref.watch(cateringOrderProvider)?.dishes.length ?? 0;
 
     // Calculating the total quantity
     final totalQuantity = getTotalQuantity(cartItems, mealItems, cateringCount);
