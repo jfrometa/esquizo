@@ -43,10 +43,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   final int _deliveryFee = 200;
   final double _taxRate = 0.067;
-  int _selectedPaymentMethod = 0;
-  DateTime? _deliveryStartTime;
-  DateTime? _deliveryEndTime;
 
+  int _selectedPaymentMethod = 0; // Variable to track payment selection
   final List<String> _paymentMethods = [
     'Transferencias',
     'Pagos por WhatsApp',
@@ -220,6 +218,57 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       .clearCateringOrder(),
                 ),
               ],
+              // Payment Method Dropdown
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DropdownButtonFormField<int>(
+                      dropdownColor: ColorsPaletteRedonda.white,
+                      value: _selectedPaymentMethod,
+                      items: List.generate(_paymentMethods.length, (index) {
+                        return DropdownMenuItem<int>(
+                          value: index,
+                          child: Text(
+                            _paymentMethods[index],
+                            style: const TextStyle(
+                                color: ColorsPaletteRedonda.primary),
+                          ),
+                        );
+                      }),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedPaymentMethod = value!;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Método de pago',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: const BorderSide(
+                            color: ColorsPaletteRedonda.primary,
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8.0),
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Text(
+                        getPaymentMethodDescription(_selectedPaymentMethod),
+                        style: const TextStyle(
+                          color: Color.fromARGB(255, 231, 107, 24),
+                          fontSize: 14.0,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 16.0),
               _buildOrderSummary(totalPrice),
               SizedBox(
@@ -245,6 +294,19 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         ),
       ),
     );
+  }
+
+  String getPaymentMethodDescription(int selectedIndex) {
+    switch (selectedIndex) {
+      case 0:
+        return 'La transferencia es manual desde su cuenta bancaria a la nuestra.';
+      case 1:
+        return 'El pago por WhatsApp le llevará a WhatsApp para completar el pago.';
+      case 2:
+        return 'Con CARNET, puede pagar directamente con su tarjeta a través de la plataforma de transacciones CARNET.';
+      default:
+        return '';
+    }
   }
 
   double _calculateTotalPrice(List<CartItem> items) {
@@ -274,9 +336,9 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Error processing order: $error'),
-        backgroundColor: Colors.red, // Light brown background color
+        backgroundColor: Colors.red, // Red background color for error
         duration:
-            const Duration(milliseconds: 500), // Display for half a second),
+            const Duration(milliseconds: 500), // Display for half a second
       ));
     }
   }
@@ -553,6 +615,7 @@ $regularDishesBuffer
     final double grandTotal = total + tax + _deliveryFee;
 
     orderDetailsBuffer.writeln('''
+*Método de Pago*: ${_paymentMethods[_selectedPaymentMethod]}
 *Totales*:
 Envío: RD \$$_deliveryFee
 Impuestos: RD \$${tax.toStringAsFixed(2)}
@@ -609,6 +672,7 @@ $mealSubscriptionBuffer
     final double grandTotal = total + tax + _deliveryFee;
 
     orderDetailsBuffer.writeln('''
+*Método de Pago*: ${_paymentMethods[_selectedPaymentMethod]}
 *Totales*:
 Envío: RD \$$_deliveryFee
 Impuestos: RD \$${tax.toStringAsFixed(2)}
@@ -662,6 +726,7 @@ $cateringBuffer
     final double grandTotal = total + tax + _deliveryFee;
 
     orderDetailsBuffer.writeln('''
+*Método de Pago*: ${_paymentMethods[_selectedPaymentMethod]}
 *Totales*:
 Envío: RD \$$_deliveryFee
 Impuestos: RD \$${tax.toStringAsFixed(2)}
@@ -1071,8 +1136,9 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
             Text(
               value,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-                  color: ColorsPaletteRedonda.deepBrown),
+                    fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+                    color: ColorsPaletteRedonda.deepBrown,
+                  ),
             ),
           ],
         ),
