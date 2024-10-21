@@ -66,7 +66,7 @@ class _AuthenticatedProfileScreenState
     final double maxTabWidth = TabUtils.calculateMaxTabWidth(
       context: context,
       tabTitles: tabTitles,
-      extraWidth: 20.0,
+      extraWidth: 10.0,
     );
 
     return DefaultTabController(

@@ -84,7 +84,7 @@ class OrderHistoryList extends ConsumerWidget {
                       ),
                       const SizedBox(height: 8.0),
                       Text(
-                        'Estatus de PAgo: ${order.paymentStatus}',
+                        'Estatus de Pago: ${order.paymentStatus}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: order.paymentStatus == 'pagado'
                                   ? Colors.green

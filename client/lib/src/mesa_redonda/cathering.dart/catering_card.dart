@@ -171,7 +171,7 @@ class _TabIndicatorPainter extends BoxPainter {
     final double height = cfg.size?.height ?? 0.0;
 
     // Calculate maximum tab width based on the largest tab
-    final double maxTabWidth = 120.0; // Example of a pre-calculated max width
+    final double maxTabWidth = 140.0; // Example of a pre-calculated max width
 
     // Define the desired height of the indicator
     const double indicatorHeight = 38.0; // Adjust as needed
