@@ -65,31 +65,38 @@ class CateringItemCardState extends State<CateringItemCard> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.remove),
-                          onPressed: () {
-                            if (quantity > 1) {
-                              setState(() {
-                                quantity--;
-                              });
-                            }
-                          },
-                        ),
-                        Text('$quantity'),
-                        IconButton(
-                          icon: const Icon(Icons.add),
-                          onPressed: () {
-                            setState(() {
-                              quantity++;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
+                    // Row(
+                    //   children: [
+                    //     IconButton(
+                    //       icon: const Icon(Icons.remove),
+                    //       onPressed: () {
+                    //         if (quantity > 1) {
+                    //           setState(() {
+                    //             quantity--;
+                    //           });
+                    //         }
+                    //       },
+                    //     ),
+                    //     Text('$quantity'),
+                    //     IconButton(
+                    //       icon: const Icon(Icons.add),
+                    //       onPressed: () {
+                    //         setState(() {
+                    //           quantity++;
+                    //         });
+                    //       },
+                    //     ),
+                    //   ],
+                    // ),
+
                     ElevatedButton(
                       onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                'Se agregó ${widget.item.title}  al carrito'),
+                          ),
+                        );
                         widget.onAddToCart(quantity);
                       },
                       child: const Text('Agregar al carrito'),

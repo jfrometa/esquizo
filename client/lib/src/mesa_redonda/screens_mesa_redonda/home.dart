@@ -246,6 +246,12 @@ class HomeState extends ConsumerState<Home> {
                       foodType: dish["foodType"],
                       actionButton: ElevatedButton(
                         onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  'Se agregó ${dish['title']}  al carrito'),
+                            ),
+                          );
                           // Add the dish directly to the cart
                           ref.read(cartProvider.notifier).addToCart(
                               dish.cast<String, dynamic>(),

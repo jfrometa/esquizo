@@ -213,6 +213,12 @@ class _AddToOrderScreenState extends ConsumerState<AddToOrderScreen> {
                         .addToCart(selectedItem, quantity);
                   }
 
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                          'Se agregó ${selectedItem['title']}  al carrito'),
+                    ),
+                  );
                   // Navigate to the cart screen
                   GoRouter.of(context).pop();
                 },
@@ -233,7 +239,6 @@ class _AddToOrderScreenState extends ConsumerState<AddToOrderScreen> {
               ),
             ),
           ),
-        
         ],
       ),
     );

@@ -28,14 +28,15 @@ class MealOrderNotifier extends StateNotifier<List<CartItem>> {
   @override
   set state(List<CartItem> value) {
     super.state = value;
-    _saveMeals(); 
+    _saveMeals();
   }
 
   // Add meal subscription to meal orders
   void addMealSubscription(Map<String, dynamic> item, int totalMeals) {
     print('Adding Meal Subscription: ${item['title']}');
     // Prevent duplicates in meal subscriptions
-    if (state.any((meal) => meal.id == item['id'] && meal.isMealSubscription)) return;
+    if (state.any((meal) => meal.id == item['id'] && meal.isMealSubscription))
+      return;
 
     final newMeal = CartItem(
       id: item['id'],
@@ -43,7 +44,7 @@ class MealOrderNotifier extends StateNotifier<List<CartItem>> {
       title: item['title'],
       description: item['description'],
       pricing: item['pricing'],
-      foodType: item['foodType'], 
+      foodType: item['foodType'],
       isMealSubscription: true,
       totalMeals: totalMeals,
       remainingMeals: totalMeals,
@@ -52,9 +53,9 @@ class MealOrderNotifier extends StateNotifier<List<CartItem>> {
       isSpicy: item['isSpicy'],
       quantity: item['quantity'],
     );
-    
+
     state = [...state, newMeal];
-      print('Meal Subscription added successfully.');
+    print('Meal Subscription added successfully.');
   }
 
   // Deserialize method
@@ -83,8 +84,15 @@ class MealOrderNotifier extends StateNotifier<List<CartItem>> {
           meal,
     ];
   }
+
+  // Clear all meal subscriptions from the cart
+  void clearCart() {
+    state = [];
+    print('Meal subscriptions cleared from the cart.');
+  }
 }
 
-final mealOrderProvider = StateNotifierProvider<MealOrderNotifier, List<CartItem>>((ref) {
+final mealOrderProvider =
+    StateNotifierProvider<MealOrderNotifier, List<CartItem>>((ref) {
   return MealOrderNotifier();
 });

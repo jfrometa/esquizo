@@ -5,45 +5,18 @@ import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/catering_cart_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/meal_subscription_item_view.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
-import 'cart_item_view.dart'; // Import the CartItemView here
+import 'cart_item_view.dart';
 
-class CartScreen extends ConsumerStatefulWidget {
-  const CartScreen({super.key, required this.isAuthenticated});
+class CartScreen extends ConsumerWidget {
+  const CartScreen({Key? key, required this.isAuthenticated}) : super(key: key);
   final bool isAuthenticated;
 
   @override
-  CartScreenState createState() => CartScreenState();
-}
-
-class CartScreenState extends ConsumerState<CartScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this); // Three tabs
-    // Add listener to track the current tab index
-    // _tabController.addListener(() {
-    //   setState(() {
-    //     // Update the state whenever the tab changes
-    //   });
-    // });
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cartItems = ref.watch(cartProvider);
     final cateringOrder = ref.watch(cateringOrderProvider);
     final mealItems = ref.watch(mealOrderProvider);
@@ -57,76 +30,105 @@ class CartScreenState extends ConsumerState<CartScreen>
         cateringOrder != null ? [cateringOrder] : [];
     final List<CartItem> mealSubscriptions = mealItems;
 
-    // Determine which items are in the current tab
-    List<dynamic> currentTabItems;
-    int currentTabIndex = _tabController.index;
+    // Create tabs dynamically based on available items
+    List<String> availableTabs = [];
+    final List<Widget> tabContent = [];
 
-    if (currentTabIndex == 0) {
-      currentTabItems = mealSubscriptions;
-    } else if (currentTabIndex == 1) {
-      currentTabItems = cateringItems;
-    } else {
-      currentTabItems = dishes;
+    if (mealSubscriptions.isNotEmpty) {
+      availableTabs.add('Subscripciones');
+      tabContent.add(_buildTabWithCheckoutButton(
+        context,
+        ref,
+        'subscriptions',
+        mealSubscriptions,
+        _buildSubscripcionesTab(ref, mealSubscriptions),
+      ));
+    }
+    if (cateringItems.isNotEmpty) {
+      availableTabs.add('Catering');
+      tabContent.add(_buildTabWithCheckoutButton(
+        context,
+        ref,
+        'catering',
+        cateringItems,
+        _buildCateringTab(ref, cateringOrder),
+      ));
+    }
+    if (dishes.isNotEmpty) {
+      availableTabs.add('Platos');
+      tabContent.add(_buildTabWithCheckoutButton(
+        context,
+        ref,
+        'platos',
+        dishes,
+        _buildPlatosTab(ref, dishes),
+      ));
     }
 
-    // Calculate total price only for the current tab's items
-    final double totalPrice = _calculateTabTotalPrice(currentTabItems);
-
-    return Scaffold(
-      appBar: AppBar(
-        forceMaterialTransparency: true,
-        elevation: 3,
-        title: const Text('Carrito'),
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          labelStyle: Theme.of(context).textTheme.titleSmall,
-          unselectedLabelStyle: Theme.of(context).textTheme.titleSmall,
-          labelColor: ColorsPaletteRedonda.white,
-          unselectedLabelColor: ColorsPaletteRedonda.deepBrown1,
-          indicatorSize: TabBarIndicatorSize.tab,
-          dividerColor: Colors.transparent,
-          indicator: TabIndicator(
-            color: ColorsPaletteRedonda
-                .primary, // Background color of the selected tab
-            radius: 16.0, // Radius for rounded corners
-          ),
-          tabs: const [
-            Tab(text: 'Subscripciones'),
-            Tab(text: 'Catering'),
-            Tab(text: 'Platos'),
-          ],
+    if (availableTabs.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Carrito'),
         ),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildSubscripcionesTab(mealSubscriptions),
-                _buildCateringTab(cateringOrder),
-                _buildPlatosTab(dishes),
-              ],
+        body: const Center(
+          child: Text('No items in the cart.'),
+        ),
+      );
+    }
+
+    return DefaultTabController(
+      length: availableTabs.length,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Carrito'),
+          bottom: TabBar(
+            isScrollable: true,
+            labelStyle: Theme.of(context).textTheme.titleSmall,
+            unselectedLabelStyle: Theme.of(context).textTheme.titleSmall,
+            labelColor: ColorsPaletteRedonda.white,
+            unselectedLabelColor: ColorsPaletteRedonda.deepBrown1,
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicator: BoxDecoration(
+              borderRadius: BorderRadius.circular(16.0),
+              color: ColorsPaletteRedonda.primary,
             ),
+            tabs: availableTabs.map((category) {
+              return Tab(text: category);
+            }).toList(),
           ),
-          _buildTotalSection(totalPrice, context),
-          // Pass all item lists (dishes, cateringItems, mealSubscriptions) to the button
-          _buildCheckoutButton(
-              context, totalPrice, dishes, cateringItems, mealSubscriptions),
-        ],
+        ),
+        body: TabBarView(
+          children: tabContent,
+        ),
       ),
     );
   }
 
-  // Total price calculator for the active tab
+  Widget _buildTabWithCheckoutButton(
+    BuildContext context,
+    WidgetRef ref,
+    String tabTitle,
+    List<dynamic> items,
+    Widget tabContent,
+  ) {
+    double totalPrice = _calculateTabTotalPrice(items);
+
+    return Column(
+      children: [
+        Expanded(child: tabContent),
+        _buildTotalSection(totalPrice, context),
+        _buildCheckoutButton(context, ref, totalPrice, items, tabTitle),
+      ],
+    );
+  }
+
   double _calculateTabTotalPrice(List<dynamic> items) {
     if (items.isEmpty) return 0.0;
 
     if (items.first is CateringOrderItem) {
       return items.fold<double>(
         0.0,
-        (sum, item) => (item as CateringOrderItem).totalPrice,
+        (sum, item) => sum + (item as CateringOrderItem).totalPrice,
       );
     } else {
       return items.fold<double>(
@@ -139,106 +141,30 @@ class CartScreenState extends ConsumerState<CartScreen>
     }
   }
 
-  Widget _buildCheckoutButton(
-      BuildContext context,
-      double totalPrice,
-      List<CartItem> dishes,
-      List<CateringOrderItem> cateringItems,
-      List<CartItem> mealSubscriptions) {
+  Widget _buildCheckoutButton(BuildContext context, WidgetRef ref,
+      double totalPrice, List<dynamic> items, String type) {
+    final bool hasItemsInCurrentTab = items.isNotEmpty;
+
     return Container(
       padding: const EdgeInsets.all(16.0),
       child: ElevatedButton(
-        onPressed: totalPrice > 0
+        onPressed: hasItemsInCurrentTab && totalPrice > 0
             ? () {
-                // Get the current tab index
-                int currentTabIndex = _tabController.index;
-                List<dynamic> currentTabItems;
-
-                if (currentTabIndex == 0) {
-                  currentTabItems = mealSubscriptions;
-                } else if (currentTabIndex == 1) {
-                  currentTabItems = cateringItems;
-                } else {
-                  currentTabItems = dishes;
-                }
-
-                // Navigate to CheckoutScreen using GoRouter and pass the current tab's items
                 GoRouter.of(context).pushNamed(
                   AppRoute.checkout.name,
-                  extra:
-                      currentTabItems, // Pass the current tab's items to the CheckoutScreen
+                  extra: type,
                 );
               }
-            : null, // Disable if no items to checkout
+            : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: ColorsPaletteRedonda.primary,
+          backgroundColor: hasItemsInCurrentTab && totalPrice > 0
+              ? ColorsPaletteRedonda.primary
+              : Colors.grey,
           foregroundColor: ColorsPaletteRedonda.white,
           minimumSize: const Size(double.infinity, 56),
         ),
         child: const Text('Realizar pedido'),
       ),
-    );
-  }
-
-  // Subscription tab builder
-  Widget _buildSubscripcionesTab(List<CartItem> mealItems) {
-    if (mealItems.isEmpty) {
-      return const Center(child: Text('No meal subscriptions found.'));
-    }
-    return ListView.builder(
-      itemCount: mealItems.length,
-      itemBuilder: (context, index) {
-        final item = mealItems[index];
-        return MealSubscriptionItemView(
-          item: item,
-          onConsumeMeal: () =>
-              ref.read(mealOrderProvider.notifier).consumeMeal(item.title),
-          onRemoveFromCart: () =>
-              ref.read(mealOrderProvider.notifier).removeFromCart(item.id),
-        );
-      },
-    );
-  }
-
-  // Catering tab builder
-  Widget _buildCateringTab(CateringOrderItem? cateringItems) {
-    if (cateringItems == null) {
-      return const Center(child: Text('No catering items found.'));
-    }
-    return SingleChildScrollView(
-      child: CateringCartItemView(
-        order: cateringItems,
-        onRemoveFromCart: () =>
-            ref.read(cateringOrderProvider.notifier).clearCateringOrder(),
-      ),
-    );
-  }
-
-  // Platos tab builder
-  Widget _buildPlatosTab(List<CartItem> platosItems) {
-    if (platosItems.isEmpty) {
-      return const Center(child: Text('No dishes found.'));
-    }
-    return ListView.builder(
-      itemCount: platosItems.length,
-      itemBuilder: (context, index) {
-        final item = platosItems[index];
-        return CartItemView(
-          img: item.img,
-          title: item.title,
-          description: item.description,
-          pricing: item.pricing,
-          offertPricing: item.offertPricing,
-          ingredients: item.ingredients,
-          isSpicy: item.isSpicy,
-          foodType: item.foodType,
-          quantity: item.quantity,
-          onRemove: () =>
-              ref.read(cartProvider.notifier).decrementQuantity(item.title),
-          onAdd: () =>
-              ref.read(cartProvider.notifier).incrementQuantity(item.title),
-        );
-      },
     );
   }
 
@@ -265,6 +191,65 @@ class CartScreenState extends ConsumerState<CartScreen>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSubscripcionesTab(WidgetRef ref, List<CartItem> mealItems) {
+    if (mealItems.isEmpty) {
+      return const Center(child: Text('No meal subscriptions found.'));
+    }
+    return ListView.builder(
+      itemCount: mealItems.length,
+      itemBuilder: (context, index) {
+        final item = mealItems[index];
+        return MealSubscriptionItemView(
+          item: item,
+          onConsumeMeal: () =>
+              ref.read(mealOrderProvider.notifier).consumeMeal(item.title),
+          onRemoveFromCart: () =>
+              ref.read(mealOrderProvider.notifier).removeFromCart(item.id),
+        );
+      },
+    );
+  }
+
+  Widget _buildCateringTab(WidgetRef ref, CateringOrderItem? cateringOrder) {
+    if (cateringOrder == null) {
+      return const Center(child: Text('No catering items found.'));
+    }
+    return SingleChildScrollView(
+      child: CateringCartItemView(
+        order: cateringOrder,
+        onRemoveFromCart: () =>
+            ref.read(cateringOrderProvider.notifier).clearCateringOrder(),
+      ),
+    );
+  }
+
+  Widget _buildPlatosTab(WidgetRef ref, List<CartItem> platosItems) {
+    if (platosItems.isEmpty) {
+      return const Center(child: Text('No dishes found.'));
+    }
+    return ListView.builder(
+      itemCount: platosItems.length,
+      itemBuilder: (context, index) {
+        final item = platosItems[index];
+        return CartItemView(
+          img: item.img,
+          title: item.title,
+          description: item.description,
+          pricing: item.pricing,
+          offertPricing: item.offertPricing,
+          ingredients: item.ingredients,
+          isSpicy: item.isSpicy,
+          foodType: item.foodType,
+          quantity: item.quantity,
+          onRemove: () =>
+              ref.read(cartProvider.notifier).decrementQuantity(item.title),
+          onAdd: () =>
+              ref.read(cartProvider.notifier).incrementQuantity(item.title),
+        );
+      },
     );
   }
 }

@@ -321,11 +321,12 @@ GoRouter goRouter(GoRouterRef ref) {
                     path: 'completar-orden',
                     name: AppRoute.checkout.name,
                     pageBuilder: (context, state) {
-                      final items = state.extra
-                          as List<dynamic>?; // Extracting items from the state
+                      final type = state.extra
+                          as String; // Extracting items from the state
                       return MaterialPage(
-                        child:
-                            CheckoutScreen(), // Passing the items or an empty list
+                        child: CheckoutScreen(
+                          displayType: type.toLowerCase(),
+                        ), // Passing the items or an empty list
                       );
                     },
                   ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/cathering_order_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class CateringOrderDetailsScreen extends ConsumerStatefulWidget {
   const CateringOrderDetailsScreen({super.key});
@@ -33,7 +34,7 @@ class CateringOrderDetailsScreenState
     tempEventType = cateringOrders.eventType;
     tempPreferencia = cateringOrders.preferencia;
     tempAdicionales = cateringOrders.adicionales;
-    tempCantidadPersonas = cateringOrders.cantidadPersonas ?? 10;
+    tempCantidadPersonas = cateringOrders.cantidadPersonas;
   }
 
   @override
@@ -51,23 +52,25 @@ class CateringOrderDetailsScreenState
           children: [
             Expanded(
               child: Text(
-                '${dish.title} - ${dish.peopleCount} personas',
+                '${dish.title}',
                 style: const TextStyle(fontSize: 14),
               ),
             ),
             Text(
-              '\$${(dish.peopleCount * dish.pricePerPerson).toStringAsFixed(2)}',
+              '\$${(dish.peopleCount * tempCantidadPersonas).toStringAsFixed(2)}',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             if (isEditing)
               Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.blue),
+                    icon: const Icon(Icons.edit,
+                        color: ColorsPaletteRedonda.deepBrown1),
                     onPressed: () => _editDishDialog(context, dish),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
+                    icon: const Icon(Icons.delete,
+                        color: ColorsPaletteRedonda.orange),
                     onPressed: () => _removeDish(index),
                   ),
                 ],
@@ -79,6 +82,7 @@ class CateringOrderDetailsScreenState
 
     return Scaffold(
       appBar: AppBar(
+        forceMaterialTransparency: true,
         title: const Text('Detalles de la Orden'),
         actions: [
           IconButton(
@@ -246,7 +250,7 @@ class CateringOrderDetailsScreenState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Edit Dish'),
+        title: const Text('Editar'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -261,7 +265,7 @@ class CateringOrderDetailsScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text('Cancelar'),
           ),
           TextButton(
             onPressed: () {
@@ -271,7 +275,7 @@ class CateringOrderDetailsScreenState
               });
               Navigator.pop(context);
             },
-            child: const Text('Save'),
+            child: const Text('Guardar'),
           ),
         ],
       ),

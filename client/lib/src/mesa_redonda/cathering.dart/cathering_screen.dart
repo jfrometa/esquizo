@@ -23,6 +23,7 @@ class CateringScreen extends ConsumerStatefulWidget {
 class CateringScreenState extends ConsumerState<CateringScreen>
     with SingleTickerProviderStateMixin {
   final TextEditingController sideRequestController = TextEditingController();
+
   late TabController _tabController;
   List<String> alergiasList = [];
   String? newAllergy = '';
@@ -90,6 +91,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
   void _showCateringForm(BuildContext context, WidgetRef ref) {
     // Retrieve the current catering order from the provider
     final cateringOrder = ref.read(cateringOrderProvider);
+    // final cateringOrderValue = ref.watch(cateringOrderProvider);
     final peopleQuantity = [
       10,
       20,
@@ -108,24 +110,32 @@ class CateringScreenState extends ConsumerState<CateringScreen>
     ];
     // Set initial values, using provider values if available
     String apetito = (cateringOrder?.apetito != null &&
-            cateringOrder?.apetito.isNotEmpty == false)
+            cateringOrder?.apetito.isNotEmpty == true)
         ? cateringOrder!.apetito
         : 'regular';
-    String preferencia = (cateringOrder?.apetito != null &&
-            cateringOrder?.apetito.isNotEmpty == false)
+    String preferencia = (cateringOrder?.preferencia != null &&
+            cateringOrder?.preferencia.isNotEmpty == true)
         ? cateringOrder!.preferencia
         : 'salado';
+
     String eventType = cateringOrder?.eventType ?? '';
     String adicionales = cateringOrder?.adicionales ?? '';
-    int? cantidadPersonas = cateringOrder?.cantidadPersonas;
+    int? cantidadPersonasRead = (cateringOrder?.cantidadPersonas != null &&
+            cateringOrder!.cantidadPersonas > 0)
+        ? cateringOrder.cantidadPersonas
+        : null;
+
     List<String> alergiasList = cateringOrder?.alergias.split(',') ?? [];
 
-    if (cantidadPersonas != null &&
-        !peopleQuantity.contains(cantidadPersonas)) {
+    if (cantidadPersonasRead != null &&
+        !peopleQuantity.contains(cantidadPersonasRead)) {
       isCustomSelected = true;
     }
     // TextController for custom number of persons
-    TextEditingController customPersonasController = TextEditingController();
+    TextEditingController customPersonasController =
+        TextEditingController(text: '$cantidadPersonasRead');
+    TextEditingController eventTypeController =
+        TextEditingController(text: eventType);
 
     // Helper function to add allergies
     void addAllergy(String value, StateSetter setModalState) {
@@ -198,9 +208,9 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<int>(
-                      value: (cantidadPersonas != null &&
-                              peopleQuantity.contains(cantidadPersonas))
-                          ? cantidadPersonas
+                      value: (cantidadPersonasRead != null &&
+                              peopleQuantity.contains(cantidadPersonasRead))
+                          ? cantidadPersonasRead
                           : null, // Ensure `null` if no valid option selected
                       dropdownColor: Colors.white,
                       decoration: InputDecoration(
@@ -215,7 +225,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                         for (var number in peopleQuantity)
                           DropdownMenuItem<int>(
                             value: number,
-                            child: Text('$number personas'),
+                            child: Text('$number'),
                           ),
                         const DropdownMenuItem<int>(
                           value:
@@ -227,7 +237,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                         if (value == -1) {
                           setModalState(() {
                             isCustomSelected = true; // Custom option selected
-                            cantidadPersonas =
+                            cantidadPersonasRead =
                                 null; // Reset to null for custom input
                           });
                           Future.delayed(Duration(milliseconds: 200), () {
@@ -237,7 +247,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                           setModalState(() {
                             isCustomSelected =
                                 false; // Predefined option selected
-                            cantidadPersonas =
+                            cantidadPersonasRead =
                                 value; // Assign the selected value
                           });
                         }
@@ -251,7 +261,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                             customPersonasFocusNode, // Assign the focus node
 
                         decoration: InputDecoration(
-                          labelText: '${cantidadPersonas ?? 0} Personas',
+                          labelText: '${cantidadPersonasRead ?? 0} Personas',
                           border: const OutlineInputBorder(),
                           filled: true,
                           fillColor: ColorsPaletteRedonda.white,
@@ -260,7 +270,8 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                         onChanged: (value) {
                           final customValue = int.tryParse(value);
                           if (customValue != null) {
-                            setModalState(() => cantidadPersonas = customValue);
+                            setModalState(
+                                () => cantidadPersonasRead = customValue);
                           }
                         },
                       ),
@@ -347,7 +358,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     TextField(
-                      controller: TextEditingController(text: eventType),
+                      controller: eventTypeController,
                       decoration: InputDecoration(
                         labelText: 'Ej. Cumpleaños, Boda',
                         labelStyle: Theme.of(context).textTheme.bodySmall,
@@ -390,7 +401,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                           style: Theme.of(context).textTheme.titleMedium),
                       children: [
                         TextFormField(
-                          controller: TextEditingController(text: adicionales),
+                          controller: TextEditingController(),
                           style: Theme.of(context).textTheme.labelLarge,
                           maxLines: 3,
                           decoration: InputDecoration(
@@ -428,7 +439,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                                 eventType,
                                 preferencia,
                                 adicionales,
-                                cantidadPersonas ?? 0);
+                                cantidadPersonasRead ?? 0);
                             alergiasList.clear();
 
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -437,6 +448,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                                     Text('Se agregó el Catering al carrito'),
                               ),
                             );
+                            Navigator.pop(context);
                             Navigator.pop(context);
                           },
                           child: const Text('Confirmar Detalles de la Orden'),
@@ -467,7 +479,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
     cateringOrderProviderNotifier.finalizeCateringOrder(
       title: 'Orden de Catering',
       img: 'assets/image.png',
-      description: eventType.isEmpty ? 'Catering' : eventType,
+      description: 'Catering',
       apetito: apetito,
       alergias: alergias,
       eventType: eventType,
@@ -496,10 +508,10 @@ class CateringScreenState extends ConsumerState<CateringScreen>
     final cateringItemCount = ref.watch(localCateringItemCountProvider);
 
     // Retrieve the current catering order from the provider
-    final cateringOrder = ref.read(cateringOrderProvider);
-
+    // final cateringOrder = ref.read(cateringOrderProvider);
+    final cateringOrderUpdate = ref.watch(cateringOrderProvider);
     // Set initial values, using provider values if available
-    int? cantidadPersonas = cateringOrder?.cantidadPersonas;
+    int? cantidadPersonas = cateringOrderUpdate?.cantidadPersonas;
 
     final double maxTabWidth =
         TabUtils.calculateMaxTabWidth(context, categorizedItems.keys.toList());
@@ -619,6 +631,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                                     peopleCount: quantity,
                                     pricePerPerson: item.pricePerPerson,
                                     ingredients: item.ingredients,
+                                    pricing: item.pricing,
                                   ),
                                 );
                           },
@@ -630,50 +643,51 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                 ),
               ),
             ),
-            // if (cateringItemCount > 0) // Conditionally render the button
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Center(
-                child: SizedBox(
-                  height: 48,
-                  child: ElevatedButton(
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(
-                        cantidadPersonas == null
-                            ? ColorsPaletteRedonda
-                                .primary // Default color when no people count is set
-                            : Colors
-                                .white, // White background when people count is set
+            if (cateringItemCount > 0) // Conditionally render the button
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Center(
+                  child: SizedBox(
+                    height: 48,
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all(
+                          cantidadPersonas == null || cantidadPersonas < 1
+                              ? ColorsPaletteRedonda
+                                  .primary // Default color when no people count is set
+                              : Colors
+                                  .white, // White background when people count is set
+                        ),
+                        foregroundColor: WidgetStateProperty.all(
+                          cantidadPersonas == null || cantidadPersonas < 1
+                              ? Colors
+                                  .white // White text when no people count is set
+                              : Theme.of(context)
+                                  .primaryColor, // Primary color for text when people count is set
+                        ),
+                        side: WidgetStateProperty.all(
+                          cantidadPersonas == null || cantidadPersonas < 1
+                              ? BorderSide
+                                  .none // No border when no people count is set
+                              : BorderSide(
+                                  color: Colors
+                                      .white, // Primary color border when people count is set
+                                ),
+                        ),
                       ),
-                      foregroundColor: MaterialStateProperty.all(
-                        cantidadPersonas == null
-                            ? Colors
-                                .white // White text when no people count is set
-                            : Theme.of(context)
-                                .primaryColor, // Primary color for text when people count is set
+                      onPressed: () {
+                        _showCateringForm(context, ref);
+                      },
+                      child: Text(
+                        cantidadPersonas == null || cantidadPersonas < 1
+                            ? 'Completar Orden' // Text when no people count is set
+                            : 'Actualizar Catering', // Text when people count is set
                       ),
-                      side: MaterialStateProperty.all(
-                        cantidadPersonas == null
-                            ? BorderSide
-                                .none // No border when no people count is set
-                            : BorderSide(
-                                color: Theme.of(context)
-                                    .primaryColor, // Primary color border when people count is set
-                              ),
-                      ),
-                    ),
-                    onPressed: () {
-                      _showCateringForm(context, ref);
-                    },
-                    child: Text(
-                      cantidadPersonas == null
-                          ? 'Completar Orden' // Text when no people count is set
-                          : 'Actualizar Catering', // Text when people count is set
                     ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),
