@@ -446,6 +446,11 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                               SnackBar(
                                 content:
                                     Text('Se agregó el Catering al carrito'),
+                                backgroundColor: Colors
+                                    .brown[200], // Light brown background color
+                                duration: const Duration(
+                                    milliseconds:
+                                        500), // Display for half a second,
                               ),
                             );
                             Navigator.pop(context);
@@ -512,9 +517,10 @@ class CateringScreenState extends ConsumerState<CateringScreen>
     final cateringOrderUpdate = ref.watch(cateringOrderProvider);
     // Set initial values, using provider values if available
     int? cantidadPersonas = cateringOrderUpdate?.cantidadPersonas;
-
-    final double maxTabWidth =
-        TabUtils.calculateMaxTabWidth(context, categorizedItems.keys.toList());
+    final double maxTabWidth = TabUtils.calculateMaxTabWidth(
+      context: context,
+      tabTitles: categorizedItems.keys.toList(),
+    );
 
     return Scaffold(
       appBar: AppBar(

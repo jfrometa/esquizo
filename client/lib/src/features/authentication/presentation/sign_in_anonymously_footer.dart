@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/constants/app_sizes.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/data/firebase_auth_repository.dart';
- 
+
 class SignInAnonymouslyFooter extends ConsumerWidget {
   const SignInAnonymouslyFooter({super.key});
 
@@ -29,9 +29,13 @@ class SignInAnonymouslyFooter extends ConsumerWidget {
               Navigator.of(context).popUntil((route) => route.isFirst);
             } on Exception {
               // Handle anonymous sign-in error
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Failed to sign in anonymously.')),
-              );
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text('Failed to sign in anonymously.'),
+                backgroundColor:
+                    Colors.brown[200], // Light brown background color
+                duration: const Duration(
+                    milliseconds: 500), // Display for half a second),
+              ));
             }
           },
           child: const Text('Continue as Guest'),

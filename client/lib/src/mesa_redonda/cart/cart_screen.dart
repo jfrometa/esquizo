@@ -78,8 +78,11 @@ class CartScreen extends ConsumerWidget {
       );
     }
 
-    final double maxTabWidth =
-        TabUtils.calculateMaxTabWidth(context, availableTabs);
+    final double maxTabWidth = TabUtils.calculateMaxTabWidth(
+      context: context,
+      tabTitles: availableTabs,
+      extraWidth: 20.0,
+    );
 
     return DefaultTabController(
       length: availableTabs.length,

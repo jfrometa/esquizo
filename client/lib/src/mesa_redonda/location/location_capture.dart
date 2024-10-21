@@ -59,11 +59,12 @@ class LocationCaptureBottomSheetState
       bool isLocationEnabled = await Geolocator.isLocationServiceEnabled();
 
       if (!isLocationEnabled) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content:
-                  Text('Location services are disabled. Please enable them.')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Location services are disabled. Please enable them.'),
+          backgroundColor: Colors.brown[200], // Light brown background color
+          duration:
+              const Duration(milliseconds: 500), // Display for half a second),
+        ));
         throw Exception("Location services are disabled.");
       }
 

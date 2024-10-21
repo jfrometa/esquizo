@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/data/subscription_repository.dart';
 
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/domain/models.dart';
@@ -27,7 +26,8 @@ Future<void> _confirmAndConsumeMeal(
     context: context,
     builder: (ctx) => AlertDialog(
       title: const Text('Hacer Pedido'),
-      content: const Text('Estas seguro que deseas pedir un almuerzo de tu subscripcion?'),
+      content: const Text(
+          'Estas seguro que deseas pedir un almuerzo de tu subscripcion?'),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(false),
@@ -44,7 +44,9 @@ Future<void> _confirmAndConsumeMeal(
   // If user confirmed, proceed with meal consumption
   if (confirmed == true) {
     try {
-      await ref.read(subscriptionsRepositoryProvider).consumeMeal(subscription.id);
+      await ref
+          .read(subscriptionsRepositoryProvider)
+          .consumeMeal(subscription.id);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Meal consumed successfully!'),
@@ -56,7 +58,8 @@ Future<void> _confirmAndConsumeMeal(
       _sendNotification(
         context,
         userEmail: subscription.id,
-        message: 'You have successfully consumed a meal from your subscription!',
+        message:
+            'You have successfully consumed a meal from your subscription!',
         subject: 'Meal Consumption Confirmation',
       );
     } catch (error) {
@@ -70,17 +73,23 @@ Future<void> _confirmAndConsumeMeal(
   }
 }
 
-void _sendNotification(BuildContext context, {required String userEmail, required String message, required String subject}) {
+void _sendNotification(BuildContext context,
+    {required String userEmail,
+    required String message,
+    required String subject}) {
   // In-app notification
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(message)),
-  );
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    content: Text(message),
+    backgroundColor: Colors.brown[200], // Light brown background color
+    duration: const Duration(milliseconds: 500), // Display for half a second),
+  ));
 
   // Send email notification
   _sendEmailNotification(userEmail, subject, message);
 }
 
-Future<void> _sendEmailNotification(String userEmail, String subject, String message) async {
+Future<void> _sendEmailNotification(
+    String userEmail, String subject, String message) async {
   const sendGridApiKey = 'YOUR_SENDGRID_API_KEY';
   const fromEmail = 'your-app-email@example.com';
 
@@ -118,6 +127,7 @@ Future<void> _sendEmailNotification(String userEmail, String subject, String mes
     debugPrint('Failed to send email: ${response.body}');
   }
 }
+
 class SubscriptionsList extends ConsumerWidget {
   const SubscriptionsList({super.key});
 
@@ -127,7 +137,8 @@ class SubscriptionsList extends ConsumerWidget {
 
     return subscriptionsAsync.when(
       data: (subscriptions) {
-        if (subscriptions.isEmpty) return const Text('No tienes suscripciones.');
+        if (subscriptions.isEmpty)
+          return const Text('No tienes suscripciones.');
         return ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -152,7 +163,8 @@ class SubscriptionsList extends ConsumerWidget {
             }
 
             return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
               child: Container(
                 width: 280,
                 margin: const EdgeInsets.symmetric(horizontal: 10),
@@ -174,7 +186,8 @@ class SubscriptionsList extends ConsumerWidget {
                         ),
                         // Plan Information
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 15),
                           child: Column(
                             children: [
                               Text(
@@ -200,28 +213,38 @@ class SubscriptionsList extends ConsumerWidget {
                               const SizedBox(height: 10),
                               Text(
                                 'Total Price: ${NumberFormat.currency(locale: 'en_US', symbol: '\$').format(subscription.totalAmount)}',
-                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                  color: ColorsPaletteRedonda.orange,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.copyWith(
+                                      color: ColorsPaletteRedonda.orange,
+                                    ),
                               ),
                               const SizedBox(height: 15),
                               ElevatedButton(
-                                onPressed: subscription.isActive && subscription.mealsRemaining > 0
-                                    ? () => _confirmAndConsumeMeal(context, ref, subscription)
+                                onPressed: subscription.isActive &&
+                                        subscription.mealsRemaining > 0
+                                    ? () => _confirmAndConsumeMeal(
+                                        context, ref, subscription)
                                     : null,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: ColorsPaletteRedonda.primary,
                                   foregroundColor: ColorsPaletteRedonda.white,
-                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 12),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(30.0),
                                   ),
                                 ),
                                 child: Text(
-                                  subscription.isActive && subscription.mealsRemaining > 0
+                                  subscription.isActive &&
+                                          subscription.mealsRemaining > 0
                                       ? 'Consume a Meal'
                                       : 'Inactive',
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
                                         color: ColorsPaletteRedonda.white,
                                       ),
                                 ),

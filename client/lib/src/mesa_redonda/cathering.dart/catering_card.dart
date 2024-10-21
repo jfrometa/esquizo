@@ -94,7 +94,14 @@ class CateringItemCardState extends State<CateringItemCard> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                                'Se agregó ${widget.item.title}  al carrito'),
+                              'Se agregó ${widget.item.title} al carrito',
+                              style: TextStyle(
+                                  color: Theme.of(context).primaryColor),
+                            ),
+                            backgroundColor: Colors
+                                .brown[200], // Light brown background color
+                            duration: const Duration(
+                                milliseconds: 500), // Display for half a second
                           ),
                         );
                         widget.onAddToCart(quantity);
@@ -114,8 +121,11 @@ class CateringItemCardState extends State<CateringItemCard> {
 
 class TabUtils {
   // A static method to calculate the maximum tab width
-  static double calculateMaxTabWidth(
-      BuildContext context, List<String> tabTitles) {
+  static double calculateMaxTabWidth({
+    required BuildContext context,
+    required List<String> tabTitles,
+    double extraWidth = 0.0,
+  }) {
     double maxWidth = 0.0;
     for (var title in tabTitles) {
       final TextPainter textPainter = TextPainter(
@@ -127,7 +137,7 @@ class TabUtils {
 
       maxWidth = maxWidth < textPainter.width ? textPainter.width : maxWidth;
     }
-    return maxWidth + 8.0; // Add padding if necessary
+    return maxWidth + 8.0 + extraWidth; // Add padding if necessary
   }
 }
 

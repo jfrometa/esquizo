@@ -54,9 +54,12 @@ class LocationCaptureWidgetState extends State<LocationCaptureWidget> {
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to get location: $e')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Failed to get location: $e'),
+        backgroundColor: Colors.brown[200], // Light brown background color
+        duration:
+            const Duration(milliseconds: 500), // Display for half a second),
+      ));
     }
   }
 

@@ -217,6 +217,10 @@ class _AddToOrderScreenState extends ConsumerState<AddToOrderScreen> {
                     SnackBar(
                       content: Text(
                           'Se agregó ${selectedItem['title']}  al carrito'),
+                      backgroundColor:
+                          Colors.brown[200], // Light brown background color
+                      duration: const Duration(
+                          milliseconds: 500), // Display for half a second
                     ),
                   );
                   // Navigate to the cart screen

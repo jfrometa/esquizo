@@ -272,9 +272,12 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         await _sendWhatsAppCateringOrder(cateringOrder, contactInfo);
       }
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error processing order: $error')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Error processing order: $error'),
+        backgroundColor: Colors.red, // Light brown background color
+        duration:
+            const Duration(milliseconds: 500), // Display for half a second),
+      ));
     }
   }
 
@@ -332,10 +335,11 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       final double price = double.tryParse(item.pricing) ?? 0.0;
       final int quantity = item.quantity;
 
-      final subscriptionData = {
+      // Save the subscription order in 'orders' collection
+      final orderData = {
         'email': email,
         'userId': userId ?? 'anon',
-        'planName': item.title,
+        'orderType': 'Subscription',
         'status': 'pending',
         'orderDate': orderDate.toIso8601String(),
         'location': {
@@ -350,7 +354,39 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         'totalAmount': price * quantity,
         'timestamp': FieldValue.serverTimestamp(),
       };
-      await firestore.collection('subscriptions').add(subscriptionData);
+      await firestore.collection('orders').add(orderData);
+
+      // Save the subscription details in 'subscriptions' collection
+      final subscriptionData = {
+        'email': email,
+        'userId': userId ?? 'anon',
+        'planName': item.title,
+        'status': 'active',
+        'startDate': orderDate.toIso8601String(),
+        'endDate': null, // or calculate based on subscription length
+        'totalMeals': quantity,
+        'consumedMeals': 0,
+        'remainingMeals': quantity,
+        'timestamp': FieldValue.serverTimestamp(),
+      };
+      final subscriptionRef =
+          await firestore.collection('subscriptions').add(subscriptionData);
+
+      // Save individual meals in 'meals' collection
+      for (int i = 0; i < quantity; i++) {
+        final mealData = {
+          'userId': userId ?? 'anon',
+          'subscriptionId': subscriptionRef.id,
+          'subscriptionPlan': item.title,
+          'status': 'unconsumed',
+          'orderDate': orderDate.toIso8601String(),
+          'mealNumber': i + 1,
+          'totalMeals': quantity,
+          'timestamp': FieldValue.serverTimestamp(),
+        };
+        // Save each meal to 'meals' collection
+        await firestore.collection('meals').add(mealData);
+      }
     }
   }
 
@@ -405,7 +441,10 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       GoRouter.of(context).goNamed(AppRoute.home.name);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No pude abrir WhatsApp')),
+        const SnackBar(
+          content: Text('No pude abrir WhatsApp'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -431,7 +470,10 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       GoRouter.of(context).goNamed(AppRoute.home.name);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No pude abrir WhatsApp')),
+        const SnackBar(
+          content: Text('No pude abrir WhatsApp'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -457,7 +499,10 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       GoRouter.of(context).goNamed(AppRoute.home.name);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No pude abrir WhatsApp')),
+        const SnackBar(
+          content: Text('No pude abrir WhatsApp'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -887,6 +932,24 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
       initialDate: DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 30)),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: ColorsPaletteRedonda.primary, // Header background color
+              onPrimary: ColorsPaletteRedonda.white, // Header text color
+              onSurface: ColorsPaletteRedonda.deepBrown1, // Body text color
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor:
+                    ColorsPaletteRedonda.primary, // Button text color
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (pickedDate == null) {
@@ -897,6 +960,24 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
     final TimeOfDay? pickedTime = await showTimePicker(
       context: context,
       initialTime: const TimeOfDay(hour: 9, minute: 0),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: ColorsPaletteRedonda.primary, // Header background color
+              onPrimary: ColorsPaletteRedonda.white, // Header text color
+              onSurface: ColorsPaletteRedonda.deepBrown1, // Body text color
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor:
+                    ColorsPaletteRedonda.primary, // Button text color
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (pickedTime == null) {

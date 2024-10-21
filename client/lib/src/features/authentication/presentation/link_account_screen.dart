@@ -57,12 +57,18 @@ class _LinkAccountScreenState extends ConsumerState<LinkAccountScreen> {
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorMessage)),
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+          ),
         );
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('An unexpected error occurred.')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('An unexpected error occurred.'),
+          backgroundColor: Colors.brown[200], // Light brown background color
+          duration:
+              const Duration(milliseconds: 500), // Display for half a second,
+        ));
       } finally {
         setState(() {
           _isLoading = false;

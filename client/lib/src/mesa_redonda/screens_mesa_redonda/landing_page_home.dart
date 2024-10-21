@@ -600,7 +600,10 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
       await launchUrl(Uri.parse(whatsappUrlWeb));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No pude abrir WhatsApp')),
+        const SnackBar(
+          content: Text('No pude abrir WhatsApp'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }

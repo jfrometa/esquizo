@@ -48,7 +48,11 @@ class _AuthenticatedProfileScreenState
       Navigator.of(context).popUntil((route) => route.isFirst);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error signing out. Please try again.')),
+        SnackBar(
+          content: Text('Error signing out. Please try again.'),
+          backgroundColor: Colors.brown[200], // Light brown background color
+          duration: Duration(milliseconds: 500), // Display for half a second
+        ),
       );
     }
   }
@@ -59,11 +63,14 @@ class _AuthenticatedProfileScreenState
       'Mis Subscripciones',
       'Historial de Ordenes',
     ];
-    final double maxTabWidth =
-        TabUtils.calculateMaxTabWidth(context, tabTitles);
+    final double maxTabWidth = TabUtils.calculateMaxTabWidth(
+      context: context,
+      tabTitles: tabTitles,
+      extraWidth: 20.0,
+    );
 
     return DefaultTabController(
-      length: 2,
+      length: tabTitles.length, // Updated to use the length of tabTitles
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Mi Perfil'),
@@ -88,10 +95,11 @@ class _AuthenticatedProfileScreenState
                   : 0.0, // Increased height for better spacing
               child: _isTabBarVisible
                   ? Material(
+                      color: ColorsPaletteRedonda
+                          .background, // Set background color to white
                       elevation:
-                          4.0, // Slight elevation to provide depth and shadow
-                      shadowColor:
-                          ColorsPaletteRedonda.deepBrown1, // Subtle shadow
+                          0, // Slight elevation to provide depth and shadow
+                      shadowColor: ColorsPaletteRedonda.white, // Subtle shadow
                       child: TabBar(
                         dividerColor:
                             Colors.transparent, // No divider between tabs
@@ -105,18 +113,16 @@ class _AuthenticatedProfileScreenState
                                 ),
                         unselectedLabelStyle:
                             Theme.of(context).textTheme.titleSmall,
-
                         labelColor: ColorsPaletteRedonda
                             .white, // Selected tab label color
                         unselectedLabelColor: ColorsPaletteRedonda
-                            .deepBrown1, // Unselected tab label color
+                            .primary1, // Unselected tab label color
                         indicatorSize: TabBarIndicatorSize.tab,
                         indicator: TabIndicator(
                           color: ColorsPaletteRedonda
                               .primary, // Background color for selected tab
                           radius: 16.0, // Smooth rounded corners for M3 design
                         ),
-
                         tabs: tabTitles.map((title) {
                           return Container(
                             width: maxTabWidth, // Set fixed width for each tab
