@@ -121,7 +121,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
     String eventType = cateringOrder?.eventType ?? '';
     String adicionales = cateringOrder?.adicionales ?? '';
     int? cantidadPersonasRead = (cateringOrder?.cantidadPersonas != null &&
-            cateringOrder!.cantidadPersonas > 0)
+            cateringOrder!.cantidadPersonas!  > 0)
         ? cateringOrder.cantidadPersonas
         : null;
 
@@ -427,10 +427,26 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                       ],
                     ),
                     const SizedBox(height: 24),
+
+                    
                     Center(
                       child: SizedBox(
                         height: 38,
                         child: ElevatedButton(
+                          style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all(  ColorsPaletteRedonda
+                                  .orange // Default color when no people count is set
+                               // White background when people count is set
+                        ),
+                        foregroundColor: WidgetStateProperty.all( 
+                               Colors
+                                  .white // White text when no people count is set
+                          
+                        ),
+                        side: WidgetStateProperty.all(  BorderSide
+                               .none) // No border when no people count is set
+                             
+                      ),
                           onPressed: () {
                             _finalizeAndAddToCart(
                                 ref,
@@ -661,7 +677,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                         backgroundColor: WidgetStateProperty.all(
                           cantidadPersonas == null || cantidadPersonas < 1
                               ? ColorsPaletteRedonda
-                                  .primary // Default color when no people count is set
+                                  .orange // Default color when no people count is set
                               : Colors
                                   .white, // White background when people count is set
                         ),

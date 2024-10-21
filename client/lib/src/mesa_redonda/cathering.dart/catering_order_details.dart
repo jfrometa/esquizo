@@ -34,7 +34,7 @@ class CateringOrderDetailsScreenState
     tempEventType = cateringOrders.eventType;
     tempPreferencia = cateringOrders.preferencia;
     tempAdicionales = cateringOrders.adicionales;
-    tempCantidadPersonas = cateringOrders.cantidadPersonas;
+    tempCantidadPersonas = cateringOrders.cantidadPersonas ?? 0;
   }
 
   @override
@@ -120,7 +120,7 @@ class CateringOrderDetailsScreenState
                   tempPreferencia = cateringOrders.preferencia;
                   tempAdicionales = cateringOrders.adicionales;
                   tempCantidadPersonas =
-                      cateringOrders.cantidadPersonas; // Revert values
+                      cateringOrders.cantidadPersonas ?? 0; // Revert values
                   isEditing = false;
                 });
               },

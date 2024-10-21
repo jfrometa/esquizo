@@ -13,7 +13,7 @@ import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.d
 import 'cart_item_view.dart';
 
 class CartScreen extends ConsumerWidget {
-  const CartScreen({Key? key, required this.isAuthenticated}) : super(key: key);
+  const CartScreen({super.key, required this.isAuthenticated});
   final bool isAuthenticated;
 
   @override
@@ -157,11 +157,19 @@ class CartScreen extends ConsumerWidget {
   Widget _buildCheckoutButton(BuildContext context, WidgetRef ref,
       double totalPrice, List<dynamic> items, String type) {
     final bool hasItemsInCurrentTab = items.isNotEmpty;
+    bool isDisabled = false;
+     // Check if personas (cantidadPersonas) is selected and valid
+     if(type.toLowerCase() == 'catering') {
+        final cateringOrder = ref.watch(cateringOrderProvider);
+        final isPersonasSelected = cateringOrder?.cantidadPersonas != null && (cateringOrder!.cantidadPersonas ?? 0) > 0;
+
+        isDisabled = !isPersonasSelected;
+     }
 
     return Container(
       padding: const EdgeInsets.all(16.0),
       child: ElevatedButton(
-        onPressed: hasItemsInCurrentTab && totalPrice > 0
+        onPressed: !isDisabled && hasItemsInCurrentTab && totalPrice > 0
             ? () {
                 GoRouter.of(context).pushNamed(
                   AppRoute.checkout.name,
@@ -169,17 +177,24 @@ class CartScreen extends ConsumerWidget {
                 );
               }
             : null,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: hasItemsInCurrentTab && totalPrice > 0
-              ? ColorsPaletteRedonda.primary
-              : Colors.grey,
-          foregroundColor: ColorsPaletteRedonda.white,
-          minimumSize: const Size(double.infinity, 56),
+        style: ButtonStyle( backgroundColor: WidgetStateProperty.resolveWith<Color>(
+        (states) {
+          if (states.contains(WidgetState.disabled)) {
+            return Colors.grey; // Disabled button color
+          }
+          return ColorsPaletteRedonda.primary; // Enabled button color
+        },
+      ),
+          foregroundColor: WidgetStateProperty.all(ColorsPaletteRedonda.white),
+          minimumSize: WidgetStateProperty.all(const Size(double.infinity, 56)),
         ),
         child: const Text('Realizar pedido'),
       ),
     );
   }
+
+
+
 
   Widget _buildTotalSection(double totalPrice, BuildContext context) {
     return Padding(

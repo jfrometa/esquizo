@@ -77,7 +77,7 @@ class CateringOrderItem {
   final String eventType;
   final String preferencia;
   final String adicionales;
-  final int cantidadPersonas; // Add cantidadPersonas field
+  final int? cantidadPersonas; // Add cantidadPersonas field
 
   CateringOrderItem({
     required this.title,
