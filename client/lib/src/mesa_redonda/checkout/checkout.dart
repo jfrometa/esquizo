@@ -305,6 +305,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           'latitude': _regularDishesLatitude ?? '',
           'longitude': _regularDishesLongitude ?? '',
         },
+        'deliveryDate': _mealSubscriptionDateController.text,
+        'deliveryTime': _mealSubscriptionTimeController.text,
         'items': [item.toJson()],
         'paymentMethod': _paymentMethods[_selectedPaymentMethod],
         'totalAmount': price * quantity,
@@ -341,6 +343,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           'latitude': _mealSubscriptionLatitude ?? '',
           'longitude': _mealSubscriptionLongitude ?? '',
         },
+        'deliveryDate': _mealSubscriptionDateController.text,
+        'deliveryTime': _mealSubscriptionTimeController.text,
         'items': [item.toJson()],
         'paymentMethod': _paymentMethods[_selectedPaymentMethod],
         'totalAmount': price * quantity,
@@ -371,6 +375,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         'latitude': _cateringLatitude ?? '',
         'longitude': _cateringLongitude ?? '',
       },
+      'deliveryDate': _cateringDateController.text,
+      'deliveryTime': _cateringTimeController.text,
       'items': cateringOrder.dishes.map((dish) => dish.toJson()).toList(),
       'paymentMethod': _paymentMethods[_selectedPaymentMethod],
       'totalAmount': cateringOrder.totalPrice ?? 0.0,
@@ -407,10 +413,9 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   // Send WhatsApp message for subscriptions
   Future<void> _sendWhatsAppSubscriptionOrder(
       List<CartItem> items, Map<String, String>? contactInfo) async {
-    // Similar to _sendWhatsAppOrder but with subscription details
-    // Implement as needed
     const String phoneNumber = '+18493590832';
-    final String orderDetails = _generateOrderDetails(items, contactInfo);
+    final String orderDetails =
+        _generateSubscriptionOrderDetails(items, contactInfo);
     final String whatsappUrlMobile =
         'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
     final String whatsappUrlWeb =
@@ -478,6 +483,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       }
     }
 
+    String regularDishesBuffer = '';
     for (var item in items) {
       if (item == null) continue;
 
@@ -485,7 +491,73 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       final int quantity = item.quantity;
       final double price = double.tryParse(item.pricing) ?? 0.0;
       total += price * quantity;
-      orderDetailsBuffer.writeln('$quantity x $title @ RD \$$price each');
+      regularDishesBuffer += '$quantity x $title @ RD \$$price each\n';
+    }
+
+    if (regularDishesBuffer.isNotEmpty) {
+      orderDetailsBuffer.writeln('''
+*Platos Regulares*:
+Ubicación: ${regularAddress ?? 'No proporcionada'}
+Google Maps: ${_generateGoogleMapsLink(_regularDishesLatitude!, _regularDishesLongitude!)}
+Fecha y Hora de Entrega: ${_mealSubscriptionDateController.text} - ${_mealSubscriptionTimeController.text}
+$regularDishesBuffer
+''');
+    }
+
+    final double tax = total * _taxRate;
+    final double grandTotal = total + tax + _deliveryFee;
+
+    orderDetailsBuffer.writeln('''
+*Totales*:
+Envío: RD \$$_deliveryFee
+Impuestos: RD \$${tax.toStringAsFixed(2)}
+Total: RD \$${grandTotal.toStringAsFixed(2)}
+''');
+
+    return orderDetailsBuffer.toString();
+  }
+
+  // Generate order details for subscriptions
+  String _generateSubscriptionOrderDetails(
+      List<CartItem> items, Map<String, String>? contactInfo) {
+    final StringBuffer orderDetailsBuffer = StringBuffer();
+    double total = 0.0;
+
+    orderDetailsBuffer.writeln('*Detalles de la Orden de Suscripción*:');
+
+    if (contactInfo != null && contactInfo.isNotEmpty) {
+      orderDetailsBuffer.writeln('*Información de Contacto*:');
+      if (contactInfo['name']?.isNotEmpty ?? false) {
+        orderDetailsBuffer.writeln('Nombre: ${contactInfo['name']}');
+      }
+      if (contactInfo['phone']?.isNotEmpty ?? false) {
+        orderDetailsBuffer.writeln('Teléfono: ${contactInfo['phone']}');
+      }
+      if (contactInfo['email']?.isNotEmpty ?? false) {
+        orderDetailsBuffer.writeln('Email: ${contactInfo['email']}');
+      }
+    }
+
+    String mealSubscriptionBuffer = '';
+    for (var item in items) {
+      if (item == null) continue;
+
+      final String title = item.title;
+      final int quantity = item.quantity;
+      final double price = double.tryParse(item.pricing) ?? 0.0;
+      total += price * quantity;
+      mealSubscriptionBuffer += '$quantity x $title @ RD \$$price each\n';
+    }
+
+    if (mealSubscriptionBuffer.isNotEmpty) {
+      orderDetailsBuffer.writeln('''
+*Suscripciones de Comidas*:
+Ubicación: ${mealSubscriptionAddress ?? 'No proporcionada'}
+Google Maps: ${_generateGoogleMapsLink(_mealSubscriptionLatitude!, _mealSubscriptionLongitude!)}
+Fecha: ${_mealSubscriptionDateController.text}
+Hora: ${_mealSubscriptionTimeController.text}
+$mealSubscriptionBuffer
+''');
     }
 
     final double tax = total * _taxRate;
@@ -521,11 +593,23 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
       }
     }
 
+    String cateringBuffer = '';
     for (var dish in cateringOrder.dishes) {
       final String title = dish.title ?? 'Unknown Dish';
       final int quantity = dish.quantity ?? 0;
       final double price = double.tryParse(dish.pricing ?? '0') ?? 0.0;
-      orderDetailsBuffer.writeln('$quantity x $title @ RD \$$price each');
+      cateringBuffer += '$quantity x $title @ RD \$$price each\n';
+    }
+
+    if (cateringBuffer.isNotEmpty) {
+      orderDetailsBuffer.writeln('''
+*Catering*:
+Ubicación: ${cateringAddress ?? 'No proporcionada'}
+Google Maps: ${_generateGoogleMapsLink(_cateringLatitude!, _cateringLongitude!)}
+Fecha: ${_cateringDateController.text}
+Hora: ${_cateringTimeController.text}
+$cateringBuffer
+''');
     }
 
     final double total = cateringOrder.totalPrice ?? 0.0;
@@ -540,6 +624,10 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
 ''');
 
     return orderDetailsBuffer.toString();
+  }
+
+  String _generateGoogleMapsLink(String latitude, String longitude) {
+    return 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
   }
 
   Future<Map<String, String>?> _checkAndPromptForContactInfo(
@@ -762,8 +850,8 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
             style: Theme.of(context).textTheme.labelLarge,
             controller: dateController,
             readOnly: true,
-            onTap: () => _selectDateTime(context, dateController,
-                isCatering: isCatering),
+            onTap: () =>
+                _selectDateTime(context, dateController, timeController),
             decoration: InputDecoration(
               hintText:
                   isCatering ? '2024-11-23 - 13:00' : '2024-11-23 - 13:00',
@@ -791,8 +879,9 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
   }
 
   Future<void> _selectDateTime(
-      BuildContext context, TextEditingController controller,
-      {required bool isCatering}) async {
+      BuildContext context,
+      TextEditingController dateController,
+      TextEditingController timeController) async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -824,9 +913,10 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
     );
 
     setState(() {
-      final formattedDateTime =
-          DateFormat('yyyy-MM-dd – HH:mm').format(selectedDateTime);
-      controller.text = formattedDateTime;
+      final formattedDate = DateFormat('yyyy-MM-dd').format(selectedDateTime);
+      final formattedTime = DateFormat('HH:mm').format(selectedDateTime);
+      dateController.text = formattedDate;
+      timeController.text = formattedTime;
     });
   }
 
