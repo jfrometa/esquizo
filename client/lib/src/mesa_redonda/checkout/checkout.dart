@@ -20,7 +20,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 class CheckoutScreen extends ConsumerStatefulWidget {
   final String displayType; // 'platos', 'catering', or 'subscriptions'
 
-  const CheckoutScreen({Key? key, required this.displayType}) : super(key: key);
+  const CheckoutScreen({super.key, required this.displayType});
 
   @override
   CheckoutScreenState createState() => CheckoutScreenState();
@@ -119,11 +119,11 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       hasItemsToDisplay = false;
     }
 
-    if (!hasItemsToDisplay) {
+    if (!hasItemsToDisplay || widget.displayType.isEmpty) {
       // No items to display, pop the screen
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          Navigator.of(context).pop();
+          GoRouter.of(context).pop(context);
         }
       });
       // Return an empty container while the screen is being popped
@@ -489,17 +489,19 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     const String phoneNumber = '+18493590832';
     final String orderDetails = _generateOrderDetails(items, contactInfo);
     final String whatsappUrlMobile =
-        'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
+        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
     final String whatsappUrlWeb =
         'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
 
     if (await canLaunchUrl(Uri.parse(whatsappUrlMobile))) {
       await launchUrl(Uri.parse(whatsappUrlMobile));
       ref.read(cartProvider.notifier).clearCart();
+      GoRouter.of(context).pop();
       GoRouter.of(context).goNamed(AppRoute.home.name);
     } else if (await canLaunchUrl(Uri.parse(whatsappUrlWeb))) {
       await launchUrl(Uri.parse(whatsappUrlWeb));
       ref.read(cartProvider.notifier).clearCart();
+      GoRouter.of(context).pop();
       GoRouter.of(context).goNamed(AppRoute.home.name);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -518,17 +520,19 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final String orderDetails =
         _generateSubscriptionOrderDetails(items, contactInfo);
     final String whatsappUrlMobile =
-        'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
+        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
     final String whatsappUrlWeb =
         'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
 
     if (await canLaunchUrl(Uri.parse(whatsappUrlMobile))) {
       await launchUrl(Uri.parse(whatsappUrlMobile));
       ref.read(mealOrderProvider.notifier).clearCart();
+      GoRouter.of(context).pop();
       GoRouter.of(context).goNamed(AppRoute.home.name);
     } else if (await canLaunchUrl(Uri.parse(whatsappUrlWeb))) {
       await launchUrl(Uri.parse(whatsappUrlWeb));
       ref.read(mealOrderProvider.notifier).clearCart();
+      GoRouter.of(context).pop();
       GoRouter.of(context).goNamed(AppRoute.home.name);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -547,17 +551,19 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final String orderDetails =
         _generateCateringOrderDetails(cateringOrder, contactInfo);
     final String whatsappUrlMobile =
-        'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
+        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
     final String whatsappUrlWeb =
         'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
 
     if (await canLaunchUrl(Uri.parse(whatsappUrlMobile))) {
       await launchUrl(Uri.parse(whatsappUrlMobile));
       ref.read(cateringOrderProvider.notifier).clearCateringOrder();
+      GoRouter.of(context).pop();
       GoRouter.of(context).goNamed(AppRoute.home.name);
     } else if (await canLaunchUrl(Uri.parse(whatsappUrlWeb))) {
       await launchUrl(Uri.parse(whatsappUrlWeb));
       ref.read(cateringOrderProvider.notifier).clearCateringOrder();
+      GoRouter.of(context).pop();
       GoRouter.of(context).goNamed(AppRoute.home.name);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -740,129 +746,150 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
     return 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
   }
 
-  Future<Map<String, String>?> _checkAndPromptForContactInfo(
-      BuildContext context) async {
-    final currentUser = FirebaseAuth.instance.currentUser;
+Future<Map<String, String>?> _checkAndPromptForContactInfo(BuildContext context) async {
+  final currentUser = FirebaseAuth.instance.currentUser;
 
-    if (currentUser == null || currentUser.isAnonymous) {
-      String? name, phone, email;
-      bool showSignInScreen = false;
-      bool? dialogResult;
+  if (currentUser == null || currentUser.isAnonymous) {
+    String? name, phone, email;
+    bool showSignInScreen = false;
+    bool? dialogResult;
 
-      await showDialog<void>(
-        context: context,
-        builder: (ctx) {
-          return StatefulBuilder(
-            builder: (ctx, setState) {
-              if (showSignInScreen) {
-                return AlertDialog(
-                  title: const Text('Registro'),
-                  content: SizedBox(
-                    height: 400,
-                    width: 400,
-                    child: CustomSignInScreen(),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(ctx).pop();
-                      },
-                      child: const Text('Cancelar'),
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false, // Prevent dismissal by tapping outside
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            if (showSignInScreen) {
+              return Dialog(
+                insetPadding: EdgeInsets.zero, // Remove default padding
+                child: SizedBox.expand(
+                  child: Scaffold(
+                    appBar: AppBar(
+                      title: const Text('Registro'),
+                      leading: IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => GoRouter.of(ctx).pop(),
+                      ),
                     ),
-                  ],
-                );
-              } else {
-                return AlertDialog(
-                  title: const Text('Información de Contacto'),
-                  content: SingleChildScrollView(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(minHeight: 200),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
+                    body: CustomSignInScreen(),
+                  ),
+                ),
+              );
+            } else {
+              return Dialog(
+                insetPadding: EdgeInsets.zero, // Remove default padding
+                child: SizedBox.expand(
+                  child: Scaffold(
+                    appBar: AppBar(
+                      title: const Text('Información de Contacto'),
+                      leading: IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => GoRouter.of(ctx).pop(false),
+                      ),
+                    ),
+                    body: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Proporcione su nombre, teléfono y correo opcional o regístrese.',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            const SizedBox(height: 16),
+                            TextField(
+                              decoration: const InputDecoration(
+                                labelText: 'Nombre',
+                                border: OutlineInputBorder(),
+                              ),
+                              onChanged: (value) => name = value,
+                            ),
+                            const SizedBox(height: 16),
+                            TextField(
+                              decoration: const InputDecoration(
+                                labelText: 'Teléfono',
+                                border: OutlineInputBorder(),
+                              ),
+                              keyboardType: TextInputType.phone,
+                              onChanged: (value) => phone = value,
+                            ),
+                            const SizedBox(height: 16),
+                            TextField(
+                              decoration: const InputDecoration(
+                                labelText: 'Correo electrónico (opcional)',
+                                border: OutlineInputBorder(),
+                              ),
+                              keyboardType: TextInputType.emailAddress,
+                              onChanged: (value) => email = value,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    bottomNavigationBar: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          const Text(
-                            'Proporcione su nombre, teléfono y correo opcional o registrese.',
-                            style: TextStyle(fontSize: 14),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                showSignInScreen = true;
+                              });
+                            },
+                            child: const Text('Registrarse'),
                           ),
-                          const SizedBox(height: 8),
-                          TextField(
-                            decoration: const InputDecoration(
-                              labelText: 'Nombre',
-                              border: OutlineInputBorder(),
-                            ),
-                            onChanged: (value) => name = value,
+                          const SizedBox(width: 8),
+                          TextButton(
+                            onPressed: () {
+                              GoRouter.of(ctx).pop(false);
+                            },
+                            child: const Text('Cancelar'),
                           ),
-                          const SizedBox(height: 8),
-                          TextField(
-                            decoration: const InputDecoration(
-                              labelText: 'Teléfono',
-                              border: OutlineInputBorder(),
-                            ),
-                            onChanged: (value) => phone = value,
-                          ),
-                          const SizedBox(height: 8),
-                          TextField(
-                            decoration: const InputDecoration(
-                              labelText: 'Correo electrónico (opcional)',
-                              border: OutlineInputBorder(),
-                            ),
-                            onChanged: (value) => email = value,
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () {
+                              GoRouter.of(ctx).pop(true);
+                            },
+                            child: const Text('Continuar'),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          showSignInScreen = true;
-                        });
-                      },
-                      child: const Text('Registrarse'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(ctx).pop(false);
-                      },
-                      child: const Text('Cancelar'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(ctx).pop(true);
-                      },
-                      child: const Text('Continuar'),
-                    ),
-                  ],
-                );
-              }
-            },
-          );
-        },
-      ).then((value) {
-        dialogResult = value as bool?;
-      });
+                ),
+              );
+            }
+          },
+        );
+      },
+    ).then((value) {
+      dialogResult = value as bool?;
+    });
 
-      if (dialogResult != true) {
-        return null;
-      }
-
-      if (!showSignInScreen) {
-        return {
-          'name': name ?? '',
-          'phone': phone ?? '',
-          'email': email ?? '',
-        };
-      }
+    if (dialogResult != true) {
+      return null;
     }
 
-    final user = FirebaseAuth.instance.currentUser;
-    return {
-      'name': user?.displayName ?? '',
-      'phone': user?.phoneNumber ?? '',
-      'email': user?.email ?? '',
-    };
+    if (!showSignInScreen) {
+      return {
+        'name': name ?? '',
+        'phone': phone ?? '',
+        'email': email ?? '',
+      };
+    }
   }
+
+  final user = FirebaseAuth.instance.currentUser;
+  return {
+    'name': user?.displayName ?? '',
+    'phone': user?.phoneNumber ?? '',
+    'email': user?.email ?? '',
+  };
+}
+
 
   Widget _buildLocationField(BuildContext context,
       TextEditingController controller, bool isValid, String name) {

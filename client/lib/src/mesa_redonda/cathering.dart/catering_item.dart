@@ -91,7 +91,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
     CateringItem(
       category: 'Pastas',
       title: 'Lasagna de Res o Pollo',
-      description: 'Lasagna clásica de res o pollo para 6/8 personas.',
+      description: 'Lasagna clásica de res o pollo ',
       pricePerPerson: 3500.00,
       pricing: '3500.00',
       img: 'assets/food5.jpeg',
@@ -100,7 +100,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
     CateringItem(
       category: 'Pastas',
       title: 'Lasagna 4 Quesos Trufada',
-      description: 'Lasagna de cuatro quesos con trufa, para 6/8 personas.',
+      description: 'Lasagna de cuatro quesos con trufa, ',
       pricePerPerson: 3800.00,
       pricing: '3800.00',
       img: 'assets/food5.jpeg',
@@ -109,7 +109,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
     CateringItem(
       category: 'Pastas',
       title: 'Lasagna Ropa Vieja',
-      description: 'Lasagna con carne de res mechada, para 6/8 personas.',
+      description: 'Lasagna con carne de res mechada, ',
       pricePerPerson: 3500.00,
       pricing: '3500.00',
       img: 'assets/food5.jpeg',
@@ -121,7 +121,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       category: 'Arroces',
       title: 'Arroz Salvaje con Hongos y Tocineta',
       description:
-          'Arroz salvaje con hongos, tocineta, nueces y cranberries para 8/10 personas.',
+          'Arroz salvaje con hongos, tocineta, nueces y cranberries .',
       pricePerPerson: 280.00,
       pricing: '280.00',
       img: 'assets/food5.jpeg',
@@ -137,7 +137,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       category: 'Arroces',
       title: 'Moro (negro, rojo, guandules)',
       description:
-          'Moro tradicional en diferentes presentaciones, para 8/10 personas.',
+          'Moro tradicional en diferentes presentaciones .',
       pricePerPerson: 220.00,
       pricing: '220.00',
       img: 'assets/food5.jpeg',
@@ -147,7 +147,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       category: 'Arroces',
       title: 'Arroz con Tocineta, Plátano Maduro y Puerro',
       description:
-          'Arroz con plátano maduro, tocineta y puerro para 8/10 personas.',
+          'Arroz con plátano maduro, tocineta y puerro .',
       pricePerPerson: 250.00,
       pricing: '250.00',
       img: 'assets/food5.jpeg',
@@ -156,7 +156,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
     CateringItem(
       category: 'Arroces',
       title: 'Arroz con Hongos Salvajes',
-      description: 'Arroz con hongos salvajes para 8/10 personas.',
+      description: 'Arroz con hongos salvajes .',
       pricePerPerson: 275.00,
       pricing: '275.00',
       img: 'assets/food5.jpeg',
@@ -168,7 +168,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       category: 'Proteínas',
       title: 'Filete de Res en Salsa de Hongos y Vino Tinto',
       description:
-          'Filete de res en salsa de hongos y vino tinto para 8/10 personas.',
+          'Filete de res en salsa de hongos y vino tinto .',
       pricePerPerson: 675.00,
       pricing: '675.00',
       img: 'assets/food5.jpeg',
@@ -177,7 +177,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
     CateringItem(
       category: 'Proteínas',
       title: 'Filete de Cerdo en Salsa Mostaza',
-      description: 'Filete de cerdo con salsa de mostaza para 8/10 personas.',
+      description: 'Filete de cerdo con salsa de mostaza .',
       pricePerPerson: 555.00,
       pricing: '555.00',
       img: 'assets/food5.jpeg',
@@ -187,7 +187,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       category: 'Proteínas',
       title: 'Filete de Cerdo Relleno de Dátiles y Cranberries',
       description:
-          'Filete de cerdo relleno de dátiles y cranberries para 8/10 personas.',
+          'Filete de cerdo relleno de dátiles y cranberries .',
       pricePerPerson: 600.00,
       pricing: '600.00',
       img: 'assets/food5.jpeg',
@@ -197,7 +197,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       category: 'Proteínas',
       title: 'Pechuga de Pollo Rellena de Ricotta y Espinaca',
       description:
-          'Pechuga de pollo rellena de ricotta y espinaca para 8/10 personas.',
+          'Pechuga de pollo rellena de ricotta y espinaca .',
       pricePerPerson: 550.00,
       pricing: '550.00',
       img: 'assets/food5.jpeg',
@@ -207,7 +207,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       category: 'Proteínas',
       title: 'Pechuga de Pollo Rellena de Manchego y Prosciutto',
       description:
-          'Pechuga de pollo rellena de queso manchego y prosciutto para 8/10 personas.',
+          'Pechuga de pollo rellena de queso manchego y prosciutto .',
       pricePerPerson: 575.00,
       pricing: '575.00',
       img: 'assets/food5.jpeg',
@@ -234,7 +234,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
     CateringItem(
       category: 'Proteínas',
       title: 'Pechuga de Pavo a las Finas Hierbas',
-      description: 'Pechuga de pavo a las finas hierbas para 8/10 personas.',
+      description: 'Pechuga de pavo a las finas hierbas .',
       pricePerPerson: 675.00,
       pricing: '675.00',
       img: 'assets/food5.jpeg',

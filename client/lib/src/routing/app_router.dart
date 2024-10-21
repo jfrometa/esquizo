@@ -321,8 +321,7 @@ GoRouter goRouter(GoRouterRef ref) {
                     path: 'completar-orden',
                     name: AppRoute.checkout.name,
                     pageBuilder: (context, state) {
-                      final type = state.extra
-                          as String; // Extracting items from the state
+                      final type = (state.extra ?? '') as String; // Extracting items from the state
                       return MaterialPage(
                         child: CheckoutScreen(
                           displayType: type.toLowerCase(),

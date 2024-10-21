@@ -59,11 +59,10 @@ class CateringItemCardState extends State<CateringItemCard> {
                 const SizedBox(height: 8),
                 Text(widget.item.description),
                 const SizedBox(height: 8),
-                Text(
-                    '\$${widget.item.pricePerPerson.toStringAsFixed(2)} por persona'),
+                // if(widget.item.pricePerPerson < 1) Text( '\$${widget.item.pricePerPerson.toStringAsFixed(2)} por persona'),
                 const SizedBox(height: 8),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     // Row(
                     //   children: [
@@ -89,25 +88,30 @@ class CateringItemCardState extends State<CateringItemCard> {
                     //   ],
                     // ),
 
-                    ElevatedButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Se agregó ${widget.item.title} al carrito',
-                              style: TextStyle(
-                                  color: Theme.of(context).primaryColor),
+                    SizedBox(
+                      height: 32,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Se agregó ${widget.item.title} al carrito',
+                                style: TextStyle(
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                              backgroundColor: Colors
+                                  .brown[200], // Light brown background color
+                              duration: const Duration(
+                                  milliseconds: 500), // Display for half a second
                             ),
-                            backgroundColor: Colors
-                                .brown[200], // Light brown background color
-                            duration: const Duration(
-                                milliseconds: 500), // Display for half a second
-                          ),
-                        );
-                        widget.onAddToCart(quantity);
-                      },
-                      child: const Text('Agregar al carrito'),
+                          );
+                          widget.onAddToCart(quantity);
+                        },
+                        child: const Text('Agregar al carrito'),
+                      ),
                     ),
+                  
+                  
                   ],
                 ),
               ],

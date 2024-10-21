@@ -171,7 +171,7 @@ class CartScreen extends ConsumerWidget {
       child: ElevatedButton(
         onPressed: !isDisabled && hasItemsInCurrentTab && totalPrice > 0
             ? () {
-                GoRouter.of(context).pushNamed(
+                GoRouter.of(context).goNamed(
                   AppRoute.checkout.name,
                   extra: type,
                 );
