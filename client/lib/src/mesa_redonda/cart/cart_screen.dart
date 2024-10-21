@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/catering_cart_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/meal_subscription_item_view.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
@@ -68,6 +69,7 @@ class CartScreen extends ConsumerWidget {
     if (availableTabs.isEmpty) {
       return Scaffold(
         appBar: AppBar(
+          forceMaterialTransparency: true,
           title: const Text('Carrito'),
         ),
         body: const Center(
@@ -76,10 +78,14 @@ class CartScreen extends ConsumerWidget {
       );
     }
 
+    final double maxTabWidth =
+        TabUtils.calculateMaxTabWidth(context, availableTabs);
+
     return DefaultTabController(
       length: availableTabs.length,
       child: Scaffold(
         appBar: AppBar(
+          forceMaterialTransparency: true,
           title: const Text('Carrito'),
           bottom: TabBar(
             isScrollable: true,
@@ -88,12 +94,16 @@ class CartScreen extends ConsumerWidget {
             labelColor: ColorsPaletteRedonda.white,
             unselectedLabelColor: ColorsPaletteRedonda.deepBrown1,
             indicatorSize: TabBarIndicatorSize.tab,
-            indicator: BoxDecoration(
-              borderRadius: BorderRadius.circular(16.0),
+            indicator: TabIndicator(
+              radius: 16.0,
               color: ColorsPaletteRedonda.primary,
             ),
-            tabs: availableTabs.map((category) {
-              return Tab(text: category);
+            tabs: availableTabs.map((title) {
+              return Container(
+                width: maxTabWidth, // Set fixed width for each tab
+                alignment: Alignment.center,
+                child: Tab(text: title),
+              );
             }).toList(),
           ),
         ),

@@ -8,7 +8,7 @@ import 'package:starter_architecture_flutter_firebase/src/features/authenticatio
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/catering_cart_item_view.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/meal_subscription_item_view.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/meal_subscription_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/location/location_capture.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_cart.dart';
@@ -110,118 +110,139 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       }
     }
 
+    // Check if there are items to display
+    bool hasItemsToDisplay;
+    if (widget.displayType == 'platos' ||
+        widget.displayType == 'subscriptions') {
+      hasItemsToDisplay = itemsToDisplay.isNotEmpty;
+    } else if (widget.displayType == 'catering') {
+      hasItemsToDisplay = (cateringOrder != null);
+    } else {
+      hasItemsToDisplay = false;
+    }
+
+    if (!hasItemsToDisplay) {
+      // No items to display, pop the screen
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      });
+      // Return an empty container while the screen is being popped
+      return const SizedBox.shrink();
+    }
+
     return Scaffold(
       appBar: AppBar(
+        forceMaterialTransparency: true,
         title: const Text('Completar Orden'),
       ),
       body: SafeArea(
-        child: (itemsToDisplay.isEmpty && widget.displayType != 'catering')
-            ? const Center(child: Text('No items to display.'))
-            : SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    if (widget.displayType == 'platos' &&
-                        itemsToDisplay.isNotEmpty) ...[
-                      _buildSectionTitle(context, 'Platos'),
-                      _buildLocationField(
-                        context,
-                        _regularDishesLocationController,
-                        _isRegularCateringAddressValid,
-                        'regular',
-                      ),
-                      for (var item in itemsToDisplay)
-                        CartItemView(
-                          img: item.img,
-                          title: item.title,
-                          description: item.description,
-                          pricing: item.pricing,
-                          offertPricing: item.offertPricing,
-                          ingredients: item.ingredients,
-                          isSpicy: item.isSpicy,
-                          foodType: item.foodType,
-                          quantity: item.quantity,
-                          onRemove: () => ref
-                              .read(cartProvider.notifier)
-                              .decrementQuantity(item.title),
-                          onAdd: () => ref
-                              .read(cartProvider.notifier)
-                              .incrementQuantity(item.title),
-                          peopleCount: 0,
-                          sideRequest: '',
-                        ),
-                    ],
-                    if (widget.displayType == 'subscriptions' &&
-                        itemsToDisplay.isNotEmpty) ...[
-                      _buildSectionTitle(context, 'Subscripciones'),
-                      _buildLocationField(
-                        context,
-                        _mealSubscriptionLocationController,
-                        _isMealSubscriptionAddressValid,
-                        'mealSubscription',
-                      ),
-                      _buildDateTimePicker(
-                        context,
-                        _mealSubscriptionDateController,
-                        _mealSubscriptionTimeController,
-                        isCatering: false,
-                      ),
-                      for (var item in itemsToDisplay)
-                        MealSubscriptionItemView(
-                          item: item,
-                          onConsumeMeal: () => ref
-                              .read(mealOrderProvider.notifier)
-                              .consumeMeal(item.title),
-                          onRemoveFromCart: () => ref
-                              .read(mealOrderProvider.notifier)
-                              .removeFromCart(item.id),
-                        ),
-                    ],
-                    if (widget.displayType == 'catering' &&
-                        cateringOrder != null) ...[
-                      _buildSectionTitle(context, 'Catering'),
-                      _buildLocationField(
-                        context,
-                        _cateringLocationController,
-                        _isCateringAddressValid,
-                        'catering',
-                      ),
-                      _buildDateTimePicker(
-                        context,
-                        _cateringDateController,
-                        _cateringTimeController,
-                        isCatering: true,
-                      ),
-                      CateringCartItemView(
-                        order: cateringOrder,
-                        onRemoveFromCart: () => ref
-                            .read(cateringOrderProvider.notifier)
-                            .clearCateringOrder(),
-                      ),
-                    ],
-                    const SizedBox(height: 16.0),
-                    _buildOrderSummary(totalPrice),
-                    SizedBox(
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: () => _processOrder(
-                            context, itemsToDisplay, cateringOrder),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: ColorsPaletteRedonda.primary,
-                          minimumSize: const Size(double.infinity, 48),
-                        ),
-                        child: Text(
-                          'Completar',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ],
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              if (widget.displayType == 'platos' &&
+                  itemsToDisplay.isNotEmpty) ...[
+                _buildSectionTitle(context, 'Platos'),
+                _buildLocationField(
+                  context,
+                  _regularDishesLocationController,
+                  _isRegularCateringAddressValid,
+                  'regular',
+                ),
+                for (var item in itemsToDisplay)
+                  CartItemView(
+                    img: item.img,
+                    title: item.title,
+                    description: item.description,
+                    pricing: item.pricing,
+                    offertPricing: item.offertPricing,
+                    ingredients: item.ingredients,
+                    isSpicy: item.isSpicy,
+                    foodType: item.foodType,
+                    quantity: item.quantity,
+                    onRemove: () => ref
+                        .read(cartProvider.notifier)
+                        .decrementQuantity(item.title),
+                    onAdd: () => ref
+                        .read(cartProvider.notifier)
+                        .incrementQuantity(item.title),
+                    peopleCount: 0,
+                    sideRequest: '',
+                  ),
+              ],
+              if (widget.displayType == 'subscriptions' &&
+                  itemsToDisplay.isNotEmpty) ...[
+                _buildSectionTitle(context, 'Subscripciones'),
+                _buildLocationField(
+                  context,
+                  _mealSubscriptionLocationController,
+                  _isMealSubscriptionAddressValid,
+                  'mealSubscription',
+                ),
+                _buildDateTimePicker(
+                  context,
+                  _mealSubscriptionDateController,
+                  _mealSubscriptionTimeController,
+                  isCatering: false,
+                ),
+                for (var item in itemsToDisplay)
+                  MealSubscriptionItemView(
+                    item: item,
+                    onConsumeMeal: () => ref
+                        .read(mealOrderProvider.notifier)
+                        .consumeMeal(item.title),
+                    onRemoveFromCart: () => ref
+                        .read(mealOrderProvider.notifier)
+                        .removeFromCart(item.id),
+                  ),
+              ],
+              if (widget.displayType == 'catering' &&
+                  cateringOrder != null) ...[
+                _buildSectionTitle(context, 'Catering'),
+                _buildLocationField(
+                  context,
+                  _cateringLocationController,
+                  _isCateringAddressValid,
+                  'catering',
+                ),
+                _buildDateTimePicker(
+                  context,
+                  _cateringDateController,
+                  _cateringTimeController,
+                  isCatering: true,
+                ),
+                CateringCartItemView(
+                  order: cateringOrder,
+                  onRemoveFromCart: () => ref
+                      .read(cateringOrderProvider.notifier)
+                      .clearCateringOrder(),
+                ),
+              ],
+              const SizedBox(height: 16.0),
+              _buildOrderSummary(totalPrice),
+              SizedBox(
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () =>
+                      _processOrder(context, itemsToDisplay, cateringOrder),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ColorsPaletteRedonda.primary,
+                    minimumSize: const Size(double.infinity, 48),
+                  ),
+                  child: Text(
+                    'Completar',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(color: Colors.white),
+                  ),
                 ),
               ),
+            ],
+          ),
+        ),
       ),
     );
   }
