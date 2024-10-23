@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
+import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/authenticated_profile_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/addToOrder/add_to_order_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/admin/services/admin_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_screen.dart';
@@ -39,37 +41,25 @@ final _landingNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'landing');
 final _cartNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'cart');
 final _adminNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'admin');
 
+
 enum AppRoute {
+  authenticatedProfile,
   onboarding,
   signIn,
-  jobs,
-  job,
-  addJob,
-  editJob,
-  entry,
-  addEntry,
-  editEntry,
-  entries,
   profile,
-  chat,
-  prompt,
-  recepies,
   trending,
   category,
   details,
   addToOrder,
   addDishToOrder,
-  cart,
   homecart,
-  homecheckout,
   checkout,
-  detailScreen,
   planDetails,
   home,
+  mealPlans,
   mealPlan,
-  mealPlans, // Added enum for Meal Plans
   catering,
-  caterings, // Added enum for Catering
+  caterings, // If both are used
   landing,
   adminPanel,
 }
@@ -282,6 +272,17 @@ List<RouteBase> _getNestedRoutes(String path) {
     case '/admin':
       return [
         // Add any nested routes for admin here
+      ];
+      case '/cuenta':
+      return [
+             GoRoute(
+        path: '/authenticated-profile',
+        name: AppRoute.authenticatedProfile.name,
+        builder: (context, state) {
+          final user = state.extra as User?;
+          return AuthenticatedProfileScreen(user: user!);
+        },
+      ),
       ];
     default:
       return [];

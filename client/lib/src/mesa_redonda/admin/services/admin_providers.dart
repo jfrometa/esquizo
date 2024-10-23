@@ -9,7 +9,7 @@ class AdminService {
   Future<bool> isUserAdmin() async {
     try {
       final user = _auth.currentUser;
-      if (user == null) return false;
+      if (user == null || user.email == null || user.isAnonymous) return false;
 
       // Check admin collection for user's ID
       final adminDoc = await _firestore

@@ -6,6 +6,8 @@ import 'package:starter_architecture_flutter_firebase/src/features/authenticatio
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/auth_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/authenticated_profile_screen.dart';
 import 'package:go_router/go_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/admin/services/admin_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
 class CustomSignInScreen extends ConsumerStatefulWidget {
   const CustomSignInScreen({super.key});
@@ -42,11 +44,31 @@ class _CustomSignInScreenState extends ConsumerState<CustomSignInScreen> {
               final RouteMatch lastMatch = GoRouter.of(context).routerDelegate.currentConfiguration.last;
               final RouteMatchList matchList = lastMatch is ImperativeRouteMatch ? 
                 lastMatch.matches : GoRouter.of(context).routerDelegate.currentConfiguration;
+
               final String location = matchList.uri.toString();
               // final int index = matchList.matches.indexWhere((match) => match.matchedLocation == location);
+
+              final isAdmin = ref.watch(isAdminProvider).value ?? false;
+              // final isAdmin = ref.watch(isAdminProvider);
+              //         return isAdmin.when(
+              //           data: (isAdmin) => isAdmin 
+              //             ? const AdminManagementScreen()
+              //             : const UnauthorizedScreen(),
+              //           loading: () => const CircularProgressIndicator(),
+              //           error: (_, __) => const UnauthorizedScreen(),
+              //         );
+              // Add admin
+              if (isAdmin) {
+                 context.goNamed(
+                      AppRoute.adminPanel.name,
+                      extra: user,
+                  );
+                return;
+              }
+
               switch (user) {
               case User(emailVerified: true):
-                Navigator.pop(context);
+                GoRouter.of(context).pop(true);
               case User(emailVerified: false, email: final String _):
 
                 final authRepo = ref.read(authRepositoryProvider);
@@ -57,15 +79,15 @@ class _CustomSignInScreenState extends ConsumerState<CustomSignInScreen> {
                 // Comportamiento para la ruta /cuenta
                 // GoRouter.of(context).pushReplacement('/cuenta');
                  // Reemplaza la pantalla de registro con la pantalla de perfil autenticado
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => AuthenticatedProfileScreen(user: user),
-                  ),
-                 // Elimina todas las rutas anteriores
-                );
+             
+
+                  // context.goNamed(
+                  //     AppRoute.authenticatedProfile.name,
+                  //     extra: user,
+                  // );
               } else if (location == '/carrito/completar-orden') {
                 // Comportamiento para la ruta /carrito
-                Navigator.pop(context);
+                GoRouter.of(context).pop(true);
               }
             }
           }),

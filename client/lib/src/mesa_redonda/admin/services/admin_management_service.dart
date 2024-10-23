@@ -32,37 +32,15 @@ class AdminManagementService {
         throw Exception('Unauthorized: Only admins can add other admins');
       }
 
-      // Get user by email
-      final userRecord = await _auth.fetchSignInMethodsForEmail(email);
-      if (userRecord.isEmpty) {
-        throw Exception('User not found');
-      }
-
       String? uid;
-      // Get user's UID
-      try {
-        final userCredential = await _auth.signInWithEmailAndPassword(
-          email: email,
-          password: '', // This will fail, but we'll get the error with the UID
-        );
-        uid = userCredential.user?.uid;
-      } on FirebaseAuthException catch (e) {
-        if (e.code == 'wrong-password') {
-          // Expected error, get the UID from the error message
-          final userRecord = await _auth.fetchSignInMethodsForEmail(email);
-          if (userRecord.isNotEmpty) {
-            // Get user by email directly
-            final users = await _firestore
-                .collection('users')
-                .where('email', isEqualTo: email)
-                .get();
-            if (users.docs.isNotEmpty) {
-              uid = users.docs.first.id;
-            }
-          }
-        } else {
-          throw Exception('Authentication error: ${e.message}');
-        }
+      // Get user by email directly
+      final users = await _firestore
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .get();
+          
+      if (users.docs.isNotEmpty) {
+        uid = users.docs.first.id;
       }
 
       if (uid == null) {

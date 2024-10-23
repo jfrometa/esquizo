@@ -546,9 +546,33 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final String orderDetails =
         _generateCateringOrderDetails(cateringOrder, contactInfo);
     final String whatsappUrlMobile =
-        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
+                    'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
     final String whatsappUrlWeb =
         'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
+
+
+
+
+  //  const String phoneNumber = '+18493590832'; // WhatsApp number
+  //               final String orderDetails = _generateOrderDetails();
+                
+  //               final String whatsappUrlWeb =
+  //                   'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
+
+  //               if (await canLaunch(whatsappUrlMobile)) {
+  //                 await launch(whatsappUrlMobile);
+  //               } else {
+  //                 // Fallback to WhatsApp Web
+  //                 if (await canLaunch(whatsappUrlWeb)) {
+  //                   await launch(whatsappUrlWeb);
+  //                 } else {
+  //                   ScaffoldMessenger.of(context).showSnackBar(
+  //                     const SnackBar(content: Text('Could not open WhatsApp')),
+  //                   );
+  //                 }
+  //               }
+
+
 
     if (await canLaunchUrl(Uri.parse(whatsappUrlMobile))) {
       await launchUrl(Uri.parse(whatsappUrlMobile));
