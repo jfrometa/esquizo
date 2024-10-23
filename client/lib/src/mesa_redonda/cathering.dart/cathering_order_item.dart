@@ -37,7 +37,7 @@ class CateringDish {
       peopleCount: peopleCount ?? this.peopleCount,
       pricePerPerson: pricePerPerson ?? this.pricePerPerson,
       ingredients: ingredients ?? this.ingredients,
-      pricing: pricing ?? this.pricing,
+      pricing: pricing ?? pricing,
       img: img ?? this.img, // Added img to copyWith
       quantity: quantity ?? this.quantity, // Added quantity to copyWith
     );

@@ -6,12 +6,16 @@ import 'package:starter_architecture_flutter_firebase/src/localization/string_ha
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_cart.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/navigation_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 final cateringItemCountProvider = StateProvider<int>((ref) {
   final cateringOrder = ref.watch(cateringOrderProvider);
   return (cateringOrder?.dishes.length ?? 0) > 0 ? 1 : 0;
 });
+
+
+
 
 class ScaffoldWithNestedNavigation extends StatelessWidget {
   const ScaffoldWithNestedNavigation({
@@ -118,6 +122,7 @@ class ScaffoldWithNavigationBarState
 
   @override
   Widget build(BuildContext context) {
+    final destinations = ref.watch(navigationDestinationsProvider);
     final cartItems = ref.watch(cartProvider);
     // final totalQuantity = getTotalCartQuantity(cartItems);
 
@@ -155,75 +160,59 @@ class ScaffoldWithNavigationBarState
           selectedIndex: widget.currentIndex,
           onDestinationSelected: _goBranch,
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-          destinations: List.generate(
-              4, (index) => _buildDestination(index, totalQuantity)),
+          destinations: destinations.map((dest) => 
+            _buildDestination(
+              dest,
+              totalQuantity,
+              destinations.indexOf(dest)
+            )
+          ).toList(),
         ),
       ),
     );
   }
 
-  NavigationDestination _buildDestination(int index, int totalQuantity) {
-    IconData icon;
-    String label;
+
+  NavigationDestination _buildDestination(
+    NavigationDestinationItem destination,
+    int totalQuantity,
+    int index
+  ) {
     Widget iconWidget;
 
-    switch (index) {
-      case 0:
-        icon = Icons.home;
-        label = 'Inicio';
-        iconWidget = Icon(icon);
-        break;
-      case 1:
-        icon = Icons.restaurant_menu;
-        label = 'Menu';
-        iconWidget = Icon(icon);
-        break;
-
-      case 2:
-        icon = Icons.shopping_cart;
-        label = 'Carrito';
-        iconWidget = Stack(
-          clipBehavior:
-              Clip.none, // Ensures the badge is visible outside the icon bounds
-          children: [
-            Icon(icon), // Base cart icon
-            if (totalQuantity > 0)
-              Positioned(
-                top: -7, // Adjusts the vertical position of the badge
-                right: -9, // Adjusts the horizontal position of the badge
-                child: CircleAvatar(
-                  radius: 8,
-                  backgroundColor: Colors.red,
-                  child: Text(
-                    '$totalQuantity',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                    ),
+    if (destination.icon == Icons.shopping_cart) {
+      iconWidget = Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Icon(destination.icon),
+          if (totalQuantity > 0)
+            Positioned(
+              top: -7,
+              right: -9,
+              child: CircleAvatar(
+                radius: 8,
+                backgroundColor: Colors.red,
+                child: Text(
+                  '$totalQuantity',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
                   ),
                 ),
               ),
-          ],
-        );
-        break;
-
-      case 3:
-        icon = Icons.account_circle;
-        label = 'Cuenta';
-        iconWidget = Icon(icon);
-        break;
-      default:
-        icon = Icons.home;
-        label = 'Inicio';
-        iconWidget = Icon(icon);
-        break;
+            ),
+        ],
+      );
+    } else {
+      iconWidget = Icon(destination.icon);
     }
 
     return NavigationDestination(
       icon: iconWidget,
-      label: label,
+      label: destination.label,
     );
   }
+
 }
 
 class ScaffoldWithNavigationRail extends ConsumerWidget {
@@ -240,6 +229,7 @@ class ScaffoldWithNavigationRail extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final destinations = ref.watch(navigationDestinationsProvider);
     // Get the total quantity from cartProvider
     final cartItems = ref.watch(cartProvider);
     // final totalQuantity = getTotalCartQuantity(cartItems);
@@ -268,8 +258,13 @@ class ScaffoldWithNavigationRail extends ConsumerWidget {
             unselectedLabelTextStyle: const TextStyle(
                 color: ColorsPaletteRedonda.deepBrown1,
                 fontWeight: FontWeight.bold),
-            destinations: List.generate(
-                4, (index) => _buildRailDestination(index, totalQuantity)),
+            destinations: destinations.map((dest) =>
+              _buildRailDestination(
+                dest,
+                totalQuantity,
+                destinations.indexOf(dest)
+              )
+            ).toList(),
           ),
           const VerticalDivider(thickness: 1, width: 1),
           Expanded(child: body),
@@ -278,67 +273,44 @@ class ScaffoldWithNavigationRail extends ConsumerWidget {
     );
   }
 
-  // Updated destination to include badge for the cart icon
+
   NavigationRailDestination _buildRailDestination(
-      int index, int totalQuantity) {
-    IconData icon;
-    String label;
+    NavigationDestinationItem destination,
+    int totalQuantity,
+    int index
+  ) {
     Widget iconWidget;
 
-    switch (index) {
-      case 0:
-        icon = Icons.home;
-        label = 'Inicio'.hardcoded;
-        iconWidget = Icon(icon);
-        break;
-      case 1:
-        icon = Icons.restaurant_menu;
-        label = 'Menu'.hardcoded;
-        iconWidget = Icon(icon);
-        break;
-
-      case 2:
-        icon = Icons.shopping_cart;
-        label = 'Carrito'.hardcoded;
-        iconWidget = Stack(
-          clipBehavior:
-              Clip.none, // Ensures the badge is visible outside the icon bounds
-          children: [
-            Icon(
-              icon,
-            ), // Base cart icon
-            if (totalQuantity > 0)
-              Positioned(
-                top: -7, // Adjusts the vertical position of the badge
-                right: -9, // Adjusts the horizontal position of the badge
-                child: CircleAvatar(
-                  radius: 8,
-                  backgroundColor: Colors.red,
-                  child: Text(
-                    '$totalQuantity',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                    ),
+    if (destination.icon == Icons.shopping_cart) {
+      iconWidget = Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Icon(destination.icon),
+          if (totalQuantity > 0)
+            Positioned(
+              top: -7,
+              right: -9,
+              child: CircleAvatar(
+                radius: 8,
+                backgroundColor: Colors.red,
+                child: Text(
+                  '$totalQuantity',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
                   ),
                 ),
               ),
-          ],
-        );
-        break;
-
-      case 3:
-        icon = Icons.account_circle;
-        label = 'Cuenta'.hardcoded;
-        iconWidget = Icon(icon);
-        break;
-      default:
-        icon = Icons.home;
-        label = 'Inicio'.hardcoded;
-        iconWidget = Icon(icon);
-        break;
+            ),
+        ],
+      );
+    } else {
+      iconWidget = Icon(destination.icon);
     }
 
-    return NavigationRailDestination(icon: iconWidget, label: Text(label));
+    return NavigationRailDestination(
+      icon: iconWidget,
+      label: Text(destination.label),
+    );
   }
 }

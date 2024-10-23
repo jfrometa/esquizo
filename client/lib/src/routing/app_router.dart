@@ -1,8 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/addToOrder/add_to_order_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/admin/services/admin_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/cathering_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/checkout.dart';
@@ -21,24 +23,21 @@ import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/onboarding/data/onboarding_repository.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/go_router_refresh_stream.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/navigation_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/not_found_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/scaffold_with_nested_navigation.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/admin/screens/admin_panel_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/unauthorized_screen.dart';
 
 part 'app_router.g.dart';
 
 // private navigators
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
-final _chatNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'chat');
-final _jobsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'jobs');
-final _entriesNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'entries');
 final _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
-final _trendingNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'trending');
 final _accountNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'account');
-final _recepiesNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'recepies');
-final _promptNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'prompt');
-final _detailsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'details');
 final _landingNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'landing');
 final _cartNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'cart');
+final _adminNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'admin');
 
 enum AppRoute {
   onboarding,
@@ -71,14 +70,15 @@ enum AppRoute {
   mealPlans, // Added enum for Meal Plans
   catering,
   caterings, // Added enum for Catering
-  landing
+  landing,
+  adminPanel,
 }
 
 @riverpod
 GoRouter goRouter(GoRouterRef ref) {
   final appStartupState = ref.watch(appStartupProvider);
   final authRepository = ref.watch(authRepositoryProvider);
-
+  final destinations = ref.watch(navigationDestinationsProvider);
   final isFirebaseInitialized = ref.watch(isFirebaseInitializedProvider);
 
   return GoRouter(
@@ -163,287 +163,199 @@ GoRouter goRouter(GoRouterRef ref) {
         pageBuilder: (context, state, navigationShell) => NoTransitionPage(
           child: ScaffoldWithNestedNavigation(navigationShell: navigationShell),
         ),
-        branches: [
-          StatefulShellBranch(
-            navigatorKey: _landingNavigatorKey,
-            routes: [
-              GoRoute(
-                path: '/',
-                name: AppRoute.landing.name,
-                pageBuilder: (context, state) {
-                  return const MaterialPage(
-                    // fullscreenDialog: true,
-                    child: ResponsiveLandingPage(),
-                  );
-                },
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            navigatorKey: _homeNavigatorKey,
-            routes: [
-              GoRoute(
-                path: '/menu',
-                name: AppRoute.home.name,
-                pageBuilder: (context, state) => const NoTransitionPage(
-                  child: Home(),
-                  // child: ResponsiveLandingPage(),
-                ),
-                routes: [
-                  GoRoute(
-                    path: 'subscripciones',
-                    name: AppRoute.mealPlan.name,
-                    pageBuilder: (context, state) {
-                      return const MaterialPage(
-                        child: MealPlansScreen(), // You must have this screen
-                      );
-                    },
-                    routes: [
-                      GoRoute(
-                        name: AppRoute.planDetails.name,
-                        path: ':planId', // Include planId as a path parameter
-                        builder: (context, state) {
-                          final planId = state.pathParameters['planId']!;
-                          return PlanDetailsScreen(planId: planId);
-                        },
-                      ),
-                    ],
-                  ),
-                  // New Route for Catering
-                  GoRoute(
-                    path: 'catering',
-                    name: AppRoute.caterings.name,
-                    pageBuilder: (context, state) {
-                      return const MaterialPage(
-                        child: CateringScreen(), // You must have this screen
-                      );
-                    },
-                  ),
-                  GoRoute(
-                    path: 'populares',
-                    name: AppRoute.trending.name,
-                    parentNavigatorKey: _homeNavigatorKey,
-                    pageBuilder: (context, state) {
-                      return const MaterialPage(
-                        child: Trending(),
-                      );
-                    },
-                  ),
-                  GoRoute(
-                    path: 'carrito/:itemId', // Changed id to itemId
-                    name: AppRoute.addToOrder.name,
-                    pageBuilder: (context, state) {
-                      final itemId = state.pathParameters['itemId']!;
-                      return MaterialPage(
-                        // fullscreenDialog: true,
-                        child: AddToOrderScreen(
-                          index: int.parse(itemId),
-                        ),
-                      );
-                    },
-                  ),
-                  GoRoute(
-                      path: 'categorias',
-                      name: AppRoute.category.name,
-                      pageBuilder: (context, state) {
-                        return const MaterialPage(
-                          child: Categories(),
-                        );
-                      },
-                      routes: [
-                        GoRoute(
-                          path: 'subscripciones',
-                          name: AppRoute.mealPlans.name,
-                          pageBuilder: (context, state) {
-                            return const MaterialPage(
-                              child:
-                                  MealPlansScreen(), // You must have this screen
-                            );
-                          },
-                        ),
-                        // New Route for Catering
-                        GoRoute(
-                          path: 'catering',
-                          name: AppRoute.catering.name,
-                          pageBuilder: (context, state) {
-                            return const MaterialPage(
-                              child:
-                                  CateringScreen(), // You must have this screen
-                            );
-                          },
-                        ),
-                      ]),
-                  GoRoute(
-                      path: 'platos',
-                      name: AppRoute.details.name,
-                      pageBuilder: (context, state) {
-                        return const MaterialPage(
-                          child: DetailsScreen(),
-                        );
-                      },
-                      routes: [
-                        GoRoute(
-                          path: 'detalle/:dishId', // Changed id to itemId
-                          name: AppRoute.addDishToOrder.name,
-                          pageBuilder: (context, state) {
-                            final itemId = state.pathParameters['dishId']!;
-                            return MaterialPage(
-                              // fullscreenDialog: true,
-                              child: AddToOrderScreen(
-                                index: int.parse(itemId),
-                              ),
-                            );
-                          },
-                        ),
-                      ]),
-                ],
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            navigatorKey: _cartNavigatorKey,
-            routes: [
-              GoRoute(
-                path: '/carrito', // Changed id to cartItemId
-                name: AppRoute.homecart.name,
-                pageBuilder: (context, state) {
-                  // final cartItemId = Math.random();
-                  return const MaterialPage(
-                    // fullscreenDialog: true,
-                    child: CartScreen(
-                      isAuthenticated: true,
-                      // selectedItemId: cartItemId,
-                    ),
-                  );
-                },
-                routes: [
-                  GoRoute(
-                    path: 'completar-orden',
-                    name: AppRoute.checkout.name,
-                    pageBuilder: (context, state) {
-                      final type = (state.extra ?? '') as String; // Extracting items from the state
-                      return MaterialPage(
-                        child: CheckoutScreen(
-                          displayType: type.toLowerCase(),
-                        ), // Passing the items or an empty list
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-
-          // StatefulShellBranch(
-          //   navigatorKey: _promptNavigatorKey,
-          //   routes: [
-          //     GoRoute(
-          //       path: '/prompt',
-          //       name: AppRoute.prompt.name,
-          //       pageBuilder: (context, state) => const NoTransitionPage(
-          //           child: PromptScreen(
-          //         canScroll: true,
-          //       )),
-          //     ),
-          //   ],
-          // ),
-          // StatefulShellBranch(
-          //   navigatorKey: _jobsNavigatorKey,
-          //   routes: [
-          //     GoRoute(
-          //       path: '/jobs',
-          //       name: AppRoute.jobs.name,
-          //       pageBuilder: (context, state) => const NoTransitionPage(
-          //         child: JobsScreen(),
-          //       ),
-          //       routes: [
-          //         GoRoute(
-          //           path: 'add',
-          //           name: AppRoute.addJob.name,
-          //           parentNavigatorKey: _jobsNavigatorKey,
-          //           pageBuilder: (context, state) {
-          //             return const MaterialPage(
-          //               fullscreenDialog: true,
-          //               child: EditJobScreen(),
-          //             );
-          //           },
-          //         ),
-          //         GoRoute(
-          //           path: ':id',
-          //           name: AppRoute.job.name,
-          //           pageBuilder: (context, state) {
-          //             final id = state.pathParameters['id']!;
-          //             return MaterialPage(
-          //               child: JobEntriesScreen(jobId: id),
-          //             );
-          //           },
-          //           routes: [
-          //             GoRoute(
-          //               path: 'entries/add',
-          //               name: AppRoute.addEntry.name,
-          //               parentNavigatorKey: _jobsNavigatorKey,
-          //               pageBuilder: (context, state) {
-          //                 final jobId = state.pathParameters['id']!;
-          //                 return MaterialPage(
-          //                   fullscreenDialog: true,
-          //                   child: EntryScreen(
-          //                     jobId: jobId,
-          //                   ),
-          //                 );
-          //               },
-          //             ),
-          //             GoRoute(
-          //               path: 'entries/:eid',
-          //               name: AppRoute.entry.name,
-          //               pageBuilder: (context, state) {
-          //                 final jobId = state.pathParameters['id']!;
-          //                 final entryId = state.pathParameters['eid']!;
-          //                 final entry = state.extra as Entry?;
-          //                 return MaterialPage(
-          //                   child: EntryScreen(
-          //                     jobId: jobId,
-          //                     entryId: entryId,
-          //                     entry: entry,
-          //                   ),
-          //                 );
-          //               },
-          //             ),
-          //             GoRoute(
-          //               path: 'edit',
-          //               name: AppRoute.editJob.name,
-          //               pageBuilder: (context, state) {
-          //                 final jobId = state.pathParameters['id'];
-          //                 final job = state.extra as Job?;
-          //                 return MaterialPage(
-          //                   fullscreenDialog: true,
-          //                   child: EditJobScreen(jobId: jobId, job: job),
-          //                 );
-          //               },
-          //             ),
-          //           ],
-          //         ),
-          //       ],
-          //     ),
-          //   ],
-          // ),
-
-          StatefulShellBranch(
-            navigatorKey: _accountNavigatorKey,
-            routes: [
-              GoRoute(
-                path: '/cuenta',
-                name: AppRoute.profile.name,
-                pageBuilder: (context, state) => const NoTransitionPage(
-                  child: CustomProfileScreen(),
-                ),
-              ),
-            ],
-          ),
-        ],
+        branches: destinations.map((dest) => _buildBranch(dest)).toList(),
       ),
     ],
     errorPageBuilder: (context, state) => const NoTransitionPage(
       child: NotFoundScreen(),
     ),
+  );
+}
+
+List<RouteBase> _getNestedRoutes(String path) {
+  switch (path) {
+    case '/menu':
+      return [
+        GoRoute(
+          path: 'subscripciones',
+          name: AppRoute.mealPlan.name,
+          pageBuilder: (context, state) => const MaterialPage(
+            child: MealPlansScreen(),
+          ),
+          routes: [
+            GoRoute(
+              name: AppRoute.planDetails.name,
+              path: ':planId',
+              builder: (context, state) {
+                final planId = state.pathParameters['planId']!;
+                return PlanDetailsScreen(planId: planId);
+              },
+            ),
+          ],
+        ),
+        GoRoute(
+          path: 'catering',
+          name: AppRoute.caterings.name,
+          pageBuilder: (context, state) => const MaterialPage(
+            child: CateringScreen(),
+          ),
+        ),
+        GoRoute(
+          path: 'populares',
+          name: AppRoute.trending.name,
+          pageBuilder: (context, state) => const MaterialPage(
+            child: Trending(),
+          ),
+        ),
+        GoRoute(
+          path: 'carrito/:itemId',
+          name: AppRoute.addToOrder.name,
+          pageBuilder: (context, state) {
+            final itemId = state.pathParameters['itemId']!;
+            return MaterialPage(
+              child: AddToOrderScreen(
+                index: int.parse(itemId),
+              ),
+            );
+          },
+        ),
+        GoRoute(
+          path: 'categorias',
+          name: AppRoute.category.name,
+          pageBuilder: (context, state) => const MaterialPage(
+            child: Categories(),
+          ),
+          routes: [
+            GoRoute(
+              path: 'subscripciones',
+              name: AppRoute.mealPlans.name,
+              pageBuilder: (context, state) => const MaterialPage(
+                child: MealPlansScreen(),
+              ),
+            ),
+            GoRoute(
+              path: 'catering',
+              name: AppRoute.catering.name,
+              pageBuilder: (context, state) => const MaterialPage(
+                child: CateringScreen(),
+              ),
+            ),
+          ],
+        ),
+        GoRoute(
+          path: 'platos',
+          name: AppRoute.details.name,
+          pageBuilder: (context, state) => const MaterialPage(
+            child: DetailsScreen(),
+          ),
+          routes: [
+            GoRoute(
+              path: 'detalle/:dishId',
+              name: AppRoute.addDishToOrder.name,
+              pageBuilder: (context, state) {
+                final itemId = state.pathParameters['dishId']!;
+                return MaterialPage(
+                  child: AddToOrderScreen(
+                    index: int.parse(itemId),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ];
+    case '/carrito':
+      return [
+        GoRoute(
+          path: 'completar-orden',
+          name: AppRoute.checkout.name,
+          pageBuilder: (context, state) {
+            final type = (state.extra ?? '') as String;
+            return MaterialPage(
+              child: CheckoutScreen(
+                displayType: type.toLowerCase(),
+              ),
+            );
+          },
+        ),
+      ];
+    case '/admin':
+      return [
+        // Add any nested routes for admin here
+      ];
+    default:
+      return [];
+  }
+}
+
+GlobalKey<NavigatorState> _getNavigatorKey(String path) {
+  switch (path) {
+    case '/':
+      return _landingNavigatorKey;
+    case '/menu':
+      return _homeNavigatorKey;
+    case '/carrito':
+      return _cartNavigatorKey;
+    case '/cuenta':
+      return _accountNavigatorKey;
+    case '/admin':
+      return _adminNavigatorKey;
+    default:
+      return _rootNavigatorKey;
+  }
+}
+
+String _getRouteName(String path) {
+  final pathToRoute = {
+    '/': AppRoute.landing.name,
+    '/menu': AppRoute.home.name,
+    '/carrito': AppRoute.homecart.name,
+    '/cuenta': AppRoute.profile.name,
+    '/admin': AppRoute.adminPanel.name,
+  };
+  return pathToRoute[path] ?? AppRoute.home.name;
+}
+
+Widget _getDestinationScreen(String path) {
+  switch (path) {
+    case '/':
+      return const ResponsiveLandingPage();
+    case '/menu':
+      return const Home();
+    case '/carrito':
+      return const CartScreen(isAuthenticated: true);
+    case '/cuenta':
+      return const CustomProfileScreen();
+    case '/admin':
+      return Consumer(
+        builder: (context, ref, _) {
+          final isAdmin = ref.watch(isAdminProvider);
+          return isAdmin.when(
+            data: (isAdmin) => isAdmin 
+              ? const AdminManagementScreen()
+              : const UnauthorizedScreen(),
+            loading: () => const CircularProgressIndicator(),
+            error: (_, __) => const UnauthorizedScreen(),
+          );
+        },
+      );
+    default:
+      return const Home();
+  }
+}
+
+StatefulShellBranch _buildBranch(NavigationDestinationItem destination) {
+  return StatefulShellBranch(
+    navigatorKey: _getNavigatorKey(destination.path),
+    routes: [
+      GoRoute(
+        path: destination.path,
+        name: _getRouteName(destination.path),
+        pageBuilder: (context, state) => NoTransitionPage(
+          child: _getDestinationScreen(destination.path),
+        ),
+        routes: _getNestedRoutes(destination.path),
+      ),
+    ],
   );
 }

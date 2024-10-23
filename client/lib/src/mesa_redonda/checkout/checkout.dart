@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:starter_architecture_flutter_firebase/src/features/authentication/domain/models.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/custom_sign_in_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item_view.dart';
@@ -354,8 +353,6 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final orderDate = DateTime.now();
 
     for (var item in items) {
-      if (item == null) continue;
-
       final double price = double.tryParse(item.pricing) ?? 0.0;
       final int quantity = item.quantity;
 
@@ -392,8 +389,6 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final orderDate = DateTime.now();
 
     for (var item in items) {
-      if (item == null) continue;
-
       final double price = double.tryParse(item.pricing) ?? 0.0;
       final int quantity = item.quantity;
 
@@ -598,8 +593,6 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     String regularDishesBuffer = '';
     for (var item in items) {
-      if (item == null) continue;
-
       final String title = item.title;
       final int quantity = item.quantity;
       final double price = double.tryParse(item.pricing) ?? 0.0;
@@ -654,8 +647,6 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
 
     String mealSubscriptionBuffer = '';
     for (var item in items) {
-      if (item == null) continue;
-
       final String title = item.title;
       final int quantity = item.quantity;
       final double price = double.tryParse(item.pricing) ?? 0.0;
@@ -766,6 +757,7 @@ Future<Map<String, String>?> _checkAndPromptForContactInfo(BuildContext context)
                 child: SizedBox.expand(
                   child: Scaffold(
                     appBar: AppBar(
+                      forceMaterialTransparency: true,
                       title: const Text('Registro'),
                       leading: IconButton(
                         icon: const Icon(Icons.close),
@@ -782,6 +774,7 @@ Future<Map<String, String>?> _checkAndPromptForContactInfo(BuildContext context)
                 child: SizedBox.expand(
                   child: Scaffold(
                     appBar: AppBar(
+                      forceMaterialTransparency: true,
                       title: const Text('Información de Contacto'),
                       leading: IconButton(
                         icon: const Icon(Icons.close),

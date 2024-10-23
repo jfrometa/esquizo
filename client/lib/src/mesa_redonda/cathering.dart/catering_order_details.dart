@@ -52,7 +52,7 @@ class CateringOrderDetailsScreenState
           children: [
             Expanded(
               child: Text(
-                '${dish.title}',
+                dish.title,
                 style: const TextStyle(fontSize: 14),
               ),
             ),

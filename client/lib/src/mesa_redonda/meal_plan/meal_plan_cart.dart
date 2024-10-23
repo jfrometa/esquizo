@@ -35,8 +35,9 @@ class MealOrderNotifier extends StateNotifier<List<CartItem>> {
   void addMealSubscription(Map<String, dynamic> item, int totalMeals) {
     print('Adding Meal Subscription: ${item['title']}');
     // Prevent duplicates in meal subscriptions
-    if (state.any((meal) => meal.id == item['id'] && meal.isMealSubscription))
+    if (state.any((meal) => meal.id == item['id'] && meal.isMealSubscription)) {
       return;
+    }
 
     final newMeal = CartItem(
       id: item['id'],

@@ -23,6 +23,7 @@ dependencies:
   camera:
   url_launcher: ^6.3.0
   localstorage: ^5.0.0
+  lottie: ^3.1.3
 
   cloud_firestore: ^5.0.2
   firebase_analytics: ^11.3.3
@@ -98,3 +99,4 @@ flutter:
     - assets/onboarding_3.svg
     - assets/onboarding_2.svg
     - assets/onboarding_1.svg
+    - assets/animations/

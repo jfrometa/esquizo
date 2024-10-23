@@ -137,8 +137,9 @@ class SubscriptionsList extends ConsumerWidget {
 
     return subscriptionsAsync.when(
       data: (subscriptions) {
-        if (subscriptions.isEmpty)
+        if (subscriptions.isEmpty) {
           return const Text('No tienes suscripciones.');
+        }
         return ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
