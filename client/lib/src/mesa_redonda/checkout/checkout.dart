@@ -17,16 +17,28 @@ import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.d
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-// First, add these providers at the top level of your file (outside the class)
-final locationValidationProvider = StateNotifierProvider.family<LocationValidationNotifier, bool, String>((ref, type) {
-  return LocationValidationNotifier();
+// First, update the provider and notifier at the top of the file
+final validationProvider = StateNotifierProvider.family<ValidationNotifier, Map<String, bool>, String>((ref, type) {
+  return ValidationNotifier();
 });
 
-class LocationValidationNotifier extends StateNotifier<bool> {
-  LocationValidationNotifier() : super(false);
+class ValidationNotifier extends StateNotifier<Map<String, bool>> {
+  ValidationNotifier() : super({
+    'location': false,
+    'date': false,
+    'time': false,
+  });
   
-  void setValid(bool isValid) {
-    state = isValid;
+  void setValid(String field, bool isValid) {
+    state = {...state, field: isValid};
+  }
+
+  bool isFieldValid(String field) {
+    return state[field] ?? false;
+  }
+
+  bool areAllFieldsValid() {
+    return !state.values.contains(false);
   }
 }
 
@@ -549,63 +561,86 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
 
 bool _validateFields() {
-  bool isValid = false;
+  bool isValid = true;
   double scrollOffset = 0;
 
   switch (widget.displayType) {
     case 'platos':
+      // Regular dishes only need location validation
       if (_regularDishesLocationController.text.isEmpty) {
-        ref.read(locationValidationProvider('regular').notifier).setValid(false);
+        ref.read(validationProvider('regular').notifier).setValid('location', false);
         isValid = false;
         scrollOffset = 0;
       } else {
-        ref.read(locationValidationProvider('regular').notifier).setValid(true);
+        ref.read(validationProvider('regular').notifier).setValid('location', true);
       }
       break;
 
     case 'subscriptions':
+      // Validate location
       if (_mealSubscriptionLocationController.text.isEmpty) {
-        ref.read(locationValidationProvider('mealSubscription').notifier).setValid(false);
+        ref.read(validationProvider('mealSubscription').notifier).setValid('location', false);
         isValid = false;
-        scrollOffset = _scrollController.position.maxScrollExtent * 0.1;
+        scrollOffset = _scrollController.position.maxScrollExtent * 0.0;
       } else {
-        ref.read(locationValidationProvider('mealSubscription').notifier).setValid(true);
+        ref.read(validationProvider('mealSubscription').notifier).setValid('location', true);
       }
       
-      // Add date/time validation for subscriptions
-      if (_mealSubscriptionDateController.text.isEmpty || 
-          _mealSubscriptionTimeController.text.isEmpty) {
+      // Validate date
+      if (_mealSubscriptionDateController.text.isEmpty) {
+        ref.read(validationProvider('mealSubscription').notifier).setValid('date', false);
         isValid = false;
-        scrollOffset = _scrollController.position.maxScrollExtent * 0.1;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Por favor seleccione fecha y hora de entrega'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        scrollOffset = _scrollController.position.maxScrollExtent * 0.0;
+      } else {
+        ref.read(validationProvider('mealSubscription').notifier).setValid('date', true);
+      }
+
+      // Validate time
+      if (_mealSubscriptionTimeController.text.isEmpty) {
+        ref.read(validationProvider('mealSubscription').notifier).setValid('time', false);
+        isValid = false;
+        scrollOffset = _scrollController.position.maxScrollExtent * 0.0;
+      } else {
+        ref.read(validationProvider('mealSubscription').notifier).setValid('time', true);
+      }
+
+      // Show error message if needed
+      if (!isValid) {
+        _showValidationError('subscription');
       }
       break;
 
     case 'catering':
+      // Validate location
       if (_cateringLocationController.text.isEmpty) {
-        ref.read(locationValidationProvider('catering').notifier).setValid(false);
+        ref.read(validationProvider('catering').notifier).setValid('location', false);
         isValid = false;
-        scrollOffset = _scrollController.position.maxScrollExtent * 0.1;
+        scrollOffset = _scrollController.position.maxScrollExtent * 0.0;
       } else {
-        ref.read(locationValidationProvider('catering').notifier).setValid(true);
+        ref.read(validationProvider('catering').notifier).setValid('location', true);
       }
       
-      // Add date/time validation for catering
-      if (_cateringDateController.text.isEmpty || 
-          _cateringTimeController.text.isEmpty) {
+      // Validate date
+      if (_cateringDateController.text.isEmpty) {
+        ref.read(validationProvider('catering').notifier).setValid('date', false);
         isValid = false;
-        scrollOffset = _scrollController.position.maxScrollExtent * 0.1;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Por favor seleccione fecha y hora del catering'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        scrollOffset = _scrollController.position.maxScrollExtent * 0.0;
+      } else {
+        ref.read(validationProvider('catering').notifier).setValid('date', true);
+      }
+
+      // Validate time
+      if (_cateringTimeController.text.isEmpty) {
+        ref.read(validationProvider('catering').notifier).setValid('time', false);
+        isValid = false;
+        scrollOffset = _scrollController.position.maxScrollExtent * 0.0;
+      } else {
+        ref.read(validationProvider('catering').notifier).setValid('time', true);
+      }
+
+      // Show error message if needed
+      if (!isValid) {
+        _showValidationError('catering');
       }
       break;
   }
@@ -623,6 +658,30 @@ bool _validateFields() {
   return isValid;
 }
 
+void _showValidationError(String type) {
+  String message = '';
+  final validationState = ref.read(validationProvider(type));
+  
+  if (!validationState['location']!) {
+    message += 'ubicación, ';
+  }
+  if (!validationState['date']!) {
+    message += 'fecha, ';
+  }
+  if (!validationState['time']!) {
+    message += 'hora, ';
+  }
+  
+  if (message.isNotEmpty) {
+    message = message.substring(0, message.length - 2); // Remove last comma
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Por favor complete los siguientes campos: $message'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
 
   void _clearCateringAndPop() {
      ref.read(cateringOrderProvider.notifier).clearCateringOrder(); 
@@ -1058,7 +1117,7 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
 
   Widget _buildLocationField(BuildContext context,
       TextEditingController controller, String name) {
-    final isValid = ref.watch(locationValidationProvider(name));
+    final isValid = ref.watch(validationProvider(name))['location'] ?? false;
     
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 60),
@@ -1149,19 +1208,19 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
                   cateringAddress = address;
                   _cateringLatitude = latitude;
                   _cateringLongitude = longitude;
-                  ref.read(locationValidationProvider('catering').notifier).setValid(true);
+                  ref.read(validationProvider('catering').notifier).setValid('location', true);
                   break;
                 case 'regular':
                   regularAddress = address;
                   _regularDishesLatitude = latitude;
                   _regularDishesLongitude = longitude;
-                  ref.read(locationValidationProvider('regular').notifier).setValid(true);
+                  ref.read(validationProvider('regular').notifier).setValid('location', true);
                   break;
                 case 'mealsubscription':
                   mealSubscriptionAddress = address;
                   _mealSubscriptionLatitude = latitude;
                   _mealSubscriptionLongitude = longitude;
-                  ref.read(locationValidationProvider('mealSubscription').notifier).setValid(true);
+                  ref.read(validationProvider('mealSubscription').notifier).setValid('location', true);
                   break;
               }
             });
@@ -1285,20 +1344,34 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
       return;
     }
 
-    final DateTime selectedDateTime = DateTime(
-      pickedDate.year,
-      pickedDate.month,
-      pickedDate.day,
-      pickedTime.hour,
-      pickedTime.minute,
-    );
+    if (pickedDate != null && pickedTime != null) {
+      final DateTime selectedDateTime = DateTime(
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+        pickedTime.hour,
+        pickedTime.minute,
+      );
 
-    setState(() {
-      final formattedDate = DateFormat('yyyy-MM-dd').format(selectedDateTime);
-      final formattedTime = DateFormat('HH:mm').format(selectedDateTime);
-      dateController.text = formattedDate;
-      timeController.text = formattedTime;
-    });
+      setState(() {
+        final formattedDate = DateFormat('yyyy-MM-dd').format(selectedDateTime);
+        final formattedTime = DateFormat('HH:mm').format(selectedDateTime);
+        dateController.text = formattedDate;
+        timeController.text = formattedTime;
+
+        // Set validation state based on which controller was used
+        String type;
+        if (dateController == _cateringDateController) {
+          type = 'catering';
+        } else {
+          type = 'mealSubscription';
+        }
+        
+        ref.read(validationProvider(type).notifier)
+          ..setValid('date', true)
+          ..setValid('time', true);
+      });
+    }
   }
 
   Widget _buildSectionTitle(BuildContext context, String title) {

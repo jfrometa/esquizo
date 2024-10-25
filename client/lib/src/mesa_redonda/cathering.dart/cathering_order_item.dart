@@ -78,6 +78,7 @@ class CateringOrderItem {
   final String preferencia;
   final String adicionales;
   final int? cantidadPersonas; // Add cantidadPersonas field
+  bool? hasChef;
 
   CateringOrderItem({
     required this.title,
@@ -89,6 +90,7 @@ class CateringOrderItem {
     required this.eventType,
     required this.preferencia,
     required this.adicionales,
+    this.hasChef,
     required this.cantidadPersonas, // Initialize in the constructor
   });
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_order_details.dart'
@@ -88,6 +89,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
     super.dispose();
   }
 
+
   void _showCateringForm(BuildContext context, WidgetRef ref) {
     // Retrieve the current catering order from the provider
     final cateringOrder = ref.read(cateringOrderProvider);
@@ -121,9 +123,11 @@ class CateringScreenState extends ConsumerState<CateringScreen>
     String eventType = cateringOrder?.eventType ?? '';
     String adicionales = cateringOrder?.adicionales ?? '';
     int? cantidadPersonasRead = (cateringOrder?.cantidadPersonas != null &&
-            cateringOrder!.cantidadPersonas!  > 0)
+            cateringOrder!.cantidadPersonas! > 0)
         ? cateringOrder.cantidadPersonas
         : null;
+
+    bool hasChef = cateringOrder?.hasChef ?? false;
 
     List<String> alergiasList = cateringOrder?.alergias.split(',') ?? [];
 
@@ -162,6 +166,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
           ),
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setModalState) {
+       
               return SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -182,28 +187,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                       ],
                     ),
                     const Divider(),
-                    const Text('Nivel de Apetito',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
-                      value: apetito,
-                      dropdownColor: Colors.white,
-                      decoration: InputDecoration(
-                        labelText: 'Apetito',
-                        border: const OutlineInputBorder(),
-                        filled: true,
-                        fillColor: ColorsPaletteRedonda.white,
-                      ),
-                      items: const [
-                        DropdownMenuItem(value: 'poco', child: Text('Poco')),
-                        DropdownMenuItem(
-                            value: 'regular', child: Text('Regular')),
-                        DropdownMenuItem(value: 'mucho', child: Text('Mucho')),
-                      ],
-                      onChanged: (value) =>
-                          setModalState(() => apetito = value ?? 'regular'),
-                    ),
-                    const SizedBox(height: 16),
+                 const SizedBox(height: 16),
                     const Text('Cantidad de Personas',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
@@ -369,35 +353,32 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                       onChanged: (value) =>
                           setModalState(() => eventType = value),
                     ),
-                    const SizedBox(height: 16),
-                    const Text('Preferencia de Sabor',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
-                      value: preferencia,
-                      dropdownColor: Colors.white,
-                      decoration: InputDecoration(
-                        labelText: 'Preferencia',
-                        border: const OutlineInputBorder(),
-                        filled: true,
-                        fillColor: ColorsPaletteRedonda
-                            .white, // Set the background color to white
-                      ),
-                      style: TextStyle(
-                        color: Theme.of(context)
-                            .primaryColor, // Set the text color to primary color
-                      ),
-                      items: const [
-                        DropdownMenuItem(value: 'dulce', child: Text('Dulce')),
-                        DropdownMenuItem(
-                            value: 'salado', child: Text('Salado')),
+                   const SizedBox(height: 16),
+                  
+                    // Add the Cheffin Switch here
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Agregar Servicio de Chef',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        Switch(
+                          value: hasChef,
+                          inactiveTrackColor: ColorsPaletteRedonda.deepBrown,
+                          activeColor: ColorsPaletteRedonda.primary,
+                          onChanged: (bool value) {
+                            setModalState(() {
+                              hasChef = value;
+                            });
+                          },
+                        ),
                       ],
-                      onChanged: (value) =>
-                          setModalState(() => preferencia = value!),
                     ),
-                    const SizedBox(height: 16),
-                    ExpansionTile(
-                      title: Text('Agregar Adicionales',
+                    const SizedBox(height: 24),
+                    
+  ExpansionTile(
+                      title: Text('Notas Adicionales',
                           style: Theme.of(context).textTheme.titleMedium),
                       children: [
                         TextFormField(
@@ -405,7 +386,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                           style: Theme.of(context).textTheme.labelLarge,
                           maxLines: 3,
                           decoration: InputDecoration(
-                            hintText: 'Ej. Arroz con fideos 20 personas',
+                            hintText: '',
                             filled: true,
                             fillColor: ColorsPaletteRedonda.white,
                             enabledBorder: OutlineInputBorder(
@@ -426,12 +407,12 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                         ),
                       ],
                     ),
-                    const SizedBox(height: 24),
-
+                    const SizedBox(height: 16),
                     
+
                     Center(
                       child: SizedBox(
-                        height: 38,
+                        height: 42,
                         child: ElevatedButton(
                           style: ButtonStyle(
                         backgroundColor: WidgetStateProperty.all(  ColorsPaletteRedonda
@@ -468,11 +449,10 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                                     milliseconds:
                                         500), // Display for half a second,
                               ),
-                            );
-                            Navigator.pop(context);
-                            Navigator.pop(context);
+                            ); 
+                            GoRouter.of(context).pop();
                           },
-                          child: const Text('Confirmar Detalles de la Orden'),
+                          child: const Text('Confirmar Detalles'),
                         ),
                       ),
                     ),
@@ -485,6 +465,8 @@ class CateringScreenState extends ConsumerState<CateringScreen>
         );
       },
     );
+  
+  
   }
 
   void _finalizeAndAddToCart(
