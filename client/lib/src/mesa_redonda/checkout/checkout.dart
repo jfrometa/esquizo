@@ -326,7 +326,9 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   Future<void> _processOrder(BuildContext context, List<CartItem> items,
       CateringOrderItem? cateringOrder) async {
-    final contactInfo = await _checkAndPromptForContactInfo(context);
+
+    if (_validateFields()) {
+           final contactInfo = await _checkAndPromptForContactInfo(context);
     if (contactInfo == null || contactInfo.isEmpty) return;
 
     try {
@@ -347,6 +349,9 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         duration:
             const Duration(milliseconds: 500), // Display for half a second
       ));
+    }
+    } else {
+        return;
     }
   }
 
@@ -490,7 +495,6 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Future<void> _sendWhatsAppOrder(
       List<CartItem> items, Map<String, String>? contactInfo) async {
   
-if (_validateFields()) {
     const String phoneNumber = '+18493590832';
     final String orderDetails = _generateOrderDetails(items, contactInfo);
     final String whatsappUrlMobile =
@@ -512,15 +516,6 @@ if (_validateFields()) {
         ),
       );
     }
-
-    } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Completa los campos requeridos.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-    }
   }
 
   // Send WhatsApp message for subscriptions
@@ -529,7 +524,7 @@ if (_validateFields()) {
     const String phoneNumber = '+18493590832';
     final String orderDetails =
         _generateSubscriptionOrderDetails(items, contactInfo);
-    if (_validateFields()) {
+    
     final String whatsappUrlMobile =
         'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
     final String whatsappUrlWeb =
@@ -549,20 +544,12 @@ if (_validateFields()) {
         ),
       );
     }
-
-    } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Completa los campos requeridos.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-    }
+ 
   }
 
 
 bool _validateFields() {
-  bool isValid = true;
+  bool isValid = false;
   double scrollOffset = 0;
 
   switch (widget.displayType) {
@@ -570,7 +557,7 @@ bool _validateFields() {
       if (_regularDishesLocationController.text.isEmpty) {
         ref.read(locationValidationProvider('regular').notifier).setValid(false);
         isValid = false;
-        scrollOffset = 0; // Set the correct scroll offset for this field
+        scrollOffset = 0;
       } else {
         ref.read(locationValidationProvider('regular').notifier).setValid(true);
       }
@@ -580,9 +567,22 @@ bool _validateFields() {
       if (_mealSubscriptionLocationController.text.isEmpty) {
         ref.read(locationValidationProvider('mealSubscription').notifier).setValid(false);
         isValid = false;
-        scrollOffset = _scrollController.position.maxScrollExtent * 0.2; // Set correct scroll offset for this field
+        scrollOffset = _scrollController.position.maxScrollExtent * 0.1;
       } else {
         ref.read(locationValidationProvider('mealSubscription').notifier).setValid(true);
+      }
+      
+      // Add date/time validation for subscriptions
+      if (_mealSubscriptionDateController.text.isEmpty || 
+          _mealSubscriptionTimeController.text.isEmpty) {
+        isValid = false;
+        scrollOffset = _scrollController.position.maxScrollExtent * 0.1;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Por favor seleccione fecha y hora de entrega'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
       break;
 
@@ -590,9 +590,22 @@ bool _validateFields() {
       if (_cateringLocationController.text.isEmpty) {
         ref.read(locationValidationProvider('catering').notifier).setValid(false);
         isValid = false;
-        scrollOffset = _scrollController.position.maxScrollExtent * 0.4; // Set the correct scroll offset for this field
+        scrollOffset = _scrollController.position.maxScrollExtent * 0.1;
       } else {
         ref.read(locationValidationProvider('catering').notifier).setValid(true);
+      }
+      
+      // Add date/time validation for catering
+      if (_cateringDateController.text.isEmpty || 
+          _cateringTimeController.text.isEmpty) {
+        isValid = false;
+        scrollOffset = _scrollController.position.maxScrollExtent * 0.1;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Por favor seleccione fecha y hora del catering'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
       break;
   }
@@ -643,7 +656,7 @@ bool _validateFields() {
     final String orderDetails =
         _generateCateringOrderDetails(cateringOrder, contactInfo);
   
-  if (_validateFields()) {
+
     final String whatsappUrlMobile =
         'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
     final String whatsappUrlWeb =
@@ -662,15 +675,6 @@ bool _validateFields() {
           backgroundColor: Colors.red,
         ),
       );
-    }
-
-    } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Completa los campos requeridos.'),
-            backgroundColor: Colors.red,
-          ),
-        );
     }
   }
 
