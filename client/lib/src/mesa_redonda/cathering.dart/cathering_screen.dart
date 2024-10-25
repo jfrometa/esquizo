@@ -629,7 +629,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                                   CateringDish(
                                     title: item.title,
                                     peopleCount: quantity,
-                                    pricePerPerson: item.pricePerUnit,
+                                    pricePerPerson: item.pricePerUnit ?? 0.0,
                                     ingredients: item.ingredients,
                                     pricing: item.pricing,
                                   ),

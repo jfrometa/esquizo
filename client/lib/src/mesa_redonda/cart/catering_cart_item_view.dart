@@ -7,9 +7,10 @@ import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.d
 class CateringCartItemView extends ConsumerWidget {
   final CateringOrderItem order;
   final VoidCallback onRemoveFromCart;
-    final FocusNode customPersonasFocusNode =
-      FocusNode(); // Declare the FocusNode
+  final FocusNode customPersonasFocusNode = FocusNode();
+  final FocusNode customUnitsFocusNode = FocusNode(); // New focus node for units
   bool isCustomSelected = false;
+  bool isCustomUnitsSelected = false; // New flag for units
 
   CateringCartItemView({
     super.key,
@@ -80,7 +81,7 @@ class CateringCartItemView extends ConsumerWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  '${dish.title} - ${dish.peopleCount} personas',
+                                  '${dish.title} - ${dish.peopleCount} unidades',
                                   style: const TextStyle(fontSize: 14),
                                 ),
                               ),
@@ -144,25 +145,10 @@ class CateringCartItemView extends ConsumerWidget {
   }
 
   void _showCateringForm(BuildContext context, WidgetRef ref) {
-    // Retrieve the current catering order from the provider
     final cateringOrder = ref.read(cateringOrderProvider);
-    // final cateringOrderValue = ref.watch(cateringOrderProvider);
-    final peopleQuantity = [
-      10,
-      20,
-      30,
-      40,
-      50,
-      100,
-      200,
-      300,
-      400,
-      500,
-      1000,
-      2000,
-      5000,
-      10000
-    ];
+    final peopleQuantity = [10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, 2000, 5000, 10000];
+    final unitQuantity = [25, 50, 75, 100, 150, 200, 300, 400, 500, 1000]; // New units array
+
     // Set initial values, using provider values if available
     String preferencia = (cateringOrder?.preferencia != null &&
             cateringOrder?.preferencia.isNotEmpty == true)
@@ -179,15 +165,29 @@ class CateringCartItemView extends ConsumerWidget {
     List<String> alergiasList = cateringOrder?.alergias.split(',') ?? [];
     bool hasChef = cateringOrder?.hasChef ?? false;
 
+    // int? cantidadUnidadesRead = (cateringOrder?.cantidadUnidades != null && 
+    //         cateringOrder!.cantidadUnidades! >= 25)
+    //     ? cateringOrder.cantidadUnidades
+    //     : null;
+
     if (cantidadPersonasRead != null &&
         !peopleQuantity.contains(cantidadPersonasRead)) {
       isCustomSelected = true;
     }
+
+    // if (cantidadUnidadesRead != null && 
+    //     !unitQuantity.contains(cantidadUnidadesRead)) {
+    //   isCustomUnitsSelected = true;
+    // }
+
     // TextController for custom number of persons
     TextEditingController customPersonasController =
         TextEditingController(text: '$cantidadPersonasRead');
     TextEditingController eventTypeController =
         TextEditingController(text: eventType);
+
+    // TextEditingController customUnitsController = 
+    //     TextEditingController(text: '$cantidadUnidadesRead');
 
     // Helper function to add allergies
     void addAllergy(String value, StateSetter setModalState) {
@@ -452,7 +452,6 @@ class CateringCartItemView extends ConsumerWidget {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    
                     Center(
                       child: SizedBox(
                         height: 42,
@@ -479,7 +478,8 @@ class CateringCartItemView extends ConsumerWidget {
                                 eventType,
                                 preferencia,
                                 adicionales,
-                                cantidadPersonasRead ?? 0);
+                                cantidadPersonasRead ?? 0,
+                                );
                             alergiasList.clear();
 
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -513,13 +513,14 @@ class CateringCartItemView extends ConsumerWidget {
   }
 
   void _finalizeAndAddToCart(
-      WidgetRef ref,
-      bool hasChef,
-      String alergias,
-      String eventType,
-      String preferencia,
-      String adicionales,
-      int cantidadPersonas) {
+    WidgetRef ref,
+    bool hasChef,
+    String alergias,
+    String eventType,
+    String preferencia,
+    String adicionales,
+    int cantidadPersonas,
+  ) {
     final cateringOrderProviderNotifier =
         ref.read(cateringOrderProvider.notifier);
     cateringOrderProviderNotifier.finalizeCateringOrder(
@@ -531,7 +532,7 @@ class CateringCartItemView extends ConsumerWidget {
       eventType: eventType,
       preferencia: preferencia,
       adicionales: adicionales,
-      cantidadPersonas: cantidadPersonas,
+      cantidadPersonas: cantidadPersonas,// Include units in the finalize call
     );
   }
 

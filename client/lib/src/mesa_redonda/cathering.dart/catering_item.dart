@@ -4,12 +4,13 @@ class CateringItem {
   final String category;
   final String title;
   final String description;
-  final double pricePerUnit;
+  final double? pricePerUnit;
   final String pricing;
   final String img;
   final List<String> ingredients;
   int peopleCount; // Number of people the catering is for
   int quantity; // Number of catering items
+  final bool hasUnitSelection; // New field
 
   CateringItem({
     required this.category,
@@ -21,22 +22,25 @@ class CateringItem {
     required this.ingredients,
     this.peopleCount = 10, // Default to 10 people
     this.quantity = 1, // Default quantity to 1
+    this.hasUnitSelection = false, // Default to false
   });
 
   CateringItem copyWith({
     int? peopleCount,
     int? quantity,
+    double? pricePerUnit
   }) {
     return CateringItem(
       title: title,
       description: description,
-      pricePerUnit: pricePerUnit,
+      pricePerUnit: pricePerUnit ?? this.pricePerUnit,
       pricing: pricing,
       img: img,
       ingredients: ingredients,
       peopleCount: peopleCount ?? this.peopleCount,
       quantity: quantity ?? this.quantity,
       category: category,
+      hasUnitSelection: hasUnitSelection,
     );
   }
 }
@@ -85,6 +89,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       pricing: '800.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Albahaca', 'Ajo', 'Aceite de oliva', 'Queso parmesano'],
+      hasUnitSelection: false,
     ),
 
     // Lasagna
@@ -96,6 +101,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       pricing: '3500.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Pasta', 'Carne de res o pollo', 'Queso', 'Tomate'],
+      hasUnitSelection: false,
     ),
     CateringItem(
       category: 'Pastas',
@@ -105,6 +111,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       pricing: '3800.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Queso trufado', 'Queso mozzarella', 'Trufa', 'Pasta'],
+      hasUnitSelection: false,
     ),
     CateringItem(
       category: 'Pastas',
@@ -114,6 +121,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       pricing: '3500.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Carne de res', 'Pasta', 'Queso'],
+      hasUnitSelection: false,
     ),
 
     // Arroces
@@ -132,6 +140,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
         'Nueces',
         'Cranberries'
       ],
+      hasUnitSelection: false,
     ),
     CateringItem(
       category: 'Arroces',
@@ -142,6 +151,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       pricing: '220.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Arroz', 'Frijoles', 'Especias'],
+      hasUnitSelection: false,
     ),
     CateringItem(
       category: 'Arroces',
@@ -152,6 +162,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       pricing: '250.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Arroz', 'Plátano maduro', 'Tocineta', 'Puerro'],
+      hasUnitSelection: false,
     ),
     CateringItem(
       category: 'Arroces',
@@ -161,6 +172,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       pricing: '275.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Arroz', 'Hongos salvajes', 'Ajo', 'Cebolla'],
+      hasUnitSelection: false,
     ),
 
     // Proteínas
@@ -173,6 +185,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       pricing: '675.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Filete de res', 'Hongos', 'Vino tinto'],
+      hasUnitSelection: false,
     ),
     CateringItem(
       category: 'Proteínas',
@@ -182,6 +195,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       pricing: '555.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Filete de cerdo', 'Mostaza', 'Especias'],
+      hasUnitSelection: false,
     ),
     CateringItem(
       category: 'Proteínas',
@@ -192,6 +206,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       pricing: '600.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Filete de cerdo', 'Dátiles', 'Cranberries'],
+      hasUnitSelection: false,
     ),
     CateringItem(
       category: 'Proteínas',
@@ -202,6 +217,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       pricing: '550.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Pechuga de pollo', 'Ricotta', 'Espinaca'],
+      hasUnitSelection: false,
     ),
     CateringItem(
       category: 'Proteínas',
@@ -212,6 +228,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       pricing: '575.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Pechuga de pollo', 'Queso manchego', 'Prosciutto'],
+      hasUnitSelection: false,
     ),
     CateringItem(
       category: 'Proteínas',
@@ -221,15 +238,17 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       pricing: '10500.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Pierna de cerdo', 'Arroz moro negro'],
+      hasUnitSelection: false,
     ),
     CateringItem(
-      category: 'Proteínas',
+      category: 'Prote��nas',
       title: 'Pierna de Cerdo en su Mojo',
       description: 'Pierna de cerdo en su mojo (unidad).',
       pricePerUnit: 8500.00,
       pricing: '8500.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Pierna de cerdo', 'Mojo criollo'],
+      hasUnitSelection: false,
     ),
     CateringItem(
       category: 'Proteínas',
@@ -239,6 +258,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       pricing: '675.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Pechuga de pavo', 'Finas hierbas', 'Ajo', 'Cebolla'],
+      hasUnitSelection: false,
     ),
 
     // Guarniciones
@@ -250,6 +270,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       pricing: '250.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Plátano maduro', 'Carne', 'Queso'],
+      hasUnitSelection: false,
     ),
     CateringItem(
       category: 'Guarniciones',
@@ -259,6 +280,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       pricing: '175.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Papines', 'Hierbas'],
+      hasUnitSelection: false,
     ),
     CateringItem(
       category: 'Guarniciones',
@@ -269,6 +291,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       pricing: '200.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Rúcula', 'Queso feta', 'Almendras'],
+      hasUnitSelection: false,
     ),
     CateringItem(
       category: 'Guarniciones',
@@ -278,6 +301,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       pricing: '250.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Papas', 'Zanahoria', 'Mayonesa'],
+      hasUnitSelection: false,
     ),
     CateringItem(
       category: 'Guarniciones',
@@ -287,6 +311,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       pricing: '225.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Orzo', 'Tomate', 'Pepino'],
+      hasUnitSelection: false,
     ),
     CateringItem(
       category: 'Guarniciones',
@@ -297,35 +322,39 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       pricing: '275.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Lechuga', 'Nueces', 'Prosciutto'],
+      hasUnitSelection: false,
     ),
 
-    // Para Picar
+    // Para Picar (all items in this category should have hasUnitSelection: true)
     CateringItem(
       category: 'Para Picar',
       title: 'Pastelitos de Pollo y Queso',
       description: 'Caja de 25 pastelitos de pollo y queso.',
-      pricePerUnit: 1000.00,
+      pricePerUnit: 40.00,
       pricing: '1000.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Pollo', 'Queso', 'Masa de hojaldre'],
+      hasUnitSelection: true,  // Set to true for Para Picar
     ),
     CateringItem(
       category: 'Para Picar',
       title: 'Croquetas de Pollo',
       description: 'Caja de 25 croquetas de pollo.',
-      pricePerUnit: 1000.00,
+      pricePerUnit: 60.00,
       pricing: '1000.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Pollo', 'Harina', 'Pan rallado'],
+      hasUnitSelection: true,  // Set to true for Para Picar
     ),
     CateringItem(
       category: 'Para Picar',
       title: 'Quipes',
       description: 'Caja de 25 quipes tradicionales.',
-      pricePerUnit: 1000.00,
+      pricePerUnit: 50.00,
       pricing: '1000.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Carne', 'Trigo', 'Especias'],
+      hasUnitSelection: true,  // Set to true for Para Picar
     ),
     CateringItem(
       category: 'Para Picar',
@@ -335,6 +364,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       pricing: '55.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Salmón ahumado', 'Pan', 'Queso crema'],
+      hasUnitSelection: true,  // Set to true for Para Picar
     ),
     CateringItem(
       category: 'Para Picar',
@@ -344,6 +374,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       pricing: '40.00',
       img: 'assets/food5.jpeg',
       ingredients: ['Queso crema', 'Tocineta', 'Pan'],
+      hasUnitSelection: true,  // Set to true for Para Picar
     ),
   ];
 });

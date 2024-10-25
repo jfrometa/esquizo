@@ -8,6 +8,7 @@ class CateringDish {
   final String title;
   final int peopleCount;
   final double pricePerPerson;
+  final double? pricePerUnit;
   final List<String> ingredients;
   final String pricing;
   final int quantity; // Added quantity field with default value of 1
@@ -19,6 +20,7 @@ class CateringDish {
     required this.pricePerPerson,
     required this.ingredients,
     required this.pricing,
+    this.pricePerUnit, 
     this.img = 'assets/food5.jpeg', // Added default img value
     this.quantity = 1, // Default quantity to 1
   });
@@ -28,6 +30,7 @@ class CateringDish {
     String? title,
     int? peopleCount,
     double? pricePerPerson,
+    double? pricePerUnit,
     List<String>? ingredients,
     int? quantity, // Added quantity to copyWith
     String? img, // Added img to copyWith
@@ -36,6 +39,7 @@ class CateringDish {
       title: title ?? this.title,
       peopleCount: peopleCount ?? this.peopleCount,
       pricePerPerson: pricePerPerson ?? this.pricePerPerson,
+      pricePerUnit: pricePerUnit ?? this.pricePerUnit,
       ingredients: ingredients ?? this.ingredients,
       pricing: pricing,
       img: img ?? this.img, // Added img to copyWith
@@ -49,6 +53,7 @@ class CateringDish {
         'pricePerPerson': pricePerPerson,
         'ingredients': ingredients,
         'pricing': pricing,
+        'pricePerUnit': pricePerUnit,
         'quantity': quantity, // Added quantity to JSON
         'img': img, // Added img to JSON
       };
@@ -60,6 +65,7 @@ class CateringDish {
       pricePerPerson: json['pricePerPerson'],
       ingredients: List<String>.from(json['ingredients']),
       pricing: json['pricing'],
+      pricePerUnit: json['pricePerUnit'],
       quantity: json['quantity'], // Added quantity from JSON
       img: json['img'] ??
           'assets/food5.jpeg', // Added default img value from JSON
@@ -76,7 +82,7 @@ class CateringOrderItem {
   final String eventType;
   final String preferencia;
   final String adicionales;
-  final int? cantidadPersonas; // Add cantidadPersonas field
+  final int? cantidadPersonas; // Add cantidadPersonas field 
   bool? hasChef;
 
   CateringOrderItem({
@@ -89,7 +95,7 @@ class CateringOrderItem {
     required this.preferencia,
     required this.adicionales,
     this.hasChef,
-    required this.cantidadPersonas, // Initialize in the constructor
+    required this.cantidadPersonas, 
   });
 
   // Calculates the total price for all dishes in the order
@@ -111,7 +117,7 @@ class CateringOrderItem {
         'preferencia': preferencia,
         'adicionales': adicionales,
         'cantidadPersonas':
-            cantidadPersonas, // Include cantidadPersonas in JSON
+            cantidadPersonas,
       };
 
   factory CateringOrderItem.fromJson(Map<String, dynamic> json) {
@@ -127,7 +133,7 @@ class CateringOrderItem {
       eventType: json['eventType'],
       preferencia: json['preferencia'],
       adicionales: json['adicionales'],
-      cantidadPersonas: json['cantidadPersonas'], // Default if not present
+      cantidadPersonas: json['cantidadPersonas'],  
     );
   }
 
@@ -143,6 +149,7 @@ class CateringOrderItem {
     String? preferencia,
     String? adicionales,
     int? cantidadPersonas,
+    int? cantidadUnidades,
   }) {
     return CateringOrderItem(
       title: title ?? this.title,
@@ -154,7 +161,7 @@ class CateringOrderItem {
       eventType: eventType ?? this.eventType,
       preferencia: preferencia ?? this.preferencia,
       adicionales: adicionales ?? this.adicionales,
-      cantidadPersonas: cantidadPersonas ?? this.cantidadPersonas,
+      cantidadPersonas: cantidadPersonas ?? this.cantidadPersonas, 
     );
   }
 }

@@ -18,7 +18,20 @@ class CateringItemCard extends StatefulWidget {
 }
 
 class CateringItemCardState extends State<CateringItemCard> {
-  int quantity = 1;
+  int quantity = 25;
+  bool isCustomUnitsSelected = false;
+  final unitQuantity = [25, 50, 75, 100, 150, 200, 300, 400, 500, 1000];
+  int? selectedUnits;
+  final TextEditingController customUnitsController = TextEditingController();
+  final FocusNode customUnitsFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    selectedUnits = widget.item.quantity;
+    customUnitsController.text = selectedUnits.toString();
+    isCustomUnitsSelected = !unitQuantity.contains(selectedUnits);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,57 +74,112 @@ class CateringItemCardState extends State<CateringItemCard> {
                 const SizedBox(height: 8),
                 // if(widget.item.pricePerPerson < 1) Text( '\$${widget.item.pricePerPerson.toStringAsFixed(2)} por persona'),
                 const SizedBox(height: 8),
+                if (widget.item.hasUnitSelection) ...[
+                  const SizedBox(height: 16),
+                  const Text('Cantidad de Unidades',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<int>(
+                    value: isCustomUnitsSelected ? null : selectedUnits,
+                    dropdownColor: Colors.white,
+                    decoration: InputDecoration(
+                      labelText: isCustomUnitsSelected
+                          ? 'Cantidad Personalizada'
+                          : 'Cantidad de Unidades',
+                      border: const OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                    items: [
+                      for (var number in unitQuantity)
+                        DropdownMenuItem<int>(
+                          value: number,
+                          child: Text('$number'),
+                        ),
+                      const DropdownMenuItem<int>(
+                        value: -1,
+                        child: Text('Personalizado'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        if (value == -1) {
+                          isCustomUnitsSelected = true;
+                          selectedUnits = null;
+                          Future.delayed(const Duration(milliseconds: 200), () {
+                            customUnitsFocusNode.requestFocus();
+                          });
+                        } else {
+                          isCustomUnitsSelected = false;
+                          selectedUnits = value;
+                        }
+                        // Save the selected units back to the CateringItem model
+                        widget.item.quantity = selectedUnits ?? 25;
+                      });
+                    },
+                  ),
+                  if (isCustomUnitsSelected) ...[
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: customUnitsController,
+                      focusNode: customUnitsFocusNode,
+                      decoration: InputDecoration(
+                        labelText: '${selectedUnits ?? 'Selecciona'} nidades',
+                        border: const OutlineInputBorder(),
+                        filled: true,
+                        fillColor: Colors.white,
+                      ),
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) {
+                        final customValue = int.tryParse(value);
+                        if (customValue != null && customValue >= 25) {
+                          setState(() => selectedUnits = customValue);
+                        }
+                      },
+                    ),
+                  ],
+                ],
+
+                const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    // Row(
-                    //   children: [
-                    //     IconButton(
-                    //       icon: const Icon(Icons.remove),
-                    //       onPressed: () {
-                    //         if (quantity > 1) {
-                    //           setState(() {
-                    //             quantity--;
-                    //           });
-                    //         }
-                    //       },
-                    //     ),
-                    //     Text('$quantity'),
-                    //     IconButton(
-                    //       icon: const Icon(Icons.add),
-                    //       onPressed: () {
-                    //         setState(() {
-                    //           quantity++;
-                    //         });
-                    //       },
-                    //     ),
-                    //   ],
-                    // ),
-
                     SizedBox(
                       height: 32,
                       child: ElevatedButton(
                         onPressed: () {
+                          final units = isCustomUnitsSelected 
+                              ? int.tryParse(customUnitsController.text) ?? 25 
+                              : selectedUnits ?? 25;
+                          
+                          if (units < 25) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('La cantidad mínima es 25 unidades'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            return;
+                          }
+
+                          // Save the selected units back to the CateringItem model
+                          widget.item.quantity = units;
+
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'Se agregó ${widget.item.title} al carrito',
-                                style: TextStyle(
-                                    color: Theme.of(context).primaryColor),
+                                'Se agregó ${widget.item.title} al carrito (${widget.item.hasUnitSelection ? '$units unidades' : '' }',
+                                style: TextStyle(color: Theme.of(context).primaryColor),
                               ),
-                              backgroundColor: Colors
-                                  .brown[200], // Light brown background color
-                              duration: const Duration(
-                                  milliseconds: 500), // Display for half a second
+                              backgroundColor: Colors.black,
+                              duration: const Duration(milliseconds: 500),
                             ),
                           );
-                          widget.onAddToCart(quantity);
+                          widget.onAddToCart(units);
                         },
                         child: const Text('Agregar al carrito'),
                       ),
                     ),
-                  
-                  
                   ],
                 ),
               ],
