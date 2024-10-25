@@ -91,6 +91,11 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   // Add these to your state class
   final ScrollController _scrollController = ScrollController();
 
+  // Add these to your state class variables
+  bool _isNameValid = true;
+  bool _isPhoneValid = true;
+  bool _isEmailValid = true;
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -836,179 +841,216 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
     return 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
   }
 
-Future<Map<String, String>?> _checkAndPromptForContactInfo(BuildContext context) async {
-  final currentUser = FirebaseAuth.instance.currentUser;
+  Future<Map<String, String>?> _checkAndPromptForContactInfo(BuildContext context) async {
+    final currentUser = FirebaseAuth.instance.currentUser;
 
-  if (currentUser == null || currentUser.isAnonymous) {
-   
+    if (currentUser == null || currentUser.isAnonymous) {
+      // Reset validation states
+      _isNameValid = true;
+      _isPhoneValid = true;
+      _isEmailValid = true;
 
-    await showDialog<void>(
-      context: context,
-      barrierDismissible: false, // Prevent dismissal by tapping outside
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setState) {
-            if (showSignInScreen) {
-              return Dialog(
-                insetPadding: EdgeInsets.zero, // Remove default padding
-                child: SizedBox.expand(
-                  child: Scaffold(
-                    appBar: AppBar(
-                      forceMaterialTransparency: true,
-                      title: const Text('Registro'),
-                      leading: IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => GoRouter.of(ctx).pop(),
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) {
+          return StatefulBuilder(
+            builder: (ctx, setState) {
+              if (showSignInScreen) {
+                return Dialog(
+                  insetPadding: EdgeInsets.zero, // Remove default padding
+                  child: SizedBox.expand(
+                    child: Scaffold(
+                      appBar: AppBar(
+                        forceMaterialTransparency: true,
+                        title: const Text('Registro'),
+                        leading: IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => GoRouter.of(ctx).pop(),
+                        ),
                       ),
+                      body: CustomSignInScreen(),
                     ),
-                    body: CustomSignInScreen(),
                   ),
-                ),
-              );
-            } else {
-              return Dialog(
-                insetPadding: EdgeInsets.zero, // Remove default padding
-                child: SizedBox.expand(
-                  child: Scaffold(
-                    appBar: AppBar(
-                      forceMaterialTransparency: true,
-                      title: const Text('Información de Contacto'),
-                      leading: IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => GoRouter.of(ctx).pop(false),
+                );
+              } else {
+                return Dialog(
+                  insetPadding: EdgeInsets.zero,
+                  child: SizedBox.expand(
+                    child: Scaffold(
+                      appBar: AppBar(
+                        forceMaterialTransparency: true,
+                        title: const Text('Información de Contacto'),
+                        leading: IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => GoRouter.of(ctx).pop(false),
+                        ),
                       ),
-                    ),
-                    body: SingleChildScrollView(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      body: SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Todos los campos son obligatorios.',
+                              ),
+                              const SizedBox(height: 16),
+                              TextField(
+                                decoration: InputDecoration(
+                                  labelText: 'Nombre',
+                                  filled: true,
+                                  fillColor: Colors.transparent,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    borderSide: BorderSide(
+                                      color: _isNameValid ? ColorsPaletteRedonda.primary : Colors.red,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  errorText: _isNameValid ? null : 'El nombre es requerido',
+                                ),
+                                textInputAction: TextInputAction.next,
+                                onChanged: (value) {
+                                  setState(() {
+                                    name = value;
+                                    _isNameValid = value.trim().isNotEmpty;
+                                  });
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              TextField(
+                                decoration: InputDecoration(
+                                  labelText: 'Teléfono',
+                                  filled: true,
+                                  fillColor: Colors.transparent,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    borderSide: BorderSide(
+                                      color: _isPhoneValid ? ColorsPaletteRedonda.primary : Colors.red,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  errorText: _isPhoneValid ? null : 'El teléfono es requerido',
+                                ),
+                                textInputAction: TextInputAction.next,
+                                keyboardType: TextInputType.phone,
+                                onChanged: (value) {
+                                  setState(() {
+                                    phone = value;
+                                    _isPhoneValid = value.trim().isNotEmpty;
+                                  });
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              TextField(
+                                decoration: InputDecoration(
+                                  labelText: 'Correo electrónico',
+                                  filled: true,
+                                  fillColor: Colors.transparent,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    borderSide: BorderSide(
+                                      color: _isEmailValid ? ColorsPaletteRedonda.primary : Colors.red,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  errorText: _isEmailValid ? null : 'Ingrese un correo electrónico válido',
+                                ),
+                                textInputAction: TextInputAction.done,
+                                keyboardType: TextInputType.emailAddress,
+                                onChanged: (value) {
+                                  setState(() {
+                                    email = value;
+                                    _isEmailValid = _validateEmail(value);
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      bottomNavigationBar: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            const Text(
-                              'Proporcione su nombre, teléfono y correo opcional o regístrese.',
-                              
+                            TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  showSignInScreen = true;
+                                });
+                              },
+                              child: const Text('Registrarse'),
                             ),
-                            const SizedBox(height: 16),
-                            TextField( 
-                              decoration: InputDecoration(
-                         labelText: 'Nombre',
-                        filled: true,
-                        fillColor: Colors.transparent,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: const BorderSide(
-                            color: ColorsPaletteRedonda.primary,
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
-                              textInputAction: TextInputAction.next,
-                              onChanged: (value) => name = value,
+                            const SizedBox(width: 8),
+                            TextButton(
+                              onPressed: () {
+                                GoRouter.of(ctx).pop(false);
+                              },
+                              child: const Text('Cancelar'),
                             ),
-                            const SizedBox(height: 16),
-                            TextField(
-                        decoration: InputDecoration(
-                        labelText: 'Teléfono',
-                        filled: true,
-                        fillColor: Colors.transparent,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: const BorderSide(
-                            color: ColorsPaletteRedonda.primary,
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
- 
-                              textInputAction: TextInputAction.next,
-                              keyboardType: TextInputType.phone,
-                              onChanged: (value) => phone = value,
-                            ),
-                            const SizedBox(height: 16),
-                            TextField(
-                        decoration: InputDecoration(
-                        labelText: 'Correo electrónico (opcional)',
-                        filled: true,
-                        fillColor: Colors.transparent,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: const BorderSide(
-                            color: ColorsPaletteRedonda.primary,
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
-
-                              
-                              textInputAction: TextInputAction.done,
-                              keyboardType: TextInputType.emailAddress,
-                              onChanged: (value) => email = value,
+                            const SizedBox(width: 8),
+                            ElevatedButton(
+                              onPressed: () {
+                                final isValid = _validateFieldss(setState);
+                                if (isValid) {
+                                  GoRouter.of(ctx).pop(true);
+                                }
+                              },
+                              child: const Text('Continuar'),
                             ),
                           ],
                         ),
                       ),
                     ),
-                    bottomNavigationBar: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(
-                            onPressed: () {
-                              setState(() {
-                                showSignInScreen = true;
-                              });
-                            },
-                            child: const Text('Registrarse'),
-                          ),
-                          const SizedBox(width: 8),
-                          TextButton(
-                            onPressed: () {
-                              GoRouter.of(ctx).pop(false);
-                            },
-                            child: const Text('Cancelar'),
-                          ),
-                          const SizedBox(width: 8),
-                          ElevatedButton(
-                            onPressed: () {
-                              GoRouter.of(ctx).pop(true);
-                            },
-                            child: const Text('Continuar'),
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
-                ),
-              );
-            }
-          },
-        );
-      },
-    ).then((value) {
-      dialogResult = value as bool?;
-    });
+                );
+              }
+            },
+          );
+        },
+      ).then((value) {
+        dialogResult = value as bool?;
+      });
 
-    if (dialogResult != true) {
-      return null;
+      if (dialogResult != true) {
+        return null;
+      }
+
+      if (!showSignInScreen) {
+        return {
+          'name': name ?? '',
+          'phone': phone ?? '',
+          'email': email ?? '',
+        };
+      }
     }
 
-    if (!showSignInScreen) {
-      return {
-        'name': name ?? '',
-        'phone': phone ?? '',
-        'email': email ?? '',
-      };
-    }
+    final user = FirebaseAuth.instance.currentUser;
+    return {
+      'name': user?.displayName ?? '',
+      'phone': user?.phoneNumber ?? '',
+      'email': user?.email ?? '',
+    };
   }
 
-  final user = FirebaseAuth.instance.currentUser;
-  return {
-    'name': user?.displayName ?? '',
-    'phone': user?.phoneNumber ?? '',
-    'email': user?.email ?? '',
-  };
-}
+  // Add these helper methods
+  bool _validateEmail(String email) {
+    if (email.isEmpty) return false;
+    final emailRegExp = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    return emailRegExp.hasMatch(email);
+  }
+
+  bool _validateFieldss(StateSetter setState) {
+    setState(() {
+      _isNameValid = (name?.trim().isNotEmpty ?? false);
+      _isPhoneValid = (phone?.trim().isNotEmpty ?? false);
+      _isEmailValid = _validateEmail(email ?? '');
+    });
+    
+    return _isNameValid && _isPhoneValid && _isEmailValid;
+  }
 
   Widget _buildLocationField(BuildContext context,
       TextEditingController controller, String name) {
@@ -1024,7 +1066,7 @@ Future<Map<String, String>?> _checkAndPromptForContactInfo(BuildContext context)
           onTap: () => _showLocationBottomSheet(context, controller, name),
           style: Theme.of(context).textTheme.labelLarge,
           decoration: InputDecoration(
-              labelText: 'Ubicación',
+              labelText: 'Ubicación de entrega',
               hintStyle: Theme.of(context)
                 .textTheme
                 .titleSmall
@@ -1136,7 +1178,7 @@ Future<Map<String, String>?> _checkAndPromptForContactInfo(BuildContext context)
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
          
-          const SizedBox(height: 8.0),
+          // const SizedBox(height: 8.0),
           TextField(
             style: Theme.of(context).textTheme.labelLarge,
             controller: dateController,
