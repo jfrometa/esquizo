@@ -870,7 +870,7 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
     for (var dish in cateringOrder.dishes) {
       final String title = dish.title ?? 'Unknown Dish';
       final int quantity = dish.quantity ?? 0;
-      final double price = double.tryParse(dish.pricing ?? '0') ?? 0.0;
+      final double price = dish.pricing ?? 0.0;
       cateringBuffer += '$quantity x $title @ RD \$$price each\n';
     }
 

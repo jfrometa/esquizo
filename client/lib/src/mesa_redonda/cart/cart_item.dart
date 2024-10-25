@@ -152,7 +152,7 @@ class CartItem {
       foodType: json['foodType'] as String,
       quantity: json['quantity'] as int,
       isOffer: json['isOffer'] as bool,
-      hasChef: json['hasChef'] as bool,
+      hasChef: json['hasChef'] as bool?,
       isMealSubscription: json['isMealSubscription'] as bool,
       totalMeals: json['totalMeals'] as int,
       remainingMeals: json['remainingMeals'] as int,

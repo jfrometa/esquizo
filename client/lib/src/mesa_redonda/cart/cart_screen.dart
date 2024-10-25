@@ -161,7 +161,7 @@ class CartScreen extends ConsumerWidget {
      // Check if personas (cantidadPersonas) is selected and valid
      if(type.toLowerCase() == 'catering') {
         final cateringOrder = ref.watch(cateringOrderProvider);
-        final isPersonasSelected = cateringOrder?.cantidadPersonas != null && (cateringOrder!.cantidadPersonas ?? 0) > 0;
+        final isPersonasSelected = cateringOrder?.peopleCount != null && (cateringOrder!.peopleCount ?? 0) > 0;
 
         isDisabled = !isPersonasSelected;
      }

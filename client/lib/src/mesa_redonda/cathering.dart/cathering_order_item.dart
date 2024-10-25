@@ -10,9 +10,10 @@ class CateringDish {
   final double pricePerPerson;
   final double? pricePerUnit;
   final List<String> ingredients;
-  final String pricing;
+  final double pricing;
   final int quantity; // Added quantity field with default value of 1
   final String img; // Added img field
+  bool hasUnitSelection;
 
   CateringDish({
     required this.title,
@@ -20,6 +21,7 @@ class CateringDish {
     required this.pricePerPerson,
     required this.ingredients,
     required this.pricing,
+    this.hasUnitSelection = false,
     this.pricePerUnit, 
     this.img = 'assets/food5.jpeg', // Added default img value
     this.quantity = 1, // Default quantity to 1
@@ -32,6 +34,7 @@ class CateringDish {
     double? pricePerPerson,
     double? pricePerUnit,
     List<String>? ingredients,
+    bool? hasUnitSelection,
     int? quantity, // Added quantity to copyWith
     String? img, // Added img to copyWith
   }) {
@@ -43,7 +46,8 @@ class CateringDish {
       ingredients: ingredients ?? this.ingredients,
       pricing: pricing,
       img: img ?? this.img, // Added img to copyWith
-      quantity: quantity ?? this.quantity, // Added quantity to copyWith
+      quantity: quantity ?? this.quantity,
+      hasUnitSelection: hasUnitSelection ?? this.hasUnitSelection
     );
   }
 
@@ -56,6 +60,7 @@ class CateringDish {
         'pricePerUnit': pricePerUnit,
         'quantity': quantity, // Added quantity to JSON
         'img': img, // Added img to JSON
+        'hasUnitSelection': hasUnitSelection
       };
 
   factory CateringDish.fromJson(Map<String, dynamic> json) {
@@ -66,6 +71,7 @@ class CateringDish {
       ingredients: List<String>.from(json['ingredients']),
       pricing: json['pricing'],
       pricePerUnit: json['pricePerUnit'],
+      hasUnitSelection: json['hasUnitSelection'],
       quantity: json['quantity'], // Added quantity from JSON
       img: json['img'] ??
           'assets/food5.jpeg', // Added default img value from JSON
@@ -82,7 +88,7 @@ class CateringOrderItem {
   final String eventType;
   final String preferencia;
   final String adicionales;
-  final int? cantidadPersonas; // Add cantidadPersonas field 
+  final int? peopleCount; // Add cantidadPersonas field 
   bool? hasChef;
 
   CateringOrderItem({
@@ -95,12 +101,12 @@ class CateringOrderItem {
     required this.preferencia,
     required this.adicionales,
     this.hasChef,
-    required this.cantidadPersonas, 
+    required this.peopleCount, 
   });
 
   // Calculates the total price for all dishes in the order
   double get totalPrice => dishes.fold(
-      0, (total, dish) => total + (dish.pricePerPerson * dish.peopleCount));
+      0, (total, dish) => total + ((dish.pricePerUnit ?? 1) * (peopleCount ?? 1)));
 
   // Combines all ingredients from all dishes into a single list for display
   List<String> get combinedIngredients =>
@@ -117,7 +123,7 @@ class CateringOrderItem {
         'preferencia': preferencia,
         'adicionales': adicionales,
         'cantidadPersonas':
-            cantidadPersonas,
+            peopleCount,
       };
 
   factory CateringOrderItem.fromJson(Map<String, dynamic> json) {
@@ -133,7 +139,7 @@ class CateringOrderItem {
       eventType: json['eventType'],
       preferencia: json['preferencia'],
       adicionales: json['adicionales'],
-      cantidadPersonas: json['cantidadPersonas'],  
+      peopleCount: json['cantidadPersonas'],  
     );
   }
 
@@ -148,7 +154,7 @@ class CateringOrderItem {
     String? eventType,
     String? preferencia,
     String? adicionales,
-    int? cantidadPersonas,
+    int? peopleCount,
     int? cantidadUnidades,
   }) {
     return CateringOrderItem(
@@ -161,7 +167,7 @@ class CateringOrderItem {
       eventType: eventType ?? this.eventType,
       preferencia: preferencia ?? this.preferencia,
       adicionales: adicionales ?? this.adicionales,
-      cantidadPersonas: cantidadPersonas ?? this.cantidadPersonas, 
+      peopleCount: peopleCount ?? this.peopleCount, 
     );
   }
 }
@@ -216,13 +222,18 @@ class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
         eventType: '',
         preferencia: 'salado',
         adicionales: '',
-        cantidadPersonas: 0,
+        peopleCount: 0,
       );
     } else {
-      // Add to existing order
-      state = state!.copyWith(
-        dishes: [...state!.dishes, dish],
-      );
+      // Check if dish already exists (comparing by title)
+      bool dishExists = state!.dishes.any((existingDish) => existingDish.title == dish.title);
+      
+      if (!dishExists) {
+        // Only add if the dish doesn't exist
+        state = state!.copyWith(
+          dishes: [...state!.dishes, dish],
+        );
+      }
     }
   }
 
@@ -248,7 +259,7 @@ class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
         eventType: eventType,
         preferencia: preferencia,
         adicionales: adicionales,
-        cantidadPersonas: cantidadPersonas, // Update cantidadPersonas
+        peopleCount: cantidadPersonas, // Update cantidadPersonas
       );
     }
   }

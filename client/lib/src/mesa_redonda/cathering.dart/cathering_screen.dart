@@ -118,9 +118,9 @@ class CateringScreenState extends ConsumerState<CateringScreen>
 
     String eventType = cateringOrder?.eventType ?? '';
     String adicionales = cateringOrder?.adicionales ?? '';
-    int? cantidadPersonasRead = (cateringOrder?.cantidadPersonas != null &&
-            cateringOrder!.cantidadPersonas! > 0)
-        ? cateringOrder.cantidadPersonas
+    int? cantidadPersonasRead = (cateringOrder?.peopleCount != null &&
+            cateringOrder!.peopleCount! > 0)
+        ? cateringOrder.peopleCount
         : null;
 
     bool hasChef = cateringOrder?.hasChef ?? false;
@@ -356,7 +356,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Agregar Servicio de Chef',
+                          'Agregar cheffing',
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         Switch(
@@ -373,7 +373,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                     ),
                     const SizedBox(height: 24),
                     
-  ExpansionTile(
+                    ExpansionTile(
                       title: Text('Notas Adicionales',
                           style: Theme.of(context).textTheme.titleMedium),
                       children: [
@@ -510,7 +510,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
     // final cateringOrder = ref.read(cateringOrderProvider);
     final cateringOrderUpdate = ref.watch(cateringOrderProvider);
     // Set initial values, using provider values if available
-    int? cantidadPersonas = cateringOrderUpdate?.cantidadPersonas;
+    int? cantidadPersonas = cateringOrderUpdate?.peopleCount;
     final double maxTabWidth = TabUtils.calculateMaxTabWidth(
       context: context,
       tabTitles: categorizedItems.keys.toList(),
@@ -623,12 +623,15 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                         return CateringItemCard(
                           item: item,
                           onAddToCart: (int quantity) {
+
+                          final order = ref.watch(cateringOrderProvider);
+
                             ref
                                 .read(cateringOrderProvider.notifier)
                                 .addCateringItem(
                                   CateringDish(
                                     title: item.title,
-                                    peopleCount: quantity,
+                                    peopleCount: order?.peopleCount ?? 1,
                                     pricePerPerson: item.pricePerUnit ?? 0.0,
                                     ingredients: item.ingredients,
                                     pricing: item.pricing,

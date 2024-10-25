@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
@@ -34,7 +35,7 @@ class CateringOrderDetailsScreenState
     tempEventType = cateringOrders.eventType;
     tempPreferencia = cateringOrders.preferencia;
     tempAdicionales = cateringOrders.adicionales;
-    tempCantidadPersonas = cateringOrders.cantidadPersonas ?? 0;
+    tempCantidadPersonas = cateringOrders.peopleCount ?? 0;
   }
 
   @override
@@ -57,7 +58,8 @@ class CateringOrderDetailsScreenState
               ),
             ),
             Text(
-              '\$${(dish.peopleCount * tempCantidadPersonas).toStringAsFixed(2)}',
+              // Update price calculation based on hasUnitSelection
+              '\$${(dish.hasUnitSelection ? dish.quantity : dish.peopleCount * tempCantidadPersonas).toStringAsFixed(2)}',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             if (isEditing)
@@ -120,7 +122,7 @@ class CateringOrderDetailsScreenState
                   tempPreferencia = cateringOrders.preferencia;
                   tempAdicionales = cateringOrders.adicionales;
                   tempCantidadPersonas =
-                      cateringOrders.cantidadPersonas ?? 0; // Revert values
+                      cateringOrders.peopleCount ?? 0; // Revert values
                   isEditing = false;
                 });
               },
@@ -171,7 +173,7 @@ class CateringOrderDetailsScreenState
                         },
                       ),
                       _buildEditableTextField(
-                        'Evento',
+                        'Tipo de evento',
                         tempEventType,
                         (newValue) {
                           setState(() {
@@ -179,15 +181,15 @@ class CateringOrderDetailsScreenState
                           });
                         },
                       ),
-                      _buildEditableTextField(
-                        'Preferencia',
-                        tempPreferencia,
-                        (newValue) {
-                          setState(() {
-                            tempPreferencia = newValue;
-                          });
-                        },
-                      ),
+                      // _buildEditableTextField(
+                      //   'Preferencia',
+                      //   tempPreferencia,
+                      //   (newValue) {
+                      //     setState(() {
+                      //       tempPreferencia = newValue;
+                      //     });
+                      //   },
+                      // ),
                       _buildEditableTextField(
                         'Adicionales',
                         tempAdicionales,
@@ -264,7 +266,10 @@ class CateringOrderDetailsScreenState
   }
 
   void _editDishDialog(BuildContext context, CateringDish dish) {
-    String updatedPeopleCount = dish.peopleCount.toString();
+    String updatedValue = dish.hasUnitSelection 
+        ? dish.pricePerUnit.toString()
+        : dish.peopleCount.toString();
+        
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -273,10 +278,12 @@ class CateringOrderDetailsScreenState
           mainAxisSize: MainAxisSize.min,
           children: [
             TextFormField(
-              initialValue: updatedPeopleCount,
+              initialValue: updatedValue,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'People Count'),
-              onChanged: (value) => updatedPeopleCount = value,
+              decoration: InputDecoration(
+                labelText: dish.hasUnitSelection ? 'Unidades' : 'Cantidad por Persona'
+              ),
+              onChanged: (value) => updatedValue = value,
             ),
           ],
         ),
@@ -288,8 +295,16 @@ class CateringOrderDetailsScreenState
           TextButton(
             onPressed: () {
               setState(() {
-                ref.read(cateringOrderProvider.notifier).addCateringItem(
-                    dish.copyWith(peopleCount: int.parse(updatedPeopleCount)));
+                final parsedValue = int.parse(updatedValue);
+                if (dish.hasUnitSelection) {
+                  ref.read(cateringOrderProvider.notifier).addCateringItem(
+                    dish.copyWith(quantity: parsedValue)
+                  );
+                } else {
+                  ref.read(cateringOrderProvider.notifier).addCateringItem(
+                    dish.copyWith(peopleCount: parsedValue)
+                  );
+                }
               });
               Navigator.pop(context);
             },

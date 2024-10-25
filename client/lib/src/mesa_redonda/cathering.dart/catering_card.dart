@@ -142,17 +142,28 @@ class CateringItemCardState extends State<CateringItemCard> {
 
                 const SizedBox(height: 8),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    // Add price display
+                    Text( widget.item.hasUnitSelection ? 
+                    '${widget.item.hasUnitSelection ? 'Unidad' : ''}: \$${widget.item.pricePerUnit}' :
+                      '',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                     SizedBox(
                       height: 32,
                       child: ElevatedButton(
                         onPressed: () {
-                          final units = isCustomUnitsSelected 
-                              ? int.tryParse(customUnitsController.text) ?? 25 
-                              : selectedUnits ?? 25;
+                          final units = widget.item.hasUnitSelection
+                              ? (isCustomUnitsSelected 
+                                  ? int.tryParse(customUnitsController.text) ?? 25 
+                                  : selectedUnits ?? 25)
+                              : widget.item.peopleCount;  // For non-unit items, quantity is always 1
                           
-                          if (units < 25) {
+                          if (widget.item.hasUnitSelection && units < 25) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('La cantidad mínima es 25 unidades'),
@@ -162,16 +173,22 @@ class CateringItemCardState extends State<CateringItemCard> {
                             return;
                           }
 
-                          // Save the selected units back to the CateringItem model
+                          // For unit items: price * units
+                          // For non-unit items: price * 1 (peopleCount will be applied later)
+                          final basePrice = widget.item.pricePerUnit * units;
+
+                          // Save the selected units and base price to the CateringItem model
                           widget.item.quantity = units;
+                          widget.item.pricing = basePrice;
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'Se agregó ${widget.item.title} al carrito (${widget.item.hasUnitSelection ? '$units unidades' : '' }',
-                                style: TextStyle(color: Theme.of(context).primaryColor),
+                                'Se agregó ${widget.item.title} al carrito${widget.item.hasUnitSelection ? ' ($units unidades)' : ''}',
+                                style: TextStyle(color: Colors.white),
                               ),
                               backgroundColor: Colors.black,
+                              
                               duration: const Duration(milliseconds: 500),
                             ),
                           );

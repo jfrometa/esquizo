@@ -20,7 +20,7 @@ class CateringCartItemView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isPersonasSelected = order.cantidadPersonas != null && order.cantidadPersonas! > 0;
+    final isPersonasSelected = order.peopleCount != null && order.peopleCount! > 0;
 
     return Card(
       margin: const EdgeInsets.all(8.0),
@@ -97,25 +97,27 @@ class CateringCartItemView extends ConsumerWidget {
                 ),
               ),
             ),
-            const Divider(),
-            // Total order price
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Precio Total:',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  '\$${order.totalPrice.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: ColorsPaletteRedonda.primary,
-                  ),
-                ),
-              ],
-            ),
+            // const Divider(),
+            // // Total order price
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //   children: [
+            //     const Text(
+            //       'Precio Total:',
+            //       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            //     ),
+            //     Text(
+            //       '\$${order.totalPrice.toStringAsFixed(2)}',
+            //       style: const TextStyle(
+            //         fontSize: 16,
+            //         fontWeight: FontWeight.bold,
+            //         color: ColorsPaletteRedonda.primary,
+            //       ),
+            //     ),
+            //   ],
+            // ),
+            
+            
             const SizedBox(height: 16),
             // Button to complete the catering order
             
@@ -157,9 +159,9 @@ class CateringCartItemView extends ConsumerWidget {
 
     String eventType = cateringOrder?.eventType ?? '';
     String adicionales = cateringOrder?.adicionales ?? '';
-    int? cantidadPersonasRead = (cateringOrder?.cantidadPersonas != null &&
-            cateringOrder!.cantidadPersonas! > 0)
-        ? cateringOrder.cantidadPersonas
+    int? cantidadPersonasRead = (cateringOrder?.peopleCount != null &&
+            cateringOrder!.peopleCount! > 0)
+        ? cateringOrder.peopleCount
         : null;
 
     List<String> alergiasList = cateringOrder?.alergias.split(',') ?? [];
