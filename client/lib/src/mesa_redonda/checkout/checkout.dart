@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/custom_sign_in_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/helpers/text_capitalization.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/catering_cart_item_view.dart';
@@ -15,6 +16,19 @@ import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dar
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+// First, add these providers at the top level of your file (outside the class)
+final locationValidationProvider = StateNotifierProvider.family<LocationValidationNotifier, bool, String>((ref, type) {
+  return LocationValidationNotifier();
+});
+
+class LocationValidationNotifier extends StateNotifier<bool> {
+  LocationValidationNotifier() : super(false);
+  
+  void setValid(bool isValid) {
+    state = isValid;
+  }
+}
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   final String displayType; // 'platos', 'catering', or 'subscriptions'
@@ -63,12 +77,23 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   String? _regularDishesLatitude;
   String? _regularDishesLongitude;
 
-  bool _isCateringAddressValid = true;
-  bool _isMealSubscriptionAddressValid = true;
-  bool _isRegularCateringAddressValid = true;
+  // bool _isCateringAddressValid = true;
+  // bool _isMealSubscriptionAddressValid = true;
+  // bool _isRegularCateringAddressValid = true;
+
+   String? name, phone, email;
+    bool showSignInScreen = false;
+    bool? dialogResult;
+
+  // Add this to your state class
+  bool _isProcessingOrder = false;
+
+  // Add these to your state class
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _cateringLocationController.dispose();
     _regularDishesLocationController.dispose();
     _mealSubscriptionLocationController.dispose();
@@ -122,7 +147,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       // No items to display, pop the screen
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          GoRouter.of(context).pop(context);
+          GoRouter.of(context).pop(true);
         }
       });
       // Return an empty container while the screen is being popped
@@ -132,22 +157,23 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     return Scaffold(
       appBar: AppBar(
         forceMaterialTransparency: true,
-        title: const Text('Completar Orden'),
+        title: Text('Completar Orden: ${widget.displayType.capitalize()}'),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          controller: _scrollController,
+          padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
               if (widget.displayType == 'platos' &&
                   itemsToDisplay.isNotEmpty) ...[
-                _buildSectionTitle(context, 'Platos'),
+                // _buildSectionTitle(context, 'Platos'),
                 _buildLocationField(
                   context,
                   _regularDishesLocationController,
-                  _isRegularCateringAddressValid,
                   'regular',
                 ),
+                _buildPaymentMethodDropdown(),
                 for (var item in itemsToDisplay)
                   CartItemView(
                     img: item.img,
@@ -171,11 +197,10 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               ],
               if (widget.displayType == 'subscriptions' &&
                   itemsToDisplay.isNotEmpty) ...[
-                _buildSectionTitle(context, 'Subscripciones'),
+                // _buildSectionTitle(context, 'Subscripciones'),
                 _buildLocationField(
                   context,
                   _mealSubscriptionLocationController,
-                  _isMealSubscriptionAddressValid,
                   'mealSubscription',
                 ),
                 _buildDateTimePicker(
@@ -184,6 +209,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   _mealSubscriptionTimeController,
                   isCatering: false,
                 ),
+                _buildPaymentMethodDropdown(),
                 for (var item in itemsToDisplay)
                   MealSubscriptionItemView(
                     item: item,
@@ -197,11 +223,10 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               ],
               if (widget.displayType == 'catering' &&
                   cateringOrder != null) ...[
-                _buildSectionTitle(context, 'Catering'),
+                // _buildSectionTitle(context, 'Catering'),
                 _buildLocationField(
                   context,
                   _cateringLocationController,
-                  _isCateringAddressValid,
                   'catering',
                 ),
                 _buildDateTimePicker(
@@ -210,6 +235,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   _cateringTimeController,
                   isCatering: true,
                 ),
+                _buildPaymentMethodDropdown(),
                 CateringCartItemView(
                   order: cateringOrder,
                   onRemoveFromCart: () => ref
@@ -217,75 +243,52 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       .clearCateringOrder(),
                 ),
               ],
-              // Payment Method Dropdown
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    DropdownButtonFormField<int>(
-                      dropdownColor: ColorsPaletteRedonda.white,
-                      value: _selectedPaymentMethod,
-                      items: List.generate(_paymentMethods.length, (index) {
-                        return DropdownMenuItem<int>(
-                          value: index,
-                          child: Text(
-                            _paymentMethods[index],
-                            style: const TextStyle(
-                                color: ColorsPaletteRedonda.primary),
-                          ),
-                        );
-                      }),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedPaymentMethod = value!;
-                        });
-                      },
-                      decoration: InputDecoration(
-                        labelText: 'Método de pago',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: const BorderSide(
-                            color: ColorsPaletteRedonda.primary,
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8.0),
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Text(
-                        getPaymentMethodDescription(_selectedPaymentMethod),
-                        style: const TextStyle(
-                          color: Color.fromARGB(255, 231, 107, 24),
-                          fontSize: 14.0,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16.0),
+             // const SizedBox(height: 16.0),
               _buildOrderSummary(totalPrice),
               SizedBox(
                 height: 48,
                 child: ElevatedButton(
-                  onPressed: () =>
-                      _processOrder(context, itemsToDisplay, cateringOrder),
+                  onPressed: _isProcessingOrder
+                      ? null
+                      : () async {
+                          setState(() {
+                            _isProcessingOrder = true;
+                          });
+                          try {
+                            await _processOrder(
+                                context, itemsToDisplay, cateringOrder);
+                          } finally {
+                            if (mounted) {
+                              setState(() {
+                                _isProcessingOrder = false;
+                              });
+                            }
+                          }
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: ColorsPaletteRedonda.primary,
                     minimumSize: const Size(double.infinity, 48),
+                    // Disabled button will be semi-transparent
+                    disabledBackgroundColor:
+                        ColorsPaletteRedonda.primary.withOpacity(0.6),
                   ),
-                  child: Text(
-                    'Completar',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(color: Colors.white),
-                  ),
+                  child: _isProcessingOrder
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : Text(
+                          'Completar',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(color: Colors.white),
+                        ),
                 ),
               ),
             ],
@@ -481,23 +484,21 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   // Send WhatsApp message for regular orders
   Future<void> _sendWhatsAppOrder(
       List<CartItem> items, Map<String, String>? contactInfo) async {
+  
+if (_validateFields()) {
     const String phoneNumber = '+18493590832';
     final String orderDetails = _generateOrderDetails(items, contactInfo);
     final String whatsappUrlMobile =
-        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
+        'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
     final String whatsappUrlWeb =
         'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
 
     if (await canLaunchUrl(Uri.parse(whatsappUrlMobile))) {
       await launchUrl(Uri.parse(whatsappUrlMobile));
-      ref.read(cartProvider.notifier).clearCart();
-      GoRouter.of(context).pop();
-      GoRouter.of(context).goNamed(AppRoute.home.name);
+      _clearCartAndPop();
     } else if (await canLaunchUrl(Uri.parse(whatsappUrlWeb))) {
       await launchUrl(Uri.parse(whatsappUrlWeb));
-      ref.read(cartProvider.notifier).clearCart();
-      GoRouter.of(context).pop();
-      GoRouter.of(context).goNamed(AppRoute.home.name);
+      _clearCartAndPop();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -505,6 +506,15 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           backgroundColor: Colors.red,
         ),
       );
+    }
+
+    } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Completa los campos requeridos.'),
+            backgroundColor: Colors.red,
+          ),
+        );
     }
   }
 
@@ -514,21 +524,18 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     const String phoneNumber = '+18493590832';
     final String orderDetails =
         _generateSubscriptionOrderDetails(items, contactInfo);
+    if (_validateFields()) {
     final String whatsappUrlMobile =
-        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
+        'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
     final String whatsappUrlWeb =
         'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
 
     if (await canLaunchUrl(Uri.parse(whatsappUrlMobile))) {
       await launchUrl(Uri.parse(whatsappUrlMobile));
-      ref.read(mealOrderProvider.notifier).clearCart();
-      GoRouter.of(context).pop();
-      GoRouter.of(context).goNamed(AppRoute.home.name);
+      _clearSubscriptionAndPop();
     } else if (await canLaunchUrl(Uri.parse(whatsappUrlWeb))) {
       await launchUrl(Uri.parse(whatsappUrlWeb));
-      ref.read(mealOrderProvider.notifier).clearCart();
-      GoRouter.of(context).pop();
-      GoRouter.of(context).goNamed(AppRoute.home.name);
+      _clearSubscriptionAndPop();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -537,53 +544,112 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         ),
       );
     }
+
+    } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Completa los campos requeridos.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+    }
   }
+
+
+bool _validateFields() {
+  bool isValid = true;
+  double scrollOffset = 0;
+
+  switch (widget.displayType) {
+    case 'platos':
+      if (_regularDishesLocationController.text.isEmpty) {
+        ref.read(locationValidationProvider('regular').notifier).setValid(false);
+        isValid = false;
+        scrollOffset = 0; // Set the correct scroll offset for this field
+      } else {
+        ref.read(locationValidationProvider('regular').notifier).setValid(true);
+      }
+      break;
+
+    case 'subscriptions':
+      if (_mealSubscriptionLocationController.text.isEmpty) {
+        ref.read(locationValidationProvider('mealSubscription').notifier).setValid(false);
+        isValid = false;
+        scrollOffset = _scrollController.position.maxScrollExtent * 0.2; // Set correct scroll offset for this field
+      } else {
+        ref.read(locationValidationProvider('mealSubscription').notifier).setValid(true);
+      }
+      break;
+
+    case 'catering':
+      if (_cateringLocationController.text.isEmpty) {
+        ref.read(locationValidationProvider('catering').notifier).setValid(false);
+        isValid = false;
+        scrollOffset = _scrollController.position.maxScrollExtent * 0.4; // Set the correct scroll offset for this field
+      } else {
+        ref.read(locationValidationProvider('catering').notifier).setValid(true);
+      }
+      break;
+  }
+
+  if (!isValid) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollController.animateTo(
+        scrollOffset,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  return isValid;
+}
+
+
+  void _clearCateringAndPop() {
+     ref.read(cateringOrderProvider.notifier).clearCateringOrder(); 
+     if (GoRouter.of(context).canPop()) {
+      GoRouter.of(context).pop();
+     }
+      GoRouter.of(context).goNamed(AppRoute.home.name);
+  }
+
+  void _clearCartAndPop() {
+      ref.read(cartProvider.notifier).clearCart(); 
+      if (GoRouter.of(context).canPop()) {
+       GoRouter.of(context).pop();
+      }
+      GoRouter.of(context).goNamed(AppRoute.home.name);
+  }
+
+    void _clearSubscriptionAndPop() {
+      ref.read(mealOrderProvider.notifier).clearCart();
+      if (GoRouter.of(context).canPop()) {
+       GoRouter.of(context).pop();
+      }
+      GoRouter.of(context).goNamed(AppRoute.home.name);
+  }
+
 
   // Send WhatsApp message for catering orders
   Future<void> _sendWhatsAppCateringOrder(
       CateringOrderItem cateringOrder, Map<String, String>? contactInfo) async {
-    const String phoneNumber = '+18493590832';
+     const String phoneNumber = '+18493590832';
     final String orderDetails =
         _generateCateringOrderDetails(cateringOrder, contactInfo);
+  
+  if (_validateFields()) {
     final String whatsappUrlMobile =
-                    'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
+        'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
     final String whatsappUrlWeb =
         'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
 
-
-
-
-  //  const String phoneNumber = '+18493590832'; // WhatsApp number
-  //               final String orderDetails = _generateOrderDetails();
-                
-  //               final String whatsappUrlWeb =
-  //                   'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
-
-  //               if (await canLaunch(whatsappUrlMobile)) {
-  //                 await launch(whatsappUrlMobile);
-  //               } else {
-  //                 // Fallback to WhatsApp Web
-  //                 if (await canLaunch(whatsappUrlWeb)) {
-  //                   await launch(whatsappUrlWeb);
-  //                 } else {
-  //                   ScaffoldMessenger.of(context).showSnackBar(
-  //                     const SnackBar(content: Text('Could not open WhatsApp')),
-  //                   );
-  //                 }
-  //               }
-
-
-
     if (await canLaunchUrl(Uri.parse(whatsappUrlMobile))) {
       await launchUrl(Uri.parse(whatsappUrlMobile));
-      ref.read(cateringOrderProvider.notifier).clearCateringOrder();
-      GoRouter.of(context).pop();
-      GoRouter.of(context).goNamed(AppRoute.home.name);
+      _clearCateringAndPop();
     } else if (await canLaunchUrl(Uri.parse(whatsappUrlWeb))) {
       await launchUrl(Uri.parse(whatsappUrlWeb));
-      ref.read(cateringOrderProvider.notifier).clearCateringOrder();
-      GoRouter.of(context).pop();
-      GoRouter.of(context).goNamed(AppRoute.home.name);
+      _clearCateringAndPop();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -591,6 +657,15 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           backgroundColor: Colors.red,
         ),
       );
+    }
+
+    } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Completa los campos requeridos.'),
+            backgroundColor: Colors.red,
+          ),
+        );
     }
   }
 
@@ -765,9 +840,7 @@ Future<Map<String, String>?> _checkAndPromptForContactInfo(BuildContext context)
   final currentUser = FirebaseAuth.instance.currentUser;
 
   if (currentUser == null || currentUser.isAnonymous) {
-    String? name, phone, email;
-    bool showSignInScreen = false;
-    bool? dialogResult;
+   
 
     await showDialog<void>(
       context: context,
@@ -813,31 +886,61 @@ Future<Map<String, String>?> _checkAndPromptForContactInfo(BuildContext context)
                           children: [
                             const Text(
                               'Proporcione su nombre, teléfono y correo opcional o regístrese.',
-                              style: TextStyle(fontSize: 16),
+                              
                             ),
                             const SizedBox(height: 16),
-                            TextField(
-                              decoration: const InputDecoration(
-                                labelText: 'Nombre',
-                                border: OutlineInputBorder(),
-                              ),
+                            TextField( 
+                              decoration: InputDecoration(
+                         labelText: 'Nombre',
+                        filled: true,
+                        fillColor: Colors.transparent,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: const BorderSide(
+                            color: ColorsPaletteRedonda.primary,
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
+                              textInputAction: TextInputAction.next,
                               onChanged: (value) => name = value,
                             ),
                             const SizedBox(height: 16),
                             TextField(
-                              decoration: const InputDecoration(
-                                labelText: 'Teléfono',
-                                border: OutlineInputBorder(),
-                              ),
+                        decoration: InputDecoration(
+                        labelText: 'Teléfono',
+                        filled: true,
+                        fillColor: Colors.transparent,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: const BorderSide(
+                            color: ColorsPaletteRedonda.primary,
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
+ 
+                              textInputAction: TextInputAction.next,
                               keyboardType: TextInputType.phone,
                               onChanged: (value) => phone = value,
                             ),
                             const SizedBox(height: 16),
                             TextField(
-                              decoration: const InputDecoration(
-                                labelText: 'Correo electrónico (opcional)',
-                                border: OutlineInputBorder(),
-                              ),
+                        decoration: InputDecoration(
+                        labelText: 'Correo electrónico (opcional)',
+                        filled: true,
+                        fillColor: Colors.transparent,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: const BorderSide(
+                            color: ColorsPaletteRedonda.primary,
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
+
+                              
+                              textInputAction: TextInputAction.done,
                               keyboardType: TextInputType.emailAddress,
                               onChanged: (value) => email = value,
                             ),
@@ -907,9 +1010,10 @@ Future<Map<String, String>?> _checkAndPromptForContactInfo(BuildContext context)
   };
 }
 
-
   Widget _buildLocationField(BuildContext context,
-      TextEditingController controller, bool isValid, String name) {
+      TextEditingController controller, String name) {
+    final isValid = ref.watch(locationValidationProvider(name));
+    
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 60),
       child: Padding(
@@ -920,23 +1024,64 @@ Future<Map<String, String>?> _checkAndPromptForContactInfo(BuildContext context)
           onTap: () => _showLocationBottomSheet(context, controller, name),
           style: Theme.of(context).textTheme.labelLarge,
           decoration: InputDecoration(
-            hintText: 'Ingrese Ubicación',
-            filled: true,
-            fillColor: ColorsPaletteRedonda.white,
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: const BorderSide(
-                color: ColorsPaletteRedonda.deepBrown1,
-                width: 1.0,
+              labelText: 'Ubicación',
+              hintStyle: Theme.of(context)
+                .textTheme
+                .titleSmall
+                ?.copyWith(fontWeight: FontWeight.bold),
+               hintText: 'Ingrese Ubicación',
+              filled: true,
+              fillColor: Colors.transparent,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: const BorderSide(
+                  color: ColorsPaletteRedonda.deepBrown1,
+                  width: 1.0,
+                ),
               ),
-            ),
-            focusedBorder: OutlineInputBorder(
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: const BorderSide(
+                  color: ColorsPaletteRedonda.primary,
+                  width: 2.0,
+                ),
+              ),
+              errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),
-              borderSide: const BorderSide(
-                color: ColorsPaletteRedonda.primary,
+              borderSide: BorderSide(
+                color: ColorsPaletteRedonda.deepBrown1,
                 width: 2.0,
               ),
             ),
+
+            // border: OutlineInputBorder(
+            //   borderRadius: BorderRadius.circular(8.0),
+            //   borderSide: BorderSide(
+            //     color: isValid 
+            //         ? ColorsPaletteRedonda.deepBrown1
+            //         : Colors.red,
+            //     width: 1.0,
+            //   ),
+            // ),
+            // focusedErrorBorder: OutlineInputBorder(
+            //   borderRadius: BorderRadius.circular(8.0),
+            //   borderSide: BorderSide(
+            //     color: isValid 
+            //         ? ColorsPaletteRedonda.deepBrown1
+                    
+            //     width: 1.0,
+            //   ),
+            // ),
+            // focusedBorder: OutlineInputBorder(
+            //   borderRadius: BorderRadius.circular(8.0),
+            //   borderSide: BorderSide(
+            //     color: isValid 
+            //         ? ColorsPaletteRedonda.primary
+            //         : Colors.red,
+            //     width: 2.0,
+            //   ),
+            // ),
+            errorText: isValid ? null : 'La ubicación es requerida',
           ),
         ),
       ),
@@ -958,19 +1103,19 @@ Future<Map<String, String>?> _checkAndPromptForContactInfo(BuildContext context)
                   cateringAddress = address;
                   _cateringLatitude = latitude;
                   _cateringLongitude = longitude;
-                  _isCateringAddressValid = true;
+                  ref.read(locationValidationProvider('catering').notifier).setValid(true);
                   break;
                 case 'regular':
                   regularAddress = address;
                   _regularDishesLatitude = latitude;
                   _regularDishesLongitude = longitude;
-                  _isRegularCateringAddressValid = true;
+                  ref.read(locationValidationProvider('regular').notifier).setValid(true);
                   break;
                 case 'mealsubscription':
                   mealSubscriptionAddress = address;
                   _mealSubscriptionLatitude = latitude;
                   _mealSubscriptionLongitude = longitude;
-                  _isMealSubscriptionAddressValid = true;
+                  ref.read(locationValidationProvider('mealSubscription').notifier).setValid(true);
                   break;
               }
             });
@@ -990,15 +1135,7 @@ Future<Map<String, String>?> _checkAndPromptForContactInfo(BuildContext context)
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            isCatering
-                ? 'Selecciona la fecha y hora de tu catering'
-                : 'Selecciona la fecha y hora de tu entrega',
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(fontWeight: FontWeight.bold),
-          ),
+         
           const SizedBox(height: 8.0),
           TextField(
             style: Theme.of(context).textTheme.labelLarge,
@@ -1007,10 +1144,18 @@ Future<Map<String, String>?> _checkAndPromptForContactInfo(BuildContext context)
             onTap: () =>
                 _selectDateTime(context, dateController, timeController),
             decoration: InputDecoration(
+              labelText:  isCatering
+                ? 'Selecciona la fecha y hora de tu catering'
+                : 'Selecciona la fecha y hora de tu entrega',
+          
+              hintStyle: Theme.of(context)
+                .textTheme
+                .titleSmall
+                ?.copyWith(fontWeight: FontWeight.bold),
               hintText:
                   isCatering ? '2024-11-23 - 13:00' : '2024-11-23 - 13:00',
               filled: true,
-              fillColor: ColorsPaletteRedonda.white,
+              fillColor: Colors.transparent,
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
                 borderSide: const BorderSide(
@@ -1118,7 +1263,7 @@ Future<Map<String, String>?> _checkAndPromptForContactInfo(BuildContext context)
         style: Theme.of(context)
             .textTheme
             .titleLarge
-            ?.copyWith(fontWeight: FontWeight.bold),
+            ,
       ),
     );
   }
@@ -1131,9 +1276,9 @@ Future<Map<String, String>?> _checkAndPromptForContactInfo(BuildContext context)
       constraints: const BoxConstraints(minHeight: 150),
       child: Card(
         color: Colors.white,
-        margin: const EdgeInsets.symmetric(vertical: 16.0),
+        margin: const EdgeInsets.symmetric(vertical: 8.0),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1189,4 +1334,56 @@ Future<Map<String, String>?> _checkAndPromptForContactInfo(BuildContext context)
       ),
     );
   }
+
+  Widget _buildPaymentMethodDropdown() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          DropdownButtonFormField<int>(
+            dropdownColor: ColorsPaletteRedonda.white,
+            value: _selectedPaymentMethod,
+            items: List.generate(_paymentMethods.length, (index) {
+              return DropdownMenuItem<int>(
+                value: index,
+                child: Text(
+                  _paymentMethods[index],
+                  style: const TextStyle(color: ColorsPaletteRedonda.primary, fontSize: 14),
+                ),
+              );
+            }),
+            onChanged: (value) {
+              setState(() {
+                _selectedPaymentMethod = value!;
+              });
+            },
+            decoration: InputDecoration(
+              labelText: 'Método de pago',
+              filled: true,
+              fillColor: Colors.transparent,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: const BorderSide(
+                  color: ColorsPaletteRedonda.primary,
+                  width: 1.5,
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
+            child: Text(
+              getPaymentMethodDescription(_selectedPaymentMethod),
+              style: const TextStyle(
+                color: ColorsPaletteRedonda.orange,
+                fontSize: 14.0,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
+

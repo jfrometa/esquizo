@@ -93,16 +93,16 @@ GoRouter goRouter(GoRouterRef ref) {
 
       final path = state.uri.path;
 
-      final onboardingRepository =
-          ref.read(onboardingRepositoryProvider).requireValue;
-      final didCompleteOnboarding = onboardingRepository.isOnboardingComplete();
+      // final onboardingRepository =
+      //     ref.read(onboardingRepositoryProvider).requireValue;
+      // final didCompleteOnboarding = onboardingRepository.isOnboardingComplete();
 
-      if (!didCompleteOnboarding) {
-        if (path != '/onboarding') {
-          return '/onboarding';
-        }
-        return null;
-      }
+      // if (!didCompleteOnboarding) {
+      //   if (path != '/onboarding') {
+      //     return '/onboarding';
+      //   }
+      //   return null;
+      // }
 
       final isLoggedIn = authRepository.currentUser != null;
 
