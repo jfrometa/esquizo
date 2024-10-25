@@ -31,7 +31,7 @@ class CartItem {
   final String sideRequest;
 
   //Catering
-  final String apetito;
+  final bool? hasChef;
   final String alergias;
   final String eventType;
   final String preferencia;
@@ -49,7 +49,7 @@ class CartItem {
     required this.foodType,
     required this.quantity,
     required this.isOffer,
-     this.apetito = '',
+     this.hasChef = false,
      this.alergias = '',
      this.eventType = '',
      this.preferencia = '',
@@ -63,7 +63,7 @@ class CartItem {
   }) : expirationDate = expirationDate ?? DateTime.now().add(const Duration(days: 40));
 
   CartItem copyWith({
-    String? apetito,
+    bool? hasChef,
     String? alergias,
     String? eventType,
     String? preferencia,
@@ -104,7 +104,7 @@ class CartItem {
       peopleCount: peopleCount ?? this.peopleCount,
       sideRequest: sideRequest ?? this.sideRequest,
       // isMealPlanDish: isMealPlanDish ?? this.isMealPlanDish,
-      apetito: apetito ?? this.apetito,
+      hasChef: hasChef ?? this.hasChef,
       alergias: alergias ?? this.alergias,
       eventType: eventType ?? this.eventType,
       preferencia: preferencia ?? this.preferencia,
@@ -131,7 +131,7 @@ class CartItem {
       'expirationDate': expirationDate.toIso8601String(),
       'peopleCount': peopleCount,
       'sideRequest': sideRequest,
-      'apetito': apetito,
+      'hasChef': hasChef,
       'alergias': alergias,
       'eventType': eventType,
       'preferencia': preferencia,
@@ -152,6 +152,7 @@ class CartItem {
       foodType: json['foodType'] as String,
       quantity: json['quantity'] as int,
       isOffer: json['isOffer'] as bool,
+      hasChef: json['hasChef'] as bool,
       isMealSubscription: json['isMealSubscription'] as bool,
       totalMeals: json['totalMeals'] as int,
       remainingMeals: json['remainingMeals'] as int,
@@ -237,7 +238,7 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
           isOffer: false,
           peopleCount: peopleCount,
           sideRequest: sideRequest ?? '', 
-          apetito: '',
+          hasChef: false,
         ),
       );
 
@@ -255,7 +256,7 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
         quantity: quantity,
         peopleCount: item['peopleCount'],
         sideRequest: item['sideRequest'] ?? '',
-        apetito: item['apetito'] ?? 'regular',
+        hasChef: item['hasChef'] ?? false,
         alergias: item['alergias'] ?? '',
         eventType: item['eventType'] ?? '',
         preferencia: item['preferencia'] ?? 'salado', isOffer: false,
@@ -303,6 +304,7 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
           isSpicy: item['isSpicy'] ?? false,
           foodType: item['foodType'] ?? 'Subscripcion',
           quantity: 1,
+          hasChef: item['hasChef'],
           isOffer: item.containsKey('offertPricing') && item['offertPricing'] != null,
           isMealSubscription: true,
           totalMeals: totalMeals,
@@ -325,6 +327,7 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
           ingredients: List<String>.from(item['ingredients']),
           isSpicy: item['isSpicy'],
           foodType: item['foodType'],
+          hasChef: item['hasChef'],
           quantity: 0,
           isOffer: item.containsKey('offertPricing') && item['offertPricing'] != null,
         ),

@@ -111,10 +111,6 @@ class CateringScreenState extends ConsumerState<CateringScreen>
       10000
     ];
     // Set initial values, using provider values if available
-    String apetito = (cateringOrder?.apetito != null &&
-            cateringOrder?.apetito.isNotEmpty == true)
-        ? cateringOrder!.apetito
-        : 'regular';
     String preferencia = (cateringOrder?.preferencia != null &&
             cateringOrder?.preferencia.isNotEmpty == true)
         ? cateringOrder!.preferencia
@@ -431,7 +427,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                           onPressed: () {
                             _finalizeAndAddToCart(
                                 ref,
-                                apetito,
+                                hasChef,
                                 alergiasList.join(','),
                                 eventType,
                                 preferencia,
@@ -471,7 +467,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
 
   void _finalizeAndAddToCart(
       WidgetRef ref,
-      String apetito,
+      bool hasChef,
       String alergias,
       String eventType,
       String preferencia,
@@ -483,7 +479,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
       title: 'Orden de Catering',
       img: 'assets/image.png',
       description: 'Catering',
-      apetito: apetito,
+      hasChef: hasChef,
       alergias: alergias,
       eventType: eventType,
       preferencia: preferencia,
@@ -633,7 +629,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                                   CateringDish(
                                     title: item.title,
                                     peopleCount: quantity,
-                                    pricePerPerson: item.pricePerPerson,
+                                    pricePerPerson: item.pricePerUnit,
                                     ingredients: item.ingredients,
                                     pricing: item.pricing,
                                   ),

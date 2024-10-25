@@ -16,7 +16,7 @@ class CateringOrderDetailsScreenState
   bool isEditing = false;
 
   // Temporary variables to store changes before applying
-  late String tempApetito;
+  late bool temphasChef;
   late String tempAlergias;
   late String tempEventType;
   late String tempPreferencia;
@@ -29,7 +29,7 @@ class CateringOrderDetailsScreenState
     final cateringOrders = ref.read(cateringOrderProvider)!;
 
     // Initialize temporary values with the existing order values
-    tempApetito = cateringOrders.apetito;
+    temphasChef = cateringOrders.hasChef ?? false;
     tempAlergias = cateringOrders.alergias;
     tempEventType = cateringOrders.eventType;
     tempPreferencia = cateringOrders.preferencia;
@@ -94,7 +94,7 @@ class CateringOrderDetailsScreenState
                       title: cateringOrders.title,
                       img: cateringOrders.img,
                       cantidadPersonas: tempCantidadPersonas, // Updated value
-                      apetito: tempApetito, // Updated value
+                      hasChef: temphasChef, // Updated value
                       alergias: tempAlergias, // Updated value
                       eventType: tempEventType, // Updated value
                       preferencia: tempPreferencia, // Updated value
@@ -114,7 +114,7 @@ class CateringOrderDetailsScreenState
               onPressed: () {
                 // Cancel editing, revert values, and pop the screen
                 setState(() {
-                  tempApetito = cateringOrders.apetito;
+                  temphasChef = cateringOrders.hasChef ?? false;
                   tempAlergias = cateringOrders.alergias;
                   tempEventType = cateringOrders.eventType;
                   tempPreferencia = cateringOrders.preferencia;
@@ -153,11 +153,11 @@ class CateringOrderDetailsScreenState
                         },
                       ),
                       _buildEditableTextField(
-                        'Apetito',
-                        tempApetito,
+                        'hasChef',
+                        temphasChef,
                         (newValue) {
                           setState(() {
-                            tempApetito = newValue;
+                            temphasChef = newValue;
                           });
                         },
                       ),
@@ -221,7 +221,25 @@ class CateringOrderDetailsScreenState
   }
 
   Widget _buildEditableTextField(
-      String label, String value, ValueChanged<String> onChanged) {
+      String label, dynamic value, Function(dynamic) onChanged) {
+    if (value is bool) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 8.0),
+        child: Row(
+          children: [
+            Text('$label: ${value ? ' Si ' : ' No '}', style: const TextStyle(fontSize: 16)),
+            Spacer(),
+           isEditing ? Switch(
+              inactiveTrackColor: ColorsPaletteRedonda.deepBrown,
+              activeColor: ColorsPaletteRedonda.primary,
+              value: value,
+              onChanged: isEditing ? (bool newValue) => onChanged(newValue) : null,
+            ) : SizedBox(),
+          ],
+        ),
+      );
+    }
+    
     return isEditing
         ? Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
@@ -230,8 +248,8 @@ class CateringOrderDetailsScreenState
                 Text('$label: ', style: const TextStyle(fontSize: 16)),
                 Expanded(
                   child: TextFormField(
-                    initialValue: value,
-                    onChanged: onChanged, // Temporarily update the value
+                    initialValue: value.toString(),
+                    onChanged: onChanged,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       contentPadding:

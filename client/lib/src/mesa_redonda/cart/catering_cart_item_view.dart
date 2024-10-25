@@ -38,7 +38,7 @@ class CateringCartItemView extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    order.title,
+                    order.title.isEmpty ? 'Orderden de Catering' : order.title,
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -56,10 +56,10 @@ class CateringCartItemView extends ConsumerWidget {
             // Order details
             Text(order.description),
             const SizedBox(height: 8),
-            Text('Apetito: ${order.apetito}'),
-            Text('Alergias: ${order.alergias.isNotEmpty ? order.alergias : "Ninguna"}'),
-            Text('Evento: ${order.eventType}'),
-            Text('Preferencia: ${order.preferencia}'),
+            Text('Cheffing: ${(order.hasChef ?? false) ? ' Si ' : ' No '}'),
+            Text('Alergias: ${order.alergias.trim().isNotEmpty ? order.alergias : "Ninguna"}'),
+            Text('Evento: ${order.eventType.isEmpty ? 'Solicitud de Catering' : order.eventType}'),
+            // Text('Preferencia: ${order.preferencia}'),
             if (order.adicionales.isNotEmpty)
               Text('Adicionales: ${order.adicionales}'),
             const SizedBox(height: 16),
@@ -164,10 +164,6 @@ class CateringCartItemView extends ConsumerWidget {
       10000
     ];
     // Set initial values, using provider values if available
-    String apetito = (cateringOrder?.apetito != null &&
-            cateringOrder?.apetito.isNotEmpty == true)
-        ? cateringOrder!.apetito
-        : 'regular';
     String preferencia = (cateringOrder?.preferencia != null &&
             cateringOrder?.preferencia.isNotEmpty == true)
         ? cateringOrder!.preferencia
@@ -195,8 +191,9 @@ class CateringCartItemView extends ConsumerWidget {
 
     // Helper function to add allergies
     void addAllergy(String value, StateSetter setModalState) {
-      if (value.isNotEmpty && !alergiasList.contains(value)) {
-        setModalState(() => alergiasList.add(value));
+      final trimmedValue = value.trim();
+      if (trimmedValue.isNotEmpty && !alergiasList.contains(trimmedValue)) {
+        setModalState(() => alergiasList.add(trimmedValue));
       }
     }
 
@@ -208,7 +205,7 @@ class CateringCartItemView extends ConsumerWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
-        String? allergyInput = '';
+        String? allergyInput ;
         return Padding(
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -349,10 +346,12 @@ class CateringCartItemView extends ConsumerWidget {
                                   title: const Text('Nueva Alergia'),
                                   content: TextField(
                                     onChanged: (value) =>
-                                        {allergyInput = value},
+                                        {allergyInput = value.trim()},
                                     onSubmitted: (value) {
-                                      addAllergy(value, setModalState);
-                                      Navigator.pop(context, value);
+                                      if (value.trim().isNotEmpty) {
+                                        addAllergy(value, setModalState);
+                                        GoRouter.of(context).pop(value);
+                                      }
                                     },
                                     decoration: const InputDecoration(
                                       hintText: 'Ingresa una alergia',
@@ -361,28 +360,22 @@ class CateringCartItemView extends ConsumerWidget {
                                   ),
                                   actions: [
                                     TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(
-                                            context); // Close the dialog without saving
-                                      },
+                                      onPressed: () => Navigator.pop(context),
                                       child: const Text('Cancelar'),
                                     ),
                                     TextButton(
                                       onPressed: () {
-                                        // Add the allergy and close the dialog
-                                        if (allergyInput != null &&
-                                            allergyInput!.isNotEmpty) {
-                                          addAllergy(
-                                              allergyInput!, setModalState);
+                                        if (allergyInput != null && allergyInput!.trim().isNotEmpty) {
+                                          addAllergy(allergyInput!, setModalState);
                                         }
-                                        Navigator.pop(context, allergyInput);
+                                        GoRouter.of(context).pop(allergyInput);
                                       },
                                       child: const Text('Aceptar'),
                                     ),
                                   ],
                                 ),
                               );
-                              if (newAllergy != null && newAllergy.isNotEmpty) {
+                              if (newAllergy != null && newAllergy.trim().isNotEmpty) {
                                 addAllergy(newAllergy, setModalState);
                               }
                             },
@@ -481,7 +474,7 @@ class CateringCartItemView extends ConsumerWidget {
                           onPressed: () {
                             _finalizeAndAddToCart(
                                 ref,
-                                apetito,
+                                hasChef,
                                 alergiasList.join(','),
                                 eventType,
                                 preferencia,
@@ -521,7 +514,7 @@ class CateringCartItemView extends ConsumerWidget {
 
   void _finalizeAndAddToCart(
       WidgetRef ref,
-      String apetito,
+      bool hasChef,
       String alergias,
       String eventType,
       String preferencia,
@@ -533,7 +526,7 @@ class CateringCartItemView extends ConsumerWidget {
       title: 'Orden de Catering',
       img: 'assets/image.png',
       description: 'Catering',
-      apetito: apetito,
+      hasChef: hasChef,
       alergias: alergias,
       eventType: eventType,
       preferencia: preferencia,

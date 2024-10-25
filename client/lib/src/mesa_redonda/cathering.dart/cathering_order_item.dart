@@ -37,7 +37,7 @@ class CateringDish {
       peopleCount: peopleCount ?? this.peopleCount,
       pricePerPerson: pricePerPerson ?? this.pricePerPerson,
       ingredients: ingredients ?? this.ingredients,
-      pricing: pricing ?? pricing,
+      pricing: pricing,
       img: img ?? this.img, // Added img to copyWith
       quantity: quantity ?? this.quantity, // Added quantity to copyWith
     );
@@ -71,8 +71,7 @@ class CateringOrderItem {
   final String title;
   final String img;
   final String description;
-  final List<CateringDish> dishes;
-  final String apetito;
+  final List<CateringDish> dishes; 
   final String alergias;
   final String eventType;
   final String preferencia;
@@ -84,8 +83,7 @@ class CateringOrderItem {
     required this.title,
     required this.img,
     required this.description,
-    required this.dishes,
-    required this.apetito,
+    required this.dishes, 
     required this.alergias,
     required this.eventType,
     required this.preferencia,
@@ -107,7 +105,7 @@ class CateringOrderItem {
         'img': img,
         'description': description,
         'dishes': dishes.map((dish) => dish.toJson()).toList(),
-        'apetito': apetito,
+        'hasChef': hasChef,
         'alergias': alergias,
         'eventType': eventType,
         'preferencia': preferencia,
@@ -124,7 +122,7 @@ class CateringOrderItem {
       dishes: (json['dishes'] as List)
           .map((dish) => CateringDish.fromJson(dish))
           .toList(),
-      apetito: json['apetito'],
+      hasChef: json['hasChef'],
       alergias: json['alergias'],
       eventType: json['eventType'],
       preferencia: json['preferencia'],
@@ -139,7 +137,7 @@ class CateringOrderItem {
     String? img,
     String? description,
     List<CateringDish>? dishes,
-    String? apetito,
+    bool? hasChef,
     String? alergias,
     String? eventType,
     String? preferencia,
@@ -151,7 +149,7 @@ class CateringOrderItem {
       img: img ?? this.img,
       description: description ?? this.description,
       dishes: dishes ?? this.dishes,
-      apetito: apetito ?? this.apetito,
+      hasChef: hasChef ?? this.hasChef,
       alergias: alergias ?? this.alergias,
       eventType: eventType ?? this.eventType,
       preferencia: preferencia ?? this.preferencia,
@@ -206,7 +204,7 @@ class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
         img: '',
         description: '',
         dishes: [dish],
-        apetito: 'regular',
+        hasChef: false,
         alergias: '',
         eventType: '',
         preferencia: 'salado',
@@ -226,7 +224,7 @@ class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
     required String title,
     required String img,
     required String description,
-    required String apetito,
+    required bool hasChef,
     required String alergias,
     required String eventType,
     required String preferencia,
@@ -238,7 +236,7 @@ class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
         title: title,
         img: img,
         description: description,
-        apetito: apetito,
+        hasChef: hasChef,
         alergias: alergias,
         eventType: eventType,
         preferencia: preferencia,
