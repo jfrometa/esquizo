@@ -163,7 +163,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     if (!hasItemsToDisplay || widget.displayType.isEmpty) {
       // No items to display, pop the screen
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
+        if (mounted && GoRouter.of(context).canPop()) {
           GoRouter.of(context).pop(true);
         }
       });
@@ -506,9 +506,9 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   // Send WhatsApp message for regular orders
   Future<void> _sendWhatsAppOrder(
       List<CartItem> items, Map<String, String>? contactInfo) async {
-  
-    const String phoneNumber = '+18493590832';
+
     final String orderDetails = _generateOrderDetails(items, contactInfo);
+        const String phoneNumber = '+18493590832';
     final String whatsappUrlMobile =
         'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
     final String whatsappUrlWeb =
@@ -533,10 +533,11 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   // Send WhatsApp message for subscriptions
   Future<void> _sendWhatsAppSubscriptionOrder(
       List<CartItem> items, Map<String, String>? contactInfo) async {
-    const String phoneNumber = '+18493590832';
+  
     final String orderDetails =
         _generateSubscriptionOrderDetails(items, contactInfo);
     
+    const String phoneNumber = '+18493590832';
     final String whatsappUrlMobile =
         'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
     final String whatsappUrlWeb =
@@ -685,41 +686,58 @@ void _showValidationError(String type) {
 
   void _clearCateringAndPop() {
      ref.read(cateringOrderProvider.notifier).clearCateringOrder(); 
-     if (GoRouter.of(context).canPop()) {
-      GoRouter.of(context).pop();
-     }
-      GoRouter.of(context).goNamed(AppRoute.home.name);
+      // Check if the current route can be popped (i.e., there's a previous screen in the stack)
+  if (GoRouter.of(context).canPop()) {
+    GoRouter.of(context).pop(); // Pop the checkout screen to return to the previous screen
+  } else {
+    // If there's no previous screen, directly navigate to the home screen
+    GoRouter.of(context).goNamed(AppRoute.home.name);
   }
+  }
+
+  void _clearAndNavigateHome() {
+    ref.read(cartProvider.notifier).clearCart(); // Clear the cart
+    if (GoRouter.of(context).canPop()) {
+        GoRouter.of(context).pop(); // Pop checkout screen if possible
+    }
+    GoRouter.of(context).goNamed(AppRoute.home.name); // Go to the home screen
+}
 
   void _clearCartAndPop() {
       ref.read(cartProvider.notifier).clearCart(); 
-      if (GoRouter.of(context).canPop()) {
-       GoRouter.of(context).pop();
-      }
-      GoRouter.of(context).goNamed(AppRoute.home.name);
+        // Check if the current route can be popped (i.e., there's a previous screen in the stack)
+  if (GoRouter.of(context).canPop()) {
+    GoRouter.of(context).pop(); // Pop the checkout screen to return to the previous screen
+  } else {
+    // If there's no previous screen, directly navigate to the home screen
+    GoRouter.of(context).goNamed(AppRoute.home.name);
+  }
   }
 
     void _clearSubscriptionAndPop() {
       ref.read(mealOrderProvider.notifier).clearCart();
-      if (GoRouter.of(context).canPop()) {
-       GoRouter.of(context).pop();
-      }
-      GoRouter.of(context).goNamed(AppRoute.home.name);
+        // Check if the current route can be popped (i.e., there's a previous screen in the stack)
+  if (GoRouter.of(context).canPop()) {
+    GoRouter.of(context).pop(); // Pop the checkout screen to return to the previous screen
+  } else {
+    // If there's no previous screen, directly navigate to the home screen
+    GoRouter.of(context).goNamed(AppRoute.home.name);
+  }
   }
 
 
   // Send WhatsApp message for catering orders
   Future<void> _sendWhatsAppCateringOrder(
       CateringOrderItem cateringOrder, Map<String, String>? contactInfo) async {
-     const String phoneNumber = '+18493590832';
+    
     final String orderDetails =
         _generateCateringOrderDetails(cateringOrder, contactInfo);
   
-
+    const String phoneNumber = '+18493590832';
     final String whatsappUrlMobile =
         'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
     final String whatsappUrlWeb =
-        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
+        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}'; 
 
     if (await canLaunchUrl(Uri.parse(whatsappUrlMobile))) {
       await launchUrl(Uri.parse(whatsappUrlMobile));
@@ -1344,7 +1362,7 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
       return;
     }
 
-    if (pickedDate != null && pickedTime != null) {
+    if (pickedTime != null) {
       final DateTime selectedDateTime = DateTime(
         pickedDate.year,
         pickedDate.month,

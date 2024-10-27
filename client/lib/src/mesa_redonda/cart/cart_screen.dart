@@ -191,6 +191,8 @@ class CartScreen extends ConsumerWidget {
         child: const Text('Realizar pedido'),
       ),
     );
+
+    
   }
 
 
