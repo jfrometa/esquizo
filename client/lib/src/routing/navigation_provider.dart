@@ -33,13 +33,17 @@ final navigationDestinationsProvider = Provider<List<NavigationDestinationItem>>
       path: '/carrito',
     ),
     NavigationDestinationItem(
-      icon: Icons.account_circle,
-      label: 'Cuenta',
+      path: '/ordenes',  // New route
+      icon: Icons.pending_actions,
+      label: 'Ordenes',
+    ),
+    NavigationDestinationItem(
       path: '/cuenta',
+      icon: Icons.person_outline,
+      label: 'Cuenta',
+
     ),
   ];
-
-  // Check if user is admin
   final isAdmin = ref.watch(isAdminProvider).value ?? false;
 
   // Add admin destination if user is admin
@@ -54,4 +58,5 @@ final navigationDestinationsProvider = Provider<List<NavigationDestinationItem>>
   }
 
   return baseDestinations;
+ 
 });

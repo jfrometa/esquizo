@@ -29,6 +29,7 @@ import 'package:starter_architecture_flutter_firebase/src/routing/not_found_scre
 import 'package:starter_architecture_flutter_firebase/src/routing/scaffold_with_nested_navigation.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/admin/screens/admin_panel_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/unauthorized_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/features/orders/presentation/in_progress_orders_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -39,6 +40,7 @@ final _accountNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'account');
 final _landingNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'landing');
 final _cartNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'cart');
 final _adminNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'admin');
+final _OrdersNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'orders');
 
 
 enum AppRoute {
@@ -61,6 +63,7 @@ enum AppRoute {
   caterings, // If both are used
   landing,
   adminPanel,
+  inProgressOrders,
 }
 
 @riverpod
@@ -300,6 +303,8 @@ GlobalKey<NavigatorState> _getNavigatorKey(String path) {
       return _accountNavigatorKey;
     case '/admin':
       return _adminNavigatorKey;
+      case '/ordenes':
+       return _OrdersNavigatorKey;
     default:
       return _rootNavigatorKey;
   }
@@ -311,6 +316,7 @@ String _getRouteName(String path) {
     '/menu': AppRoute.home.name,
     '/carrito': AppRoute.homecart.name,
     '/cuenta': AppRoute.profile.name,
+    '/ordenes': AppRoute.inProgressOrders.name,
     '/admin': AppRoute.adminPanel.name,
   };
   return pathToRoute[path] ?? AppRoute.home.name;
@@ -339,6 +345,8 @@ Widget _getDestinationScreen(String path) {
           );
         },
       );
+    case '/ordenes':
+      return const InProgressOrdersScreen();
     default:
       return const Home();
   }
@@ -359,3 +367,4 @@ StatefulShellBranch _buildBranch(NavigationDestinationItem destination) {
     ],
   );
 }
+

@@ -22,7 +22,8 @@ class OrderHistoryList extends ConsumerWidget {
           physics: const NeverScrollableScrollPhysics(),
           itemCount: orders.length,
           itemBuilder: (context, index) {
-            final order = orders.reversed.toList()[index];
+              final latest = orders..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+            final order = latest[index];
             return Padding(
               padding:
                   const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
