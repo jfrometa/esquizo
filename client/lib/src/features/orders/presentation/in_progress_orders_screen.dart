@@ -16,36 +16,55 @@ enum OrderStatus {
   const OrderStatus(this.label);
 }
 
-class InProgressOrdersScreen extends ConsumerWidget {
+class InProgressOrdersScreen extends ConsumerStatefulWidget {
   const InProgressOrdersScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Mis Ordenes'),
-          bottom: TabBar(
-            labelColor: ColorsPaletteRedonda.white,
-            unselectedLabelColor: ColorsPaletteRedonda.deepBrown1,
-            indicatorSize: TabBarIndicatorSize.tab,
-            indicator: TabIndicator(
-              radius: 16.0,
-              color: ColorsPaletteRedonda.primary,
-            ),
-            tabs: const [
-              Tab(text: 'En Proceso'),
-              Tab(text: 'Completadas'),
-            ],
+  _InProgressOrdersScreenState createState() => _InProgressOrdersScreenState();
+}
+
+class _InProgressOrdersScreenState extends ConsumerState<InProgressOrdersScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Mis Ordenes'),
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: ColorsPaletteRedonda.white,
+          unselectedLabelColor: ColorsPaletteRedonda.deepBrown1,
+          indicatorSize: TabBarIndicatorSize.tab,
+          indicator: TabIndicator(
+            radius: 16.0,
+            color: ColorsPaletteRedonda.primary,
           ),
-        ),
-        body: TabBarView(
-          children: [
-            _OrdersList(isCompleted: false),
-            _OrdersList(isCompleted: true),
+          tabs: const [
+            Tab(text: 'En Proceso'),
+            Tab(text: 'Completadas'),
           ],
         ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _OrdersList(isCompleted: false),
+          _OrdersList(isCompleted: true),
+        ],
       ),
     );
   }
@@ -72,61 +91,111 @@ class _OrdersList extends ConsumerWidget {
     }
   }
 
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return StreamBuilder(
+    return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('orders')
-          .where('status', isEqualTo: isCompleted ? 'pendiente' : 'entregado')
+          .where('status', isEqualTo: isCompleted ? 'Entregado' : 'En Proceso')
           .orderBy('timestamp', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
+        // Improved error handling
         if (snapshot.hasError) {
-          return const Center(child: Text('Something went wrong'));
-        }
-
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        final orders = snapshot.data?.docs ?? [];
-        
-        if (orders.isEmpty) {
           return Center(
-            child: Text(
-              isCompleted 
-                ? 'No hay órdenes completadas' 
-                : 'No hay órdenes en proceso'
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red, size: 60),
+                const SizedBox(height: 16),
+                Text(
+                  'Error al cargar las órdenes',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                Text(
+                  'Por favor, revise su conexión e intente de nuevo',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
             ),
           );
         }
 
+        // Loading state
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator.adaptive(),
+          );
+        }
+
+        // Check if snapshot has data
+        final orders = snapshot.data?.docs ?? [];
+
+        // Empty state handling
+        if (orders.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.inbox_outlined, color: Colors.grey, size: 60),
+                const SizedBox(height: 16),
+                Text(
+                  isCompleted
+                      ? 'No hay órdenes completadas'
+                      : 'No hay órdenes en proceso',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
+            ),
+          );
+        }
+
+        // List of orders
         return ListView.builder(
+          key: PageStorageKey<bool>(isCompleted),
+          physics: const AlwaysScrollableScrollPhysics(),
           itemCount: orders.length,
           itemBuilder: (context, index) {
-            final order = orders[index].data();
+            // Safely extract order data
+            final order = orders[index].data() as Map<String, dynamic>? ?? {};
+
+            // Null-safe checks for critical fields
+            final orderNumber = order['orderNumber']?.toString() ?? 'N/A';
+            final orderType = order['orderType']?.toString() ?? 'N/A';
+            final timestamp = order['timestamp'] is Timestamp
+                ? (order['timestamp'] as Timestamp).toDate()
+                : DateTime.now();
+            final orderStatus =
+                order['orderStatus']?.toString() ?? 'Desconocido';
+            final paymentStatus =
+                order['paymentStatus']?.toString() ?? 'No pagado';
+            final totalAmount = order['totalAmount'] is num
+                ? (order['totalAmount'] as num).toStringAsFixed(2)
+                : '0.00';
+
             return Card(
-              margin: const EdgeInsets.all(8.0),
+              margin:
+                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              elevation: 2,
               child: ListTile(
                 title: Text(
-                  'Orden #${order['orderNumber']}',
+                  'Orden #$orderNumber',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 4),
-                    Text('Tipo: ${order['orderType']}'),
+                    Text('Tipo: $orderType'),
                     Text(
-                      'Fecha: ${DateFormat.yMMMd().add_jm().format(order['timestamp'].toDate())}',
+                      'Fecha: ${DateFormat.yMMMd().add_jm().format(timestamp)}',
                     ),
                     Row(
                       children: [
                         const Text('Estado: '),
                         Chip(
-                          label: Text(order['orderStatus']),
-                          backgroundColor: _getStatusColor(order['orderStatus']),
+                          label: Text(orderStatus),
+                          backgroundColor: _getStatusColor(orderStatus),
                           labelStyle: const TextStyle(color: Colors.white),
                         ),
                       ],
@@ -135,10 +204,11 @@ class _OrdersList extends ConsumerWidget {
                       children: [
                         const Text('Pago: '),
                         Chip(
-                          label: Text(order['paymentStatus']),
-                          backgroundColor: order['paymentStatus'] == 'pagado' 
-                            ? Colors.green 
-                            : Colors.red,
+                          label: Text(paymentStatus),
+                          backgroundColor:
+                              paymentStatus.toLowerCase() == 'pagado'
+                                  ? Colors.green
+                                  : Colors.red,
                           labelStyle: const TextStyle(color: Colors.white),
                         ),
                       ],
@@ -146,7 +216,7 @@ class _OrdersList extends ConsumerWidget {
                   ],
                 ),
                 trailing: Text(
-                  '\$${order['totalAmount'].toStringAsFixed(2)}',
+                  '\$$totalAmount',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,

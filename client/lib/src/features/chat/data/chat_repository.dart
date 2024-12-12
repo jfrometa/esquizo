@@ -81,13 +81,13 @@ class ChatRepository {
         // Define your parts
         final prompt = TextPart(promptText);
         final mimeType = image.getMimeTypeFromExtension();
-        final imagePart = DataPart('image/jpeg', imageBytes);
+        // final imagePart = DataPart('image/jpeg', imageBytes);
 
         // Make a mutli-model request to Gemini API
         response = await model.generateContent([
           Content.multi([
             prompt,
-            imagePart,
+            // imagePart,
           ])
         ]);
       }
@@ -186,15 +186,15 @@ class GeminiService {
     final mainText = TextPart(prompt.textInput);
     final additionalTextParts =
         prompt.additionalTextInputs.map((t) => TextPart(t));
-    final imagesParts = <DataPart>[];
+    // final imagesParts = <DataPart>[];
 
     for (var f in prompt.images) {
       final bytes = await (f.readAsBytes());
-      imagesParts.add(DataPart('image/jpeg', bytes));
+      // imagesParts.add(DataPart('image/jpeg', bytes));
     }
 
-    final input = [
-      Content.multi([...imagesParts, mainText, ...additionalTextParts])
+    final List<Content> input = [
+      // Content.multi([...imagesParts, mainText, ...additionalTextParts])
     ];
 
     return await model.generateContent(

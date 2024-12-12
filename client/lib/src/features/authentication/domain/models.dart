@@ -26,7 +26,8 @@ class Subscription {
     required this.orderNumber, // Initialize order number
   });
 
-  bool get isActive => paymentStatus == 'pagado' && DateTime.now().isBefore(expirationDate);
+  bool get isActive =>
+      paymentStatus == 'pagado' && DateTime.now().isBefore(expirationDate);
 
   factory Subscription.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
@@ -45,16 +46,16 @@ class Subscription {
   }
 
   Map<String, dynamic> toFirestore() => {
-    'planName': planName,
-    'mealsRemaining': mealsRemaining,
-    'status': status,
-    'orderDate': orderDate,
-    'totalCost': totalCost,
-    'expirationDate': expirationDate.toIso8601String(),
-    'paymentStatus': paymentStatus,
-    'totalAmount': totalAmount,
-    'orderNumber': orderNumber, // Save order number
-  };
+        'planName': planName,
+        'mealsRemaining': mealsRemaining,
+        'status': status,
+        'orderDate': orderDate,
+        'totalCost': totalCost,
+        'expirationDate': expirationDate.toIso8601String(),
+        'paymentStatus': paymentStatus,
+        'totalAmount': totalAmount,
+        'orderNumber': orderNumber, // Save order number
+      };
 }
 
 class Order {
