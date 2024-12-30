@@ -17,6 +17,6 @@ List categories = [
     "name": "Almuerzos",
     "color1": const Color.fromARGB(100, 0, 0, 0),
     "color2": const Color.fromARGB(100, 0, 0, 0),
-    "img": "assets/food3.jpeg"
+    "img": "assets/dishes/mechada_nuez_box.jpg"
   },
 ];

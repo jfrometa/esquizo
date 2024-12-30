@@ -25,11 +25,8 @@ class CateringItem {
     this.hasUnitSelection = false, // Default to false
   });
 
-  CateringItem copyWith({
-    int? peopleCount,
-    int? quantity,
-    double? pricePerUnit
-  }) {
+  CateringItem copyWith(
+      {int? peopleCount, int? quantity, double? pricePerUnit}) {
     return CateringItem(
       title: title,
       description: description,
@@ -45,16 +42,356 @@ class CateringItem {
   }
 }
 
+// final cateringProvider = Provider<List<CateringItem>>((ref) {
+//   return [
+//     // Pastas
+//     CateringItem(
+//       category: 'Salsas',
+//       title: 'Salsa Bolognese',
+//       description: 'Salsa Bolognese en presentación de 1/2 litro o 1 litro.',
+//       pricePerUnit: 750.00,
+//       pricing: 0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Carne de res', 'Tomate', 'Cebolla', 'Especias'],
+//     ),
+//     CateringItem(
+//       category: 'Salsas',
+//       title: 'Salsa Pomodoro',
+//       description: 'Salsa Pomodoro en presentación de 1/2 litro o 1 litro.',
+//       pricePerUnit: 650.00,
+//       pricing: 0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Tomate', 'Ajo', 'Albahaca'],
+//     ),
+//     CateringItem(
+//       category: 'Salsas',
+//       title: 'Salsa 3 Quesos',
+//       description:
+//           'Salsa de tres quesos en presentación de 1/2 litro o 1 litro.',
+//       pricePerUnit: 850.00,
+//       pricing: 0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Queso parmesano', 'Queso ricotta', 'Queso mozzarella'],
+//     ),
+//     CateringItem(
+//       category: 'Salsas',
+//       title: 'Salsa Alfredo',
+//       description: 'Salsa Alfredo en presentación de 1/2 litro o 1 litro.',
+//       pricePerUnit: 650.00,
+//       pricing: 0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Crema', 'Queso parmesano', 'Ajo'],
+
+//     ),
+//     CateringItem(
+//       category: 'Salsas',
+//       title: 'Salsa Pesto',
+//       description: 'Salsa Pesto en presentación de 1/2 litro o 1 litro.',
+//       pricePerUnit: 800.00,
+//       pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Albahaca', 'Ajo', 'Aceite de oliva', 'Queso parmesano'],
+//       hasUnitSelection: false,
+//     ),
+
+//     // Lasagna
+//     CateringItem(
+//       category: 'Pastas',
+//       title: 'Lasagna de Res o Pollo',
+//       description: 'Lasagna clásica de res o pollo ',
+//       pricePerUnit: 3500.00,
+//        pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Pasta', 'Carne de res o pollo', 'Queso', 'Tomate'],
+//       hasUnitSelection: false,
+//     ),
+//     CateringItem(
+//       category: 'Pastas',
+//       title: 'Lasagna 4 Quesos Trufada',
+//       description: 'Lasagna de cuatro quesos con trufa, ',
+//       pricePerUnit: 3800.00,
+//        pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Queso trufado', 'Queso mozzarella', 'Trufa', 'Pasta'],
+//       hasUnitSelection: false,
+//     ),
+//     CateringItem(
+//       category: 'Pastas',
+//       title: 'Lasagna Ropa Vieja',
+//       description: 'Lasagna con carne de res mechada, ',
+//       pricePerUnit: 3500.00,
+//        pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Carne de res', 'Pasta', 'Queso'],
+//       hasUnitSelection: false,
+//     ),
+
+//     // Arroces
+//     CateringItem(
+//       category: 'Arroces',
+//       title: 'Arroz Salvaje con Hongos y Tocineta',
+//       description:
+//           'Arroz salvaje con hongos, tocineta, nueces y cranberries .',
+//       pricePerUnit: 280.00,
+//       pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: [
+//         'Arroz salvaje',
+//         'Hongos',
+//         'Tocineta',
+//         'Nueces',
+//         'Cranberries'
+//       ],
+//       hasUnitSelection: false,
+//     ),
+//     CateringItem(
+//       category: 'Arroces',
+//       title: 'Moro (negro, rojo, guandules)',
+//       description:
+//           'Moro tradicional en diferentes presentaciones .',
+//       pricePerUnit: 220.00,
+//        pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Arroz', 'Frijoles', 'Especias'],
+//       hasUnitSelection: false,
+//     ),
+//     CateringItem(
+//       category: 'Arroces',
+//       title: 'Arroz con Tocineta, Plátano Maduro y Puerro',
+//       description:
+//           'Arroz con plátano maduro, tocineta y puerro .',
+//       pricePerUnit: 250.00,
+//       pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Arroz', 'Plátano maduro', 'Tocineta', 'Puerro'],
+//       hasUnitSelection: false,
+//     ),
+//     CateringItem(
+//       category: 'Arroces',
+//       title: 'Arroz con Hongos Salvajes',
+//       description: 'Arroz con hongos salvajes .',
+//       pricePerUnit: 275.00,
+//        pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Arroz', 'Hongos salvajes', 'Ajo', 'Cebolla'],
+//       hasUnitSelection: false,
+//     ),
+
+//     // Proteínas
+//     CateringItem(
+//       category: 'Proteínas',
+//       title: 'Filete de Res en Salsa de Hongos y Vino Tinto',
+//       description:
+//           'Filete de res en salsa de hongos y vino tinto .',
+//       pricePerUnit: 675.00,
+//       pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Filete de res', 'Hongos', 'Vino tinto'],
+//       hasUnitSelection: false,
+//     ),
+//     CateringItem(
+//       category: 'Proteínas',
+//       title: 'Filete de Cerdo en Salsa Mostaza',
+//       description: 'Filete de cerdo con salsa de mostaza .',
+//       pricePerUnit: 555.00,
+//        pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Filete de cerdo', 'Mostaza', 'Especias'],
+//       hasUnitSelection: false,
+//     ),
+//     CateringItem(
+//       category: 'Proteínas',
+//       title: 'Filete de Cerdo Relleno de Dátiles y Cranberries',
+//       description:
+//           'Filete de cerdo relleno de dátiles y cranberries .',
+//       pricePerUnit: 600.00,
+//        pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Filete de cerdo', 'Dátiles', 'Cranberries'],
+//       hasUnitSelection: false,
+//     ),
+//     CateringItem(
+//       category: 'Proteínas',
+//       title: 'Pechuga de Pollo Rellena de Ricotta y Espinaca',
+//       description:
+//           'Pechuga de pollo rellena de ricotta y espinaca .',
+//       pricePerUnit: 550.00,
+//       pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Pechuga de pollo', 'Ricotta', 'Espinaca'],
+//       hasUnitSelection: false,
+//     ),
+//     CateringItem(
+//       category: 'Proteínas',
+//       title: 'Pechuga de Pollo Rellena de Manchego y Prosciutto',
+//       description:
+//           'Pechuga de pollo rellena de queso manchego y prosciutto .',
+//       pricePerUnit: 575.00,
+//        pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Pechuga de pollo', 'Queso manchego', 'Prosciutto'],
+//       hasUnitSelection: false,
+//     ),
+//     CateringItem(
+//       category: 'Proteínas',
+//       title: 'Pierna de Cerdo Rellena de Moro Negro',
+//       description: 'Pierna de cerdo rellena de moro negro (unidad).',
+//       pricePerUnit: 10500.00,
+//        pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Pierna de cerdo', 'Arroz moro negro'],
+//       hasUnitSelection: false,
+//     ),
+//     CateringItem(
+//       category: 'Proteínas',
+//       title: 'Pierna de Cerdo en su Mojo',
+//       description: 'Pierna de cerdo en su mojo (unidad).',
+//       pricePerUnit: 8500.00,
+//        pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Pierna de cerdo', 'Mojo criollo'],
+//       hasUnitSelection: false,
+//     ),
+//     CateringItem(
+//       category: 'Proteínas',
+//       title: 'Pechuga de Pavo a las Finas Hierbas',
+//       description: 'Pechuga de pavo a las finas hierbas .',
+//       pricePerUnit: 675.00,
+//        pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Pechuga de pavo', 'Finas hierbas', 'Ajo', 'Cebolla'],
+//       hasUnitSelection: false,
+//     ),
+
+//     // Guarniciones
+//     CateringItem(
+//       category: 'Guarniciones',
+//       title: 'Pastelón de Plátano Maduro',
+//       description: 'Pastelón de plátano maduro como guarnición, por persona.',
+//       pricePerUnit: 250.00,
+//       pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Plátano maduro', 'Carne', 'Queso'],
+//       hasUnitSelection: false,
+//     ),
+//     CateringItem(
+//       category: 'Guarniciones',
+//       title: 'Papines a las Hierbas',
+//       description: 'Papines asados con hierbas, por persona.',
+//       pricePerUnit: 175.00,
+//        pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Papines', 'Hierbas'],
+//       hasUnitSelection: false,
+//     ),
+//     CateringItem(
+//       category: 'Guarniciones',
+//       title: 'Ensalada de Rúcula, Queso Feta y Almendras',
+//       description:
+//           'Ensalada de rúcula con queso feta y almendras, por persona.',
+//       pricePerUnit: 200.00,
+//        pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Rúcula', 'Queso feta', 'Almendras'],
+//       hasUnitSelection: false,
+//     ),
+//     CateringItem(
+//       category: 'Guarniciones',
+//       title: 'Ensalada Rusa Tradicional',
+//       description: 'Ensalada rusa tradicional, por persona.',
+//       pricePerUnit: 250.00,
+//        pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Papas', 'Zanahoria', 'Mayonesa'],
+//       hasUnitSelection: false,
+//     ),
+//     CateringItem(
+//       category: 'Guarniciones',
+//       title: 'Ensalada de Orzo',
+//       description: 'Ensalada de pasta orzo, por persona.',
+//       pricePerUnit: 225.00,
+//        pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Orzo', 'Tomate', 'Pepino'],
+//       hasUnitSelection: false,
+//     ),
+//     CateringItem(
+//       category: 'Guarniciones',
+//       title: 'Mezclum de Lechugas, Nueces y Prosciutto',
+//       description:
+//           'Ensalada de mezclum de lechugas con nueces y prosciutto, por persona.',
+//       pricePerUnit: 275.00,
+//       pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Lechuga', 'Nueces', 'Prosciutto'],
+//       hasUnitSelection: false,
+//     ),
+
+//     // Para Picar (all items in this category should have hasUnitSelection: true)
+//     CateringItem(
+//       category: 'Para Picar',
+//       title: 'Pastelitos de Pollo y Queso',
+//       description: 'Caja de 25 pastelitos de pollo y queso.',
+//       pricePerUnit: 40.00,
+//        pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Pollo', 'Queso', 'Masa de hojaldre'],
+//       hasUnitSelection: true,  // Set to true for Para Picar
+//     ),
+//     CateringItem(
+//       category: 'Para Picar',
+//       title: 'Croquetas de Pollo',
+//       description: 'Caja de 25 croquetas de pollo.',
+//       pricePerUnit: 60.00,
+//        pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Pollo', 'Harina', 'Pan rallado'],
+//       hasUnitSelection: true,  // Set to true for Para Picar
+//     ),
+//     CateringItem(
+//       category: 'Para Picar',
+//       title: 'Quipes',
+//       description: 'Caja de 25 quipes tradicionales.',
+//       pricePerUnit: 50.00,
+//        pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Carne', 'Trigo', 'Especias'],
+//       hasUnitSelection: true,  // Set to true for Para Picar
+//     ),
+//     CateringItem(
+//       category: 'Para Picar',
+//       title: 'Canapés de Salmón Ahumado',
+//       description: 'Canapés individuales de salmón ahumado.',
+//       pricePerUnit: 55.00,
+//        pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Salmón ahumado', 'Pan', 'Queso crema'],
+//       hasUnitSelection: true,  // Set to true for Para Picar
+//     ),
+//     CateringItem(
+//       category: 'Para Picar',
+//       title: 'Sandwichitos de Queso Crema y Tocineta',
+//       description: 'Sandwichitos de queso crema y tocineta.',
+//       pricePerUnit: 40.00,
+//        pricing: 0.0,
+//       img: 'assets/food5.jpeg',
+//       ingredients: ['Queso crema', 'Tocineta', 'Pan'],
+//       hasUnitSelection: true,  // Set to true for Para Picar
+//     ),
+//   ];
+// });
+
 final cateringProvider = Provider<List<CateringItem>>((ref) {
   return [
-    // Pastas
+    // Cross-checked and updated items
+    // Updated images are used where applicable; others retain their placeholder images
     CateringItem(
       category: 'Salsas',
       title: 'Salsa Bolognese',
       description: 'Salsa Bolognese en presentación de 1/2 litro o 1 litro.',
       pricePerUnit: 750.00,
       pricing: 0,
-      img: 'assets/food5.jpeg',
+      img: 'assets/catering/lasagna.jpg', // Updated
       ingredients: ['Carne de res', 'Tomate', 'Cebolla', 'Especias'],
     ),
     CateringItem(
@@ -63,7 +400,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       description: 'Salsa Pomodoro en presentación de 1/2 litro o 1 litro.',
       pricePerUnit: 650.00,
       pricing: 0,
-      img: 'assets/food5.jpeg',
+      img: 'assets/catering/lasagna_blanca.jpg', // Updated
       ingredients: ['Tomate', 'Ajo', 'Albahaca'],
     ),
     CateringItem(
@@ -73,7 +410,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
           'Salsa de tres quesos en presentación de 1/2 litro o 1 litro.',
       pricePerUnit: 850.00,
       pricing: 0,
-      img: 'assets/food5.jpeg',
+      img: 'assets/catering/croquetas.jpg', // Updated
       ingredients: ['Queso parmesano', 'Queso ricotta', 'Queso mozzarella'],
     ),
     CateringItem(
@@ -82,9 +419,8 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       description: 'Salsa Alfredo en presentación de 1/2 litro o 1 litro.',
       pricePerUnit: 650.00,
       pricing: 0,
-      img: 'assets/food5.jpeg',
+      img: 'assets/catering/arroz_maduro_tocineta.jpg', // Updated
       ingredients: ['Crema', 'Queso parmesano', 'Ajo'],
-     
     ),
     CateringItem(
       category: 'Salsas',
@@ -92,28 +428,126 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       description: 'Salsa Pesto en presentación de 1/2 litro o 1 litro.',
       pricePerUnit: 800.00,
       pricing: 0.0,
-      img: 'assets/food5.jpeg',
+      img: 'assets/catering/papas_salteadas.jpg', // Updated
       ingredients: ['Albahaca', 'Ajo', 'Aceite de oliva', 'Queso parmesano'],
       hasUnitSelection: false,
     ),
-
     // Lasagna
     CateringItem(
       category: 'Pastas',
       title: 'Lasagna de Res o Pollo',
-      description: 'Lasagna clásica de res o pollo ',
+      description: 'Lasagna clásica de res o pollo.',
       pricePerUnit: 3500.00,
-       pricing: 0.0,
-      img: 'assets/food5.jpeg',
+      pricing: 0.0,
+      img: 'assets/food5.jpeg', // Not updated
       ingredients: ['Pasta', 'Carne de res o pollo', 'Queso', 'Tomate'],
       hasUnitSelection: false,
     ),
     CateringItem(
       category: 'Pastas',
       title: 'Lasagna 4 Quesos Trufada',
+      description: 'Lasagna de cuatro quesos con trufa.',
+      pricePerUnit: 3800.00,
+      pricing: 0.0,
+      img: 'assets/food5.jpeg', // Not updated
+      ingredients: ['Queso trufado', 'Queso mozzarella', 'Trufa', 'Pasta'],
+      hasUnitSelection: false,
+    ),
+    CateringItem(
+      category: 'Pastas',
+      title: 'Lasagna Ropa Vieja',
+      description: 'Lasagna con carne de res mechada.',
+      pricePerUnit: 3500.00,
+      pricing: 0.0,
+      img: 'assets/food5.jpeg', // Not updated
+      ingredients: ['Carne de res', 'Pasta', 'Queso'],
+      hasUnitSelection: false,
+    ),
+    // Arroces
+    CateringItem(
+      category: 'Arroces',
+      title: 'Arroz Salvaje con Hongos y Tocineta',
+      description: 'Arroz salvaje con hongos, tocineta, nueces y cranberries.',
+      pricePerUnit: 280.00,
+      pricing: 0.0,
+      img: 'assets/food5.jpeg', // Not updated
+      ingredients: [
+        'Arroz salvaje',
+        'Hongos',
+        'Tocineta',
+        'Nueces',
+        'Cranberries'
+      ],
+      hasUnitSelection: false,
+    ),
+    CateringItem(
+      category: 'Arroces',
+      title: 'Moro (negro, rojo, guandules)',
+      description: 'Moro tradicional en diferentes presentaciones.',
+      pricePerUnit: 220.00,
+      pricing: 0.0,
+      img: 'assets/food5.jpeg', // Not updated
+      ingredients: ['Arroz', 'Frijoles', 'Especias'],
+      hasUnitSelection: false,
+    ),
+    // Para Picar
+    CateringItem(
+      category: 'Para Picar',
+      title: 'Pastelitos de Pollo y Queso',
+      description: 'Caja de 25 pastelitos de pollo y queso.',
+      pricePerUnit: 40.00,
+      pricing: 0.0,
+      img: 'assets/catering/pastelitos.jpg', // Updated
+      ingredients: ['Pollo', 'Queso', 'Masa de hojaldre'],
+      hasUnitSelection: true,
+    ),
+    CateringItem(
+      category: 'Para Picar',
+      title: 'Croquetas de Pollo',
+      description: 'Caja de 25 croquetas de pollo.',
+      pricePerUnit: 60.00,
+      pricing: 0.0,
+      img: 'assets/catering/croquetas_2.jpg', // Updated
+      ingredients: ['Pollo', 'Harina', 'Pan rallado'],
+      hasUnitSelection: true,
+    ),
+    CateringItem(
+      category: 'Para Picar',
+      title: 'Quipes',
+      description: 'Caja de 25 quipes tradicionales.',
+      pricePerUnit: 50.00,
+      pricing: 0.0,
+      img: 'assets/catering/kipes.jpg', // Updated
+      ingredients: ['Carne', 'Trigo', 'Especias'],
+      hasUnitSelection: true,
+    ),
+    CateringItem(
+      category: 'Proteínas',
+      title: 'Pierna de Cerdo en su Mojo',
+      description: 'Pierna de cerdo en su mojo (unidad).',
+      pricePerUnit: 8500.00,
+      pricing: 0.0,
+      img: 'assets/catering/pierna.jpg', // Updated
+      ingredients: ['Pierna de cerdo', 'Mojo criollo'],
+      hasUnitSelection: false,
+    ),
+    CateringItem(
+      category: 'Proteínas',
+      title: 'Pechuga de Pollo Rellena de Manchego y Prosciutto',
+      description: 'Pechuga de pollo rellena de queso manchego y prosciutto.',
+      pricePerUnit: 575.00,
+      pricing: 0.0,
+      img: 'assets/food5.jpeg', // Not updated
+      ingredients: ['Pechuga de pollo', 'Queso manchego', 'Prosciutto'],
+      hasUnitSelection: false,
+    ),
+    // Add all other unmatched items
+    CateringItem(
+      category: 'Pastas',
+      title: 'Lasagna 4 Quesos Trufada',
       description: 'Lasagna de cuatro quesos con trufa, ',
       pricePerUnit: 3800.00,
-       pricing: 0.0,
+      pricing: 0.0,
       img: 'assets/food5.jpeg',
       ingredients: ['Queso trufado', 'Queso mozzarella', 'Trufa', 'Pasta'],
       hasUnitSelection: false,
@@ -123,18 +557,15 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       title: 'Lasagna Ropa Vieja',
       description: 'Lasagna con carne de res mechada, ',
       pricePerUnit: 3500.00,
-       pricing: 0.0,
+      pricing: 0.0,
       img: 'assets/food5.jpeg',
       ingredients: ['Carne de res', 'Pasta', 'Queso'],
       hasUnitSelection: false,
     ),
-
-    // Arroces
     CateringItem(
       category: 'Arroces',
       title: 'Arroz Salvaje con Hongos y Tocineta',
-      description:
-          'Arroz salvaje con hongos, tocineta, nueces y cranberries .',
+      description: 'Arroz salvaje con hongos, tocineta, nueces y cranberries .',
       pricePerUnit: 280.00,
       pricing: 0.0,
       img: 'assets/food5.jpeg',
@@ -150,23 +581,11 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
     CateringItem(
       category: 'Arroces',
       title: 'Moro (negro, rojo, guandules)',
-      description:
-          'Moro tradicional en diferentes presentaciones .',
+      description: 'Moro tradicional en diferentes presentaciones .',
       pricePerUnit: 220.00,
-       pricing: 0.0,
-      img: 'assets/food5.jpeg',
-      ingredients: ['Arroz', 'Frijoles', 'Especias'],
-      hasUnitSelection: false,
-    ),
-    CateringItem(
-      category: 'Arroces',
-      title: 'Arroz con Tocineta, Plátano Maduro y Puerro',
-      description:
-          'Arroz con plátano maduro, tocineta y puerro .',
-      pricePerUnit: 250.00,
       pricing: 0.0,
       img: 'assets/food5.jpeg',
-      ingredients: ['Arroz', 'Plátano maduro', 'Tocineta', 'Puerro'],
+      ingredients: ['Arroz', 'Frijoles', 'Especias'],
       hasUnitSelection: false,
     ),
     CateringItem(
@@ -174,18 +593,15 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       title: 'Arroz con Hongos Salvajes',
       description: 'Arroz con hongos salvajes .',
       pricePerUnit: 275.00,
-       pricing: 0.0,
+      pricing: 0.0,
       img: 'assets/food5.jpeg',
       ingredients: ['Arroz', 'Hongos salvajes', 'Ajo', 'Cebolla'],
       hasUnitSelection: false,
     ),
-
-    // Proteínas
     CateringItem(
       category: 'Proteínas',
       title: 'Filete de Res en Salsa de Hongos y Vino Tinto',
-      description:
-          'Filete de res en salsa de hongos y vino tinto .',
+      description: 'Filete de res en salsa de hongos y vino tinto .',
       pricePerUnit: 675.00,
       pricing: 0.0,
       img: 'assets/food5.jpeg',
@@ -197,7 +613,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       title: 'Filete de Cerdo en Salsa Mostaza',
       description: 'Filete de cerdo con salsa de mostaza .',
       pricePerUnit: 555.00,
-       pricing: 0.0,
+      pricing: 0.0,
       img: 'assets/food5.jpeg',
       ingredients: ['Filete de cerdo', 'Mostaza', 'Especias'],
       hasUnitSelection: false,
@@ -205,10 +621,9 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
     CateringItem(
       category: 'Proteínas',
       title: 'Filete de Cerdo Relleno de Dátiles y Cranberries',
-      description:
-          'Filete de cerdo relleno de dátiles y cranberries .',
+      description: 'Filete de cerdo relleno de dátiles y cranberries .',
       pricePerUnit: 600.00,
-       pricing: 0.0,
+      pricing: 0.0,
       img: 'assets/food5.jpeg',
       ingredients: ['Filete de cerdo', 'Dátiles', 'Cranberries'],
       hasUnitSelection: false,
@@ -216,8 +631,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
     CateringItem(
       category: 'Proteínas',
       title: 'Pechuga de Pollo Rellena de Ricotta y Espinaca',
-      description:
-          'Pechuga de pollo rellena de ricotta y espinaca .',
+      description: 'Pechuga de pollo rellena de ricotta y espinaca .',
       pricePerUnit: 550.00,
       pricing: 0.0,
       img: 'assets/food5.jpeg',
@@ -226,33 +640,12 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
     ),
     CateringItem(
       category: 'Proteínas',
-      title: 'Pechuga de Pollo Rellena de Manchego y Prosciutto',
-      description:
-          'Pechuga de pollo rellena de queso manchego y prosciutto .',
-      pricePerUnit: 575.00,
-       pricing: 0.0,
-      img: 'assets/food5.jpeg',
-      ingredients: ['Pechuga de pollo', 'Queso manchego', 'Prosciutto'],
-      hasUnitSelection: false,
-    ),
-    CateringItem(
-      category: 'Proteínas',
       title: 'Pierna de Cerdo Rellena de Moro Negro',
       description: 'Pierna de cerdo rellena de moro negro (unidad).',
       pricePerUnit: 10500.00,
-       pricing: 0.0,
+      pricing: 0.0,
       img: 'assets/food5.jpeg',
       ingredients: ['Pierna de cerdo', 'Arroz moro negro'],
-      hasUnitSelection: false,
-    ),
-    CateringItem(
-      category: 'Proteínas',
-      title: 'Pierna de Cerdo en su Mojo',
-      description: 'Pierna de cerdo en su mojo (unidad).',
-      pricePerUnit: 8500.00,
-       pricing: 0.0,
-      img: 'assets/food5.jpeg',
-      ingredients: ['Pierna de cerdo', 'Mojo criollo'],
       hasUnitSelection: false,
     ),
     CateringItem(
@@ -260,21 +653,9 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       title: 'Pechuga de Pavo a las Finas Hierbas',
       description: 'Pechuga de pavo a las finas hierbas .',
       pricePerUnit: 675.00,
-       pricing: 0.0,
-      img: 'assets/food5.jpeg',
-      ingredients: ['Pechuga de pavo', 'Finas hierbas', 'Ajo', 'Cebolla'],
-      hasUnitSelection: false,
-    ),
-
-    // Guarniciones
-    CateringItem(
-      category: 'Guarniciones',
-      title: 'Pastelón de Plátano Maduro',
-      description: 'Pastelón de plátano maduro como guarnición, por persona.',
-      pricePerUnit: 250.00,
       pricing: 0.0,
       img: 'assets/food5.jpeg',
-      ingredients: ['Plátano maduro', 'Carne', 'Queso'],
+      ingredients: ['Pechuga de pavo', 'Finas hierbas', 'Ajo', 'Cebolla'],
       hasUnitSelection: false,
     ),
     CateringItem(
@@ -282,30 +663,9 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       title: 'Papines a las Hierbas',
       description: 'Papines asados con hierbas, por persona.',
       pricePerUnit: 175.00,
-       pricing: 0.0,
+      pricing: 0.0,
       img: 'assets/food5.jpeg',
       ingredients: ['Papines', 'Hierbas'],
-      hasUnitSelection: false,
-    ),
-    CateringItem(
-      category: 'Guarniciones',
-      title: 'Ensalada de Rúcula, Queso Feta y Almendras',
-      description:
-          'Ensalada de rúcula con queso feta y almendras, por persona.',
-      pricePerUnit: 200.00,
-       pricing: 0.0,
-      img: 'assets/food5.jpeg',
-      ingredients: ['Rúcula', 'Queso feta', 'Almendras'],
-      hasUnitSelection: false,
-    ),
-    CateringItem(
-      category: 'Guarniciones',
-      title: 'Ensalada Rusa Tradicional',
-      description: 'Ensalada rusa tradicional, por persona.',
-      pricePerUnit: 250.00,
-       pricing: 0.0,
-      img: 'assets/food5.jpeg',
-      ingredients: ['Papas', 'Zanahoria', 'Mayonesa'],
       hasUnitSelection: false,
     ),
     CateringItem(
@@ -313,7 +673,7 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       title: 'Ensalada de Orzo',
       description: 'Ensalada de pasta orzo, por persona.',
       pricePerUnit: 225.00,
-       pricing: 0.0,
+      pricing: 0.0,
       img: 'assets/food5.jpeg',
       ingredients: ['Orzo', 'Tomate', 'Pepino'],
       hasUnitSelection: false,
@@ -329,57 +689,25 @@ final cateringProvider = Provider<List<CateringItem>>((ref) {
       ingredients: ['Lechuga', 'Nueces', 'Prosciutto'],
       hasUnitSelection: false,
     ),
-
-    // Para Picar (all items in this category should have hasUnitSelection: true)
-    CateringItem(
-      category: 'Para Picar',
-      title: 'Pastelitos de Pollo y Queso',
-      description: 'Caja de 25 pastelitos de pollo y queso.',
-      pricePerUnit: 40.00,
-       pricing: 0.0,
-      img: 'assets/food5.jpeg',
-      ingredients: ['Pollo', 'Queso', 'Masa de hojaldre'],
-      hasUnitSelection: true,  // Set to true for Para Picar
-    ),
-    CateringItem(
-      category: 'Para Picar',
-      title: 'Croquetas de Pollo',
-      description: 'Caja de 25 croquetas de pollo.',
-      pricePerUnit: 60.00,
-       pricing: 0.0,
-      img: 'assets/food5.jpeg',
-      ingredients: ['Pollo', 'Harina', 'Pan rallado'],
-      hasUnitSelection: true,  // Set to true for Para Picar
-    ),
-    CateringItem(
-      category: 'Para Picar',
-      title: 'Quipes',
-      description: 'Caja de 25 quipes tradicionales.',
-      pricePerUnit: 50.00,
-       pricing: 0.0,
-      img: 'assets/food5.jpeg',
-      ingredients: ['Carne', 'Trigo', 'Especias'],
-      hasUnitSelection: true,  // Set to true for Para Picar
-    ),
     CateringItem(
       category: 'Para Picar',
       title: 'Canapés de Salmón Ahumado',
       description: 'Canapés individuales de salmón ahumado.',
       pricePerUnit: 55.00,
-       pricing: 0.0,
+      pricing: 0.0,
       img: 'assets/food5.jpeg',
       ingredients: ['Salmón ahumado', 'Pan', 'Queso crema'],
-      hasUnitSelection: true,  // Set to true for Para Picar
+      hasUnitSelection: true,
     ),
     CateringItem(
       category: 'Para Picar',
       title: 'Sandwichitos de Queso Crema y Tocineta',
       description: 'Sandwichitos de queso crema y tocineta.',
       pricePerUnit: 40.00,
-       pricing: 0.0,
+      pricing: 0.0,
       img: 'assets/food5.jpeg',
       ingredients: ['Queso crema', 'Tocineta', 'Pan'],
-      hasUnitSelection: true,  // Set to true for Para Picar
+      hasUnitSelection: true,
     ),
   ];
 });
