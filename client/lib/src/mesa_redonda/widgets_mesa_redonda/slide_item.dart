@@ -141,15 +141,15 @@ class SlideItem extends StatelessWidget {
                     ),
                     const SizedBox(height: 8.0),
                     // Ingredients
-                    Text(
-                      'Ingredientes: ${ingredients.join(', ')}',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.grey[600],
-                          ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 12.0),
+                    // Text(
+                    //   'Ingredientes: ${ingredients.join(', ')}',
+                    //   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    //         color: Colors.grey[600],
+                    //       ),
+                    //   maxLines: 2,
+                    //   overflow: TextOverflow.ellipsis,
+                    // ),
+                    // const SizedBox(height: 12.0),
                     // Spacer to push the content below to the bottom
                     Expanded(child: Container()),
                     // Pricing and Action Button

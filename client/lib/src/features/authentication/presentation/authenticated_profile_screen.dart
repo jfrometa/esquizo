@@ -8,7 +8,7 @@ import 'package:starter_architecture_flutter_firebase/src/constants/app_sizes.da
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/data/firebase_auth_repository.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/order_history_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/subscription_list_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_card.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/catering_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class AuthenticatedProfileScreen extends ConsumerStatefulWidget {

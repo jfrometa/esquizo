@@ -9,7 +9,7 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/catering_cart_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/meal_subscription_item_view.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/cathering_order_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/location/location_capture.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
@@ -18,17 +18,20 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 // First, update the provider and notifier at the top of the file
-final validationProvider = StateNotifierProvider.family<ValidationNotifier, Map<String, bool>, String>((ref, type) {
+final validationProvider =
+    StateNotifierProvider.family<ValidationNotifier, Map<String, bool>, String>(
+        (ref, type) {
   return ValidationNotifier();
 });
 
 class ValidationNotifier extends StateNotifier<Map<String, bool>> {
-  ValidationNotifier() : super({
-    'location': false,
-    'date': false,
-    'time': false,
-  });
-  
+  ValidationNotifier()
+      : super({
+          'location': false,
+          'date': false,
+          'time': false,
+        });
+
   void setValid(String field, bool isValid) {
     state = {...state, field: isValid};
   }
@@ -93,9 +96,9 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   // bool _isMealSubscriptionAddressValid = true;
   // bool _isRegularCateringAddressValid = true;
 
-   String? name, phone, email;
-    bool showSignInScreen = false;
-    bool? dialogResult;
+  String? name, phone, email;
+  bool showSignInScreen = false;
+  bool? dialogResult;
 
   // Add this to your state class
   bool _isProcessingOrder = false;
@@ -260,7 +263,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       .clearCateringOrder(),
                 ),
               ],
-             // const SizedBox(height: 16.0),
+              // const SizedBox(height: 16.0),
               _buildOrderSummary(totalPrice),
               SizedBox(
                 height: 48,
@@ -338,32 +341,31 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   Future<void> _processOrder(BuildContext context, List<CartItem> items,
       CateringOrderItem? cateringOrder) async {
-
     if (_validateFields()) {
-           final contactInfo = await _checkAndPromptForContactInfo(context);
-    if (contactInfo == null || contactInfo.isEmpty) return;
+      final contactInfo = await _checkAndPromptForContactInfo(context);
+      if (contactInfo == null || contactInfo.isEmpty) return;
 
-    try {
-      if (widget.displayType == 'platos') {
-        await _saveOrderToFirestore(items, contactInfo);
-        await _sendWhatsAppOrder(items, contactInfo);
-      } else if (widget.displayType == 'subscriptions') {
-        await _saveSubscriptionToFirestore(items, contactInfo);
-        await _sendWhatsAppSubscriptionOrder(items, contactInfo);
-      } else if (widget.displayType == 'catering' && cateringOrder != null) {
-        await _saveCateringOrderToFirestore(cateringOrder, contactInfo);
-        await _sendWhatsAppCateringOrder(cateringOrder, contactInfo);
+      try {
+        if (widget.displayType == 'platos') {
+          await _saveOrderToFirestore(items, contactInfo);
+          await _sendWhatsAppOrder(items, contactInfo);
+        } else if (widget.displayType == 'subscriptions') {
+          await _saveSubscriptionToFirestore(items, contactInfo);
+          await _sendWhatsAppSubscriptionOrder(items, contactInfo);
+        } else if (widget.displayType == 'catering' && cateringOrder != null) {
+          await _saveCateringOrderToFirestore(cateringOrder, contactInfo);
+          await _sendWhatsAppCateringOrder(cateringOrder, contactInfo);
+        }
+      } catch (error) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error processing order: $error'),
+          backgroundColor: Colors.red, // Red background color for error
+          duration:
+              const Duration(milliseconds: 500), // Display for half a second
+        ));
       }
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Error processing order: $error'),
-        backgroundColor: Colors.red, // Red background color for error
-        duration:
-            const Duration(milliseconds: 500), // Display for half a second
-      ));
-    }
     } else {
-        return;
+      return;
     }
   }
 
@@ -506,9 +508,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   // Send WhatsApp message for regular orders
   Future<void> _sendWhatsAppOrder(
       List<CartItem> items, Map<String, String>? contactInfo) async {
-
     final String orderDetails = _generateOrderDetails(items, contactInfo);
-        const String phoneNumber = '+18493590832';
+    const String phoneNumber = '+18493590832';
     final String whatsappUrlMobile =
         'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
     final String whatsappUrlWeb =
@@ -533,10 +534,9 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   // Send WhatsApp message for subscriptions
   Future<void> _sendWhatsAppSubscriptionOrder(
       List<CartItem> items, Map<String, String>? contactInfo) async {
-  
     final String orderDetails =
         _generateSubscriptionOrderDetails(items, contactInfo);
-    
+
     const String phoneNumber = '+18493590832';
     final String whatsappUrlMobile =
         'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
@@ -557,187 +557,214 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         ),
       );
     }
- 
   }
 
+  bool _validateFields() {
+    bool isValid = true;
+    double scrollOffset = 0;
 
-bool _validateFields() {
-  bool isValid = true;
-  double scrollOffset = 0;
+    switch (widget.displayType) {
+      case 'platos':
+        // Regular dishes only need location validation
+        if (_regularDishesLocationController.text.isEmpty) {
+          ref
+              .read(validationProvider('regular').notifier)
+              .setValid('location', false);
+          isValid = false;
+          scrollOffset = 0;
+        } else {
+          ref
+              .read(validationProvider('regular').notifier)
+              .setValid('location', true);
+        }
+        break;
 
-  switch (widget.displayType) {
-    case 'platos':
-      // Regular dishes only need location validation
-      if (_regularDishesLocationController.text.isEmpty) {
-        ref.read(validationProvider('regular').notifier).setValid('location', false);
-        isValid = false;
-        scrollOffset = 0;
-      } else {
-        ref.read(validationProvider('regular').notifier).setValid('location', true);
-      }
-      break;
+      case 'subscriptions':
+        // Validate location
+        if (_mealSubscriptionLocationController.text.isEmpty) {
+          ref
+              .read(validationProvider('mealSubscription').notifier)
+              .setValid('location', false);
+          isValid = false;
+          scrollOffset = _scrollController.position.maxScrollExtent * 0.0;
+        } else {
+          ref
+              .read(validationProvider('mealSubscription').notifier)
+              .setValid('location', true);
+        }
 
-    case 'subscriptions':
-      // Validate location
-      if (_mealSubscriptionLocationController.text.isEmpty) {
-        ref.read(validationProvider('mealSubscription').notifier).setValid('location', false);
-        isValid = false;
-        scrollOffset = _scrollController.position.maxScrollExtent * 0.0;
-      } else {
-        ref.read(validationProvider('mealSubscription').notifier).setValid('location', true);
-      }
-      
-      // Validate date
-      if (_mealSubscriptionDateController.text.isEmpty) {
-        ref.read(validationProvider('mealSubscription').notifier).setValid('date', false);
-        isValid = false;
-        scrollOffset = _scrollController.position.maxScrollExtent * 0.0;
-      } else {
-        ref.read(validationProvider('mealSubscription').notifier).setValid('date', true);
-      }
+        // Validate date
+        if (_mealSubscriptionDateController.text.isEmpty) {
+          ref
+              .read(validationProvider('mealSubscription').notifier)
+              .setValid('date', false);
+          isValid = false;
+          scrollOffset = _scrollController.position.maxScrollExtent * 0.0;
+        } else {
+          ref
+              .read(validationProvider('mealSubscription').notifier)
+              .setValid('date', true);
+        }
 
-      // Validate time
-      if (_mealSubscriptionTimeController.text.isEmpty) {
-        ref.read(validationProvider('mealSubscription').notifier).setValid('time', false);
-        isValid = false;
-        scrollOffset = _scrollController.position.maxScrollExtent * 0.0;
-      } else {
-        ref.read(validationProvider('mealSubscription').notifier).setValid('time', true);
-      }
+        // Validate time
+        if (_mealSubscriptionTimeController.text.isEmpty) {
+          ref
+              .read(validationProvider('mealSubscription').notifier)
+              .setValid('time', false);
+          isValid = false;
+          scrollOffset = _scrollController.position.maxScrollExtent * 0.0;
+        } else {
+          ref
+              .read(validationProvider('mealSubscription').notifier)
+              .setValid('time', true);
+        }
 
-      // Show error message if needed
-      if (!isValid) {
-        _showValidationError('subscription');
-      }
-      break;
+        // Show error message if needed
+        if (!isValid) {
+          _showValidationError('subscription');
+        }
+        break;
 
-    case 'catering':
-      // Validate location
-      if (_cateringLocationController.text.isEmpty) {
-        ref.read(validationProvider('catering').notifier).setValid('location', false);
-        isValid = false;
-        scrollOffset = _scrollController.position.maxScrollExtent * 0.0;
-      } else {
-        ref.read(validationProvider('catering').notifier).setValid('location', true);
-      }
-      
-      // Validate date
-      if (_cateringDateController.text.isEmpty) {
-        ref.read(validationProvider('catering').notifier).setValid('date', false);
-        isValid = false;
-        scrollOffset = _scrollController.position.maxScrollExtent * 0.0;
-      } else {
-        ref.read(validationProvider('catering').notifier).setValid('date', true);
-      }
+      case 'catering':
+        // Validate location
+        if (_cateringLocationController.text.isEmpty) {
+          ref
+              .read(validationProvider('catering').notifier)
+              .setValid('location', false);
+          isValid = false;
+          scrollOffset = _scrollController.position.maxScrollExtent * 0.0;
+        } else {
+          ref
+              .read(validationProvider('catering').notifier)
+              .setValid('location', true);
+        }
 
-      // Validate time
-      if (_cateringTimeController.text.isEmpty) {
-        ref.read(validationProvider('catering').notifier).setValid('time', false);
-        isValid = false;
-        scrollOffset = _scrollController.position.maxScrollExtent * 0.0;
-      } else {
-        ref.read(validationProvider('catering').notifier).setValid('time', true);
-      }
+        // Validate date
+        if (_cateringDateController.text.isEmpty) {
+          ref
+              .read(validationProvider('catering').notifier)
+              .setValid('date', false);
+          isValid = false;
+          scrollOffset = _scrollController.position.maxScrollExtent * 0.0;
+        } else {
+          ref
+              .read(validationProvider('catering').notifier)
+              .setValid('date', true);
+        }
 
-      // Show error message if needed
-      if (!isValid) {
-        _showValidationError('catering');
-      }
-      break;
+        // Validate time
+        if (_cateringTimeController.text.isEmpty) {
+          ref
+              .read(validationProvider('catering').notifier)
+              .setValid('time', false);
+          isValid = false;
+          scrollOffset = _scrollController.position.maxScrollExtent * 0.0;
+        } else {
+          ref
+              .read(validationProvider('catering').notifier)
+              .setValid('time', true);
+        }
+
+        // Show error message if needed
+        if (!isValid) {
+          _showValidationError('catering');
+        }
+        break;
+    }
+
+    if (!isValid) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollController.animateTo(
+          scrollOffset,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      });
+    }
+
+    return isValid;
   }
 
-  if (!isValid) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollController.animateTo(
-        scrollOffset,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
+  void _showValidationError(String type) {
+    String message = '';
+    final validationState = ref.read(validationProvider(type));
+
+    if (!validationState['location']!) {
+      message += 'ubicación, ';
+    }
+    if (!validationState['date']!) {
+      message += 'fecha, ';
+    }
+    if (!validationState['time']!) {
+      message += 'hora, ';
+    }
+
+    if (message.isNotEmpty) {
+      message = message.substring(0, message.length - 2); // Remove last comma
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Por favor complete los siguientes campos: $message'),
+          backgroundColor: Colors.red,
+        ),
       );
-    });
+    }
   }
-
-  return isValid;
-}
-
-void _showValidationError(String type) {
-  String message = '';
-  final validationState = ref.read(validationProvider(type));
-  
-  if (!validationState['location']!) {
-    message += 'ubicación, ';
-  }
-  if (!validationState['date']!) {
-    message += 'fecha, ';
-  }
-  if (!validationState['time']!) {
-    message += 'hora, ';
-  }
-  
-  if (message.isNotEmpty) {
-    message = message.substring(0, message.length - 2); // Remove last comma
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Por favor complete los siguientes campos: $message'),
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
-}
 
   void _clearCateringAndPop() {
-     ref.read(cateringOrderProvider.notifier).clearCateringOrder(); 
-      // Check if the current route can be popped (i.e., there's a previous screen in the stack)
-  if (GoRouter.of(context).canPop()) {
-    GoRouter.of(context).pop(); // Pop the checkout screen to return to the previous screen
-  } else {
-    // If there's no previous screen, directly navigate to the home screen
-    GoRouter.of(context).goNamed(AppRoute.home.name);
-  }
+    ref.read(cateringOrderProvider.notifier).clearCateringOrder();
+    // Check if the current route can be popped (i.e., there's a previous screen in the stack)
+    if (GoRouter.of(context).canPop()) {
+      GoRouter.of(context)
+          .pop(); // Pop the checkout screen to return to the previous screen
+    } else {
+      // If there's no previous screen, directly navigate to the home screen
+      GoRouter.of(context).goNamed(AppRoute.home.name);
+    }
   }
 
   void _clearAndNavigateHome() {
     ref.read(cartProvider.notifier).clearCart(); // Clear the cart
     if (GoRouter.of(context).canPop()) {
-        GoRouter.of(context).pop(); // Pop checkout screen if possible
+      GoRouter.of(context).pop(); // Pop checkout screen if possible
     }
     GoRouter.of(context).goNamed(AppRoute.home.name); // Go to the home screen
-}
+  }
 
   void _clearCartAndPop() {
-      ref.read(cartProvider.notifier).clearCart(); 
-        // Check if the current route can be popped (i.e., there's a previous screen in the stack)
-  if (GoRouter.of(context).canPop()) {
-    GoRouter.of(context).pop(); // Pop the checkout screen to return to the previous screen
-  } else {
-    // If there's no previous screen, directly navigate to the home screen
-    GoRouter.of(context).goNamed(AppRoute.home.name);
-  }
-  }
-
-    void _clearSubscriptionAndPop() {
-      ref.read(mealOrderProvider.notifier).clearCart();
-        // Check if the current route can be popped (i.e., there's a previous screen in the stack)
-  if (GoRouter.of(context).canPop()) {
-    GoRouter.of(context).pop(); // Pop the checkout screen to return to the previous screen
-  } else {
-    // If there's no previous screen, directly navigate to the home screen
-    GoRouter.of(context).goNamed(AppRoute.home.name);
-  }
+    ref.read(cartProvider.notifier).clearCart();
+    // Check if the current route can be popped (i.e., there's a previous screen in the stack)
+    if (GoRouter.of(context).canPop()) {
+      GoRouter.of(context)
+          .pop(); // Pop the checkout screen to return to the previous screen
+    } else {
+      // If there's no previous screen, directly navigate to the home screen
+      GoRouter.of(context).goNamed(AppRoute.home.name);
+    }
   }
 
+  void _clearSubscriptionAndPop() {
+    ref.read(mealOrderProvider.notifier).clearCart();
+    // Check if the current route can be popped (i.e., there's a previous screen in the stack)
+    if (GoRouter.of(context).canPop()) {
+      GoRouter.of(context)
+          .pop(); // Pop the checkout screen to return to the previous screen
+    } else {
+      // If there's no previous screen, directly navigate to the home screen
+      GoRouter.of(context).goNamed(AppRoute.home.name);
+    }
+  }
 
   // Send WhatsApp message for catering orders
   Future<void> _sendWhatsAppCateringOrder(
       CateringOrderItem cateringOrder, Map<String, String>? contactInfo) async {
-    
     final String orderDetails =
         _generateCateringOrderDetails(cateringOrder, contactInfo);
-  
+
     const String phoneNumber = '+18493590832';
     final String whatsappUrlMobile =
         'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
     final String whatsappUrlWeb =
-        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}'; 
+        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
 
     if (await canLaunchUrl(Uri.parse(whatsappUrlMobile))) {
       await launchUrl(Uri.parse(whatsappUrlMobile));
@@ -922,7 +949,8 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
     return 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
   }
 
-  Future<Map<String, String>?> _checkAndPromptForContactInfo(BuildContext context) async {
+  Future<Map<String, String>?> _checkAndPromptForContactInfo(
+      BuildContext context) async {
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser == null || currentUser.isAnonymous) {
@@ -985,11 +1013,15 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8.0),
                                     borderSide: BorderSide(
-                                      color: _isNameValid ? ColorsPaletteRedonda.primary : Colors.red,
+                                      color: _isNameValid
+                                          ? ColorsPaletteRedonda.primary
+                                          : Colors.red,
                                       width: 1.5,
                                     ),
                                   ),
-                                  errorText: _isNameValid ? null : 'El nombre es requerido',
+                                  errorText: _isNameValid
+                                      ? null
+                                      : 'El nombre es requerido',
                                 ),
                                 textInputAction: TextInputAction.next,
                                 onChanged: (value) {
@@ -1008,11 +1040,15 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8.0),
                                     borderSide: BorderSide(
-                                      color: _isPhoneValid ? ColorsPaletteRedonda.primary : Colors.red,
+                                      color: _isPhoneValid
+                                          ? ColorsPaletteRedonda.primary
+                                          : Colors.red,
                                       width: 1.5,
                                     ),
                                   ),
-                                  errorText: _isPhoneValid ? null : 'El teléfono es requerido',
+                                  errorText: _isPhoneValid
+                                      ? null
+                                      : 'El teléfono es requerido',
                                 ),
                                 textInputAction: TextInputAction.next,
                                 keyboardType: TextInputType.phone,
@@ -1032,11 +1068,15 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8.0),
                                     borderSide: BorderSide(
-                                      color: _isEmailValid ? ColorsPaletteRedonda.primary : Colors.red,
+                                      color: _isEmailValid
+                                          ? ColorsPaletteRedonda.primary
+                                          : Colors.red,
                                       width: 1.5,
                                     ),
                                   ),
-                                  errorText: _isEmailValid ? null : 'Ingrese un correo electrónico válido',
+                                  errorText: _isEmailValid
+                                      ? null
+                                      : 'Ingrese un correo electrónico válido',
                                 ),
                                 textInputAction: TextInputAction.done,
                                 keyboardType: TextInputType.emailAddress,
@@ -1129,14 +1169,14 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
       _isPhoneValid = (phone?.trim().isNotEmpty ?? false);
       _isEmailValid = _validateEmail(email ?? '');
     });
-    
+
     return _isNameValid && _isPhoneValid && _isEmailValid;
   }
 
-  Widget _buildLocationField(BuildContext context,
-      TextEditingController controller, String name) {
+  Widget _buildLocationField(
+      BuildContext context, TextEditingController controller, String name) {
     final isValid = ref.watch(validationProvider(name))['location'] ?? false;
-    
+
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 60),
       child: Padding(
@@ -1147,29 +1187,29 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
           onTap: () => _showLocationBottomSheet(context, controller, name),
           style: Theme.of(context).textTheme.labelLarge,
           decoration: InputDecoration(
-              labelText: 'Ubicación de entrega',
-              hintStyle: Theme.of(context)
+            labelText: 'Ubicación de entrega',
+            hintStyle: Theme.of(context)
                 .textTheme
                 .titleSmall
                 ?.copyWith(fontWeight: FontWeight.bold),
-               hintText: 'Ingrese Ubicación',
-              filled: true,
-              fillColor: Colors.transparent,
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: const BorderSide(
-                  color: ColorsPaletteRedonda.deepBrown1,
-                  width: 1.0,
-                ),
+            hintText: 'Ingrese Ubicación',
+            filled: true,
+            fillColor: Colors.transparent,
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              borderSide: const BorderSide(
+                color: ColorsPaletteRedonda.deepBrown1,
+                width: 1.0,
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: const BorderSide(
-                  color: ColorsPaletteRedonda.primary,
-                  width: 2.0,
-                ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              borderSide: const BorderSide(
+                color: ColorsPaletteRedonda.primary,
+                width: 2.0,
               ),
-              errorBorder: OutlineInputBorder(
+            ),
+            errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),
               borderSide: BorderSide(
                 color: ColorsPaletteRedonda.deepBrown1,
@@ -1180,7 +1220,7 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
             // border: OutlineInputBorder(
             //   borderRadius: BorderRadius.circular(8.0),
             //   borderSide: BorderSide(
-            //     color: isValid 
+            //     color: isValid
             //         ? ColorsPaletteRedonda.deepBrown1
             //         : Colors.red,
             //     width: 1.0,
@@ -1189,16 +1229,16 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
             // focusedErrorBorder: OutlineInputBorder(
             //   borderRadius: BorderRadius.circular(8.0),
             //   borderSide: BorderSide(
-            //     color: isValid 
+            //     color: isValid
             //         ? ColorsPaletteRedonda.deepBrown1
-                    
+
             //     width: 1.0,
             //   ),
             // ),
             // focusedBorder: OutlineInputBorder(
             //   borderRadius: BorderRadius.circular(8.0),
             //   borderSide: BorderSide(
-            //     color: isValid 
+            //     color: isValid
             //         ? ColorsPaletteRedonda.primary
             //         : Colors.red,
             //     width: 2.0,
@@ -1226,19 +1266,25 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
                   cateringAddress = address;
                   _cateringLatitude = latitude;
                   _cateringLongitude = longitude;
-                  ref.read(validationProvider('catering').notifier).setValid('location', true);
+                  ref
+                      .read(validationProvider('catering').notifier)
+                      .setValid('location', true);
                   break;
                 case 'regular':
                   regularAddress = address;
                   _regularDishesLatitude = latitude;
                   _regularDishesLongitude = longitude;
-                  ref.read(validationProvider('regular').notifier).setValid('location', true);
+                  ref
+                      .read(validationProvider('regular').notifier)
+                      .setValid('location', true);
                   break;
                 case 'mealsubscription':
                   mealSubscriptionAddress = address;
                   _mealSubscriptionLatitude = latitude;
                   _mealSubscriptionLongitude = longitude;
-                  ref.read(validationProvider('mealSubscription').notifier).setValid('location', true);
+                  ref
+                      .read(validationProvider('mealSubscription').notifier)
+                      .setValid('location', true);
                   break;
               }
             });
@@ -1258,7 +1304,6 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-         
           // const SizedBox(height: 8.0),
           TextField(
             style: Theme.of(context).textTheme.labelLarge,
@@ -1267,14 +1312,13 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
             onTap: () =>
                 _selectDateTime(context, dateController, timeController),
             decoration: InputDecoration(
-              labelText:  isCatering
-                ? 'Selecciona la fecha y hora de tu catering'
-                : 'Selecciona la fecha y hora de tu entrega',
-          
+              labelText: isCatering
+                  ? 'Selecciona la fecha y hora de tu catering'
+                  : 'Selecciona la fecha y hora de tu entrega',
               hintStyle: Theme.of(context)
-                .textTheme
-                .titleSmall
-                ?.copyWith(fontWeight: FontWeight.bold),
+                  .textTheme
+                  .titleSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
               hintText:
                   isCatering ? '2024-11-23 - 13:00' : '2024-11-23 - 13:00',
               filled: true,
@@ -1373,9 +1417,8 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
 
       setState(() {
         final formattedDate = DateFormat('yyyy-MM-dd').format(selectedDateTime);
-        final formattedTime = DateFormat('HH:mm').format(selectedDateTime);
-        dateController.text = formattedDate;
-        timeController.text = formattedTime;
+        final formattedTime = DateFormat('hh:mm a').format(selectedDateTime);
+        dateController.text = '$formattedDate - $formattedTime';
 
         // Set validation state based on which controller was used
         String type;
@@ -1384,7 +1427,7 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
         } else {
           type = 'mealSubscription';
         }
-        
+
         ref.read(validationProvider(type).notifier)
           ..setValid('date', true)
           ..setValid('time', true);
@@ -1397,10 +1440,7 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Text(
         title,
-        style: Theme.of(context)
-            .textTheme
-            .titleLarge
-            ,
+        style: Theme.of(context).textTheme.titleLarge,
       ),
     );
   }
@@ -1486,7 +1526,8 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
                 value: index,
                 child: Text(
                   _paymentMethods[index],
-                  style: const TextStyle(color: ColorsPaletteRedonda.primary, fontSize: 14),
+                  style: const TextStyle(
+                      color: ColorsPaletteRedonda.primary, fontSize: 14),
                 ),
               );
             }),
@@ -1523,4 +1564,3 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
     );
   }
 }
-

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/catering_item.dart';
 
 class CateringItemCard extends StatefulWidget {
   final CateringItem item;
@@ -47,7 +47,7 @@ class CateringItemCardState extends State<CateringItemCard> {
               widget.item.img,
               height: 150,
               width: double.infinity,
-              fit: BoxFit.cover,
+              fit: BoxFit.fitWidth,
               errorBuilder: (context, error, stackTrace) {
                 return Container(
                   height: 150,
@@ -145,9 +145,10 @@ class CateringItemCardState extends State<CateringItemCard> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     // Add price display
-                    Text( widget.item.hasUnitSelection ? 
-                    '${widget.item.hasUnitSelection ? 'Unidad' : ''}: \$${widget.item.pricePerUnit}' :
-                      '',
+                    Text(
+                      widget.item.hasUnitSelection
+                          ? '${widget.item.hasUnitSelection ? 'Unidad' : ''}: \$${widget.item.pricePerUnit}'
+                          : '',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -158,15 +159,18 @@ class CateringItemCardState extends State<CateringItemCard> {
                       child: ElevatedButton(
                         onPressed: () {
                           final units = widget.item.hasUnitSelection
-                              ? (isCustomUnitsSelected 
-                                  ? int.tryParse(customUnitsController.text) ?? 25 
+                              ? (isCustomUnitsSelected
+                                  ? int.tryParse(customUnitsController.text) ??
+                                      25
                                   : selectedUnits ?? 25)
-                              : widget.item.peopleCount;  // For non-unit items, quantity is always 1
-                          
+                              : widget.item
+                                  .peopleCount; // For non-unit items, quantity is always 1
+
                           if (widget.item.hasUnitSelection && units < 25) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('La cantidad mínima es 25 unidades'),
+                                content:
+                                    Text('La cantidad mínima es 25 unidades'),
                                 backgroundColor: Colors.red,
                               ),
                             );
@@ -188,7 +192,6 @@ class CateringItemCardState extends State<CateringItemCard> {
                                 style: TextStyle(color: Colors.white),
                               ),
                               backgroundColor: Colors.black,
-                              
                               duration: const Duration(milliseconds: 500),
                             ),
                           );

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering.dart/catering_card.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/catering_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 enum OrderStatus {

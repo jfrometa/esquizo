@@ -173,6 +173,15 @@ class LocationCaptureBottomSheetState
                   color: Colors.black,
                 ),
               ),
+              !_isMapView
+                  ? const SizedBox.shrink()
+                  : IconButton(
+                      icon: Icon(Icons.refresh,
+                          color: ColorsPaletteRedonda.primary),
+                      onPressed: () {
+                        _getCurrentLocation(); // Trigger location refresh
+                      },
+                    ),
               IconButton(
                 icon: Icon(_isMapView ? Icons.edit : Icons.map,
                     color: ColorsPaletteRedonda.primary),
@@ -211,14 +220,18 @@ class LocationCaptureBottomSheetState
                 ),
               const SizedBox(height: 10),
               if (_currentPosition != null)
-                Expanded(
+                // Full-Screen Map
+                SizedBox(
+                  // Make sure the container takes all available space
+                  width: double.infinity,
+                  height: 300,
                   child: GoogleMap(
                     onMapCreated: (GoogleMapController controller) {
                       _mapController = controller;
                     },
                     initialCameraPosition: CameraPosition(
                       target: _currentPosition!,
-                      zoom: 15.0,
+                      zoom: 16.0,
                     ),
                     myLocationEnabled: true,
                     myLocationButtonEnabled: true,
@@ -241,29 +254,29 @@ class LocationCaptureBottomSheetState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: TextButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.yellow[800],
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: () {
-                    if (_isMapView) {
-                      _getCurrentLocation();
-                    } else {
-                      _clearForm();
-                    }
-                  },
-                  child: Text(
-                    _isMapView ? 'Reintentar' : 'Limpiar',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(color: ColorsPaletteRedonda.white),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10), // Spacing between buttons
+              // Expanded(
+              //   child: TextButton(
+              //     style: ElevatedButton.styleFrom(
+              //       backgroundColor: Colors.yellow[800],
+              //       foregroundColor: Colors.white,
+              //     ),
+              //     onPressed: () {
+              //       if (_isMapView) {
+              //         _getCurrentLocation();
+              //       } else {
+              //         _clearForm();
+              //       }
+              //     },
+              //     child: Text(
+              //       _isMapView ? 'Reintentar' : 'Limpiar',
+              //       style: Theme.of(context)
+              //           .textTheme
+              //           .bodyMedium
+              //           ?.copyWith(color: ColorsPaletteRedonda.white),
+              //     ),
+              //   ),
+              // ),
+              // const SizedBox(width: 10), // Spacing between buttons
 
               Expanded(
                 child: ElevatedButton(
