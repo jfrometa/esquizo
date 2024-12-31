@@ -89,7 +89,6 @@ class CateringScreenState extends ConsumerState<CateringScreen>
     super.dispose();
   }
 
-
   void _showCateringForm(BuildContext context, WidgetRef ref) {
     // Retrieve the current catering order from the provider
     final cateringOrder = ref.read(cateringOrderProvider);
@@ -118,10 +117,10 @@ class CateringScreenState extends ConsumerState<CateringScreen>
 
     String eventType = cateringOrder?.eventType ?? '';
     String adicionales = cateringOrder?.adicionales ?? '';
-    int? cantidadPersonasRead = (cateringOrder?.peopleCount != null &&
-            cateringOrder!.peopleCount! > 0)
-        ? cateringOrder.peopleCount
-        : null;
+    int? cantidadPersonasRead =
+        (cateringOrder?.peopleCount != null && cateringOrder!.peopleCount! > 0)
+            ? cateringOrder.peopleCount
+            : null;
 
     bool hasChef = cateringOrder?.hasChef ?? false;
 
@@ -162,7 +161,6 @@ class CateringScreenState extends ConsumerState<CateringScreen>
           ),
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setModalState) {
-       
               return SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -183,7 +181,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                       ],
                     ),
                     const Divider(),
-                 const SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     const Text('Cantidad de Personas',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
@@ -349,8 +347,8 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                       onChanged: (value) =>
                           setModalState(() => eventType = value),
                     ),
-                   const SizedBox(height: 16),
-                  
+                    const SizedBox(height: 16),
+
                     // Add the Cheffin Switch here
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -372,7 +370,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                       ],
                     ),
                     const SizedBox(height: 24),
-                    
+
                     ExpansionTile(
                       title: Text('Notas Adicionales',
                           style: Theme.of(context).textTheme.titleMedium),
@@ -404,26 +402,25 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                       ],
                     ),
                     const SizedBox(height: 16),
-                    
 
                     Center(
                       child: SizedBox(
                         height: 42,
                         child: ElevatedButton(
                           style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.all(  ColorsPaletteRedonda
-                                  .orange // Default color when no people count is set
-                               // White background when people count is set
-                        ),
-                        foregroundColor: WidgetStateProperty.all( 
-                               Colors
-                                  .white // White text when no people count is set
-                          
-                        ),
-                        side: WidgetStateProperty.all(  BorderSide
-                               .none) // No border when no people count is set
-                             
-                      ),
+                              backgroundColor: WidgetStateProperty.all(
+                                  ColorsPaletteRedonda
+                                      .orange // Default color when no people count is set
+                                  // White background when people count is set
+                                  ),
+                              foregroundColor: WidgetStateProperty.all(Colors
+                                      .white // White text when no people count is set
+
+                                  ),
+                              side: WidgetStateProperty.all(BorderSide
+                                  .none) // No border when no people count is set
+
+                              ),
                           onPressed: () {
                             _finalizeAndAddToCart(
                                 ref,
@@ -445,7 +442,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                                     milliseconds:
                                         500), // Display for half a second,
                               ),
-                            ); 
+                            );
                             GoRouter.of(context).pop();
                           },
                           child: const Text('Confirmar Detalles'),
@@ -461,8 +458,6 @@ class CateringScreenState extends ConsumerState<CateringScreen>
         );
       },
     );
-  
-  
   }
 
   void _finalizeAndAddToCart(
@@ -623,8 +618,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                         return CateringItemCard(
                           item: item,
                           onAddToCart: (int quantity) {
-
-                          final order = ref.watch(cateringOrderProvider);
+                            final order = ref.watch(cateringOrderProvider);
 
                             ref
                                 .read(cateringOrderProvider.notifier)
