@@ -22,45 +22,38 @@ class OrderHistoryList extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        forceMaterialTransparency: true,
-        title: const Text('Historial de Órdenes'),
-      ),
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return Column(
-              children: [
-                Container(
-                  width: double.infinity,
-                  color: ColorsPaletteRedonda.primary.withOpacity(0.1),
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    'Tus órdenes previas',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: ColorsPaletteRedonda.primary,
-                        ),
-                  ),
+    return SafeArea(child: LayoutBuilder(
+      builder: (context, constraints) {
+        return Column(
+          children: [
+            // Container(
+            //   width: double.infinity,
+            //   color: ColorsPaletteRedonda.primary.withOpacity(0.1),
+            //   padding: const EdgeInsets.all(16.0),
+            //   child: Text(
+            //     'Tus órdenes previas',
+            //     style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            //           fontWeight: FontWeight.bold,
+            //           color: ColorsPaletteRedonda.primary,
+            //         ),
+            //   ),
+            // ),
+
+            Expanded(
+              child: PaginatedListView<auth_models.Order>(
+                provider: ordersPaginationProvider(user.uid),
+                emptyWidget: const Center(
+                  child: Text('No tienes historial de órdenes.'),
                 ),
-                Expanded(
-                  child: PaginatedListView<auth_models.Order>(
-                    provider: ordersPaginationProvider(user.uid),
-                    emptyWidget: const Center(
-                      child: Text('No tienes historial de órdenes.'),
-                    ),
-                    itemBuilder: (context, order) {
-                      return OrderHistoryCard(order: order);
-                    },
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
-    );
+                itemBuilder: (context, order) {
+                  return OrderHistoryCard(order: order);
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    ));
   }
 }
 

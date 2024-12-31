@@ -771,6 +771,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         _generateCateringOrderDetails(cateringOrder, contactInfo);
 
     const String phoneNumber = '+18493590832';
+
     final String whatsappUrlMobile =
         'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
     final String whatsappUrlWeb =
@@ -778,10 +779,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     if (await canLaunchUrl(Uri.parse(whatsappUrlMobile))) {
       await launchUrl(Uri.parse(whatsappUrlMobile));
-      _clearCateringAndPop();
     } else if (await canLaunchUrl(Uri.parse(whatsappUrlWeb))) {
       await launchUrl(Uri.parse(whatsappUrlWeb));
-      _clearCateringAndPop();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -790,6 +789,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         ),
       );
     }
+
+    _clearCateringAndPop();
   }
 
   // Generate order details for regular orders
@@ -933,7 +934,7 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
       orderDetailsBuffer.writeln('''
 *Catering*:
 Ubicación: ${cateringAddress ?? 'No proporcionada'}
-Google Maps: ${_generateGoogleMapsLink(_cateringLatitude!, _cateringLongitude!)}
+Google Maps: ${_generateGoogleMapsLink(_cateringLatitude ?? '', _cateringLongitude ?? '')}
 Fecha: ${_cateringDateController.text}
 Hora: ${_cateringTimeController.text}
 $cateringBuffer
