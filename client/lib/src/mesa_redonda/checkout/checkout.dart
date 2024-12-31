@@ -124,6 +124,16 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     super.dispose();
   }
 
+  double _calculateCateringTotalPrice(CateringOrderItem? cateringOrder) {
+    if (cateringOrder == null) return 0.0;
+    double sum = 0.0;
+    for (var dish in cateringOrder.dishes) {
+      // dish.pricing * dish.quantity
+      sum += dish.pricing * dish.quantity;
+    }
+    return sum;
+  }
+
   @override
   Widget build(BuildContext context) {
     // Fetch items based on displayType
@@ -146,7 +156,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       totalPrice = _calculateTotalPrice(itemsToDisplay);
     } else if (widget.displayType == 'catering') {
       if (cateringOrder != null) {
-        totalPrice = cateringOrder.totalPrice ?? 0.0;
+        totalPrice = _calculateCateringTotalPrice(cateringOrder);
       } else {
         totalPrice = 0.0;
       }
@@ -930,7 +940,8 @@ $cateringBuffer
 ''');
     }
 
-    final double total = cateringOrder.totalPrice ?? 0.0;
+    final double total = _calculateCateringTotalPrice(cateringOrder);
+
     final double tax = total * _taxRate;
     final double grandTotal = total + tax + _deliveryFee;
 
@@ -1417,8 +1428,9 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
 
       setState(() {
         final formattedDate = DateFormat('yyyy-MM-dd').format(selectedDateTime);
-        final formattedTime = DateFormat('hh:mm a').format(selectedDateTime);
+        final formattedTime = DateFormat('HH:mm').format(selectedDateTime);
         dateController.text = '$formattedDate - $formattedTime';
+        timeController.text = formattedTime;
 
         // Set validation state based on which controller was used
         String type;

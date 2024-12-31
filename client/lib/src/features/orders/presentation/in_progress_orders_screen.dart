@@ -43,6 +43,7 @@ class _InProgressOrdersScreenState extends ConsumerState<InProgressOrdersScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        forceMaterialTransparency: true,
         title: const Text('Mis Ordenes'),
         bottom: TabBar(
           controller: _tabController,

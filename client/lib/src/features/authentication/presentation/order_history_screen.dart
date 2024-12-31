@@ -24,6 +24,7 @@ class OrderHistoryList extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        forceMaterialTransparency: true,
         title: const Text('Historial de Órdenes'),
       ),
       body: SafeArea(

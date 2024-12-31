@@ -201,7 +201,7 @@ class HomeState extends ConsumerState<Home> {
   }
 
   Widget buildDishList(BuildContext context, List dishes) {
-    double height = 400;
+    double height = 380;
 
     return SizedBox(
       height: height,

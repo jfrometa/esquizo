@@ -14,14 +14,14 @@ final localCateringItemCountProvider = StateProvider<int>((ref) {
   return cateringOrder?.dishes.length ?? 0;
 });
 
-class CateringScreen extends ConsumerStatefulWidget {
-  const CateringScreen({super.key});
+class CateringSelectionScreen extends ConsumerStatefulWidget {
+  const CateringSelectionScreen({super.key});
 
   @override
   CateringScreenState createState() => CateringScreenState();
 }
 
-class CateringScreenState extends ConsumerState<CateringScreen>
+class CateringScreenState extends ConsumerState<CateringSelectionScreen>
     with SingleTickerProviderStateMixin {
   final TextEditingController sideRequestController = TextEditingController();
 
@@ -513,7 +513,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Catering'),
+        title: const Text('Selecciona tu buffet'),
         forceMaterialTransparency: true,
         actions: [
           Padding(
@@ -582,13 +582,7 @@ class CateringScreenState extends ConsumerState<CateringScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Construye tu Buffete',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             Expanded(
               child: NotificationListener<UserScrollNotification>(
                 onNotification: (notification) {
@@ -640,51 +634,51 @@ class CateringScreenState extends ConsumerState<CateringScreen>
                 ),
               ),
             ),
-            if (cateringItemCount > 0) // Conditionally render the button
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Center(
-                  child: SizedBox(
-                    height: 48,
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.all(
-                          cantidadPersonas == null || cantidadPersonas < 1
-                              ? ColorsPaletteRedonda
-                                  .orange // Default color when no people count is set
-                              : Colors
-                                  .white, // White background when people count is set
-                        ),
-                        foregroundColor: WidgetStateProperty.all(
-                          cantidadPersonas == null || cantidadPersonas < 1
-                              ? Colors
-                                  .white // White text when no people count is set
-                              : Theme.of(context)
-                                  .primaryColor, // Primary color for text when people count is set
-                        ),
-                        side: WidgetStateProperty.all(
-                          cantidadPersonas == null || cantidadPersonas < 1
-                              ? BorderSide
-                                  .none // No border when no people count is set
-                              : BorderSide(
-                                  color: Colors
-                                      .white, // Primary color border when people count is set
-                                ),
-                        ),
-                      ),
-                      onPressed: () {
-                        _showCateringForm(context, ref);
-                      },
-                      child: Text(
-                        cantidadPersonas == null || cantidadPersonas < 1
-                            ? 'Completar Orden' // Text when no people count is set
-                            : 'Actualizar Catering', // Text when people count is set
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+            // if (cateringItemCount > 0) // Conditionally render the button
+            //   Padding(
+            //     padding: const EdgeInsets.all(16.0),
+            //     child: Center(
+            //       child: SizedBox(
+            //         height: 48,
+            //         width: double.infinity,
+            //         child: ElevatedButton(
+            //           style: ButtonStyle(
+            //             backgroundColor: WidgetStateProperty.all(
+            //               cantidadPersonas == null || cantidadPersonas < 1
+            //                   ? ColorsPaletteRedonda
+            //                       .orange // Default color when no people count is set
+            //                   : Colors
+            //                       .white, // White background when people count is set
+            //             ),
+            //             foregroundColor: WidgetStateProperty.all(
+            //               cantidadPersonas == null || cantidadPersonas < 1
+            //                   ? Colors
+            //                       .white // White text when no people count is set
+            //                   : Theme.of(context)
+            //                       .primaryColor, // Primary color for text when people count is set
+            //             ),
+            //             side: WidgetStateProperty.all(
+            //               cantidadPersonas == null || cantidadPersonas < 1
+            //                   ? BorderSide
+            //                       .none // No border when no people count is set
+            //                   : BorderSide(
+            //                       color: Colors
+            //                           .white, // Primary color border when people count is set
+            //                     ),
+            //             ),
+            //           ),
+            //           onPressed: () {
+            //             _showCateringForm(context, ref);
+            //           },
+            //           child: Text(
+            //             cantidadPersonas == null || cantidadPersonas < 1
+            //                 ? 'Completar Orden' // Text when no people count is set
+            //                 : 'Actualizar Catering', // Text when people count is set
+            //           ),
+            //         ),
+            //       ),
+            //     ),
+            //   ),
           ],
         ),
       ),

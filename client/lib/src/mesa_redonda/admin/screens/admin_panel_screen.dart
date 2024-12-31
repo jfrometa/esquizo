@@ -6,7 +6,8 @@ class AdminManagementScreen extends ConsumerStatefulWidget {
   const AdminManagementScreen({super.key});
 
   @override
-  ConsumerState<AdminManagementScreen> createState() => _AdminManagementScreenState();
+  ConsumerState<AdminManagementScreen> createState() =>
+      _AdminManagementScreenState();
 }
 
 class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
@@ -19,6 +20,7 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        forceMaterialTransparency: true,
         title: const Text('Gestión de Administradores'),
       ),
       body: Column(
@@ -40,7 +42,8 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
                 ElevatedButton(
                   onPressed: () async {
                     try {
-                      final result = await adminService.addAdmin(_emailController.text);
+                      final result =
+                          await adminService.addAdmin(_emailController.text);
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(result)),
@@ -74,7 +77,8 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
                       icon: const Icon(Icons.delete),
                       onPressed: () async {
                         try {
-                          final result = await adminService.removeAdmin(admin.email);
+                          final result =
+                              await adminService.removeAdmin(admin.email);
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text(result)),

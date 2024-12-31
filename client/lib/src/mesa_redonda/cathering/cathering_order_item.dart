@@ -22,7 +22,7 @@ class CateringDish {
     required this.ingredients,
     required this.pricing,
     this.hasUnitSelection = false,
-    this.pricePerUnit, 
+    this.pricePerUnit,
     this.img = 'assets/food5.jpeg', // Added default img value
     this.quantity = 1, // Default quantity to 1
   });
@@ -39,16 +39,15 @@ class CateringDish {
     String? img, // Added img to copyWith
   }) {
     return CateringDish(
-      title: title ?? this.title,
-      peopleCount: peopleCount ?? this.peopleCount,
-      pricePerPerson: pricePerPerson ?? this.pricePerPerson,
-      pricePerUnit: pricePerUnit ?? this.pricePerUnit,
-      ingredients: ingredients ?? this.ingredients,
-      pricing: pricing,
-      img: img ?? this.img, // Added img to copyWith
-      quantity: quantity ?? this.quantity,
-      hasUnitSelection: hasUnitSelection ?? this.hasUnitSelection
-    );
+        title: title ?? this.title,
+        peopleCount: peopleCount ?? this.peopleCount,
+        pricePerPerson: pricePerPerson ?? this.pricePerPerson,
+        pricePerUnit: pricePerUnit ?? this.pricePerUnit,
+        ingredients: ingredients ?? this.ingredients,
+        pricing: pricing,
+        img: img ?? this.img, // Added img to copyWith
+        quantity: quantity ?? this.quantity,
+        hasUnitSelection: hasUnitSelection ?? this.hasUnitSelection);
   }
 
   Map<String, dynamic> toJson() => {
@@ -83,30 +82,30 @@ class CateringOrderItem {
   final String title;
   final String img;
   final String description;
-  final List<CateringDish> dishes; 
+  final List<CateringDish> dishes;
   final String alergias;
   final String eventType;
   final String preferencia;
   final String adicionales;
-  final int? peopleCount; // Add cantidadPersonas field 
+  final int? peopleCount; // Add cantidadPersonas field
   bool? hasChef;
 
   CateringOrderItem({
     required this.title,
     required this.img,
     required this.description,
-    required this.dishes, 
+    required this.dishes,
     required this.alergias,
     required this.eventType,
     required this.preferencia,
     required this.adicionales,
     this.hasChef,
-    required this.peopleCount, 
+    required this.peopleCount,
   });
 
   // Calculates the total price for all dishes in the order
-  double get totalPrice => dishes.fold(
-      0, (total, dish) => total + ((dish.pricePerUnit ?? 1) * (peopleCount ?? 1)));
+  double get totalPrice => dishes.fold(0,
+      (total, dish) => total + ((dish.pricePerUnit ?? 1) * (peopleCount ?? 1)));
 
   // Combines all ingredients from all dishes into a single list for display
   List<String> get combinedIngredients =>
@@ -122,8 +121,7 @@ class CateringOrderItem {
         'eventType': eventType,
         'preferencia': preferencia,
         'adicionales': adicionales,
-        'cantidadPersonas':
-            peopleCount,
+        'cantidadPersonas': peopleCount,
       };
 
   factory CateringOrderItem.fromJson(Map<String, dynamic> json) {
@@ -139,7 +137,7 @@ class CateringOrderItem {
       eventType: json['eventType'],
       preferencia: json['preferencia'],
       adicionales: json['adicionales'],
-      peopleCount: json['cantidadPersonas'],  
+      peopleCount: json['cantidadPersonas'],
     );
   }
 
@@ -167,7 +165,7 @@ class CateringOrderItem {
       eventType: eventType ?? this.eventType,
       preferencia: preferencia ?? this.preferencia,
       adicionales: adicionales ?? this.adicionales,
-      peopleCount: peopleCount ?? this.peopleCount, 
+      peopleCount: peopleCount ?? this.peopleCount,
     );
   }
 }
@@ -226,8 +224,9 @@ class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
       );
     } else {
       // Check if dish already exists (comparing by title)
-      bool dishExists = state!.dishes.any((existingDish) => existingDish.title == dish.title);
-      
+      bool dishExists =
+          state!.dishes.any((existingDish) => existingDish.title == dish.title);
+
       if (!dishExists) {
         // Only add if the dish doesn't exist
         state = state!.copyWith(
@@ -260,6 +259,20 @@ class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
         preferencia: preferencia,
         adicionales: adicionales,
         peopleCount: cantidadPersonas, // Update cantidadPersonas
+      );
+    } else {
+      // Create a new order with default values
+      state = CateringOrderItem(
+        title: title,
+        img: img,
+        description: description,
+        dishes: [],
+        hasChef: hasChef,
+        alergias: alergias,
+        eventType: eventType,
+        preferencia: preferencia,
+        adicionales: adicionales,
+        peopleCount: cantidadPersonas, // Add cantidadPersonas
       );
     }
   }

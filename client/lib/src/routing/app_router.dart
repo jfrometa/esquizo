@@ -8,6 +8,7 @@ import 'package:starter_architecture_flutter_firebase/src/features/authenticatio
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/addToOrder/add_to_order_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/admin/services/admin_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/catering_entry_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/cathering_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/checkout.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/details/details_screen.dart';
@@ -41,7 +42,6 @@ final _landingNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'landing');
 final _cartNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'cart');
 final _adminNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'admin');
 final _OrdersNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'orders');
-
 
 enum AppRoute {
   authenticatedProfile,
@@ -189,7 +189,7 @@ List<RouteBase> _getNestedRoutes(String path) {
           path: 'catering',
           name: AppRoute.caterings.name,
           pageBuilder: (context, state) => const MaterialPage(
-            child: CateringScreen(),
+            child: CateringEntryScreen(),
           ),
         ),
         GoRoute(
@@ -229,7 +229,7 @@ List<RouteBase> _getNestedRoutes(String path) {
               path: 'catering',
               name: AppRoute.catering.name,
               pageBuilder: (context, state) => const MaterialPage(
-                child: CateringScreen(),
+                child: CateringEntryScreen(),
               ),
             ),
           ],
@@ -275,16 +275,16 @@ List<RouteBase> _getNestedRoutes(String path) {
       return [
         // Add any nested routes for admin here
       ];
-      case '/cuenta':
+    case '/cuenta':
       return [
-             GoRoute(
-        path: '/authenticated-profile',
-        name: AppRoute.authenticatedProfile.name,
-        builder: (context, state) {
-          final user = state.extra as User?;
-          return AuthenticatedProfileScreen(user: user!);
-        },
-      ),
+        GoRoute(
+          path: '/authenticated-profile',
+          name: AppRoute.authenticatedProfile.name,
+          builder: (context, state) {
+            final user = state.extra as User?;
+            return AuthenticatedProfileScreen(user: user!);
+          },
+        ),
       ];
     default:
       return [];
@@ -303,8 +303,8 @@ GlobalKey<NavigatorState> _getNavigatorKey(String path) {
       return _accountNavigatorKey;
     case '/admin':
       return _adminNavigatorKey;
-      case '/ordenes':
-       return _OrdersNavigatorKey;
+    case '/ordenes':
+      return _OrdersNavigatorKey;
     default:
       return _rootNavigatorKey;
   }
@@ -337,9 +337,9 @@ Widget _getDestinationScreen(String path) {
         builder: (context, ref, _) {
           final isAdmin = ref.watch(isAdminProvider);
           return isAdmin.when(
-            data: (isAdmin) => isAdmin 
-              ? const AdminManagementScreen()
-              : const UnauthorizedScreen(),
+            data: (isAdmin) => isAdmin
+                ? const AdminManagementScreen()
+                : const UnauthorizedScreen(),
             loading: () => const CircularProgressIndicator(),
             error: (_, __) => const UnauthorizedScreen(),
           );
@@ -367,4 +367,3 @@ StatefulShellBranch _buildBranch(NavigationDestinationItem destination) {
     ],
   );
 }
-

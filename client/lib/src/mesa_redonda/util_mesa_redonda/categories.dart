@@ -11,7 +11,7 @@ List categories = [
     "name": "Catering",
     "color1": const Color.fromARGB(100, 0, 0, 0),
     "color2": const Color.fromARGB(100, 0, 0, 0),
-    "img": "assets/food2.jpeg"
+    "img": "assets/catering/pierna.jpg"
   },
   {
     "name": "Almuerzos",

@@ -8,7 +8,8 @@ class CateringCartItemView extends ConsumerWidget {
   final CateringOrderItem order;
   final VoidCallback onRemoveFromCart;
   final FocusNode customPersonasFocusNode = FocusNode();
-  final FocusNode customUnitsFocusNode = FocusNode(); // New focus node for units
+  final FocusNode customUnitsFocusNode =
+      FocusNode(); // New focus node for units
   bool isCustomSelected = false;
   bool isCustomUnitsSelected = false; // New flag for units
 
@@ -20,7 +21,8 @@ class CateringCartItemView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isPersonasSelected = order.peopleCount != null && order.peopleCount! > 0;
+    final isPersonasSelected =
+        order.peopleCount != null && order.peopleCount! > 0;
 
     return Card(
       margin: const EdgeInsets.all(8.0),
@@ -58,8 +60,10 @@ class CateringCartItemView extends ConsumerWidget {
             Text(order.description),
             const SizedBox(height: 8),
             Text('Cheffing: ${(order.hasChef ?? false) ? ' Si ' : ' No '}'),
-            Text('Alergias: ${order.alergias.trim().isNotEmpty ? order.alergias : "Ninguna"}'),
-            Text('Evento: ${order.eventType.isEmpty ? 'Solicitud de Catering' : order.eventType}'),
+            Text(
+                'Alergias: ${order.alergias.trim().isNotEmpty ? order.alergias : "Ninguna"}'),
+            Text(
+                'Evento: ${order.eventType.isEmpty ? 'Solicitud de Catering' : order.eventType}'),
             // Text('Preferencia: ${order.preferencia}'),
             if (order.adicionales.isNotEmpty)
               Text('Adicionales: ${order.adicionales}'),
@@ -116,30 +120,29 @@ class CateringCartItemView extends ConsumerWidget {
             //     ),
             //   ],
             // ),
-            
-            
+
             const SizedBox(height: 16),
             // Button to complete the catering order
-            
-            if(!isPersonasSelected)
-            ElevatedButton(
-              onPressed: !isPersonasSelected
-                  ? () {
-                      _showCateringForm(context, ref);
-                    }
-                  : null, // Disable button if personas not selected
-              style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.resolveWith<Color>(
-                  (states) {
-                    if (states.contains(WidgetState.disabled)) {
-                      return Colors.grey; // Disabled color
-                    }
-                    return ColorsPaletteRedonda.orange; // Active color
-                  },
+
+            if (!isPersonasSelected)
+              ElevatedButton(
+                onPressed: !isPersonasSelected
+                    ? () {
+                        _showCateringForm(context, ref);
+                      }
+                    : null, // Disable button if personas not selected
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.resolveWith<Color>(
+                    (states) {
+                      if (states.contains(WidgetState.disabled)) {
+                        return Colors.grey; // Disabled color
+                      }
+                      return ColorsPaletteRedonda.orange; // Active color
+                    },
+                  ),
                 ),
+                child: const Text('Completar Orden de Catering'),
               ),
-              child: const Text('Completar Orden de Catering'),
-            ),
           ],
         ),
       ),
@@ -148,8 +151,34 @@ class CateringCartItemView extends ConsumerWidget {
 
   void _showCateringForm(BuildContext context, WidgetRef ref) {
     final cateringOrder = ref.read(cateringOrderProvider);
-    final peopleQuantity = [10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, 2000, 5000, 10000];
-    final unitQuantity = [25, 50, 75, 100, 150, 200, 300, 400, 500, 1000]; // New units array
+    final peopleQuantity = [
+      10,
+      20,
+      30,
+      40,
+      50,
+      100,
+      200,
+      300,
+      400,
+      500,
+      1000,
+      2000,
+      5000,
+      10000
+    ];
+    final unitQuantity = [
+      25,
+      50,
+      75,
+      100,
+      150,
+      200,
+      300,
+      400,
+      500,
+      1000
+    ]; // New units array
 
     // Set initial values, using provider values if available
     String preferencia = (cateringOrder?.preferencia != null &&
@@ -159,15 +188,15 @@ class CateringCartItemView extends ConsumerWidget {
 
     String eventType = cateringOrder?.eventType ?? '';
     String adicionales = cateringOrder?.adicionales ?? '';
-    int? cantidadPersonasRead = (cateringOrder?.peopleCount != null &&
-            cateringOrder!.peopleCount! > 0)
-        ? cateringOrder.peopleCount
-        : null;
+    int? cantidadPersonasRead =
+        (cateringOrder?.peopleCount != null && cateringOrder!.peopleCount! > 0)
+            ? cateringOrder.peopleCount
+            : null;
 
     List<String> alergiasList = cateringOrder?.alergias.split(',') ?? [];
     bool hasChef = cateringOrder?.hasChef ?? false;
 
-    // int? cantidadUnidadesRead = (cateringOrder?.cantidadUnidades != null && 
+    // int? cantidadUnidadesRead = (cateringOrder?.cantidadUnidades != null &&
     //         cateringOrder!.cantidadUnidades! >= 25)
     //     ? cateringOrder.cantidadUnidades
     //     : null;
@@ -177,7 +206,7 @@ class CateringCartItemView extends ConsumerWidget {
       isCustomSelected = true;
     }
 
-    // if (cantidadUnidadesRead != null && 
+    // if (cantidadUnidadesRead != null &&
     //     !unitQuantity.contains(cantidadUnidadesRead)) {
     //   isCustomUnitsSelected = true;
     // }
@@ -188,10 +217,13 @@ class CateringCartItemView extends ConsumerWidget {
     TextEditingController eventTypeController =
         TextEditingController(text: eventType);
 
-    // TextEditingController customUnitsController = 
+    // TextEditingController customUnitsController =
     //     TextEditingController(text: '$cantidadUnidadesRead');
 
     // Helper function to add allergies
+
+
+
     void addAllergy(String value, StateSetter setModalState) {
       final trimmedValue = value.trim();
       if (trimmedValue.isNotEmpty && !alergiasList.contains(trimmedValue)) {
@@ -207,7 +239,7 @@ class CateringCartItemView extends ConsumerWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
-        String? allergyInput ;
+        String? allergyInput;
         return Padding(
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -217,7 +249,6 @@ class CateringCartItemView extends ConsumerWidget {
           ),
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setModalState) {
-       
               return SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -238,7 +269,7 @@ class CateringCartItemView extends ConsumerWidget {
                       ],
                     ),
                     const Divider(),
-                 const SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     const Text('Cantidad de Personas',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
@@ -367,8 +398,10 @@ class CateringCartItemView extends ConsumerWidget {
                                     ),
                                     TextButton(
                                       onPressed: () {
-                                        if (allergyInput != null && allergyInput!.trim().isNotEmpty) {
-                                          addAllergy(allergyInput!, setModalState);
+                                        if (allergyInput != null &&
+                                            allergyInput!.trim().isNotEmpty) {
+                                          addAllergy(
+                                              allergyInput!, setModalState);
                                         }
                                         GoRouter.of(context).pop(allergyInput);
                                       },
@@ -377,7 +410,8 @@ class CateringCartItemView extends ConsumerWidget {
                                   ],
                                 ),
                               );
-                              if (newAllergy != null && newAllergy.trim().isNotEmpty) {
+                              if (newAllergy != null &&
+                                  newAllergy.trim().isNotEmpty) {
                                 addAllergy(newAllergy, setModalState);
                               }
                             },
@@ -400,8 +434,8 @@ class CateringCartItemView extends ConsumerWidget {
                       onChanged: (value) =>
                           setModalState(() => eventType = value),
                     ),
-                   const SizedBox(height: 16),
-                   
+                    const SizedBox(height: 16),
+
                     // Add the Cheffin Switch here
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -412,7 +446,7 @@ class CateringCartItemView extends ConsumerWidget {
                         ),
                         Switch(
                           value: hasChef,
-                           inactiveTrackColor: ColorsPaletteRedonda.deepBrown,
+                          inactiveTrackColor: ColorsPaletteRedonda.deepBrown,
                           activeColor: ColorsPaletteRedonda.primary,
                           onChanged: (bool value) {
                             setModalState(() {
@@ -423,7 +457,7 @@ class CateringCartItemView extends ConsumerWidget {
                       ],
                     ),
                     const SizedBox(height: 24),
-                     ExpansionTile(
+                    ExpansionTile(
                       title: Text('Notas Adicionales',
                           style: Theme.of(context).textTheme.titleMedium),
                       children: [
@@ -459,29 +493,29 @@ class CateringCartItemView extends ConsumerWidget {
                         height: 42,
                         child: ElevatedButton(
                           style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.all(  ColorsPaletteRedonda
-                                  .orange // Default color when no people count is set
-                               // White background when people count is set
-                        ),
-                        foregroundColor: WidgetStateProperty.all( 
-                               Colors
-                                  .white // White text when no people count is set
-                          
-                        ),
-                        side: WidgetStateProperty.all(  BorderSide
-                               .none) // No border when no people count is set
-                             
-                      ),
+                              backgroundColor: WidgetStateProperty.all(
+                                  ColorsPaletteRedonda
+                                      .orange // Default color when no people count is set
+                                  // White background when people count is set
+                                  ),
+                              foregroundColor: WidgetStateProperty.all(Colors
+                                      .white // White text when no people count is set
+
+                                  ),
+                              side: WidgetStateProperty.all(BorderSide
+                                  .none) // No border when no people count is set
+
+                              ),
                           onPressed: () {
                             _finalizeAndAddToCart(
-                                ref,
-                                hasChef,
-                                alergiasList.join(','),
-                                eventType,
-                                preferencia,
-                                adicionales,
-                                cantidadPersonasRead ?? 0,
-                                );
+                              ref,
+                              hasChef,
+                              alergiasList.join(','),
+                              eventType,
+                              preferencia,
+                              adicionales,
+                              cantidadPersonasRead ?? 0,
+                            );
                             alergiasList.clear();
 
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -494,7 +528,7 @@ class CateringCartItemView extends ConsumerWidget {
                                     milliseconds:
                                         500), // Display for half a second,
                               ),
-                            ); 
+                            );
                             GoRouter.of(context).pop();
                           },
                           child: const Text('Confirmar Detalles'),
@@ -534,9 +568,7 @@ class CateringCartItemView extends ConsumerWidget {
       eventType: eventType,
       preferencia: preferencia,
       adicionales: adicionales,
-      cantidadPersonas: cantidadPersonas,// Include units in the finalize call
+      cantidadPersonas: cantidadPersonas, // Include units in the finalize call
     );
   }
-
 }
-
