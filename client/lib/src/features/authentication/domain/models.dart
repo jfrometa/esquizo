@@ -67,13 +67,14 @@ class Order {
   final String address;
   final String latitude;
   final String longitude;
+  final String status;
   final List<dynamic> items;
   final String paymentMethod;
   final String paymentStatus;
   final double totalAmount;
   final Timestamp timestamp;
 
-  Order({
+  Order(this.status, {
     required this.orderNumber,
     required this.id,
     required this.email,
@@ -92,6 +93,7 @@ class Order {
   factory Order.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return Order(
+      data['status'] ?? 'Pending',
       orderNumber: data['orderNumber'] ?? '', // Fetch order number
       id: doc.id,
       email: data['email'] ?? 'No email provided',

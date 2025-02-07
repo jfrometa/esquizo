@@ -11,6 +11,10 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_m
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/slide_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/home_search_section.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/home_categories_section.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/home_dishes_section.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/home_search_results.dart';
 
 class Home extends ConsumerStatefulWidget {
   const Home({super.key});
@@ -22,9 +26,14 @@ class Home extends ConsumerStatefulWidget {
 class HomeState extends ConsumerState<Home> {
   String _searchQuery = '';
 
+  void _updateSearchQuery(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Get the list of dishes from the dishProvider
     final dishes = ref.watch(dishProvider);
     final filteredDishes = _searchQuery.isEmpty
         ? dishes
@@ -35,7 +44,6 @@ class HomeState extends ConsumerState<Home> {
 
     return GestureDetector(
       onTap: () {
-        // Dismiss keyboard when tapping outside
         FocusScopeNode currentFocus = FocusScope.of(context);
         if (!currentFocus.hasPrimaryFocus) {
           currentFocus.unfocus();
@@ -50,7 +58,7 @@ class HomeState extends ConsumerState<Home> {
         body: Column(
           children: <Widget>[
             const SizedBox(height: 10.0),
-            buildSearchBar(context),
+            HomeSearchSection(onChanged: _updateSearchQuery),
             const SizedBox(height: 10.0),
             Expanded(
               child: _searchQuery.isEmpty
@@ -58,18 +66,14 @@ class HomeState extends ConsumerState<Home> {
                       padding: const EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
                       child: Column(
                         children: [
-                          buildCategoryRow('Servicios', context),
-                          const SizedBox(height: 10.0),
-                          buildCategoryList(context),
+                          const HomeCategoriesSection(),
                           const SizedBox(height: 30.0),
-                          buildDishRow(' Populares', context),
-                          const SizedBox(height: 10.0),
-                          buildDishList(context, filteredDishes),
+                          HomeDishesSection(dishes: filteredDishes),
                           const SizedBox(height: 30.0),
                         ],
                       ),
                     )
-                  : buildSearchResults(filteredDishes),
+                  : HomeSearchResults(filteredDishes: filteredDishes),
             ),
           ],
         ),
@@ -339,9 +343,4 @@ class HomeState extends ConsumerState<Home> {
     );
   }
 
-  void _updateSearchQuery(String query) {
-    setState(() {
-      _searchQuery = query;
-    });
-  }
 }
