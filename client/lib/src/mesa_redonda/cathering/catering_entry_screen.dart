@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/cathering_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/manual_quote_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
@@ -512,131 +513,163 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen> {
     final dishes = cateringOrder?.dishes ?? [];
 
     return Scaffold(
-        appBar: AppBar(
-          forceMaterialTransparency: true,
-          title: const Text('Catering', style: TextStyle(color: Colors.black)),
-          backgroundColor: Colors.white,
-          iconTheme: const IconThemeData(color: Colors.black),
-          actions: [
-            if (cateringOrder != null)
-              IconButton(
-                icon: const Icon(Icons.edit, color: Colors.black),
-                onPressed: () => _showCateringForm(context, ref),
-              ),
-            if (cateringOrder != null)
-              IconButton(
-                icon: const Icon(Icons.check, color: Colors.black),
-                onPressed: dishes.isNotEmpty
-                    ? () {
-                        GoRouter.of(context).goNamed(
-                          AppRoute.checkout.name,
-                          extra: 'catering',
-                        );
-                      }
-                    : null,
-              ),
+      appBar: AppBar(
+        forceMaterialTransparency: true,
+        title: const Text('Catering', style: TextStyle(color: Colors.black)),
+        backgroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.black),
+        actions: [
+          if (cateringOrder != null) ...[
+            IconButton(
+              icon: const Icon(Icons.edit, color: Colors.black),
+              onPressed: () => _showCateringForm(context, ref),
+            ),
+            IconButton(
+              icon: const Icon(Icons.check, color: Colors.black),
+              onPressed: dishes.isNotEmpty
+                  ? () {
+                      GoRouter.of(context).goNamed(
+                        AppRoute.checkout.name,
+                        extra: 'catering',
+                      );
+                    }
+                  : null,
+            ),
           ],
-        ),
-        body: ((cateringOrder == null))
-            ? Center(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: ColorsPaletteRedonda.primary,
+        ],
+      ),
+      body: ((cateringOrder == null))
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: ColorsPaletteRedonda.primary,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
+                    onPressed: () => _showCateringForm(context, ref),
+                    child: const Text('Inicia tu orden'),
                   ),
-                  onPressed: () => _showCateringForm(context, ref),
-                  child: const Text('Inicia tu orden'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: ColorsPaletteRedonda.orange,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ManualQuoteScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text('Cotización Manual'),
+                  ),
+                ],
+              ),
+            )
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12.0,
+                  vertical: 16.0,
                 ),
-              )
-            : SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12.0,
-                    vertical: 16.0,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Detalles de la Orden',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Detalles de la Orden',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
-                      const SizedBox(height: 8),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Evento: ${cateringOrder?.eventType ?? "-"}',
+                      style: const TextStyle(color: Colors.black),
+                    ),
+                    Text(
+                      'Alergias: ${cateringOrder?.alergias.isNotEmpty == true ? cateringOrder!.alergias : "-"}',
+                      style: const TextStyle(color: Colors.black),
+                    ),
+                    Text(
+                      'Cantidad de Personas: ${cateringOrder?.peopleCount ?? 0}',
+                      style: const TextStyle(color: Colors.black),
+                    ),
+                    Text(
+                      'Preferencia: ${cateringOrder?.preferencia ?? "-"}',
+                      style: const TextStyle(color: Colors.black),
+                    ),
+                    Text(
+                      'Chef Incluido: ${cateringOrder?.hasChef == true ? "Sí" : "No"}',
+                      style: const TextStyle(color: Colors.black),
+                    ),
+                    if (cateringOrder?.adicionales.isNotEmpty == true)
                       Text(
-                        'Evento: ${cateringOrder?.eventType ?? "-"}',
+                        'Notas: ${cateringOrder?.adicionales}',
                         style: const TextStyle(color: Colors.black),
                       ),
-                      Text(
-                        'Alergias: ${cateringOrder?.alergias.isNotEmpty == true ? cateringOrder!.alergias : "-"}',
-                        style: const TextStyle(color: Colors.black),
-                      ),
-                      Text(
-                        'Cantidad de Personas: ${cateringOrder?.peopleCount ?? 0}',
-                        style: const TextStyle(color: Colors.black),
-                      ),
-                      Text(
-                        'Preferencia: ${cateringOrder?.preferencia ?? "-"}',
-                        style: const TextStyle(color: Colors.black),
-                      ),
-                      Text(
-                        'Chef Incluido: ${cateringOrder?.hasChef == true ? "Sí" : "No"}',
-                        style: const TextStyle(color: Colors.black),
-                      ),
-                      if (cateringOrder?.adicionales.isNotEmpty == true)
-                        Text(
-                          'Notas: ${cateringOrder?.adicionales}',
-                          style: const TextStyle(color: Colors.black),
-                        ),
-                      const Divider(height: 24, color: Colors.black),
+                    const Divider(height: 24, color: Colors.black),
 
-                      // Show selected dishes or a message
-                      if (dishes.isEmpty)
-                        const Text(
-                          'No hay platos seleccionados.',
-                          style: TextStyle(color: Colors.black),
-                        )
-                      else
-                        ...dishes.map(
-                          (dish) => Card(
-                            color: ColorsPaletteRedonda.white,
-                            margin: const EdgeInsets.only(bottom: 8),
-                            child: ListTile(
-                              title: Text(
-                                dish.title,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
+                    // Show selected dishes or a message
+                    if (dishes.isEmpty)
+                      const Text(
+                        'No hay platos seleccionados.',
+                        style: TextStyle(color: Colors.black),
+                      )
+                    else
+                      ...dishes.map(
+                        (dish) => Card(
+                          color: ColorsPaletteRedonda.white,
+                          margin: const EdgeInsets.only(bottom: 8),
+                          child: ListTile(
+                            title: Text(
+                              dish.title,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
                               ),
-                              subtitle: Text(
-                                dish.hasUnitSelection
-                                    ? '${dish.quantity} unidades'
-                                    : '${dish.peopleCount} personas',
-                                style: const TextStyle(color: Colors.black),
-                              ),
-                              trailing: IconButton(
-                                icon:
-                                    const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => ref
-                                    .read(cateringOrderProvider.notifier)
-                                    .removeFromCart(dishes.indexOf(dish)),
-                              ),
+                            ),
+                            subtitle: Text(
+                              dish.hasUnitSelection
+                                  ? '${dish.quantity} unidades'
+                                  : '${dish.peopleCount} personas',
+                              style: const TextStyle(color: Colors.black),
+                            ),
+                            trailing: IconButton(
+                              icon:
+                                  const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => ref
+                                  .read(cateringOrderProvider.notifier)
+                                  .removeFromCart(dishes.indexOf(dish)),
                             ),
                           ),
                         ),
-                    ],
-                  ),
+                      ),
+                  ],
                 ),
               ),
-        // FAB to add more dishes if we already have an order
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: ColorsPaletteRedonda.primary,
-          onPressed: _navigateToSelectionScreen,
-          child: const Icon(Icons.add, color: Colors.white),
-        ));
+            ),
+      // Only show FAB if we have an order and completed the initial form
+      floatingActionButton: cateringOrder != null
+          ? FloatingActionButton(
+              backgroundColor: ColorsPaletteRedonda.primary,
+              onPressed: _navigateToSelectionScreen,
+              child: const Icon(Icons.add, color: Colors.white),
+            )
+          : null,
+    );
   }
 }
