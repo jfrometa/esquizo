@@ -62,7 +62,7 @@ class ManualQuoteScreen extends ConsumerStatefulWidget {
 }
 
 class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
-  // Controllers for the new item form and event details.
+  // Controllers for new item form and event details.
   final TextEditingController _itemNameController = TextEditingController();
   final TextEditingController _itemDescriptionController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
@@ -77,10 +77,14 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
   bool isEditing = true;
   List<String> alergiasList = [];
 
+  // Controls whether the event details are collapsed.
+  // When required fields are filled, the header shows a summary.
+  bool _eventDetailsCollapsed = false;
+
   @override
   void initState() {
     super.initState();
-    // Initialize quote details.
+    // Initialize manual quote details.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(manualQuoteProvider.notifier).updateQuoteDetails(
         hasChef: false,
@@ -105,37 +109,45 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
   }
 
   /// Adds a new item to the quote.
-  /// If the manual quantity is not provided, the general quantity (from the event)
-  /// is used instead.
+  /// If the manual quantity is not provided, uses the general quantity (people count).
   void _addItem() {
-    if (_itemNameController.text.trim().isEmpty) return;
+    if (_itemNameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('El nombre del item es requerido')),
+      );
+      return;
+    }
     final manualQuantity = int.tryParse(_quantityController.text);
     final generalQuantity = ref.read(manualQuoteProvider)?.peopleCount ?? 0;
     final quantity = manualQuantity ?? generalQuantity;
 
-    ref.read(manualQuoteProvider.notifier).addManualItem(
-      CateringDish(
-        title: _itemNameController.text.trim(),
-        quantity: quantity,
-        // Mark as having a manual unit selection only if a manual quantity was provided.
-        hasUnitSelection: manualQuantity != null,
-        peopleCount: 1,
-        pricePerUnit: 0,
-        pricePerPerson: 0,
-        ingredients: [],
-        pricing: 0,
-      ),
-    );
-
-    _itemNameController.clear();
-    _itemDescriptionController.clear();
-    _quantityController.clear();
+    try {
+      ref.read(manualQuoteProvider.notifier).addManualItem(
+        CateringDish(
+          title: _itemNameController.text.trim(),
+          quantity: quantity,
+          hasUnitSelection: manualQuantity != null,
+          peopleCount: 1,
+          pricePerUnit: 0,
+          pricePerPerson: 0,
+          ingredients: [],
+          pricing: 0,
+        ),
+      );
+      _itemNameController.clear();
+      _itemDescriptionController.clear();
+      _quantityController.clear();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al agregar item: $e')),
+      );
+    }
   }
 
-  /// Inline form for adding a new item.
+  /// Builds an inline form for adding a new item.
   Widget _buildNewItemForm() {
     return Card(
-      margin: const EdgeInsets.only(top: 16),
+      margin: const EdgeInsets.all(16),
       elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -179,19 +191,13 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
               ),
               keyboardType: TextInputType.number,
               textInputAction: TextInputAction.done,
-              onSubmitted: (_) {
-                if (_itemNameController.text.trim().isNotEmpty) {
-                  _addItem();
-                }
-              },
+              onSubmitted: (_) => _addItem(),
             ),
             const SizedBox(height: 16),
-            // A nice "Agregar Item" button.
             ElevatedButton(
               onPressed: _addItem,
               child: const Text('Agregar Item'),
             ),
-            const SizedBox(height: 16), // Extra margin below the button.
           ],
         ),
       ),
@@ -209,57 +215,31 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
         final item = items[index];
         return Card(
           elevation: 2,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.title,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      if (item.title.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          item.title,
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                if (item.hasUnitSelection)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: Text(
-                      'Cantidad: ${item.quantity}',
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                  ),
-                if (isEditing)
-                  IconButton(
+          child: ListTile(
+            title: Text(
+              item.title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            subtitle: item.title.isNotEmpty
+                ? Text(
+                    item.title,
+                    style: const TextStyle(color: Colors.grey, fontSize: 14),
+                  )
+                : null,
+            trailing: isEditing
+                ? IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),
                     onPressed: () =>
                         ref.read(manualQuoteProvider.notifier).removeItem(index),
-                  ),
-              ],
-            ),
+                  )
+                : null,
           ),
         );
       },
     );
   }
 
-  /// Builds the event details section.
+  /// Builds the event details input fields.
   Widget _buildEventDetails() {
     final quote = ref.watch(manualQuoteProvider);
     return Column(
@@ -275,8 +255,11 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
             border: OutlineInputBorder(),
             filled: true,
           ),
-          onChanged: (value) =>
-              ref.read(manualQuoteProvider.notifier).updateQuoteDetails(eventType: value),
+          onChanged: (value) {
+            ref
+                .read(manualQuoteProvider.notifier)
+                .updateQuoteDetails(eventType: value);
+          },
         ),
         const SizedBox(height: 16),
         _buildAllergiesSection(),
@@ -286,14 +269,41 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
         SwitchListTile(
           title: const Text('Incluir Chef'),
           value: quote?.hasChef ?? false,
-          onChanged: (value) =>
-              ref.read(manualQuoteProvider.notifier).updateQuoteDetails(hasChef: value),
+          onChanged: (value) {
+            ref
+                .read(manualQuoteProvider.notifier)
+                .updateQuoteDetails(hasChef: value);
+          },
         ),
       ],
     );
   }
 
-  /// Builds the people quantity section with a dropdown and an optional custom field.
+  /// Wraps the event details in a collapsible (ExpansionTile) widget.
+  Widget _buildCollapsibleEventDetails() {
+    final quote = ref.watch(manualQuoteProvider);
+    final isFilled =
+        (quote?.eventType.isNotEmpty ?? false) && (quote?.peopleCount ?? 0) > 0;
+    return ExpansionTile(
+      initiallyExpanded: !isFilled,
+      title: isFilled
+          ? Text('Evento: ${quote?.eventType} - ${quote?.peopleCount} personas')
+          : const Text('Detalles del Evento'),
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: _buildEventDetails(),
+        ),
+      ],
+      onExpansionChanged: (expanded) {
+        setState(() {
+          _eventDetailsCollapsed = !expanded;
+        });
+      },
+    );
+  }
+
+  /// Builds the people quantity section with a dropdown and optional custom field.
   Widget _buildPeopleQuantitySection() {
     final quote = ref.watch(manualQuoteProvider);
     return Column(
@@ -334,8 +344,7 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
               setState(() {
                 isCustomSelected = true;
                 _customPersonasController.clear();
-                ref
-                    .read(manualQuoteProvider.notifier)
+                ref.read(manualQuoteProvider.notifier)
                     .updateQuoteDetails(peopleCount: 0);
               });
               Future.delayed(const Duration(milliseconds: 200), () {
@@ -344,8 +353,7 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
             } else {
               setState(() {
                 isCustomSelected = false;
-                ref
-                    .read(manualQuoteProvider.notifier)
+                ref.read(manualQuoteProvider.notifier)
                     .updateQuoteDetails(peopleCount: value);
               });
             }
@@ -370,8 +378,7 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
                 onChanged: (value) {
                   final count = int.tryParse(value);
                   if (count != null) {
-                    ref
-                        .read(manualQuoteProvider.notifier)
+                    ref.read(manualQuoteProvider.notifier)
                         .updateQuoteDetails(peopleCount: count);
                   }
                 },
@@ -382,7 +389,7 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
     );
   }
 
-  /// Builds the allergies section using the current theme’s primary color.
+  /// Builds the allergies section.
   Widget _buildAllergiesSection() {
     final primaryColor = Theme.of(context).colorScheme.primary;
     return Column(
@@ -409,7 +416,8 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
                   setState(() {
                     alergiasList.remove(allergy);
                   });
-                  ref.read(manualQuoteProvider.notifier)
+                  ref
+                      .read(manualQuoteProvider.notifier)
                       .updateQuoteDetails(alergias: alergiasList.join(', '));
                 },
               ),
@@ -420,7 +428,6 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
                 avatar: Icon(Icons.add, color: primaryColor),
                 label: Text('Agregar Alergia', style: TextStyle(color: primaryColor)),
                 onPressed: () async {
-                  // Inline dialog for allergy input.
                   String? allergyInput;
                   final newAllergy = await showDialog<String>(
                     context: context,
@@ -450,11 +457,11 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
                       ],
                     ),
                   );
-
                   if (newAllergy?.isNotEmpty == true &&
                       !alergiasList.contains(newAllergy)) {
                     setState(() => alergiasList.add(newAllergy ?? ''));
-                    ref.read(manualQuoteProvider.notifier)
+                    ref
+                        .read(manualQuoteProvider.notifier)
                         .updateQuoteDetails(alergias: alergiasList.join(', '));
                   }
                 },
@@ -481,13 +488,52 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
               filled: true,
               border: OutlineInputBorder(),
             ),
-            onChanged: (value) => ref
-                .read(manualQuoteProvider.notifier)
-                .updateQuoteDetails(adicionales: value),
+            onChanged: (value) {
+              ref
+                  .read(manualQuoteProvider.notifier)
+                  .updateQuoteDetails(adicionales: value);
+            },
           ),
         ),
       ],
     );
+  }
+
+  /// Validates required fields and, if all is well, returns the completed order.
+  void _confirmOrder() {
+    final quote = ref.read(manualQuoteProvider);
+    if (quote == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error: No hay datos de la cotización')),
+      );
+      return;
+    }
+    if ((quote.peopleCount ?? 0) <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('La cantidad de personas es requerida')),
+      );
+      return;
+    }
+    if (quote.eventType.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('El tipo de evento es requerido')),
+      );
+      return;
+    }
+    if (quote.dishes.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Debe agregar al menos un item')),
+      );
+      return;
+    }
+    try {
+      // Finalize the manual order. (In a full app you might perform further processing here.)
+      Navigator.pop(context, quote);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al confirmar la orden: $e')),
+      );
+    }
   }
 
   @override
@@ -496,6 +542,61 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
     final items = quote?.dishes ?? [];
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 600;
+
+    final eventDetailsCard = Card(
+      elevation: 4,
+      child: _buildCollapsibleEventDetails(),
+    );
+
+    final itemsCard = Card(
+      elevation: 4,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Items Solicitados',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            items.isEmpty
+                ? const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32.0),
+                      child: Text(
+                        'No hay items agregados',
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                      ),
+                    ),
+                  )
+                : _buildItemsList(items),
+            _buildNewItemForm(),
+          ],
+        ),
+      ),
+    );
+
+    Widget content;
+    if (isDesktop) {
+      content = Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: eventDetailsCard),
+          const SizedBox(width: 24),
+          Expanded(child: itemsCard),
+        ],
+      );
+    } else {
+      content = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          eventDetailsCard,
+          const SizedBox(height: 24),
+          itemsCard,
+        ],
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -507,64 +608,22 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
           ),
         ],
       ),
-      // No bottom navigation bar – the user focuses on input within the scrollable content.
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
             constraints:
-                BoxConstraints(maxWidth: isDesktop ? 800 : double.infinity),
+                BoxConstraints(maxWidth: isDesktop ? 1000 : double.infinity),
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
-              ).copyWith(bottom: 32), // Extra bottom margin.
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16)
+                  .copyWith(bottom: 32),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Event Details.
-                  Card(
-                    elevation: 4,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: _buildEventDetails(),
-                    ),
-                  ),
+                  content,
                   const SizedBox(height: 24),
-                  // Items Solicitados (with inline new item form and the add button).
-                  Card(
-                    elevation: 4,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Items Solicitados',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          if (items.isEmpty)
-                            const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(32.0),
-                                child: Text(
-                                  'No hay items agregados',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            )
-                          else
-                            _buildItemsList(items),
-                          _buildNewItemForm(),
-                        ],
-                      ),
-                    ),
+                  ElevatedButton(
+                    onPressed: _confirmOrder,
+                    child: const Text('Confirmar Orden'),
                   ),
                 ],
               ),

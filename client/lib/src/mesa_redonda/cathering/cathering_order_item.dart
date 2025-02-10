@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Model representing an individual dish within the catering order
+/// Model representing an individual dish within the catering order
 class CateringDish {
   final String title;
   final int peopleCount;
@@ -11,8 +11,8 @@ class CateringDish {
   final double? pricePerUnit;
   final List<String> ingredients;
   final double pricing;
-  final int quantity; // Added quantity field with default value of 1
-  final String img; // Added img field
+  final int quantity; // Default quantity field (default = 1)
+  final String img; // Image for the dish
   bool hasUnitSelection;
 
   CateringDish({
@@ -23,11 +23,11 @@ class CateringDish {
     required this.pricing,
     this.hasUnitSelection = false,
     this.pricePerUnit,
-    this.img = 'assets/food5.jpeg', // Added default img value
+    this.img = 'assets/food5.jpeg', // Default image value
     this.quantity = 1, // Default quantity to 1
   });
 
-  // Add the copyWith method
+  // copyWith method for immutability updates.
   CateringDish copyWith({
     String? title,
     int? peopleCount,
@@ -35,19 +35,20 @@ class CateringDish {
     double? pricePerUnit,
     List<String>? ingredients,
     bool? hasUnitSelection,
-    int? quantity, // Added quantity to copyWith
-    String? img, // Added img to copyWith
+    int? quantity,
+    String? img,
   }) {
     return CateringDish(
-        title: title ?? this.title,
-        peopleCount: peopleCount ?? this.peopleCount,
-        pricePerPerson: pricePerPerson ?? this.pricePerPerson,
-        pricePerUnit: pricePerUnit ?? this.pricePerUnit,
-        ingredients: ingredients ?? this.ingredients,
-        pricing: pricing,
-        img: img ?? this.img, // Added img to copyWith
-        quantity: quantity ?? this.quantity,
-        hasUnitSelection: hasUnitSelection ?? this.hasUnitSelection);
+      title: title ?? this.title,
+      peopleCount: peopleCount ?? this.peopleCount,
+      pricePerPerson: pricePerPerson ?? this.pricePerPerson,
+      pricePerUnit: pricePerUnit ?? this.pricePerUnit,
+      ingredients: ingredients ?? this.ingredients,
+      pricing: pricing,
+      img: img ?? this.img,
+      quantity: quantity ?? this.quantity,
+      hasUnitSelection: hasUnitSelection ?? this.hasUnitSelection,
+    );
   }
 
   Map<String, dynamic> toJson() => {
@@ -57,9 +58,9 @@ class CateringDish {
         'ingredients': ingredients,
         'pricing': pricing,
         'pricePerUnit': pricePerUnit,
-        'quantity': quantity, // Added quantity to JSON
-        'img': img, // Added img to JSON
-        'hasUnitSelection': hasUnitSelection
+        'quantity': quantity,
+        'img': img,
+        'hasUnitSelection': hasUnitSelection,
       };
 
   factory CateringDish.fromJson(Map<String, dynamic> json) {
@@ -71,13 +72,13 @@ class CateringDish {
       pricing: json['pricing'],
       pricePerUnit: json['pricePerUnit'],
       hasUnitSelection: json['hasUnitSelection'],
-      quantity: json['quantity'], // Added quantity from JSON
-      img: json['img'] ??
-          'assets/food5.jpeg', // Added default img value from JSON
+      quantity: json['quantity'],
+      img: json['img'] ?? 'assets/food5.jpeg',
     );
   }
 }
 
+/// Model representing the complete catering order
 class CateringOrderItem {
   final String title;
   final String img;
@@ -87,8 +88,9 @@ class CateringOrderItem {
   final String eventType;
   final String preferencia;
   final String adicionales;
-  final int? peopleCount; // Add cantidadPersonas field
+  final int? peopleCount; // cantidadPersonas
   bool? hasChef;
+  final bool isQuote; // New flag to mark manual quotes
 
   CateringOrderItem({
     required this.title,
@@ -101,13 +103,20 @@ class CateringOrderItem {
     required this.adicionales,
     this.hasChef,
     required this.peopleCount,
+    this.isQuote = false, // Default to false for normal orders
   });
 
-  // Calculates the total price for all dishes in the order
-  double get totalPrice => dishes.fold(0,
-      (total, dish) => total + ((dish.pricePerUnit ?? 1) * (peopleCount ?? 1)));
+  /// Calculates the total price for all dishes.
+  /// If this is a quote, return 0.0 to bypass pricing.
+  double get totalPrice {
+    if (isQuote) return 0.0;
+    return dishes.fold(0.0, (total, dish) {
+      // Simple calculation: multiply dish price per unit (or 1) by the people count.
+      return total + ((dish.pricePerUnit ?? 1) * (peopleCount ?? 1));
+    });
+  }
 
-  // Combines all ingredients from all dishes into a single list for display
+  /// Combines all ingredients from all dishes into a single list.
   List<String> get combinedIngredients =>
       dishes.expand((dish) => dish.ingredients).toList();
 
@@ -122,6 +131,7 @@ class CateringOrderItem {
         'preferencia': preferencia,
         'adicionales': adicionales,
         'cantidadPersonas': peopleCount,
+        'isQuote': isQuote, // Save the quote flag
       };
 
   factory CateringOrderItem.fromJson(Map<String, dynamic> json) {
@@ -138,10 +148,11 @@ class CateringOrderItem {
       preferencia: json['preferencia'],
       adicionales: json['adicionales'],
       peopleCount: json['cantidadPersonas'],
+      isQuote: json['isQuote'] ?? false,
     );
   }
 
-  // Add the copyWith method to include cantidadPersonas
+  /// copyWith method updated to include isQuote.
   CateringOrderItem copyWith({
     String? title,
     String? img,
@@ -153,7 +164,7 @@ class CateringOrderItem {
     String? preferencia,
     String? adicionales,
     int? peopleCount,
-    int? cantidadUnidades,
+    bool? isQuote,
   }) {
     return CateringOrderItem(
       title: title ?? this.title,
@@ -166,11 +177,12 @@ class CateringOrderItem {
       preferencia: preferencia ?? this.preferencia,
       adicionales: adicionales ?? this.adicionales,
       peopleCount: peopleCount ?? this.peopleCount,
+      isQuote: isQuote ?? this.isQuote,
     );
   }
 }
 
-// State notifier for managing catering orders with persistence
+/// State notifier for managing catering orders with persistence.
 class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
   Timer? _saveDebounce;
 
@@ -178,7 +190,7 @@ class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
     _loadCateringOrder();
   }
 
-  // Load catering order from SharedPreferences
+  // Load catering order from SharedPreferences.
   Future<void> _loadCateringOrder() async {
     final prefs = await SharedPreferences.getInstance();
     String? serializedOrder = prefs.getString('cateringOrder');
@@ -187,7 +199,7 @@ class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
     }
   }
 
-  // Save catering order to SharedPreferences
+  // Save catering order to SharedPreferences.
   Future<void> _saveCateringOrder() async {
     final prefs = await SharedPreferences.getInstance();
     if (state != null) {
@@ -206,10 +218,10 @@ class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
     });
   }
 
-  // Add a new dish to the active order
+  /// Add a new dish to the active order.
   void addCateringItem(CateringDish dish) {
     if (state == null) {
-      // Create a new order with default values
+      // Create a new order with default values.
       state = CateringOrderItem(
         title: '',
         img: '',
@@ -221,14 +233,15 @@ class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
         preferencia: 'salado',
         adicionales: '',
         peopleCount: 0,
+        isQuote: false,
       );
     } else {
-      // Check if dish already exists (comparing by title)
+      // Check if dish already exists (comparing by title).
       bool dishExists =
           state!.dishes.any((existingDish) => existingDish.title == dish.title);
 
       if (!dishExists) {
-        // Only add if the dish doesn't exist
+        // Only add if the dish doesn't exist.
         state = state!.copyWith(
           dishes: [...state!.dishes, dish],
         );
@@ -236,8 +249,9 @@ class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
     }
   }
 
-  // Update the order detailsvoid
-  finalizeCateringOrder({
+  /// Update or finalize the order details.
+  /// An optional [isQuote] flag can be provided to mark the order as a manual quote.
+  void finalizeCateringOrder({
     required String title,
     required String img,
     required String description,
@@ -246,7 +260,8 @@ class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
     required String eventType,
     required String preferencia,
     required String adicionales,
-    required int cantidadPersonas, // Add cantidadPersonas
+    required int cantidadPersonas,
+    bool isQuote = false,
   }) {
     if (state != null) {
       state = state!.copyWith(
@@ -258,10 +273,11 @@ class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
         eventType: eventType,
         preferencia: preferencia,
         adicionales: adicionales,
-        peopleCount: cantidadPersonas, // Update cantidadPersonas
+        peopleCount: cantidadPersonas,
+        isQuote: isQuote,
       );
     } else {
-      // Create a new order with default values
+      // Create a new order with the provided details.
       state = CateringOrderItem(
         title: title,
         img: img,
@@ -272,34 +288,33 @@ class CateringOrderNotifier extends StateNotifier<CateringOrderItem?> {
         eventType: eventType,
         preferencia: preferencia,
         adicionales: adicionales,
-        peopleCount: cantidadPersonas, // Add cantidadPersonas
+        peopleCount: cantidadPersonas,
+        isQuote: isQuote,
       );
     }
   }
 
-  // Update a specific dish by index
+  /// Update a specific dish by index.
   void updateDish(int index, CateringDish updatedDish) {
     if (state != null && index >= 0 && index < state!.dishes.length) {
       final updatedDishes = List<CateringDish>.from(state!.dishes);
-      updatedDishes[index] = updatedDish; // Update dish at the specified index
-
+      updatedDishes[index] = updatedDish; // Update dish at the specified index.
       state = state!.copyWith(
         dishes: updatedDishes,
       );
     }
   }
 
-  // Clear the active order
+  /// Clear the active order.
   void clearCateringOrder() {
     state = null;
   }
 
-  // Remove a specific dish from the order by index
+  /// Remove a specific dish from the order by index.
   void removeFromCart(int index) {
     if (state != null && index >= 0 && index < state!.dishes.length) {
       final updatedDishes = List<CateringDish>.from(state!.dishes)
-        ..removeAt(index); // Remove dish at the specified index
-
+        ..removeAt(index); // Remove dish at the specified index.
       state = state!.copyWith(
         dishes: updatedDishes,
       );
@@ -311,7 +326,8 @@ final cateringOrderProvider =
     StateNotifierProvider<CateringOrderNotifier, CateringOrderItem?>((ref) {
   return CateringOrderNotifier();
 });
-// Serialization and Deserialization for CateringOrderItems
+
+/// Serialization and Deserialization for CateringOrderItems.
 String serializeCateringOrders(List<CateringOrderItem> orders) {
   return jsonEncode(orders.map((order) => order.toJson()).toList());
 }

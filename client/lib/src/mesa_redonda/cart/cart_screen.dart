@@ -7,6 +7,7 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cate
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/meal_subscription_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/catering_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/cathering_order_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/manual_quote_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
@@ -20,6 +21,7 @@ class CartScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cartItems = ref.watch(cartProvider);
     final cateringOrder = ref.watch(cateringOrderProvider);
+    final manualQuote = ref.watch(manualQuoteProvider); // Add this line
     final mealItems = ref.watch(mealOrderProvider);
 
     // Separate items by type for each tab
@@ -29,6 +31,10 @@ class CartScreen extends ConsumerWidget {
         .toList();
     final List<CateringOrderItem> cateringItems =
         cateringOrder != null ? [cateringOrder] : [];
+  
+   final List<CateringOrderItem> quoteItems =
+        manualQuote != null ? [manualQuote] : [];
+     
     final List<CartItem> mealSubscriptions = mealItems;
 
     // Create tabs dynamically based on available items
@@ -45,6 +51,17 @@ class CartScreen extends ConsumerWidget {
         _buildSubscripcionesTab(ref, mealSubscriptions),
       ));
     }
+    if (quoteItems.isNotEmpty) {
+      availableTabs.add('Catering');
+      tabContent.add(_buildTabWithCheckoutButton(
+        context,
+        ref,
+        'catering',
+        cateringItems,
+        _buildManualQuoteTab(ref, manualQuote!),
+      ));
+    }
+
     if (cateringItems.isNotEmpty) {
       availableTabs.add('Catering');
       tabContent.add(_buildTabWithCheckoutButton(
@@ -154,49 +171,83 @@ class CartScreen extends ConsumerWidget {
     }
   }
 
-  Widget _buildCheckoutButton(BuildContext context, WidgetRef ref,
-      double totalPrice, List<dynamic> items, String type) {
-    final bool hasItemsInCurrentTab = items.isNotEmpty;
-    bool isDisabled = false;
-     // Check if personas (cantidadPersonas) is selected and valid
-     if(type.toLowerCase() == 'catering') {
-        final cateringOrder = ref.watch(cateringOrderProvider);
-        final isPersonasSelected = cateringOrder?.peopleCount != null && (cateringOrder!.peopleCount ?? 0) > 0;
 
-        isDisabled = !isPersonasSelected;
-     }
 
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      child: ElevatedButton(
-        onPressed: !isDisabled && hasItemsInCurrentTab && totalPrice > 0
-            ? () {
-                GoRouter.of(context).goNamed(
-                  AppRoute.checkout.name,
-                  extra: type,
-                );
-              }
-            : null,
-        style: ButtonStyle( backgroundColor: WidgetStateProperty.resolveWith<Color>(
-        (states) {
-          if (states.contains(WidgetState.disabled)) {
-            return Colors.grey; // Disabled button color
-          }
-          return ColorsPaletteRedonda.primary; // Enabled button color
-        },
-      ),
-          foregroundColor: WidgetStateProperty.all(ColorsPaletteRedonda.white),
-          minimumSize: WidgetStateProperty.all(const Size(double.infinity, 56)),
-        ),
-        child: const Text('Realizar pedido'),
-      ),
-    );
+Widget _buildCheckoutButton(BuildContext context, WidgetRef ref,
+    double totalPrice, List<dynamic> items, String type) {
+  final bool hasItemsInCurrentTab = items.isNotEmpty;
+  bool isDisabled = false;
+  String buttonLabel = 'Realizar pedido';
 
-    
+  if (type.toLowerCase() == 'catering') {
+    final cateringOrder = ref.watch(cateringOrderProvider);
+    final isPersonasSelected = cateringOrder?.peopleCount != null &&
+        ((cateringOrder!.peopleCount ?? 0) > 0);
+    isDisabled = !isPersonasSelected;
+
+    // If this catering order is a quote, change the label and action.
+    if (cateringOrder != null && cateringOrder.isQuote) {
+      buttonLabel = 'Guardar cotización';
+      // You might want to disable the pricing check:
+      isDisabled = !isPersonasSelected; // Or adjust if needed.
+    }
   }
 
-
-
+  return Container(
+    padding: const EdgeInsets.all(16.0),
+    child: ElevatedButton(
+      onPressed: !isDisabled && hasItemsInCurrentTab
+          ? () {
+              if (type.toLowerCase() == 'catering') {
+                final cateringOrder = ref.read(cateringOrderProvider);
+                if (cateringOrder != null && cateringOrder.isQuote) {
+                  // Instead of going to the payment checkout, handle quote saving.
+                  // For example, you might call a service to save the quote or
+                  // navigate to a quote summary screen.
+                  // Here, we simply display a confirmation dialog.
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Cotización Guardada'),
+                      content: const Text('La cotización se ha guardado correctamente.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            // Optionally, clear the order from the provider
+                            ref.read(cateringOrderProvider.notifier).state = null;
+                          },
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  // Normal catering order flow.
+                  GoRouter.of(context).goNamed(AppRoute.checkout.name, extra: type);
+                }
+              } else {
+                // For other types, keep the normal behavior.
+                GoRouter.of(context).goNamed(AppRoute.checkout.name, extra: type);
+              }
+            }
+          : null,
+      style: ButtonStyle(
+        backgroundColor: MaterialStateProperty.resolveWith<Color>(
+          (states) {
+            if (states.contains(MaterialState.disabled)) {
+              return Colors.grey; // Disabled button color.
+            }
+            return ColorsPaletteRedonda.primary; // Enabled button color.
+          },
+        ),
+        foregroundColor: MaterialStateProperty.all(ColorsPaletteRedonda.white),
+        minimumSize: MaterialStateProperty.all(const Size(double.infinity, 56)),
+      ),
+      child: Text(buttonLabel),
+    ),
+  );
+}
 
   Widget _buildTotalSection(double totalPrice, BuildContext context) {
     return Padding(
@@ -280,6 +331,137 @@ class CartScreen extends ConsumerWidget {
               ref.read(cartProvider.notifier).incrementQuantity(item.title),
         );
       },
+    );
+  }
+
+  // Add this new method for manual quote tab
+  Widget _buildManualQuoteTab(WidgetRef ref, CateringOrderItem quote) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Detalles de la Cotización',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildQuoteDetailItem('Personas', '${quote.peopleCount ?? 0}'),
+          _buildQuoteDetailItem('Tipo de Evento', quote.eventType),
+          _buildQuoteDetailItem('Chef Incluido', quote.hasChef ?? false ? 'Sí' : 'No'),
+          if (quote.alergias.isNotEmpty)
+            _buildQuoteDetailItem('Alergias', quote.alergias),
+          if (quote.adicionales.isNotEmpty)
+            _buildQuoteDetailItem('Notas Adicionales', quote.adicionales),
+          const Divider(height: 32),
+          Text(
+            'Items Solicitados',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ...quote.dishes.map((dish) => Card(
+                margin: const EdgeInsets.only(bottom: 8),
+                child: ListTile(
+                  title: Text(dish.title),
+                  subtitle: dish.hasUnitSelection
+                      ? Text('Cantidad: ${dish.quantity}')
+                      : null,
+                ),
+              )),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuoteDetailItem(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              '$label:',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(value),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Update the _buildCheckoutButton method to handle manual quotes
+  Widget _buildCateringQuoteCheckoutButton(BuildContext context, WidgetRef ref,
+      double totalPrice, List<dynamic> items, String type) {
+    final bool hasItemsInCurrentTab = items.isNotEmpty;
+    bool isDisabled = false;
+    String buttonLabel = 'Realizar pedido';
+
+    if (type.toLowerCase() == 'manual_quote') {
+      buttonLabel = 'Finalizar Cotización';
+      final quote = items.first as CateringOrderItem;
+      isDisabled = quote.peopleCount == null || quote.peopleCount == 0 || 
+                  quote.eventType.isEmpty || quote.dishes.isEmpty;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      child: ElevatedButton(
+        onPressed: !isDisabled && hasItemsInCurrentTab
+            ? () {
+                if (type.toLowerCase() == 'manual_quote') {
+                  // Handle manual quote submission
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Cotización Finalizada'),
+                      content: const Text(
+                          'La cotización ha sido enviada correctamente.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            ref.read(manualQuoteProvider.notifier).state = null;
+                            Navigator.pop(context); // Return to previous screen
+                          },
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  // Existing checkout logic
+                  GoRouter.of(context)
+                      .goNamed(AppRoute.checkout.name, extra: type);
+                }
+              }
+            : null,
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.resolveWith<Color>(
+            (states) {
+              if (states.contains(MaterialState.disabled)) {
+                return Colors.grey;
+              }
+              return ColorsPaletteRedonda.primary;
+            },
+          ),
+          foregroundColor: MaterialStateProperty.all(ColorsPaletteRedonda.white),
+          minimumSize: MaterialStateProperty.all(const Size(double.infinity, 56)),
+        ),
+        child: Text(buttonLabel),
+      ),
     );
   }
 }
