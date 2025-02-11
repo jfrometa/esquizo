@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:starter_architecture_flutter_firebase/src/common_widgets/date_time_picker.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/custom_sign_in_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/helpers/text_capitalization.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
@@ -10,40 +11,25 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/catering_cart_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/meal_subscription_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/cathering_order_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/providers/manual_quote_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/providers/validation_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/screens/order_success_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/services/order_details_generator.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/services/order_processor.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/widgets/catering_checkout.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/widgets/date_time_picker.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/widgets/meal_plan_checkout.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/widgets/order_summary.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/widgets/payment_method_dropdown.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/widgets/platos_checkout.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/widgets/quote_checkout.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/location/location_capture.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_cart.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/prompt_dialogs/contact_info_dialog.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
-// First, update the provider and notifier at the top of the file
-final validationProvider =
-    StateNotifierProvider.family<ValidationNotifier, Map<String, bool>, String>(
-        (ref, type) {
-  return ValidationNotifier();
-});
-
-class ValidationNotifier extends StateNotifier<Map<String, bool>> {
-  ValidationNotifier()
-      : super({
-          'location': false,
-          'date': false,
-          'time': false,
-        });
-
-  void setValid(String field, bool isValid) {
-    state = {...state, field: isValid};
-  }
-
-  bool isFieldValid(String field) {
-    return state[field] ?? false;
-  }
-
-  bool areAllFieldsValid() {
-    return !state.values.contains(false);
-  }
-}
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   final String displayType; // 'platos', 'catering', or 'subscriptions'
@@ -91,11 +77,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   String? _regularDishesLatitude;
   String? _regularDishesLongitude;
-
-  // bool _isCateringAddressValid = true;
-  // bool _isMealSubscriptionAddressValid = true;
-  // bool _isRegularCateringAddressValid = true;
-
+ 
   String? name, phone, email;
   bool showSignInScreen = false;
   bool? dialogResult;
@@ -134,57 +116,74 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     return sum;
   }
 
+ (List<CartItem>, double) _getItemsAndTotalPrice(
+    List<CartItem> cartItems,
+    List<CartItem> mealItems,
+    CateringOrderItem? cateringOrder,
+    CateringOrderItem? cateringQuote,
+  ) {
+    List<CartItem> itemsToDisplay = [];
+    double totalPrice = 0.0;
+
+    switch (widget.displayType) {
+      case 'platos':
+        itemsToDisplay = cartItems
+            .where(
+                (item) => !item.isMealSubscription && item.foodType != 'Catering')
+            .toList();
+        totalPrice = _calculateTotalPrice(itemsToDisplay);
+        break;
+      case 'subscriptions':
+        itemsToDisplay = mealItems;
+        totalPrice = _calculateTotalPrice(itemsToDisplay);
+        break;
+      case 'catering':
+        itemsToDisplay = [];
+        totalPrice = cateringOrder != null
+            ? _calculateCateringTotalPrice(cateringOrder)
+            : 0.0;
+        break;
+      case 'quote':
+        itemsToDisplay = [];
+        totalPrice = cateringQuote != null
+            ? _calculateCateringTotalPrice(cateringQuote)
+            : 0.0;
+        break;
+      default:
+        break;
+    }
+
+    return (itemsToDisplay, totalPrice);
+  }
+
   @override
   Widget build(BuildContext context) {
     // Fetch items based on displayType
     final List<CartItem> cartItems = ref.watch(cartProvider) ?? [];
     final CateringOrderItem? cateringOrder = ref.watch(cateringOrderProvider);
+    final CateringOrderItem? cateringQuote = ref.watch(manualQuoteProvider);
     final List<CartItem> mealItems =
         ref.watch(mealOrderProvider) ?? []; // Fetch meal subscriptions
 
-    List<CartItem> itemsToDisplay = [];
-    double totalPrice = 0.0;
+     final (itemsToDisplay, totalPrice) = _getItemsAndTotalPrice(
+      cartItems,
+      mealItems,
+      cateringOrder,
+      cateringQuote,
+    );
 
-    if (widget.displayType == 'platos') {
-      itemsToDisplay = cartItems
-          .where(
-              (item) => !item.isMealSubscription && item.foodType != 'Catering')
-          .toList();
-      totalPrice = _calculateTotalPrice(itemsToDisplay);
-    } else if (widget.displayType == 'subscriptions') {
-      itemsToDisplay = mealItems; // Use mealItems from mealOrderProvider
-      totalPrice = _calculateTotalPrice(itemsToDisplay);
-    } else if (widget.displayType == 'catering') {
-      if (cateringOrder != null) {
-        totalPrice = _calculateCateringTotalPrice(cateringOrder);
-      } else {
-        totalPrice = 0.0;
-      }
-    }
+    // if (widget.displayType.isEmpty) {
+    //   // No items to display, pop the screen
+    //   WidgetsBinding.instance.addPostFrameCallback((_) {
+    //     if (mounted && GoRouter.of(context).canPop()) {
+    //       GoRouter.of(context).pop(true);
+    //     }
+    //   });
+    //   // Return an empty container while the screen is being popped
+    //   return const SizedBox.shrink();
+    // }
 
-    // Check if there are items to display
-    bool hasItemsToDisplay;
-    if (widget.displayType == 'platos' ||
-        widget.displayType == 'subscriptions') {
-      hasItemsToDisplay = itemsToDisplay.isNotEmpty;
-    } else if (widget.displayType == 'catering') {
-      hasItemsToDisplay = (cateringOrder != null);
-    } else {
-      hasItemsToDisplay = false;
-    }
-
-    if (!hasItemsToDisplay || widget.displayType.isEmpty) {
-      // No items to display, pop the screen
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && GoRouter.of(context).canPop()) {
-          GoRouter.of(context).pop(true);
-        }
-      });
-      // Return an empty container while the screen is being popped
-      return const SizedBox.shrink();
-    }
-
-    return Scaffold(
+  return Scaffold(
       appBar: AppBar(
         forceMaterialTransparency: true,
         title: Text('Completar Orden: ${widget.displayType.capitalize()}'),
@@ -195,88 +194,16 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              if (widget.displayType == 'platos' &&
-                  itemsToDisplay.isNotEmpty) ...[
-                // _buildSectionTitle(context, 'Platos'),
-                _buildLocationField(
-                  context,
-                  _regularDishesLocationController,
-                  'regular',
-                ),
-                _buildPaymentMethodDropdown(),
-                for (var item in itemsToDisplay)
-                  CartItemView(
-                    img: item.img,
-                    title: item.title,
-                    description: item.description,
-                    pricing: item.pricing,
-                    offertPricing: item.offertPricing,
-                    ingredients: item.ingredients,
-                    isSpicy: item.isSpicy,
-                    foodType: item.foodType,
-                    quantity: item.quantity,
-                    onRemove: () => ref
-                        .read(cartProvider.notifier)
-                        .decrementQuantity(item.title),
-                    onAdd: () => ref
-                        .read(cartProvider.notifier)
-                        .incrementQuantity(item.title),
-                    peopleCount: 0,
-                    sideRequest: '',
-                  ),
-              ],
-              if (widget.displayType == 'subscriptions' &&
-                  itemsToDisplay.isNotEmpty) ...[
-                // _buildSectionTitle(context, 'Subscripciones'),
-                _buildLocationField(
-                  context,
-                  _mealSubscriptionLocationController,
-                  'mealSubscription',
-                ),
-                _buildDateTimePicker(
-                  context,
-                  _mealSubscriptionDateController,
-                  _mealSubscriptionTimeController,
-                  isCatering: false,
-                ),
-                _buildPaymentMethodDropdown(),
-                for (var item in itemsToDisplay)
-                  MealSubscriptionItemView(
-                    item: item,
-                    onConsumeMeal: () => ref
-                        .read(mealOrderProvider.notifier)
-                        .consumeMeal(item.title),
-                    onRemoveFromCart: () => ref
-                        .read(mealOrderProvider.notifier)
-                        .removeFromCart(item.id),
-                  ),
-              ],
-              if (widget.displayType == 'catering' &&
-                  cateringOrder != null) ...[
-                // _buildSectionTitle(context, 'Catering'),
-                _buildLocationField(
-                  context,
-                  _cateringLocationController,
-                  'catering',
-                ),
-                _buildDateTimePicker(
-                  context,
-                  _cateringDateController,
-                  _cateringTimeController,
-                  isCatering: true,
-                ),
-                _buildPaymentMethodDropdown(),
-                CateringCartItemView(
-                  order: cateringOrder,
-                  onRemoveFromCart: () => ref
-                      .read(cateringOrderProvider.notifier)
-                      .clearCateringOrder(),
-                ),
-              ],
-              // const SizedBox(height: 16.0),
-              _buildOrderSummary(totalPrice),
-              SizedBox(
-                height: 48,
+              _buildCheckoutContent(),
+              const SizedBox(height: 16),
+              OrderSummary(
+                totalPrice: totalPrice,
+                deliveryFee: _deliveryFee.toDouble(),
+                taxRate: _taxRate, orderType: widget.displayType,
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: ElevatedButton(
                   onPressed: _isProcessingOrder
                       ? null
@@ -284,48 +211,101 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           setState(() {
                             _isProcessingOrder = true;
                           });
-                          try {
-                            await _processOrder(
-                                context, itemsToDisplay, cateringOrder);
-                          } finally {
-                            if (mounted) {
-                              setState(() {
-                                _isProcessingOrder = false;
-                              });
-                            }
-                          }
+                          await _processOrder(
+                            context,
+                            itemsToDisplay,
+                            cateringOrder,
+                            cateringQuote,
+                          );
+                          setState(() {
+                            _isProcessingOrder = false;
+                          });
                         },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorsPaletteRedonda.primary,
-                    minimumSize: const Size(double.infinity, 48),
-                    // Disabled button will be semi-transparent
-                    disabledBackgroundColor:
-                        ColorsPaletteRedonda.primary.withOpacity(0.6),
+                    minimumSize: const Size.fromHeight(50),
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
                   ),
                   child: _isProcessingOrder
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        )
+                      ? const CircularProgressIndicator(color: Colors.white)
                       : Text(
-                          'Completar',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(color: Colors.white),
+                          widget.displayType == 'quote'
+                              ? 'Enviar Cotización'
+                              : 'Procesar Orden',
+                          style: const TextStyle(fontSize: 16),
                         ),
                 ),
               ),
+              const SizedBox(height: 16),
             ],
           ),
         ),
       ),
     );
+  }
+  
+  
+
+   Widget _buildCheckoutContent() {
+    final paymentDropdown = _buildPaymentMethodDropdown();
+
+    // Fetch items based on displayType
+    final List<CartItem> cartItems = ref.watch(cartProvider) ?? [];
+    final CateringOrderItem? cateringOrder = ref.watch(cateringOrderProvider);
+    final CateringOrderItem? cateringQuote = ref.watch(manualQuoteProvider);
+    final List<CartItem> mealItems = ref.watch(mealOrderProvider) ?? [];
+
+    switch (widget.displayType) {
+      case 'platos':
+        return PlatosCheckout(
+          items: cartItems,
+          locationController: _regularDishesLocationController,
+          onLocationTap: _showLocationBottomSheet,
+          paymentMethodDropdown: paymentDropdown,
+        );
+      case 'catering':
+        if (cateringOrder == null) {
+          return const Center(
+            child: Text('No hay orden de catering disponible'),
+          );
+        }
+        return CateringCheckout(
+          order: cateringOrder,
+          locationController: _cateringLocationController,
+          dateController: _cateringDateController,
+          timeController: _cateringTimeController,
+          onLocationTap: _showLocationBottomSheet,
+          onDateTimeTap: _selectDateTime,
+          paymentMethodDropdown: paymentDropdown,
+        );
+      case 'quote':
+        if (cateringQuote == null) {
+          return const Center(
+            child: Text('No hay cotización disponible'),
+          );
+        }
+        return QuoteCheckout(
+          quote: cateringQuote,
+          locationController: _cateringLocationController,
+          dateController: _cateringDateController,
+          timeController: _cateringTimeController,
+          onLocationTap: _showLocationBottomSheet,
+          onDateTimeTap: _selectDateTime,
+          paymentMethodDropdown: paymentDropdown,
+        );
+      case 'subscriptions':
+        return MealPlanCheckout(
+          items: mealItems,
+          locationController: _mealSubscriptionLocationController,
+          dateController: _mealSubscriptionDateController,
+          timeController: _mealSubscriptionTimeController,
+          onLocationTap: _showLocationBottomSheet,
+          onDateTimeTap: _selectDateTime,
+          paymentMethodDropdown: paymentDropdown,
+        );
+      default:
+        return const SizedBox.shrink();
+    }
   }
 
   String getPaymentMethodDescription(int selectedIndex) {
@@ -350,224 +330,229 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   Future<void> _processOrder(BuildContext context, List<CartItem> items,
-      CateringOrderItem? cateringOrder) async {
+      CateringOrderItem? cateringOrder, CateringOrderItem? cateringQuote) async {
+    // Store context related objects before async operations
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    final goRouter = GoRouter.of(context);
+
     if (_validateFields()) {
-      final contactInfo = await _checkAndPromptForContactInfo(context);
+      final contactInfo = await ContactInfoDialog.show(context);
       if (contactInfo == null || contactInfo.isEmpty) return;
+
+      final processor = OrderProcessor(ref, context);
+      final paymentMethod = _paymentMethods[_selectedPaymentMethod];
 
       try {
         if (widget.displayType == 'platos') {
-          await _saveOrderToFirestore(items, contactInfo);
-          await _sendWhatsAppOrder(items, contactInfo);
+          await processor.processRegularOrder(
+            items,
+            contactInfo,
+            paymentMethod,
+            {
+              'address': regularAddress ?? '',
+              'latitude': _regularDishesLatitude ?? '',
+              'longitude': _regularDishesLongitude ?? '',
+            },
+            {
+              'date': _mealSubscriptionDateController.text,
+              'time': _mealSubscriptionTimeController.text,
+            },
+            _generateOrderDetails(items, contactInfo),
+          );
         } else if (widget.displayType == 'subscriptions') {
-          await _saveSubscriptionToFirestore(items, contactInfo);
-          await _sendWhatsAppSubscriptionOrder(items, contactInfo);
+          await processor.processSubscriptionOrder(
+            items,
+            contactInfo,
+            paymentMethod,
+            {
+              'address': mealSubscriptionAddress ?? '',
+              'latitude': _mealSubscriptionLatitude ?? '',
+              'longitude': _mealSubscriptionLongitude ?? '',
+            },
+            {
+              'date': _mealSubscriptionDateController.text,
+              'time': _mealSubscriptionTimeController.text,
+            },
+            _generateSubscriptionOrderDetails(items, contactInfo),
+          );
         } else if (widget.displayType == 'catering' && cateringOrder != null) {
-          await _saveCateringOrderToFirestore(cateringOrder, contactInfo);
-          await _sendWhatsAppCateringOrder(cateringOrder, contactInfo);
+          await processor.processCateringOrder(
+            cateringOrder,
+            contactInfo,
+            paymentMethod,
+            {
+              'address': cateringAddress ?? '',
+              'latitude': _cateringLatitude ?? '',
+              'longitude': _cateringLongitude ?? '',
+            },
+            {
+              'date': _cateringDateController.text,
+              'time': _cateringTimeController.text,
+            },
+            _generateCateringOrderDetails(cateringOrder, contactInfo),
+          );
+        } else if (widget.displayType == 'quote' && cateringQuote != null) {
+          await processor.processQuoteOrder(
+            cateringQuote,
+            contactInfo,
+            paymentMethod,
+            {
+              'address': cateringAddress ?? '',
+              'latitude': _cateringLatitude ?? '',
+              'longitude': _cateringLongitude ?? '',
+            },
+            {
+              'date': _cateringDateController.text,
+              'time': _cateringTimeController.text,
+            },
+            _generateCateringQuoteOrderDetails(cateringQuote, contactInfo),
+          );
+        }
+
+        // Show success screen
+        if (!mounted) return;
+        
+        await navigator.push(
+          MaterialPageRoute(
+            builder: (context) => OrderSuccessScreen(
+              orderType: widget.displayType,
+            ),
+          ),
+        );
+
+        // Pop back to home after success screen is dismissed
+        if (!mounted) return;
+        if (goRouter.canPop()) {
+          goRouter.pop();
         }
       } catch (error) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        if (!mounted) return;
+        scaffoldMessenger.showSnackBar(SnackBar(
           content: Text('Error processing order: $error'),
-          backgroundColor: Colors.red, // Red background color for error
-          duration:
-              const Duration(milliseconds: 500), // Display for half a second
+          backgroundColor: Colors.red,
+          duration: const Duration(milliseconds: 500),
         ));
       }
-    } else {
-      return;
     }
   }
 
-  // Save regular orders to Firestore
-  Future<void> _saveOrderToFirestore(
-      List<CartItem> items, Map<String, String>? contactInfo) async {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    final email =
-        FirebaseAuth.instance.currentUser?.email ?? contactInfo?['email'] ?? '';
+ 
+ 
 
-    final firestore = FirebaseFirestore.instance;
-    final orderDate = DateTime.now();
+  // Send WhatsApp message for catering orders
+  // Future<void> _sendWhatsAppCateringOrder(
+  //     CateringOrderItem cateringOrder, Map<String, String>? contactInfo) async {
+  //   final String orderDetails =
+  //       _generateCateringOrderDetails(cateringOrder, contactInfo);
 
-    for (var item in items) {
-      final double price = double.tryParse(item.pricing) ?? 0.0;
-      final int quantity = item.quantity;
+  //   const String phoneNumber = '+18493590832';
 
-      final orderData = {
-        'email': email,
-        'userId': userId ?? 'anon',
-        'orderType': item.foodType ?? 'Unknown',
-        'status': 'pending',
-        'orderDate': orderDate.toIso8601String(),
-        'location': {
-          'address': regularAddress ?? '',
-          'latitude': _regularDishesLatitude ?? '',
-          'longitude': _regularDishesLongitude ?? '',
-        },
-        'deliveryDate': _mealSubscriptionDateController.text,
-        'deliveryTime': _mealSubscriptionTimeController.text,
-        'items': [item.toJson()],
-        'paymentMethod': _paymentMethods[_selectedPaymentMethod],
-        'totalAmount': price * quantity,
-        'timestamp': FieldValue.serverTimestamp(),
-      };
-      await firestore.collection('orders').add(orderData);
-    }
+  //   final String whatsappUrlMobile =
+  //       'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
+  //   final String whatsappUrlWeb =
+  //       'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
+
+  //   if (await canLaunchUrl(Uri.parse(whatsappUrlMobile))) {
+  //     await launchUrl(Uri.parse(whatsappUrlMobile));
+  //   } else if (await canLaunchUrl(Uri.parse(whatsappUrlWeb))) {
+  //     await launchUrl(Uri.parse(whatsappUrlWeb));
+  //   } else {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content: Text('No pude abrir WhatsApp'),
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //   }
+
+  //   _clearCateringAndPop();
+  // }
+
+  // Generate order details for regular orders
+  // Remove the old order detail generation methods and replace with:
+  String _generateOrderDetails(
+      List<CartItem> items, Map<String, String>? contactInfo) {
+    
+    final generator = OrderDetailsGenerator(
+      taxRate: _taxRate,
+      deliveryFee: _deliveryFee,
+      paymentMethods: _paymentMethods,
+      selectedPaymentMethod: _selectedPaymentMethod,
+    );
+
+    return generator.generateRegularOrder(
+      items: items,
+      contactInfo: contactInfo,
+      address: regularAddress ?? 'No proporcionada',
+      latitude: _regularDishesLatitude ?? '',
+      longitude: _regularDishesLongitude ?? '',
+      date: _mealSubscriptionDateController.text,
+      time: _mealSubscriptionTimeController.text,
+    );
   }
 
-  // Save subscriptions to Firestore
-  Future<void> _saveSubscriptionToFirestore(
-      List<CartItem> items, Map<String, String>? contactInfo) async {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    final email =
-        FirebaseAuth.instance.currentUser?.email ?? contactInfo?['email'] ?? '';
+  String _generateSubscriptionOrderDetails(
+      List<CartItem> items, Map<String, String>? contactInfo) {
+    final generator = OrderDetailsGenerator(
+      taxRate: _taxRate,
+      deliveryFee: _deliveryFee,
+      paymentMethods: _paymentMethods,
+      selectedPaymentMethod: _selectedPaymentMethod,
+    );
 
-    final firestore = FirebaseFirestore.instance;
-    final orderDate = DateTime.now();
-
-    for (var item in items) {
-      final double price = double.tryParse(item.pricing) ?? 0.0;
-      final int quantity = item.quantity;
-
-      // Save the subscription order in 'orders' collection
-      final orderData = {
-        'email': email,
-        'userId': userId ?? 'anon',
-        'orderType': 'Subscription',
-        'status': 'pending',
-        'orderDate': orderDate.toIso8601String(),
-        'location': {
-          'address': mealSubscriptionAddress ?? '',
-          'latitude': _mealSubscriptionLatitude ?? '',
-          'longitude': _mealSubscriptionLongitude ?? '',
-        },
-        'deliveryDate': _mealSubscriptionDateController.text,
-        'deliveryTime': _mealSubscriptionTimeController.text,
-        'items': [item.toJson()],
-        'paymentMethod': _paymentMethods[_selectedPaymentMethod],
-        'totalAmount': price * quantity,
-        'timestamp': FieldValue.serverTimestamp(),
-      };
-      await firestore.collection('orders').add(orderData);
-
-      // Save the subscription details in 'subscriptions' collection
-      final subscriptionData = {
-        'email': email,
-        'userId': userId ?? 'anon',
-        'planName': item.title,
-        'status': 'active',
-        'startDate': orderDate.toIso8601String(),
-        'endDate': null, // or calculate based on subscription length
-        'totalMeals': quantity,
-        'consumedMeals': 0,
-        'remainingMeals': quantity,
-        'timestamp': FieldValue.serverTimestamp(),
-      };
-      final subscriptionRef =
-          await firestore.collection('subscriptions').add(subscriptionData);
-
-      // Save individual meals in 'meals' collection
-      for (int i = 0; i < quantity; i++) {
-        final mealData = {
-          'userId': userId ?? 'anon',
-          'subscriptionId': subscriptionRef.id,
-          'subscriptionPlan': item.title,
-          'status': 'unconsumed',
-          'orderDate': orderDate.toIso8601String(),
-          'mealNumber': i + 1,
-          'totalMeals': quantity,
-          'timestamp': FieldValue.serverTimestamp(),
-        };
-        // Save each meal to 'meals' collection
-        await firestore.collection('meals').add(mealData);
-      }
-    }
+    return generator.generateSubscriptionOrder(
+      items: items,
+      contactInfo: contactInfo,
+      address: mealSubscriptionAddress ?? 'No proporcionada',
+      latitude: _mealSubscriptionLatitude ?? '',
+      longitude: _mealSubscriptionLongitude ?? '',
+      date: _mealSubscriptionDateController.text,
+      time: _mealSubscriptionTimeController.text,
+    );
   }
 
-  // Save catering orders to Firestore
-  Future<void> _saveCateringOrderToFirestore(
-      CateringOrderItem cateringOrder, Map<String, String>? contactInfo) async {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    final email =
-        FirebaseAuth.instance.currentUser?.email ?? contactInfo?['email'] ?? '';
+  String _generateCateringOrderDetails(
+      CateringOrderItem order, Map<String, String>? contactInfo) {
+    final generator = OrderDetailsGenerator(
+      taxRate: _taxRate,
+      deliveryFee: _deliveryFee,
+      paymentMethods: _paymentMethods,
+      selectedPaymentMethod: _selectedPaymentMethod,
+    );
 
-    final firestore = FirebaseFirestore.instance;
-    final orderDate = DateTime.now();
-
-    final orderData = {
-      'email': email,
-      'userId': userId ?? 'anon',
-      'orderType': 'Catering',
-      'status': 'pending',
-      'orderDate': orderDate.toIso8601String(),
-      'location': {
-        'address': cateringAddress ?? '',
-        'latitude': _cateringLatitude ?? '',
-        'longitude': _cateringLongitude ?? '',
-      },
-      'deliveryDate': _cateringDateController.text,
-      'deliveryTime': _cateringTimeController.text,
-      'items': cateringOrder.dishes.map((dish) => dish.toJson()).toList(),
-      'paymentMethod': _paymentMethods[_selectedPaymentMethod],
-      'totalAmount': cateringOrder.totalPrice ?? 0.0,
-      'timestamp': FieldValue.serverTimestamp(),
-    };
-    await firestore.collection('orders').add(orderData);
+    return generator.generateCateringOrder(
+      order: order,
+      contactInfo: contactInfo,
+      address: cateringAddress ?? 'No proporcionada',
+      latitude: _cateringLatitude ?? '',
+      longitude: _cateringLongitude ?? '',
+      date: _cateringDateController.text,
+      time: _cateringTimeController.text,
+    );
   }
 
-  // Send WhatsApp message for regular orders
-  Future<void> _sendWhatsAppOrder(
-      List<CartItem> items, Map<String, String>? contactInfo) async {
-    final String orderDetails = _generateOrderDetails(items, contactInfo);
-    const String phoneNumber = '+18493590832';
-    final String whatsappUrlMobile =
-        'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
-    final String whatsappUrlWeb =
-        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
+  String _generateCateringQuoteOrderDetails(
+      CateringOrderItem quote, Map<String, String>? contactInfo) {
+    final generator = OrderDetailsGenerator(
+      taxRate: _taxRate,
+      deliveryFee: _deliveryFee,
+      paymentMethods: _paymentMethods,
+      selectedPaymentMethod: _selectedPaymentMethod,
+    );
 
-    if (await canLaunchUrl(Uri.parse(whatsappUrlMobile))) {
-      await launchUrl(Uri.parse(whatsappUrlMobile));
-      _clearCartAndPop();
-    } else if (await canLaunchUrl(Uri.parse(whatsappUrlWeb))) {
-      await launchUrl(Uri.parse(whatsappUrlWeb));
-      _clearCartAndPop();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No pude abrir WhatsApp'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+    return generator.generateCateringOrder(
+      order: quote,
+      contactInfo: contactInfo,
+      address: cateringAddress ?? 'No proporcionada',
+      latitude: _cateringLatitude ?? '',
+      longitude: _cateringLongitude ?? '',
+      date: _cateringDateController.text,
+      time: _cateringTimeController.text,
+      isQuote: true,
+    );
   }
 
-  // Send WhatsApp message for subscriptions
-  Future<void> _sendWhatsAppSubscriptionOrder(
-      List<CartItem> items, Map<String, String>? contactInfo) async {
-    final String orderDetails =
-        _generateSubscriptionOrderDetails(items, contactInfo);
-
-    const String phoneNumber = '+18493590832';
-    final String whatsappUrlMobile =
-        'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
-    final String whatsappUrlWeb =
-        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
-
-    if (await canLaunchUrl(Uri.parse(whatsappUrlMobile))) {
-      await launchUrl(Uri.parse(whatsappUrlMobile));
-      _clearSubscriptionAndPop();
-    } else if (await canLaunchUrl(Uri.parse(whatsappUrlWeb))) {
-      await launchUrl(Uri.parse(whatsappUrlWeb));
-      _clearSubscriptionAndPop();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No pude abrir WhatsApp'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
 
   bool _validateFields() {
     bool isValid = true;
@@ -720,557 +705,18 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     }
   }
 
-  void _clearCateringAndPop() {
-    ref.read(cateringOrderProvider.notifier).clearCateringOrder();
-    // Check if the current route can be popped (i.e., there's a previous screen in the stack)
-    if (GoRouter.of(context).canPop()) {
-      GoRouter.of(context)
-          .pop(); // Pop the checkout screen to return to the previous screen
-    } else {
-      // If there's no previous screen, directly navigate to the home screen
-      GoRouter.of(context).goNamed(AppRoute.home.name);
-    }
-  }
-
-  void _clearAndNavigateHome() {
-    ref.read(cartProvider.notifier).clearCart(); // Clear the cart
-    if (GoRouter.of(context).canPop()) {
-      GoRouter.of(context).pop(); // Pop checkout screen if possible
-    }
-    GoRouter.of(context).goNamed(AppRoute.home.name); // Go to the home screen
-  }
-
-  void _clearCartAndPop() {
-    ref.read(cartProvider.notifier).clearCart();
-    // Check if the current route can be popped (i.e., there's a previous screen in the stack)
-    if (GoRouter.of(context).canPop()) {
-      GoRouter.of(context)
-          .pop(); // Pop the checkout screen to return to the previous screen
-    } else {
-      // If there's no previous screen, directly navigate to the home screen
-      GoRouter.of(context).goNamed(AppRoute.home.name);
-    }
-  }
-
-  void _clearSubscriptionAndPop() {
-    ref.read(mealOrderProvider.notifier).clearCart();
-    // Check if the current route can be popped (i.e., there's a previous screen in the stack)
-    if (GoRouter.of(context).canPop()) {
-      GoRouter.of(context)
-          .pop(); // Pop the checkout screen to return to the previous screen
-    } else {
-      // If there's no previous screen, directly navigate to the home screen
-      GoRouter.of(context).goNamed(AppRoute.home.name);
-    }
-  }
-
-  // Send WhatsApp message for catering orders
-  Future<void> _sendWhatsAppCateringOrder(
-      CateringOrderItem cateringOrder, Map<String, String>? contactInfo) async {
-    final String orderDetails =
-        _generateCateringOrderDetails(cateringOrder, contactInfo);
-
-    const String phoneNumber = '+18493590832';
-
-    final String whatsappUrlMobile =
-        'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
-    final String whatsappUrlWeb =
-        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
-
-    if (await canLaunchUrl(Uri.parse(whatsappUrlMobile))) {
-      await launchUrl(Uri.parse(whatsappUrlMobile));
-    } else if (await canLaunchUrl(Uri.parse(whatsappUrlWeb))) {
-      await launchUrl(Uri.parse(whatsappUrlWeb));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No pude abrir WhatsApp'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-
-    _clearCateringAndPop();
-  }
-
-  // Generate order details for regular orders
-  String _generateOrderDetails(
-      List<CartItem> items, Map<String, String>? contactInfo) {
-    final StringBuffer orderDetailsBuffer = StringBuffer();
-    double total = 0.0;
-
-    orderDetailsBuffer.writeln('*Detalles de la Orden*:');
-
-    if (contactInfo != null && contactInfo.isNotEmpty) {
-      orderDetailsBuffer.writeln('*Información de Contacto*:');
-      if (contactInfo['name']?.isNotEmpty ?? false) {
-        orderDetailsBuffer.writeln('Nombre: ${contactInfo['name']}');
-      }
-      if (contactInfo['phone']?.isNotEmpty ?? false) {
-        orderDetailsBuffer.writeln('Teléfono: ${contactInfo['phone']}');
-      }
-      if (contactInfo['email']?.isNotEmpty ?? false) {
-        orderDetailsBuffer.writeln('Email: ${contactInfo['email']}');
-      }
-    }
-
-    String regularDishesBuffer = '';
-    for (var item in items) {
-      final String title = item.title;
-      final int quantity = item.quantity;
-      final double price = double.tryParse(item.pricing) ?? 0.0;
-      total += price * quantity;
-      regularDishesBuffer += '$quantity x $title @ RD \$$price each\n';
-    }
-
-    if (regularDishesBuffer.isNotEmpty) {
-      orderDetailsBuffer.writeln('''
-*Platos Regulares*:
-Ubicación: ${regularAddress ?? 'No proporcionada'}
-Google Maps: ${_generateGoogleMapsLink(_regularDishesLatitude!, _regularDishesLongitude!)}
-Fecha y Hora de Entrega: ${_mealSubscriptionDateController.text} - ${_mealSubscriptionTimeController.text}
-$regularDishesBuffer
-''');
-    }
-
-    final double tax = total * _taxRate;
-    final double grandTotal = total + tax + _deliveryFee;
-
-    orderDetailsBuffer.writeln('''
-*Método de Pago*: ${_paymentMethods[_selectedPaymentMethod]}
-*Totales*:
-Envío: RD \$$_deliveryFee
-Impuestos: RD \$${tax.toStringAsFixed(2)}
-Total: RD \$${grandTotal.toStringAsFixed(2)}
-''');
-
-    return orderDetailsBuffer.toString();
-  }
-
-  // Generate order details for subscriptions
-  String _generateSubscriptionOrderDetails(
-      List<CartItem> items, Map<String, String>? contactInfo) {
-    final StringBuffer orderDetailsBuffer = StringBuffer();
-    double total = 0.0;
-
-    orderDetailsBuffer.writeln('*Detalles de la Orden de Suscripción*:');
-
-    if (contactInfo != null && contactInfo.isNotEmpty) {
-      orderDetailsBuffer.writeln('*Información de Contacto*:');
-      if (contactInfo['name']?.isNotEmpty ?? false) {
-        orderDetailsBuffer.writeln('Nombre: ${contactInfo['name']}');
-      }
-      if (contactInfo['phone']?.isNotEmpty ?? false) {
-        orderDetailsBuffer.writeln('Teléfono: ${contactInfo['phone']}');
-      }
-      if (contactInfo['email']?.isNotEmpty ?? false) {
-        orderDetailsBuffer.writeln('Email: ${contactInfo['email']}');
-      }
-    }
-
-    String mealSubscriptionBuffer = '';
-    for (var item in items) {
-      final String title = item.title;
-      final int quantity = item.quantity;
-      final double price = double.tryParse(item.pricing) ?? 0.0;
-      total += price * quantity;
-      mealSubscriptionBuffer += '$quantity x $title @ RD \$$price each\n';
-    }
-
-    if (mealSubscriptionBuffer.isNotEmpty) {
-      orderDetailsBuffer.writeln('''
-*Suscripciones de Comidas*:
-Ubicación: ${mealSubscriptionAddress ?? 'No proporcionada'}
-Google Maps: ${_generateGoogleMapsLink(_mealSubscriptionLatitude!, _mealSubscriptionLongitude!)}
-Fecha: ${_mealSubscriptionDateController.text}
-Hora: ${_mealSubscriptionTimeController.text}
-$mealSubscriptionBuffer
-''');
-    }
-
-    final double tax = total * _taxRate;
-    final double grandTotal = total + tax + _deliveryFee;
-
-    orderDetailsBuffer.writeln('''
-*Método de Pago*: ${_paymentMethods[_selectedPaymentMethod]}
-*Totales*:
-Envío: RD \$$_deliveryFee
-Impuestos: RD \$${tax.toStringAsFixed(2)}
-Total: RD \$${grandTotal.toStringAsFixed(2)}
-''');
-
-    return orderDetailsBuffer.toString();
-  }
-
-  // Generate order details for catering orders
-  String _generateCateringOrderDetails(
-      CateringOrderItem cateringOrder, Map<String, String>? contactInfo) {
-    final StringBuffer orderDetailsBuffer = StringBuffer();
-
-    orderDetailsBuffer.writeln('*Detalles de la Orden de Catering*:');
-
-    if (contactInfo != null && contactInfo.isNotEmpty) {
-      orderDetailsBuffer.writeln('*Información de Contacto*:');
-      if (contactInfo['name']?.isNotEmpty ?? false) {
-        orderDetailsBuffer.writeln('Nombre: ${contactInfo['name']}');
-      }
-      if (contactInfo['phone']?.isNotEmpty ?? false) {
-        orderDetailsBuffer.writeln('Teléfono: ${contactInfo['phone']}');
-      }
-      if (contactInfo['email']?.isNotEmpty ?? false) {
-        orderDetailsBuffer.writeln('Email: ${contactInfo['email']}');
-      }
-    }
-
-    String cateringBuffer = '';
-    for (var dish in cateringOrder.dishes) {
-      final String title = dish.title ?? 'Unknown Dish';
-      final int quantity = dish.quantity ?? 0;
-      final double price = dish.pricing ?? 0.0;
-      cateringBuffer += '$quantity x $title @ RD \$$price each\n';
-    }
-
-    if (cateringBuffer.isNotEmpty) {
-      orderDetailsBuffer.writeln('''
-*Catering*:
-Ubicación: ${cateringAddress ?? 'No proporcionada'}
-Google Maps: ${_generateGoogleMapsLink(_cateringLatitude ?? '', _cateringLongitude ?? '')}
-Fecha: ${_cateringDateController.text}
-Hora: ${_cateringTimeController.text}
-$cateringBuffer
-''');
-    }
-
-    final double total = _calculateCateringTotalPrice(cateringOrder);
-
-    final double tax = total * _taxRate;
-    final double grandTotal = total + tax + _deliveryFee;
-
-    orderDetailsBuffer.writeln('''
-*Método de Pago*: ${_paymentMethods[_selectedPaymentMethod]}
-*Totales*:
-Envío: RD \$$_deliveryFee
-Impuestos: RD \$${tax.toStringAsFixed(2)}
-Total: RD \$${grandTotal.toStringAsFixed(2)}
-''');
-
-    return orderDetailsBuffer.toString();
-  }
-
-  String _generateGoogleMapsLink(String latitude, String longitude) {
-    return 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
-  }
-
-  Future<Map<String, String>?> _checkAndPromptForContactInfo(
-      BuildContext context) async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-
-    if (currentUser == null || currentUser.isAnonymous) {
-      // Reset validation states
-      _isNameValid = true;
-      _isPhoneValid = true;
-      _isEmailValid = true;
-
-      await showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (ctx) {
-          return StatefulBuilder(
-            builder: (ctx, setState) {
-              if (showSignInScreen) {
-                return Dialog(
-                  insetPadding: EdgeInsets.zero, // Remove default padding
-                  child: SizedBox.expand(
-                    child: Scaffold(
-                      appBar: AppBar(
-                        forceMaterialTransparency: true,
-                        title: const Text('Registro'),
-                        leading: IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: () => GoRouter.of(ctx).pop(),
-                        ),
-                      ),
-                      body: CustomSignInScreen(),
-                    ),
-                  ),
-                );
-              } else {
-                return Dialog(
-                  insetPadding: EdgeInsets.zero,
-                  child: SizedBox.expand(
-                    child: Scaffold(
-                      appBar: AppBar(
-                        forceMaterialTransparency: true,
-                        title: const Text('Información de Contacto'),
-                        leading: IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: () => GoRouter.of(ctx).pop(false),
-                        ),
-                      ),
-                      body: SingleChildScrollView(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Todos los campos son obligatorios.',
-                              ),
-                              const SizedBox(height: 16),
-                              TextField(
-                                decoration: InputDecoration(
-                                  labelText: 'Nombre',
-                                  filled: true,
-                                  fillColor: Colors.transparent,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    borderSide: BorderSide(
-                                      color: _isNameValid
-                                          ? ColorsPaletteRedonda.primary
-                                          : Colors.red,
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  errorText: _isNameValid
-                                      ? null
-                                      : 'El nombre es requerido',
-                                ),
-                                textInputAction: TextInputAction.next,
-                                onChanged: (value) {
-                                  setState(() {
-                                    name = value;
-                                    _isNameValid = value.trim().isNotEmpty;
-                                  });
-                                },
-                              ),
-                              const SizedBox(height: 16),
-                              TextField(
-                                decoration: InputDecoration(
-                                  labelText: 'Teléfono',
-                                  filled: true,
-                                  fillColor: Colors.transparent,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    borderSide: BorderSide(
-                                      color: _isPhoneValid
-                                          ? ColorsPaletteRedonda.primary
-                                          : Colors.red,
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  errorText: _isPhoneValid
-                                      ? null
-                                      : 'El teléfono es requerido',
-                                ),
-                                textInputAction: TextInputAction.next,
-                                keyboardType: TextInputType.phone,
-                                onChanged: (value) {
-                                  setState(() {
-                                    phone = value;
-                                    _isPhoneValid = value.trim().isNotEmpty;
-                                  });
-                                },
-                              ),
-                              const SizedBox(height: 16),
-                              TextField(
-                                decoration: InputDecoration(
-                                  labelText: 'Correo electrónico',
-                                  filled: true,
-                                  fillColor: Colors.transparent,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    borderSide: BorderSide(
-                                      color: _isEmailValid
-                                          ? ColorsPaletteRedonda.primary
-                                          : Colors.red,
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  errorText: _isEmailValid
-                                      ? null
-                                      : 'Ingrese un correo electrónico válido',
-                                ),
-                                textInputAction: TextInputAction.done,
-                                keyboardType: TextInputType.emailAddress,
-                                onChanged: (value) {
-                                  setState(() {
-                                    email = value;
-                                    _isEmailValid = _validateEmail(value);
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      bottomNavigationBar: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  showSignInScreen = true;
-                                });
-                              },
-                              child: const Text('Registrarse'),
-                            ),
-                            const SizedBox(width: 8),
-                            TextButton(
-                              onPressed: () {
-                                GoRouter.of(ctx).pop(false);
-                              },
-                              child: const Text('Cancelar'),
-                            ),
-                            const SizedBox(width: 8),
-                            ElevatedButton(
-                              onPressed: () {
-                                final isValid = _validateFieldss(setState);
-                                if (isValid) {
-                                  GoRouter.of(ctx).pop(true);
-                                }
-                              },
-                              child: const Text('Continuar'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }
-            },
-          );
-        },
-      ).then((value) {
-        dialogResult = value as bool?;
-      });
-
-      if (dialogResult != true) {
-        return null;
-      }
-
-      if (!showSignInScreen) {
-        return {
-          'name': name ?? '',
-          'phone': phone ?? '',
-          'email': email ?? '',
-        };
-      }
-    }
-
-    final user = FirebaseAuth.instance.currentUser;
-    return {
-      'name': user?.displayName ?? '',
-      'phone': user?.phoneNumber ?? '',
-      'email': user?.email ?? '',
-    };
-  }
-
-  // Add these helper methods
-  bool _validateEmail(String email) {
-    if (email.isEmpty) return false;
-    final emailRegExp = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    return emailRegExp.hasMatch(email);
-  }
-
-  bool _validateFieldss(StateSetter setState) {
-    setState(() {
-      _isNameValid = (name?.trim().isNotEmpty ?? false);
-      _isPhoneValid = (phone?.trim().isNotEmpty ?? false);
-      _isEmailValid = _validateEmail(email ?? '');
-    });
-
-    return _isNameValid && _isPhoneValid && _isEmailValid;
-  }
-
-  Widget _buildLocationField(
-      BuildContext context, TextEditingController controller, String name) {
-    final isValid = ref.watch(validationProvider(name))['location'] ?? false;
-
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 60),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: TextField(
-          controller: controller,
-          readOnly: true,
-          onTap: () => _showLocationBottomSheet(context, controller, name),
-          style: Theme.of(context).textTheme.labelLarge,
-          decoration: InputDecoration(
-            labelText: 'Ubicación de entrega',
-            hintStyle: Theme.of(context)
-                .textTheme
-                .titleSmall
-                ?.copyWith(fontWeight: FontWeight.bold),
-            hintText: 'Ingrese Ubicación',
-            filled: true,
-            fillColor: Colors.transparent,
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: const BorderSide(
-                color: ColorsPaletteRedonda.deepBrown1,
-                width: 1.0,
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: const BorderSide(
-                color: ColorsPaletteRedonda.primary,
-                width: 2.0,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: BorderSide(
-                color: ColorsPaletteRedonda.deepBrown1,
-                width: 2.0,
-              ),
-            ),
-
-            // border: OutlineInputBorder(
-            //   borderRadius: BorderRadius.circular(8.0),
-            //   borderSide: BorderSide(
-            //     color: isValid
-            //         ? ColorsPaletteRedonda.deepBrown1
-            //         : Colors.red,
-            //     width: 1.0,
-            //   ),
-            // ),
-            // focusedErrorBorder: OutlineInputBorder(
-            //   borderRadius: BorderRadius.circular(8.0),
-            //   borderSide: BorderSide(
-            //     color: isValid
-            //         ? ColorsPaletteRedonda.deepBrown1
-
-            //     width: 1.0,
-            //   ),
-            // ),
-            // focusedBorder: OutlineInputBorder(
-            //   borderRadius: BorderRadius.circular(8.0),
-            //   borderSide: BorderSide(
-            //     color: isValid
-            //         ? ColorsPaletteRedonda.primary
-            //         : Colors.red,
-            //     width: 2.0,
-            //   ),
-            // ),
-            errorText: isValid ? null : 'La ubicación es requerida',
-          ),
-        ),
-      ),
-    );
-  }
-
   void _showLocationBottomSheet(BuildContext context,
       TextEditingController controller, String orderType) {
+    if (!mounted) return;
+    
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) {
+      builder: (BuildContext bottomSheetContext) {
         return LocationCaptureBottomSheet(
           onLocationCaptured: (latitude, longitude, address) {
+            if (!mounted) return;
+            
             setState(() {
               controller.text = address;
               switch (orderType.toLowerCase()) {
@@ -1305,275 +751,40 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
       },
     );
   }
-
-  Widget _buildDateTimePicker(
-      BuildContext context,
-      TextEditingController dateController,
-      TextEditingController timeController,
-      {required bool isCatering}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // const SizedBox(height: 8.0),
-          TextField(
-            style: Theme.of(context).textTheme.labelLarge,
-            controller: dateController,
-            readOnly: true,
-            onTap: () =>
-                _selectDateTime(context, dateController, timeController),
-            decoration: InputDecoration(
-              labelText: isCatering
-                  ? 'Selecciona la fecha y hora de tu catering'
-                  : 'Selecciona la fecha y hora de tu entrega',
-              hintStyle: Theme.of(context)
-                  .textTheme
-                  .titleSmall
-                  ?.copyWith(fontWeight: FontWeight.bold),
-              hintText:
-                  isCatering ? '2024-11-23 - 13:00' : '2024-11-23 - 13:00',
-              filled: true,
-              fillColor: Colors.transparent,
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: const BorderSide(
-                  color: ColorsPaletteRedonda.deepBrown1,
-                  width: 1.0,
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: const BorderSide(
-                  color: ColorsPaletteRedonda.primary,
-                  width: 2.0,
-                ),
-              ),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
+  
   Future<void> _selectDateTime(
-      BuildContext context,
-      TextEditingController dateController,
-      TextEditingController timeController) async {
-    final DateTime? pickedDate = await showDatePicker(
+    BuildContext context,
+    TextEditingController dateController,
+    TextEditingController timeController,
+  ) async {
+    if (!mounted) return;
+
+    final type = dateController == _cateringDateController
+        ? 'catering'
+        : 'mealSubscription';
+
+    await DateTimePicker2.show(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 30)),
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: ColorsPaletteRedonda.primary, // Header background color
-              onPrimary: ColorsPaletteRedonda.white, // Header text color
-              onSurface: ColorsPaletteRedonda.deepBrown1, // Body text color
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor:
-                    ColorsPaletteRedonda.primary, // Button text color
-              ),
-            ),
-          ),
-          child: child!,
-        );
+      dateController: dateController,
+      timeController: timeController,
+      onValidationUpdate: (field) {
+        if (!mounted) return;
+        ref.read(validationProvider(type).notifier).setValid(field, true);
       },
-    );
-
-    if (pickedDate == null) {
-      debugPrint('Selección de fecha cancelada');
-      return;
-    }
-
-    final TimeOfDay? pickedTime = await showTimePicker(
-      context: context,
-      initialTime: const TimeOfDay(hour: 9, minute: 0),
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: ColorsPaletteRedonda.primary, // Header background color
-              onPrimary: ColorsPaletteRedonda.white, // Header text color
-              onSurface: ColorsPaletteRedonda.deepBrown1, // Body text color
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor:
-                    ColorsPaletteRedonda.primary, // Button text color
-              ),
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (pickedTime == null) {
-      debugPrint('Selección de hora cancelada');
-      return;
-    }
-
-    if (pickedTime != null) {
-      final DateTime selectedDateTime = DateTime(
-        pickedDate.year,
-        pickedDate.month,
-        pickedDate.day,
-        pickedTime.hour,
-        pickedTime.minute,
-      );
-
-      setState(() {
-        final formattedDate = DateFormat('yyyy-MM-dd').format(selectedDateTime);
-        final formattedTime = DateFormat('HH:mm').format(selectedDateTime);
-        dateController.text = '$formattedDate - $formattedTime';
-        timeController.text = formattedTime;
-
-        // Set validation state based on which controller was used
-        String type;
-        if (dateController == _cateringDateController) {
-          type = 'catering';
-        } else {
-          type = 'mealSubscription';
-        }
-
-        ref.read(validationProvider(type).notifier)
-          ..setValid('date', true)
-          ..setValid('time', true);
-      });
-    }
-  }
-
-  Widget _buildSectionTitle(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.titleLarge,
-      ),
-    );
-  }
-
-  Widget _buildOrderSummary(double totalPrice) {
-    final double tax = totalPrice * _taxRate;
-    final double orderTotal = totalPrice + _deliveryFee + tax;
-
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 150),
-      child: Card(
-        color: Colors.white,
-        margin: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Resumen de la Orden',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: ColorsPaletteRedonda.primary,
-                    ),
-              ),
-              const SizedBox(height: 16.0),
-              _buildOrderSummaryRow(
-                  'Items', 'RD \$${totalPrice.toStringAsFixed(2)}'),
-              _buildOrderSummaryRow('Envio', 'RD \$$_deliveryFee'),
-              _buildOrderSummaryRow(
-                  'Impuestos', 'RD \$${tax.toStringAsFixed(2)}'),
-              const Divider(),
-              _buildOrderSummaryRow(
-                  'Order total', 'RD \$${orderTotal.toStringAsFixed(2)}',
-                  isBold: true),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOrderSummaryRow(String label, String value,
-      {bool isBold = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-                    color: Colors.black,
-                  ),
-            ),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-                    color: ColorsPaletteRedonda.deepBrown,
-                  ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
   Widget _buildPaymentMethodDropdown() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          DropdownButtonFormField<int>(
-            dropdownColor: ColorsPaletteRedonda.white,
-            value: _selectedPaymentMethod,
-            items: List.generate(_paymentMethods.length, (index) {
-              return DropdownMenuItem<int>(
-                value: index,
-                child: Text(
-                  _paymentMethods[index],
-                  style: const TextStyle(
-                      color: ColorsPaletteRedonda.primary, fontSize: 14),
-                ),
-              );
-            }),
-            onChanged: (value) {
-              setState(() {
-                _selectedPaymentMethod = value!;
-              });
-            },
-            decoration: InputDecoration(
-              labelText: 'Método de pago',
-              filled: true,
-              fillColor: Colors.transparent,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: const BorderSide(
-                  color: ColorsPaletteRedonda.primary,
-                  width: 1.5,
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
-            child: Text(
-              getPaymentMethodDescription(_selectedPaymentMethod),
-              style: const TextStyle(
-                color: ColorsPaletteRedonda.orange,
-                fontSize: 14.0,
-              ),
-            ),
-          ),
-        ],
-      ),
+    return PaymentMethodDropdown(
+      selectedMethod: _selectedPaymentMethod,
+      onMethodSelected: (value) {
+        setState(() {
+          _selectedPaymentMethod = value;
+        });
+      },
+      paymentMethods: _paymentMethods,
+      getDescription: getPaymentMethodDescription,
     );
   }
+
 }

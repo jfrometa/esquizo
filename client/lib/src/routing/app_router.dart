@@ -10,6 +10,7 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/admin/ser
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/catering_entry_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/cathering_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/manual_quote_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/checkout.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/details/details_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_details.dart';
@@ -60,14 +61,16 @@ enum AppRoute {
   mealPlans,
   mealPlan,
   catering,
+  cateringMenu,
   caterings, // If both are used
   landing,
   adminPanel,
   inProgressOrders,
+  manualQuote
 }
 
 @riverpod
-GoRouter goRouter(GoRouterRef ref) {
+GoRouter goRouter(Ref ref) {
   final appStartupState = ref.watch(appStartupProvider);
   final authRepository = ref.watch(authRepositoryProvider);
   final destinations = ref.watch(navigationDestinationsProvider);
@@ -191,6 +194,27 @@ List<RouteBase> _getNestedRoutes(String path) {
           pageBuilder: (context, state) => const MaterialPage(
             child: CateringEntryScreen(),
           ),
+             routes: [
+            GoRoute(
+              path: 'quote',
+              name: AppRoute.manualQuote.name,
+              pageBuilder: (context, state) { 
+                return MaterialPage(
+                  child: ManualQuoteScreen()
+                );
+              },
+            ),
+                      GoRoute(
+              path: 'menu',
+              name: AppRoute.cateringMenu.name,
+              pageBuilder: (context, state) { 
+                return MaterialPage(
+                  child: CateringSelectionScreen()
+                );
+              },
+            ),
+          ],
+            
         ),
         GoRoute(
           path: 'populares',

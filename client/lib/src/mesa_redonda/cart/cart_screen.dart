@@ -7,7 +7,8 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cate
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/meal_subscription_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/catering_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/cathering_order_item.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/manual_quote_screen.dart';
+
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/providers/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
@@ -52,11 +53,11 @@ class CartScreen extends ConsumerWidget {
       ));
     }
     if (quoteItems.isNotEmpty) {
-      availableTabs.add('Catering');
+      availableTabs.add('Cotizar Catering');
       tabContent.add(_buildTabWithCheckoutButton(
         context,
         ref,
-        'catering',
+        'quote',
         cateringItems,
         _buildManualQuoteTab(ref, manualQuote!),
       ));
@@ -185,64 +186,68 @@ Widget _buildCheckoutButton(BuildContext context, WidgetRef ref,
         ((cateringOrder!.peopleCount ?? 0) > 0);
     isDisabled = !isPersonasSelected;
 
+  }
+
+    if (type.toLowerCase() == 'quote') {
+    final cateringQuote = ref.watch(manualQuoteProvider);
+    final isPersonasSelected = cateringQuote?.peopleCount != null &&
+        ((cateringQuote!.peopleCount ?? 0) > 0);
+    isDisabled = !isPersonasSelected;
+
     // If this catering order is a quote, change the label and action.
-    if (cateringOrder != null && cateringOrder.isQuote) {
+    if (cateringQuote != null && cateringQuote.isQuote) {
       buttonLabel = 'Guardar cotización';
       // You might want to disable the pricing check:
       isDisabled = !isPersonasSelected; // Or adjust if needed.
     }
   }
-
   return Container(
     padding: const EdgeInsets.all(16.0),
     child: ElevatedButton(
       onPressed: !isDisabled && hasItemsInCurrentTab
           ? () {
-              if (type.toLowerCase() == 'catering') {
-                final cateringOrder = ref.read(cateringOrderProvider);
-                if (cateringOrder != null && cateringOrder.isQuote) {
-                  // Instead of going to the payment checkout, handle quote saving.
-                  // For example, you might call a service to save the quote or
-                  // navigate to a quote summary screen.
-                  // Here, we simply display a confirmation dialog.
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Cotización Guardada'),
-                      content: const Text('La cotización se ha guardado correctamente.'),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            // Optionally, clear the order from the provider
-                            ref.read(cateringOrderProvider.notifier).state = null;
-                          },
-                          child: const Text('OK'),
-                        ),
-                      ],
-                    ),
-                  );
-                } else {
-                  // Normal catering order flow.
-                  GoRouter.of(context).goNamed(AppRoute.checkout.name, extra: type);
-                }
-              } else {
+              // if (type.toLowerCase() == 'quote') {
+              //   final cateringQuote = ref.read(manualQuoteProvider);
+              //   if (cateringQuote != null && cateringQuote.isQuote) {
+                
+              //     showDialog(
+              //       context: context,
+              //       builder: (context) => AlertDialog(
+              //         title: const Text('Cotización Guardada'),
+              //         content: const Text('La cotización se ha guardado correctamente.'),
+              //         actions: [
+              //           TextButton(
+              //             onPressed: () {
+              //               // Navigator.of(context).pop();
+              //               // Optionally, clear the order from the provider
+              //               // ref.read(cateringOrderProvider.notifier).state = null;
+              //             },
+              //             child: const Text('OK'),
+              //           ),
+              //         ],
+              //       ),
+              //     );
+              //   } else {
+              //     // Normal catering order flow.
+              //     GoRouter.of(context).goNamed(AppRoute.checkout.name, extra: type);
+              //   }
+              // } else {
                 // For other types, keep the normal behavior.
                 GoRouter.of(context).goNamed(AppRoute.checkout.name, extra: type);
-              }
+              // }
             }
           : null,
       style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.resolveWith<Color>(
+        backgroundColor: WidgetStateProperty.resolveWith<Color>(
           (states) {
-            if (states.contains(MaterialState.disabled)) {
+            if (states.contains(WidgetState.disabled)) {
               return Colors.grey; // Disabled button color.
             }
             return ColorsPaletteRedonda.primary; // Enabled button color.
           },
         ),
-        foregroundColor: MaterialStateProperty.all(ColorsPaletteRedonda.white),
-        minimumSize: MaterialStateProperty.all(const Size(double.infinity, 56)),
+        foregroundColor: WidgetStateProperty.all(ColorsPaletteRedonda.white),
+        minimumSize: WidgetStateProperty.all(const Size(double.infinity, 56)),
       ),
       child: Text(buttonLabel),
     ),
@@ -341,39 +346,97 @@ Widget _buildCheckoutButton(BuildContext context, WidgetRef ref,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Detalles de la Cotización',
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Detalles de la Cotización',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildQuoteDetailItem('Personas', '${quote.peopleCount ?? 0}'),
+                  _buildQuoteDetailItem('Tipo de Evento', quote.eventType),
+                  _buildQuoteDetailItem('Chef Incluido', quote.hasChef ?? false ? 'Sí' : 'No'),
+                  if (quote.alergias.isNotEmpty)
+                    _buildQuoteDetailItem('Alergias', quote.alergias),
+                  if (quote.preferencia.isNotEmpty)
+                    _buildQuoteDetailItem('Preferencia', quote.preferencia),
+                  if (quote.adicionales.isNotEmpty)
+                    _buildQuoteDetailItem('Notas', quote.adicionales),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 16),
-          _buildQuoteDetailItem('Personas', '${quote.peopleCount ?? 0}'),
-          _buildQuoteDetailItem('Tipo de Evento', quote.eventType),
-          _buildQuoteDetailItem('Chef Incluido', quote.hasChef ?? false ? 'Sí' : 'No'),
-          if (quote.alergias.isNotEmpty)
-            _buildQuoteDetailItem('Alergias', quote.alergias),
-          if (quote.adicionales.isNotEmpty)
-            _buildQuoteDetailItem('Notas Adicionales', quote.adicionales),
-          const Divider(height: 32),
-          Text(
-            'Items Solicitados',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Items Solicitados',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          // Replace Navigator.pop with GoRouter navigation
+                          // GoRouter.of(ref.context).pop();
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  if (quote.dishes.isEmpty)
+                    const Center(
+                      child: Text('No hay items agregados'),
+                    )
+                  else
+                    ...quote.dishes.map((dish) => Card(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          child: ListTile(
+                            title: Text(
+                              dish.title,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (dish.title.isNotEmpty)
+                                  Text(dish.title),
+                                Text(
+                                  dish.hasUnitSelection
+                                      ? '${dish.quantity} unidades'
+                                      : '${quote.peopleCount} personas',
+                                ),
+                              ],
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                final index = quote.dishes.indexOf(dish);
+                                ref.read(manualQuoteProvider.notifier).removeItem(index);
+                              },
+                            ),
+                          ),
+                        )),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 16),
-          ...quote.dishes.map((dish) => Card(
-                margin: const EdgeInsets.only(bottom: 8),
-                child: ListTile(
-                  title: Text(dish.title),
-                  subtitle: dish.hasUnitSelection
-                      ? Text('Cantidad: ${dish.quantity}')
-                      : null,
-                ),
-              )),
         ],
       ),
     );
@@ -398,69 +461,6 @@ Widget _buildCheckoutButton(BuildContext context, WidgetRef ref,
             child: Text(value),
           ),
         ],
-      ),
-    );
-  }
-
-  // Update the _buildCheckoutButton method to handle manual quotes
-  Widget _buildCateringQuoteCheckoutButton(BuildContext context, WidgetRef ref,
-      double totalPrice, List<dynamic> items, String type) {
-    final bool hasItemsInCurrentTab = items.isNotEmpty;
-    bool isDisabled = false;
-    String buttonLabel = 'Realizar pedido';
-
-    if (type.toLowerCase() == 'manual_quote') {
-      buttonLabel = 'Finalizar Cotización';
-      final quote = items.first as CateringOrderItem;
-      isDisabled = quote.peopleCount == null || quote.peopleCount == 0 || 
-                  quote.eventType.isEmpty || quote.dishes.isEmpty;
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      child: ElevatedButton(
-        onPressed: !isDisabled && hasItemsInCurrentTab
-            ? () {
-                if (type.toLowerCase() == 'manual_quote') {
-                  // Handle manual quote submission
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Cotización Finalizada'),
-                      content: const Text(
-                          'La cotización ha sido enviada correctamente.'),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            ref.read(manualQuoteProvider.notifier).state = null;
-                            Navigator.pop(context); // Return to previous screen
-                          },
-                          child: const Text('OK'),
-                        ),
-                      ],
-                    ),
-                  );
-                } else {
-                  // Existing checkout logic
-                  GoRouter.of(context)
-                      .goNamed(AppRoute.checkout.name, extra: type);
-                }
-              }
-            : null,
-        style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.resolveWith<Color>(
-            (states) {
-              if (states.contains(MaterialState.disabled)) {
-                return Colors.grey;
-              }
-              return ColorsPaletteRedonda.primary;
-            },
-          ),
-          foregroundColor: MaterialStateProperty.all(ColorsPaletteRedonda.white),
-          minimumSize: MaterialStateProperty.all(const Size(double.infinity, 56)),
-        ),
-        child: Text(buttonLabel),
       ),
     );
   }

@@ -145,12 +145,18 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen> {
   }
 
 void _navigateToManualQuote() async {
-  final manualOrder = await Navigator.push<CateringOrderItem>(
-    context,
-    MaterialPageRoute(
-      builder: (_) => const ManualQuoteScreen(),
-    ),
+  // final manualOrder = await Navigator.push<CateringOrderItem>(
+  //   context,
+  //   MaterialPageRoute(
+  //     builder: (_) => const ManualQuoteScreen(),
+  //   ),
+  // );
+
+
+   final manualOrder = await GoRouter.of(context).pushNamed<CateringOrderItem>(
+    AppRoute.manualQuote.name, 
   );
+
   if (manualOrder != null) {
     // Directly update the global order with the manual quote,
     // which includes the complete list of manually added dishes.
@@ -575,12 +581,17 @@ void _navigateToManualQuote() async {
 
   /// Navigates to the catering selection screen.
   void _navigateToSelectionScreen() async {
-    final result = await Navigator.push<CateringDish>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const CateringSelectionScreen(),
-      ),
-    );
+    // final result = await Navigator.push<CateringDish>(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => const CateringSelectionScreen(),
+    //   ),
+    // );
+
+    final result = await GoRouter.of(context).pushNamed<CateringDish>(
+         AppRoute.cateringMenu.name, 
+     );
+
     if (result is CateringDish) {
       ref.read(cateringOrderProvider.notifier).addCateringItem(result);
       setState(() {});
@@ -588,23 +599,21 @@ void _navigateToManualQuote() async {
   }
 
 void _addItem(String name, String description, int? quantity) {
-              if (name.trim().isEmpty) return;
-              
-              ref.read(cateringOrderProvider.notifier).addCateringItem(
-                CateringDish(
-                  title: name.trim(),
-                  quantity: quantity ?? 0,
-                  hasUnitSelection: quantity != null,
-                  peopleCount: 1,
-                  pricePerUnit: 0,
-                  pricePerPerson: 0,
-                  ingredients: [],
-                  pricing: 0,
-                ),
-              );
-            }
-
-     
+    if (name.trim().isEmpty) return;
+    
+    ref.read(cateringOrderProvider.notifier).addCateringItem(
+      CateringDish(
+        title: name.trim(),
+        quantity: quantity ?? 0,
+        hasUnitSelection: quantity != null,
+        peopleCount: 1,
+        pricePerUnit: 0,
+        pricePerPerson: 0,
+        ingredients: [],
+        pricing: 0,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -654,18 +663,16 @@ void _addItem(String name, String description, int? quantity) {
       ),
     );
 
-    Widget content;
-    if (isDesktop) {
-      content = Row(
+  final content = isDesktop
+    ? Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(child: eventDetailsCard),
           const SizedBox(width: 24),
           Expanded(child: itemsCard),
         ],
-      );
-    } else {
-      content = Column(
+      )
+    : Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           eventDetailsCard,
@@ -673,7 +680,7 @@ void _addItem(String name, String description, int? quantity) {
           itemsCard,
         ],
       );
-    }
+ 
 
     return Scaffold(
       appBar: AppBar(
@@ -694,7 +701,7 @@ void _addItem(String name, String description, int? quantity) {
               onPressed: items.isNotEmpty
                   ? () {
                       GoRouter.of(context)
-                          .goNamed(AppRoute.checkout.name, extra: 'catering');
+                          .goNamed(AppRoute.homecart.name, extra: 'catering');
                     }
                   : null,
             ),
@@ -715,8 +722,19 @@ void _addItem(String name, String description, int? quantity) {
                         vertical: 12,
                       ),
                     ),
-                    onPressed: () {
-                      // Show regular catering form.
+                    onPressed: () async {
+
+
+                        await GoRouter.of(ref.context).pushNamed(
+                            AppRoute.cateringMenu.name, 
+                          );
+
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (context) => const CateringSelectionScreen(),
+                      //   ),
+                      // );
                     },
                     child: const Text('Inicia tu orden'),
                   ),

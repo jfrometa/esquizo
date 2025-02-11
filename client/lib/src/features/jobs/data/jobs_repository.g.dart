@@ -20,6 +20,8 @@ final jobsRepositoryProvider = Provider<JobsRepository>.internal(
   allTransitiveDependencies: null,
 );
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
 typedef JobsRepositoryRef = ProviderRef<JobsRepository>;
 String _$jobsQueryHash() => r'46482866aecb8be7e41fd6bdb0e2d5a6a87fc350';
 
@@ -34,6 +36,8 @@ final jobsQueryProvider = AutoDisposeProvider<Query<Job>>.internal(
   allTransitiveDependencies: null,
 );
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
 typedef JobsQueryRef = AutoDisposeProviderRef<Query<Job>>;
 String _$jobStreamHash() => r'72fc86cf080cd4a6bdb2da9f13ff81efb312521e';
 
@@ -170,6 +174,8 @@ class JobStreamProvider extends AutoDisposeStreamProvider<Job> {
   }
 }
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
 mixin JobStreamRef on AutoDisposeStreamProviderRef<Job> {
   /// The parameter `jobId` of this provider.
   String get jobId;
@@ -183,4 +189,4 @@ class _JobStreamProviderElement extends AutoDisposeStreamProviderElement<Job>
   String get jobId => (origin as JobStreamProvider).jobId;
 }
 // ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
