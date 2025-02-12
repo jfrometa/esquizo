@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item_view.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/cart_provider.dart';
 
 class PlatosCheckout extends ConsumerWidget {
   final List<CartItem> items;

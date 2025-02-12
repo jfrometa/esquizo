@@ -280,38 +280,3 @@ final dishProvider = Provider<List<Map<String, dynamic>>>((ref) {
 
 // Meal Plan Options
 enum MealPlan { twelveLunch, tenLunch, eightLunch }
-
-// Meal Plan StateNotifier
-class MealPlanNotifier extends StateNotifier<MealPlan> {
-  MealPlanNotifier() : super(MealPlan.twelveLunch);
-
-  void selectPlan(MealPlan plan) {
-    state = plan;
-  }
-}
-
-// Meal Plan Provider
-final mealPlanProvider =
-    StateNotifierProvider<MealPlanNotifier, MealPlan>((ref) {
-  return MealPlanNotifier();
-});
-
-// Date and Time Picker for each lunch in the subscription
-class LunchTimeNotifier extends StateNotifier<Map<int, DateTime>> {
-  LunchTimeNotifier() : super({});
-
-  // Select a date and time for a particular lunch (at least 1 hour before delivery)
-  void selectLunchTime(int lunchNumber, DateTime time) {
-    if (time.isAfter(DateTime.now().add(const Duration(hours: 1)))) {
-      state = {...state, lunchNumber: time};
-    } else {
-      throw Exception("Lunch time must be at least 1 hour before delivery.");
-    }
-  }
-}
-
-// Lunch Time Provider
-final lunchTimeProvider =
-    StateNotifierProvider<LunchTimeNotifier, Map<int, DateTime>>((ref) {
-  return LunchTimeNotifier();
-});

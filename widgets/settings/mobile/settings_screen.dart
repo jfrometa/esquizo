@@ -1,22 +1,4 @@
-import 'dart:async';
-
-import 'package:auto_route/auto_route.dart';
-import 'package:starter_architecture_flutter_firebase/navigation/app_router.dart';
-import 'package:starter_architecture_flutter_firebase/providers/general.dart';
-import 'package:starter_architecture_flutter_firebase/src/theme/app_theme.dart';
-import 'package:starter_architecture_flutter_firebase/themes/icons/thanos_icons.dart';
-import 'package:starter_architecture_flutter_firebase/utils/biometric_manager.dart';
-import 'package:starter_architecture_flutter_firebase/widgets/localization/teapayment_localization.dart';
-import 'package:starter_architecture_flutter_firebase/widgets/nav_component/nav_component.dart';
-import 'package:starter_architecture_flutter_firebase/widgets/toast_message.dart';
-import 'package:starter_architecture_flutter_firebase/widgets/toggle.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:natasha/entities/client_info/client_info.dart';
-import 'package:natasha/entities/kyc/kyc_status/kyc_status.dart';
-import 'package:natasha/notifiers/account_manager_provider_notifier.dart';
-import 'package:natasha/notifiers/client_provider_notifier.dart';
-
+ 
 // @RoutePage()
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});

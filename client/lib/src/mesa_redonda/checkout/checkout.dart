@@ -10,8 +10,10 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/catering_cart_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/meal_subscription_item_view.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/cart_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/catering_order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/cathering_order_item.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/providers/manual_quote_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/providers/validation_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/screens/order_success_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/services/order_details_generator.dart';

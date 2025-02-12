@@ -5,10 +5,12 @@ import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/catering_cart_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/meal_subscription_item_view.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/cart_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/catering_order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/catering_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/cathering_order_item.dart';
 
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/providers/manual_quote_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
@@ -428,7 +430,7 @@ Widget _buildCheckoutButton(BuildContext context, WidgetRef ref,
                               icon: const Icon(Icons.delete, color: Colors.red),
                               onPressed: () {
                                 final index = quote.dishes.indexOf(dish);
-                                ref.read(manualQuoteProvider.notifier).removeItem(index);
+                                ref.read(manualQuoteProvider.notifier).removeFromCart(index);
                               },
                             ),
                           ),

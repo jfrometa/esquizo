@@ -3,19 +3,77 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/cart_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/catering_order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/cathering_order_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/navigation_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
+
+
+// Update the provider to include both catering and manual orders
 final cateringItemCountProvider = StateProvider<int>((ref) {
   final cateringOrder = ref.watch(cateringOrderProvider);
-  return (cateringOrder?.dishes.length ?? 0) > 0 ? 1 : 0;
+  final manualQuote = ref.watch(manualQuoteProvider);
+  
+  final hasCateringOrder = (cateringOrder?.dishes.length ?? 0) > 0;
+  final hasManualQuote = (manualQuote?.dishes.length ?? 0) > 0;
+  
+  return (hasCateringOrder || hasManualQuote) ? 1 : 0;
 });
 
+/// --------------------------------------------------------------------------
+/// 1. Computed Provider to Lazily Calculate the Total Cart Quantity
+/// --------------------------------------------------------------------------
+final totalCartQuantityProvider = Provider<int>((ref) {
+  final cartItems = ref.watch(cartProvider);
+  final mealItems = ref.watch(mealOrderProvider);
+  final cateringCount = ref.watch(cateringItemCountProvider);
+  final cartTotal = cartItems.fold(0, (total, item) => total + item.quantity);
+  final mealTotal = mealItems.length;
+  return cartTotal + mealTotal + cateringCount;
+});
 
+/// --------------------------------------------------------------------------
+/// 2. A Separate Widget for the Cart Badge to Limit Rebuilds
+/// --------------------------------------------------------------------------
+class CartBadge extends ConsumerWidget {
+  final IconData icon;
+  const CartBadge({Key? key, required this.icon}) : super(key: key);
+  
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final totalQuantity = ref.watch(totalCartQuantityProvider);
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Icon(icon),
+        if (totalQuantity > 0)
+          Positioned(
+            top: -7,
+            right: -9,
+            child: CircleAvatar(
+              radius: 8,
+              backgroundColor: Colors.red,
+              child: Text(
+                '$totalQuantity',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
 
-
+/// --------------------------------------------------------------------------
+/// 3. ScaffoldWithNestedNavigation
+/// --------------------------------------------------------------------------
 class ScaffoldWithNestedNavigation extends StatelessWidget {
   const ScaffoldWithNestedNavigation({
     super.key,
@@ -25,8 +83,10 @@ class ScaffoldWithNestedNavigation extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
   void _goBranch(int index) {
-    navigationShell.goBranch(index,
-        initialLocation: index == navigationShell.currentIndex);
+    navigationShell.goBranch(
+      index,
+      initialLocation: index == navigationShell.currentIndex,
+    );
   }
 
   @override
@@ -36,27 +96,19 @@ class ScaffoldWithNestedNavigation extends StatelessWidget {
         ? ScaffoldWithNavigationBar(
             body: navigationShell,
             currentIndex: navigationShell.currentIndex,
-            onDestinationSelected: _goBranch)
+            onDestinationSelected: _goBranch,
+          )
         : ScaffoldWithNavigationRail(
             body: navigationShell,
             currentIndex: navigationShell.currentIndex,
-            onDestinationSelected: _goBranch);
+            onDestinationSelected: _goBranch,
+          );
   }
 }
 
-// Helper function to calculate total quantity
-// int getTotalCartQuantity(List<CartItem> cartItems) {
-//   return cartItems.fold(0, (total, item) => total + item.quantity);
-// }
-
-// Helper function to calculate total quantity from multiple providers
-int getTotalQuantity(
-    List<CartItem> cartItems, List<CartItem> mealItems, int cateringCount) {
-  final cartTotal = cartItems.fold(0, (total, item) => total + item.quantity);
-  final mealTotal = mealItems.length;
-  return cartTotal + mealTotal + cateringCount;
-}
-
+/// --------------------------------------------------------------------------
+/// 4. ScaffoldWithNavigationBar (ConsumerStatefulWidget)
+/// --------------------------------------------------------------------------
 class ScaffoldWithNavigationBar extends ConsumerStatefulWidget {
   const ScaffoldWithNavigationBar({
     super.key,
@@ -83,7 +135,7 @@ class ScaffoldWithNavigationBarState
   void initState() {
     super.initState();
 
-    // Add scroll listener to hide/show the navigation bar on all tabs except "Cuenta"
+    // Listen to scroll events to hide/show the navigation bar (except for the "Cuenta" tab).
     _scrollController.addListener(() {
       if (widget.currentIndex != 3) {
         if (_scrollController.position.userScrollDirection ==
@@ -107,7 +159,7 @@ class ScaffoldWithNavigationBarState
 
   void _goBranch(int index) {
     setState(() {
-      // Show the navigation bar when navigating, and keep it visible on "Cuenta" tab
+      // Ensure the navigation bar is visible on tab "Cuenta" (assumed index 3)
       _isVisible = index == 3 ? true : _isVisible;
     });
     widget.onDestinationSelected(index);
@@ -122,14 +174,7 @@ class ScaffoldWithNavigationBarState
   @override
   Widget build(BuildContext context) {
     final destinations = ref.watch(navigationDestinationsProvider);
-    final cartItems = ref.watch(cartProvider);
-    // final totalQuantity = getTotalCartQuantity(cartItems);
-
-    final mealItems = ref.watch(mealOrderProvider);
-    final cateringCount = ref.watch(cateringItemCountProvider);
-
-    // Calculating the total quantity
-    final totalQuantity = getTotalQuantity(cartItems, mealItems, cateringCount);
+    final totalQuantity = ref.watch(totalCartQuantityProvider);
 
     return Scaffold(
       body: widget.body,
@@ -159,61 +204,36 @@ class ScaffoldWithNavigationBarState
           selectedIndex: widget.currentIndex,
           onDestinationSelected: _goBranch,
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-          destinations: destinations.map((dest) => 
-            _buildDestination(
-              dest,
-              totalQuantity,
-              destinations.indexOf(dest)
-            )
-          ).toList(),
+          destinations: destinations.map((dest) {
+            return _buildDestination(dest, totalQuantity, destinations.indexOf(dest));
+          }).toList(),
         ),
       ),
     );
   }
 
-
   NavigationDestination _buildDestination(
     NavigationDestinationItem destination,
     int totalQuantity,
-    int index
+    int index,
   ) {
     Widget iconWidget;
-
     if (destination.icon == Icons.shopping_cart) {
-      iconWidget = Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Icon(destination.icon),
-          if (totalQuantity > 0)
-            Positioned(
-              top: -7,
-              right: -9,
-              child: CircleAvatar(
-                radius: 8,
-                backgroundColor: Colors.red,
-                child: Text(
-                  '$totalQuantity',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      );
+      // Use CartBadge for the shopping cart.
+      iconWidget = const CartBadge(icon: Icons.shopping_cart);
     } else {
       iconWidget = Icon(destination.icon);
     }
-
     return NavigationDestination(
       icon: iconWidget,
       label: destination.label,
     );
   }
-
 }
 
+/// --------------------------------------------------------------------------
+/// 5. ScaffoldWithNavigationRail (ConsumerWidget)
+/// --------------------------------------------------------------------------
 class ScaffoldWithNavigationRail extends ConsumerWidget {
   const ScaffoldWithNavigationRail({
     super.key,
@@ -229,15 +249,7 @@ class ScaffoldWithNavigationRail extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final destinations = ref.watch(navigationDestinationsProvider);
-    // Get the total quantity from cartProvider
-    final cartItems = ref.watch(cartProvider);
-    // final totalQuantity = getTotalCartQuantity(cartItems);
-
-    final mealItems = ref.watch(mealOrderProvider);
-    final cateringCount = ref.watch(cateringOrderProvider)?.dishes.length ?? 0;
-
-    // Calculating the total quantity
-    final totalQuantity = getTotalQuantity(cartItems, mealItems, cateringCount);
+    final totalQuantity = ref.watch(totalCartQuantityProvider);
 
     return Scaffold(
       body: Row(
@@ -250,20 +262,22 @@ class ScaffoldWithNavigationRail extends ConsumerWidget {
             labelType: NavigationRailLabelType.all,
             selectedIconTheme: const IconThemeData(color: Colors.white),
             selectedLabelTextStyle: const TextStyle(
-                color: ColorsPaletteRedonda.primary,
-                fontWeight: FontWeight.bold),
+              color: ColorsPaletteRedonda.primary,
+              fontWeight: FontWeight.bold,
+            ),
             unselectedIconTheme:
                 const IconThemeData(color: ColorsPaletteRedonda.deepBrown1),
             unselectedLabelTextStyle: const TextStyle(
-                color: ColorsPaletteRedonda.deepBrown1,
-                fontWeight: FontWeight.bold),
-            destinations: destinations.map((dest) =>
-              _buildRailDestination(
-                dest,
-                totalQuantity,
-                destinations.indexOf(dest)
-              )
-            ).toList(),
+              color: ColorsPaletteRedonda.deepBrown1,
+              fontWeight: FontWeight.bold,
+            ),
+            destinations: destinations
+                .map((dest) => _buildRailDestination(
+                      dest,
+                      totalQuantity,
+                      destinations.indexOf(dest),
+                    ))
+                .toList(),
           ),
           const VerticalDivider(thickness: 1, width: 1),
           Expanded(child: body),
@@ -272,41 +286,17 @@ class ScaffoldWithNavigationRail extends ConsumerWidget {
     );
   }
 
-
   NavigationRailDestination _buildRailDestination(
     NavigationDestinationItem destination,
     int totalQuantity,
-    int index
+    int index,
   ) {
     Widget iconWidget;
-
     if (destination.icon == Icons.shopping_cart) {
-      iconWidget = Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Icon(destination.icon),
-          if (totalQuantity > 0)
-            Positioned(
-              top: -7,
-              right: -9,
-              child: CircleAvatar(
-                radius: 8,
-                backgroundColor: Colors.red,
-                child: Text(
-                  '$totalQuantity',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      );
+      iconWidget = const CartBadge(icon: Icons.shopping_cart);
     } else {
       iconWidget = Icon(destination.icon);
     }
-
     return NavigationRailDestination(
       icon: iconWidget,
       label: Text(destination.label),

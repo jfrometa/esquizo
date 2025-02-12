@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/cathering_order_item.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/providers/manual_quote_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class ManualQuoteCartItemView extends ConsumerWidget {
@@ -37,7 +37,7 @@ class ManualQuoteCartItemView extends ConsumerWidget {
                   icon: const Icon(Icons.delete_outline),
                   color: Colors.red,
                   onPressed: () {
-                    ref.read(manualQuoteProvider.notifier).clearCateringQuote();
+                    ref.read(manualQuoteProvider.notifier).clearManualQuote();
                     if (onRemove != null) onRemove!();
                   },
                 ),

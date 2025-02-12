@@ -121,6 +121,54 @@ class OrderStorageService {
     await _firestore.collection('orders').add(orderData);
   }
 
+  Future<void> saveQuoteOrder(
+    CateringOrderItem quote,
+    Map<String, String>? contactInfo,
+    String paymentMethod,
+    Map<String, String> location,
+    Map<String, String> delivery,
+  ) async {
+    final quoteDate = DateTime.now();
+    final email = _getEmail(contactInfo);
+
+    final quoteData = {
+      'email': email,
+      'userId': _userId,
+      'orderType': 'Quote',
+      'status': 'pending',
+      'quoteDate': quoteDate.toIso8601String(),
+      'location': location,
+      'eventDate': delivery['date'],
+      'eventTime': delivery['time'],
+      'items': quote.dishes.map((dish) => dish.toJson()).toList(),
+      'paymentMethod': paymentMethod,
+      'estimatedAmount': quote.totalPrice ?? 0.0,
+      'hasChef': quote.hasChef,
+      'peopleCount': quote.peopleCount,
+      'eventType': quote.eventType,
+      'preferences': quote.preferencia,
+      'allergies': quote.alergias,
+      'additionalNotes': quote.adicionales,
+      'contactInfo': contactInfo,
+      'timestamp': FieldValue.serverTimestamp(),
+    };
+
+    // Save to quotes collection
+    final quoteRef = await _firestore.collection('quotes').add(quoteData);
+
+    // Create a notification document for admin
+    await _firestore.collection('notifications').add({
+      'type': 'new_quote',
+      'quoteId': quoteRef.id,
+      'status': 'unread',
+      'createdAt': FieldValue.serverTimestamp(),
+      'email': email,
+      'eventType': quote.eventType,
+      'peopleCount': quote.peopleCount,
+      'eventDate': delivery['date'],
+    });
+  }
+
   Future<void> _createMeals(
     int quantity,
     String planName,

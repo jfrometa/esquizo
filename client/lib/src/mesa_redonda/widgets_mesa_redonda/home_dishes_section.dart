@@ -5,15 +5,15 @@ import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/helpers/scroll_bahaviour.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/ordering_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/cart_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/slide_item.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
 class HomeDishesSection extends ConsumerWidget {
-  final List dishes;
-
-  const HomeDishesSection({super.key, required this.dishes});
+  
+  const HomeDishesSection({super.key,  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -55,6 +55,7 @@ class HomeDishesSection extends ConsumerWidget {
   }
 
   Widget _buildDishList(BuildContext context, WidgetRef ref) {
+    final dishes = ref.watch(dishProvider);
     return SizedBox(
       height: 380,
       child: Focus(
