@@ -21,7 +21,7 @@ class CateringEntryScreen extends ConsumerStatefulWidget {
   CateringEntryScreenState createState() => CateringEntryScreenState();
 }
 
-class CateringEntryScreenState extends ConsumerState<CateringEntryScreen> {
+class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>  with SingleTickerProviderStateMixin {
   // Controllers for the catering form.
   late TextEditingController eventTypeController;
   late TextEditingController customPersonasController;
@@ -39,11 +39,25 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen> {
     10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, 2000, 5000, 10000
   ];
 
+  late TabController _tabController;
+
   @override
   void initState() {
     super.initState();
     _initializeCateringValues();
+    _tabController = TabController(length: 2, vsync: this);
   }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    customPersonasFocusNode.dispose();
+    eventTypeController.dispose();
+    customPersonasController.dispose();
+    adicionalesController.dispose();
+    super.dispose();
+  }
+
 
   /// Initializes the catering form from the global catering order.
   void _initializeCateringValues() {
@@ -68,14 +82,6 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen> {
         TextEditingController(text: cateringOrder?.adicionales ?? '');
   }
 
-  @override
-  void dispose() {
-    customPersonasFocusNode.dispose();
-    eventTypeController.dispose();
-    customPersonasController.dispose();
-    adicionalesController.dispose();
-    super.dispose();
-  }
 
   /// -----------------------------
   /// Bottom Sheet Forms for Adding Products
@@ -113,52 +119,6 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen> {
                     cantidadPersonas: formData.peopleCount,
                   );
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Se actualizó el Catering'),
-                  backgroundColor: Colors.brown,
-                  duration: Duration(milliseconds: 500),
-                ),
-              );
-              Navigator.pop(context);
-            },
-          ),
-        );
-      },
-    );
-  }
-
-
-
-  /// Opens the bottom sheet to add/update a product for the Catering order.
-  void _showCateringForm1(BuildContext context, WidgetRef ref) {
-    final order = ref.read(cateringOrderProvider);
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-              left: 20,
-              right: 20,
-              top: 20),
-          child: CateringForm(
-            initialData: order,
-            onSubmit: (formData) {
-              ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(
-                    title: order?.title ?? 'Orden de Catering',
-                    img: order?.img ?? 'assets/image.png',
-                    description: order?.description ?? 'Catering',
-                    hasChef: formData.hasChef,
-                    alergias: formData.allergies.join(','),
-                    eventType: formData.eventType,
-                    preferencia: order?.preferencia ?? 'salado',
-                    adicionales: formData.additionalNotes,
-                    cantidadPersonas: formData.peopleCount,
-                  );
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Se actualizó el Catering'),
@@ -218,7 +178,29 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen> {
     );
   }
 
- 
+   // Add method to handle FAB press based on current tab
+  void _handleFabPressed() {
+    if (_tabController.index == 0) {
+      // Catering tab
+      final order = ref.read(cateringOrderProvider);
+      if (order == null || (order.peopleCount ?? 0) <= 0) {
+        _showCateringForm(context, ref);
+      } else {
+        GoRouter.of(context).pushNamed(
+          AppRoute.cateringMenu.name,
+          extra: order,
+        );
+      }
+    } else {
+      // Cotización tab
+      final order = ref.read(manualQuoteProvider);
+      if (order == null || (order.peopleCount ?? 0) <= 0) {
+        _showQuoteForm(context, ref);
+      } else {
+        _showNewItemDialog();
+      }
+    }
+  }
 
   /// -----------------------------
   /// Confirmation Button Handlers
@@ -288,26 +270,7 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
              CateringOrderForm(),
-       
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                final order = ref.read(cateringOrderProvider);
-                if (order == null || 
-                    // order.preferencia.isEmpty ||
-                    // order.adicionales.isEmpty ||
-                    (order.peopleCount ?? 0) <= 0) {
-                  _showCateringForm(context, ref);
-                } else {
-                  // Navigate to dish selection screen
-                  GoRouter.of(context).pushNamed(
-                    AppRoute.cateringMenu.name,
-                    extra: order,
-                  );
-                }
-              },
-              child: const Text('Agregar Producto'),
-            ),
+      
           ], 
      
     );
@@ -323,10 +286,11 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen> {
             // const SizedBox(height: 24),
             itemsCard,
             const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _confirmCateringOrder,
-              child: const Text('Completar Orden'),
-            ),
+            if (MediaQuery.of(context).size.width > 600 && items.isNotEmpty) // Only show on desktop with dishes
+              ElevatedButton(
+                onPressed: _confirmCateringOrder,
+                child: const Text('Completar Orden'),
+              ),
           ],
         ),
       ),
@@ -346,26 +310,39 @@ void _showNewItemDialog() {
   Widget _buildQuoteOrderForm() {
     final quote = ref.watch(manualQuoteProvider);
     if (quote == null) {
-      return Center(
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            foregroundColor: Colors.white,
-            backgroundColor: ColorsPaletteRedonda.orange,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      return const Center(
+        child: Card(
+          margin: EdgeInsets.all(16),
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.restaurant_menu,
+                  size: 48,
+                  color: Colors.grey,
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'No hay orden iniciada',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Inicia una orden agregando los detalles del evento',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ],
+            ),
           ),
-          onPressed: () async {
-            // Navigate to manual quote screen to create a new quote.
-            final manualOrder = await GoRouter.of(context)
-                .pushNamed<CateringOrderItem>(AppRoute.manualQuote.name);
-            if (manualOrder != null) {
-              ref.read(manualQuoteProvider.notifier).state = manualOrder;
-            }
-          },
-          child: const Text('Cotización Manual'),
         ),
       );
     }
-
 
     return SingleChildScrollView(
       child: Padding(
@@ -376,24 +353,21 @@ void _showNewItemDialog() {
           children: [
             QuoteOrderFormView(quote: quote,),
             const SizedBox(height: 16),
-            ElevatedButton(
+//             ElevatedButton(
 
-onPressed: () {
-                final order = ref.read(manualQuoteProvider);
-                if (order == null ||    (order.peopleCount ?? 0) <= 0) {
+// onPressed: () {
+//                 final order = ref.read(manualQuoteProvider);
+//                 if (order == null ||    (order.peopleCount ?? 0) <= 0) {
                   
-                  _showQuoteForm(context, ref);
+//                   _showQuoteForm(context, ref);
                  
-                } else {
-                  // Navigate to dish selection screen
-                 _showNewItemDialog();
-                }
-              },
-
-            
-              child: const Text('Agregar Producto'),
-            ),
-            const SizedBox(height: 24),
+//                 } else {
+//                   // Navigate to dish selection screen
+//                  _showNewItemDialog();
+//                 }
+//               },
+ 
+          if (MediaQuery.of(context).size.width > 600  && quote.dishes.isNotEmpty)  // Only show on desktop
             ElevatedButton(
               onPressed: _confirmQuoteOrder,
               child: const Text('Finalizar Cotización'),
@@ -425,33 +399,54 @@ onPressed: () {
 
   @override
   Widget build(BuildContext context) {
-   
-    // Use a DefaultTabController with two tabs.
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Catering'),
-          backgroundColor: Colors.white,
-          iconTheme: const IconThemeData(color: Colors.black),
-          bottom: const TabBar(
-            indicatorColor: ColorsPaletteRedonda.primary,
-            labelColor: ColorsPaletteRedonda.primary,
-            unselectedLabelColor: Colors.black,
-            tabs: [
-              Tab(text: 'Catering'),
-              Tab(text: 'Cotización'),
-            ],
+    return Scaffold(
+      appBar: AppBar(
+        forceMaterialTransparency: true,
+        title: const Text('Catering'),
+        backgroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.black),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.check),
+            color: ColorsPaletteRedonda.primary,
+            onPressed: () {
+              if (_tabController.index == 0) {
+                _confirmCateringOrder();
+              } else {
+                _confirmQuoteOrder();
+              }
+            },
           ),
-        ),
-        body: TabBarView(
-          children: [
-             _buildCateringOrderForm(),
-             _buildQuoteOrderForm(),
-          //  if (quote != null)  QuoteOrderFormView(quote: quote,),
-     
+        ],
+        bottom: TabBar(
+          controller: _tabController,
+          indicator: const UnderlineTabIndicator(
+            borderSide: BorderSide(
+              width: 2.0,
+              color: ColorsPaletteRedonda.primary,
+            ),
+          ),
+          indicatorColor: ColorsPaletteRedonda.primary,
+          labelColor: ColorsPaletteRedonda.primary,
+          unselectedLabelColor: Colors.black,
+          tabs: const [
+            Tab(text: 'Nuestro Menu'),
+            Tab(text: 'Cotización'),
           ],
         ),
+      ),
+      body: TabBarView(
+        controller: _tabController,  // Add the controller here
+        physics: const NeverScrollableScrollPhysics(),  // Optional: prevents swipe between tabs
+        children: [
+          _buildCateringOrderForm(),
+          _buildQuoteOrderForm(),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _handleFabPressed,
+        backgroundColor: ColorsPaletteRedonda.primary,
+        child: const Icon(Icons.add_shopping_cart),
       ),
     );
   }

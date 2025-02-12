@@ -24,19 +24,19 @@ class ManualQuoteNotifier extends StateNotifier<CateringOrderItem?> {
       state = CateringOrderItem.fromJson(jsonDecode(serializedQuote));
     } else {
       // Optionally, you can initialize a blank quote here.
-      state = CateringOrderItem(
-        title: 'Quote',
-        img: '',
-        description: '',
-        dishes: [],
-        hasChef: false,
-        alergias: '',
-        eventType: '',
-        preferencia: '',
-        adicionales: '',
-        peopleCount: 0,
-        isQuote: true,
-      );
+      // state = CateringOrderItem(
+      //   title: 'Quote',
+      //   img: '',
+      //   description: '',
+      //   dishes: [],
+      //   hasChef: false,
+      //   alergias: '',
+      //   eventType: '',
+      //   preferencia: '',
+      //   adicionales: '',
+      //   peopleCount: 0,
+      //   isQuote: true,
+      // );
     }
   }
 
@@ -72,7 +72,7 @@ class ManualQuoteNotifier extends StateNotifier<CateringOrderItem?> {
         eventType: '',
         preferencia: '',
         adicionales: '',
-        peopleCount: 0,
+        peopleCount: (dish.quantity > 0 ) ? state?.peopleCount : 0,
         isQuote: true,
       );
     } else {

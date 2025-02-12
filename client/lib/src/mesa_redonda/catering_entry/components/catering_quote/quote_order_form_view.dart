@@ -91,10 +91,10 @@ class QuoteOrderFormView extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        // const SizedBox(height: 16),
         Card(
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: quote!.dishes.isEmpty
                 ? const Center(child: Text('No hay items agregados'))
                 : ItemsList(items: quote!.dishes, isQuote: true),

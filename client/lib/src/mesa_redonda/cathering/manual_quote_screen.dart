@@ -77,7 +77,7 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
           title: _itemNameController.text.trim(),
           quantity: quantity,
           hasUnitSelection: manualQuantity != null,
-          peopleCount: 1,
+          peopleCount: quantity != 0 ? quantity : generalQuantity ,
           pricePerUnit: 0,
           pricePerPerson: 0,
           ingredients: [],

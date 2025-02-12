@@ -1,29 +1,29 @@
 // lib/src/mesa_redonda/catering_entry/widgets/items_list.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/cathering_order_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/catering_order_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/manual_quote_provider.dart';
 
-class ItemsList extends StatelessWidget {
+class ItemsList extends ConsumerWidget {
   final List<CateringDish> items;
-  /// Optionally indicate if this is for a quote (affecting text labels, etc.)
   final bool isQuote;
-  const ItemsList({Key? key, required this.items, this.isQuote = false})
-      : super(key: key);
+  const ItemsList({super.key, required this.items, this.isQuote = false});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return ListView.separated(
+      reverse: true,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: items.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, __) => const SizedBox(height: 2),
       itemBuilder: (context, index) {
         final dish = items[index];
-        return Card(
-          elevation: 2,
-          child: ListTile(
+        return    ListTile(
             title: Text(
               dish.title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
             ),
             subtitle: Text(
               dish.hasUnitSelection
@@ -34,10 +34,13 @@ class ItemsList extends StatelessWidget {
             trailing: IconButton(
               icon: const Icon(Icons.delete, color: Colors.red),
               onPressed: () {
-                // You can pass a callback from the parent to remove the item.
+                if (isQuote) {
+                  ref.read(manualQuoteProvider.notifier).removeFromCart(index);
+                } else {
+                  ref.read(cateringOrderProvider.notifier).removeFromCart(index);
+                }
               },
-            ),
-          ),
+            ), 
         );
       },
     );

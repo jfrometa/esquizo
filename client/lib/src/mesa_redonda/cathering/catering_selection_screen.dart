@@ -125,9 +125,13 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
       appBar: AppBar(
         title: const Text('Selecciona tu buffet'),
         forceMaterialTransparency: true,
-        // actions: [
-        //   CartButton(itemCount: cateringItemCount),
-        // ],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.check_circle_outline),
+            color: ColorsPaletteRedonda.primary,
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
         bottom: _isTabBarVisible ? PreferredSize(
           preferredSize: const Size.fromHeight(48.0),
           child: CateringTabBar(
@@ -178,14 +182,6 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
           ),
         ),
       ),
-      floatingActionButton: cateringItemCount > 0
-          ? FloatingActionButton.extended(
-              onPressed: () => _showCateringForm(context),
-              label: const Text('Completar Orden'),
-              icon: Icon(Icons.shopping_cart_checkout, color: ColorsPaletteRedonda.primary),
-              backgroundColor: ColorsPaletteRedonda.primary,
-            )
-          : null,
     );
   }
 

@@ -9,7 +9,7 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/addToOrde
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/admin/services/admin_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering_entry/catering_entry_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/cathering_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/catering_selection_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering_quote/manual_quote_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/checkout.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/details/details_screen.dart';

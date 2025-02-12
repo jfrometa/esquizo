@@ -101,7 +101,7 @@ Widget _buildOrderDetails(CateringOrderItem? order) {
           ),
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(8),
               child: order.dishes.isEmpty
                   ? const Center(child: Text('No hay items agregados'))
                   : ItemsList(items: order.dishes, isQuote: false),
