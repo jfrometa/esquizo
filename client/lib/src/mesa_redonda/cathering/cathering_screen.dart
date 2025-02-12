@@ -3,15 +3,12 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/catering_card.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/catering_entry_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/catering_item.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/catering_order_details.dart'
-    as orderDetails;
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/widgets/cart_button.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/widgets/category_items_list.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/widgets/catering_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/widgets/catering_tab_bar.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/catering_order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 final localCateringItemCountProvider = StateProvider<int>((ref) {
@@ -128,9 +125,9 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
       appBar: AppBar(
         title: const Text('Selecciona tu buffet'),
         forceMaterialTransparency: true,
-        actions: [
-          CartButton(itemCount: cateringItemCount),
-        ],
+        // actions: [
+        //   CartButton(itemCount: cateringItemCount),
+        // ],
         bottom: _isTabBarVisible ? PreferredSize(
           preferredSize: const Size.fromHeight(48.0),
           child: CateringTabBar(

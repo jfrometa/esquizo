@@ -5,13 +5,8 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/ordering_
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/plans/plans.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/slide_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
-
-import 'package:starter_architecture_flutter_firebase/src/helpers/scroll_bahaviour.dart';
+import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart'; 
 import 'package:url_launcher/url_launcher.dart';
-// Import your theme and SlideItem widget
-// import 'path_to_colors_palette_redonda.dart';
-// import 'path_to_slide_item.dart';
 
 class ResponsiveLandingPage extends ConsumerStatefulWidget {
   const ResponsiveLandingPage({super.key});
@@ -30,84 +25,85 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
     _selectRandomDishes();
   }
 
+  // Select random dishes once in initState.
   void _selectRandomDishes() {
     final dishes = ref.read(dishProvider);
-    final dishesCopy = List<Map<String, dynamic>>.from(dishes);
-    dishesCopy.shuffle();
-    setState(() {
-      randomDishes = dishesCopy.take(3).toList();
-    });
+    // final dishesCopy = List<Map<String, dynamic>>.from(dishes);
+    // dishesCopy.shuffle();
+    // Cache the random dishes only once.
+    randomDishes =dishes; // dishesCopy.take(3).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Use MediaQuery to determine screen width
+    // Determine device type by screen width.
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isMobile = screenWidth < 450;
 
     return Scaffold(
       body: isMobile
-          ? buildMobileView(context, ref)
-          : buildDesktopView(context, ref),
+          ? buildMobileView(context)
+          : buildDesktopView(context),
     );
   }
 
-  // Mobile view (450px and below)
-  Widget buildMobileView(BuildContext context, WidgetRef ref) {
+  // Mobile view with vertical scrolling.
+  Widget buildMobileView(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        // Dismiss keyboard when tapping outside
-        FocusScope.of(context).unfocus();
-      },
+      onTap: () => FocusScope.of(context).unfocus(), // Dismiss keyboard.
       child: SingleChildScrollView(
         child: Column(
-          children: [
-            buildHeroSection(context),
-            buildPerksSectionMobile(context),
-            buildPlansSectionMobile(context),
-            buildDishesSectionMobile(context),
-            buildContactSection(context),
-            buildFooter(context),
+          children:  [
+           const HeroSection(),
+           const PerksSectionMobile(),
+           const PlansSectionMobile(),
+           DishesSectionMobile(randomDishes: randomDishes,),
+           const ContactSection(),
+           const FooterSection(),
           ],
         ),
       ),
     );
   }
 
-  // Desktop view (451px and above)
-  Widget buildDesktopView(BuildContext context, WidgetRef ref) {
+  // Desktop view with more generous spacing.
+  Widget buildDesktopView(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
-        children: [
-          buildHeroSection(context),
-          buildPerksSectionDesktop(context),
-          buildPlansSectionDesktop(context),
-          buildDishesSectionDesktop(context),
-          buildContactSection(context),
-          buildFooter(context),
+        children:  [
+        const  HeroSection(),
+         const PerksSectionDesktop(),
+        const  PlansSectionDesktop(),
+          DishesSectionDesktop(randomDishes: randomDishes,),
+         const ContactSection(),
+         const FooterSection(),
         ],
       ),
     );
   }
+}
 
-  // Hero Section
-  Widget buildHeroSection(BuildContext context) {
-    return SizedBox(
+/// ------------------------
+/// Hero Section (static, so marked const)
+/// ------------------------
+class HeroSection extends StatelessWidget {
+  const HeroSection({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
       width: double.infinity,
       height: 400,
-      // decoration: BoxDecoration(
-      //   image: DecorationImage(
-      //     image: const AssetImage('assets/hero_background.jpg'),
-      //     fit: BoxFit.cover,
-      //     colorFilter: ColorFilter.mode(
-      //       ColorsPaletteRedonda.primary.withOpacity(0.6),
-      //       BlendMode.darken,
-      //     ),
-      //   ),
-      // ),
+      // If using network images, consider caching them.
+      decoration: BoxDecoration(
+        image: const DecorationImage(
+          image: AssetImage('assets/hero_background.jpg'),
+          fit: BoxFit.cover,
+        ),
+        color: ColorsPaletteRedonda.primary.withOpacity(0.6),
+      ),
       child: Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -130,16 +126,14 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
               ),
               const SizedBox(height: 30),
               ElevatedButton(
-                onPressed: () {
-                  // Navigate to the menu tab
-                  GoRouter.of(context).goNamed(AppRoute.home.name);
-                },
+                onPressed: () =>
+                    GoRouter.of(context).goNamed(AppRoute.home.name),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ColorsPaletteRedonda.orange,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30.0),
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
                 child: Text(
@@ -156,26 +150,33 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
       ),
     );
   }
+}
 
-  // Mobile Perks Section
-  Widget buildPerksSectionMobile(BuildContext context) {
-    final perks = [
+/// ------------------------
+/// Perks Section (Mobile)
+/// ------------------------
+class PerksSectionMobile extends StatelessWidget {
+  const PerksSectionMobile({super.key});
+  @override
+  Widget build(BuildContext context) {
+    // Use a constant list of perks.
+    const perks = [
       {
         'title': 'Ingredientes Frescos',
         'description':
-            'Utilizamos solo ingredientes orgánicos y frescos para garantizar el mejor sabor y nutrición.',
+            'Ingredientes orgánicos y frescos garantizan el mejor sabor.',
         'icon': Icons.eco,
       },
       {
         'title': 'Presentación Exquisita',
         'description':
-            'Nuestros platos no solo saben bien, sino que también se ven increíbles.',
+            'Platos que se ven tan bien como saben.',
         'icon': Icons.palette,
       },
       {
         'title': 'Servicio Personalizado',
         'description':
-            'Planes de catering y almuerzo adaptados a tus necesidades.',
+            'Planes adaptados a tus necesidades.',
         'icon': Icons.person,
       },
     ];
@@ -192,30 +193,33 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
           const SizedBox(height: 20),
           SizedBox(
             height: 240,
-            child: ScrollConfiguration(
-              behavior: CustomScrollBehavior(),
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: EdgeInsets.zero,
-                itemCount: perks.length,
-                itemBuilder: (context, index) {
-                  final perk = perks[index];
-                  final title = perk['title']! as String;
-                  final desc = perk['description']! as String;
-                  final icon = perk['icon']! as IconData;
-
-                  return buildPerkCard(context, title, desc, icon);
-                },
-              ),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.zero,
+              itemCount: perks.length,
+              itemBuilder: (context, index) {
+                final perk = perks[index];
+                return PerkCard(
+                  title: perk['title'] as String,
+                  description: perk['description'] as String,
+                  icon: perk['icon'] as IconData,
+                );
+              },
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  // Desktop Perks Section
-  Widget buildPerksSectionDesktop(BuildContext context) {
+/// ------------------------
+/// Perks Section (Desktop)
+/// ------------------------
+class PerksSectionDesktop extends StatelessWidget {
+  const PerksSectionDesktop({super.key});
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 50),
       child: Column(
@@ -229,24 +233,24 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
             spacing: 20,
             runSpacing: 20,
             alignment: WrapAlignment.center,
-            children: [
-              buildPerkCard(
-                context,
-                'Ingredientes Frescos',
-                'Utilizamos solo ingredientes orgánicos y frescos para garantizar el mejor sabor y nutrición.',
-                Icons.eco,
+            children: const [
+              PerkCard(
+                title: 'Ingredientes Frescos',
+                description:
+                    'Ingredientes orgánicos y frescos garantizan el mejor sabor.',
+                icon: Icons.eco,
               ),
-              buildPerkCard(
-                context,
-                'Presentación Exquisita',
-                'Nuestros platos no solo saben bien, sino que también se ven increíbles.',
-                Icons.palette,
+              PerkCard(
+                title: 'Presentación Exquisita',
+                description:
+                    'Platos que se ven tan bien como saben.',
+                icon: Icons.palette,
               ),
-              buildPerkCard(
-                context,
-                'Servicio Personalizado',
-                'Planes de catering y almuerzo adaptados a tus necesidades.',
-                Icons.person,
+              PerkCard(
+                title: 'Servicio Personalizado',
+                description:
+                    'Planes adaptados a tus necesidades.',
+                icon: Icons.person,
               ),
             ],
           ),
@@ -254,10 +258,22 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
       ),
     );
   }
+}
 
-  // Perk Card
-  Widget buildPerkCard(
-      BuildContext context, String title, String description, IconData icon) {
+/// Reusable Perk Card widget.
+class PerkCard extends StatelessWidget {
+  final String title;
+  final String description;
+  final IconData icon;
+  const PerkCard({
+    super.key,
+    required this.title,
+    required this.description,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       height: 240,
       width: 300,
@@ -266,7 +282,7 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
         color: ColorsPaletteRedonda.softBrown,
         elevation: 5,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Padding(
           padding: const EdgeInsets.all(15),
@@ -291,10 +307,56 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
       ),
     );
   }
+}
 
-  Widget buildPlansSectionDesktop(BuildContext context) {
+/// ------------------------
+/// Plans Section (Mobile)
+/// ------------------------
+class PlansSectionMobile extends ConsumerWidget {
+  const PlansSectionMobile({super.key});
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final mealPlans = ref.watch(mealPlansProvider);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 30),
+      child: Column(
+        children: [
+          Text(
+            'Nuestros Planes',
+            style: Theme.of(context).textTheme.headlineLarge,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            height: 320,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: mealPlans.length,
+              itemBuilder: (context, index) {
+                final mealPlan = mealPlans[index];
+                return PlanCard(
+                  planName: mealPlan.title,
+                  description: mealPlan.description,
+                  price: mealPlan.price,
+                  planId: mealPlan.id,
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
+/// ------------------------
+/// Plans Section (Desktop)
+/// ------------------------
+class PlansSectionDesktop extends ConsumerWidget {
+  const PlansSectionDesktop({super.key});
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mealPlans = ref.watch(mealPlansProvider);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 50),
       child: Column(
@@ -309,12 +371,11 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
             runSpacing: 20,
             alignment: WrapAlignment.center,
             children: mealPlans.map((mealPlan) {
-              return buildPlanCard(
-                context,
-                mealPlan.title,
-                mealPlan.description,
-                mealPlan.price,
-                mealPlan.id,
+              return PlanCard(
+                planName: mealPlan.title,
+                description: mealPlan.description,
+                price: mealPlan.price,
+                planId: mealPlan.id,
               );
             }).toList(),
           ),
@@ -322,69 +383,38 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
       ),
     );
   }
+}
 
-  // Plan Card
-  Widget buildPlansSectionMobile(BuildContext context) {
-    final mealPlans = ref.watch(mealPlansProvider);
+/// A reusable Plan Card widget.
+class PlanCard extends StatelessWidget {
+  final String planName;
+  final String description;
+  final String price;
+  final String planId;
+  const PlanCard({
+    super.key,
+    required this.planName,
+    required this.description,
+    required this.price,
+    required this.planId,
+  });
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 30),
-      child: Column(
-        children: [
-          Text(
-            'Nuestros Planes',
-            style: Theme.of(context).textTheme.headlineLarge,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          SizedBox(
-            height: 320, // Adjusted height to accommodate new layout
-            child: ScrollConfiguration(
-              behavior: CustomScrollBehavior(),
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: mealPlans.length,
-                itemBuilder: (context, index) {
-                  final mealPlan = mealPlans[index];
-                  return buildPlanCard(
-                    context,
-                    mealPlan.title,
-                    mealPlan.description,
-                    mealPlan.price,
-                    mealPlan.id,
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget buildPlanCard(
-    BuildContext context,
-    String planName,
-    String description,
-    String price,
-    String planId,
-  ) {
-    // Map planId to appropriate icons
+  @override
+  Widget build(BuildContext context) {
     IconData planIcon;
     switch (planId) {
       case 'basico':
-        planIcon = Icons.emoji_food_beverage; // Represents basic plan
+        planIcon = Icons.emoji_food_beverage;
         break;
       case 'estandar':
-        planIcon = Icons.local_cafe; // Represents standard plan
+        planIcon = Icons.local_cafe;
         break;
       case 'premium':
-        planIcon = Icons.local_dining; // Represents premium plan
+        planIcon = Icons.local_dining;
         break;
       default:
         planIcon = Icons.fastfood;
     }
-
     return Container(
       width: 300,
       height: 340,
@@ -393,46 +423,35 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
         color: ColorsPaletteRedonda.softBrown,
         elevation: 5,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              // Plan Icon
-              Icon(
-                planIcon,
-                size: 80,
-                color: ColorsPaletteRedonda.primary,
-              ),
+              Icon(planIcon, size: 80, color: ColorsPaletteRedonda.primary),
               const SizedBox(height: 20),
-              // Plan Name
               Text(
                 planName,
                 style: Theme.of(context).textTheme.titleLarge,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 10),
-              // Plan Description
               Text(
                 description,
                 style: Theme.of(context).textTheme.bodyMedium,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 10),
-              // Plan Price
               Text(
                 price,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       color: ColorsPaletteRedonda.orange,
                     ),
               ),
-              // const SizedBox(height: 15),
               const Spacer(),
-              // "Seleccionar Plan" Button
               ElevatedButton(
                 onPressed: () {
-                  // Navigate to the plan details screen
                   GoRouter.of(context).goNamed(
                     AppRoute.planDetails.name,
                     pathParameters: {'planId': planId},
@@ -441,10 +460,9 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ColorsPaletteRedonda.primary,
                   foregroundColor: ColorsPaletteRedonda.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30.0),
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
                 child: Text(
@@ -460,12 +478,20 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
       ),
     );
   }
+}
 
-  Widget buildDishesSectionMobile(BuildContext context) {
+/// ------------------------
+/// Dishes Section (Mobile)
+/// ------------------------
+class DishesSectionMobile extends StatelessWidget {
+  final List<Map<String, dynamic>>? randomDishes;
+  const DishesSectionMobile({super.key, this.randomDishes});
+
+  @override
+  Widget build(BuildContext context) {
     if (randomDishes == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator.adaptive());
     }
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 30),
       child: Column(
@@ -478,41 +504,39 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
           const SizedBox(height: 20),
           SizedBox(
             height: 400,
-            child: ScrollConfiguration(
-              behavior: CustomScrollBehavior(),
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: randomDishes!.length,
-                itemBuilder: (context, index) {
-                  final dish = randomDishes![index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: SlideItem(
-                      img: dish['img'],
-                      title: dish['title'],
-                      description: dish['description'],
-                      pricing: dish['pricing'],
-                      ingredients: List<String>.from(dish['ingredients']),
-                      isSpicy: dish['isSpicy'],
-                      foodType: dish['foodType'],
-                      index: index,
-                    ),
-                  );
-                },
-              ),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: randomDishes!.length,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              itemBuilder: (context, index) {
+                final dish = randomDishes![index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: SlideItem(
+                    key: Key('dish_$index'),
+                    index: index,
+                    img: dish['img'],
+                    title: dish['title'],
+                    description: dish['description'],
+                    pricing: dish['pricing'],
+                    ingredients: List<String>.from(dish['ingredients']),
+                    isSpicy: dish['isSpicy'],
+                    foodType: dish['foodType'],
+                  ),
+                );
+              },
             ),
           ),
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
-              // Navigate to the menu tab
               GoRouter.of(context).goNamed(AppRoute.details.name);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: ColorsPaletteRedonda.orange,
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0),
+                borderRadius: BorderRadius.circular(30),
               ),
             ),
             child: Text(
@@ -527,13 +551,20 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
       ),
     );
   }
+}
 
-// Desktop Dishes Section
-  Widget buildDishesSectionDesktop(BuildContext context) {
+/// ------------------------
+/// Dishes Section (Desktop)
+/// ------------------------
+class DishesSectionDesktop extends StatelessWidget {
+  final List<Map<String, dynamic>>? randomDishes;
+  const DishesSectionDesktop({super.key, this.randomDishes});
+
+  @override
+  Widget build(BuildContext context) {
     if (randomDishes == null) {
       return const Center(child: CircularProgressIndicator());
     }
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 50),
       child: Column(
@@ -547,9 +578,12 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
             spacing: 20,
             runSpacing: 20,
             alignment: WrapAlignment.center,
-            children: randomDishes!.map((dish) {
-              int index = randomDishes!.indexOf(dish);
+            children: randomDishes!.asMap().entries.map((entry) {
+              final index = entry.key;
+              final dish = entry.value;
               return SlideItem(
+                key: Key('dish_$index'),
+                index: index,
                 img: dish['img'],
                 title: dish['title'],
                 description: dish['description'],
@@ -557,21 +591,19 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
                 ingredients: List<String>.from(dish['ingredients']),
                 isSpicy: dish['isSpicy'],
                 foodType: dish['foodType'],
-                index: index,
               );
             }).toList(),
           ),
           const SizedBox(height: 30),
           ElevatedButton(
             onPressed: () {
-              // Navigate to the menu tab
               GoRouter.of(context).goNamed(AppRoute.details.name);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: ColorsPaletteRedonda.orange,
               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0),
+                borderRadius: BorderRadius.circular(30),
               ),
             ),
             child: Text(
@@ -586,9 +618,15 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
       ),
     );
   }
+}
 
-  Future<void> _sendWhatsAppHello() async {
-    // const String phoneNumber = '+18493590832';
+/// ------------------------
+/// Contact Section
+/// ------------------------
+class ContactSection extends StatelessWidget {
+  const ContactSection({super.key});
+
+  Future<void> _sendWhatsAppHello(BuildContext context) async {
     const String phoneNumber = '+18099880275';
     final String whatsappUrlMobile =
         'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent('Hola')}';
@@ -609,14 +647,12 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
     }
   }
 
-  // Contact Section
-  Widget buildContactSection(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      width: double.infinity, // Ensures the container takes the full width
+      width: double.infinity,
       color: ColorsPaletteRedonda.deepBrown1.withOpacity(0.05),
-      padding: const EdgeInsets.symmetric(
-        vertical: 50,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 50),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -626,7 +662,7 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
           ),
           const SizedBox(height: 20),
           Text(
-            'Estamos aquí para ayudarte. Si tienes alguna pregunta o necesitas un servicio personalizado, no dudes en contactarnos.',
+            'Si tienes preguntas o necesitas un servicio personalizado, contáctanos.',
             style: Theme.of(context).textTheme.bodyLarge,
             textAlign: TextAlign.center,
           ),
@@ -641,15 +677,12 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
           ),
           const SizedBox(height: 30),
           ElevatedButton(
-            onPressed: () async {
-              // Navigate to contact form or open email client
-              await _sendWhatsAppHello();
-            },
+            onPressed: () => _sendWhatsAppHello(context),
             style: ElevatedButton.styleFrom(
               backgroundColor: ColorsPaletteRedonda.primary,
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0),
+                borderRadius: BorderRadius.circular(30),
               ),
             ),
             child: Text(
@@ -664,11 +697,17 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
       ),
     );
   }
+}
 
-  // Footer
-  Widget buildFooter(BuildContext context) {
+/// ------------------------
+/// Footer Section
+/// ------------------------
+class FooterSection extends StatelessWidget {
+  const FooterSection({super.key});
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      width: double.infinity, // Ensures the container takes the full width
+      width: double.infinity,
       color: ColorsPaletteRedonda.deepBrown1,
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -694,11 +733,9 @@ class _ResponsiveLandingPageState extends ConsumerState<ResponsiveLandingPage> {
                       ),
                 ),
               ),
-              Text(
+              const Text(
                 '|',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: ColorsPaletteRedonda.white,
-                    ),
+                style: TextStyle(color: Colors.white),
               ),
               TextButton(
                 onPressed: () {},

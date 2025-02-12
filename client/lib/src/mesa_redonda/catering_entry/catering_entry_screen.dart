@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/widgets/catering_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering_entry/components/catering_order/catering_order_form_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering_entry/components/catering_quote/quote_order_form_view.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/prompt_dialogs/new_item_dialog.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/catering_order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering_quote/manual_quote_screen.dart';
@@ -290,7 +291,21 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen> {
        
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => _showCateringForm(context, ref),
+              onPressed: () {
+                final order = ref.read(cateringOrderProvider);
+                if (order == null || 
+                    // order.preferencia.isEmpty ||
+                    // order.adicionales.isEmpty ||
+                    (order.peopleCount ?? 0) <= 0) {
+                  _showCateringForm(context, ref);
+                } else {
+                  // Navigate to dish selection screen
+                  GoRouter.of(context).pushNamed(
+                    AppRoute.cateringMenu.name,
+                    extra: order,
+                  );
+                }
+              },
               child: const Text('Agregar Producto'),
             ),
           ], 
@@ -318,6 +333,15 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen> {
     );
   }
 
+
+// In your screen/widget:
+void _showNewItemDialog() {
+  NewItemDialog.show(
+    context: context,
+    onAddItem: _addItem, 
+  );
+}
+
   /// Builds the complete quote order form view.
   Widget _buildQuoteOrderForm() {
     final quote = ref.watch(manualQuoteProvider);
@@ -341,6 +365,8 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen> {
         ),
       );
     }
+
+
     return SingleChildScrollView(
       child: Padding(
         padding:
@@ -351,7 +377,20 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen> {
             QuoteOrderFormView(quote: quote,),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => _showQuoteForm(context, ref),
+
+onPressed: () {
+                final order = ref.read(manualQuoteProvider);
+                if (order == null ||    (order.peopleCount ?? 0) <= 0) {
+                  
+                  _showQuoteForm(context, ref);
+                 
+                } else {
+                  // Navigate to dish selection screen
+                 _showNewItemDialog();
+                }
+              },
+
+            
               child: const Text('Agregar Producto'),
             ),
             const SizedBox(height: 24),
@@ -364,43 +403,7 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen> {
       ),
     );
   }
-
-  
-  /// Builds the list of items added to the order.
-  Widget _buildItemsList(List<CateringDish> items) {
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: items.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return Card(
-          elevation: 2,
-          child: ListTile(
-            title: Text(
-              item.title,
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            subtitle: item.title.isNotEmpty
-                ? Text(
-                    item.title,
-                    style: const TextStyle(color: Colors.grey, fontSize: 14),
-                  )
-                : null,
-            trailing: IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
-              onPressed: () => ref
-                  .read(cateringOrderProvider.notifier)
-                  .removeFromCart(items.indexOf(item)),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
+ 
   /// Adds a new dish to the catering order.
   void _addItem(String name, String description, int? quantity) {
     if (name.trim().isEmpty) return;
