@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/cart_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class PlatosCheckout extends ConsumerWidget {
   final List<CartItem> items;
@@ -22,7 +23,10 @@ class PlatosCheckout extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
-        _buildLocationField(context),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: _buildLocationField(context),
+        ),
         paymentMethodDropdown,
         ...items.map(
           (item) => CartItemView(
@@ -54,10 +58,18 @@ class PlatosCheckout extends ConsumerWidget {
         controller: locationController,
         readOnly: true,
         onTap: () => onLocationTap(context, locationController, 'regular'),
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           labelText: 'Ubicación de entrega',
-          border: OutlineInputBorder(),
-        ),
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: const BorderSide(
+              color: ColorsPaletteRedonda.primary,
+              width: 1.5,
+            ),
+          ),
+      ),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/meal_subscription_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_cart.dart';
+import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class MealPlanCheckout extends ConsumerWidget {
   final List<CartItem> items;
@@ -29,8 +30,15 @@ class MealPlanCheckout extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
-        _buildLocationField(context),
-        _buildDateTimePicker(context),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            children: [
+              _buildLocationField(context),
+              _buildDateTimePicker(context),
+            ],
+          ),
+        ),
         paymentMethodDropdown,
         ...items.map(
           (item) => MealSubscriptionItemView(
@@ -45,27 +53,47 @@ class MealPlanCheckout extends ConsumerWidget {
     );
   }
 
-    Widget _buildDateTimePicker(BuildContext context) {
+  Widget _buildDateTimePicker(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
+      child: Row(
         children: [
-          TextField(
-            controller: dateController,
-            readOnly: true,
-            onTap: () => onDateTimeTap(context, dateController, timeController),
-            decoration: const InputDecoration(
-              labelText: 'Fecha de entrega',
-              border: OutlineInputBorder(),
+          Expanded(
+            child: TextField(
+              controller: dateController,
+              readOnly: true,
+              onTap: () => onDateTimeTap(context, dateController, timeController),
+              decoration: InputDecoration(
+                labelText: 'Fecha de entrega',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: const BorderSide(
+                    color: ColorsPaletteRedonda.primary,
+                    width: 1.5,
+                  ),
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: timeController,
-            readOnly: true,
-            decoration: const InputDecoration(
-              labelText: 'Hora de entrega',
-              border: OutlineInputBorder(),
+          const SizedBox(width: 16),
+          Expanded(
+            child: TextField(
+              controller: timeController,
+              readOnly: true,
+              decoration: InputDecoration(
+                labelText: 'Hora de entrega',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: const BorderSide(
+                    color: ColorsPaletteRedonda.primary,
+                    width: 1.5,
+                  ),
+                ),
+              ),
             ),
           ),
         ],
@@ -81,11 +109,18 @@ class MealPlanCheckout extends ConsumerWidget {
         controller: locationController,
         readOnly: true,
         onTap: () => onLocationTap(context, locationController, 'regular'),
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           labelText: 'Ubicación de entrega',
-          border: OutlineInputBorder(),
-        ),
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: const BorderSide(
+              color: ColorsPaletteRedonda.primary,
+              width: 1.5,
+            ),
+          ),
       ),
-    );
+    ),);
   }
 }

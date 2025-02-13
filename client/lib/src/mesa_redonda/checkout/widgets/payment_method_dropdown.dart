@@ -22,45 +22,48 @@ class PaymentMethodDropdown extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          DropdownButtonFormField<int>(
-            dropdownColor: ColorsPaletteRedonda.white,
-            value: selectedMethod,
-            items: List.generate(paymentMethods.length, (index) {
-              return DropdownMenuItem<int>(
-                value: index,
-                child: Text(
-                  paymentMethods[index],
-                  style: const TextStyle(
-                    color: ColorsPaletteRedonda.primary,
-                    fontSize: 14,
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0, left: 16.0, right: 16.0),
+            child: DropdownButtonFormField<int>(
+              dropdownColor: ColorsPaletteRedonda.white,
+              value: selectedMethod,
+              items: List.generate(paymentMethods.length, (index) {
+                return DropdownMenuItem<int>(
+                  value: index,
+                  child: Text(
+                    paymentMethods[index],
+                    style: const TextStyle(
+                      color: ColorsPaletteRedonda.primary,
+                      fontSize: 14,
+                    ),
                   ),
-                ),
-              );
-            }),
-            onChanged: (int? value) {
-              if (value != null) {
-                onMethodSelected(value);
-              }
-            },
-            decoration: InputDecoration(
-              labelText: 'Método de pago',
-              filled: true,
-              fillColor: Colors.transparent,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: const BorderSide(
-                  color: ColorsPaletteRedonda.primary,
-                  width: 1.5,
+                );
+              }),
+              onChanged: (int? value) {
+                if (value != null) {
+                  onMethodSelected(value);
+                }
+              },
+              decoration: InputDecoration(
+                labelText: 'Método de pago',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: const BorderSide(
+                    color: ColorsPaletteRedonda.primary,
+                    width: 1.5,
+                  ),
                 ),
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
+            padding: const EdgeInsets.only(top: 8.0, left: 16.0, right: 16.0),
             child: Text(
               getDescription(selectedMethod),
               style: const TextStyle(
-                color: ColorsPaletteRedonda.orange,
+                color: ColorsPaletteRedonda.primary,
                 fontSize: 14.0,
               ),
             ),

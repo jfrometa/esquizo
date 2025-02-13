@@ -187,18 +187,26 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-            _buildCheckoutContent(), 
-              const SizedBox(height: 16),
-                if (widget.displayType != 'quote') 
-              OrderSummary(
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: _buildCheckoutContent(),
+            ), 
+              // const SizedBox(height: 16),
+                
+              if (widget.displayType != 'quote') 
+               Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: OrderSummary(
                 totalPrice: totalPrice,
                 deliveryFee: _deliveryFee.toDouble(),
                 taxRate: _taxRate, orderType: widget.displayType,
-              ),
+              ),),
+              
               const SizedBox(height: 16),
-              Padding(
+            
+             Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: ElevatedButton(
+                child:  ElevatedButton(
                   onPressed: _isProcessingOrder
                       ? null
                       : () async {
@@ -229,7 +237,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           style: const TextStyle(fontSize: 16),
                         ),
                 ),
-              ),
+             ),
+              
               const SizedBox(height: 16),
             ],
           ),
@@ -431,38 +440,6 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     }
   }
 
- 
- 
-
-  // Send WhatsApp message for catering orders
-  // Future<void> _sendWhatsAppCateringOrder(
-  //     CateringOrderItem cateringOrder, Map<String, String>? contactInfo) async {
-  //   final String orderDetails =
-  //       _generateCateringOrderDetails(cateringOrder, contactInfo);
-
-  //   const String phoneNumber = '+18493590832';
-
-  //   final String whatsappUrlMobile =
-  //       'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(orderDetails)}';
-  //   final String whatsappUrlWeb =
-  //       'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(orderDetails)}';
-
-  //   if (await canLaunchUrl(Uri.parse(whatsappUrlMobile))) {
-  //     await launchUrl(Uri.parse(whatsappUrlMobile));
-  //   } else if (await canLaunchUrl(Uri.parse(whatsappUrlWeb))) {
-  //     await launchUrl(Uri.parse(whatsappUrlWeb));
-  //   } else {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //         content: Text('No pude abrir WhatsApp'),
-  //         backgroundColor: Colors.red,
-  //       ),
-  //     );
-  //   }
-
-  //   _clearCateringAndPop();
-  // }
-
   // Generate order details for regular orders
   // Remove the old order detail generation methods and replace with:
   String _generateOrderDetails(
@@ -546,7 +523,6 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       isQuote: true,
     );
   }
-
 
   bool _validateFields() {
     bool isValid = true;

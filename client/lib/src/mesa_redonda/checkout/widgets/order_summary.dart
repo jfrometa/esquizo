@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
-class OrderSummary extends StatelessWidget {
+class OrderSummary extends ConsumerWidget {
   final double totalPrice;
   final double deliveryFee;
   final double taxRate;
@@ -18,12 +19,9 @@ class OrderSummary extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final double tax = totalPrice * taxRate;
     final double orderTotal = totalPrice + (orderType == 'quote' ? 0 : deliveryFee) + tax;
-
-
-    // if (orderType == 'quote') return SizedBox.shrink();
 
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 150),
@@ -31,20 +29,20 @@ class OrderSummary extends StatelessWidget {
         color: Colors.white,
         margin: const EdgeInsets.symmetric(vertical: 8.0),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 _getTitle(),
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: ColorsPaletteRedonda.primary,
                     ),
               ),
               const SizedBox(height: 16.0),
               if (orderType == 'catering' || orderType == 'quote')
-                ..._buildCateringDetails(),
+                ..._buildCateringDetails(ref),
               _buildOrderSummaryRow(
                 context,
                 _getItemsLabel(),
@@ -97,7 +95,7 @@ class OrderSummary extends StatelessWidget {
       case 'subscriptions':
         return 'Plan';
       default:
-        return 'Items';
+        return 'Platos';
     }
   }
 
@@ -110,25 +108,25 @@ class OrderSummary extends StatelessWidget {
     }
   }
 
-  List<Widget> _buildCateringDetails() {
+  List<Widget> _buildCateringDetails(WidgetRef ref) {
     if (additionalInfo == null) return [];
 
     return [
       if (additionalInfo!['peopleCount'] != null)
         _buildOrderSummaryRow(
-          null,
+          ref.context,
           'Cantidad de Personas',
           additionalInfo!['peopleCount'].toString(),
         ),
       if (additionalInfo!['hasChef'] != null)
         _buildOrderSummaryRow(
-          null,
+          ref.context,
           'Chef Incluido',
           additionalInfo!['hasChef'] ? 'Sí' : 'No',
         ),
       if (additionalInfo!['eventType']?.isNotEmpty ?? false)
         _buildOrderSummaryRow(
-          null,
+          ref.context,
           'Tipo de Evento',
           additionalInfo!['eventType'],
         ),
@@ -137,39 +135,37 @@ class OrderSummary extends StatelessWidget {
   }
 
   Widget _buildOrderSummaryRow(
-    BuildContext? context,
-    String label,
-    String value, {
-    bool isBold = false,
-  }) {
-    final textStyle = context != null
-        ? Theme.of(context).textTheme.bodyLarge
-        : const TextStyle(fontSize: 16);
+  BuildContext context,
+  String label,
+  String value, {
+  bool isBold = false,
+}) {
+  // Use bodySmall with an explicit font size override for a more compact style.
+  final textStyle = Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 13, color: Colors.black) 
+      ?? const TextStyle(fontSize: 12, color: Colors.black);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: textStyle?.copyWith(
-                fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-                color: Colors.black,
-              ),
-            ),
-            Text(
-              value,
-              style: textStyle?.copyWith(
-                fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-                color: ColorsPaletteRedonda.deepBrown,
-              ),
-            ),
-          ],
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 2.0), // Reduced vertical padding.
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: textStyle.copyWith(
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            color: Colors.black87,
+          ),
         ),
-      ),
-    );
-  }
+        Text(
+          value,
+          style: textStyle.copyWith(
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            color: Colors.black,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 }

@@ -391,7 +391,7 @@ Widget _buildCheckoutButton(BuildContext context, WidgetRef ref,
     double totalPrice, List<dynamic> items, String type) {
   final bool hasItemsInCurrentTab = items.isNotEmpty;
   bool isDisabled = false;
-  String buttonLabel = 'Continuar';
+  String buttonLabel = 'Ir a Pagar';
 
   if (type.toLowerCase() == 'catering') {
     final cateringOrder = ref.watch(cateringOrderProvider);

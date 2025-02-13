@@ -42,7 +42,7 @@ class CateringCartItemView extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    order.title.isEmpty ? 'Orderden de Catering' : order.title,
+                    order.title.isEmpty ? 'Catering' : order.title,
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,

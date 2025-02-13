@@ -29,9 +29,6 @@ class QuoteCheckout extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
-        // _buildLocationField(context),
-        // _buildDateTimePicker(context),
-        // paymentMethodDropdown,
         CateringCartItemView(
           order: quote,
           onRemoveFromCart: () =>
@@ -41,48 +38,5 @@ class QuoteCheckout extends ConsumerWidget {
     );
   }
 
-  
-  Widget _buildLocationField(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextField(
-        controller: locationController,
-        readOnly: true,
-        onTap: () => onLocationTap(context, locationController, 'catering'),
-        decoration: const InputDecoration(
-          labelText: 'Ubicación de entrega',
-          border: OutlineInputBorder(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDateTimePicker(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        children: [
-          TextField(
-            controller: dateController,
-            readOnly: true,
-            onTap: () => onDateTimeTap(context, dateController, timeController),
-            decoration: const InputDecoration(
-              labelText: 'Fecha de entrega',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: timeController,
-            readOnly: true,
-            decoration: const InputDecoration(
-              labelText: 'Hora de entrega',
-              border: OutlineInputBorder(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
 }

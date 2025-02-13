@@ -35,18 +35,18 @@ class CartItemView extends StatelessWidget {
     this.peopleCount = 0,
     this.sideRequest = '',
   });
-  
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.all( 16.0),
+      margin: const EdgeInsets.all(8.0), // Reduced margin
       elevation: 2.0,
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(8.0), // Reduced padding
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Top Row: Image & Details
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -55,49 +55,57 @@ class CartItemView extends StatelessWidget {
                   child: Image.asset(
                     img,
                     fit: BoxFit.cover,
-                    width: 100,
-                    height: 100,
+                    width: 80, // Reduced image size
+                    height: 80,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        width: 100,
-                        height: 100,
+                        width: 80,
+                        height: 80,
                         color: Colors.grey[200],
-                        child: const Icon(Icons.broken_image, size: 40),
+                        child: const Icon(Icons.broken_image, size: 30),
                       );
                     },
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Title
                       Text(
                         title,
                         style: const TextStyle(
-                          fontSize: 18.0,
+                          fontSize: 16.0, // Reduced font size
                           fontWeight: FontWeight.bold,
                           color: ColorsPaletteRedonda.primary,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4.0),
+                      const SizedBox(height: 2.0),
+                      // Description
                       Text(
                         description,
-                        style: const TextStyle(
-                            fontSize: 12.0, color: Colors.black),
+                        style: const TextStyle(fontSize: 10.0, color: Colors.black),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4.0),
+                      const SizedBox(height: 2.0),
+                      // Catering-specific info
                       if (foodType == 'Catering')
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('People: $peopleCount'),
+                            Text(
+                              'People: $peopleCount',
+                              style: const TextStyle(fontSize: 10),
+                            ),
                             if (sideRequest.isNotEmpty)
-                              Text('Side Request: $sideRequest'),
+                              Text(
+                                'Side Request: $sideRequest',
+                                style: const TextStyle(fontSize: 10),
+                              ),
                           ],
                         ),
                     ],
@@ -105,40 +113,39 @@ class CartItemView extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8.0),
+            const SizedBox(height: 4.0),
+            // Ingredients Row
             Row(
               children: [
                 Expanded(
                   child: Text(
                     'Ingredients: ${ingredients.join(', ')}',
-                    style: const TextStyle(
-                      fontSize: 12.0,
-                      color: Colors.black,
-                    ),
+                    style: const TextStyle(fontSize: 10.0, color: Colors.black),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 4.0),
+            const SizedBox(height: 2.0),
+            // Food Type and Spicy Indicator
             Row(
               children: [
                 Text(
                   foodType,
                   style: const TextStyle(
-                    fontSize: 12.0,
+                    fontSize: 10.0,
                     fontWeight: FontWeight.bold,
                     color: ColorsPaletteRedonda.primary,
                   ),
                 ),
                 if (isSpicy)
                   const Padding(
-                    padding: EdgeInsets.only(left: 8.0),
+                    padding: EdgeInsets.only(left: 4.0),
                     child: Text(
                       '🌶️ Spicy',
                       style: TextStyle(
-                        fontSize: 12.0,
+                        fontSize: 10.0,
                         color: Colors.red,
                         fontWeight: FontWeight.bold,
                       ),
@@ -146,41 +153,47 @@ class CartItemView extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 12.0),
-            // Quantity and Total Price Section
+            const SizedBox(height: 8.0),
+            // Quantity & Total Price Section
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Quantity Control
+                // Quantity Controls
                 Row(
                   children: [
                     IconButton(
                       color: ColorsPaletteRedonda.primary,
-                      icon: const Icon(Icons.remove),
+                      icon: const Icon(Icons.remove, size: 18),
                       onPressed: onRemove,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
                     ),
                     Text(
                       quantity.toString(),
-                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                            color: ColorsPaletteRedonda.primary,
-                            fontSize: 20,
-                          ),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: ColorsPaletteRedonda.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     IconButton(
                       color: ColorsPaletteRedonda.primary,
-                      icon: const Icon(Icons.add),
+                      icon: const Icon(Icons.add, size: 18),
                       onPressed: onAdd,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
                     ),
                   ],
                 ),
                 // Total Price
-
                 Text(
-                  NumberFormat.currency(locale: 'en_US', symbol: '\$').format((double.tryParse(pricing) ?? 0.0) * quantity),
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        color: Colors.deepOrange,
-                        fontSize: 20,
-                      ),
+                  NumberFormat.currency(locale: 'en_US', symbol: '\$')
+                      .format((double.tryParse(pricing) ?? 0.0) * quantity),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.deepOrange,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),

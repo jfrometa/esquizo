@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/catering_order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/catering_cart_item_view.dart';
+import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class CateringCheckout extends ConsumerWidget {
   final CateringOrderItem order;
@@ -29,8 +30,14 @@ class CateringCheckout extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
-        _buildLocationField(context),
-        _buildDateTimePicker(context),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: _buildLocationField(context),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: _buildDateTimePicker(context),
+        ),
         paymentMethodDropdown,
         CateringCartItemView(
           order: order,
@@ -48,10 +55,19 @@ class CateringCheckout extends ConsumerWidget {
         controller: locationController,
         readOnly: true,
         onTap: () => onLocationTap(context, locationController, 'catering'),
-        decoration: const InputDecoration(
-          labelText: 'Ubicación de entrega',
-          border: OutlineInputBorder(),
-        ),
+        decoration: InputDecoration(
+                labelText: 'Ubicación de entrega',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: const BorderSide(
+                    color: ColorsPaletteRedonda.primary,
+                    width: 1.5,
+                  ),
+                ),
+      ),
+    
       ),
     );
   }
@@ -59,24 +75,44 @@ class CateringCheckout extends ConsumerWidget {
   Widget _buildDateTimePicker(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
+      child: Row(
         children: [
-          TextField(
-            controller: dateController,
-            readOnly: true,
-            onTap: () => onDateTimeTap(context, dateController, timeController),
-            decoration: const InputDecoration(
-              labelText: 'Fecha de entrega',
-              border: OutlineInputBorder(),
+          Expanded(
+            child: TextField(
+              controller: dateController,
+              readOnly: true,
+              onTap: () => onDateTimeTap(context, dateController, timeController),
+              decoration: InputDecoration(
+                labelText: 'Fecha de entrega',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: const BorderSide(
+                    color: ColorsPaletteRedonda.primary,
+                    width: 1.5,
+                  ),
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: timeController,
-            readOnly: true,
-            decoration: const InputDecoration(
-              labelText: 'Hora de entrega',
-              border: OutlineInputBorder(),
+          const SizedBox(width: 16),
+          Expanded(
+            child: TextField(
+              controller: timeController,
+              readOnly: true,
+              decoration: InputDecoration(
+                labelText: 'Hora de entrega',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: const BorderSide(
+                    color: ColorsPaletteRedonda.primary,
+                    width: 1.5,
+                  ),
+                ),
+              ),
             ),
           ),
         ],
