@@ -62,7 +62,7 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
             child: Stack(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.shopping_cart),
+                  icon: const Icon(Icons.check),
                   onPressed: () {
                     // Navigate to the cart screen
                     // context.push('/cart'); // Assuming the cart route is '/cart'
@@ -71,22 +71,22 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
                     );
                   },
                 ),
-                if (cart.isNotEmpty)
-                  Positioned(
-                    top: 0, // Adjusts the vertical position of the badge
-                    right: 0, // Adjusts the horizontal position of the badge
-                    child: CircleAvatar(
-                      radius: 8,
-                      backgroundColor: Colors.red,
-                      child: Text(
-                        '${cart.length}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                        ),
-                      ),
-                    ),
-                  ),
+                // if (cart.isNotEmpty)
+                //   Positioned(
+                //     top: 0, // Adjusts the vertical position of the badge
+                //     right: 0, // Adjusts the horizontal position of the badge
+                //     child: CircleAvatar(
+                //       radius: 8,
+                //       backgroundColor: Colors.red,
+                //       child: Text(
+                //         '${cart.length}',
+                //         style: const TextStyle(
+                //           color: Colors.white,
+                //           fontSize: 10,
+                //         ),
+                //       ),
+                //     ),
+                //   ),
               ],
             ),
           ),

@@ -173,22 +173,13 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       cateringOrder,
       cateringQuote,
     );
-
-    // if (widget.displayType.isEmpty) {
-    //   // No items to display, pop the screen
-    //   WidgetsBinding.instance.addPostFrameCallback((_) {
-    //     if (mounted && GoRouter.of(context).canPop()) {
-    //       GoRouter.of(context).pop(true);
-    //     }
-    //   });
-    //   // Return an empty container while the screen is being popped
-    //   return const SizedBox.shrink();
-    // }
-
+ 
   return Scaffold(
       appBar: AppBar(
         forceMaterialTransparency: true,
-        title: Text('Completar Orden: ${widget.displayType.capitalize()}'),
+        title: Text( widget.displayType == 'quote'
+                              ? 'Confirmar Cotización'
+                              : 'Confirmar Orden', ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -196,8 +187,9 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              _buildCheckoutContent(),
+            _buildCheckoutContent(), 
               const SizedBox(height: 16),
+                if (widget.displayType != 'quote') 
               OrderSummary(
                 totalPrice: totalPrice,
                 deliveryFee: _deliveryFee.toDouble(),
@@ -233,7 +225,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       : Text(
                           widget.displayType == 'quote'
                               ? 'Enviar Cotización'
-                              : 'Procesar Orden',
+                              : 'Completar Orden',
                           style: const TextStyle(fontSize: 16),
                         ),
                 ),

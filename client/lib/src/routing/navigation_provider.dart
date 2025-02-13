@@ -15,6 +15,9 @@ class NavigationDestinationItem {
 }
 
 final navigationDestinationsProvider = Provider<List<NavigationDestinationItem>>((ref) {
+
+  final isAdmin = ref.watch(isAdminProvider).value ?? false;
+
   // Base destinations always shown
   final baseDestinations = [
     NavigationDestinationItem(
@@ -43,19 +46,12 @@ final navigationDestinationsProvider = Provider<List<NavigationDestinationItem>>
       label: 'Cuenta',
 
     ),
-  ];
-  final isAdmin = ref.watch(isAdminProvider).value ?? false;
-
-  // Add admin destination if user is admin
-  if (isAdmin) {
-    baseDestinations.add(
-      NavigationDestinationItem(
+      if (isAdmin)   NavigationDestinationItem(
         icon: Icons.admin_panel_settings,
         label: 'Admin',
         path: '/admin',
       ),
-    );
-  }
+  ];
 
   return baseDestinations;
  

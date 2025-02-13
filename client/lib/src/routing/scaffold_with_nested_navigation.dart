@@ -18,10 +18,10 @@ final cateringItemCountProvider = StateProvider<int>((ref) {
   final cateringOrder = ref.watch(cateringOrderProvider);
   final manualQuote = ref.watch(manualQuoteProvider);
   
-  final hasCateringOrder = (cateringOrder?.dishes.length ?? 0) > 0;
-  final hasManualQuote = (manualQuote?.dishes.length ?? 0) > 0;
+  final hasCateringOrder = (cateringOrder?.dishes.length ?? 0) > 0 ? 1 : 0;
+  final hasManualQuote = (manualQuote?.dishes.length ?? 0) > 0 ? 1 : 0;
   
-  return (hasCateringOrder || hasManualQuote) ? 1 : 0;
+  return hasCateringOrder + hasManualQuote;
 });
 
 /// --------------------------------------------------------------------------

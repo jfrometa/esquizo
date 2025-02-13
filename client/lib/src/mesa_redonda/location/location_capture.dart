@@ -5,8 +5,11 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
+// Add to imports
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/delivery_location_provider.dart';
 
-class LocationCaptureBottomSheet extends StatefulWidget {
+class LocationCaptureBottomSheet extends ConsumerStatefulWidget {
   final Function(String latitude, String longitude, String address)
       onLocationCaptured;
 
@@ -19,7 +22,7 @@ class LocationCaptureBottomSheet extends StatefulWidget {
 }
 
 class LocationCaptureBottomSheetState
-    extends State<LocationCaptureBottomSheet> {
+    extends ConsumerState<LocationCaptureBottomSheet> {
   String? _latitude;
   String? _longitude;
   String? _address;
@@ -47,6 +50,43 @@ class LocationCaptureBottomSheetState
   void initState() {
     super.initState();
     _getCurrentLocation();
+    _loadSavedLocation();
+  }
+
+  void _loadSavedLocation() {
+    final savedLocation = ref.read(deliveryLocationProvider);
+    if (savedLocation != null) {
+      _addressController.text = savedLocation.address;
+      _floorController.text = savedLocation.floor;
+      _cityController.text = savedLocation.city;
+      _noteController.text = savedLocation.note;
+    }
+  }
+
+  // Update _submitForm method
+  void _submitForm() {
+    final address = _addressController.text;
+    final floor = _floorController.text;
+    final city = _cityController.text;
+    final note = _noteController.text;
+
+    if (address.isNotEmpty && city.isNotEmpty) {
+      // Save to provider
+      ref.read(deliveryLocationProvider.notifier).updateLocation(
+            address: address,
+            floor: floor,
+            city: city,
+            note: note,
+          );
+
+      final fullAddress = '$address, Piso: $floor, $city. Nota: $note';
+      widget.onLocationCaptured('0.0', '0.0', fullAddress);
+      Navigator.of(context).pop();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor ingrese todos los detalles')),
+      );
+    }
   }
 
   Future<void> _getCurrentLocation() async {
@@ -422,23 +462,6 @@ class LocationCaptureBottomSheetState
         ),
       ],
     );
-  }
-
-  void _submitForm() {
-    final address = _addressController.text;
-    final floor = _floorController.text;
-    final city = _cityController.text;
-    final note = _noteController.text;
-
-    if (address.isNotEmpty && city.isNotEmpty) {
-      final fullAddress = '$address, Piso: $floor, $city. Nota: $note';
-      widget.onLocationCaptured('0.0', '0.0', fullAddress);
-      Navigator.of(context).pop();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor ingrese todos los detalles')),
-      );
-    }
   }
 
   void _clearForm() {

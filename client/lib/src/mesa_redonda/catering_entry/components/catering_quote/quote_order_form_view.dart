@@ -6,7 +6,13 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering
 
 class QuoteOrderFormView extends StatelessWidget {
   final CateringOrderItem? quote;
-  const QuoteOrderFormView({super.key, required this.quote});
+  final VoidCallback? onEdit;
+  
+  const QuoteOrderFormView({
+    super.key, 
+    required this.quote,
+    this.onEdit,
+  });
 
   Widget _buildQuoteDetailItem(String label, String value) {
     return Padding(
@@ -64,34 +70,47 @@ class QuoteOrderFormView extends StatelessWidget {
       );
     }
 
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Detalles de la Cotización',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Detalles de la Cotización',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildQuoteDetailItem('Personas', '${quote!.peopleCount ?? 0}'),
+                    _buildQuoteDetailItem('Tipo de Evento', quote!.eventType),
+                    _buildQuoteDetailItem('Chef Incluido', quote!.hasChef ?? false ? 'Sí' : 'No'),
+                    if (quote!.alergias.isNotEmpty)
+                      _buildQuoteDetailItem('Alergias', quote!.alergias),
+                    if (quote!.preferencia.isNotEmpty)
+                      _buildQuoteDetailItem('Preferencia', quote!.preferencia),
+                    if (quote!.adicionales.isNotEmpty)
+                      _buildQuoteDetailItem('Notas', quote!.adicionales),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                _buildQuoteDetailItem('Personas', '${quote!.peopleCount ?? 0}'),
-                _buildQuoteDetailItem('Tipo de Evento', quote!.eventType),
-                _buildQuoteDetailItem('Chef Incluido', quote!.hasChef ?? false ? 'Sí' : 'No'),
-                if (quote!.alergias.isNotEmpty)
-                  _buildQuoteDetailItem('Alergias', quote!.alergias),
-                if (quote!.preferencia.isNotEmpty)
-                  _buildQuoteDetailItem('Preferencia', quote!.preferencia),
-                if (quote!.adicionales.isNotEmpty)
-                  _buildQuoteDetailItem('Notas', quote!.adicionales),
-              ],
-            ),
+              ),
+              if (onEdit != null)
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: IconButton(
+                    icon: const Icon(Icons.edit),
+                    onPressed: onEdit,
+                  ),
+                ),
+            ],
           ),
         ),
-        // const SizedBox(height: 16),
         Card(
           child: Padding(
             padding: const EdgeInsets.all(8),

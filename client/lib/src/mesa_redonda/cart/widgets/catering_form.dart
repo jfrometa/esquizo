@@ -22,11 +22,13 @@ class CateringFormData {
 }
 
 class CateringForm extends ConsumerStatefulWidget {
+  final String? title;
   final CateringOrderItem? initialData;
   final void Function(CateringFormData formData) onSubmit;
 
   const CateringForm({
     super.key,
+    this.title,
     this.initialData,
     required this.onSubmit,
   });
@@ -108,7 +110,7 @@ class _CateringFormState extends ConsumerState<CateringForm> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Detalles de la orden',
+                '${widget.title}',
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               IconButton(
@@ -182,7 +184,38 @@ class _CateringFormState extends ConsumerState<CateringForm> {
               },
             ),
           ],
+          const SizedBox(height: 16), 
+          const Text('Tipo de Evento',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+            TextField(
+            controller: eventTypeController,
+            decoration: const InputDecoration(
+              labelText: 'Ej. Cumpleaños, Boda',
+              border: OutlineInputBorder(),
+              filled: true,
+              fillColor: ColorsPaletteRedonda.white,
+            ),
+          ),
+          const SizedBox(height: 16), 
+
+             Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Agregar Servicio de Cheffin',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              Switch(
+                value: hasChef,
+                inactiveTrackColor: ColorsPaletteRedonda.deepBrown,
+                activeColor: ColorsPaletteRedonda.primary,
+                onChanged: (value) => setState(() => hasChef = value),
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
+        
           const Text('Alergias', style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Wrap(
@@ -210,39 +243,10 @@ class _CateringFormState extends ConsumerState<CateringForm> {
                   onPressed: _showAllergyDialog,
                 ),
             ],
-          ),
-          const SizedBox(height: 16),
-          const Text('Tipo de Evento',
-              style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          TextField(
-            controller: eventTypeController,
-            decoration: const InputDecoration(
-              labelText: 'Ej. Cumpleaños, Boda',
-              border: OutlineInputBorder(),
-              filled: true,
-              fillColor: ColorsPaletteRedonda.white,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Agregar Servicio de Chef',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              Switch(
-                value: hasChef,
-                inactiveTrackColor: ColorsPaletteRedonda.deepBrown,
-                activeColor: ColorsPaletteRedonda.primary,
-                onChanged: (value) => setState(() => hasChef = value),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          ExpansionTile(
-            title: const Text('Notas Adicionales'),
+          ),          
+        const SizedBox(height: 16),
+         ExpansionTile(
+            title: const Text('Notas Adicionales', style: TextStyle(color: ColorsPaletteRedonda.primary)),
             children: [
               TextFormField(
                 controller: adicionalesController,
@@ -276,8 +280,8 @@ class _CateringFormState extends ConsumerState<CateringForm> {
               child: ElevatedButton(
                 style: ButtonStyle(
                   backgroundColor:
-                      MaterialStateProperty.all(ColorsPaletteRedonda.orange),
-                  foregroundColor: MaterialStateProperty.all(Colors.white),
+                      WidgetStateProperty.all(ColorsPaletteRedonda.orange),
+                  foregroundColor: WidgetStateProperty.all(Colors.white),
                 ),
                 onPressed: _handleSubmit,
                 child: const Text('Confirmar Detalles'),

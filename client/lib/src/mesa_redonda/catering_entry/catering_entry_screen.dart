@@ -105,6 +105,7 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>  with 
             top: 20.0,
           ),
           child: CateringForm(
+            title: 'Detalles de la Orden',
             initialData: order,
             onSubmit: (formData) {
               ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(
@@ -150,6 +151,7 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>  with 
               right: 20,
               top: 20),
           child: CateringForm(
+            title: 'Detalles de la Cotizacion',
             initialData: quote,
             onSubmit: (formData) {
               ref.read(manualQuoteProvider.notifier).finalizeManualQuote(
@@ -228,6 +230,8 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>  with 
       return;
     }
     // For catering, navigate to the catering selection screen.
+    // Navigator.of(context).pop();
+    
     GoRouter.of(context)
         .goNamed(AppRoute.homecart.name, extra: 'catering');
   }
@@ -255,6 +259,7 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>  with 
       return;
     }
     // For quotes, navigate accordingly (e.g. to a quote summary screen).
+    // GoRouter.of(context).pop(context);
     GoRouter.of(context).goNamed(AppRoute.homecart.name, extra: 'quote');
   }
 
@@ -269,8 +274,9 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>  with 
     final itemsCard =    Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-             CateringOrderForm(),
-      
+             CateringOrderForm(  onEdit: () {
+            _showCateringForm(context, ref);
+          },),
           ], 
      
     );
@@ -351,22 +357,11 @@ void _showNewItemDialog() {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            QuoteOrderFormView(quote: quote,),
+            QuoteOrderFormView(quote: quote,   onEdit: () {
+              _showQuoteForm(context, ref);
+            },),
             const SizedBox(height: 16),
-//             ElevatedButton(
 
-// onPressed: () {
-//                 final order = ref.read(manualQuoteProvider);
-//                 if (order == null ||    (order.peopleCount ?? 0) <= 0) {
-                  
-//                   _showQuoteForm(context, ref);
-                 
-//                 } else {
-//                   // Navigate to dish selection screen
-//                  _showNewItemDialog();
-//                 }
-//               },
- 
           if (MediaQuery.of(context).size.width > 600  && quote.dishes.isNotEmpty)  // Only show on desktop
             ElevatedButton(
               onPressed: _confirmQuoteOrder,

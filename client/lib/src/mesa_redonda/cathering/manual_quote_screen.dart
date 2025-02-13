@@ -426,7 +426,7 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
   Widget _buildAdditionalNotesSection() {
     final quote = ref.watch(manualQuoteProvider);
     return ExpansionTile(
-      title: const Text('Notas Adicionales'),
+      title: const Text('Notas Adicionales', style: TextStyle(color: ColorsPaletteRedonda.primary)),
       children: [
         Padding(
           padding: const EdgeInsets.all(16.0),

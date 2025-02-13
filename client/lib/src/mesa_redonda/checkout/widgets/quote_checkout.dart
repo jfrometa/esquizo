@@ -29,9 +29,9 @@ class QuoteCheckout extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
-        _buildLocationField(context),
-        _buildDateTimePicker(context),
-        paymentMethodDropdown,
+        // _buildLocationField(context),
+        // _buildDateTimePicker(context),
+        // paymentMethodDropdown,
         CateringCartItemView(
           order: quote,
           onRemoveFromCart: () =>

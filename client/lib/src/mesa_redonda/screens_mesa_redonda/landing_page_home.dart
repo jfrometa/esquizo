@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -94,13 +96,13 @@ class HeroSection extends StatelessWidget {
       width: double.infinity,
       height: 400,
       // If using network images, consider caching them.
-      decoration: BoxDecoration(
-        image: const DecorationImage(
-          image: AssetImage('assets/hero_background.jpg'),
-          fit: BoxFit.cover,
-        ),
-        color: ColorsPaletteRedonda.primary.withOpacity(0.6),
-      ),
+      // decoration: BoxDecoration(
+      //   image: const DecorationImage(
+      //     image: AssetImage('assets/hero_background.jpg'),
+      //     fit: BoxFit.cover,
+      //   ),
+      //   color: ColorsPaletteRedonda.primary.withOpacity(0.6),
+      // ),
       child: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -634,9 +636,11 @@ class ContactSection extends StatelessWidget {
         'https://wa.me/$phoneNumber?text=${Uri.encodeComponent('Hola!')}';
 
     if (await canLaunchUrl(Uri.parse(whatsappUrlMobile))) {
+       log('MOBILE: ${whatsappUrlMobile}');
       await launchUrl(Uri.parse(whatsappUrlMobile));
     } else if (await canLaunchUrl(Uri.parse(whatsappUrlWeb))) {
       await launchUrl(Uri.parse(whatsappUrlWeb));
+      log('WEB: ${whatsappUrlWeb}');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

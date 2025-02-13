@@ -119,15 +119,14 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
   Widget build(BuildContext context) {
     final cateringOptions = ref.watch(cateringProvider);
     final categorizedItems = groupCateringItemsByCategory(cateringOptions);
-    final cateringItemCount = ref.watch(localCateringItemCountProvider);
-    
+ 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Selecciona tu buffet'),
+        title: const Text('Selecciona los platos de tu buffet'),
         forceMaterialTransparency: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.check_circle_outline),
+            icon: const Icon(Icons.check),
             color: ColorsPaletteRedonda.primary,
             onPressed: () => Navigator.of(context).pop(),
           ),

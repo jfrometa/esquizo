@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/catering_order_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class CateringForm extends ConsumerStatefulWidget {
@@ -272,7 +271,7 @@ class _CateringFormState extends ConsumerState<CateringForm> {
       return ExpansionTile(
         title: Text(
           'Notas Adicionales',
-          style: Theme.of(context).textTheme.titleMedium,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(color:  ColorsPaletteRedonda.primary),
         ),
         children: [
           TextFormField(
@@ -310,9 +309,9 @@ class _CateringFormState extends ConsumerState<CateringForm> {
           height: 42,
           child: ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(ColorsPaletteRedonda.orange),
-              foregroundColor: MaterialStateProperty.all(Colors.white),
-              side: MaterialStateProperty.all(BorderSide.none),
+              backgroundColor: WidgetStateProperty.all(ColorsPaletteRedonda.orange),
+              foregroundColor: WidgetStateProperty.all(Colors.white),
+              side: WidgetStateProperty.all(BorderSide.none),
             ),
             onPressed: _handleSubmit,
             child: const Text('Confirmar Detalles'),

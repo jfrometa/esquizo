@@ -56,10 +56,9 @@ class CateringCartItemView extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            // Order details
-            Text(order.description),
-            const SizedBox(height: 8),
+            const SizedBox(height: 8), 
+             Text('Personas: ${order.peopleCount}'),
+            
             Text('Cheffing: ${(order.hasChef ?? false) ? ' Si ' : ' No '}'),
             Text(
                 'Alergias: ${order.alergias.trim().isNotEmpty ? order.alergias : "Ninguna"}'),
@@ -71,7 +70,7 @@ class CateringCartItemView extends ConsumerWidget {
             const SizedBox(height: 16),
             // Order items
             Text(
-              'Items del Catering:',
+              'Platos :',
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
@@ -86,7 +85,7 @@ class CateringCartItemView extends ConsumerWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  '${dish.title} - ${dish.peopleCount} unidades',
+                                  '${dish.title} - ${dish.peopleCount} Personas',
                                   style: const TextStyle(fontSize: 14),
                                 ),
                               ),
@@ -166,6 +165,7 @@ class CateringCartItemView extends ConsumerWidget {
             top: 20.0,
           ),
           child: CateringForm(
+            title: 'Detalles de la Orden',
             initialData: order,
             onSubmit: (formData) {
               ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(

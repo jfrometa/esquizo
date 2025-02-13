@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/catering_cart_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/meal_subscription_item_view.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/widgets/catering_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/prompt_dialogs/new_item_dialog.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/cart_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/catering_order_provider.dart';
@@ -71,6 +72,54 @@ class CartScreen extends ConsumerWidget {
       );
     }
 
+
+  /// Opens the bottom sheet to add/update a product for the Quote order.
+  void _showQuoteForm(BuildContext context, WidgetRef ref) {
+    final quote = ref.read(manualQuoteProvider);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+              left: 20,
+              right: 20,
+              top: 20),
+          child: CateringForm(
+            title: 'Detalles de la Cotizacion',
+            initialData: quote,
+            onSubmit: (formData) {
+              ref.read(manualQuoteProvider.notifier).finalizeManualQuote(
+                    title: quote?.title ?? 'Cotización',
+                    img: quote?.img ?? '',
+                    description: quote?.description ?? '',
+                    hasChef: formData.hasChef,
+                    alergias: formData.allergies.join(','),
+                    eventType: formData.eventType,
+                    preferencia: quote?.preferencia ?? '',
+                    adicionales: formData.additionalNotes,
+                    cantidadPersonas: formData.peopleCount,
+                  );
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Se actualizó la Cotización'),
+                  backgroundColor: Colors.brown,
+                  duration: Duration(milliseconds: 500),
+                ),
+              );
+              GoRouter.of(context).pop(context);
+            },
+          ),
+        );
+      },
+    );
+  }
+
+
+
   // Add this new method for manual quote tab
   Widget buildManualQuoteTab(WidgetRef ref, CateringOrderItem quote) {
     if (manualQuote == null) {
@@ -85,14 +134,27 @@ class CartScreen extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Detalles de la Cotización',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Row(
+                    children: [
+                      const Text(
+                        'Detalles de la Cotización',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Spacer(),
+                      IconButton(
+                        icon: Icon(Icons.edit, size: 20),
+                        onPressed: () => _showQuoteForm(context, ref),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.delete_forever, size: 20, color: Colors.redAccent,),
+                        onPressed: () => _showQuoteForm(context, ref),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   _buildQuoteDetailItem('Personas', '${quote.peopleCount ?? 0}'),
@@ -104,6 +166,7 @@ class CartScreen extends ConsumerWidget {
                     _buildQuoteDetailItem('Preferencia', quote.preferencia),
                   if (quote.adicionales.isNotEmpty)
                     _buildQuoteDetailItem('Notas', quote.adicionales),
+                 
                 ],
               ),
             ),
@@ -119,14 +182,14 @@ class CartScreen extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'Items Solicitados',
+                        'Platos',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.edit),
+                        icon: Icon(Icons.add, size: 20),
                         onPressed: () {
                           
                      _showNewItemDialog();
@@ -135,38 +198,59 @@ class CartScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  // const SizedBox(height: 16),
                   if (quote.dishes.isEmpty)
                     const Center(
-                      child: Text('No hay items agregados'),
+                      child: Text('No hay platos agregados'),
                     )
                   else
-                    ...quote.dishes.map((dish) =>  ListTile(
-                            title: Text(
-                              dish.title,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (dish.title.isNotEmpty)
-                                  Text(dish.title),
-                                Text(
-                                  dish.hasUnitSelection
-                                      ? '${dish.quantity} unidades'
-                                      : '${quote.peopleCount} personas',
+                    ...quote.dishes.map((dish) =>   Card(
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    side: BorderSide(
+                                      color: Colors.grey.shade200,
+                                      // width: 1,
+                                    ),
+                                  ),
+                                  child: ListTile(
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16.0,
+                                      // vertical: 8.0,
+                                    ),
+                                    title: Text(
+                                      dish.title,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: Colors.black
+                                      ),
+                                    ),
+                                    subtitle: Padding(
+                                      padding: const EdgeInsets.only(top: 4.0),
+                                      child: Text(
+                                        dish.hasUnitSelection
+                                            ? '${dish.quantity} unidades'
+                                            : '${quote.peopleCount} personas',
+                                        style: TextStyle(
+                                          color: Colors.grey.shade600,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                    trailing: IconButton(
+                                      icon: const Icon(Icons.close, 
+                                        color: Colors.red, 
+                                        size: 20,
+                                      ),
+                                      onPressed: () {
+                                        final index = quote.dishes.indexOf(dish);
+                                        ref.read(manualQuoteProvider.notifier).removeFromCart(index);
+                                      },
+                                    ),
+                                  ),
                                 ),
-                              ],
-                            ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () {
-                                final index = quote.dishes.indexOf(dish);
-                                ref.read(manualQuoteProvider.notifier).removeFromCart(index);
-                              },
-                            ),
-                          ),
-                        ),
+                              ),
                 ],
               ),
             ),
@@ -231,13 +315,6 @@ class CartScreen extends ConsumerWidget {
       );
     }
 
-    final double maxTabWidth = TabUtils.calculateMaxTabWidth(
-      context: context,
-      tabTitles: availableTabs,
-      extraWidth: 20.0,
-    );
-
-
 
     return DefaultTabController(
       length: availableTabs.length,
@@ -245,27 +322,26 @@ class CartScreen extends ConsumerWidget {
         appBar: AppBar(
           forceMaterialTransparency: true,
           title: const Text('Carrito'),
+          backgroundColor: Colors.white,
+          iconTheme: const IconThemeData(color: Colors.black),
           bottom: TabBar(
             isScrollable: true,
-            labelStyle: Theme.of(context).textTheme.titleSmall,
-            unselectedLabelStyle: Theme.of(context).textTheme.titleSmall,
-            labelColor: ColorsPaletteRedonda.white,
-            unselectedLabelColor: ColorsPaletteRedonda.deepBrown1,
-            indicatorSize: TabBarIndicatorSize.tab,
-            indicator: TabIndicator(
-              radius: 16.0,
-              color: ColorsPaletteRedonda.primary,
+            indicator: const UnderlineTabIndicator(
+              borderSide: BorderSide(
+                width: 2.0,
+                color: ColorsPaletteRedonda.primary,
+              ),
             ),
+            indicatorColor: ColorsPaletteRedonda.primary,
+            labelColor: ColorsPaletteRedonda.primary,
+            unselectedLabelColor: Colors.black,
             tabs: availableTabs.map((title) {
-              return Container(
-                width: maxTabWidth, // Set fixed width for each tab
-                alignment: Alignment.center,
-                child: Tab(text: title),
-              );
+              return Tab(text: title);
             }).toList(),
           ),
         ),
         body: TabBarView(
+          physics: const NeverScrollableScrollPhysics(),
           children: tabContent,
         ),
       ),
@@ -310,8 +386,6 @@ class CartScreen extends ConsumerWidget {
     }
   }
 
-
-
 Widget _buildCheckoutButton(BuildContext context, WidgetRef ref,
     double totalPrice, List<dynamic> items, String type) {
   final bool hasItemsInCurrentTab = items.isNotEmpty;
@@ -331,14 +405,8 @@ Widget _buildCheckoutButton(BuildContext context, WidgetRef ref,
     final isPersonasSelected = cateringQuote?.peopleCount != null &&
         ((cateringQuote!.peopleCount ?? 0) > 0);
     isDisabled = !isPersonasSelected;
-
-    // // If this catering order is a quote, change the label and action.
-    // if (cateringQuote != null && cateringQuote.isQuote) {
-    //   buttonLabel = 'Guardar cotización';
-    //   // You might want to disable the pricing check:
-    //   isDisabled = !isPersonasSelected; // Or adjust if needed.
-    // }
   }
+
   return Container(
     padding: const EdgeInsets.all(16.0),
     child: ElevatedButton(
@@ -415,23 +483,195 @@ Widget _buildCheckoutButton(BuildContext context, WidgetRef ref,
     if (cateringOrder == null) {
       return const Center(child: Text('No catering items found.'));
     }
-    return SingleChildScrollView(
-      child: CateringCartItemView(
-        order: cateringOrder,
-        onRemoveFromCart: () =>
-            ref.read(cateringOrderProvider.notifier).clearCateringOrder(),
+      return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child:  
+             Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                    Card( child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child:  Column(
+                        children: [
+                          Row(children: [
+                              const Text(
+                                'Detalles de la Orden',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Spacer(),
+                              IconButton(
+                                icon: const Icon(Icons.edit, size: 20),
+                                onPressed: () => _showCateringForm(ref.context, ref),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.delete_forever, size: 20, color: Colors.redAccent,),
+                                onPressed: () => ref.read(cateringOrderProvider.notifier).clearCateringOrder(),
+                              ),
+                            ],
+                          ),
+                                      const SizedBox(height: 16),
+                      _buildQuoteDetailItem('Personas', '${cateringOrder.peopleCount ?? 0}'),
+                      _buildQuoteDetailItem('Tipo de Evento', cateringOrder.eventType),
+                      _buildQuoteDetailItem('Cheffin Incluido', (cateringOrder.hasChef ?? false) ? 'Sí' : 'No'),
+                      
+         
+                  if (cateringOrder.alergias.isNotEmpty)
+                    _buildQuoteDetailItem('Alergias', cateringOrder.alergias),
+                  if (cateringOrder.preferencia.isNotEmpty)
+                    _buildQuoteDetailItem('Preferencia', cateringOrder.preferencia),
+                  if (cateringOrder.adicionales.isNotEmpty)
+                    _buildQuoteDetailItem('Notas', cateringOrder.adicionales),
+                        
+                        ],
+                      ),
+                    ),
+                    ),  
+       
+
+       
+                Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header row with title and add icon.
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Platos',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add, size: 20),
+                        onPressed: () => {}
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  // If no dishes added, show a placeholder text.
+                  if (cateringOrder.dishes.isEmpty)
+                    const Center(child: Text('No hay platos agregados'))
+                  else
+                    ...cateringOrder.dishes.map((dish) => Card(
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(
+                              color: Colors.grey.shade200,
+                            ),
+                          ),
+                          margin: const EdgeInsets.only(bottom: 8),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            title: Text(
+                              dish.title,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
+                            ),
+                            subtitle: Padding(
+                              padding: const EdgeInsets.only(top: 4.0),
+                              child: Text(
+                                dish.hasUnitSelection
+                                    ? '${dish.quantity} unidades'
+                                    : '${cateringOrder.peopleCount} personas',
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(
+                                Icons.close,
+                                color: Colors.red,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                final index = cateringOrder.dishes.indexOf(dish);
+                                ref.read(cateringOrderProvider.notifier).removeFromCart(index);
+                              },
+                            ),
+                          ),
+                        )),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
+      
+      );
+  }
+
+   void _showCateringForm(BuildContext context, WidgetRef ref) {
+     final order = ref.read(cateringOrderProvider);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 20.0,
+            right: 20.0,
+            top: 20.0,
+          ),
+          child: CateringForm(
+            title: 'Detalles de la Orden',
+            initialData: order,
+            onSubmit: (formData) {
+              ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(
+                    title: order?.title ?? '',
+                    img: order?.img ?? '',
+                    description: order?.title ?? '',
+                    hasChef: formData.hasChef,
+                    alergias: formData.allergies.join(','),
+                    eventType: formData.eventType,
+                    preferencia: order?.preferencia ?? '',
+                    adicionales: formData.additionalNotes,
+                    cantidadPersonas: formData.peopleCount,
+                  );
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Se actualizó el Catering'),
+                  backgroundColor: Colors.brown,
+                  duration: Duration(milliseconds: 500),
+                ),
+              );
+              Navigator.pop(context);
+            },
+          ),
+        );
+      },
     );
   }
+
 
   Widget _buildPlatosTab(WidgetRef ref, List<CartItem> platosItems) {
     if (platosItems.isEmpty) {
       return const Center(child: Text('No dishes found.'));
     }
     return ListView.builder(
+      padding:  const EdgeInsets.only(bottom: 8.0),
       itemCount: platosItems.length,
       itemBuilder: (context, index) {
         final item = platosItems[index];
+        
         return CartItemView(
           img: item.img,
           title: item.title,

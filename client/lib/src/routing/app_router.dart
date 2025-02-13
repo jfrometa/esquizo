@@ -194,27 +194,22 @@ List<RouteBase> _getNestedRoutes(String path) {
           pageBuilder: (context, state) => const MaterialPage(
             child: CateringEntryScreen(),
           ),
-             routes: [
+          routes: [
             GoRoute(
               path: 'quote',
               name: AppRoute.manualQuote.name,
-              pageBuilder: (context, state) { 
-                return MaterialPage(
-                  child: ManualQuoteScreen()
-                );
+              pageBuilder: (context, state) {
+                return MaterialPage(child: ManualQuoteScreen());
               },
             ),
-                      GoRoute(
+            GoRoute(
               path: 'menu',
               name: AppRoute.cateringMenu.name,
-              pageBuilder: (context, state) { 
-                return MaterialPage(
-                  child: CateringSelectionScreen()
-                );
+              pageBuilder: (context, state) {
+                return MaterialPage(child: CateringSelectionScreen());
               },
             ),
           ],
-            
         ),
         GoRoute(
           path: 'populares',
@@ -286,7 +281,7 @@ List<RouteBase> _getNestedRoutes(String path) {
           path: 'completar-orden',
           name: AppRoute.checkout.name,
           pageBuilder: (context, state) {
-            final type = (state.extra ?? '') as String;
+            final type = (state.extra ?? 'platos') as String;
             return MaterialPage(
               child: CheckoutScreen(
                 displayType: type.toLowerCase(),

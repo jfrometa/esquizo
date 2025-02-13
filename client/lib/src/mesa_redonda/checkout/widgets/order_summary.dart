@@ -22,6 +22,9 @@ class OrderSummary extends StatelessWidget {
     final double tax = totalPrice * taxRate;
     final double orderTotal = totalPrice + (orderType == 'quote' ? 0 : deliveryFee) + tax;
 
+
+    // if (orderType == 'quote') return SizedBox.shrink();
+
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 150),
       child: Card(

@@ -7,7 +7,8 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering
  
 
 class CateringOrderForm extends ConsumerWidget {
-  const CateringOrderForm({super.key});
+  final VoidCallback? onEdit;
+  const CateringOrderForm({super.key, this.onEdit});
 
   Widget _buildCateringOrderDetailItem(String label, String value) {
     return Padding(
@@ -91,12 +92,25 @@ Widget _buildOrderDetails(CateringOrderItem? order) {
       child: Column(
         children: [
           Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [_buildOrderDetails(order)],
-              ),
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [_buildOrderDetails(order)],
+                  ),
+                ),
+                if (onEdit != null)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: onEdit,
+                    ),
+                  ),
+              ],
             ),
           ),
           Card(

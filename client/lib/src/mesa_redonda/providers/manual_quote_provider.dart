@@ -148,6 +148,8 @@ class ManualQuoteNotifier extends StateNotifier<CateringOrderItem?> {
   void removeFromCart(int index) {
     if (state != null && index >= 0 && index < state!.dishes.length) {
       final updatedDishes = List<CateringDish>.from(state!.dishes)..removeAt(index);
+
+      
       state = state!.copyWith(dishes: updatedDishes);
     }
   }

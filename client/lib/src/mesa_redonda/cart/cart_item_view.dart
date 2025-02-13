@@ -40,7 +40,7 @@ class CartItemView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      margin: const EdgeInsets.all( 16.0),
       elevation: 2.0,
       child: Padding(
         padding: const EdgeInsets.all(12.0),

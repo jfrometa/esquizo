@@ -1,6 +1,10 @@
+import 'dart:developer';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:path/path.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/cart_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/catering_order_provider.dart';
@@ -28,14 +32,16 @@ class OrderProcessor {
     String orderDetails,
   ) async {
     try {
-      await ref.read(orderStorageProvider).saveRegularOrder(
-            items,
-            contactInfo,
-            paymentMethod,
-            location,
-            delivery,
-          );
-      await _sendWhatsAppMessage(orderDetails, () => _clearRegularCart());
+    await _sendWhatsAppMessage(orderDetails, () => _clearRegularCart());
+
+    await ref.read(orderStorageProvider).saveRegularOrder(
+              items,
+              contactInfo,
+              paymentMethod,
+              location,
+              delivery,
+            );
+
     } catch (error) {
       _showError(error);
     }
@@ -50,6 +56,7 @@ class OrderProcessor {
     String orderDetails,
   ) async {
     try {
+      await _sendWhatsAppMessage(orderDetails, () => _clearSubscriptionCart());
       await ref.read(orderStorageProvider).saveSubscription(
             items,
             contactInfo,
@@ -57,7 +64,7 @@ class OrderProcessor {
             location,
             delivery,
           );
-      await _sendWhatsAppMessage(orderDetails, () => _clearSubscriptionCart());
+     
     } catch (error) {
       _showError(error);
     }
@@ -72,14 +79,14 @@ class OrderProcessor {
     String orderDetails,
   ) async {
     try {
+      await _sendWhatsAppMessage(orderDetails, () => _clearCateringCart());
       await ref.read(orderStorageProvider).saveCateringOrder(
             order,
             contactInfo,
             paymentMethod,
             location,
             delivery,
-          );
-      await _sendWhatsAppMessage(orderDetails, () => _clearCateringCart());
+          ); 
     } catch (error) {
       _showError(error);
     }
@@ -94,6 +101,7 @@ class OrderProcessor {
     String orderDetails,
   ) async {
     try {
+      await _sendWhatsAppMessage(orderDetails, () => _clearCateringQuoteCart());
       await ref.read(orderStorageProvider).saveCateringOrder(
             quote,
             contactInfo,
@@ -101,7 +109,7 @@ class OrderProcessor {
             location,
             delivery,
           );
-      await _sendWhatsAppMessage(orderDetails, () => _clearCateringQuoteCart());
+      
     } catch (error) {
       _showError(error);
     }
@@ -111,19 +119,27 @@ class OrderProcessor {
     String message,
     VoidCallback onSuccess,
   ) async {
-    final whatsappUrlMobile = 'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(message)}';
-    final whatsappUrlWeb = 'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}';
-
+    const String phoneNumber = '+18099880275';
+    final String whatsappUrlMobile =
+        'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(message)}';
+    final String whatsappUrlWeb =
+        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}';
+// log('WhatsApp Web URL: $whatsappUrlWeb ');
     if (await canLaunchUrl(Uri.parse(whatsappUrlMobile))) {
       await launchUrl(Uri.parse(whatsappUrlMobile));
+      // log('LAUCH mopbile: $whatsappUrlWeb \nMessage: $message');
       onSuccess();
     } else if (await canLaunchUrl(Uri.parse(whatsappUrlWeb))) {
+      // log('LAUCH Web URL: $whatsappUrlWeb\nMessage: $message');
       await launchUrl(Uri.parse(whatsappUrlWeb));
       onSuccess();
     } else {
+      // log('WhatsApp Web URL: $whatsappUrlWeb\nMessage: $message');
       _showError('No pude abrir WhatsApp');
     }
   }
+
+
 
   void _showError(Object error) {
     ScaffoldMessenger.of(context).showSnackBar(
