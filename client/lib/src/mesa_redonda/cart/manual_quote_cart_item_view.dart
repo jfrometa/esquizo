@@ -34,8 +34,7 @@ class ManualQuoteCartItemView extends ConsumerWidget {
                       ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete_outline),
-                  color: Colors.red,
+                  icon: const Icon(Icons.delete_forever,size: 20, color: Colors.red),
                   onPressed: () {
                     ref.read(manualQuoteProvider.notifier).clearManualQuote();
                     if (onRemove != null) onRemove!();

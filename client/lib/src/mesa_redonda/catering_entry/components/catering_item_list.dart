@@ -32,7 +32,7 @@ class ItemsList extends ConsumerWidget {
               style: const TextStyle(color: Colors.grey, fontSize: 14),
             ),
             trailing: IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
+              icon: const Icon(Icons.close,size: 20, color: Colors.red),
               onPressed: () {
                 if (isQuote) {
                   ref.read(manualQuoteProvider.notifier).removeFromCart(index);

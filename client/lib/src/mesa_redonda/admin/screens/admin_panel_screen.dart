@@ -74,7 +74,7 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
                     title: Text(admin.email),
                     subtitle: Text('Desde: ${admin.createdAt.toLocal()}'),
                     trailing: IconButton(
-                      icon: const Icon(Icons.delete),
+                      icon: const Icon(Icons.delete_forever,size: 20, color: Colors.red),
                       onPressed: () async {
                         try {
                           final result =

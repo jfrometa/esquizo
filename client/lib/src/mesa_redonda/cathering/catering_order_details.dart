@@ -71,8 +71,7 @@ class CateringOrderDetailsScreenState
                     onPressed: () => _editDishDialog(context, dish),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete,
-                        color: ColorsPaletteRedonda.orange),
+                    icon: const Icon(Icons.delete_forever,size: 20, color: Colors.red),
                     onPressed: () => _removeDish(index),
                   ),
                 ],

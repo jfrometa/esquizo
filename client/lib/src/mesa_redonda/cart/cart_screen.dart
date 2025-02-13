@@ -34,6 +34,7 @@ class CartScreen extends ConsumerWidget {
         .where(
             (item) => !item.isMealSubscription && item.foodType != 'Catering')
         .toList();
+        
     final List<CateringOrderItem> cateringItems =
         cateringOrder != null ? [cateringOrder] : [];
   
@@ -390,7 +391,7 @@ Widget _buildCheckoutButton(BuildContext context, WidgetRef ref,
     double totalPrice, List<dynamic> items, String type) {
   final bool hasItemsInCurrentTab = items.isNotEmpty;
   bool isDisabled = false;
-  String buttonLabel = 'Realizar pedido';
+  String buttonLabel = 'Continuar';
 
   if (type.toLowerCase() == 'catering') {
     final cateringOrder = ref.watch(cateringOrderProvider);

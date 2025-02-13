@@ -43,7 +43,7 @@ class MealSubscriptionItemView extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
+                  icon: const Icon(Icons.delete_forever,size: 20, color: Colors.red),
                   onPressed: onRemoveFromCart,
                 ),
               ],

@@ -178,7 +178,7 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
                 : null,
             trailing: isEditing
                 ? IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
+                    icon: const Icon(Icons.delete_forever,size: 20, color: Colors.red),
                     onPressed: () =>
                         ref.read(manualQuoteProvider.notifier).removeFromCart(index),
                   )
