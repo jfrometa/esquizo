@@ -125,7 +125,7 @@ class HomeState extends ConsumerState<Home> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Mesa Redonda"),
+          title: const Text("Kako"),
           forceMaterialTransparency: true,
           elevation: 3,
           actions: [

@@ -10,8 +10,7 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/navigation_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
-
-
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/admin/services/admin_providers.dart';
 
 // Update the provider to include both catering and manual orders
 final cateringItemCountProvider = StateProvider<int>((ref) {
@@ -46,6 +45,8 @@ class CartBadge extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final totalQuantity = ref.watch(totalCartQuantityProvider);
+    final theme = Theme.of(context);
+    
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -56,11 +57,11 @@ class CartBadge extends ConsumerWidget {
             right: -9,
             child: CircleAvatar(
               radius: 8,
-              backgroundColor: Colors.red,
+              backgroundColor: theme.colorScheme.error,
               child: Text(
                 '$totalQuantity',
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: theme.colorScheme.onError,
                   fontSize: 12,
                 ),
               ),
@@ -175,38 +176,63 @@ class ScaffoldWithNavigationBarState
   Widget build(BuildContext context) {
     final destinations = ref.watch(navigationDestinationsProvider);
     final totalQuantity = ref.watch(totalCartQuantityProvider);
+    
+    // Watch both the cached status and the auth state
+    final isAdmin = ref.watch(cachedAdminStatusProvider);
+    final authState = ref.watch(authStateChangesProvider);
+    
+    // If user is null (signed out), ensure admin is false
+    if (authState.value == null && isAdmin) {
+      // Use Future.microtask to avoid build-time state changes
+      Future.microtask(() {
+        ref.read(cachedAdminStatusProvider.notifier).state = false;
+      });
+    }
+    
+    final theme = Theme.of(context);
 
     return Scaffold(
       body: widget.body,
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
-          backgroundColor: Colors.white,
-          indicatorColor: ColorsPaletteRedonda.primary,
+          indicatorColor: theme.colorScheme.primary,
           labelTextStyle: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
-              return const TextStyle(
-                color: ColorsPaletteRedonda.primary,
+              return theme.textTheme.labelMedium?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: theme.colorScheme.primary,
               );
             }
-            return const TextStyle(
-              color: ColorsPaletteRedonda.deepBrown1,
+            return theme.textTheme.labelMedium?.copyWith(
               fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
             );
           }),
           iconTheme: WidgetStateProperty.resolveWith((states) {
             return states.contains(WidgetState.selected)
-                ? const IconThemeData(color: Colors.white)
-                : const IconThemeData(color: ColorsPaletteRedonda.deepBrown1);
+                ? IconThemeData(color: theme.colorScheme.onPrimary)
+                : IconThemeData(color: theme.colorScheme.onSurface);
           }),
         ),
-        child: NavigationBar(
-          selectedIndex: widget.currentIndex,
-          onDestinationSelected: _goBranch,
-          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-          destinations: destinations.map((dest) {
-            return _buildDestination(dest, totalQuantity, destinations.indexOf(dest));
-          }).toList(),
+        // Use AnimatedSize to smoothly resize the navigation bar when items are added/removed
+        child: AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          child: NavigationBar(
+            selectedIndex: widget.currentIndex,
+            onDestinationSelected: _goBranch,
+            labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+            destinations: [
+              // Map regular destinations
+              ...destinations.map((dest) => 
+                _buildDestination(dest, totalQuantity, destinations.indexOf(dest))
+              ),
+              
+              // Admin destination with animation
+              if (isAdmin && authState.value != null)
+                _buildAdminDestination(),
+            ],
+          ),
         ),
       ),
     );
@@ -227,6 +253,24 @@ class ScaffoldWithNavigationBarState
     return NavigationDestination(
       icon: iconWidget,
       label: destination.label,
+    );
+  }
+  
+  // New method to build the admin destination
+  NavigationDestination _buildAdminDestination() {
+    return NavigationDestination(
+      icon: TweenAnimationBuilder<double>(
+        tween: Tween<double>(begin: 0.0, end: 1.0),
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+        builder: (context, value, child) {
+          return Opacity(
+            opacity: value,
+            child: const Icon(Icons.admin_panel_settings),
+          );
+        },
+      ),
+      label: 'Admin',
     );
   }
 }
@@ -250,36 +294,58 @@ class ScaffoldWithNavigationRail extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final destinations = ref.watch(navigationDestinationsProvider);
     final totalQuantity = ref.watch(totalCartQuantityProvider);
+    
+    // Watch both the cached status and the auth state
+    final isAdmin = ref.watch(cachedAdminStatusProvider);
+    final authState = ref.watch(authStateChangesProvider);
+    
+    // If user is null (signed out), ensure admin is false
+    if (authState.value == null && isAdmin) {
+      // Use Future.microtask to avoid build-time state changes
+      Future.microtask(() {
+        ref.read(cachedAdminStatusProvider.notifier).state = false;
+      });
+    }
+    
+    final theme = Theme.of(context);
 
     return Scaffold(
       body: Row(
         children: [
-          NavigationRail(
-            indicatorColor: ColorsPaletteRedonda.primary,
-            backgroundColor: Colors.white,
-            selectedIndex: currentIndex,
-            onDestinationSelected: onDestinationSelected,
-            labelType: NavigationRailLabelType.all,
-            selectedIconTheme: const IconThemeData(color: Colors.white),
-            selectedLabelTextStyle: const TextStyle(
-              color: ColorsPaletteRedonda.primary,
-              fontWeight: FontWeight.bold,
+          // Use AnimatedContainer to smoothly resize the rail when items are added/removed
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            child: NavigationRail(
+              indicatorColor: theme.colorScheme.primary,
+              backgroundColor: theme.colorScheme.surface,
+              selectedIndex: currentIndex,
+              onDestinationSelected: onDestinationSelected,
+              labelType: NavigationRailLabelType.all,
+              selectedIconTheme: IconThemeData(color: theme.colorScheme.onPrimary),
+              selectedLabelTextStyle: TextStyle(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
+              unselectedIconTheme:
+                  IconThemeData(color: theme.colorScheme.onSurface),
+              unselectedLabelTextStyle: TextStyle(
+                color: theme.colorScheme.onSurface,
+                fontWeight: FontWeight.bold,
+              ),
+              destinations: [
+                // Map regular destinations
+                ...destinations.map((dest) => 
+                  _buildRailDestination(dest, totalQuantity, destinations.indexOf(dest))
+                ),
+                
+                // Admin destination with animation
+                if (isAdmin && authState.value != null)
+                  _buildAdminRailDestination(),
+              ],
             ),
-            unselectedIconTheme:
-                const IconThemeData(color: ColorsPaletteRedonda.deepBrown1),
-            unselectedLabelTextStyle: const TextStyle(
-              color: ColorsPaletteRedonda.deepBrown1,
-              fontWeight: FontWeight.bold,
-            ),
-            destinations: destinations
-                .map((dest) => _buildRailDestination(
-                      dest,
-                      totalQuantity,
-                      destinations.indexOf(dest),
-                    ))
-                .toList(),
           ),
-          const VerticalDivider(thickness: 1, width: 1),
+          VerticalDivider(thickness: 1, width: 1, color: theme.dividerColor),
           Expanded(child: body),
         ],
       ),
@@ -300,6 +366,34 @@ class ScaffoldWithNavigationRail extends ConsumerWidget {
     return NavigationRailDestination(
       icon: iconWidget,
       label: Text(destination.label),
+    );
+  }
+  
+  // New method to build the admin rail destination
+  NavigationRailDestination _buildAdminRailDestination() {
+    return NavigationRailDestination(
+      icon: TweenAnimationBuilder<double>(
+        tween: Tween<double>(begin: 0.0, end: 1.0),
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+        builder: (context, value, child) {
+          return Opacity(
+            opacity: value,
+            child: const Icon(Icons.admin_panel_settings),
+          );
+        },
+      ),
+      label: TweenAnimationBuilder<double>(
+        tween: Tween<double>(begin: 0.0, end: 1.0),
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+        builder: (context, value, child) {
+          return Opacity(
+            opacity: value,
+            child: const Text('Admin'),
+          );
+        },
+      ),
     );
   }
 }

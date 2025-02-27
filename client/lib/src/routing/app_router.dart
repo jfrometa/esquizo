@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/authenticated_profile_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/QR/qr_code.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/addToOrder/add_to_order_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/admin/services/admin_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_screen.dart';
@@ -344,7 +345,7 @@ String _getRouteName(String path) {
 Widget _getDestinationScreen(String path) {
   switch (path) {
     case '/':
-      return const ResponsiveLandingPage();
+      return const QRCodeScreen(); //const ResponsiveLandingPage();
     case '/menu':
       return const Home();
     case '/carrito':

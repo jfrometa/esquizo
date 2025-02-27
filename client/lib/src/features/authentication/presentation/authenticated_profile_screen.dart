@@ -8,6 +8,7 @@ import 'package:starter_architecture_flutter_firebase/src/constants/app_sizes.da
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/data/firebase_auth_repository.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/order_history_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/subscription_list_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/admin/services/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/catering_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
@@ -62,8 +63,15 @@ class _AuthenticatedProfileScreenState
     setState(() => _isSigningOut = true);
 
     try {
+      // Reset admin status in cache before signing out
+      ref.read(cachedAdminStatusProvider.notifier).state = false;
+      
+      // Force refresh the admin provider
+      ref.invalidate(isAdminProvider);
+      
+      // Sign out
       await ref.read(firebaseAuthProvider).signOut();
-
+      
       // Safely navigate back to the first route
       Navigator.of(context).popUntil((route) => route.isFirst);
     } catch (e) {
@@ -72,7 +80,7 @@ class _AuthenticatedProfileScreenState
         SnackBar(
           content: const Text(
               'Error al cerrar sesión. Por favor, intente nuevamente.'),
-          backgroundColor: Colors.redAccent.shade100,
+          
           duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
         ),
@@ -136,7 +144,7 @@ class _AuthenticatedProfileScreenState
               width: 24,
               height: 24,
               child: CircularProgressIndicator(strokeWidth: 2))
-          : const Icon(Icons.logout, color: Colors.redAccent),
+          : Icon(Icons.logout, color: Theme.of(context).colorScheme.error),
       onPressed: _isSigningOut ? null : () => _signOut(context, ref),
       tooltip: 'Cerrar Sesión',
     );
@@ -144,28 +152,29 @@ class _AuthenticatedProfileScreenState
 
   Widget _buildAnimatedTabBar(
       BuildContext context, List<String> tabTitles, double maxTabWidth) {
+    final theme = Theme.of(context);
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
       height: _isTabBarVisible ? 56.0 : 0.0,
       child: _isTabBarVisible
           ? Material(
-              color: ColorsPaletteRedonda.background,
+              color: theme.colorScheme.surface,
               elevation: 1,
               child: TabBar(
                 controller: _tabController,
                 dividerColor: Colors.transparent,
-                indicatorColor: ColorsPaletteRedonda.primary,
+                indicatorColor: theme.colorScheme.primary,
                 isScrollable: true,
-                labelStyle: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                unselectedLabelStyle: Theme.of(context).textTheme.titleSmall,
-                labelColor: ColorsPaletteRedonda.white,
-                unselectedLabelColor: ColorsPaletteRedonda.primary1,
+                labelStyle: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+                unselectedLabelStyle: theme.textTheme.titleSmall,
+                labelColor: theme.colorScheme.onPrimary,
+                unselectedLabelColor: theme.colorScheme.primary,
                 indicatorSize: TabBarIndicatorSize.tab,
                 indicator: TabIndicator(
-                  color: ColorsPaletteRedonda.primary,
+                  color: theme.colorScheme.primary,
                   radius: 16.0,
                 ),
                 tabs: tabTitles.map((title) {
@@ -235,8 +244,9 @@ class _AuthenticatedProfileScreenState
   }
 
   Widget _buildProfileAvatar() {
+    final theme = Theme.of(context);
     return CircleAvatar(
-      backgroundColor: ColorsPaletteRedonda.primary,
+      backgroundColor: theme.colorScheme.primary,
       radius: 40,
       child: widget.user.photoURL != null
           ? ClipOval(
@@ -247,14 +257,14 @@ class _AuthenticatedProfileScreenState
                 height: 80,
                 placeholder: (context, url) =>
                     const CircularProgressIndicator(),
-                errorWidget: (context, url, error) => const Icon(
+                errorWidget: (context, url, error) => Icon(
                   Icons.person,
                   size: 40,
-                  color: Colors.white,
+                  color: theme.colorScheme.onPrimary,
                 ),
               ),
             )
-          : const Icon(Icons.person, size: 40, color: Colors.white),
+          : Icon(Icons.person, size: 40, color: theme.colorScheme.onPrimary),
     );
   }
 

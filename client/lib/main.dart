@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/app.dart';
@@ -20,11 +21,12 @@ Future<void> main() async {
   usePathUrlStrategy();
   registerErrorHandlers();
 
-  await initLocalStorage();
-  notifier = ValueNotifier(int.parse(localStorage.getItem('counter') ?? '0'));
-  notifier.addListener(() {
-    localStorage.setItem('counter', notifier.value.toString());
-  });
+    SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+    ),
+  );
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 

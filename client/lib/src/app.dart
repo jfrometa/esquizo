@@ -10,16 +10,12 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final goRouter = ref.watch(goRouterProvider);
 
-    // try {
-    //   ref.read(firebaseAuthProvider).signInAnonymously();
-    // } catch (e) {
-    //   print("signInAnonymously did fail");
-    // } finally {}
-
-    return MaterialApp.router(
-      routerConfig: goRouter,
-      theme: ColorsPaletteRedonda.themeData,
-      debugShowCheckedModeBanner: false,
-    );
+  return MaterialApp.router(
+    routerConfig: goRouter,
+    theme: AppTheme.lightTheme,
+    darkTheme: AppTheme.darkTheme,
+    themeMode: ThemeMode.dark,
+    debugShowCheckedModeBanner: true,
+  );
   }
 }

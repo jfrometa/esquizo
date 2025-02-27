@@ -31,10 +31,7 @@ class AuthRepository {
     }
   }
 
-  // Sign out
-  Future<void> signOut() async {
-    await _auth.signOut();
-  }
+
 
   // Initialize authentication
   Future<void> initialize() async {
