@@ -165,7 +165,7 @@ class CateringCartItemView extends ConsumerWidget {
             top: 20.0,
           ),
           child: CateringForm(
-            title: 'Detalles de la Orden',
+            // title: 'Detalles de la Orden',
             initialData: order,
             onSubmit: (formData) {
               ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(

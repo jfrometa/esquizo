@@ -10,8 +10,7 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering_quote/manual_quote_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart'; 
- 
+import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 /// The complete entry screen with two tabs: one for Catering and one for Cotización.
 class CateringEntryScreen extends ConsumerStatefulWidget {
@@ -21,7 +20,8 @@ class CateringEntryScreen extends ConsumerStatefulWidget {
   CateringEntryScreenState createState() => CateringEntryScreenState();
 }
 
-class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>  with SingleTickerProviderStateMixin {
+class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
+    with SingleTickerProviderStateMixin {
   // Controllers for the catering form.
   late TextEditingController eventTypeController;
   late TextEditingController customPersonasController;
@@ -36,7 +36,20 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>  with 
 
   // Static list for people quantity drop-down.
   final _peopleQuantity = [
-    10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, 2000, 5000, 10000
+    10,
+    20,
+    30,
+    40,
+    50,
+    100,
+    200,
+    300,
+    400,
+    500,
+    1000,
+    2000,
+    5000,
+    10000
   ];
 
   late TabController _tabController;
@@ -46,10 +59,17 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>  with 
     super.initState();
     _initializeCateringValues();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      // Force rebuild when tab changes
+      setState(() {});
+    });
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(() {
+      setState(() {});
+    });
     _tabController.dispose();
     customPersonasFocusNode.dispose();
     eventTypeController.dispose();
@@ -57,7 +77,6 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>  with 
     adicionalesController.dispose();
     super.dispose();
   }
-
 
   /// Initializes the catering form from the global catering order.
   void _initializeCateringValues() {
@@ -67,10 +86,10 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>  with 
         ? cateringOrder!.preferencia
         : 'salado';
     tempAlergiasList = cateringOrder?.alergias.split(',') ?? [];
-    final peopleCount = (cateringOrder?.peopleCount != null &&
-            cateringOrder!.peopleCount! > 0)
-        ? cateringOrder.peopleCount
-        : null;
+    final peopleCount =
+        (cateringOrder?.peopleCount != null && cateringOrder!.peopleCount! > 0)
+            ? cateringOrder.peopleCount
+            : null;
     if (peopleCount != null && !_peopleQuantity.contains(peopleCount)) {
       isCustomSelected = true;
     }
@@ -82,14 +101,12 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>  with 
         TextEditingController(text: cateringOrder?.adicionales ?? '');
   }
 
-
   /// -----------------------------
   /// Bottom Sheet Forms for Adding Products
   /// -----------------------------
 
-
- void _showCateringForm(BuildContext context, WidgetRef ref) {
-     final order = ref.read(cateringOrderProvider);
+  void _showCateringForm(BuildContext context, WidgetRef ref) {
+    final order = ref.read(cateringOrderProvider);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -180,7 +197,7 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>  with 
     );
   }
 
-   // Add method to handle FAB press based on current tab
+  // Add method to handle FAB press based on current tab
   void _handleFabPressed() {
     if (_tabController.index == 0) {
       // Catering tab
@@ -215,8 +232,8 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>  with 
       return;
     }
     if ((order.peopleCount ?? 0) <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('La cantidad de personas es requerida')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('La cantidad de personas es requerida')));
       return;
     }
     if (order.eventType.isEmpty) {
@@ -231,21 +248,20 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>  with 
     }
     // For catering, navigate to the catering selection screen.
     // Navigator.of(context).pop();
-    
-    GoRouter.of(context)
-        .goNamed(AppRoute.homecart.name, extra: 'catering');
+
+    GoRouter.of(context).goNamed(AppRoute.homecart.name, extra: 'catering');
   }
 
   void _confirmQuoteOrder() {
     final quote = ref.read(manualQuoteProvider);
     if (quote == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error: No hay datos de la cotización')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Error: No hay datos de la cotización')));
       return;
     }
     if ((quote.peopleCount ?? 0) <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('La cantidad de personas es requerida')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('La cantidad de personas es requerida')));
       return;
     }
     if (quote.eventType.isEmpty) {
@@ -271,20 +287,20 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>  with 
   Widget _buildCateringOrderForm() {
     final cateringOrder = ref.watch(cateringOrderProvider);
     final items = cateringOrder?.dishes ?? [];
-    final itemsCard =    Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-             CateringOrderForm(  onEdit: () {
+    final itemsCard = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CateringOrderForm(
+          onEdit: () {
             _showCateringForm(context, ref);
-          },),
-          ], 
-     
+          },
+        ),
+      ],
     );
 
     return SingleChildScrollView(
       child: Padding(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -292,7 +308,8 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>  with 
             // const SizedBox(height: 24),
             itemsCard,
             const SizedBox(height: 24),
-            if (MediaQuery.of(context).size.width > 600 && items.isNotEmpty) // Only show on desktop with dishes
+            if (MediaQuery.of(context).size.width > 600 &&
+                items.isNotEmpty) // Only show on desktop with dishes
               ElevatedButton(
                 onPressed: _confirmCateringOrder,
                 child: const Text('Completar Orden'),
@@ -303,14 +320,13 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>  with 
     );
   }
 
-
 // In your screen/widget:
-void _showNewItemDialog() {
-  NewItemDialog.show(
-    context: context,
-    onAddItem: _addItem, 
-  );
-}
+  void _showNewItemDialog() {
+    NewItemDialog.show(
+      context: context,
+      onAddItem: _addItem,
+    );
+  }
 
   /// Builds the complete quote order form view.
   Widget _buildQuoteOrderForm() {
@@ -352,48 +368,55 @@ void _showNewItemDialog() {
 
     return SingleChildScrollView(
       child: Padding(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            QuoteOrderFormView(quote: quote,   onEdit: () {
-              _showQuoteForm(context, ref);
-            },),
-            const SizedBox(height: 16),
-
-          if (MediaQuery.of(context).size.width > 600  && quote.dishes.isNotEmpty)  // Only show on desktop
-            ElevatedButton(
-              onPressed: _confirmQuoteOrder,
-              child: const Text('Finalizar Cotización'),
+            QuoteOrderFormView(
+              quote: quote,
+              onEdit: () {
+                _showQuoteForm(context, ref);
+              },
             ),
+            const SizedBox(height: 16),
+            if (MediaQuery.of(context).size.width > 600 &&
+                quote.dishes.isNotEmpty) // Only show on desktop
+              ElevatedButton(
+                onPressed: _confirmQuoteOrder,
+                child: const Text('Finalizar Cotización'),
+              ),
           ],
         ),
       ),
     );
   }
- 
+
   /// Adds a new dish to the catering order.
   void _addItem(String name, String description, int? quantity) {
     if (name.trim().isEmpty) return;
-   final quoteOrder  = ref.watch(manualQuoteProvider);
+    final quoteOrder = ref.watch(manualQuoteProvider);
 
     ref.read(manualQuoteProvider.notifier).addManualItem(
-      CateringDish(
-        title: name.trim(),
-        quantity: quantity ?? 0,
-        hasUnitSelection: false,
-        peopleCount: quantity ?? quoteOrder?.peopleCount ?? 0,
-        pricePerUnit: 0,
-        pricePerPerson: 0,
-        ingredients: [],
-        pricing: 0,
-      ),
-    );
+          CateringDish(
+            title: name.trim(),
+            quantity: quantity ?? 0,
+            hasUnitSelection: false,
+            peopleCount: quantity ?? quoteOrder?.peopleCount ?? 0,
+            pricePerUnit: 0,
+            pricePerPerson: 0,
+            ingredients: [],
+            pricing: 0,
+          ),
+        );
   }
 
   @override
   Widget build(BuildContext context) {
+    final cateringOrder = ref.watch(cateringOrderProvider);
+    final quoteOrder = ref.watch(manualQuoteProvider);
+    final currentOrder = _tabController.index == 0 ? cateringOrder : quoteOrder;
+    final hasItems = currentOrder != null;
+
     return Scaffold(
       appBar: AppBar(
         forceMaterialTransparency: true,
@@ -401,17 +424,19 @@ void _showNewItemDialog() {
         backgroundColor: Colors.white,
         iconTheme: const IconThemeData(color: Colors.black),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.check),
-            color: ColorsPaletteRedonda.primary,
-            onPressed: () {
-              if (_tabController.index == 0) {
-                _confirmCateringOrder();
-              } else {
-                _confirmQuoteOrder();
-              }
-            },
-          ),
+          if (hasItems)
+            FilledButton.icon(
+              onPressed: () {
+                if (_tabController.index == 0) {
+                  _confirmCateringOrder();
+                } else {
+                  _confirmQuoteOrder();
+                }
+              },
+              icon: const Icon(Icons.check),
+              label: const Text('Finalizar'),
+            ),
+          const SizedBox(width: 16),
         ],
         bottom: TabBar(
           controller: _tabController,
@@ -431,17 +456,23 @@ void _showNewItemDialog() {
         ),
       ),
       body: TabBarView(
-        controller: _tabController,  // Add the controller here
-        physics: const NeverScrollableScrollPhysics(),  // Optional: prevents swipe between tabs
+        controller: _tabController, // Add the controller here
+        physics:
+            const NeverScrollableScrollPhysics(), // Optional: prevents swipe between tabs
         children: [
           _buildCateringOrderForm(),
           _buildQuoteOrderForm(),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'completar orden',
         onPressed: _handleFabPressed,
         backgroundColor: ColorsPaletteRedonda.primary,
-        child: const Icon(Icons.add_shopping_cart),
+        icon: Icon(
+          (!hasItems ? Icons.start : Icons.add_shopping_cart),
+          color: Colors.white,
+        ),
+        label: Text((!hasItems ? 'Iniciar Orden' : 'Agregar plato')),
       ),
     );
   }

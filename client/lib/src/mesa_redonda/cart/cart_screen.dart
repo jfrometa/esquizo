@@ -90,7 +90,7 @@ class CartScreen extends ConsumerWidget {
               right: 20,
               top: 20),
           child: CateringForm(
-            title: 'Detalles de la Cotizacion',
+            // title: 'Detalles de la Cotizacion',
             initialData: quote,
             onSubmit: (formData) {
               ref.read(manualQuoteProvider.notifier).finalizeManualQuote(
@@ -632,7 +632,7 @@ Widget _buildCheckoutButton(BuildContext context, WidgetRef ref,
             top: 20.0,
           ),
           child: CateringForm(
-            title: 'Detalles de la Orden',
+            // title: 'Detalles de la Orden',
             initialData: order,
             onSubmit: (formData) {
               ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(

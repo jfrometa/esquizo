@@ -67,7 +67,16 @@ dependencies:
   google_sign_in: ^6.2.1
   # google_generative_ai: ^0.4.3
   # flutter_secure_storage: ^9.2.2
- 
+
+  # QR code generation and scanning
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^3.5.5
+
+  animations: ^2.0.8
+  flutter_animate: ^4.5.0 
+
+  path_provider: ^2.1.2
+  logger: ^2.0.2 
   
 dev_dependencies:
   flutter_test:
@@ -79,6 +88,7 @@ dev_dependencies:
   # a tool for running code generators
   # dart run build_runner build --delete-conflicting-outputs
   build_runner: ^2.4.10
+  mockito: ^5.4.4
   # the code generator
   riverpod_generator: ^2.4.3
   # riverpod_lint makes it easier to work with Riverpod

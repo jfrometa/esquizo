@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
+import '../../../dishes/dish_card.dart';
+
 class HomeSearchResults extends StatelessWidget {
   final List<dynamic> filteredDishes;
   final String searchQuery;
@@ -83,76 +85,18 @@ class HomeSearchResults extends StatelessWidget {
             itemCount: filteredDishes.length,
             itemBuilder: (context, index) {
               final dish = filteredDishes[index];
-              return DishCard(dish: dish);
+              return DishCard(
+                dish: dish,
+                onTap: () {
+                  // Navigate to dish detail
+                  // context.pushNamed('dish-detail', params: {'id': dish['id']});
+                  HapticFeedback.selectionClick();
+                },
+              );
             },
           ),
         ),
       ],
-    );
-  }
-}
-
-// Simple DishCard implementation
-class DishCard extends StatelessWidget {
-  final Map<String, dynamic> dish;
-
-  const DishCard({Key? key, required this.dish}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Image placeholder
-          Container(
-            height: 120,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
-            ),
-            width: double.infinity,
-            child: Center(
-              child: Icon(Icons.restaurant, color: Colors.grey[600]),
-            ),
-          ),
-          // Dish details
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  dish['title'] ?? 'No title',
-                  style: Theme.of(context).textTheme.titleMedium,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  dish['description'] ?? 'No description',
-                  style: Theme.of(context).textTheme.bodySmall,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'S/ ${dish['price'] ?? '0.00'}',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: ColorsPaletteRedonda.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

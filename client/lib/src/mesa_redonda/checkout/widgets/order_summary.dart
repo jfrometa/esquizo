@@ -167,5 +167,4 @@ class OrderSummary extends ConsumerWidget {
     ),
   );
 }
-
 }
