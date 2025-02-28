@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/authenticated_profile_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/QR/qr_code.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/QR/qr_code_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/addToOrder/add_to_order_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/admin/services/admin_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_screen.dart';
@@ -41,6 +41,7 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
 final _accountNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'account');
 final _landingNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'landing');
+final _localNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'local');
 final _cartNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'cart');
 final _adminNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'admin');
 final _OrdersNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'orders');
@@ -65,6 +66,7 @@ enum AppRoute {
   cateringMenu,
   caterings, // If both are used
   landing,
+  local,
   adminPanel,
   inProgressOrders,
   manualQuote
@@ -276,6 +278,19 @@ List<RouteBase> _getNestedRoutes(String path) {
           ],
         ),
       ];
+    case '/locales':
+      return [
+        GoRoute(
+          path: 'localese',
+          name: AppRoute.local.name,
+          pageBuilder: (context, state) {
+            return MaterialPage(
+              child: QRCodeScreen(),
+            );
+          },
+        ),
+      ];
+    
     case '/carrito':
       return [
         GoRoute(
@@ -315,6 +330,8 @@ GlobalKey<NavigatorState> _getNavigatorKey(String path) {
   switch (path) {
     case '/':
       return _landingNavigatorKey;
+    case '/local':
+      return _localNavigatorKey;
     case '/menu':
       return _homeNavigatorKey;
     case '/carrito':
@@ -333,6 +350,7 @@ GlobalKey<NavigatorState> _getNavigatorKey(String path) {
 String _getRouteName(String path) {
   final pathToRoute = {
     '/': AppRoute.landing.name,
+    '/local': AppRoute.local.name,
     '/menu': AppRoute.home.name,
     '/carrito': AppRoute.homecart.name,
     '/cuenta': AppRoute.profile.name,
@@ -345,9 +363,11 @@ String _getRouteName(String path) {
 Widget _getDestinationScreen(String path) {
   switch (path) {
     case '/':
+      return const ResponsiveLandingPage(); //const ResponsiveLandingPage();
+    case '/local':
       return const QRCodeScreen(); //const ResponsiveLandingPage();
     case '/menu':
-      return const Home();
+      return const MenuHome();
     case '/carrito':
       return const CartScreen(isAuthenticated: true);
     case '/cuenta':
@@ -358,7 +378,7 @@ Widget _getDestinationScreen(String path) {
           final isAdmin = ref.watch(isAdminProvider);
           return isAdmin.when(
             data: (isAdmin) => isAdmin
-                ? const AdminManagementScreen()
+                ? const AdminPanelScreen()
                 : const UnauthorizedScreen(),
             loading: () => const CircularProgressIndicator(),
             error: (_, __) => const UnauthorizedScreen(),
@@ -368,7 +388,7 @@ Widget _getDestinationScreen(String path) {
     case '/ordenes':
       return const InProgressOrdersScreen();
     default:
-      return const Home();
+      return const MenuHome();
   }
 }
 

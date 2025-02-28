@@ -26,14 +26,14 @@ final recentSearchesProvider =
 });
 
 /// The Home screen for the app.
-class Home extends ConsumerStatefulWidget {
-  const Home({super.key});
+class MenuHome extends ConsumerStatefulWidget {
+  const MenuHome({super.key});
 
   @override
   HomeState createState() => HomeState();
 }
 
-class HomeState extends ConsumerState<Home> {
+class HomeState extends ConsumerState<MenuHome> {
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
@@ -191,17 +191,6 @@ class _MainHomeView extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // User greeting section
-              Padding(
-                padding: const EdgeInsets.only(bottom: 24.0),
-                child: Text(
-                  '¿Qué te gustaría pedir hoy?',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-              ),
-
               const HomeCategoriesSection(),
               const SizedBox(height: 30),
 

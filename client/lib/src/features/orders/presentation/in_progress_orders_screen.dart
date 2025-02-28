@@ -4,47 +4,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/constants/app_sizes.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/data/firebase_auth_repository.dart';
-import 'package:starter_architecture_flutter_firebase/src/features/authentication/domain/models.dart';
+ 
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/order_history_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/admin/services/order_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/catering_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
-import 'package:starter_architecture_flutter_firebase/src/constants/app_sizes.dart';
+ 
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/domain/models.dart'
     as auth_models;
-// Create a provider for active orders pagination
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/admin/models/order_status.dart';
+ 
+import '../../../mesa_redonda/admin/models/order_status_enum.dart';
 
-// Update the providers to use enum values
-final activeOrdersProvider = StreamProvider.family<List<auth_models.Order>, String>((ref, userId) {
-  return FirebaseFirestore.instance
-      .collection('orders')
-      .where('userId', isEqualTo: userId)
-      .where('status', whereIn: [
-        OrderStatus.pending.name,
-        OrderStatus.paymentConfirmed.name,
-        OrderStatus.preparing.name,
-        OrderStatus.readyForDelivery.name,
-        OrderStatus.delivering.name,
-      ])
-      .orderBy('orderDate', descending: true)
-      .snapshots()
-      .map((snapshot) => snapshot.docs
-          .map((doc) => auth_models.Order.fromFirestore(doc))
-          .toList());
-});
-
-// Create a provider for completed orders pagination
-final completedOrdersProvider = StreamProvider.family<List<auth_models.Order>, String>((ref, userId) {
-  return FirebaseFirestore.instance
-      .collection('orders')
-      .where('userId', isEqualTo: userId)
-      .where('status', whereIn: ['delivered', 'cancelled'])
-      .orderBy('orderDate', descending: true)
-      .snapshots()
-      .map((snapshot) => snapshot.docs
-          .map((doc) => auth_models.Order.fromFirestore(doc))
-          .toList());
-});
 
 class InProgressOrdersScreen extends ConsumerStatefulWidget {
   const InProgressOrdersScreen({super.key});
@@ -186,6 +156,12 @@ class OrderCard extends StatelessWidget {
         return Colors.green;
       case OrderStatus.cancelled:
         return Colors.red;
+      case OrderStatus.inProgress:
+        return Colors.deepPurple;
+      case OrderStatus.ready:
+        return Colors.lightGreen;
+      case OrderStatus.delivered:
+        return Colors.green.shade700;
     }
   }
 
@@ -223,8 +199,8 @@ class OrderCard extends StatelessWidget {
                 OrderDetailRow(
                   icon: Icons.local_shipping,
                   label: 'Estado',
-                  value: order.status,
-                  valueColor: _getStatusColor(order.status),
+                  value: order.status.name,
+                  valueColor: _getStatusColor(order.status.name),
                 ),
                 const SizedBox(height: 8),
                 if (order.items != null) ...[
@@ -236,7 +212,7 @@ class OrderCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   ...order.items!.map((item) => ListTile(
                         dense: true,
-                        title: Text(item.title),
+                        title: Text(item.name),
                         trailing: Text('x${item.quantity}'),
                       )),
                 ],

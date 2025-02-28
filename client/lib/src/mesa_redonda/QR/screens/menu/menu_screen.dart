@@ -92,7 +92,7 @@ class MenuScreen extends ConsumerWidget {
                                 categoryId: category.id,
                                 categoryName: category.name,
                                 tableData: QRCodeData(
-                                  tableId: 0,
+                                  tableId: DateTime.now().millisecondsSinceEpoch.toString(),
                                   tableName: 'Takeaway',
                                   restaurantId: 'la-redonda-123',
                                   generatedAt: DateTime.now(),

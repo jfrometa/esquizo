@@ -17,9 +17,15 @@ class AdminService {
           .doc(user.uid)
           .get();
 
-      // Check admin claims in user's token
-      final idTokenResult = await user.getIdTokenResult(true);
-      final isAdminClaim = idTokenResult.claims?['admin'] == true;
+      // Check admin claims in user's token with better exception handling
+      bool isAdminClaim = false;
+      try {
+        final idTokenResult = await user.getIdTokenResult(true);
+        isAdminClaim = idTokenResult.claims?['admin'] == true;
+      } catch (tokenError) {
+        print('Error getting token claims: $tokenError');
+        // Continue execution - we'll fall back to Firestore check
+      }
 
       return adminDoc.exists || isAdminClaim;
     } catch (e) {

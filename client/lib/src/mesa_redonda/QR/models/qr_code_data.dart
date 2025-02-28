@@ -2,7 +2,7 @@
 import 'dart:convert';
 
 class QRCodeData {
-  final int tableId;
+  final String tableId;
   final String tableName;
   final String restaurantId;
   final DateTime generatedAt;
