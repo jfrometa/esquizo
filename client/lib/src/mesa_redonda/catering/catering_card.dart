@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/catering_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering/catering_item.dart';
 
 class CateringItemCard extends StatefulWidget {
   final CateringItem item;

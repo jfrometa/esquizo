@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/catering_selection_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/widgets/catering_selection/catering_enhanced_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering/catering_selection_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering/widgets/catering_selection/catering_enhanced_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/catering_order_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/catering_card.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/catering_item.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/cathering_order_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering/catering_card.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering/catering_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering/cathering_order_item.dart';
 
 class CategoryItemsList extends ConsumerWidget {
   const CategoryItemsList({

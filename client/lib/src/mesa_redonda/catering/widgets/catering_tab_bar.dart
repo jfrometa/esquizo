@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/catering_card.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering/catering_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class CateringTabBar extends StatelessWidget {

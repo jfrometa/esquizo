@@ -3,12 +3,12 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/widgets/catering_form.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/catering_card.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/catering_item.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/widgets/cart_button.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/widgets/catering_selection/category_items_list.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/widgets/catering_form.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/widgets/catering_tab_bar.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering/catering_card.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering/catering_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering/widgets/cart_button.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering/widgets/catering_selection/category_items_list.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering/widgets/catering_form.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering/widgets/catering_tab_bar.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/catering_order_provider.dart';
 
 final localCateringItemCountProvider = StateProvider<int>((ref) {

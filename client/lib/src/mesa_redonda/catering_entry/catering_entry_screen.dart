@@ -6,7 +6,7 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering_
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering_entry/components/catering_quote/quote_order_form_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/prompt_dialogs/new_item_dialog.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/catering_order_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/cathering_order_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering_quote/manual_quote_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
