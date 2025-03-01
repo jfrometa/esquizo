@@ -1,16 +1,21 @@
-// lib/src/mesa_redonda/catering_entry/widgets/catering_order_form.dart
+// UPDATED CateringOrderForm.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering_entry/components/catering_item_list.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/cathering_order_item.dart';
- import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/catering_order_provider.dart';
- 
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/catering_order_provider.dart';
 
 class CateringOrderForm extends ConsumerWidget {
   final VoidCallback? onEdit;
-  const CateringOrderForm({super.key, this.onEdit});
+  final VoidCallback? onConfirm;
+  
+  const CateringOrderForm({
+    super.key, 
+    this.onEdit,
+    this.onConfirm,
+  });
 
-  Widget _buildCateringOrderDetailItem(String label, String value) {
+  Widget _buildCateringOrderDetailItem(String label, String value, ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -20,109 +25,264 @@ class CateringOrderForm extends ConsumerWidget {
             width: 120,
             child: Text(
               '$label:',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
+              ),
             ),
           ),
-          Expanded(child: Text(value)),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-Widget _buildOrderDetails(CateringOrderItem? order) {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final order = ref.watch(cateringOrderProvider);
+    final isDesktop = MediaQuery.of(context).size.width > 600;
+
+    if (order == null) {
+      return const SizedBox(); // Empty state handled by parent
+    }
+
+    final items = order.dishes;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Detalles de la Orden',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        // Order details card
+        Card(
+          elevation: 0,
+          color: colorScheme.surfaceVariant.withOpacity(0.3),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Detalles de la Orden',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildCateringOrderDetailItem('Personas', '${order.peopleCount ?? 0}', theme),
+                    _buildCateringOrderDetailItem('Tipo de Evento', order.eventType, theme),
+                    _buildCateringOrderDetailItem(
+                      'Chef Incluido',
+                      order.hasChef ?? false ? 'Sí' : 'No', 
+                      theme
+                    ),
+                    if (order.alergias.isNotEmpty)
+                      _buildCateringOrderDetailItem('Alergias', order.alergias, theme),
+                    if (order.preferencia.isNotEmpty)
+                      _buildCateringOrderDetailItem('Preferencia', order.preferencia, theme),
+                    if (order.adicionales.isNotEmpty)
+                      _buildCateringOrderDetailItem('Notas', order.adicionales, theme),
+                  ],
+                ),
+              ),
+              if (onEdit != null)
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.edit,
+                      color: colorScheme.primary,
+                    ),
+                    onPressed: onEdit,
+                  ),
+                ),
+            ],
+          ),
         ),
-        const SizedBox(height: 16),
-        _buildCateringOrderDetailItem('Personas', '${order?.peopleCount ?? 0}'),
-        _buildCateringOrderDetailItem('Tipo de Evento', order?.eventType ?? ''),
-        _buildCateringOrderDetailItem('Chef Incluido', order?.hasChef ?? false ? 'Sí' : 'No'),
-        if ((order?.alergias ?? '').isNotEmpty)
-          _buildCateringOrderDetailItem('Alergias', order?.alergias ?? ''),
-        if ((order?.adicionales ?? '').isNotEmpty)
-          _buildCateringOrderDetailItem('Notas', order?.adicionales ?? 'No adicionales'),
+        
+        const SizedBox(height: 24),
+        
+        // Order items summary
+        if (items.isNotEmpty)
+          Card(
+            elevation: 0,
+            color: colorScheme.secondaryContainer.withOpacity(0.3),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Resumen de la Orden',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '${items.length} platos',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSecondaryContainer,
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 8),
+                  
+                  const Divider(),
+                  
+                  // Item list with delete option
+                  ...items.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final item = entry.value;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: colorScheme.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Icons.restaurant,
+                                color: colorScheme.primary,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.title,
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                if (item.ingredients.isNotEmpty)
+                                  Text(
+                                    item.ingredients.join(', '),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8, 
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colorScheme.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '\$${item.pricing}',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: Icon(
+                              Icons.delete_outline,
+                              color: colorScheme.error,
+                              size: 20,
+                            ),
+                            onPressed: () {
+                              ref.read(cateringOrderProvider.notifier).removeFromCart(index);
+                            },
+                            tooltip: 'Eliminar',
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  
+                  const Divider(),
+                  
+                  // Total
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Total estimado:',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '\$${_calculateTotal(items)}',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        
+        const SizedBox(height: 24),
+        
+        // Desktop complete order button
+        if (isDesktop && items.isNotEmpty && onConfirm != null)
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: onConfirm,
+              icon: const Icon(Icons.check),
+              label: const Text('Completar Orden'),
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.all(16),
+              ),
+            ),
+          ),
       ],
     );
   }
- 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final order = ref.watch(cateringOrderProvider); 
-
-    if (order == null) {
-      return const Center(
-        child: Card(
-          margin: EdgeInsets.all(16),
-          child: Padding(
-            padding: EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.restaurant_menu,
-                  size: 48,
-                  color: Colors.grey,
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'No hay orden iniciada',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'Inicia una orden agregando los detalles del evento',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
+  
+  // Calculate total from items
+  String _calculateTotal(List<CateringDish> items) {
+    double total = 0;
+    for (var item in items) {
+      total += (item.pricing?.toDouble() ?? 0);
     }
-
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          Card(
-            child: Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [_buildOrderDetails(order)],
-                  ),
-                ),
-                if (onEdit != null)
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: onEdit,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: order.dishes.isEmpty
-                  ? const Center(child: Text('No hay items agregados'))
-                  : ItemsList(items: order.dishes, isQuote: false),
-            ),
-          ),
-        ],
-      ),
-    );
+    return total.toStringAsFixed(2);
   }
 }

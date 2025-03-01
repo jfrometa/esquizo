@@ -14,7 +14,7 @@ class MyApp extends ConsumerWidget {
     routerConfig: goRouter,
     theme: AppTheme.lightTheme,
     darkTheme: AppTheme.darkTheme,
-    themeMode: ThemeMode.dark,
+    themeMode: ThemeMode.light,
     debugShowCheckedModeBanner: true,
   );
   }

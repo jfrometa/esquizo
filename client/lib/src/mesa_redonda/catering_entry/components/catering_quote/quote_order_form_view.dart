@@ -1,20 +1,23 @@
-// lib/src/mesa_redonda/catering_entry/widgets/quote_order_form_view.dart
+// UPDATED QuoteOrderFormView.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering_entry/components/catering_item_list.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cathering/cathering_order_item.dart';
- import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/manual_quote_provider.dart';
 
-class QuoteOrderFormView extends StatelessWidget {
-  final CateringOrderItem? quote;
+class QuoteOrderFormView extends ConsumerWidget {
+  final CateringOrderItem quote;
   final VoidCallback? onEdit;
+  final VoidCallback? onConfirm;
   
   const QuoteOrderFormView({
     super.key, 
     required this.quote,
     this.onEdit,
+    this.onConfirm,
   });
 
-  Widget _buildQuoteDetailItem(String label, String value) {
+  Widget _buildQuoteDetailItem(String label, String value, ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -24,57 +27,41 @@ class QuoteOrderFormView extends StatelessWidget {
             width: 120,
             child: Text(
               '$label:',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
+              ),
             ),
           ),
-          Expanded(child: Text(value)),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
   @override
-  Widget build(BuildContext context) {
-    if (quote == null) {
-      return Center(
-        child: Card(
-          margin: const EdgeInsets.all(16),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.description_outlined,
-                  size: 48,
-                  color: ColorsPaletteRedonda.deepBrown1,
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'No hay cotización iniciada',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Inicia una cotización manual para ver los detalles',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDesktop = MediaQuery.of(context).size.width > 600;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Quote details card
         Card(
+          elevation: 0,
+          color: colorScheme.surfaceVariant.withOpacity(0.3),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Stack(
             children: [
               Padding(
@@ -82,20 +69,26 @@ class QuoteOrderFormView extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Detalles de la Cotización',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 16),
-                    _buildQuoteDetailItem('Personas', '${quote!.peopleCount ?? 0}'),
-                    _buildQuoteDetailItem('Tipo de Evento', quote!.eventType),
-                    _buildQuoteDetailItem('Chef Incluido', quote!.hasChef ?? false ? 'Sí' : 'No'),
-                    if (quote!.alergias.isNotEmpty)
-                      _buildQuoteDetailItem('Alergias', quote!.alergias),
-                    if (quote!.preferencia.isNotEmpty)
-                      _buildQuoteDetailItem('Preferencia', quote!.preferencia),
-                    if (quote!.adicionales.isNotEmpty)
-                      _buildQuoteDetailItem('Notas', quote!.adicionales),
+                    _buildQuoteDetailItem('Personas', '${quote.peopleCount ?? 0}', theme),
+                    _buildQuoteDetailItem('Tipo de Evento', quote.eventType, theme),
+                    _buildQuoteDetailItem(
+                      'Chef Incluido',
+                      quote.hasChef ?? false ? 'Sí' : 'No', 
+                      theme
+                    ),
+                    if (quote.alergias.isNotEmpty)
+                      _buildQuoteDetailItem('Alergias', quote.alergias, theme),
+                    if (quote.preferencia.isNotEmpty)
+                      _buildQuoteDetailItem('Preferencia', quote.preferencia, theme),
+                    if (quote.adicionales.isNotEmpty)
+                      _buildQuoteDetailItem('Notas', quote.adicionales, theme),
                   ],
                 ),
               ),
@@ -104,22 +97,132 @@ class QuoteOrderFormView extends StatelessWidget {
                   top: 8,
                   right: 8,
                   child: IconButton(
-                    icon: const Icon(Icons.edit),
+                    icon: Icon(
+                      Icons.edit,
+                      color: colorScheme.primary,
+                    ),
                     onPressed: onEdit,
                   ),
                 ),
             ],
           ),
         ),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: quote!.dishes.isEmpty
-                ? const Center(child: Text('No hay items agregados'))
-                : ItemsList(items: quote!.dishes, isQuote: true),
+        
+        const SizedBox(height: 24),
+        
+        // Quote items summary
+        if (quote.dishes.isNotEmpty)
+          Card(
+            elevation: 0,
+            color: colorScheme.tertiaryContainer.withOpacity(0.3),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Detalle de Productos',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '${quote.dishes.length} ítems',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onTertiaryContainer,
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 8),
+                  
+                  const Divider(),
+                  
+                  // Item list
+                  ...quote.dishes.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final item = entry.value;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: colorScheme.tertiary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Icons.description,
+                                color: colorScheme.tertiary,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.title,
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  'Cantidad: ${item.quantity ?? 1}',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              Icons.delete_outline,
+                              color: colorScheme.error,
+                            ),
+                            onPressed: () {
+                              ref.read(manualQuoteProvider.notifier).removeFromCart(index);
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ],
+              ),
+            ),
           ),
-        ),
+        
+        const SizedBox(height: 24),
+        
+        // Desktop complete quote button
+        if (isDesktop && quote.dishes.isNotEmpty && onConfirm != null)
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: onConfirm,
+              icon: const Icon(Icons.check),
+              label: const Text('Finalizar Cotización'),
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.all(16),
+              ),
+            ),
+          ),
       ],
     );
   }
 }
+
