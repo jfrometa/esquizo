@@ -51,7 +51,7 @@ enum AppRoute {
   onboarding,
   signIn,
   profile,
-  trending,
+  allDishes,
   category,
   details,
   addToOrder,
@@ -216,9 +216,9 @@ List<RouteBase> _getNestedRoutes(String path) {
         ),
         GoRoute(
           path: 'populares',
-          name: AppRoute.trending.name,
+          name: AppRoute.allDishes.name,
           pageBuilder: (context, state) => const MaterialPage(
-            child: Trending(),
+            child: AllDishesScreen(),
           ),
         ),
         GoRoute(
@@ -260,7 +260,7 @@ List<RouteBase> _getNestedRoutes(String path) {
           path: 'platos',
           name: AppRoute.details.name,
           pageBuilder: (context, state) => const MaterialPage(
-            child: DetailsScreen(),
+            child: AllDishesMenuHomeScreen(),
           ),
           routes: [
             GoRoute(

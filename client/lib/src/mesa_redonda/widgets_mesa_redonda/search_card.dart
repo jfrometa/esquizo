@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class SearchCard extends StatefulWidget {
   final ValueChanged<String> onChanged;
@@ -13,7 +12,7 @@ class SearchCard extends StatefulWidget {
   final bool showClearButton;
 
   const SearchCard({
-    Key? key,
+    super.key,
     required this.onChanged,
     this.onSubmitted,
     this.focusNode,
@@ -22,7 +21,7 @@ class SearchCard extends StatefulWidget {
     this.controller,
     this.onClear,
     this.showClearButton = true,
-  }) : super(key: key);
+  });
 
   @override
   State<SearchCard> createState() => _SearchCardState();
@@ -78,79 +77,67 @@ class _SearchCardState extends State<SearchCard> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final bool isDarkMode = theme.brightness == Brightness.dark;
-
-    // Adapt colors based on theme mode
-    final Color cardColor = isDarkMode
-        ? ColorsPaletteRedonda.deepBrown.withOpacity(0.1)
-        : ColorsPaletteRedonda.white;
-
-    final Color hintColor = isDarkMode ? Colors.grey[400]! : Colors.grey[500]!;
-
-    final Color textColor =
-        isDarkMode ? Colors.white : ColorsPaletteRedonda.deepBrown;
 
     return Card(
-      color: cardColor,
+      color: colorScheme.surfaceVariant,
       elevation: 3,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16.0),
       ),
-      child: Container(
-        height: 56,
-        child: TextField(
-          controller: _controller,
-          focusNode: _focusNode,
-          onChanged: widget.onChanged,
-          onSubmitted: widget.onSubmitted,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: textColor,
+      child: TextField(
+        controller: _controller,
+        focusNode: _focusNode,
+        onChanged: widget.onChanged,
+        onSubmitted: widget.onSubmitted,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: colorScheme.onSurface,
+        ),
+        textInputAction: TextInputAction.search,
+        textAlignVertical: TextAlignVertical.center,
+        decoration: InputDecoration(
+          hintText: widget.hintText ?? 'Buscar platos...',
+          hintStyle: theme.textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurfaceVariant,
           ),
-          textInputAction: TextInputAction.search,
-          textAlignVertical: TextAlignVertical.center,
-          decoration: InputDecoration(
-            suffixIconColor: ColorsPaletteRedonda.primary,
-            focusColor: ColorsPaletteRedonda.primary,
-            hintText: widget.hintText ?? 'Buscar platos...',
-            hintStyle: theme.textTheme.bodyMedium?.copyWith(color: hintColor),
-            prefixIcon: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.all(12),
-              child: Icon(
-                Icons.search,
-                color: _focusNode.hasFocus
-                    ? ColorsPaletteRedonda.primary
-                    : Colors.grey[500],
-              ),
+          prefixIcon: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(12),
+            child: Icon(
+              Icons.search,
+              color: _focusNode.hasFocus
+                  ? colorScheme.primary
+                  : colorScheme.onSurfaceVariant,
             ),
-            suffixIcon: _showClearButton
-                ? IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: _clearSearch,
-                    color: Colors.grey[500],
-                    tooltip: 'Clear search',
-                    splashRadius: 20,
-                  )
-                : null,
-            filled: true,
-            fillColor: cardColor,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16.0),
-              borderSide: BorderSide.none,
+          ),
+          suffixIcon: _showClearButton
+              ? IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: _clearSearch,
+                  color: colorScheme.onSurfaceVariant,
+                  tooltip: 'Clear search',
+                  splashRadius: 20,
+                )
+              : null,
+          filled: true,
+          fillColor: colorScheme.surfaceVariant,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.0),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.0),
+            borderSide: BorderSide(
+              color: theme.dividerColor.withOpacity(0.3),
+              width: 0.5,
             ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16.0),
-              borderSide: BorderSide(
-                  color: theme.dividerColor.withOpacity(0.3), width: 0.5),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16.0),
-              borderSide: BorderSide(
-                color: ColorsPaletteRedonda.primary,
-                width: 2.0,
-              ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.0),
+            borderSide: BorderSide(
+              color: colorScheme.primary,
+              width: 2.0,
             ),
           ),
         ),

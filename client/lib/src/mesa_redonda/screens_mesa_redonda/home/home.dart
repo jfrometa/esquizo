@@ -140,7 +140,6 @@ class HomeState extends ConsumerState<MenuHome> {
         ),
         body: Column(
           children: <Widget>[
-            const SizedBox(height: 16.0),
             HomeSearchSection(
               onSearch: _updateSearchQuery,
               recentSearches: recentSearches,
@@ -205,8 +204,9 @@ class _MainHomeView extends ConsumerWidget {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     TextButton(
+                      
                       onPressed: () {
-                        // Navigate to see all featured dishes
+                         context.goNamed(AppRoute.allDishes.name);
                         HapticFeedback.selectionClick();
                       },
                       child: const Text('Ver todos'),

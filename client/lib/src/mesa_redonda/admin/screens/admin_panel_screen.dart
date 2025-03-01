@@ -354,24 +354,7 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
             ),
           ),
           
-          // Padding(
-          //   padding: const EdgeInsets.all(16.0),
-          //   child: Row(
-          //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //     children: [
-          //       Text(
-          //         'Pedidos Activos',
-          //         style: Theme.of(context).textTheme.titleLarge,
-          //       ),
-          //       TextButton.icon(
-          //         icon: const Icon(Icons.receipt_long),
-          //         label: const Text('Ver Todos'),
-          //         onPressed: () => _navigateToSection(context, 'orders'),
-          //       ),
-          //     ],
-          //   ),
-          // ),
-
+   
           SizedBox(
             height: 180,
             child: tables.when(

@@ -5,8 +5,13 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/ordering_
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/widgets_mesa_redonda/trending_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
-class Trending extends ConsumerWidget {
-  const Trending({super.key});
+class AllDishesScreen extends ConsumerWidget {
+  final bool hideIngredients; // New parameter
+  
+  const AllDishesScreen({
+    super.key,
+    this.hideIngredients = false, // Default to false
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,6 +30,7 @@ class Trending extends ConsumerWidget {
           ),
           child: DishGridView(
             dishes: ref.watch(dishProvider),
+            hideIngredients: hideIngredients, // Pass the parameter
           ),
         ),
       ),
@@ -34,23 +40,37 @@ class Trending extends ConsumerWidget {
 
 class DishGridView extends StatelessWidget {
   final List dishes;
+  final bool hideIngredients; // New parameter
 
   const DishGridView({
     super.key,
     required this.dishes,
+    this.hideIngredients = true, // Default to false
   });
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth > 900 ? 3 : 2;
+        // Adjust cross axis count based on screen width
+        final crossAxisCount = constraints.maxWidth > 900 
+            ? 3 
+            : constraints.maxWidth > 600 
+                ? 2 
+                : 1;
+        
+        // Adjust aspect ratio based on screen width
+        final aspectRatio = constraints.maxWidth > 900 
+            ? 0.8 
+            : constraints.maxWidth > 600 
+                ? 0.75 
+                : 0.9;
         
         return GridView.builder(
           itemCount: dishes.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
-            childAspectRatio: 0.75,
+            childAspectRatio: aspectRatio,
             crossAxisSpacing: 10.0,
             mainAxisSpacing: 10.0,
           ),
@@ -67,15 +87,21 @@ class DishGridView extends StatelessWidget {
                 );
               },
               child: RepaintBoundary(
-                child: DishItem(
-                  img: dish["img"],
-                  title: dish["title"],
-                  description: dish["description"],
-                  pricing: dish["pricing"],
-                  ingredients: List<String>.from(dish["ingredients"]),
-                  isSpicy: dish["isSpicy"],
-                  foodType: dish["foodType"],
-                  key: ValueKey('dish_$index'),
+                // Wrap with ClipRect to prevent overflow
+                child: ClipRect(
+                  child: DishItem(
+                    img: dish["img"],
+                    title: dish["title"],
+                    description: dish["description"],
+                    pricing: dish["pricing"],
+                    ingredients: List<String>.from(dish["ingredients"]),
+                    isSpicy: dish["isSpicy"],
+                    foodType: dish["foodType"],
+                    key: ValueKey('dish_$index'),
+                    index: index,
+                    dishData: dish,
+                    hideIngredients: hideIngredients, // Pass the parameter
+                  ),
                 ),
               ),
             );

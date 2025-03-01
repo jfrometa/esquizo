@@ -20,40 +20,12 @@ class HomeDishesSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
-        _buildDishRow(context),
         const SizedBox(height: 10.0),
         _buildDishList(context, ref),
       ],
     );
   }
 
-  Widget _buildDishRow(BuildContext context) {
-    return SizedBox(
-      height: 60.0,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Text(
-            'Populares',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          TextButton(
-            child: const Text(
-              "Ver todos",
-              style: TextStyle(
-                color: ColorsPaletteRedonda.deepBrown1,
-              ),
-            ),
-            onPressed: () {
-              context.goNamed(AppRoute.trending.name);
-            },
-          ),
-        ],
-      ),
-    );
-  }
 
 Widget _buildDishList(BuildContext context, WidgetRef ref) {
   final dishes = ref.watch(dishProvider);
