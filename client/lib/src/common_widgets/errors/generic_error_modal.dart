@@ -1,26 +1,32 @@
-import 'package:starter_architecture_flutter_firebase/src/theme/app_theme.dart';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:starter_architecture_flutter_firebase/src/widgets/button.dart';
-
-class GenericErrorModal extends ModalRoute {
+class GenericErrorModal extends ModalRoute<void> {
   GenericErrorModal({
-    required this.customAppTheme,
-    this.message,
+    required this.message,
     required this.tryAgain,
     required this.leaveFlow,
   });
-  final CustomAppTheme customAppTheme;
+
   final String? message;
   final Function() tryAgain;
   final Function() leaveFlow;
 
   @override
-  bool get barrierDismissible => false;
+  bool get barrierDismissible => true;
 
   @override
-  String? get barrierLabel => 'Error Modal';
+  String? get barrierLabel => null;
+
+  @override
+  Color get barrierColor => Colors.black54;
+
+  @override
+  bool get opaque => false;
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 300);
+
+  @override
+  bool get maintainState => true;
 
   @override
   Widget buildPage(
@@ -28,72 +34,113 @@ class GenericErrorModal extends ModalRoute {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
   ) {
-    return Scaffold(
-      backgroundColor: customAppTheme.colorsPalette.white,
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 92.0, bottom: 32.0),
-              child: SvgPicture.asset('assets/big_icon_error.svg'),
-            ),
-            Text(
-              'An error has ocurred',
-              style: customAppTheme.textStyles.displaySmall,
-              textAlign: TextAlign.center,
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  top: 10,
-                ),
-                child: message != null
-                    ? Text(
-                        message!,
-                        style: customAppTheme.textStyles.bodyLarge,
-                        textAlign: TextAlign.center,
-                      )
-                    : Container(),
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return SafeArea(
+      child: AnimatedBuilder(
+        animation: animation,
+        builder: (context, child) {
+          return Opacity(
+            opacity: animation.value,
+            child: AlertDialog(
+              backgroundColor: colorScheme.surface,
+              surfaceTintColor: colorScheme.surfaceTint,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(28),
               ),
-            ),
-            Button.primary(
-              onPressed: () {
-                Navigator.pop(context);
-                tryAgain();
-              },
-              rounded: true,
-              text: const Text('Let me try again'),
-              wrap: true,
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 32.0, bottom: 40.0),
-              child: TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  leaveFlow();
-                },
-                child: Text(
-                  'Leave flow',
-                  style: customAppTheme.textStyles.button,
+              icon: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: colorScheme.errorContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.error_outline,
+                  color: colorScheme.onErrorContainer,
+                  size: 32,
                 ),
               ),
+              title: Text(
+                'An error has occurred',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              content: message != null
+                  ? Text(
+                      message!,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      textAlign: TextAlign.center,
+                    )
+                  : null,
+              actions: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          leaveFlow();
+                        },
+                        icon: const Icon(Icons.arrow_back),
+                        label: const Text('Go Back'),
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          tryAgain();
+                        },
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Try Again'),
+                        style: FilledButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              actionsPadding: const EdgeInsets.all(24),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
   @override
-  bool get opaque => true;
-
-  @override
-  Duration get transitionDuration => const Duration();
-
-  @override
-  bool get maintainState => true;
-
-  @override
-  Color? get barrierColor => customAppTheme.colorsPalette.white;
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return FadeTransition(
+      opacity: animation,
+      child: ScaleTransition(
+        scale: Tween<double>(begin: 0.9, end: 1.0).animate(
+          CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          ),
+        ),
+        child: child,
+      ),
+    );
+  }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/chat/domain/message.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/app_theme.dart';
+import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class MessageTile extends ConsumerWidget {
   final Message message;
@@ -24,9 +25,7 @@ class MessageTile extends ConsumerWidget {
         margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
         padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
-          color: isOutgoing
-              ? theme.colorsPalette.secondary
-              : theme.colorsPalette.secondarySoft,
+         
           borderRadius: BorderRadius.circular(16.0),
         ),
         child: Column(
@@ -34,9 +33,7 @@ class MessageTile extends ConsumerWidget {
           children: [
             Text(
               message.message,
-              style: theme.textStyles.bodyLarge.copyWith(
-                color: isOutgoing ? Colors.white : Colors.black,
-              ),
+           
             ),
             const SizedBox(height: 10),
             message.imageUrl != null

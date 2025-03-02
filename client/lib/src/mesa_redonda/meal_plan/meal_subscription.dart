@@ -6,7 +6,7 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
-import '../cart/cart_item.dart';
+import '../cart/model/cart_item.dart';
 
 class MealPlansScreen extends ConsumerWidget {
   const MealPlansScreen({super.key});

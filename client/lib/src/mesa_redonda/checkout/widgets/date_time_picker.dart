@@ -9,62 +9,81 @@ class DateTimePicker2 {
     required TextEditingController timeController,
     required Function(String) onValidationUpdate,
   }) async {
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 30)),
-      builder: _buildTheme,
-    );
+    try {
+      final theme = Theme.of(context);
+      final colorScheme = theme.colorScheme;
+      
+      final DateTime? pickedDate = await showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime.now(),
+        lastDate: DateTime.now().add(const Duration(days: 30)),
+        builder: (context, child) {
+          return Theme(
+            data: Theme.of(context).copyWith(
+              useMaterial3: true,
+              colorScheme: colorScheme,
+            ),
+            child: child!,
+          );
+        },
+      );
 
-    if (pickedDate == null) {
-      debugPrint('Selección de fecha cancelada');
-      return;
-    }
+      if (!context.mounted) return;
+      if (pickedDate == null) return;
 
-    final TimeOfDay? pickedTime = await showTimePicker(
-      context: context,
-      initialTime: const TimeOfDay(hour: 9, minute: 0),
-      builder: _buildTheme,
-    );
+      final TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+        builder: (context, child) {
+          return Theme(
+            data: Theme.of(context).copyWith(
+              useMaterial3: true,
+              colorScheme: colorScheme,
+              timePickerTheme: TimePickerThemeData(
+                backgroundColor: colorScheme.surface,
+                hourMinuteTextColor: colorScheme.onSurface,
+                dayPeriodTextColor: colorScheme.onSurface,
+                dialHandColor: colorScheme.primary,
+                dialBackgroundColor: colorScheme.surfaceVariant,
+              ),
+            ),
+            child: child!,
+          );
+        },
+      );
 
-    if (pickedTime == null) {
-      debugPrint('Selección de hora cancelada');
-      return;
-    }
+      if (!context.mounted) return;
+      if (pickedTime == null) return;
 
-    final DateTime selectedDateTime = DateTime(
-      pickedDate.year,
-      pickedDate.month,
-      pickedDate.day,
-      pickedTime.hour,
-      pickedTime.minute,
-    );
+      final DateTime selectedDateTime = DateTime(
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+        pickedTime.hour,
+        pickedTime.minute,
+      );
 
-    final formattedDate = DateFormat('yyyy-MM-dd').format(selectedDateTime);
-    final formattedTime = DateFormat('HH:mm').format(selectedDateTime);
-    dateController.text = '$formattedDate - $formattedTime';
-    timeController.text = formattedTime;
+      final formattedDate = DateFormat('dd MMM yyyy').format(selectedDateTime);
+      final formattedTime = DateFormat('HH:mm').format(selectedDateTime);
+      
+      dateController.text = formattedDate;
+      timeController.text = formattedTime;
 
-    onValidationUpdate('date');
-    onValidationUpdate('time');
-  }
-
-  static Widget _buildTheme(BuildContext context, Widget? child) {
-    return Theme(
-      data: Theme.of(context).copyWith(
-        colorScheme: ColorScheme.light(
-          primary: ColorsPaletteRedonda.primary,
-          onPrimary: ColorsPaletteRedonda.white,
-          onSurface: ColorsPaletteRedonda.deepBrown1,
-        ),
-        textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(
-            foregroundColor: ColorsPaletteRedonda.primary,
+      onValidationUpdate('date');
+      onValidationUpdate('time');
+    } catch (e) {
+      debugPrint('Error in DateTimePicker: $e');
+      // Show error snackbar
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Error al seleccionar fecha y hora'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
           ),
-        ),
-      ),
-      child: child!,
-    );
+        );
+      }
+    }
   }
 }

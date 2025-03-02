@@ -27,8 +27,19 @@ class QuoteCheckout extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+  
     return Column(
       children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            children: [
+              _buildLocationField(context),
+              _buildDateTimePicker(context),
+            ],
+          ),
+        ),
+        paymentMethodDropdown,
         CateringCartItemView(
           order: quote,
           onRemoveFromCart: () =>
@@ -37,6 +48,126 @@ class QuoteCheckout extends ConsumerWidget {
       ],
     );
   }
+  
+  Widget _buildLocationField(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        controller: locationController,
+        readOnly: true,
+        onTap: () => onLocationTap(context, locationController, 'quote'),
+        decoration: InputDecoration(
+          labelText: 'Ubicación del evento',
+          prefixIcon: Icon(Icons.location_on_outlined, color: colorScheme.primary),
+          filled: true,
+          fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
+            borderSide: BorderSide(
+              color: colorScheme.outline,
+              width: 1.0,
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
+            borderSide: BorderSide(
+              color: colorScheme.outline,
+              width: 1.0,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
+            borderSide: BorderSide(
+              color: colorScheme.primary,
+              width: 2.0,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-
+  Widget _buildDateTimePicker(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: dateController,
+              readOnly: true,
+              onTap: () => onDateTimeTap(context, dateController, timeController),
+              decoration: InputDecoration(
+                labelText: 'Fecha del evento',
+                prefixIcon: Icon(Icons.calendar_today, color: colorScheme.primary),
+                filled: true,
+                fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(
+                    color: colorScheme.outline,
+                    width: 1.0,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(
+                    color: colorScheme.outline,
+                    width: 1.0,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(
+                    color: colorScheme.primary,
+                    width: 2.0,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: TextField(
+              controller: timeController,
+              readOnly: true,
+              decoration: InputDecoration(
+                labelText: 'Hora del evento',
+                prefixIcon: Icon(Icons.access_time, color: colorScheme.primary),
+                filled: true,
+                fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(
+                    color: colorScheme.outline,
+                    width: 1.0,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(
+                    color: colorScheme.outline,
+                    width: 1.0,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(
+                    color: colorScheme.primary,
+                    width: 2.0,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

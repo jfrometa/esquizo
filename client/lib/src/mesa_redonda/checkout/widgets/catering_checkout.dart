@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/catering_order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/catering_cart_item_view.dart';
-import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class CateringCheckout extends ConsumerWidget {
   final CateringOrderItem order;
@@ -28,6 +27,9 @@ class CateringCheckout extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       children: [
         Padding(
@@ -49,6 +51,9 @@ class CateringCheckout extends ConsumerWidget {
   }
 
   Widget _buildLocationField(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextField(
@@ -56,23 +61,40 @@ class CateringCheckout extends ConsumerWidget {
         readOnly: true,
         onTap: () => onLocationTap(context, locationController, 'catering'),
         decoration: InputDecoration(
-                labelText: 'Ubicación de entrega',
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(
-                    color: ColorsPaletteRedonda.primary,
-                    width: 1.5,
-                  ),
-                ),
-      ),
-    
+          labelText: 'Ubicación de entrega',
+          prefixIcon: Icon(Icons.location_on_outlined, color: colorScheme.primary),
+          filled: true,
+          fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
+            borderSide: BorderSide(
+              color: colorScheme.outline,
+              width: 1.0,
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
+            borderSide: BorderSide(
+              color: colorScheme.outline,
+              width: 1.0,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
+            borderSide: BorderSide(
+              color: colorScheme.primary,
+              width: 2.0,
+            ),
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildDateTimePicker(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -84,13 +106,28 @@ class CateringCheckout extends ConsumerWidget {
               onTap: () => onDateTimeTap(context, dateController, timeController),
               decoration: InputDecoration(
                 labelText: 'Fecha de entrega',
+                prefixIcon: Icon(Icons.calendar_today, color: colorScheme.primary),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(
-                    color: ColorsPaletteRedonda.primary,
-                    width: 1.5,
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(
+                    color: colorScheme.outline,
+                    width: 1.0,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(
+                    color: colorScheme.outline,
+                    width: 1.0,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(
+                    color: colorScheme.primary,
+                    width: 2.0,
                   ),
                 ),
               ),
@@ -103,13 +140,28 @@ class CateringCheckout extends ConsumerWidget {
               readOnly: true,
               decoration: InputDecoration(
                 labelText: 'Hora de entrega',
+                prefixIcon: Icon(Icons.access_time, color: colorScheme.primary),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(
-                    color: ColorsPaletteRedonda.primary,
-                    width: 1.5,
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(
+                    color: colorScheme.outline,
+                    width: 1.0,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(
+                    color: colorScheme.outline,
+                    width: 1.0,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(
+                    color: colorScheme.primary,
+                    width: 2.0,
                   ),
                 ),
               ),

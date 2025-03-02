@@ -191,283 +191,283 @@ class LocationCaptureBottomSheetState
 
   @override
   Widget build(BuildContext context) {
-    return _buildBottomSheetContent();
-  }
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final size = MediaQuery.of(context).size;
+    final isDesktop = size.width > 1024;
+    final isTablet = size.width > 600 && size.width <= 1024;
 
-  Widget _buildBottomSheetContent() {
     return Container(
-      padding: const EdgeInsets.all(16.0),
-      height: 500, // Adjust height of the BottomSheet
+      constraints: BoxConstraints(
+        maxHeight: size.height * 0.85,
+        maxWidth: isDesktop ? 800 : double.infinity,
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: isDesktop ? 32 : 16,
+        vertical: 24,
+      ),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Top row with title and switch view button
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Confirma tu dirección de envío',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              !_isMapView
-                  ? const SizedBox.shrink()
-                  : IconButton(
-                      icon: Icon(Icons.refresh,
-                          color: ColorsPaletteRedonda.primary),
-                      onPressed: () {
-                        _getCurrentLocation(); // Trigger location refresh
-                      },
-                    ),
-              IconButton(
-                icon: Icon(_isMapView ? Icons.edit : Icons.map,
-                    color: ColorsPaletteRedonda.primary),
-                onPressed: () {
-                  setState(() {
-                    _isMapView = !_isMapView;
-                  });
-                },
-              ),
-            ],
+          _buildHeader(colorScheme, theme),
+          const SizedBox(height: 24),
+          Expanded(
+            child: _isMapView
+                ? _buildMapView(colorScheme, theme)
+                : _buildAddressFormView(colorScheme, theme),
           ),
-          const SizedBox(height: 16),
-
-          // Conditional rendering for map view or form view
-          if (_isMapView) ...[
-            if (_isLoading)
-              const Center(
-                child: SizedBox(
-                  height: 50,
-                  width: 50,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 4.0,
-                    color: ColorsPaletteRedonda.primary,
-                  ),
-                ),
-              )
-            else if (_currentPosition != null) ...[
-              const SizedBox(height: 10),
-              if (_address != null)
-                Text(
-                  'Dirección: $_address',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(color: ColorsPaletteRedonda.primary),
-                ),
-              const SizedBox(height: 10),
-              if (_currentPosition != null)
-                // Full-Screen Map
-                SizedBox(
-                  // Make sure the container takes all available space
-                  width: double.infinity,
-                  height: 300,
-                  child: GoogleMap(
-                    onMapCreated: (GoogleMapController controller) {
-                      _mapController = controller;
-                    },
-                    initialCameraPosition: CameraPosition(
-                      target: _currentPosition!,
-                      zoom: 16.0,
-                    ),
-                    myLocationEnabled: true,
-                    myLocationButtonEnabled: true,
-                    markers: {
-                      Marker(
-                        markerId: const MarkerId('current_location'),
-                        position: _currentPosition!,
-                      ),
-                    },
-                  ),
-                ),
-            ] else
-              const Text('Ubicación no disponible'),
-          ] else ...[
-            _buildAddressForm(),
-          ],
-          const SizedBox(height: 16),
-          const Spacer(),
-          // Row with equal-sized buttons
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Expanded(
-              //   child: TextButton(
-              //     style: ElevatedButton.styleFrom(
-              //       backgroundColor: Colors.yellow[800],
-              //       foregroundColor: Colors.white,
-              //     ),
-              //     onPressed: () {
-              //       if (_isMapView) {
-              //         _getCurrentLocation();
-              //       } else {
-              //         _clearForm();
-              //       }
-              //     },
-              //     child: Text(
-              //       _isMapView ? 'Reintentar' : 'Limpiar',
-              //       style: Theme.of(context)
-              //           .textTheme
-              //           .bodyMedium
-              //           ?.copyWith(color: ColorsPaletteRedonda.white),
-              //     ),
-              //   ),
-              // ),
-              // const SizedBox(width: 10), // Spacing between buttons
-
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_isMapView) {
-                      if (_latitude != null &&
-                          _longitude != null &&
-                          _address != null) {
-                        widget.onLocationCaptured(
-                            _latitude!, _longitude!, _address!);
-                        Navigator.of(context).pop();
-                      }
-                    } else {
-                      _submitForm();
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorsPaletteRedonda.deepBrown1,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Aceptar'),
-                ),
-              ),
-              const SizedBox(width: 10), // Spacing between buttons
-              Expanded(
-                child: TextButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red[900],
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Cancelar'),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
+          _buildActionButtons(colorScheme, theme),
         ],
       ),
     );
   }
 
-  Widget _buildAddressForm() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildHeader(ColorScheme colorScheme, ThemeData theme) {
+    return Row(
       children: [
-        TextField(
-          controller: _addressController,
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium
-              ?.copyWith(color: ColorsPaletteRedonda.primary),
-          decoration: InputDecoration(
-            labelText: 'Dirección',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
+        Expanded(
+          child: Text(
+            'Confirma tu dirección de envío',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
             ),
-            prefixIcon: const Icon(Icons.location_on),
-            focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(
-                  color: ColorsPaletteRedonda.primary, width: 2.0),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            labelStyle: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: ColorsPaletteRedonda.deepBrown1),
           ),
         ),
-        const SizedBox(height: 10),
-        TextField(
-          controller: _floorController,
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium
-              ?.copyWith(color: ColorsPaletteRedonda.primary),
-          decoration: InputDecoration(
-            labelText: 'Piso',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            prefixIcon: const Icon(Icons.layers),
-            focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(
-                  color: ColorsPaletteRedonda.primary, width: 2.0),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            labelStyle: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: ColorsPaletteRedonda.deepBrown1),
+        if (_isMapView)
+          IconButton(
+            icon: Icon(Icons.my_location, color: colorScheme.primary),
+            onPressed: _getCurrentLocation,
+            tooltip: 'Obtener ubicación actual',
           ),
-        ),
-        const SizedBox(height: 10),
-        TextField(
-          controller: _cityController,
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium
-              ?.copyWith(color: ColorsPaletteRedonda.primary),
-          decoration: InputDecoration(
-            labelText: 'Ciudad',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            prefixIcon: const Icon(Icons.location_city),
-            focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(
-                  color: ColorsPaletteRedonda.primary, width: 2.0),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            labelStyle: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: ColorsPaletteRedonda.deepBrown1),
+        IconButton(
+          icon: Icon(
+            _isMapView ? Icons.edit : Icons.map,
+            color: colorScheme.primary,
           ),
+          onPressed: () => setState(() => _isMapView = !_isMapView),
+          tooltip: _isMapView ? 'Editar manualmente' : 'Ver mapa',
         ),
-        const SizedBox(height: 10),
-        TextField(
-          controller: _noteController,
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium
-              ?.copyWith(color: ColorsPaletteRedonda.primary),
-          decoration: InputDecoration(
-            labelText: 'Nota para la entrega',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
+      ],
+    );
+  }
+
+  Widget _buildMapView(ColorScheme colorScheme, ThemeData theme) {
+    if (_isLoading) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(color: colorScheme.primary),
+            const SizedBox(height: 16),
+            Text(
+              'Obteniendo ubicación...',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
-            prefixIcon: const Icon(Icons.note),
-            focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(
-                  color: ColorsPaletteRedonda.primary, width: 2.0),
-              borderRadius: BorderRadius.circular(10),
+          ],
+        ),
+      );
+    }
+
+    if (_currentPosition == null) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.location_off, size: 48, color: colorScheme.error),
+            const SizedBox(height: 16),
+            Text(
+              'Ubicación no disponible',
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: colorScheme.error,
+              ),
             ),
-            labelStyle: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: ColorsPaletteRedonda.deepBrown1),
+            const SizedBox(height: 8),
+            FilledButton.icon(
+              onPressed: _getCurrentLocation,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Reintentar'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        if (_address != null)
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: colorScheme.secondaryContainer,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.location_on,
+                  color: colorScheme.onSecondaryContainer,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    _address!,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSecondaryContainer,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        const SizedBox(height: 16),
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: GoogleMap(
+              onMapCreated: (controller) => _mapController = controller,
+              initialCameraPosition: CameraPosition(
+                target: _currentPosition!,
+                zoom: 16.0,
+              ),
+              myLocationEnabled: true,
+              myLocationButtonEnabled: false,
+              zoomControlsEnabled: false,
+              markers: {
+                Marker(
+                  markerId: const MarkerId('current_location'),
+                  position: _currentPosition!,
+                  infoWindow: InfoWindow(title: _address),
+                ),
+              },
+            ),
           ),
         ),
       ],
     );
   }
 
-  void _clearForm() {
-    _addressController.clear();
-    _floorController.clear();
-    _cityController.clear();
-    _noteController.clear();
+  Widget _buildAddressFormView(ColorScheme colorScheme, ThemeData theme) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildTextField(
+            controller: _addressController,
+            label: 'Dirección',
+            icon: Icons.location_on,
+            colorScheme: colorScheme,
+            theme: theme,
+            required: true,
+          ),
+          const SizedBox(height: 16),
+          _buildTextField(
+            controller: _floorController,
+            label: 'Piso / Apartamento',
+            icon: Icons.layers,
+            colorScheme: colorScheme,
+            theme: theme,
+          ),
+          const SizedBox(height: 16),
+          _buildTextField(
+            controller: _cityController,
+            label: 'Ciudad',
+            icon: Icons.location_city,
+            colorScheme: colorScheme,
+            theme: theme,
+            required: true,
+          ),
+          const SizedBox(height: 16),
+          _buildTextField(
+            controller: _noteController,
+            label: 'Instrucciones de entrega',
+            icon: Icons.note,
+            colorScheme: colorScheme,
+            theme: theme,
+            maxLines: 3,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    required ColorScheme colorScheme,
+    required ThemeData theme,
+    bool required = false,
+    int maxLines = 1,
+  }) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      style: theme.textTheme.bodyLarge?.copyWith(
+        color: colorScheme.onSurface,
+      ),
+      decoration: InputDecoration(
+        labelText: required ? '$label *' : label,
+        prefixIcon: Icon(icon, color: colorScheme.primary),
+        filled: true,
+        fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: colorScheme.outline),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: colorScheme.primary, width: 2),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(ColorScheme colorScheme, ThemeData theme) {
+    return Row(
+      children: [
+        Expanded(
+          child: FilledButton.icon(
+            onPressed: () {
+              if (_isMapView) {
+                if (_latitude != null && _longitude != null && _address != null) {
+                  widget.onLocationCaptured(_latitude!, _longitude!, _address!);
+                  Navigator.of(context).pop();
+                }
+              } else {
+                _submitForm();
+              }
+            },
+            icon: const Icon(Icons.check),
+            label: const Text('Confirmar'),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(double.infinity, 48),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(Icons.close),
+            label: const Text('Cancelar'),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 48),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

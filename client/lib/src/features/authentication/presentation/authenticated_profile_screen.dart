@@ -6,11 +6,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/constants/app_sizes.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/data/firebase_auth_repository.dart';
-import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/order_history_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/subscription_list_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/admin/services/admin_management_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering/catering_card.dart';
-import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
+import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/location_management/locations_management_section.dart';
+import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/profile/profile_edit_section.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/theming_selection/theming_setting_section.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/admin/services/admin_management_service.dart'; 
 
 class AuthenticatedProfileScreen extends ConsumerStatefulWidget {
   final User user;
@@ -26,8 +25,6 @@ class _AuthenticatedProfileScreenState
     extends ConsumerState<AuthenticatedProfileScreen>
     with SingleTickerProviderStateMixin {
   late final ScrollController _scrollController;
-  late final TabController _tabController;
-
   bool _isTabBarVisible = true;
   bool _isSigningOut = false;
 
@@ -37,8 +34,6 @@ class _AuthenticatedProfileScreenState
 
     // Initialize controllers with proper lifecycle management
     _scrollController = ScrollController()..addListener(_scrollListener);
-
-    _tabController = TabController(length: 2, vsync: this);
   }
 
   void _scrollListener() {
@@ -73,18 +68,22 @@ class _AuthenticatedProfileScreenState
       await ref.read(firebaseAuthProvider).signOut();
       
       // Safely navigate back to the first route
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      if (mounted) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
     } catch (e) {
       // Enhanced error handling
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text(
-              'Error al cerrar sesión. Por favor, intente nuevamente.'),
-          
-          duration: const Duration(seconds: 2),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+                'Error al cerrar sesión. Por favor, intente nuevamente.'),
+            
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     } finally {
       // Always reset the signing out state
       if (mounted) {
@@ -95,44 +94,21 @@ class _AuthenticatedProfileScreenState
 
   @override
   Widget build(BuildContext context) {
-    const tabTitles = [
-      'Mis Subscripciones',
-      'Historial de Ordenes',
-    ];
-
-    // Precompute max tab width for consistency
-    final double maxTabWidth = TabUtils.calculateMaxTabWidth(
-      context: context,
-      tabTitles: tabTitles,
-      extraWidth: 10.0,
-    );
-
-    return DefaultTabController(
-      length: tabTitles.length,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Mi Perfil'),
-          forceMaterialTransparency: true,
-          actions: [
-            _buildSignOutButton(context),
-          ],
-        ),
-        body: Column(
-          children: [
-            _buildUserInfo(context),
-            _buildAnimatedTabBar(context, tabTitles, maxTabWidth),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  const SubscriptionsList(),
-                  const OrderHistoryList(),
-                ],
-              ),
-            ),
-          ],
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Mi Perfil'),
+        forceMaterialTransparency: true,
+        actions: [
+          _buildSignOutButton(context),
+        ],
+      ),
+      body: Column(
+        children: [
+          _buildUserInfo(context),
+          Expanded(
+            child: SettingsTabContent(user: widget.user),
+          ),
+        ],
       ),
     );
   }
@@ -147,65 +123,6 @@ class _AuthenticatedProfileScreenState
           : Icon(Icons.logout, color: Theme.of(context).colorScheme.error),
       onPressed: _isSigningOut ? null : () => _signOut(context, ref),
       tooltip: 'Cerrar Sesión',
-    );
-  }
-
-  Widget _buildAnimatedTabBar(
-      BuildContext context, List<String> tabTitles, double maxTabWidth) {
-    final theme = Theme.of(context);
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-      height: _isTabBarVisible ? 56.0 : 0.0,
-      child: _isTabBarVisible
-          ? Material(
-              color: theme.colorScheme.surface,
-              elevation: 1,
-              child: TabBar(
-                controller: _tabController,
-                dividerColor: Colors.transparent,
-                indicatorColor: theme.colorScheme.primary,
-                isScrollable: true,
-                labelStyle: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-                unselectedLabelStyle: theme.textTheme.titleSmall,
-                labelColor: theme.colorScheme.onPrimary,
-                unselectedLabelColor: theme.colorScheme.primary,
-                indicatorSize: TabBarIndicatorSize.tab,
-                indicator: TabIndicator(
-                  color: theme.colorScheme.primary,
-                  radius: 16.0,
-                ),
-                tabs: tabTitles.map((title) {
-                  return Container(
-                    width: maxTabWidth,
-                    alignment: Alignment.center,
-                    child: Tab(text: title),
-                  );
-                }).toList(),
-              ),
-            )
-          : null,
-    );
-  }
-
-  Widget _buildScrollableContent(Widget child) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        if (notification is UserScrollNotification) {
-          _scrollListener();
-        }
-        return false;
-      },
-      child: SingleChildScrollView(
-        controller: _scrollController,
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Padding(
-          padding: const EdgeInsets.all(Sizes.p8),
-          child: child,
-        ),
-      ),
     );
   }
 
@@ -234,6 +151,14 @@ class _AuthenticatedProfileScreenState
                     widget.user.email ?? 'Correo no disponible',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
+                  // Show phone number if available
+                  if (widget.user.phoneNumber != null) ...[
+                    const SizedBox(height: Sizes.p4),
+                    Text(
+                      widget.user.phoneNumber!,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -271,7 +196,103 @@ class _AuthenticatedProfileScreenState
   @override
   void dispose() {
     _scrollController.dispose();
-    _tabController.dispose();
     super.dispose();
+  }
+}
+
+// A component for the Settings tab content
+class SettingsTabContent extends ConsumerStatefulWidget {
+  final User user;
+
+  const SettingsTabContent({
+    required this.user,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  ConsumerState<SettingsTabContent> createState() => _SettingsTabContentState();
+}
+
+class _SettingsTabContentState extends ConsumerState<SettingsTabContent> {
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: [
+        // Profile Edit Section
+        ProfileEditSection(user: widget.user),
+        const SizedBox(height: 16),
+        // Saved Locations Section
+        LocationsSection(userId: widget.user.uid),
+        const SizedBox(height: 16),
+        // Theme Settings Section
+        const ThemeSettingsSection(),
+      ],
+    );
+  }
+}
+
+// TabIndicator class for consistent styling
+class TabIndicator extends Decoration {
+  final Color color;
+  final double radius;
+
+  const TabIndicator({
+    required this.color,
+    required this.radius,
+  });
+
+  @override
+  BoxPainter createBoxPainter([VoidCallback? onChanged]) {
+    return _TabIndicatorPainter(color: color, radius: radius);
+  }
+}
+
+class _TabIndicatorPainter extends BoxPainter {
+  final Color color;
+  final double radius;
+
+  _TabIndicatorPainter({
+    required this.color,
+    required this.radius,
+  });
+
+  @override
+  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+    final rect = offset & configuration.size!;
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, Radius.circular(radius)),
+      paint,
+    );
+  }
+}
+
+// TabUtils for calculating tab width
+class TabUtils {
+  static double calculateMaxTabWidth({
+    required BuildContext context,
+    required List<String> tabTitles,
+    double extraWidth = 48.0, // Extra padding
+  }) {
+    final textTheme = Theme.of(context).textTheme.titleSmall;
+    final textPainter = TextPainter(
+      textDirection: TextDirection.ltr,
+    );
+
+    double maxWidth = 0;
+    for (final title in tabTitles) {
+      textPainter.text = TextSpan(
+        text: title,
+        style: textTheme,
+      );
+      textPainter.layout();
+      maxWidth = maxWidth > textPainter.width ? maxWidth : textPainter.width;
+    }
+
+    return maxWidth + extraWidth;
   }
 }

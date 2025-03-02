@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/model/cart_item.dart';
 
 class MealSubscriptionItemView extends StatelessWidget {
   final CartItem item;
@@ -17,78 +17,168 @@ class MealSubscriptionItemView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isExpiringSoon = item.expirationDate.difference(DateTime.now()).inDays <= 7;
+
     return Card(
       margin: const EdgeInsets.all(8.0),
-      elevation: 3,
+      elevation: 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with title and remove button
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Text(
                     item.title,
-                    style: const TextStyle(
-                      fontSize: 20,
+                    style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: ColorsPaletteRedonda.primary,
+                      color: colorScheme.primary,
                     ),
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete_forever,size: 20, color: Colors.red),
+                  icon: Icon(
+                    Icons.delete_outline,
+                    color: colorScheme.error,
+                  ),
                   onPressed: onRemoveFromCart,
+                  tooltip: 'Eliminar suscripción',
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            // Description
-            Text(item.description),
-            const SizedBox(height: 8),
-            // Remaining Meals and Expiration Date
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Comidas restantes: ${item.remainingMeals} / ${item.totalMeals}',
-                  style: Theme.of(context).textTheme.bodyMedium,
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceVariant.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                item.description,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
                 ),
-                Text(
-                  'Expira: ${DateFormat('dd/MM/yyyy').format(item.expirationDate)}',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.red,
-                      ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primaryContainer.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.restaurant_menu,
+                          size: 20,
+                          color: colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${item.remainingMeals} / ${item.totalMeals}',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'comidas',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: isExpiringSoon
+                          ? colorScheme.errorContainer.withOpacity(0.3)
+                          : colorScheme.surfaceVariant.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.event_outlined,
+                          size: 20,
+                          color: isExpiringSoon
+                              ? colorScheme.error
+                              : colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            DateFormat('dd MMM yyyy').format(item.expirationDate),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: isExpiringSoon
+                                  ? colorScheme.error
+                                  : colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            // Price and Action Button to consume a meal
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Precio: \$${item.pricing}',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: ColorsPaletteRedonda.primary,
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceVariant.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.payments_outlined,
+                        size: 20,
+                        color: colorScheme.primary,
                       ),
-                ),
-                // ElevatedButton(
-                //   onPressed: onConsumeMeal,
-                //   style: ElevatedButton.styleFrom(
-                //     backgroundColor: ColorsPaletteRedonda.primary,
-                //     minimumSize: const Size(120, 36),
-                //   ),
-                //   child: const Text('Ordenar'),
-                // ),
-              ],
+                      const SizedBox(width: 8),
+                      Text(
+                        'RD\$ ${item.pricing}',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  FilledButton.icon(
+                    onPressed: onConsumeMeal,
+                    icon: const Icon(Icons.restaurant),
+                    label: const Text('Ordenar'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

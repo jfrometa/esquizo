@@ -8,10 +8,11 @@ import 'package:starter_architecture_flutter_firebase/src/features/authenticatio
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 /// A dialog to collect contact information or use existing authenticated user data.
-/// Supports three modes:
+/// Supports four modes:
 /// 1. Guest mode: Collects contact info without registration
 /// 2. Registration mode: Creates a new user account
-/// 3. Authenticated mode: Uses existing user info with option to edit
+/// 3. Login mode: Allows existing users to log in
+/// 4. Authenticated mode: Uses existing user info with option to edit
 class ContactInfoDialog {
   /// Shows the contact info dialog
   /// Returns a map with user information or null if canceled
@@ -23,7 +24,8 @@ class ContactInfoDialog {
     );
   }
 }
-
+  // UI state
+  enum FormMode { contact, register, login }
 /// The internal widget for the contact info dialog content
 class _ContactInfoDialogContent extends ConsumerStatefulWidget {
   final BuildContext dialogContext;
@@ -41,6 +43,10 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+  
+  // Login form controllers
+  final TextEditingController _loginEmailController = TextEditingController();
+  final TextEditingController _loginPasswordController = TextEditingController();
 
   // Form validation state
   bool _isNameValid = true;
@@ -48,9 +54,11 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
   bool _isEmailValid = true;
   bool _isPasswordValid = true;
   bool _isConfirmPasswordValid = true;
+  bool _isLoginEmailValid = true;
+  bool _isLoginPasswordValid = true;
   
-  // UI state
-  bool _showRegistrationForm = false;
+
+  FormMode _formMode = FormMode.contact;
   bool _isEditingInfo = false;
   bool _isProcessing = false;
   String? _errorMessage;
@@ -103,6 +111,8 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _loginEmailController.dispose();
+    _loginPasswordController.dispose();
     super.dispose();
   }
 
@@ -153,7 +163,7 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
               if (isUserLoggedIn && !_isEditingInfo)
                 _buildLoggedInBanner(user!, successColor, textColor, subtitleColor, isDarkMode),
               
-              // Toggle between contact info and registration (only for guests)
+              // Toggle between form modes (only for guests)
               if (!isUserLoggedIn && !_isEditingInfo)
                 _buildFormToggle(dividerColor, subtitleColor),
               
@@ -186,10 +196,6 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
                 user, 
                 subtitleColor,
               ),
-              
-              // Login option for contact-only users
-              if (!isUserLoggedIn && !_showRegistrationForm)
-                _buildLoginOption(subtitleColor),
             ],
           ),
         ),
@@ -199,25 +205,43 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
 
   /// Builds the header section with title and close button
   Widget _buildHeader(bool isUserLoggedIn, Color textColor, Color subtitleColor) {
+    IconData headerIcon;
+    String headerTitle;
+    
+    if (isUserLoggedIn && !_isEditingInfo) {
+      headerIcon = Icons.person;
+      headerTitle = 'Confirmar Información';
+    } else if (_isEditingInfo) {
+      headerIcon = Icons.edit;
+      headerTitle = 'Editar Información';
+    } else {
+      switch (_formMode) {
+        case FormMode.contact:
+          headerIcon = Icons.contact_mail_outlined;
+          headerTitle = 'Información de Contacto';
+          break;
+        case FormMode.register:
+          headerIcon = Icons.app_registration;
+          headerTitle = 'Registro de Usuario';
+          break;
+        case FormMode.login:
+          headerIcon = Icons.login;
+          headerTitle = 'Iniciar Sesión';
+          break;
+      }
+    }
+    
     return Row(
       children: [
         Icon(
-          isUserLoggedIn && !_isEditingInfo 
-              ? Icons.person
-              : _showRegistrationForm 
-                  ? Icons.app_registration 
-                  : Icons.contact_mail_outlined,
+          headerIcon,
           color: ColorsPaletteRedonda.primary,
           size: 24,
         ),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
-            isUserLoggedIn && !_isEditingInfo
-                ? 'Confirmar Información'
-                : _showRegistrationForm 
-                    ? 'Registro de Usuario' 
-                    : 'Información de Contacto',
+            headerTitle,
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 18,
@@ -302,82 +326,151 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
     );
   }
 
-  /// Builds the toggle between contact info and registration
+  /// Builds the toggle between form modes
   Widget _buildFormToggle(Color dividerColor, Color subtitleColor) {
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: InkWell(
-            onTap: () {
-              setState(() {
-                _showRegistrationForm = false;
-                _errorMessage = null;
-              });
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: !_showRegistrationForm 
-                        ? ColorsPaletteRedonda.primary 
-                        : dividerColor,
-                    width: !_showRegistrationForm ? 2 : 1,
+        Row(
+          children: [
+            // Contact Info Tab
+            Expanded(
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    _formMode = FormMode.contact;
+                    _errorMessage = null;
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: _formMode == FormMode.contact 
+                            ? ColorsPaletteRedonda.primary 
+                            : dividerColor,
+                        width: _formMode == FormMode.contact ? 2 : 1,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              child: Text(
-                'Información de Contacto',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: !_showRegistrationForm 
-                      ? ColorsPaletteRedonda.primary 
-                      : subtitleColor,
-                  fontWeight: !_showRegistrationForm 
-                      ? FontWeight.bold 
-                      : FontWeight.normal,
+                  child: Text(
+                    'Contacto',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: _formMode == FormMode.contact 
+                          ? ColorsPaletteRedonda.primary 
+                          : subtitleColor,
+                      fontWeight: _formMode == FormMode.contact 
+                          ? FontWeight.bold 
+                          : FontWeight.normal,
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
-        Expanded(
-          child: InkWell(
-            onTap: () {
-              setState(() {
-                _showRegistrationForm = true;
-                _errorMessage = null;
-              });
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: _showRegistrationForm 
-                        ? ColorsPaletteRedonda.primary 
-                        : dividerColor,
-                    width: _showRegistrationForm ? 2 : 1,
+            
+            // Login Tab
+            Expanded(
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    _formMode = FormMode.login;
+                    _errorMessage = null;
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: _formMode == FormMode.login 
+                            ? ColorsPaletteRedonda.primary 
+                            : dividerColor,
+                        width: _formMode == FormMode.login ? 2 : 1,
+                      ),
+                    ),
+                  ),
+                  child: Text(
+                    'Iniciar Sesión',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: _formMode == FormMode.login 
+                          ? ColorsPaletteRedonda.primary 
+                          : subtitleColor,
+                      fontWeight: _formMode == FormMode.login 
+                          ? FontWeight.bold 
+                          : FontWeight.normal,
+                    ),
                   ),
                 ),
               ),
-              child: Text(
-                'Registrarse',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: _showRegistrationForm 
-                      ? ColorsPaletteRedonda.primary 
-                      : subtitleColor,
-                  fontWeight: _showRegistrationForm 
-                      ? FontWeight.bold 
-                      : FontWeight.normal,
+            ),
+            
+            // Register Tab
+            Expanded(
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    _formMode = FormMode.register;
+                    _errorMessage = null;
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: _formMode == FormMode.register 
+                            ? ColorsPaletteRedonda.primary 
+                            : dividerColor,
+                        width: _formMode == FormMode.register ? 2 : 1,
+                      ),
+                    ),
+                  ),
+                  child: Text(
+                    'Registrarse',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: _formMode == FormMode.register 
+                          ? ColorsPaletteRedonda.primary 
+                          : subtitleColor,
+                      fontWeight: _formMode == FormMode.register 
+                          ? FontWeight.bold 
+                          : FontWeight.normal,
+                    ),
+                  ),
                 ),
               ),
+            ),
+          ],
+        ),
+        
+        // Subtitle for the selected mode
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Text(
+            _getFormModeSubtitle(),
+            style: TextStyle(
+              fontSize: 13,
+              fontStyle: FontStyle.italic,
+              color: subtitleColor,
             ),
           ),
         ),
       ],
     );
+  }
+
+  /// Get subtitle text based on form mode
+  String _getFormModeSubtitle() {
+    switch (_formMode) {
+      case FormMode.contact:
+        return 'Complete su pedido sin crear una cuenta';
+      case FormMode.register:
+        return 'Cree una cuenta para facilitar sus compras futuras';
+      case FormMode.login:
+        return 'Acceda a su cuenta existente';
+    }
   }
 
   /// Builds error message container
@@ -423,25 +516,45 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
         subtitleColor,
         isDarkMode,
       );
-    } else if (_showRegistrationForm) {
-      // Show registration form
-      return _buildRegistrationForm(
-        textColor,
-        subtitleColor,
-        fieldBorderColor,
-        fieldFillColor,
-        isDarkMode,
-      );
-    } else {
-      // Show contact info form
+    } else if (isUserLoggedIn && _isEditingInfo) {
+      // Show edit form for logged-in users
       return _buildContactForm(
         textColor,
         subtitleColor,
         fieldBorderColor,
         fieldFillColor,
         isDarkMode,
-        isUserLoggedIn && _isEditingInfo,
+        true, // isEditing = true
       );
+    } else {
+      // Show form based on selected mode
+      switch (_formMode) {
+        case FormMode.contact:
+          return _buildContactForm(
+            textColor,
+            subtitleColor,
+            fieldBorderColor,
+            fieldFillColor,
+            isDarkMode,
+            false, // isEditing = false
+          );
+        case FormMode.register:
+          return _buildRegistrationForm(
+            textColor,
+            subtitleColor,
+            fieldBorderColor,
+            fieldFillColor,
+            isDarkMode,
+          );
+        case FormMode.login:
+          return _buildLoginForm(
+            textColor,
+            subtitleColor,
+            fieldBorderColor,
+            fieldFillColor,
+            isDarkMode,
+          );
+      }
     }
   }
 
@@ -610,6 +723,76 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
           fieldFillColor: fieldFillColor,
           isDarkMode: isDarkMode,
           readOnly: isEditing, // Make email readonly when editing profile
+        ),
+      ],
+    );
+  }
+
+  /// Builds the login form
+  Widget _buildLoginForm(
+    Color textColor,
+    Color subtitleColor,
+    Color fieldBorderColor,
+    Color fieldFillColor,
+    bool isDarkMode,
+  ) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildTextField(
+          controller: _loginEmailController,
+          label: 'Correo electrónico',
+          hint: 'ejemplo@correo.com',
+          icon: Icons.email_outlined,
+          isValid: _isLoginEmailValid,
+          errorText: 'Por favor ingrese un correo válido',
+          inputType: TextInputType.emailAddress,
+          textColor: textColor,
+          subtitleColor: subtitleColor,
+          fieldBorderColor: fieldBorderColor,
+          fieldFillColor: fieldFillColor,
+          isDarkMode: isDarkMode,
+        ),
+        const SizedBox(height: 16),
+        _buildTextField(
+          controller: _loginPasswordController,
+          label: 'Contraseña',
+          hint: 'Su contraseña',
+          icon: Icons.lock_outline,
+          isValid: _isLoginPasswordValid,
+          errorText: 'Por favor ingrese su contraseña',
+          inputType: TextInputType.visiblePassword,
+          obscureText: true,
+          textColor: textColor,
+          subtitleColor: subtitleColor,
+          fieldBorderColor: fieldBorderColor,
+          fieldFillColor: fieldFillColor,
+          isDarkMode: isDarkMode,
+        ),
+        const SizedBox(height: 16),
+        // Password recovery link
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton(
+            onPressed: () {
+              // Show password reset dialog
+              _showPasswordResetDialog(context);
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: ColorsPaletteRedonda.primary,
+              padding: EdgeInsets.zero,
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(
+              '¿Olvidó su contraseña?',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -878,54 +1061,133 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
                   ),
                 )
               : Text(
-                  isUserLoggedIn && !_isEditingInfo
-                      ? 'Continuar'
-                      : _isEditingInfo
-                          ? 'Guardar Cambios'
-                          : _showRegistrationForm 
-                              ? 'Registrarse' 
-                              : 'Confirmar',
+                  _getActionButtonText(isUserLoggedIn),
                 ),
         ),
       ],
     );
   }
 
-  /// Builds the "Already have an account?" option
-  Widget _buildLoginOption(Color subtitleColor) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            '¿Ya tiene una cuenta?',
-            style: TextStyle(
-              color: subtitleColor,
-              fontSize: 14,
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              // Navigate to sign in screen
-              Navigator.of(context).pop();
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const CustomSignInScreen(),
-                ),
-              );
-            },
-            child: Text(
-              'Iniciar sesión',
-              style: TextStyle(
-                color: ColorsPaletteRedonda.primary,
-                fontWeight: FontWeight.bold,
+  /// Get the appropriate text for the main action button
+  String _getActionButtonText(bool isUserLoggedIn) {
+    if (isUserLoggedIn && !_isEditingInfo) {
+      return 'Continuar';
+    } else if (_isEditingInfo) {
+      return 'Guardar Cambios';
+    } else {
+      switch (_formMode) {
+        case FormMode.contact:
+          return 'Confirmar';
+        case FormMode.register:
+          return 'Registrarse';
+        case FormMode.login:
+          return 'Iniciar Sesión';
+      }
+    }
+  }
+
+  /// Shows a dialog to reset password
+  Future<void> _showPasswordResetDialog(BuildContext context) async {
+    final TextEditingController emailController = TextEditingController();
+    bool isProcessing = false;
+    String? errorMessage;
+    
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Restablecer Contraseña'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Ingrese su correo electrónico y le enviaremos un enlace para restablecer su contraseña.',
+                    style: TextStyle(
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: emailController,
+                    decoration: InputDecoration(
+                      labelText: 'Correo electrónico',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.email_outlined),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  if (errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        errorMessage!,
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                ],
               ),
-            ),
-          ),
-        ],
-      ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text('Cancelar'),
+                ),
+                ElevatedButton(
+                  onPressed: isProcessing
+                      ? null
+                      : () async {
+                          if (emailController.text.isEmpty) {
+                            setState(() {
+                              errorMessage = 'Por favor ingrese su correo electrónico';
+                            });
+                            return;
+                          }
+                          
+                          setState(() {
+                            isProcessing = true;
+                            errorMessage = null;
+                          });
+                          
+                          try {
+                            await FirebaseAuth.instance.sendPasswordResetEmail(
+                              email: emailController.text,
+                            );
+                            Navigator.of(context).pop();
+                            
+                            // Show success message
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Hemos enviado un enlace para restablecer su contraseña'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          } catch (e) {
+                            setState(() {
+                              errorMessage = _getFirebaseErrorMessage(e);
+                              isProcessing = false;
+                            });
+                          }
+                        },
+                  child: isProcessing
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text('Enviar'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
@@ -942,47 +1204,161 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
       return;
     }
     
-    // Validate form fields
-    setState(() {
-      _isNameValid = _nameController.text.trim().isNotEmpty;
-      _isPhoneValid = _validatePhone(_phoneController.text);
-      _isEmailValid = _validateEmail(_emailController.text);
-      
-      if (_showRegistrationForm) {
-        _isPasswordValid = _passwordController.text.length >= 6;
-        _isConfirmPasswordValid = 
-            _passwordController.text == _confirmPasswordController.text;
-      }
-    });
-
-    // If any validation fails, return early
-    if (!_isNameValid || !_isPhoneValid || !_isEmailValid || 
-        (_showRegistrationForm && (!_isPasswordValid || !_isConfirmPasswordValid))) {
-      return;
-    }
-
     setState(() {
       _isProcessing = true;
       _errorMessage = null;
     });
-
+    
     try {
-      // Handle based on current state
+      // Handle based on current state/mode
       if (isUserLoggedIn && _isEditingInfo) {
         await _updateUserProfile(user!);
-      } else if (_showRegistrationForm) {
-        await _registerNewUser();
       } else {
-        // Just using contact info without registration
-        Navigator.of(widget.dialogContext).pop({
-          'name': _nameController.text,
-          'phone': _phoneController.text,
-          'email': _emailController.text,
-        });
+        switch (_formMode) {
+          case FormMode.contact:
+            // Validate contact form
+            if (!_validateContactForm()) {
+              setState(() => _isProcessing = false);
+              return;
+            }
+            
+            // Just using contact info without registration
+            Navigator.of(widget.dialogContext).pop({
+              'name': _nameController.text,
+              'phone': _phoneController.text,
+              'email': _emailController.text,
+            });
+            break;
+            
+          case FormMode.register:
+            // Validate registration form
+            if (!_validateRegistrationForm()) {
+              setState(() => _isProcessing = false);
+              return;
+            }
+            
+            await _registerNewUser();
+            break;
+            
+          case FormMode.login:
+            // Validate login form
+            if (!_validateLoginForm()) {
+              setState(() => _isProcessing = false);
+              return;
+            }
+            
+            await _loginUser();
+            break;
+        }
       }
     } catch (e) {
       setState(() {
         _errorMessage = "Hubo un error. Por favor intente nuevamente.";
+        _isProcessing = false;
+      });
+    }
+  }
+
+  /// Validate the contact form
+  bool _validateContactForm() {
+    setState(() {
+      _isNameValid = _nameController.text.trim().isNotEmpty;
+      _isPhoneValid = _validatePhone(_phoneController.text);
+      _isEmailValid = _validateEmail(_emailController.text);
+    });
+    
+    return _isNameValid && _isPhoneValid && _isEmailValid;
+  }
+
+  /// Validate the registration form
+  bool _validateRegistrationForm() {
+    setState(() {
+      _isNameValid = _nameController.text.trim().isNotEmpty;
+      _isPhoneValid = _validatePhone(_phoneController.text);
+      _isEmailValid = _validateEmail(_emailController.text);
+      _isPasswordValid = _passwordController.text.length >= 6;
+      _isConfirmPasswordValid = _passwordController.text == _confirmPasswordController.text;
+    });
+    
+    return _isNameValid && _isPhoneValid && _isEmailValid && 
+           _isPasswordValid && _isConfirmPasswordValid;
+  }
+
+  /// Validate the login form
+  bool _validateLoginForm() {
+    setState(() {
+      _isLoginEmailValid = _loginEmailController.text.trim().isNotEmpty && 
+                           _validateEmail(_loginEmailController.text);
+      _isLoginPasswordValid = _loginPasswordController.text.trim().isNotEmpty;
+    });
+    
+    return _isLoginEmailValid && _isLoginPasswordValid;
+  }
+
+  /// Login an existing user
+  Future<void> _loginUser() async {
+    try {
+      // Get Firebase Auth instance from provider
+      final auth = ref.read(firebaseAuthProvider);
+      
+      // Sign in user
+      final credentials = await auth.signInWithEmailAndPassword(
+        email: _loginEmailController.text,
+        password: _loginPasswordController.text,
+      );
+      
+      // Initialize user data for the view
+      _nameController.text = credentials.user?.displayName ?? '';
+      _emailController.text = credentials.user?.email ?? '';
+      
+      // Try to get additional user info from Firestore
+      if (credentials.user != null) {
+        try {
+          final userDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(credentials.user!.uid)
+              .get();
+          
+          if (userDoc.exists) {
+            _userData = userDoc.data();
+            _phoneController.text = _userData?['phone'] ?? '';
+          } else {
+            // Create user document if it doesn't exist
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(credentials.user!.uid)
+                .set({
+                  'name': credentials.user?.displayName ?? '',
+                  'email': credentials.user?.email ?? '',
+                  'createdAt': FieldValue.serverTimestamp(),
+                });
+          }
+        } catch (e) {
+          debugPrint('Error fetching/creating user data: $e');
+        }
+      }
+      
+      // Make sure auth state is refreshed
+      final authRepo = ref.read(authRepositoryProvider);
+      await authRepo.forceRefreshAuthState();
+      
+      // Return user data
+      if (mounted) {
+        Navigator.of(widget.dialogContext).pop({
+          'name': _nameController.text,
+          'phone': _phoneController.text,
+          'email': _emailController.text,
+          'userId': credentials.user?.uid ?? '',
+        });
+      }
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _errorMessage = _getFirebaseErrorMessage(e);
+        _isProcessing = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Error al iniciar sesión: ${e.toString()}';
         _isProcessing = false;
       });
     }
@@ -1103,6 +1479,10 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
           return 'No se encontró ningún usuario con este correo electrónico.';
         case 'wrong-password':
           return 'Contraseña incorrecta. Por favor intente nuevamente.';
+        case 'user-disabled':
+          return 'Esta cuenta ha sido desactivada. Contacte al administrador.';
+        case 'too-many-requests':
+          return 'Demasiados intentos fallidos. Por favor, inténtelo más tarde.';
         default:
           return 'Error: ${error.message}';
       }

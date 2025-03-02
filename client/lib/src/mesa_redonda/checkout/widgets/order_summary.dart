@@ -20,42 +20,53 @@ class OrderSummary extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     final double tax = totalPrice * taxRate;
     final double orderTotal = totalPrice + (orderType == 'quote' ? 0 : deliveryFee) + tax;
 
     return Card(
-      elevation: 2,
+      elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: colorScheme.outlineVariant),
       ),
-      color: Colors.white,
+      color: colorScheme.surface,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(
-                  _getOrderTypeIcon(),
-                  color: ColorsPaletteRedonda.primary,
-                  size: 20,
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    _getOrderTypeIcon(),
+                    color: colorScheme.onPrimaryContainer,
+                    size: 20,
+                  ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
                 Text(
                   _getTitle(),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: ColorsPaletteRedonda.primary,
-                      ),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            const Divider(height: 1),
+            Divider(color: colorScheme.outlineVariant),
             
             if (orderType == 'catering' || orderType == 'quote')
-              ..._buildCateringDetails(ref),
+              ..._buildCateringDetails(context, ref),
             
             _buildOrderSummaryRow(
               context,
@@ -67,7 +78,7 @@ class OrderSummary extends ConsumerWidget {
               _buildOrderSummaryRow(
                 context,
                 'Envío',
-                'RD \$$deliveryFee',
+                'RD \$${deliveryFee.toStringAsFixed(2)}',
                 icon: Icons.local_shipping_outlined,
               ),
               
@@ -78,9 +89,9 @@ class OrderSummary extends ConsumerWidget {
               icon: Icons.receipt_outlined,
             ),
             
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12.0),
-              child: Divider(height: 1),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
+              child: Divider(color: colorScheme.outlineVariant),
             ),
             
             _buildOrderSummaryRow(
@@ -88,7 +99,7 @@ class OrderSummary extends ConsumerWidget {
               _getTotalLabel(),
               'RD \$${orderTotal.toStringAsFixed(2)}',
               isBold: true,
-              fontSize: 16,
+              fontSize: 18,
             ),
             
             if (orderType != 'quote')
@@ -147,34 +158,37 @@ class OrderSummary extends ConsumerWidget {
     }
   }
 
-  List<Widget> _buildCateringDetails(WidgetRef ref) {
+  List<Widget> _buildCateringDetails(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     if (additionalInfo == null) return [];
 
     return [
       if (additionalInfo!['peopleCount'] != null)
         _buildOrderSummaryRow(
-          ref.context,
+          context,
           'Cantidad de Personas',
           additionalInfo!['peopleCount'].toString(),
           icon: Icons.people_outline,
         ),
       if (additionalInfo!['hasChef'] != null)
         _buildOrderSummaryRow(
-          ref.context,
+          context,
           'Chef Incluido',
           additionalInfo!['hasChef'] ? 'Sí' : 'No',
           icon: Icons.restaurant,
         ),
       if (additionalInfo!['eventType']?.isNotEmpty ?? false)
         _buildOrderSummaryRow(
-          ref.context,
+          context,
           'Tipo de Evento',
           additionalInfo!['eventType'],
           icon: Icons.event,
         ),
-      const Padding(
-        padding: EdgeInsets.symmetric(vertical: 8.0),
-        child: Divider(height: 1),
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Divider(color: colorScheme.outlineVariant),
       ),
     ];
   }
@@ -187,34 +201,43 @@ class OrderSummary extends ConsumerWidget {
     IconData? icon,
     double fontSize = 14,
   }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
           if (icon != null) ...[
-            Icon(
-              icon,
-              size: 16,
-              color: Colors.grey[600],
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: colorScheme.secondaryContainer.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                size: 16,
+                color: colorScheme.onSecondaryContainer,
+              ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 12),
           ],
           Expanded(
             child: Text(
               label,
-              style: TextStyle(
+              style: (isBold ? theme.textTheme.titleMedium : theme.textTheme.bodyMedium)?.copyWith(
                 fontSize: fontSize,
-                fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-                color: isBold ? ColorsPaletteRedonda.deepBrown1 : Colors.grey[700],
+                color: colorScheme.onSurface,
               ),
             ),
           ),
           Text(
             value,
-            style: TextStyle(
+            style: (isBold ? theme.textTheme.titleMedium : theme.textTheme.bodyMedium)?.copyWith(
               fontSize: fontSize,
+              color: isBold ? colorScheme.primary : colorScheme.onSurface,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-              color: isBold ? ColorsPaletteRedonda.primary : Colors.black87,
             ),
           ),
         ],
@@ -223,6 +246,9 @@ class OrderSummary extends ConsumerWidget {
   }
 
   Widget _buildTimeEstimate(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     String estimatedTime;
     IconData icon;
     
@@ -242,30 +268,25 @@ class OrderSummary extends ConsumerWidget {
     }
     
     return Container(
-      margin: const EdgeInsets.only(top: 12),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: ColorsPaletteRedonda.primary.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: ColorsPaletteRedonda.primary.withOpacity(0.2),
-          width: 1,
-        ),
+        color: colorScheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
           Icon(
             icon,
-            size: 18,
-            color: ColorsPaletteRedonda.primary,
+            size: 20,
+            color: colorScheme.onSecondaryContainer,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               estimatedTime,
-              style: TextStyle(
-                fontSize: 13,
-                color: ColorsPaletteRedonda.primary,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSecondaryContainer,
                 fontWeight: FontWeight.w500,
               ),
             ),

@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:starter_architecture_flutter_firebase/src/helpers/scroll_bahaviour.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/model/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/ordering_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/cart_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/home/provider/recent_search_notifier.dart';

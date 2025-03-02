@@ -1,150 +1,8 @@
 import 'package:flutter/material.dart';
-
-class ColorsPalette {
-  const ColorsPalette({
-    required this.ternary20,
-    required this.primary,
-    required this.primary70,
-    required this.primary7,
-    required this.primary40,
-    required this.neutral1,
-    required this.neutral2,
-    required this.neutral3,
-    required this.neutral4,
-    required this.neutral5,
-    required this.neutral6,
-    required this.neutral7,
-    required this.neutral8,
-    required this.neutral9,
-    required this.darkBG,
-    required this.positiveAction,
-    required this.positiveActionSoft,
-    required this.secondary,
-    required this.secondary70,
-    required this.secondary40,
-    required this.secondary7,
-    required this.secondarySoft,
-    required this.tertiary,
-    required this.negativeAction,
-    required this.negativeActionSoft,
-    required this.alert,
-    required this.alertSoft,
-    required this.white,
-    required this.black,
-  });
-
-  final Color primary;
-  final Color primary70;
-  final Color primary40;
-  final Color primary7;
-
-  final Color darkBG;
-
-  final Color positiveAction;
-  final Color positiveActionSoft;
-
-  final Color secondary;
-  final Color secondary70;
-  final Color secondary40;
-  final Color secondary7;
-  final Color secondarySoft;
-
-  final Color negativeAction;
-  final Color negativeActionSoft;
-
-  final Color alert;
-  final Color alertSoft;
-
-  final Color tertiary;
-  final Color ternary20;
-
-  final Color white;
-  final Color black;
-
-  final Color neutral1;
-  final Color neutral2;
-  final Color neutral3;
-  final Color neutral4;
-  final Color neutral5;
-  final Color neutral6;
-  final Color neutral7;
-  final Color neutral8;
-  final Color neutral9;
-
-//add these colors as these are the brand colors: #863509, #f3d2c0, #bf8768, #a7613b
-  static ColorsPalette get light {
-    return const ColorsPalette(
-      alert: Color(0xFF863509), // updated to brand color
-      alertSoft: Color(0xFFF3D2C0), // updated to brand color
-      negativeAction:
-          Color(0xFFA7613B), // darker brand tone for important actions
-      negativeActionSoft:
-          Color(0xFFBF8768), // softer tone for less priority actions
-      darkBG: Color(0xFFF3D2C0), // lightest brand color for backgrounds
-      positiveAction: Color(0xFF863509), // contrast color for positive actions
-      positiveActionSoft:
-          Color(0xFFF3D2C0), // soft background for positive hints
-      primary7: Color(0xFF863509),
-      primary40: Color.fromRGBO(134, 53, 9, 0.4),
-      primary70: Color.fromRGBO(134, 53, 9, 0.7),
-      primary: Color.fromRGBO(134, 53, 9, 0.07), // main brand color
-      secondary: Color(0xFFA7613B), // secondary brand color
-      secondary40: Color.fromRGBO(167, 97, 59, 0.4),
-      secondary70: Color.fromRGBO(167, 97, 59, 0.7),
-      secondary7: Color.fromRGBO(167, 97, 59, 0.07),
-      secondarySoft: Color(0xFFF3D2C0), // softest brand color
-      neutral1: Color(0xFFF8F9FA),
-      neutral2: Color(0xFFF1F3F5),
-      neutral3: Color(0xFFE9ECEF),
-      neutral4: Color(0xFFDEE2E6),
-      neutral5: Color(0xFFCED4DA),
-      neutral6: Color(0xFFADB5BD),
-      neutral7: Color(0xFF6A7076),
-      neutral8: Color(0xFF4F575E),
-      neutral9: Color(0xFF272B30),
-      tertiary: Color(0xFFA7613B),
-      black: Color(0xFF000000),
-      white: Color(0xFFFFFFFF),
-      ternary20: Color(0xFFCDE2E3), // adjusted to match brand aesthetic
-    );
-  }
-
-  static ColorsPalette get dark {
-    return const ColorsPalette(
-      alert: Color(0xFF863509), // maintained brand color for consistency
-      alertSoft: Color(0xFF693526), // darker variant for soft alert
-      negativeAction:
-          Color(0xFFA7613B), // darker brand tone for negative actions
-      negativeActionSoft: Color(0xFFBF8768), // soft negative actions
-      darkBG: Color(0xFF2C2C2C), // darker background
-      positiveAction:
-          Color(0xFF98D3AE), // lighter positive action for dark theme
-      positiveActionSoft: Color(0xFF303F36), // dark green for background hints
-      primary7: Color.fromRGBO(134, 53, 9, 0.07),
-      primary40: Color.fromRGBO(134, 53, 9, 0.4),
-      primary70: Color.fromRGBO(134, 53, 9, 0.7),
-      primary: Color(0xFF863509), // main brand color
-      secondary: Color(0xFFA7613B), // secondary brand color
-      secondary40: Color.fromRGBO(167, 97, 59, 0.4),
-      secondary70: Color.fromRGBO(167, 97, 59, 0.7),
-      secondary7: Color.fromRGBO(167, 97, 59, 0.07),
-      secondarySoft: Color(0xFF693526), // darker soft color for overlays
-      neutral1: Color(0xFF212121),
-      neutral2: Color(0xFF373737),
-      neutral3: Color(0xFF555555),
-      neutral4: Color(0xFF787878),
-      neutral5: Color(0xFF919191),
-      neutral6: Color(0xFFAFAFAF),
-      neutral7: Color(0xFFC8C8C8),
-      neutral8: Color(0xFFDCDCDC),
-      neutral9: Color(0xFFF5F5F5),
-      tertiary: Color(0xFF616161),
-      black: Color(0xFF000000),
-      white: Color(0xFFFFFFFF),
-      ternary20: Color(0xFF69BECA), // adjusted blue for dark theme accents
-    );
-  }
-}
+ import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/features/authentication/data/firebase_auth_repository.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/user_preference/user_preference_provider.dart';
 
 class ColorsPaletteRedonda {
   static const Color primary1 = Color(0xFF863509); // Main brand color
@@ -348,65 +206,81 @@ class ColorsPaletteRedonda {
   }
 }
 
-/// App theme configuration using Material 3 design system
+ 
+// App theme configuration using Material 3 design system with brand colors
 class AppTheme {
   // Private constructor to prevent instantiation
   AppTheme._();
 
   // Primary color palette - Brand colors
-  static const Color brandPrimaryDark = Color(0xFF402e32);     // Main brand color
-  static const Color brandPrimaryMedium = Color(0xFF694631);   // Medium variant
-  static const Color brandPrimaryLight = Color(0xFFfff7f0);    // Light variant
+  // PANTONE Bright Red C
+  static const Color brandPrimaryDark = Color(0xFFD12D14);    // Darker variant of primary
+  static const Color brandPrimary = Color(0xFFFF3A1D);        // Primary brand color #ff3a1d
+  static const Color brandPrimaryMedium = Color(0xFFFF5A40);  // Medium variant
+  static const Color brandPrimaryLight = Color(0xFFFF8A78);   // Light variant
+  static const Color brandPrimaryLightest = Color(0xFFFFEDE9); // Lightest variant for backgrounds
   
   // Secondary color palette
-  static const Color brandSecondaryDark = Color(0xFF694631);   // Dark secondary
-  static const Color brandSecondaryMedium = Color(0xFFBF8768); // Medium secondary
-  static const Color brandSecondaryLight = Color(0xFFfff7f0);  // Light secondary
+  // PANTONE 151C
+  static const Color brandSecondaryDark = Color(0xFFCC6800);    // Darker variant of secondary
+  static const Color brandSecondary = Color(0xFFFF8300);        // Secondary brand color #ff8300
+  static const Color brandSecondaryMedium = Color(0xFFFF9E3A);  // Medium variant
+  static const Color brandSecondaryLight = Color(0xFFFFBB78);   // Light variant
+  static const Color brandSecondaryLightest = Color(0xFFFFEFDC); // Lightest variant for backgrounds
   
-  // Accent/Tertiary colors
-  static const Color brandAccent = Color(0xFFd87738);         // Orange accent
-  static const Color brandAccentDark = Color(0xFFA7613B);     // Darker accent
-  static const Color brandAccentLight = Color(0xFFfff7f0);    // Light accent
-  
-  // Background and Surface colors
-  static const Color backgroundMain = Color(0xFFF9F5F2);      // Main background
-  static const Color surfaceMain = Colors.white;              // Main surface
-  static const Color surfaceVariantLight = Color(0xFFfff7f0); // Surface variant
+  // Neutral color palette - for backgrounds and surfaces
+  static const Color neutralDark = Color(0xFF1E1E1E);        // Dark neutral for text
+  static const Color neutralMedium = Color(0xFF757575);      // Medium neutral for secondary text
+  static const Color neutralLight = Color(0xFFE0E0E0);       // Light neutral for borders
+  static const Color neutralLightest = Color(0xFFF8F8F8);    // Lightest neutral for backgrounds
   
   // Text colors
-  static const Color textPrimary = Color(0xFF402e32);         // Main text color
-  static const Color textSecondary = Color(0xFF694631);       // Secondary text
+  static const Color textPrimary = Color(0xFF1E1E1E);         // Main text color
+  static const Color textSecondary = Color(0xFF757575);       // Secondary text
   static const Color textOnPrimary = Colors.white;            // Text on primary
+  static const Color textOnSecondary = Colors.white;          // Text on secondary
+  
+  // Status colors
+  static const Color successColor = Color(0xFF4CAF50);        // Success
+  static const Color warningColor = Color(0xFFFFC107);        // Warning
+  static const Color errorColor = Color(0xFFE53935);          // Error
+  static const Color infoColor = Color(0xFF2196F3);           // Info
   
   // Error and warning colors
-  static const Color errorMain = Color(0xFFBA1A1A);           // Error
-  static const Color errorLight = Color(0xFFFFDAD6);          // Light error
-  static const Color errorDark = Color(0xFF410002);           // Dark error
+  static const Color errorMain = Color(0xFFE53935);           // Error
+  static const Color errorLight = Color(0xFFFFCDD2);          // Light error
+  static const Color errorDark = Color(0xFFB71C1C);           // Dark error
   
   // Border and decoration colors
-  static const Color outlineMain = Color(0xFF85736D);         // Outline
-  static const Color outlineLight = Color(0xFFD8C2B7);        // Light outline
+  static const Color outlineMain = Color(0xFFBDBDBD);         // Outline
+  static const Color outlineLight = Color(0xFFE0E0E0);        // Light outline
   
   // System colors
-  static const Color shadowColor = Color(0xFF000000);
-  static const Color scrimColor = Color(0xFF000000);
+  static const Color shadowColor = Color(0x40000000);         // Shadows with 25% opacity
+  static const Color scrimColor = Color(0x80000000);          // Scrim with 50% opacity
   
   // Inverse colors (for dark mode/contrast)
-  static const Color inverseSurface = Color(0xFF362F2C);
-  static const Color inverseOnSurface = Color(0xFFFBEEE9);
-  static const Color inversePrimary = Color(0xFFFFB694);
+  static const Color inverseSurface = Color(0xFF1E1E1E);
+  static const Color inverseOnSurface = Color(0xFFF8F8F8);
+  static const Color inversePrimary = Color(0xFFFF8A78);
 
   // Dark mode variants
-  static const Color darkModePrimary = Color(0xFFFFB694);
-  static const Color darkModeOnPrimary = Color(0xFF5C1900);
-  static const Color darkModePrimaryContainer = Color(0xFF802800);
-  static const Color darkModeOnPrimaryContainer = Color(0xFFFFDBCA);
-  static const Color darkModeBackground = Color(0xFF201A17);
-  static const Color darkModeOnBackground = Color(0xFFEDE0DA);
-  static const Color darkModeSurface = Color(0xFF201A17);
-  static const Color darkModeOnSurface = Color(0xFFEDE0DA);
-  static const Color darkModeSurfaceVariant = Color(0xFF53433C);
-  static const Color darkModeOnSurfaceVariant = Color(0xFFD8C2B7);
+  static const Color darkModePrimary = Color(0xFFFF8A78);
+  static const Color darkModeOnPrimary = Color(0xFF690002);
+  static const Color darkModePrimaryContainer = Color(0xFF930005);
+  static const Color darkModeOnPrimaryContainer = Color(0xFFFFDAD5);
+  
+  static const Color darkModeSecondary = Color(0xFFFFB77D);
+  static const Color darkModeOnSecondary = Color(0xFF4B2800);
+  static const Color darkModeSecondaryContainer = Color(0xFF6B3C00);
+  static const Color darkModeOnSecondaryContainer = Color(0xFFFFDCC1);
+  
+  static const Color darkModeBackground = Color(0xFF1E1E1E);
+  static const Color darkModeOnBackground = Color(0xFFE0E0E0);
+  static const Color darkModeSurface = Color(0xFF2D2D2D);
+  static const Color darkModeOnSurface = Color(0xFFE0E0E0);
+  static const Color darkModeSurfaceVariant = Color(0xFF3D3D3D);
+  static const Color darkModeOnSurfaceVariant = Color(0xFFBDBDBD);
 
   /// Typography configuration - keeping Montserrat for headings and Roboto for body
   static const String fontHeadings = 'Montserrat';
@@ -500,27 +374,27 @@ class AppTheme {
     if (brightness == Brightness.light) {
       return ColorScheme(
         brightness: Brightness.light,
-        primary: brandPrimaryDark,
+        primary: brandPrimary,
         onPrimary: textOnPrimary,
-        primaryContainer: brandPrimaryMedium,
-        onPrimaryContainer: brandPrimaryLight,
-        secondary: brandSecondaryDark,
-        onSecondary: textOnPrimary,
-        secondaryContainer: brandSecondaryMedium,
-        onSecondaryContainer: brandSecondaryLight,
-        tertiary: brandAccent,
-        onTertiary: textOnPrimary,
-        tertiaryContainer: brandAccentDark,
-        onTertiaryContainer: brandAccentLight,
+        primaryContainer: brandPrimaryLight,
+        onPrimaryContainer: brandPrimaryDark,
+        secondary: brandSecondary,
+        onSecondary: textOnSecondary,
+        secondaryContainer: brandSecondaryLight,
+        onSecondaryContainer: brandSecondaryDark,
+        tertiary: brandSecondaryMedium,
+        onTertiary: textOnSecondary,
+        tertiaryContainer: brandPrimaryMedium,
+        onTertiaryContainer: textOnPrimary,
         error: errorMain,
         onError: textOnPrimary,
         errorContainer: errorLight,
         onErrorContainer: errorDark,
-        background: backgroundMain,
+        background: neutralLightest,
         onBackground: textPrimary,
-        surface: surfaceMain,
+        surface: Colors.white,
         onSurface: textPrimary,
-        surfaceVariant: surfaceVariantLight,
+        surfaceVariant: brandPrimaryLightest,
         onSurfaceVariant: textSecondary,
         outline: outlineMain,
         outlineVariant: outlineLight,
@@ -538,14 +412,14 @@ class AppTheme {
         onPrimary: darkModeOnPrimary,
         primaryContainer: darkModePrimaryContainer,
         onPrimaryContainer: darkModeOnPrimaryContainer,
-        secondary: Color(0xFFE5BFA7),
-        onSecondary: Color(0xFF432A1B),
-        secondaryContainer: Color(0xFF5B4131),
-        onSecondaryContainer: Color(0xFFFFDBCA),
+        secondary: darkModeSecondary,
+        onSecondary: darkModeOnSecondary,
+        secondaryContainer: darkModeSecondaryContainer,
+        onSecondaryContainer: darkModeOnSecondaryContainer,
         tertiary: Color(0xFFFFB77D),
-        onTertiary: Color(0xFF4E2700),
-        tertiaryContainer: Color(0xFF703800),
-        onTertiaryContainer: Color(0xFFFFDBC8),
+        onTertiary: Color(0xFF462700),
+        tertiaryContainer: Color(0xFF633B00),
+        onTertiaryContainer: Color(0xFFFFDCC1),
         error: Color(0xFFFFB4AB),
         onError: Color(0xFF690005),
         errorContainer: Color(0xFF93000A),
@@ -556,13 +430,13 @@ class AppTheme {
         onSurface: darkModeOnSurface,
         surfaceVariant: darkModeSurfaceVariant,
         onSurfaceVariant: darkModeOnSurfaceVariant,
-        outline: Color(0xFFA08D84),
+        outline: Color(0xFF8C8C8C),
         outlineVariant: darkModeSurfaceVariant,
         shadow: shadowColor,
         scrim: scrimColor,
-        inverseSurface: darkModeOnBackground,
-        onInverseSurface: Color(0xFF362F2C),
-        inversePrimary: Color(0xFF984700),
+        inverseSurface: Color(0xFFF8F8F8),
+        onInverseSurface: Color(0xFF1E1E1E),
+        inversePrimary: brandPrimary,
       );
     }
   }
@@ -959,3 +833,37 @@ class AppTheme {
     );
   }
 }
+
+// Extension to provide theme-related utilities
+extension ThemeHelpers on BuildContext {
+  // Easy access to current theme
+  ThemeData get theme => Theme.of(this);
+  
+  // Easy access to current color scheme
+  ColorScheme get colorScheme => Theme.of(this).colorScheme;
+  
+  // Easy access to current text theme
+  TextTheme get textTheme => Theme.of(this).textTheme;
+  
+  // Check if current theme is dark
+  bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
+}
+
+// Theme provider that integrates with UserPreferencesRepository
+final appThemeProvider = Provider<ThemeData>((ref) {
+  final themeMode = ref.watch(themeProvider);
+  
+  switch (themeMode) {
+    case ThemeMode.light:
+      return AppTheme.lightTheme;
+    case ThemeMode.dark:
+      return AppTheme.darkTheme;
+    case ThemeMode.system:
+    default:
+      // For system mode, let's determine based on platform brightness
+      final platformBrightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+      return platformBrightness == Brightness.dark 
+          ? AppTheme.darkTheme 
+          : AppTheme.lightTheme;
+  }
+});

@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/catering_cart_item_view.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/model/cart_item.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/meal_subscription_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/widgets/catering_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/prompt_dialogs/new_item_dialog.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/cart_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/catering_order_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering/catering_card.dart';
+
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_cart.dart';

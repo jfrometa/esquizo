@@ -5,6 +5,7 @@ import 'package:starter_architecture_flutter_firebase/src/features/chat/applicat
 import 'package:starter_architecture_flutter_firebase/src/features/chat/presentation/send_image_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/dialog_flow_cx/data/dialog_flow_client.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/app_theme.dart';
+import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 import 'package:uuid/uuid.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
@@ -82,10 +83,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final theme = ref.watch(appThemeProvider);
 
     return Scaffold(
-      backgroundColor: theme.colorsPalette.white,
+   
       appBar: AppBar(
         title: const Text("Gemini Chat"),
-        backgroundColor: theme.colorsPalette.white,
+ 
         scrolledUnderElevation: 1.0,
         forceMaterialTransparency: true,
         actions: [
@@ -147,7 +148,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   vertical: 3,
                 ),
                 decoration: BoxDecoration(
-                  color: theme.colorsPalette.neutral2,
+                 
                   borderRadius: BorderRadius.circular(15.0),
                 ),
                 child: Row(

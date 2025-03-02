@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../cart/cart_item.dart';
+import '../cart/model/cart_item.dart';
 
 
 class CartNotifier extends StateNotifier<List<CartItem>> {

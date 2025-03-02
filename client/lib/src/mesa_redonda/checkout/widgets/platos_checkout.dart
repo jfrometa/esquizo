@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/model/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/cart_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
@@ -52,25 +52,45 @@ class PlatosCheckout extends ConsumerWidget {
   }
 
   Widget _buildLocationField(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextField(
         controller: locationController,
         readOnly: true,
-        onTap: () => onLocationTap(context, locationController, 'regular'),
+        onTap: () => onLocationTap(context, locationController, 'catering'),
         decoration: InputDecoration(
           labelText: 'Ubicación de entrega',
+          prefixIcon: Icon(Icons.location_on_outlined, color: colorScheme.primary),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8.0),
-            borderSide: const BorderSide(
-              color: ColorsPaletteRedonda.primary,
-              width: 1.5,
+            borderRadius: BorderRadius.circular(12.0),
+            borderSide: BorderSide(
+              color: colorScheme.outline,
+              width: 1.0,
             ),
           ),
-      ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
+            borderSide: BorderSide(
+              color: colorScheme.outline,
+              width: 1.0,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
+            borderSide: BorderSide(
+              color: colorScheme.primary,
+              width: 2.0,
+            ),
+          ),
+        ),
       ),
     );
   }
+
+
 }
