@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/model/cart_item.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/cart_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/catering_order_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering/cathering_order_item.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/manual_quote_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_cart.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/providers/cart_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/providers/catering_order_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/catering/cathering_order_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/providers/manual_quote_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/navigation_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/admin/services/admin_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/services/admin_providers.dart';
 
 // Update the provider to include both catering and manual orders
 final cateringItemCountProvider = StateProvider<int>((ref) {

@@ -69,8 +69,8 @@ dependencies:
   # flutter_secure_storage: ^9.2.2
 
   # QR code generation and scanning
-  qr_flutter: ^4.1.0
-  mobile_scanner: ^3.5.5
+  # qr_flutter: ^4.1.0
+  # mobile_scanner: ^3.5.5
 
   animations: ^2.0.8
   flutter_animate: ^4.5.0 

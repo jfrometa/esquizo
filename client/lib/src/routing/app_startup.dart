@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/constants/app_sizes.dart';
-import 'package:starter_architecture_flutter_firebase/src/features/onboarding/data/onboarding_repository.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/onboarding/data/onboarding_repository.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 part 'app_startup.g.dart';

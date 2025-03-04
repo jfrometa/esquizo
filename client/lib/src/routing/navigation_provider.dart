@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../src/mesa_redonda/admin/services/admin_providers.dart';
+import '../screens/admin/services/admin_providers.dart';
 
 class NavigationDestinationItem {
   final IconData icon;

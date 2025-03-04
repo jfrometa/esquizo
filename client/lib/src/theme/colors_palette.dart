@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
- import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; 
-import 'package:starter_architecture_flutter_firebase/src/features/authentication/data/firebase_auth_repository.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/user_preference/user_preference_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/providers/user_preference/user_preference_provider.dart';
 
-class ColorsPaletteRedonda {
+class ColorsPaletteRedonda1 {
   static const Color primary1 = Color(0xFF863509); // Main brand color
   static const Color lightBrown = Color(0xFFBF8768); // Lighter brown for AppBar
   static const Color deepBrown =
@@ -318,6 +316,7 @@ class AppTheme {
   }
 
   /// Builds the theme data based on the specified brightness
+  // Fix the rendering issue by ensuring proper constraints in the ThemeData
   static ThemeData _buildThemeData(Brightness brightness) {
     final ColorScheme colorScheme = _getColorScheme(brightness);
     
