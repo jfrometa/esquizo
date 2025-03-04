@@ -1,5 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/QR/screens/reservation/reservation_screen.dart';
+// Add this import for navigation
 
 class MenuHeader extends StatelessWidget {
   final double scrollOffset;
@@ -111,9 +113,65 @@ class MenuHeader extends StatelessWidget {
                 ),
               ),
             ),
+
+            // Add reservation FAB-style button
+            Positioned(
+              bottom: 16,
+              right: 24,
+              child: _buildReservationButton(context, colorScheme),
+            ),
+            
+            // Scroll progress indicator - wrap with RepaintBoundary
+            Positioned(
+              bottom: 0,
+              left: 0,
+              child: RepaintBoundary(
+                child: FadeTransition(
+                  opacity: opacityAnimation,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    height: 2,
+                    color: colorScheme.primary,
+                    width: progressWidth,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildReservationButton(BuildContext context, ColorScheme colorScheme) {
+    return ElevatedButton.icon(
+      icon: Icon(
+        Icons.calendar_month_rounded,
+        color: colorScheme.onPrimary,
+        size: 20,
+      ),
+      label: Text(
+        'Reserve Table',
+        style: TextStyle(
+          color: colorScheme.onPrimary,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+        elevation: 2,
+        backgroundColor: colorScheme.primary,
+        shadowColor: colorScheme.shadow.withOpacity(0.3),
+      ),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ReservationScreen()),
+        );
+      },
     );
   }
 }

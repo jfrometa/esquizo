@@ -280,18 +280,18 @@ List<RouteBase> _getNestedRoutes(String path) {
           ],
         ),
       ];
-    case '/locales':
-      return [
-        GoRoute(
-          path: 'localese',
-          name: AppRoute.local.name,
-          pageBuilder: (context, state) {
-            return MaterialPage(
-              child: QRCodeScreen(),
-            );
-          },
-        ),
-      ];
+    // case '/locales':
+    //   return [
+    //     GoRoute(
+    //       path: 'localese',
+    //       name: AppRoute.local.name,
+    //       pageBuilder: (context, state) {
+    //         return MaterialPage(
+    //           child: QRCodeScreen(),
+    //         );
+    //       },
+    //     ),
+    //   ];
     
     case '/carrito':
       return [
@@ -332,8 +332,8 @@ GlobalKey<NavigatorState> _getNavigatorKey(String path) {
   switch (path) {
     case '/':
       return _landingNavigatorKey;
-    case '/local':
-      return _localNavigatorKey;
+    // case '/local':
+    //   return _localNavigatorKey;
     case '/menu':
       return _homeNavigatorKey;
     case '/carrito':
@@ -352,7 +352,7 @@ GlobalKey<NavigatorState> _getNavigatorKey(String path) {
 String _getRouteName(String path) {
   final pathToRoute = {
     '/': AppRoute.landing.name,
-    '/local': AppRoute.local.name,
+    // '/local': AppRoute.local.name,
     '/menu': AppRoute.home.name,
     '/carrito': AppRoute.homecart.name,
     '/cuenta': AppRoute.profile.name,
@@ -366,8 +366,8 @@ Widget _getDestinationScreen(String path) {
   switch (path) {
     case '/':
       return const ResponsiveLandingPage(); //const ResponsiveLandingPage();
-    case '/local':
-      return const QRCodeScreen(); //const ResponsiveLandingPage();
+    // case '/local':
+    //   return const QRCodeScreen(); //const ResponsiveLandingPage();
     case '/menu':
       return const MenuScreen(); //const MenuHome();
     case '/carrito':
