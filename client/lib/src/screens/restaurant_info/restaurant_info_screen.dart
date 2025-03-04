@@ -43,7 +43,7 @@ class RestaurantInfoScreen extends StatelessWidget {
                 children: [
                   // Restaurant name
                   Text(
-                    'La Redonda',
+                    'Kako',
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),

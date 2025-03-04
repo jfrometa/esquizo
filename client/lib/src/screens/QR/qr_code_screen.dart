@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/menu_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/QR/screens/qr_generator_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/QR/screens/qr_scanner/qr_scanner_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/QR/screens/reservation/reservation_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/QR/screens/restaurant_info/restaurant_info_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/reservation/reservation_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/restaurant_info/restaurant_info_screen.dart';
 
 class QRCodeScreen extends StatelessWidget {
   const QRCodeScreen({Key? key}) : super(key: key);
@@ -26,7 +26,7 @@ class QRCodeScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'La Redonda',
+                      'Kako',
                       style: theme.textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: theme.colorScheme.primary,
@@ -66,7 +66,7 @@ class QRCodeScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Welcome to La Redonda',
+                          'Welcome to Kako',
                           style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: theme.colorScheme.onPrimaryContainer,

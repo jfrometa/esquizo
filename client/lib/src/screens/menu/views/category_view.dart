@@ -11,6 +11,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/ordering_provi
 import 'package:starter_architecture_flutter_firebase/src/screens/providers/cart_provider.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/reservation/reservation_screen.dart';
 
 class CategoryView extends ConsumerWidget {
   final ScrollController scrollController;
@@ -38,7 +39,7 @@ class CategoryView extends ConsumerWidget {
         },
         child: ListView(
           controller: scrollController,
-          physics: const AlwaysScrollableScrollPhysics(), // Ensures refresh works even when content is small
+          physics: const AlwaysScrollableScrollPhysics(),
           children: [
             const SizedBox(height: 20),
             
@@ -66,7 +67,7 @@ class CategoryView extends ConsumerWidget {
             
             const SizedBox(height: 16),
             
-            // Categories list
+            // Categories list with added reservation category
             SizedBox(
               height: 140,
               child: categoriesAsync.when(
@@ -80,9 +81,55 @@ class CategoryView extends ConsumerWidget {
                   return ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     scrollDirection: Axis.horizontal,
-                    itemCount: categories.length,
+                    itemCount: categories.length + 1, // +1 for reservation
                     itemBuilder: (context, index) {
-                      final category = categories[index];
+                      // Special case for reservation category
+                      if (index == 0) {
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ReservationScreen(),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            width: 100,
+                            margin: const EdgeInsets.only(right: 16),
+                            child: Column(
+                              children: [
+                                Container(
+                                  width: 80,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.primaryContainer,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Icon(
+                                    Icons.calendar_month_rounded,
+                                    size: 40,
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Reserve Table',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+                      
+                      // Regular categories (shifted by 1)
+                      final category = categories[index - 1];
                       return GestureDetector(
                         onTap: () {
                           Navigator.push(

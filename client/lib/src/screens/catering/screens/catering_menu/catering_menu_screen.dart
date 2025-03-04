@@ -6,25 +6,20 @@ import 'package:starter_architecture_flutter_firebase/src/screens/cart/widgets/c
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering_entry/components/catering_quote/quote_order_form_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/providers/catering_order_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/providers/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/providers/manual_quote_provider.dart';
 
-class CateringView extends ConsumerStatefulWidget {
-  final ScrollController scrollController;
-
-  const CateringView({super.key, required this.scrollController});
+/// A screen that displays the catering menu with different package options.
+class CateringMenuScreen extends ConsumerStatefulWidget {
+  const CateringMenuScreen({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<CateringView> createState() => _CateringViewState();
+  ConsumerState<CateringMenuScreen> createState() => _CateringMenuScreenState();
 }
 
-class _CateringViewState extends ConsumerState<CateringView> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  final TextEditingController _itemNameController = TextEditingController();
-  final TextEditingController _itemDescriptionController = TextEditingController();
-  final TextEditingController _quantityController = TextEditingController();
-  bool _showFab = true;
-
+class _CateringMenuScreenState extends ConsumerState<CateringMenuScreen> {
+  final ScrollController _scrollController = ScrollController();
+  
   // Catering packages data
   final List<Map<String, dynamic>> _cateringPackages = [
     {
@@ -52,39 +47,6 @@ class _CateringViewState extends ConsumerState<CateringView> with SingleTickerPr
       'icon': Icons.settings,
     },
   ];
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(_handleTabChange);
-    widget.scrollController.addListener(_onScroll);
-  }
-
-  @override
-  void dispose() {
-    _tabController.removeListener(_handleTabChange);
-    _tabController.dispose();
-    _itemNameController.dispose();
-    _itemDescriptionController.dispose();
-    _quantityController.dispose();
-    super.dispose();
-  }
-
-  void _handleTabChange() {
-    // Only rebuild if needed
-    if (_tabController.indexIsChanging) {
-      setState(() {});
-    }
-  }
-
-  void _onScroll() {
-    if (widget.scrollController.position.userScrollDirection == ScrollDirection.reverse && _showFab) {
-      setState(() => _showFab = false);
-    } else if (widget.scrollController.position.userScrollDirection == ScrollDirection.forward && !_showFab) {
-      setState(() => _showFab = true);
-    }
-  }
 
   void _showCateringForm(BuildContext context, WidgetRef ref, Map<String, dynamic> package) {
     final theme = Theme.of(context);
@@ -136,6 +98,220 @@ class _CateringViewState extends ConsumerState<CateringView> with SingleTickerPr
         );
       },
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Catering Services'),
+        elevation: 0,
+      ),
+      body: ListView(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(20),
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          // Header
+          Text(
+            'Catering Services',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Perfect for events, parties, and corporate meetings',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.7),
+            ),
+          ),
+          const SizedBox(height: 24),
+          
+          // Catering packages grid
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final screenWidth = constraints.maxWidth;
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: screenWidth > 600 ? 2 : 1,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: screenWidth > 600 ? 0.85 : 1.2,
+                ),
+                itemCount: _cateringPackages.length,
+                itemBuilder: (context, index) {
+                  final package = _cateringPackages[index];
+                  
+                  return Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: InkWell(
+                      onTap: () => _showCateringForm(context, ref, package),
+                      borderRadius: BorderRadius.circular(16),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              package['icon'],
+                              size: 48,
+                              color: theme.colorScheme.primary,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              package['title'],
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              package['description'],
+                              style: theme.textTheme.bodyMedium,
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Starting from',
+                              style: TextStyle(
+                                fontSize: 12,
+                              ),
+                            ),
+                            Text(
+                              package['price'],
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () => _showCateringForm(context, ref, package),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: colorScheme.primary,
+                                  foregroundColor: colorScheme.onPrimary,
+                                ),
+                                child: const Text('Order Now'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            }
+          ),
+          
+          const SizedBox(height: 30),
+          
+          // Custom catering form teaser
+          Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            color: theme.colorScheme.primaryContainer,
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Need Something Custom?',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Tell us about your event and we\'ll create the perfect menu',
+                    style: TextStyle(
+                      color: theme.colorScheme.onPrimaryContainer.withOpacity(0.8),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      GoRouter.of(context).pushNamed(AppRoute.cateringQuote.name);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primary,
+                      foregroundColor: theme.colorScheme.onPrimary,
+                    ),
+                    icon: const Icon(Icons.edit_note),
+                    label: const Text('Request Custom Quote'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A screen for creating and managing catering quote requests.
+class QuoteScreen extends ConsumerStatefulWidget {
+  const QuoteScreen({Key? key}) : super(key: key);
+
+  @override
+  ConsumerState<QuoteScreen> createState() => _QuoteScreenState();
+}
+
+class _QuoteScreenState extends ConsumerState<QuoteScreen> {
+  final TextEditingController _eventTypeController = TextEditingController();
+  final TextEditingController _customPersonasController = TextEditingController();
+  final TextEditingController _adicionalesController = TextEditingController();
+  final TextEditingController _itemNameController = TextEditingController();
+  final TextEditingController _itemDescriptionController = TextEditingController();
+  final TextEditingController _quantityController = TextEditingController();
+  
+  final _scrollController = ScrollController();
+  bool _showFab = true;
+  
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+  
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _eventTypeController.dispose();
+    _customPersonasController.dispose();
+    _adicionalesController.dispose();
+    _itemNameController.dispose();
+    _itemDescriptionController.dispose();
+    _quantityController.dispose();
+    super.dispose();
+  }
+  
+  void _onScroll() {
+    if (_scrollController.position.userScrollDirection == ScrollDirection.reverse && _showFab) {
+      setState(() => _showFab = false);
+    } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward && !_showFab) {
+      setState(() => _showFab = true);
+    }
   }
 
   void _showQuoteForm(BuildContext context, WidgetRef ref) {
@@ -334,222 +510,60 @@ class _CateringViewState extends ConsumerState<CateringView> with SingleTickerPr
     
     GoRouter.of(context).goNamed(AppRoute.homecart.name, extra: 'quote');
   }
-
-  // Builds the menu packages tab content
-  Widget _buildCateringPackagesTab() {
-    final theme = Theme.of(context);
-    
-    return ListView(
-      controller: widget.scrollController,
-      padding: const EdgeInsets.all(20),
-      physics: const AlwaysScrollableScrollPhysics(),
-      children: [
-        // Header
-        Text(
-          'Catering Services',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Perfect for events, parties, and corporate meetings',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withOpacity(0.7),
-          ),
-        ),
-        const SizedBox(height: 24),
-        
-        // Catering packages grid
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final screenWidth = constraints.maxWidth;
-            return GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: screenWidth > 600 ? 2 : 1,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: screenWidth > 600 ? 0.85 : 1.2,
-              ),
-              itemCount: _cateringPackages.length,
-              itemBuilder: (context, index) {
-                final package = _cateringPackages[index];
-                
-                return Card(
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: InkWell(
-                    onTap: () => _showCateringForm(context, ref, package),
-                    borderRadius: BorderRadius.circular(16),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            package['icon'],
-                            size: 48,
-                            color: theme.colorScheme.primary,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            package['title'],
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'Starting from',
-                            style: TextStyle(
-                              fontSize: 12,
-                            ),
-                          ),
-                          Text(
-                            package['price'],
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          OutlinedButton(
-                            onPressed: () => _showCateringForm(context, ref, package),
-                            child: const Text('Request Quote'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            );
-          }
-        ),
-        
-        const SizedBox(height: 30),
-        
-        // Custom catering form teaser
-        Card(
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          color: theme.colorScheme.primaryContainer,
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Need Something Custom?',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onPrimaryContainer,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Tell us about your event and we\'ll create the perfect menu',
-                  style: TextStyle(
-                    color: theme.colorScheme.onPrimaryContainer.withOpacity(0.8),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // Switch to the quote tab
-                    _tabController.animateTo(1);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary,
-                    foregroundColor: theme.colorScheme.onPrimary,
-                  ),
-                  icon: const Icon(Icons.edit_note),
-                  label: const Text('Create Custom Order'),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Builds the custom quote tab content
-  Widget _buildQuoteTab() {
+  
+  Widget _buildEmptyState() {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final quote = ref.watch(manualQuoteProvider);
     
-    if (quote == null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceVariant,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.request_quote,
-                  size: 40,
-                  color: colorScheme.primary,
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceVariant,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.request_quote,
+                size: 40,
+                color: colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'No hay cotización iniciada',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Inicia una cotización agregando los detalles del evento',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 32),
+            FilledButton.icon(
+              onPressed: () => _showQuoteForm(context, ref),
+              icon: const Icon(Icons.add),
+              label: const Text('Iniciar Cotización'),
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
                 ),
               ),
-              const SizedBox(height: 24),
-              Text(
-                'No hay cotización iniciada',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Inicia una cotización agregando los detalles del evento',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 32),
-              FilledButton.icon(
-                onPressed: () => _showQuoteForm(context, ref),
-                icon: const Icon(Icons.add),
-                label: const Text('Iniciar Cotización'),
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-      );
-    }
-    
-    return ListView(
-      controller: widget.scrollController,
-      padding: const EdgeInsets.all(16),
-      children: [
-        QuoteOrderFormView(
-          quote: quote,
-          onEdit: () => _showQuoteForm(context, ref),
-          onConfirm: _confirmQuoteOrder,
-        ),
-      ],
+      ),
     );
   }
 
@@ -557,39 +571,17 @@ class _CateringViewState extends ConsumerState<CateringView> with SingleTickerPr
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final quote = ref.watch(manualQuoteProvider);
+    final hasItems = quote != null && 
+                     ((quote.dishes.isNotEmpty) || 
+                     ((quote.peopleCount ?? 0) > 0 && !quote.eventType.isEmpty));
     
-    final quoteOrder = ref.watch(manualQuoteProvider);
-    final hasQuoteItems = quoteOrder != null && 
-                         ((quoteOrder.dishes.isNotEmpty) || 
-                         ((quoteOrder.peopleCount ?? 0) > 0 && !quoteOrder.eventType.isEmpty));
-
     return Scaffold(
       appBar: AppBar(
+        title: const Text('Custom Quote Request'),
         elevation: 0,
-        scrolledUnderElevation: 2,
-        title: const Text('Catering Services'),
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: colorScheme.primary,
-          unselectedLabelColor: colorScheme.onSurfaceVariant,
-          indicatorColor: colorScheme.primary,
-          dividerColor: colorScheme.outline.withOpacity(0.2),
-          labelStyle: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-          tabs: const [
-            Tab(
-              icon: Icon(Icons.restaurant_menu),
-              text: 'Catering Packages',
-            ),
-            Tab(
-              icon: Icon(Icons.request_quote),
-              text: 'Custom Quote',
-            ),
-          ],
-        ),
         actions: [
-          if (_tabController.index == 1 && hasQuoteItems)
+          if (hasItems)
             Padding(
               padding: const EdgeInsets.only(right: 16.0),
               child: FilledButton.icon(
@@ -604,14 +596,17 @@ class _CateringViewState extends ConsumerState<CateringView> with SingleTickerPr
             ),
         ],
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildCateringPackagesTab(),
-          _buildQuoteTab(),
-        ],
-      ),
-      floatingActionButton: _tabController.index == 1 && hasQuoteItems
+      body: quote == null
+          ? _buildEmptyState()
+          : Padding(
+              padding: const EdgeInsets.all(16),
+              child: QuoteOrderFormView(
+                quote: quote,
+                onEdit: () => _showQuoteForm(context, ref),
+                onConfirm: _confirmQuoteOrder,
+              ),
+            ),
+      floatingActionButton: hasItems 
           ? AnimatedSlide(
               duration: const Duration(milliseconds: 300),
               offset: _showFab ? const Offset(0, 0) : const Offset(0, 2),
@@ -619,7 +614,7 @@ class _CateringViewState extends ConsumerState<CateringView> with SingleTickerPr
                 duration: const Duration(milliseconds: 300),
                 opacity: _showFab ? 1.0 : 0.0,
                 child: FloatingActionButton.extended(
-                  heroTag: 'add_quote_item',
+                  heroTag: 'add_item',
                   onPressed: _showAddItemDialog,
                   backgroundColor: colorScheme.primaryContainer,
                   foregroundColor: colorScheme.onPrimaryContainer,

@@ -69,7 +69,8 @@ class _AllDishesMenuHomeScreenState extends ConsumerState<AllDishesMenuHomeScree
                 index: index,
                 dishData: dish,
                 // Don't hide ingredients in the details view
-                hideIngredients: true,
+                hideIngredients: true, 
+                key: ValueKey(index),
               ),
             );
           },

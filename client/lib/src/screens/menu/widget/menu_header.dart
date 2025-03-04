@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/QR/screens/reservation/reservation_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/reservation/reservation_screen.dart';
 // Add this import for navigation
 
 class MenuHeader extends StatelessWidget {
@@ -39,7 +39,7 @@ class MenuHeader extends StatelessWidget {
       top: -clampedParallaxOffset,
       left: 0,
       right: 0,
-      height: 200, // Fixed height for header
+      height: 200,
       child: AnimatedScale(
         duration: const Duration(milliseconds: 100),
         scale: headerScaleValue,
@@ -114,13 +114,62 @@ class MenuHeader extends StatelessWidget {
               ),
             ),
 
-            // Add reservation FAB-style button
+            // Centered reservation button with animation
             Positioned(
-              bottom: 16,
-              right: 24,
-              child: _buildReservationButton(context, colorScheme),
+              top: 80, // Position in the middle of the header
+              left: 0,
+              right: 0,
+              child: Center(
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.0, end: 1.0),
+                  duration: const Duration(milliseconds: 800),
+                  curve: Curves.easeOutBack,
+                  builder: (context, value, child) {
+                    return Transform.scale(
+                      scale: value,
+                      child: child,
+                    );
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: [
+                        BoxShadow(
+                          color: colorScheme.shadow.withOpacity(0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: FilledButton.icon(
+                      icon: const Icon(Icons.calendar_month_rounded, size: 24),
+                      label: const Text(
+                        'Reserve Your Table',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ReservationScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
             ),
-            
+
             // Scroll progress indicator - wrap with RepaintBoundary
             Positioned(
               bottom: 0,
@@ -143,35 +192,5 @@ class MenuHeader extends StatelessWidget {
     );
   }
 
-  Widget _buildReservationButton(BuildContext context, ColorScheme colorScheme) {
-    return ElevatedButton.icon(
-      icon: Icon(
-        Icons.calendar_month_rounded,
-        color: colorScheme.onPrimary,
-        size: 20,
-      ),
-      label: Text(
-        'Reserve Table',
-        style: TextStyle(
-          color: colorScheme.onPrimary,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-        ),
-        elevation: 2,
-        backgroundColor: colorScheme.primary,
-        shadowColor: colorScheme.shadow.withOpacity(0.3),
-      ),
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ReservationScreen()),
-        );
-      },
-    );
-  }
+  // Remove the _buildReservationButton method as it's no longer needed
 }

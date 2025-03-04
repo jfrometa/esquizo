@@ -6,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/authenticated_profile_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/QR/qr_code_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/catering/screens/catering_menu/catering_menu_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/menu_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/addToOrder/add_to_order_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/services/admin_providers.dart';
@@ -67,6 +68,8 @@ enum AppRoute {
   catering,
   cateringMenu,
   caterings, // If both are used
+  cateringMenuE, // Add this route
+  cateringQuote, // Add this route
   landing,
   local,
   adminPanel,
@@ -174,6 +177,19 @@ GoRouter goRouter(Ref ref) {
 
 List<RouteBase> _getNestedRoutes(String path) {
   switch (path) {
+    case '/':
+  return [     // ... your existing routes
+    GoRoute(
+      path: '/catering-menu',
+      name: AppRoute.cateringMenuE.name,
+      builder: (context, state) => const CateringMenuScreen(),
+    ),
+    GoRoute(
+      path: '/catering-quote',
+      name: AppRoute.cateringQuote.name, 
+      builder: (context, state) => const QuoteScreen(),
+    ),
+  ];
     case '/menu':
       return [
         GoRoute(

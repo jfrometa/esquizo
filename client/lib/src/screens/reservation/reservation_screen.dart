@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 
 // Reservation Screen
 class ReservationScreen extends StatelessWidget {
@@ -41,7 +42,7 @@ class ReservationScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Book in advance to ensure your spot at La Redonda',
+                      'Book in advance to ensure your spot at Kako',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onPrimaryContainer,
                       ),
@@ -298,8 +299,12 @@ class ReservationScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
+              // Close dialog and return to menu
+              Navigator.of(context).pop(); // Close dialog
+              // Navigator.of(context).pop(); // Return to menu
+              GoRouter.of(context).pop();
+              // Add haptic feedback for confirmation
+              HapticFeedback.mediumImpact();
             },
             child: const Text('Done'),
           ),

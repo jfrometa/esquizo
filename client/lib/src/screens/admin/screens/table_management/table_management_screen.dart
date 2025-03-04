@@ -1159,7 +1159,7 @@ class _AddEditTableDialogState extends ConsumerState<AddEditTableDialog> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _buildShapeOption(TableShape.rectangle, 'Rectangular'),
-                      _buildShapeOption(TableShape.round, 'Redonda'),
+                      _buildShapeOption(TableShape.round, 'Kako'),
                       _buildShapeOption(TableShape.oval, 'Ovalada'),
                     ],
                   ),
