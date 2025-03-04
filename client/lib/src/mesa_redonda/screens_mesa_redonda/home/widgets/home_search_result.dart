@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
-import '../../../dishes/dish_card.dart';
+import '../../../dishes/cards/dish_card.dart';
 
 class HomeSearchResults extends StatelessWidget {
   final List<dynamic> filteredDishes;

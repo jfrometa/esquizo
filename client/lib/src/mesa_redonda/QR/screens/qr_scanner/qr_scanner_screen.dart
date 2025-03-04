@@ -7,7 +7,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:flutter/services.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/QR/models/qr_code_data.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/QR/screens/table_menu_screen.dart';
-import '../../providers/provider.dart';
+import '../../../providers/provider.dart';
 
 class QRScannerScreen extends ConsumerStatefulWidget {
   const QRScannerScreen({Key? key}) : super(key: key);

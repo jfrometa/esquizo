@@ -6,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/features/authentication/presentation/authenticated_profile_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/QR/qr_code_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/QR/screens/menu/menu_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/addToOrder/add_to_order_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/admin/services/admin_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/cart/cart_screen.dart';
@@ -14,6 +15,7 @@ import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering/
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/catering_quote/manual_quote_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/checkout/checkout_creen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/all_dishes_menu_home/all_dishes_menu_home_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/dishes/dish_details/dish_details_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_plan_details.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/meal_plan/meal_subscription.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/screens_mesa_redonda/categories.dart';
@@ -227,7 +229,7 @@ List<RouteBase> _getNestedRoutes(String path) {
           pageBuilder: (context, state) {
             final itemId = state.pathParameters['itemId']!;
             return MaterialPage(
-              child: AddToOrderScreen(
+              child: DishDetailsScreen(
                 index: int.parse(itemId),
               ),
             );
@@ -269,7 +271,7 @@ List<RouteBase> _getNestedRoutes(String path) {
               pageBuilder: (context, state) {
                 final itemId = state.pathParameters['dishId']!;
                 return MaterialPage(
-                  child: AddToOrderScreen(
+                  child: DishDetailsScreen(
                     index: int.parse(itemId),
                   ),
                 );
@@ -367,7 +369,7 @@ Widget _getDestinationScreen(String path) {
     case '/local':
       return const QRCodeScreen(); //const ResponsiveLandingPage();
     case '/menu':
-      return const MenuHome();
+      return const MenuScreen(); //const MenuHome();
     case '/carrito':
       return const CartScreen(isAuthenticated: true);
     case '/cuenta':

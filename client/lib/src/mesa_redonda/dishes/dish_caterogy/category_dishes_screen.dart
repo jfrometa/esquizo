@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/QR/providers/dish_providers.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/QR/screens/dish_details/dish_details_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/dishes/dish_card.dart';
-import '../models/qr_code_data.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/dish_providers.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/dishes/cards/dish_card.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/dishes/dish_details/dish_details_screen.dart';
+import '../../QR/models/qr_code_data.dart';
 
 // Category Dishes Screen
 class CategoryDishesScreen extends ConsumerWidget {
@@ -12,11 +12,11 @@ class CategoryDishesScreen extends ConsumerWidget {
   final QRCodeData tableData;
   
   const CategoryDishesScreen({
-    Key? key,
+    super.key,
     required this.categoryId,
     required this.categoryName,
     required this.tableData,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -64,10 +64,7 @@ class CategoryDishesScreen extends ConsumerWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => DishDetailScreen(
-                          dish: dish,
-                          tableData: tableData,
-                        ),
+                        builder: (context) => DishDetailsScreen(index: 1 ),
                       ),
                     );
                   },

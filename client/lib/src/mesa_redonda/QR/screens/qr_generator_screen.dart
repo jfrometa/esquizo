@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/QR/models/restaurant_table.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/QR/providers/provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/admin/models/table_model.dart';
 import '../models/qr_code_data.dart';
 

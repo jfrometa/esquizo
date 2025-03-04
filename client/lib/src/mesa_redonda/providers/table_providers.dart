@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/admin/models/table_model.dart';
-import '../models/restaurant_table.dart';
+import '../QR/models/restaurant_table.dart';
 
 final tablesProvider = FutureProvider<List<RestaurantTable>>((ref) async {
   await Future.delayed(const Duration(milliseconds: 800));

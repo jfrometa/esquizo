@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/QR/models/food_dish.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/QR/providers/provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/QR/screens/dish_details/dish_details_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/providers/provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/QR/screens/order/order_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/dishes/dish_card.dart';
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/dishes/dish_details/dish_details_screen.dart';
+
+import 'package:starter_architecture_flutter_firebase/src/mesa_redonda/dishes/cards/dish_card.dart';
 import '../models/qr_code_data.dart';
-import 'category_dishes_screen.dart';
+import '../../dishes/dish_caterogy/category_dishes_screen.dart';
 
 // Table Menu Screen (after scanning)
 class TableMenuScreen extends ConsumerWidget {
@@ -172,10 +173,7 @@ class TableMenuScreen extends ConsumerWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => DishDetailScreen(
-                                  dish: dish,
-                                  tableData: tableData,
-                                ),
+                                builder: (context) => DishDetailsScreen(index:index)
                               ),
                             );
                           },
