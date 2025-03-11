@@ -12,31 +12,6 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/services
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/services/staff_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/services/table_service.dart';
 
-// // Initialize Firebase instances
-// final firebaseFirestoreProvider = Provider<CloudFireStore.FirebaseFirestore>((ref) {
-//   return CloudFireStore.FirebaseFirestore.instance;
-// });
-
-// Service providers
-// final tableServiceProvider = Provider<TableService>((ref) {
-//   // final firestore = ref.watch(firebaseFirestoreProvider);
-//   return TableService();
-// });
-
-
-
-
-// final printServiceProvider = Provider<PrintService>((ref) {
-//   return PrintService();
-// });
-
-
-// Order-related stream providers
-// final activeOrdersProvider = StreamProvider<List<Order>>((ref) {
-//   final orderService = ref.watch(orderServiceProvider);
-//   // Cast the stream to ensure type compatibility between different Order definitions
-//   return orderService.getActiveOrdersStream()  ;
-// });
 
 final orderByIdProvider = FutureProvider.family<Order?, String>((ref, orderId) {
   final orderService = ref.watch(orderServiceProvider);
