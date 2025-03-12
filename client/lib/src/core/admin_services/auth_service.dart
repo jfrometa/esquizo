@@ -15,14 +15,14 @@
 // }
 
 
-class UserProfile {
-  final String uid;
-  final String email;
-  final String? displayName;
+// class UserProfile {
+//   final String uid;
+//   final String email;
+//   final String? displayName;
   
-  UserProfile({
-    required this.uid,
-    required this.email,
-    this.displayName,
-  });
-}
+//   UserProfile({
+//     required this.uid,
+//     required this.email,
+//     this.displayName,
+//   });
+// }

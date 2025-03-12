@@ -30,13 +30,13 @@
 //   TableStatus _parseTableStatus(String status) {
 //     switch (status) {
 //       case 'occupied':
-//         return TableStatus.occupied;
+//         return TableStatusEnum.occupied;
 //       case 'reserved':
-//         return TableStatus.reserved;
+//         return TableStatusEnum.reserved;
 //       case 'maintenance':
-//         return TableStatus.maintenance;
+//         return TableStatusEnum.maintenance;
 //       default:
-//         return TableStatus.available;
+//         return TableStatusEnum.available;
 //     }
 //   }
   
@@ -111,7 +111,7 @@
     
 //     if (orderId != null) {
 //       updates['attributes.currentOrderId'] = orderId;
-//     } else if (status == TableStatus.available) {
+//     } else if (status == TableStatusEnum.available) {
 //       updates['attributes.currentOrderId'] = FieldValue.delete();
 //     }
     

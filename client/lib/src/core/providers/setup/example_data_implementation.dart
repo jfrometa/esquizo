@@ -1,17 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart' as CloudFireStore;
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/business_config_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/resource_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/order_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/reservation_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/admin_user.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 
-part 'example_data_implementation.g.dart';
+// part 'example_data_implementation.g.dart';
 
 /// Service for initializing example data for different business types
 class ExampleDataService {
@@ -425,7 +422,7 @@ class ExampleDataService {
           paymentMethod: 'cash',
           paymentStatus: 'pending',
           totalAmount: total,
-          timestamp: CloudFireStore.Timestamp.now(),
+          // timestamp: CloudFireStore.Timestamp.now(),
           tableNumber: i + 1,
           tableId: tableId,
           createdAt: createdAt,
@@ -684,7 +681,7 @@ class ExampleDataService {
         userId: 'sample_user',
         resourceId: roomId,
         items: orderItems,
-        status: 'confirmed',
+        status: OrderStatus.confirmed,
         subtotal: subtotal,
         tax: tax,
         total: total,
@@ -692,6 +689,7 @@ class ExampleDataService {
         isDelivery: false,
         peopleCount: 2,
         createdAt: now.subtract(Duration(days: 5 - i)),
+        paymentMethod: '',
       );
       
       await _firestore

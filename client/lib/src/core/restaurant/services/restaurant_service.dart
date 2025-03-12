@@ -12,7 +12,6 @@ import 'dart:async';
  import 'package:starter_architecture_flutter_firebase/src/core/admin_services/order_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/product_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/staff_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/table_service.dart';
 
 
 final orderByIdProvider = FutureProvider.family<Order?, String>((ref, orderId) {
@@ -27,8 +26,9 @@ final ordersByTableProvider = StreamProvider.family<List<Order>, String>((ref, t
 
 final pendingOrdersProvider = StreamProvider<List<Order>>((ref) {
   final orderService = ref.watch(orderServiceProvider);
-  return orderService.getOrdersByStatusStream(OrderStatus.pending)  ;
+  return orderService.getOrdersByStatusStream(OrderStatus.pending);
 });
+
 
 final preparingOrdersProvider = StreamProvider<List<Order>>((ref) {
   final orderService = ref.watch(orderServiceProvider);
@@ -40,16 +40,6 @@ final readyOrdersProvider = StreamProvider<List<Order>>((ref) {
   return orderService.getOrdersByStatusStream(OrderStatus.readyForDelivery)  ;
 });
 
-// Menu-related providers
-// final menuCategoriesProvider = FutureProvider<List<MenuCategory>>((ref) {
-//   final productService = ref.watch(productServiceProvider);
-//   return productService.getCategories() as FutureOr<List<MenuCategory>>;
-// });
-
-// final menuProductsProvider = FutureProvider<List<MenuItem>>((ref) {
-//   final productService = ref.watch(productServiceProvider);
-//   return productService.getProducts() as FutureOr<List<MenuItem>>;
-// });
 
 final productsByCategoryProvider = FutureProvider.family<List<MenuItem>, String>((ref, categoryId) {
   final productService = ref.watch(productServiceProvider);

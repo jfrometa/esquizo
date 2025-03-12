@@ -43,8 +43,8 @@ final tablesStatusProvider = StreamProvider<List<RestaurantTable>>((ref) {
 final availableTablesProvider = FutureProvider<List<RestaurantTable>>((ref) async {
   final allTables = await ref.watch(tablesStatusProvider.future);
   return allTables.where((table) => 
-    table.status == TableStatus.available || 
-    table.status == TableStatus.reserved
+    table.status == TableStatusEnum.available || 
+    table.status == TableStatusEnum.reserved
   ).toList();
 });
 

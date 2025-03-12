@@ -26,7 +26,7 @@ class _TableFormState extends ConsumerState<TableForm> {
   // Form state
   int _tableNumber = 1;
   int _capacity = 4;
-  restairant_table.TableStatus _status = restairant_table.TableStatus.available;
+  restairant_table.TableStatus _status = restairant_table.TableStatusEnum.available;
   Map<String, double> _position = {'x': 0, 'y': 0};
   String? _currentOrderId;
 
@@ -143,7 +143,7 @@ class _TableFormState extends ConsumerState<TableForm> {
                 labelText: 'Status',
                 border: OutlineInputBorder(),
               ),
-              items: restairant_table.TableStatus.values.map((status) {
+              items: restairant_table.TableStatusEnum.values.map((status) {
                 return DropdownMenuItem<restairant_table.TableStatus>(
                   value: status,
                   child: Text(_getStatusText(status)),
@@ -332,15 +332,15 @@ class _TableFormState extends ConsumerState<TableForm> {
   
   Color _getStatusColor(restairant_table.TableStatus status) {
     switch (status) {
-      case restairant_table.TableStatus.available:
+      case restairant_table.TableStatusEnum.available:
         return Colors.green;
-      case restairant_table.TableStatus.occupied:
+      case restairant_table.TableStatusEnum.occupied:
         return Colors.red;
-      case restairant_table.TableStatus.reserved:
+      case restairant_table.TableStatusEnum.reserved:
         return Colors.orange;
-      case restairant_table.TableStatus.maintenance:
+      case restairant_table.TableStatusEnum.maintenance:
         return Colors.blue;
-      case restairant_table.TableStatus.cleaning:
+      case restairant_table.TableStatusEnum.cleaning:
         // TODO: Handle this case.
        return Colors.yellow;
     }
@@ -348,15 +348,15 @@ class _TableFormState extends ConsumerState<TableForm> {
   
   String _getStatusText(restairant_table.TableStatus status) {
     switch (status) {
-      case restairant_table.TableStatus.available:
+      case restairant_table.TableStatusEnum.available:
         return 'Available';
-      case restairant_table.TableStatus.occupied:
+      case restairant_table.TableStatusEnum.occupied:
         return 'Occupied';
-      case restairant_table.TableStatus.reserved:
+      case restairant_table.TableStatusEnum.reserved:
         return 'Reserved';
-      case restairant_table.TableStatus.maintenance:
+      case restairant_table.TableStatusEnum.maintenance:
         return 'Maintenance';
-      case restairant_table.TableStatus.cleaning:
+      case restairant_table.TableStatusEnum.cleaning:
         // TODO: Handle this case.
         return 'Cleaning';
     }

@@ -77,9 +77,9 @@ class TableService {
       final tables = snapshot.docs.map((doc) => RestaurantTable.fromFirestore(doc)).toList();
       
       final totalTables = tables.where((table) => table.isActive).length;
-      final occupiedTables = tables.where((table) => table.status == TableStatus.occupied).length;
-      final reservedTables = tables.where((table) => table.status == TableStatus.reserved).length;
-      final cleaningTables = tables.where((table) => table.status == TableStatus.maintenance).length;
+      final occupiedTables = tables.where((table) => table.status == TableStatusEnum.occupied).length;
+      final reservedTables = tables.where((table) => table.status == TableStatusEnum.reserved).length;
+      final cleaningTables = tables.where((table) => table.status == TableStatusEnum.maintenance).length;
       
       return TableStats(
         totalTables: totalTables,
@@ -98,7 +98,7 @@ class TableService {
     }
   }
   
-  Future<void> updateTableStatus(String tableId, TableStatus status, [String? orderId]) async {
+  Future<void> updateTableStatus(String tableId, TableStatusEnum status, [String? orderId]) async {
     final updates = {
       'status': status.toString().split('.').last,
       'updatedAt': FieldValue.serverTimestamp(),
@@ -106,7 +106,7 @@ class TableService {
     
     if (orderId != null) {
       updates['currentOrderId'] = orderId;
-    } else if (status == TableStatus.available) {
+    } else if (status == TableStatusEnum.available) {
       // Clear the current order ID if the table is available
       updates['currentOrderId'] = FieldValue.delete();
     }

@@ -4,7 +4,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/o
  
 
 // Table status enum 
-enum TableStatus {
+enum TableStatusEnum {
   available,    // Table is free and can be occupied
   occupied,     // Table is currently in use
   reserved,     // Table has been reserved for future use
@@ -25,7 +25,7 @@ class RestaurantTable {
   final String businessId;
   final int number;
   final int capacity;
-  final TableStatus status;
+  final TableStatusEnum status;
   final String? currentOrderId;
   final String? area;         // Section of restaurant (e.g., "Terrace", "Indoor")
   final String? description;  // Additional description
@@ -41,7 +41,7 @@ class RestaurantTable {
     required this.businessId,
     required this.number,
     required this.capacity,
-    this.status = TableStatus.available,
+    this.status = TableStatusEnum.available,
     this.currentOrderId,
     this.area,
     this.description,
@@ -128,7 +128,7 @@ class RestaurantTable {
     String? businessId,
     int? number,
     int? capacity,
-    TableStatus? status,
+    TableStatusEnum? status,
     String? currentOrderId,
     String? area,
     String? description,
@@ -251,23 +251,23 @@ class StaffMember {
   }
   
   // Helper method to parse table status from string
-  TableStatus _parseTableStatus(dynamic status) {
-    if (status == null) return TableStatus.available;
-    if (status is TableStatus) return status;
+  TableStatusEnum _parseTableStatus(dynamic status) {
+    if (status == null) return TableStatusEnum.available;
+    if (status is TableStatusEnum) return status;
     
     final statusStr = status.toString();
     
     switch (statusStr) {
       case 'occupied':
-        return TableStatus.occupied;
+        return TableStatusEnum.occupied;
       case 'reserved':
-        return TableStatus.reserved;
+        return TableStatusEnum.reserved;
       case 'maintenance':
-        return TableStatus.maintenance;
+        return TableStatusEnum.maintenance;
       case 'cleaning':
-        return TableStatus.cleaning;
+        return TableStatusEnum.cleaning;
       case 'available':
       default:
-        return TableStatus.available;
+        return TableStatusEnum.available;
     }
   }

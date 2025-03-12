@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/firebase_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_provider.dart';
 
 /// Generic catalog item model that can be extended for specific use cases
 class CatalogItem {
@@ -148,7 +150,128 @@ class CatalogService {
               .toList();
         });
   }
-  
-  // Additional methods for CRUD operations
-  // ...
+
+// Add these methods to your CatalogService class
+
+// Add a new item
+Future<void> addItem(CatalogItem item) async {
+  try {
+    final docRef = item.id.isEmpty 
+        ? _itemsCollection.doc() 
+        : _itemsCollection.doc(item.id);
+    
+    final newItem = item.id.isEmpty 
+        ? CatalogItem(
+            id: docRef.id,
+            name: item.name,
+            description: item.description,
+            price: item.price,
+            imageUrl: item.imageUrl,
+            categoryId: item.categoryId,
+            isAvailable: item.isAvailable,
+            metadata: item.metadata,
+          )
+        : item;
+    
+    await docRef.set(newItem.toFirestore());
+  } catch (e) {
+    print('Error adding item: $e');
+    throw e;
+  }
 }
+
+// Update an existing item
+Future<void> updateItem(CatalogItem item) async {
+  try {
+    await _itemsCollection.doc(item.id).update(item.toFirestore());
+  } catch (e) {
+    print('Error updating item: $e');
+    throw e;
+  }
+}
+
+// Delete an item
+Future<void> deleteItem(String itemId) async {
+  try {
+    await _itemsCollection.doc(itemId).delete();
+  } catch (e) {
+    print('Error deleting item: $e');
+    throw e;
+  }
+}
+
+// Add a new category
+Future<void> addCategory(CatalogCategory category) async {
+  try {
+    final docRef = category.id.isEmpty 
+        ? _categoriesCollection.doc() 
+        : _categoriesCollection.doc(category.id);
+    
+    final newCategory = category.id.isEmpty 
+        ? CatalogCategory(
+            id: docRef.id,
+            name: category.name,
+            imageUrl: category.imageUrl,
+            sortOrder: category.sortOrder,
+            isActive: category.isActive,
+          )
+        : category;
+    
+    await docRef.set(newCategory.toFirestore());
+  } catch (e) {
+    print('Error adding category: $e');
+    throw e;
+  }
+}
+
+// Update an existing category
+Future<void> updateCategory(CatalogCategory category) async {
+  try {
+    await _categoriesCollection.doc(category.id).update(category.toFirestore());
+  } catch (e) {
+    print('Error updating category: $e');
+    throw e;
+  }
+}
+
+// Delete a category
+Future<void> deleteCategory(String categoryId) async {
+  try {
+    await _categoriesCollection.doc(categoryId).delete();
+  } catch (e) {
+    print('Error deleting category: $e');
+    throw e;
+  }
+}
+
+}
+
+// Additional providers used in the admin panel screens
+
+
+
+
+
+// Provider for current catalog type
+// final currentCatalogTypeProvider = StateProvider<String>((ref) => 'menu');
+
+// Provider for catalog items
+// final catalogItemsProvider = StreamProvider.family<List<CatalogItem>, String>((ref, catalogType) {
+//   final catalogService = ref.watch(catalogServiceProvider(catalogType));
+//   return catalogService.getItems();
+// });
+
+// // Provider for catalog categories
+// final catalogCategoriesProvider = StreamProvider.family<List<CatalogCategory>, String>((ref, catalogType) {
+//   final catalogService = ref.watch(catalogServiceProvider(catalogType));
+//   return catalogService.getCategories();
+// });
+
+
+
+// // Provider for current business ID
+// final currentBusinessIdProvider = Provider<String>((ref) {
+//   // This could be fetched from user settings or authentication
+//   // For now, return a placeholder or default value
+//   return 'default_business_id';
+// });

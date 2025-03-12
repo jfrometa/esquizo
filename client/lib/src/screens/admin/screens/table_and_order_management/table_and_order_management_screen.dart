@@ -78,7 +78,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
         latitude: '0.0',
         longitude: '0.0',
         paymentStatus: 'pending',
-        timestamp: CloudFireStore.Timestamp.now(),
+        // timestamp: CloudFireStore.Timestamp.now(),
         orderDate: DateTime.now(),
         location: <String, dynamic>{},
       );
@@ -1272,7 +1272,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
         latitude: _currentOrder.latitude ?? '0.0',
         longitude: _currentOrder.longitude ?? '0.0',
         paymentStatus: _currentOrder.paymentStatus ?? 'pending',
-        timestamp: _currentOrder.timestamp ?? CloudFireStore.Timestamp.now(),
+        // timestamp: _currentOrder.timestamp ?? CloudFireStore.Timestamp.now(),
         orderDate: _currentOrder.orderDate ?? DateTime.now(),
         location: _currentOrder.location ?? <String, dynamic>{},
       );
@@ -1342,7 +1342,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
         latitude: widget.existingOrder?.latitude ?? '0.0',
         longitude: widget.existingOrder?.longitude ?? '0.0',
         paymentStatus: widget.existingOrder?.paymentStatus ?? 'pending',
-        timestamp: widget.existingOrder?.timestamp ?? CloudFireStore.Timestamp.now(),
+        // timestamp: widget.existingOrder?.timestamp ?? CloudFireStore.Timestamp.now(),
         orderDate: widget.existingOrder?.orderDate ?? DateTime.now(),
         location: widget.existingOrder?.location ?? <String, dynamic>{},
       );
@@ -1353,10 +1353,10 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
         await orderService.createOrder(orderToSave);
         
         // If this is a new order, update the table status
-        if (widget.table.status != TableStatus.occupied) {
+        if (widget.table.status != TableStatusEnum.occupied) {
           await tableService.updateTableStatus(
             widget.table.id, 
-            TableStatus.occupied, 
+            TableStatusEnum.occupied, 
             orderToSave.id,
           );
         }

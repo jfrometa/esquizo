@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; 
 import '../../services/auth_service.dart';
 
 // Provider for auth service
@@ -18,6 +18,13 @@ final currentUserIdProvider = Provider<String?>((ref) {
   return ref.watch(firebaseUserProvider).value?.uid;
 });
 
+
+final isCurrentUserProvider = FutureProvider.family<bool, String>((ref, email) async {
+  final currentUser = await ref.watch(currentUserProvider.future);
+  return currentUser?.email == email;
+});
+
+
 // Provider for current app user data
 final currentUserProvider = StreamProvider<AppUser?>((ref) {
   final authService = ref.watch(authServiceProvider);
@@ -30,11 +37,6 @@ final currentUserProvider = StreamProvider<AppUser?>((ref) {
   return authService.streamUserData(userId);
 });
 
-
-final isCurrentUserProvider = FutureProvider.family<bool, String>((ref, email) async {
-  final currentUser = await ref.watch(currentUserProvider.future);
-  return currentUser?.email == email;
-});
 
 // Provider to check if user has a specific role
 final hasRoleProvider = Provider.family<bool, String>((ref, role) {

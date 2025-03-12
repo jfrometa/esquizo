@@ -12,15 +12,15 @@
 // extension TableStatusExtension on TableStatus {
 //   String get name {
 //     switch (this) {
-//       case TableStatus.available:
+//       case TableStatusEnum.available:
 //         return 'available';
-//       case TableStatus.occupied:
+//       case TableStatusEnum.occupied:
 //         return 'occupied';
-//       case TableStatus.reserved:
+//       case TableStatusEnum.reserved:
 //         return 'reserved';
-//       case TableStatus.maintenance:
+//       case TableStatusEnum.maintenance:
 //         return 'maintenance';
-//       case TableStatus.cleaning:
+//       case TableStatusEnum.cleaning:
 //         return 'cleaning';
 //     }
 //   }
@@ -28,15 +28,15 @@
 //   static TableStatus fromString(String status) {
 //     switch (status) {
 //       case 'available':
-//         return TableStatus.available;
+//         return TableStatusEnum.available;
 //       case 'occupied':
-//         return TableStatus.occupied;
+//         return TableStatusEnum.occupied;
 //       case 'reserved':
-//         return TableStatus.reserved;
+//         return TableStatusEnum.reserved;
 //       case 'maintenance':
-//         return TableStatus.maintenance;
+//         return TableStatusEnum.maintenance;
 //       default:
-//         return TableStatus.available;
+//         return TableStatusEnum.available;
 //     }
 //   }
 // }
@@ -54,7 +54,7 @@
 //     required String businessId,
 //     required this.number,
 //     required this.capacity,
-//     this.status = TableStatus.available,
+//     this.status = TableStatusEnum.available,
 //     this.position = const {'x': 0, 'y': 0},
 //     this.currentOrderId,
 //   }) : super(
@@ -373,7 +373,7 @@
 //                         tooltip: 'Edit',
 //                         visualDensity: VisualDensity.compact,
 //                       ),
-//                       if (table.status != TableStatus.occupied)
+//                       if (table.status != TableStatusEnum.occupied)
 //                         IconButton(
 //                           icon: const Icon(Icons.delete, size: 20),
 //                           onPressed: () => _confirmDeleteTable(table),
@@ -518,7 +518,7 @@
             
 //             const SizedBox(height: 16),
             
-//             if (table.status == TableStatus.available || table.status == TableStatus.reserved) ...[
+//             if (table.status == TableStatusEnum.available || table.status == TableStatusEnum.reserved) ...[
 //               ElevatedButton.icon(
 //                 icon: const Icon(Icons.add_shopping_cart),
 //                 label: const Text('Create New Order'),
@@ -586,7 +586,7 @@
   
 //   Widget _buildStatusUpdateButton(Table table) {
 //     // If occupied, show different options
-//     if (table.status == TableStatus.occupied) {
+//     if (table.status == TableStatusEnum.occupied) {
 //       return OutlinedButton.icon(
 //         icon: const Icon(Icons.check_circle),
 //         label: const Text('Mark Available'),
@@ -656,7 +656,7 @@
 //           TextButton(
 //             onPressed: () {
 //               Navigator.pop(context);
-//               _updateTableStatus(table, TableStatus.available);
+//               _updateTableStatus(table, TableStatusEnum.available);
 //             },
 //             child: const Text('Confirm'),
 //           ),
@@ -674,7 +674,7 @@
 //           SimpleDialogOption(
 //             onPressed: () {
 //               Navigator.pop(context);
-//               _updateTableStatus(table, TableStatus.available);
+//               _updateTableStatus(table, TableStatusEnum.available);
 //             },
 //             child: const ListTile(
 //               leading: Icon(Icons.check_circle, color: Colors.green),
@@ -684,7 +684,7 @@
 //           SimpleDialogOption(
 //             onPressed: () {
 //               Navigator.pop(context);
-//               _updateTableStatus(table, TableStatus.reserved);
+//               _updateTableStatus(table, TableStatusEnum.reserved);
 //             },
 //             child: const ListTile(
 //               leading: Icon(Icons.schedule, color: Colors.orange),
@@ -694,7 +694,7 @@
 //           SimpleDialogOption(
 //             onPressed: () {
 //               Navigator.pop(context);
-//               _updateTableStatus(table, TableStatus.maintenance);
+//               _updateTableStatus(table, TableStatusEnum.maintenance);
 //             },
 //             child: const ListTile(
 //               leading: Icon(Icons.build, color: Colors.blue),
@@ -914,13 +914,13 @@
   
 //   Color _getStatusColor(TableStatus status) {
 //     switch (status) {
-//       case TableStatus.available:
+//       case TableStatusEnum.available:
 //         return Colors.green;
-//       case TableStatus.occupied:
+//       case TableStatusEnum.occupied:
 //         return Colors.red;
-//       case TableStatus.reserved:
+//       case TableStatusEnum.reserved:
 //         return Colors.orange;
-//       case TableStatus.maintenance:
+//       case TableStatusEnum.maintenance:
 //         return Colors.blue;
 //     }
 //   }

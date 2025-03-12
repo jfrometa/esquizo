@@ -88,7 +88,7 @@
     
 //     if (orderId != null) {
 //       updates['currentOrderId'] = orderId;
-//     } else if (status == TableStatus.available) {
+//     } else if (status == TableStatusEnum.available) {
 //       // Clear the current order ID if the table is available
 //       updates['currentOrderId'] = FieldValue.delete();
 //     }
@@ -176,9 +176,9 @@
 //       final tables = await getAllTables();
       
 //       final totalTables = tables.where((table) => table.isActive).length;
-//       final occupiedTables = tables.where((table) => table.status == TableStatus.occupied).length;
-//       final reservedTables = tables.where((table) => table.status == TableStatus.reserved).length;
-//       final cleaningTables = tables.where((table) => table.status == TableStatus.maintenance).length;
+//       final occupiedTables = tables.where((table) => table.status == TableStatusEnum.occupied).length;
+//       final reservedTables = tables.where((table) => table.status == TableStatusEnum.reserved).length;
+//       final cleaningTables = tables.where((table) => table.status == TableStatusEnum.maintenance).length;
       
 //       return TableStats(
 //         totalTables: totalTables,
@@ -234,8 +234,8 @@
 // final availableTablesProvider = FutureProvider<List<RestaurantTable>>((ref) async {
 //   final allTables = await ref.watch(tablesStatusProvider.future);
 //   return allTables.where((table) => 
-//     table.status == TableStatus.available || 
-//     table.status == TableStatus.reserved
+//     table.status == TableStatusEnum.available || 
+//     table.status == TableStatusEnum.reserved
 //   ).toList();
 // });
 

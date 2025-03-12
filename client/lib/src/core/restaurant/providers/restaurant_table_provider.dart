@@ -32,7 +32,7 @@
 // // Provider for available tables
 // final availableTablesProvider = StreamProvider<List<RestaurantTable>>((ref) {
 //   final tableService = ref.watch(restaurantTableServiceProvider);
-//   return tableService.getTablesByStatusStream(TableStatus.available);
+//   return tableService.getTablesByStatusStream(TableStatusEnum.available);
 // });
 
 // // Provider for table by ID

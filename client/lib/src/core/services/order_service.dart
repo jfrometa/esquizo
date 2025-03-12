@@ -1,4 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart' as CloudFireStore; 
+import 'package:cloud_firestore/cloud_firestore.dart' as CloudFireStore;
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/product_model.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
 
@@ -12,6 +13,82 @@ class OrderService {
   }) : 
     _firestore = firestore ?? CloudFireStore.FirebaseFirestore.instance,
     _businessId = businessId;
+
+    // Add these methods to your OrderService class
+
+// Get all orders (stream)
+Stream<List<Order>> getAllOrdersStream() {
+  return _ordersCollection
+      .orderBy('createdAt', descending: true)
+      .snapshots()
+      .map((snapshot) => snapshot.docs
+          .map((doc) => Order.fromFirestore(doc))
+          .toList());
+}
+
+// Get orders by date (stream)
+Stream<List<Order>> getOrdersByDateStream(DateTime? date) {
+  if (date == null) {
+    return getAllOrdersStream();
+  }
+  
+  // Create date range: start of day to end of day
+  final startDate = DateTime(date.year, date.month, date.day);
+  final endDate = startDate.add(const Duration(days: 1));
+  
+  return _ordersCollection
+      .where('createdAt', isGreaterThanOrEqualTo: CloudFireStore.Timestamp.fromDate(startDate))
+      .where('createdAt', isLessThan: CloudFireStore.Timestamp.fromDate(endDate))
+      .orderBy('createdAt', descending: true)
+      .snapshots()
+      .map((snapshot) => snapshot.docs
+          .map((doc) => Order.fromFirestore(doc))
+          .toList());
+}
+
+// Get orders by status (non-stream version)
+Future<List<Order>> getOrdersByStatus(String status) async {
+  try {
+    final snapshot = await _ordersCollection
+        .where('status', isEqualTo: status)
+        .orderBy('createdAt', descending: true)
+        .get();
+    
+    return snapshot.docs
+        .map((doc) => Order.fromFirestore(doc))
+        .toList();
+  } catch (e) {
+    print('Error fetching orders by status: $e');
+    return [];
+  }
+}
+
+// Get all orders (non-stream version)
+Future<List<Order>> getAllOrders() async {
+  try {
+    final snapshot = await _ordersCollection
+        .orderBy('createdAt', descending: true)
+        .get();
+    
+    return snapshot.docs
+        .map((doc) => Order.fromFirestore(doc))
+        .toList();
+  } catch (e) {
+    print('Error fetching all orders: $e');
+    return [];
+  }
+}
+
+// Get recent orders stream
+Stream<List<Order>> getRecentOrdersStream() {
+  return _ordersCollection
+      .orderBy('createdAt', descending: true)
+      .limit(10) // Limit to 10 most recent orders
+      .snapshots()
+      .map((snapshot) => snapshot.docs
+          .map((doc) => Order.fromFirestore(doc))
+          .toList());
+}
   
   // Collection reference
   CloudFireStore.CollectionReference get _ordersCollection => 
@@ -84,17 +161,7 @@ class OrderService {
   }
   
   // Get recent orders (last 24 hours)
-  Stream<List<Order>> getRecentOrdersStream() {
-    final yesterday = DateTime.now().subtract(const Duration(days: 1));
-    
-    return _ordersCollection
-        .where('createdAt', isGreaterThan: CloudFireStore.Timestamp.fromDate(yesterday))
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => Order.fromFirestore(doc))
-            .toList());
-  }
+
 }
 
 // Extension methods for Order class to handle Firestore conversion
@@ -139,7 +206,7 @@ extension OrderFirestoreExtension on Order {
       userName: data['userName'],
       userEmail: data['userEmail'],
       userPhone: data['userPhone'],
-      items: (data['items'] as List?)?.map((item) => item as Map<String, dynamic>).toList() ?? [],
+      items: (data['items'])?.map((item) => item.fromMap(item)).toList()?? [],
       subtotal: (data['subtotal'] as num?)?.toDouble() ?? 0.0,
       tax: (data['tax'] as num?)?.toDouble() ?? 0.0,
       total: (data['total'] as num?)?.toDouble() ?? 0.0,
@@ -171,3 +238,4 @@ extension OrderFirestoreExtension on Order {
     }
   }
 }
+

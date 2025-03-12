@@ -44,6 +44,17 @@ class OrderService {
             .map((doc) => Order.fromFirestore(doc))
             .toList());
   }
+
+  // Get recent orders stream with limit
+Stream<List<Order>> getRecentOrdersStream() {
+  return _ordersCollection
+      .orderBy('createdAt', descending: true)
+      .limit(10) // Limit to 10 most recent orders
+      .snapshots()
+      .map((snapshot) => snapshot.docs
+          .map((doc) => Order.fromFirestore(doc))
+          .toList());
+}
   
   // Stream orders for a specific table
   Stream<List<Order>> getOrdersByTableStream(String tableId) {
@@ -127,7 +138,7 @@ class OrderService {
           final table = RestaurantTable.fromFirestore(tableDoc);
           
           // Check if table is available
-          if (table.status == TableStatus.occupied && table.currentOrderId != null && table.currentOrderId != order.id) {
+          if (table.status == TableStatusEnum.occupied && table.currentOrderId != null && table.currentOrderId != order.id) {
             throw Exception('La mesa ya está ocupada con otro pedido');
           }
           
@@ -135,7 +146,7 @@ class OrderService {
           transaction.update(
             _firestore.collection('tables').doc(order.tableId),
             {
-              'status': TableStatus.occupied.toString().split('.').last,
+              'status': TableStatusEnum.occupied.toString().split('.').last,
               'currentOrderId': orderId,
               'updatedAt': CloudFireStore.FieldValue.serverTimestamp(),
             },
@@ -206,8 +217,8 @@ class OrderService {
                 _firestore.collection('tables').doc(order.tableId),
                 {
                   'status': newStatus == OrderStatus.completed 
-                      ? TableStatus.maintenance.toString().split('.').last 
-                      : TableStatus.available.toString().split('.').last,
+                      ? TableStatusEnum.maintenance.toString().split('.').last 
+                      : TableStatusEnum.available.toString().split('.').last,
                   'currentOrderId': null,
                   'updatedAt': CloudFireStore.FieldValue.serverTimestamp(),
                 },
@@ -267,7 +278,7 @@ class OrderService {
               transaction.update(
                 _firestore.collection('tables').doc(order.tableId),
                 {
-                  'status': TableStatus.maintenance.toString().split('.').last,
+                  'status': TableStatusEnum.maintenance.toString().split('.').last,
                   'currentOrderId': null,
                   'updatedAt': CloudFireStore.FieldValue.serverTimestamp(),
                 },

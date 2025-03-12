@@ -34,7 +34,7 @@ final userOrdersProvider = StreamProvider<List<Order>>((ref) {
   return orderService.getUserOrdersStream(user.value!.uid);
 });
 
-// Provider for recent orders
+// Provider for recent orders using getRecentOrdersStream
 final recentOrdersProvider = StreamProvider<List<Order>>((ref) {
   final orderService = ref.watch(orderServiceProvider);
   return orderService.getRecentOrdersStream();
@@ -58,3 +58,4 @@ final activeOrderProvider = FutureProvider<Order?>((ref) {
   
   return ref.watch(orderByIdProvider(orderId)).value;
 });
+

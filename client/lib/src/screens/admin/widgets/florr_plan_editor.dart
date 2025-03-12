@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart' as restaurants;
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart';
 
 class FloorPlanEditor extends StatefulWidget {
-  final List<restaurants.RestaurantTable> tables;
-  final Function(restaurants.RestaurantTable, Map<String, double>) onTableMoved;
-  final Function(restaurants.RestaurantTable) onTableTapped;
+  final List<RestaurantTable> tables;
+  final Function(RestaurantTable, Map<String, double>) onTableMoved;
+  final Function(RestaurantTable) onTableTapped;
 
   const FloorPlanEditor({
     Key? key,
@@ -18,7 +18,7 @@ class FloorPlanEditor extends StatefulWidget {
 }
 
 class _FloorPlanEditorState extends State<FloorPlanEditor> {
-  restaurants.RestaurantTable? _selectedTable;
+  RestaurantTable? _selectedTable;
   bool _isEditing = false;
   bool _showGrid = true;
   double _zoom = 1.0;
@@ -209,7 +209,7 @@ class _FloorPlanEditorState extends State<FloorPlanEditor> {
             
             // Update the selected table
             setState(() {
-              _selectedTable = restaurants.RestaurantTable(
+              _selectedTable = RestaurantTable(
                 id: table.id,
                 businessId: table.businessId,
                 number: table.number,
@@ -226,7 +226,7 @@ class _FloorPlanEditorState extends State<FloorPlanEditor> {
     }).toList();
   }
   
-  Widget _buildTableWidget(restaurants.RestaurantTable table, bool isSelected) {
+  Widget _buildTableWidget(RestaurantTable table, bool isSelected) {
     // Determine table size based on capacity and zoom
     final baseSize = 60.0;
     final tableSize = baseSize * _zoom;
@@ -318,13 +318,13 @@ class _FloorPlanEditorState extends State<FloorPlanEditor> {
           const SizedBox(height: 8),
           Row(
             children: [
-              _buildStatusIndicator(restaurants.TableStatus.available),
+              _buildStatusIndicator(TableStatusEnum.available),
               const SizedBox(width: 16),
-              _buildStatusIndicator(restaurants.TableStatus.occupied),
+              _buildStatusIndicator(TableStatusEnum.occupied),
               const SizedBox(width: 16),
-              _buildStatusIndicator(restaurants.TableStatus.reserved),
+              _buildStatusIndicator(TableStatusEnum.reserved),
               const SizedBox(width: 16),
-              _buildStatusIndicator(restaurants.TableStatus.maintenance),
+              _buildStatusIndicator(TableStatusEnum.maintenance),
             ],
           ),
           const SizedBox(height: 8),
@@ -342,7 +342,7 @@ class _FloorPlanEditorState extends State<FloorPlanEditor> {
     );
   }
   
-  Widget _buildStatusIndicator(restaurants.TableStatus status) {
+  Widget _buildStatusIndicator(TableStatusEnum status) {
     return Row(
       children: [
         Container(
@@ -362,33 +362,33 @@ class _FloorPlanEditorState extends State<FloorPlanEditor> {
     );
   }
   
-  Color _getStatusColor(restaurants.TableStatus status) {
+  Color _getStatusColor(TableStatusEnum status) {
     switch (status) {
-      case restaurants.TableStatus.available:
+      case TableStatusEnum.available:
         return Colors.green;
-      case restaurants.TableStatus.occupied:
+      case TableStatusEnum.occupied:
         return Colors.red;
-      case restaurants.TableStatus.reserved:
+      case TableStatusEnum.reserved:
         return Colors.orange;
-      case restaurants.TableStatus.maintenance:
+      case TableStatusEnum.maintenance:
         return Colors.blue;
-      case restaurants.TableStatus.cleaning:
+      case TableStatusEnum.cleaning:
         // TODO: Handle this case.
         return Colors.yellow;
     }
   }
   
-  String _getStatusText(restaurants.TableStatus status) {
+  String _getStatusText(TableStatusEnum status) {
     switch (status) {
-      case restaurants.TableStatus.available:
+      case TableStatusEnum.available:
         return 'Available';
-      case restaurants.TableStatus.occupied:
+      case TableStatusEnum.occupied:
         return 'Occupied';
-      case restaurants.TableStatus.reserved:
+      case TableStatusEnum.reserved:
         return 'Reserved';
-      case restaurants.TableStatus.maintenance:
+      case TableStatusEnum.maintenance:
         return 'Maintenance';
-      case restaurants.TableStatus.cleaning:
+      case TableStatusEnum.cleaning:
         // TODO: Handle this case.
         return 'Cleaning';
     }
