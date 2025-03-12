@@ -1,12 +1,12 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'app_startup.dart';
+part of 'app_config_services.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$appStartupHash() => r'68e7b8dea98cdd63627cb2778fd126d576bf7edc';
+String _$appStartupHash() => r'6d8f3533ca8208b6e27cbde258ede2e317a2db4f';
 
 /// See also [appStartup].
 @ProviderFor(appStartup)
