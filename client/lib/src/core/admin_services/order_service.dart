@@ -3,9 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart' as CloudFireStore;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/restaurant_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/restaurant/services/restaurant_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/services/firebase_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/firebase_providers.dart';
  
 // Order Service Implementation
 class OrderService {

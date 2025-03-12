@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/restaurant/providers/table_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/product_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_panel_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/services/order_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/services/print_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/services/product_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/services/table_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/order_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/print_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/product_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/table_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as CloudFireStore;  
 
 // Create or view order screen with table context
@@ -2191,171 +2192,3 @@ class _AddEditCategoryDialogState extends State<AddEditCategoryDialog> {
   }
 }
 
-// // Enhanced Models
-// class MenuItem {
-//   final String id;
-//   final String name;
-//   final String description;
-//   final double price;
-//   final String categoryId;
-//   final String? imageUrl;
-//   final bool isAvailable;
-//   final bool isSpecial;
-
-//   MenuItem({
-//     required this.id,
-//     required this.name,
-//     required this.description,
-//     required this.price,
-//     required this.categoryId,
-//     this.imageUrl,
-//     this.isAvailable = true,
-//     this.isSpecial = false,
-//   });
-// }
-
-// class MenuCategory {
-//   final String id;
-//   final String name;
-//   final int sortOrder;
-
-//   MenuCategory({
-//     required this.id,
-//     required this.name,
-//     required this.sortOrder,
-//   });
-// }
-
-// Enhanced Order Model
-// class Order {
-//   final String id;
-//   final int? tableNumber;
-//   final String? tableId;
-//   final DateTime createdAt;
-//   final DateTime? lastUpdated;
-//   final List<OrderItem> items;
-//   final double totalAmount;
-//   final OrderStatus status;
-//   final String? customerName;
-//   final int? customerCount;
-//   final String? waiterNotes;
-
-//   Order({
-//     required this.id,
-//     this.tableNumber,
-//     this.tableId,
-//     required this.createdAt,
-//     this.lastUpdated,
-//     required this.items,
-//     required this.status,
-//     required this.totalAmount,
-//     this.customerName,
-//     this.customerCount,
-//     this.waiterNotes,
-//   });
-// }
-
-// // Add the OrderItem class if it doesn't exist
-// class OrderItem {
-//   final String productId;
-//   final String name;
-//   final double price;
-//   final int quantity;
-//   final String? notes;
-
-//   OrderItem({
-//     required this.productId,
-//     required this.name,
-//     required this.price,
-//     required this.quantity,
-//     this.notes,
-//   });
-// }
-
-// // Model-related providers
-// final menuProductsProvider = FutureProvider<List<MenuItem>>((ref) {
-//   final productService = ref.watch(productServiceProvider);
-//   return productService.getProducts();
-// });
-
-// final menuCategoriesProvider = FutureProvider<List<MenuCategory>>((ref) {
-//   final productService = ref.watch(productServiceProvider);
-//   return productService.getCategories();
-// });
-
- 
-// // Enhanced TableService with table management methods
-// class TableService {
-//   // Existing methods
-  
-//   Future<void> updateTableStatus(String tableId, TableStatus newStatus, [String? orderId]) async {
-//     // Mock implementation - replace with real API calls
-//     await Future.delayed(const Duration(milliseconds: 500));
-//     // In a real app, you would update the table status in your database
-//     // If orderId is provided, also update the currentOrderId field
-//   }
-// }
-
-// Enhanced OrderService with order management methods
-// class OrderService {
-  // Existing methods
-  
-//   Future<void> createOrder(Order order) async {
-//     // Mock implementation - replace with real API calls
-//     await Future.delayed(const Duration(milliseconds: 500));
-//     // In a real app, you would create the order in your database
-//   }
-  
-//   Future<void> updateOrder(Order order) async {
-//     // Mock implementation - replace with real API calls
-//     await Future.delayed(const Duration(milliseconds: 500));
-//     // In a real app, you would update the order in your database
-//   }
-  
-//   Future<Order?> getOrderById(String orderId) async {
-//     // Mock implementation - replace with real API calls
-//     await Future.delayed(const Duration(milliseconds: 500));
-    
-//     // Return a mock order
-//     return Order(
-//       id: orderId,
-//       tableNumber: 5,
-//       tableId: 'table5',
-//       createdAt: DateTime.now().subtract(const Duration(minutes: 30)),
-//       orderNumber: 'ORD-${orderId.substring(0, 6)}',
-//       email: 'customer@example.com',
-//       userId: 'user123',
-//       orderType: OrderType.dineIn,
-//       address: 'Restaurant Location',
-//       latitude: 0.0,
-//       longitude: 0.0,
-//       paymentMethod:  'cash',
-//       paymentStatus:  pending,
-//       timestamp: DateTime.now().millisecondsSinceEpoch,
-//       orderDate: DateTime.now(),
-//       location: 'Main Restaurant',
-//       id: orderId,
-//       tableNumber: 5,
-//       tableId: 'table5',
-//       createdAt: DateTime.now().subtract(const Duration(minutes: 30)),
-//       items: [
-//         OrderItem(
-//           productId: 'product1',
-//           name: 'Hamburguesa Clásica',
-//           price: 9.99,
-//           quantity: 2,
-//         ),
-//         OrderItem(
-//           productId: 'product4',
-//           name: 'Limonada',
-//           price: 2.99,
-//           quantity: 2,
-//         ),
-//       ],
-//       status: OrderStatus.inProgress,
-//       totalAmount: 25.96,
-//       customerCount: 2,
-//     );
-//   }
-
-// }

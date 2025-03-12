@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/authentication/data/firebase_auth_repository.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/custom_sign_in_screen.dart';
 
 /// A dialog to collect contact information or use existing authenticated user data.

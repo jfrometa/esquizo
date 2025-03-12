@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/authentication/data/firebase_auth_repository.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/pagination/paginated_list_widget.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/authentication/data/subscription_repository.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/subscription_repository.dart';
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;

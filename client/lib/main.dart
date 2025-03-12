@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/app.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/authentication/data/firebase_auth_repository.dart';  
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';  
 import 'package:starter_architecture_flutter_firebase/src/localization/string_hardcoded.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/providers/user_preference/user_preference_provider.dart';

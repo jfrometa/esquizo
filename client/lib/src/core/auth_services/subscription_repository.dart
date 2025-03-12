@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/authentication/data/firebase_auth_repository.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/authentication/data/firebase_auth_repository.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart'
     as auth_models;
 

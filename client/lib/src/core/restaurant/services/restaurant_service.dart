@@ -1,5 +1,7 @@
  
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/restaurant/providers/table_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/restaurant/services/table_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/product_model.dart';
@@ -7,10 +9,10 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/t
 
 import 'dart:async';
 
- import 'package:starter_architecture_flutter_firebase/src/screens/admin/services/order_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/services/product_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/services/staff_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/services/table_service.dart';
+ import 'package:starter_architecture_flutter_firebase/src/core/admin_services/order_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/product_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/staff_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/table_service.dart';
 
 
 final orderByIdProvider = FutureProvider.family<Order?, String>((ref, orderId) {

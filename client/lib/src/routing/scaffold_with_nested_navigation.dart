@@ -10,7 +10,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/providers/manu
 import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/navigation_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/services/admin_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_providers.dart';
 
 // Update the provider to include both catering and manual orders
 final cateringItemCountProvider = StateProvider<int>((ref) {

@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/restaurant/providers/table_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/restaurant/services/table_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/restaurant_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/restaurant/services/restaurant_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart';
 
 import 'dart:math' as math;
 
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_panel_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/services/order_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/services/table_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/order_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/table_service.dart';
 
 class TableManagementScreen extends ConsumerStatefulWidget {
   const TableManagementScreen({Key? key}) : super(key: key);
@@ -1342,25 +1344,25 @@ class _AddEditTableDialogState extends ConsumerState<AddEditTableDialog> {
 // }
 
 // Extend TableService with table management methods
-extension TableServiceExtension on TableService {
-  Future<void> addTable(RestaurantTable table) async {
-    // Mock implementation - replace with real API calls
-    await Future.delayed(const Duration(milliseconds: 500));
-    // In a real app, you would add the table to your database
-  }
+// extension TableServiceExtension on TableService {
+//   Future<void> addTable(RestaurantTable table) async {
+//     // Mock implementation - replace with real API calls
+//     await Future.delayed(const Duration(milliseconds: 500));
+//     // In a real app, you would add the table to your database
+//   }
   
-  Future<void> updateTable(RestaurantTable table) async {
-    // Mock implementation - replace with real API calls
-    await Future.delayed(const Duration(milliseconds: 500));
-    // In a real app, you would update the table in your database
-  }
+//   Future<void> updateTable(RestaurantTable table) async {
+//     // Mock implementation - replace with real API calls
+//     await Future.delayed(const Duration(milliseconds: 500));
+//     // In a real app, you would update the table in your database
+//   }
   
-  Future<void> deleteTable(String tableId) async {
-    // Mock implementation - replace with real API calls
-    await Future.delayed(const Duration(milliseconds: 500));
-    // In a real app, you would delete the table from your database
-  }
-}
+//   Future<void> deleteTable(String tableId) async {
+//     // Mock implementation - replace with real API calls
+//     await Future.delayed(const Duration(milliseconds: 500));
+//     // In a real app, you would delete the table from your database
+//   }
+// }
 
 // Placeholder for QR code
 class QRCodePlaceholder extends CustomPainter {

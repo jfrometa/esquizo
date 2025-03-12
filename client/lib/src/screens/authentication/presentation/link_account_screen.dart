@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/authentication/data/firebase_auth_repository.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';
 
 class LinkAccountScreen extends ConsumerStatefulWidget {
   final String email;

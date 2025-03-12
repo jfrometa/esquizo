@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/product_model.dart';
+import '../../screens/admin/models/product_model.dart';
 
 class ProductService {
   final FirebaseFirestore _firestore;

@@ -1,0 +1,141 @@
+import 'package:cloud_firestore/cloud_firestore.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart';
+
+class TableStats {
+  final int totalTables;
+  final int occupiedTables;
+  final int reservedTables;
+  final int cleaningTables;
+  
+  TableStats({
+    required this.totalTables,
+    required this.occupiedTables,
+    required this.reservedTables,
+    required this.cleaningTables,
+  });
+}
+
+// Restaurant-specific table service
+class TableService {
+  final FirebaseFirestore _firestore;
+  final String _restaurantId;
+  
+  TableService({
+    FirebaseFirestore? firestore,
+    required String restaurantId,
+  }) : 
+    _firestore = firestore ?? FirebaseFirestore.instance,
+    _restaurantId = restaurantId;
+  
+  // Collection reference
+  CollectionReference get _tablesCollection => 
+      _firestore.collection('businesses').doc(_restaurantId).collection('tables');
+  
+  // Get all tables
+  Stream<List<RestaurantTable>> getTablesStream() {
+    return _tablesCollection
+        .orderBy('number')
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => RestaurantTable.fromFirestore(doc))
+              .toList();
+        });
+  }
+
+  // Get active tables
+  Stream<List<RestaurantTable>> getActiveTablesStream() {
+    return _tablesCollection
+        .where('isActive', isEqualTo: true)
+        .orderBy('number')
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => RestaurantTable.fromFirestore(doc))
+              .toList();
+        });
+  }
+
+  // Get table by ID
+  Future<RestaurantTable?> getTableById(String tableId) async {
+    try {
+      final doc = await _tablesCollection.doc(tableId).get();
+      if (doc.exists) {
+        return RestaurantTable.fromFirestore(doc);
+      }
+      return null;
+    } catch (e) {
+      print('Error getting table by ID: $e');
+      return null;
+    }
+  }
+  
+  // Get table statistics
+  Future<TableStats> getTableStats() async {
+    try {
+      final snapshot = await _tablesCollection.get();
+      final tables = snapshot.docs.map((doc) => RestaurantTable.fromFirestore(doc)).toList();
+      
+      final totalTables = tables.where((table) => table.isActive).length;
+      final occupiedTables = tables.where((table) => table.status == TableStatus.occupied).length;
+      final reservedTables = tables.where((table) => table.status == TableStatus.reserved).length;
+      final cleaningTables = tables.where((table) => table.status == TableStatus.maintenance).length;
+      
+      return TableStats(
+        totalTables: totalTables,
+        occupiedTables: occupiedTables,
+        reservedTables: reservedTables,
+        cleaningTables: cleaningTables,
+      );
+    } catch (e) {
+      print('Error calculating table stats: $e');
+      return TableStats(
+        totalTables: 0,
+        occupiedTables: 0,
+        reservedTables: 0,
+        cleaningTables: 0,
+      );
+    }
+  }
+  
+  Future<void> updateTableStatus(String tableId, TableStatus status, [String? orderId]) async {
+    final updates = {
+      'status': status.toString().split('.').last,
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+    
+    if (orderId != null) {
+      updates['currentOrderId'] = orderId;
+    } else if (status == TableStatus.available) {
+      // Clear the current order ID if the table is available
+      updates['currentOrderId'] = FieldValue.delete();
+    }
+    
+    await _tablesCollection.doc(tableId).update(updates);
+  }
+  
+  Future<void> addTable(RestaurantTable table) async {
+    await _tablesCollection.doc(table.id).set({
+      'number': table.number,
+      'capacity': table.capacity,
+      'status': table.status.toString().split('.').last,
+      'isActive': table.isActive,
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+  
+  Future<void> updateTable(RestaurantTable table) async {
+    await _tablesCollection.doc(table.id).update({
+      'number': table.number,
+      'capacity': table.capacity,
+      'status': table.status.toString().split('.').last,
+      'isActive': table.isActive,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+  
+  Future<void> deleteTable(String tableId) async {
+    await _tablesCollection.doc(tableId).delete();
+  }
+}

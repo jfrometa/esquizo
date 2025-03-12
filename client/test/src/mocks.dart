@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/authentication/data/firebase_auth_repository.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/onboarding/data/onboarding_repository.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/onboarding/onboarding_repository.dart';
 
 class MockAuthRepository extends Mock implements AuthRepository {}
 
