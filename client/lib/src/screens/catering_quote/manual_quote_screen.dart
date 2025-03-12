@@ -490,7 +490,7 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
   Widget build(BuildContext context) {
     final quote = ref.watch(manualQuoteProvider);
     final items = quote?.dishes ?? [];
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final isDesktop = screenWidth > 600;
 
     final eventDetailsCard = Card(

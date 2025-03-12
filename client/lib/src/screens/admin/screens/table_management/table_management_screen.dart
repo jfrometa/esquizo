@@ -1290,7 +1290,7 @@ class _AddEditTableDialogState extends ConsumerState<AddEditTableDialog> {
       status: _status,
       // location: _locationController.text.isEmpty ? null : _locationController.text,
       shape: _shape as TableShape?,
-      currentOrderId: widget.table?.currentOrderId,
+      currentOrderId: widget.table?.currentOrderId, businessId: '',
     );
     
     Future<void> operation;

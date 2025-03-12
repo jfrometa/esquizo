@@ -6,7 +6,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/cart/meal_subs
 import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/models/scheduled_meal.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/providers/meal_schedule_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
+ 
 
 class MealPlanCheckout extends ConsumerWidget {
   final List<CartItem> items;
@@ -249,7 +249,7 @@ class MealPlanCheckout extends ConsumerWidget {
         
         return Padding(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+            bottom: MediaQuery.viewInsetsOf(context).bottom,
             left: 20.0,
             right: 20.0,
             top: 20.0,
@@ -430,7 +430,7 @@ class MealPlanCheckout extends ConsumerWidget {
         
         return Padding(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+            bottom: MediaQuery.viewInsetsOf(context).bottom,
             left: 20.0,
             right: 20.0,
             top: 20.0,

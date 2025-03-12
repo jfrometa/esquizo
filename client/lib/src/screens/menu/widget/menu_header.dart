@@ -22,7 +22,7 @@ class MenuHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final mediaQuery = MediaQuery.of(context);
+    final mediaQuery = MediaQuery.sizeOf(context);
     final isDarkMode = theme.brightness == Brightness.dark;
     
     // Pre-calculate values outside layout calculations
@@ -31,7 +31,7 @@ class MenuHeader extends StatelessWidget {
     final headerBlurValue = (scrollOffset * 0.05).clamp(0.0, 10.0);
     final clampedParallaxOffset = headerParallaxOffset.clamp(0.0, 150.0);
     final alignmentValue = (0.5 - headerParallaxOffset / 500).clamp(-1.0, 1.0);
-    final progressWidth = mediaQuery.size.width * (scrollOffset / 1000).clamp(0.0, 1.0);
+    final progressWidth = mediaQuery.width * (scrollOffset / 1000).clamp(0.0, 1.0);
 
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 100),

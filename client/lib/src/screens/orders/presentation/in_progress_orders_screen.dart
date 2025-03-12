@@ -164,6 +164,9 @@ class OrderCard extends StatelessWidget {
         return colorScheme.tertiary;
       case OrderStatus.delivered:
         return colorScheme.primary;
+      case OrderStatus.confirmed:
+        // TODO: Handle this case.
+       return colorScheme.secondary;
     }
   }
 

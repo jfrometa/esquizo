@@ -1,7 +1,6 @@
 // UPDATED CateringOrderForm.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/catering_entry/components/catering_item_list.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/providers/catering_order_provider.dart';
 
@@ -49,7 +48,7 @@ class CateringOrderForm extends ConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final order = ref.watch(cateringOrderProvider);
-    final isDesktop = MediaQuery.of(context).size.width > 600;
+    final isDesktop = MediaQuery.sizeOf(context).width > 600;
 
     if (order == null) {
       return const SizedBox(); // Empty state handled by parent

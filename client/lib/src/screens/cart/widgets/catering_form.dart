@@ -109,7 +109,7 @@ class _CateringFormState extends ConsumerState<CateringForm> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final isDesktop = MediaQuery.of(context).size.width > 800;
+    final isDesktop = MediaQuery.sizeOf(context).width > 800;
     
     final formContent = Form(
       key: _formKey,
@@ -501,7 +501,7 @@ class _CateringFormState extends ConsumerState<CateringForm> {
     } else {
       return SingleChildScrollView(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
+          bottom: MediaQuery.viewInsetsOf(context).bottom,
         ),
         child: formContent,
       );

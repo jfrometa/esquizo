@@ -2,68 +2,70 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart'; 
+import 'package:go_router/go_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/ordering_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/plans/plans.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/screens/widgets_mesa_redonda/dish_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 
-// Provider for dish data used in _selectRandomDishes() method
-final dishProvider = Provider<List<Map<String, dynamic>>>((ref) {
-  // Implementation that provides the list of dishes
-  return [
-    // Sample dish data structure
-    {
-      'title': 'Sample Dish',
-      'description': 'Description of the dish',
-      'pricing': 'S/ 25.00',
-      'img': 'image_url',
-      'ingredients': <String>['Ingredient 1', 'Ingredient 2'],
-      'isSpicy': false,
-      'foodType': 'Main',
-    },
-    // Additional dishes would be added here
-  ];
-});
+// // Provider for dish data used in _selectRandomDishes() method
+// final dishProvider = Provider<List<Map<String, dynamic>>>((ref) {
+//   // Implementation that provides the list of dishes
+//   return [
+//     // Sample dish data structure
+//     {
+//       'title': 'Sample Dish',
+//       'description': 'Description of the dish',
+//       'pricing': 'S/ 25.00',
+//       'img': 'image_url',
+//       'ingredients': <String>['Ingredient 1', 'Ingredient 2'],
+//       'isSpicy': false,
+//       'foodType': 'Main',
+//     },
+//     // Additional dishes would be added here
+//   ];
+// });
 
 // Meal Plan data class
-class MealPlan {
-  final String id;
-  final String title;
-  final String description;
-  final String price;
+// class MealPlan {
+//   final String id;
+//   final String title;
+//   final String description;
+//   final String price;
   
-  const MealPlan({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.price,
-  });
-}
+//   const MealPlan({
+//     required this.id,
+//     required this.title,
+//     required this.description,
+//     required this.price,
+//   });
+// }
 
-// Provider for meal plans data used in MealPlansSection
-final mealPlansProvider = Provider<List<MealPlan>>((ref) {
-  return [
-    MealPlan(
-      id: 'plan1',
-      title: 'Plan Básico',
-      description: 'Ideal para individuos o parejas, incluye 5 comidas a la semana',
-      price: 'S/ 149.99/semana',
-    ),
-    MealPlan(
-      id: 'plan2',
-      title: 'Plan Familiar',
-      description: 'Perfecto para familias, incluye 10 comidas a la semana',
-      price: 'S/ 259.99/semana',
-    ),
-    MealPlan(
-      id: 'plan3',
-      title: 'Plan Ejecutivo',
-      description: 'Comidas gourmet para profesionales ocupados, 7 almuerzos a la semana',
-      price: 'S/ 199.99/semana',
-    ),
-  ];
-});
+// // Provider for meal plans data used in MealPlansSection
+// final mealPlansProvider = Provider<List<MealPlan>>((ref) {
+//   return [
+//     MealPlan(
+//       id: 'plan1',
+//       title: 'Plan Básico',
+//       description: 'Ideal para individuos o parejas, incluye 5 comidas a la semana',
+//       price: 'S/ 149.99/semana',
+//     ),
+//     MealPlan(
+//       id: 'plan2',
+//       title: 'Plan Familiar',
+//       description: 'Perfecto para familias, incluye 10 comidas a la semana',
+//       price: 'S/ 259.99/semana',
+//     ),
+//     MealPlan(
+//       id: 'plan3',
+//       title: 'Plan Ejecutivo',
+//       description: 'Comidas gourmet para profesionales ocupados, 7 almuerzos a la semana',
+//       price: 'S/ 199.99/semana',
+//     ),
+//   ];
+// });
 
 // Widget for displaying meal plan cards in MealPlansSection
 class PlanCard extends StatelessWidget {
@@ -418,7 +420,7 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final isDesktop = screenWidth > 1024;
     final isTablet = screenWidth > 600 && screenWidth <= 1024;
     final isMobile = screenWidth <= 600;
@@ -596,7 +598,7 @@ class EnhancedHeroSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final isMobile = size.width < 600;
     
     // Height calculation with parallax effect
@@ -794,7 +796,7 @@ class QuickAccessSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final isMobile = size.width < 600;
     
     return Container(
@@ -861,7 +863,7 @@ class QuickAccessSection extends StatelessWidget {
     required Color color,
   }) {
     final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final isMobile = size.width < 600;
     
     return InkWell(
@@ -2771,7 +2773,7 @@ class EnhancedContactSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final isMobile = size.width < 600;
     
     return Container(
@@ -3430,7 +3432,7 @@ class EnhancedFooterSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final isMobile = size.width < 600;
     
     return Container(
@@ -3956,7 +3958,7 @@ class _ReservationSectionState extends State<ReservationSection> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final isMobile = size.width < 600;
     
     return SingleChildScrollView(
@@ -4432,7 +4434,7 @@ class RestaurantInfoSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final isMobile = size.width < 600;
     
     return ListView(
@@ -4920,7 +4922,7 @@ class RestaurantInfoSection extends StatelessWidget {
     required String position,
     required String image,
   }) {
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final isMobile = size.width < 600;
     final cardWidth = isMobile ? double.infinity : 200.0;
     

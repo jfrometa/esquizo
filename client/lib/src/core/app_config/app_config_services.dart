@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/onboarding/onboarding_repository.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/setup/setup_screen_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/business_config_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/local_storage_service.dart';
  
@@ -75,8 +77,12 @@ Future<void> appStartup(AppStartupRef ref) async {
 
   // Initialize business configuration
   final businessConfig = await ref.read(businessConfigInitProvider.future);
-  if (businessConfig == null) {
-    throw Exception('Failed to load business configuration');
+  
+  // Check if admin and if example data should be initialized
+  final isAdmin = await ref.read(isAdminProvider.future);
+  if (isAdmin && businessConfig == null) {
+    // This is an admin with no business config - show setup screen
+    ref.read(showSetupScreenProvider.notifier).state = true;
   }
 
   // Wait for all initialization code to be complete before returning

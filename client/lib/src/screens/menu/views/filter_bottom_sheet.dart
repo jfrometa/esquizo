@@ -45,18 +45,18 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final mediaQuery = MediaQuery.of(context);
-    
+    final mediaQuery = MediaQuery.sizeOf(context);
+    final mediaQueryInset = MediaQuery.viewInsetsOf(context);
     return Container(
       constraints: BoxConstraints(
-        maxHeight: mediaQuery.size.height * 0.85,
+        maxHeight: mediaQuery.height * 0.85,
       ),
       padding: EdgeInsets.only(
         left: 24,
         right: 24,
         top: 24,
         // Ensure the bottom sheet doesn't overlap with the keyboard
-        bottom: 24 + mediaQuery.viewInsets.bottom,
+        bottom: 24 + mediaQueryInset.bottom,
       ),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,

@@ -1,25 +1,25 @@
 /// Type defining a user ID from Firebase.
 typedef UserID = String;
 
-/// Simple class representing the user UID and email.
-class AppUser {
-  const AppUser({
-    required this.uid,
-    required this.email,
-  });
-  final String uid;
-  final String email;
+// /// Simple class representing the user UID and email.
+// class AppUser {
+//   const AppUser({
+//     required this.uid,
+//     required this.email,
+//   });
+//   final String uid;
+//   final String email;
 
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
+//   @override
+//   bool operator ==(Object other) {
+//     if (identical(this, other)) return true;
 
-    return other is AppUser && other.uid == uid && other.email == email;
-  }
+//     return other is AppUser && other.uid == uid && other.email == email;
+//   }
 
-  @override
-  int get hashCode => uid.hashCode ^ email.hashCode;
+//   @override
+//   int get hashCode => uid.hashCode ^ email.hashCode;
 
-  @override
-  String toString() => 'AppUser(uid: $uid, email: $email)';
-}
+//   @override
+//   String toString() => 'AppUser(uid: $uid, email: $email)';
+// }

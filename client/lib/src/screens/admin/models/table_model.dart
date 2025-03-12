@@ -22,6 +22,7 @@ enum TableShape {
 // Restaurant table model
 class RestaurantTable {
   final String id;
+  final String businessId;
   final int number;
   final int capacity;
   final TableStatus status;
@@ -33,9 +34,11 @@ class RestaurantTable {
   final DateTime? updatedAt;  // Last update timestamp
   final String name; 
   final bool isAvailable;
+  final Map<String, double> position; // Position on floor plan {x, y}
 
   RestaurantTable({
     required this.id,
+    required this.businessId,
     required this.number,
     required this.capacity,
     this.status = TableStatus.available,
@@ -47,31 +50,10 @@ class RestaurantTable {
     this.updatedAt,
     this.name = '',
     this.isAvailable = true,
+    this.position = const {'x': 50.0, 'y': 50.0}, // Default to center
   });
 
-    // Helper method to parse table status from string
-  static TableStatus _parseTableStatus(dynamic status) {
-    if (status == null) return TableStatus.available;
-    
-    if (status is TableStatus) return status;
-    
-    final statusStr = status.toString();
-    
-    switch (statusStr) {
-      case 'occupied':
-        return TableStatus.occupied;
-      case 'reserved':
-        return TableStatus.reserved;
-      case 'maintenance':
-        return TableStatus.maintenance;
-      case 'available':
-      default:
-        return TableStatus.available;
-    }
-  }
-  
-  // Helper method to parse table shape from string
-  static TableShape? _parseTableShape(dynamic shape) {
+ static TableShape _parseTableShape(dynamic shape) {
     if (shape == null) return TableShape.rectangle;
     
     if (shape is TableShape) return shape;
@@ -92,8 +74,20 @@ class RestaurantTable {
   // Create from Firestore document
   factory RestaurantTable.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+    
+    // Parse position data
+    Map<String, double> positionData = {'x': 50.0, 'y': 50.0};
+    if (data['position'] != null && data['position'] is Map) {
+      final posMap = data['position'] as Map;
+      positionData = {
+        'x': (posMap['x'] as num?)?.toDouble() ?? 50.0,
+        'y': (posMap['y'] as num?)?.toDouble() ?? 50.0,
+      };
+    }
+    
     return RestaurantTable(
       id: doc.id,
+      businessId: data['businessId'] ?? '',
       number: data['number'] ?? 0,
       capacity: data['capacity'] ?? 4,
       status: _parseTableStatus(data['status']),
@@ -105,12 +99,14 @@ class RestaurantTable {
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
       name: data['name'] ?? 'Table ${data['number'] ?? 0}',
       isAvailable: data['isAvailable'] ?? true,
+      position: positionData,
     );
   }
 
   // Convert to map for Firestore
   Map<String, dynamic> toFirestore() {
     return {
+      'businessId': businessId,
       'number': number,
       'capacity': capacity,
       'status': status.toString().split('.').last,
@@ -122,12 +118,14 @@ class RestaurantTable {
       'updatedAt': FieldValue.serverTimestamp(),
       'name': name,
       'isAvailable': isAvailable,
+      'position': position,
     };
   }
 
   // Create a copy with updated fields
   RestaurantTable copyWith({
     String? id,
+    String? businessId,
     int? number,
     int? capacity,
     TableStatus? status,
@@ -139,9 +137,11 @@ class RestaurantTable {
     DateTime? updatedAt,
     String? name,
     bool? isAvailable,
+    Map<String, double>? position,
   }) {
     return RestaurantTable(
       id: id ?? this.id,
+      businessId: businessId ?? this.businessId,
       number: number ?? this.number,
       capacity: capacity ?? this.capacity,
       status: status ?? this.status,
@@ -153,10 +153,9 @@ class RestaurantTable {
       updatedAt: updatedAt ?? this.updatedAt,
       name: name ?? this.name,
       isAvailable: isAvailable ?? this.isAvailable,
+      position: position ?? this.position,
     );
   }
-
-  // Helper methods remain unchanged
 }
 
 
@@ -224,8 +223,12 @@ class StaffMember {
     };
   }
   
+
+
+}
+
   // Helper method to parse staff role from string
-  static StaffRole _parseStaffRole(String? role) {
+   StaffRole _parseStaffRole(String? role) {
     if (role == null) return StaffRole.waiter;
     
     switch (role) {
@@ -246,4 +249,25 @@ class StaffMember {
         return StaffRole.waiter;
     }
   }
-}
+  
+  // Helper method to parse table status from string
+  TableStatus _parseTableStatus(dynamic status) {
+    if (status == null) return TableStatus.available;
+    if (status is TableStatus) return status;
+    
+    final statusStr = status.toString();
+    
+    switch (statusStr) {
+      case 'occupied':
+        return TableStatus.occupied;
+      case 'reserved':
+        return TableStatus.reserved;
+      case 'maintenance':
+        return TableStatus.maintenance;
+      case 'cleaning':
+        return TableStatus.cleaning;
+      case 'available':
+      default:
+        return TableStatus.available;
+    }
+  }

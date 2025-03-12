@@ -60,8 +60,8 @@ class Subscription {
       };
 }
 
+
 class Order {
-  // Fields remain the same
   final String orderNumber;
   final String id;
   final String email;
@@ -73,80 +73,120 @@ class Order {
   final String paymentStatus;
   final double totalAmount;
   final Timestamp timestamp;
-  final int tableNumber;
-  final String tableId;
+  final int? tableNumber;
+  final String? tableId;
   final DateTime createdAt;
   final DateTime? lastUpdated;
   final List<OrderItem> items;
   final OrderStatus status;
   final String? customerName;
+  final String? userName;  // Added to match create_order.dart
+  final String? userEmail;  // Added to match create_order.dart
+  final String? userPhone;  // Added to match create_order.dart
   final int? customerCount;
+  final int? peopleCount;  // Added to match create_order.dart
   final String? waiterNotes;
+  final String? specialInstructions;  // Added to match create_order.dart
   final String? waiterId;
   final String? waiterName;
   final String paymentMethod;
- 
-  final double subtotal;     // Before tax & tips
-  final double taxAmount;    // Tax amount
-  final double tipAmount;    // Tip amount
- 
-  final String? cashierId;   // ID of cashier who processed payment
-  final String? cashierName; // Name of cashier 
+  final double? subtotal;
+  final double? taxAmount;
+  final double? tax;  // Added to match create_order.dart
+  final double? tipAmount;
+  final double? total;  // Added to match create_order.dart
+  final double? deliveryFee;  // Added to match create_order.dart
+  final double? discount;  // Added to match create_order.dart
+  final String? cashierId;
+  final String? cashierName;
   final bool isPaid;
   final DateTime? paidAt;
   final String? receiptNumber;
-  final bool isDelivery;     // Is delivery order
-
+  final bool isDelivery;
+  final String? deliveryAddress;  // Added to match create_order.dart
   final DateTime orderDate;
   final Map<String, dynamic> location;
   final String? deliveryDate;
-  final String? deliveryTime; 
-
+  final String? deliveryTime;
   final bool isReviewed;
   final String? assignedToId;
   final String? assignedToName;
+  final String? businessId;
+  final String? resourceId;  // Added to match create_order.dart
+  final String? adminNotes;
+  final DateTime? adminReviewedAt;
+  final String? adminId;
+  final String? adminName;
+  final bool isArchived;
+  final Map<String, dynamic>? adminMetadata;
 
   Order({
-    required this.orderNumber,
+    this.orderNumber = '',
     required this.id,
-    required this.email,
+    this.email = '',
     required this.userId,
-    required this.orderType,
-    required this.address,
-    required this.latitude,
-    required this.longitude,
+    this.orderType = 'standard',
+    this.address = '',
+    this.latitude = '',
+    this.longitude = '',
     required this.items,
     required this.paymentMethod,
-    required this.paymentStatus,
-    required this.totalAmount,
-    required this.timestamp,
-    required this.tableNumber,
-    required this.tableId,
+    this.paymentStatus = 'pending',
+    this.totalAmount = 0.0,
+      // Initialize timestamp properly
+    this.tableNumber,
+    this.tableId,
     required this.createdAt,
-    required this.status,
-    required this.orderDate,
-    required this.location,
     this.lastUpdated,
+    this.status = OrderStatus.pending,
     this.customerName,
+    this.userName,
+    this.userEmail,
+    this.userPhone,
     this.customerCount,
+    this.peopleCount,
     this.waiterNotes,
+    this.specialInstructions,
     this.waiterId,
     this.waiterName,
-    this.subtotal = 0.0,
-    this.taxAmount = 0.0,
-    this.tipAmount = 0.0,
+    this.subtotal,
+    this.taxAmount,
+    this.tax,
+    this.tipAmount,
+    this.total,
+    this.deliveryFee,
+    this.discount,
     this.cashierId,
     this.cashierName,
     this.isPaid = false,
     this.paidAt,
     this.receiptNumber,
     this.isDelivery = false,
+    this.deliveryAddress,
+    DateTime? orderDate,  // Keep as parameter
+    Map<String, dynamic>? location,
     this.deliveryDate,
     this.deliveryTime,
     this.isReviewed = false,
     this.assignedToId,
     this.assignedToName,
-  });
+    this.businessId,
+    this.resourceId,
+    this.adminNotes,
+    this.adminReviewedAt,
+    this.adminId,
+    this.adminName,
+    this.isArchived = false,
+    this.adminMetadata,
+  }) : 
+    // Initialize orderDate and location with default values if not provided
+    this.timestamp =  Timestamp.now(),
+    this.orderDate = orderDate ?? DateTime.now(),
+    this.location = location ?? {
+      'address': address,
+      'latitude': latitude,
+      'longitude': longitude,
+    };
 
   factory Order.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
@@ -198,7 +238,7 @@ class Order {
       paymentMethod: data['paymentMethod'] ?? 'Unknown Method',
       paymentStatus: data['paymentStatus'] ?? 'Unknown Status',
       totalAmount: (data['totalAmount'] ?? 0.0).toDouble(),
-      timestamp: data['timestamp'] ?? Timestamp.now(),
+      // timestamp: data['timestamp'] ?? Timestamp.now(),
       tableNumber: data['tableNumber'] ?? 0,
       tableId: data['tableId'] ?? '',
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
@@ -357,7 +397,7 @@ class Order {
       paymentMethod: 'efectivo',
       paymentStatus: 'pending',
       totalAmount: 0.0,
-      timestamp: Timestamp.now(),
+      // timestamp: Timestamp.now(),
       tableNumber: 0,
       tableId: '',
       createdAt: DateTime.now(),
@@ -424,7 +464,7 @@ class Order {
       longitude: longitude ?? this.longitude,
       paymentStatus: paymentStatus ?? this.paymentStatus,
       totalAmount: totalAmount ?? this.totalAmount,
-      timestamp: timestamp ?? this.timestamp,
+      // timestamp: timestamp ?? this.timestamp,
       tableNumber: tableNumber ?? this.tableNumber,
       tableId: tableId ?? this.tableId,
       createdAt: createdAt ?? this.createdAt,
@@ -459,6 +499,7 @@ class Order {
 
 // Order item model
 class OrderItem {
+  final String? id;  // Added optional id field
   final String productId;
   final String name;
   final double price;
@@ -471,6 +512,7 @@ class OrderItem {
   final bool isModifiable;  // Whether the item can be modified after order is placed
 
   OrderItem({
+    this.id,  // Optional id parameter
     required this.productId,
     required this.name,
     required this.price,
@@ -486,6 +528,7 @@ class OrderItem {
   // Create from map
   factory OrderItem.fromMap(Map<String, dynamic> map) {
     return OrderItem(
+      id: map['id'],  // Get id from map
       productId: map['productId'] ?? '',
       name: map['name'] ?? '',
       price: (map['price'] ?? 0).toDouble(),
@@ -502,6 +545,7 @@ class OrderItem {
   // Convert to map
   Map<String, dynamic> toMap() {
     return {
+      'id': id,  // Include id in map
       'productId': productId,
       'name': name,
       'price': price,
@@ -517,6 +561,7 @@ class OrderItem {
 
   // Create a copy with updated fields
   OrderItem copyWith({
+    String? id,  // Add id to copyWith
     String? productId,
     String? name,
     double? price,
@@ -529,6 +574,7 @@ class OrderItem {
     bool? isModifiable,
   }) {
     return OrderItem(
+      id: id ?? this.id,  // Use provided id or current id
       productId: productId ?? this.productId,
       name: name ?? this.name,
       price: price ?? this.price,

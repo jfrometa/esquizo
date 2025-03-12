@@ -38,23 +38,23 @@ class AdminService {
   void clearAdminStatus() {}
 }
 
-final adminServiceProvider = Provider<AdminService>((ref) => AdminService());
+// final adminServiceProvider = Provider<AdminService>((ref) => AdminService());
 
-// Update the isAdminProvider to listen to auth state changes
-final isAdminProvider = FutureProvider<bool>((ref) async {
-  final adminService = ref.watch(adminServiceProvider);
-  final authStateChanges = FirebaseAuth.instance.authStateChanges();
+// // Update the isAdminProvider to listen to auth state changes
+// final isAdminProvider = FutureProvider<bool>((ref) async {
+//   final adminService = ref.watch(adminServiceProvider);
+//   final authStateChanges = FirebaseAuth.instance.authStateChanges();
   
-  // Listen to auth state changes to update admin status
-  ref.listen(authStateChangesProvider, (_, next) {
-    if (next == null) {
-      // User signed out, reset cached admin status
-      ref.read(cachedAdminStatusProvider.notifier).state = false;
-    }
-  });
+//   // Listen to auth state changes to update admin status
+//   ref.listen(authStateChangesProvider, (_, next) {
+//     if (next == null) {
+//       // User signed out, reset cached admin status
+//       ref.read(cachedAdminStatusProvider.notifier).state = false;
+//     }
+//   });
   
-  return adminService.isUserAdmin();
-});
+//   return adminService.isUserAdmin();
+// });
 
 // Auth state changes provider
 final authStateChangesProvider = StreamProvider<User?>((ref) {

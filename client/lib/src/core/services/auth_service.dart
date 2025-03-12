@@ -20,6 +20,19 @@ class AppUser {
     this.isActive = true,
   });
   
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is AppUser && other.uid == uid && other.email == email;
+  }
+
+  @override
+  int get hashCode => uid.hashCode ^ email.hashCode;
+
+  @override
+  String toString() => 'AppUser(uid: $uid, email: $email)';
+
   factory AppUser.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return AppUser(

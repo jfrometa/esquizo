@@ -78,6 +78,8 @@ final restaurantStatsProvider = FutureProvider<RestaurantStats>((ref) {
       readyOrders: orderStats.readyOrders,
       dailySales: orderStats.dailySales,
       averageServiceTime: orderStats.averageServiceTime,
+      totalOrders: orderStats.totalOrders,
+      completedOrders: orderStats.completedOrders,
     );
   });
 });
@@ -98,25 +100,23 @@ final cashiersProvider = FutureProvider<List<StaffMember>>((ref) {
   return staffService.getStaffByRole(StaffRole.cashier);
 });
 
-
-
-
-
-
-
 class OrderStats {
   final int pendingOrders;
   final int preparingOrders;
   final int readyOrders;
   final double dailySales;
   final int averageServiceTime;
-  
+  final int totalOrders;
+  final int completedOrders;
+
   OrderStats({
     required this.pendingOrders,
     required this.preparingOrders,
     required this.readyOrders,
     required this.dailySales,
     required this.averageServiceTime,
+    required this.totalOrders,
+    required this.completedOrders,
   });
 }
 
@@ -130,6 +130,8 @@ class RestaurantStats {
   final int readyOrders;
   final double dailySales;
   final int averageServiceTime;
+  final int totalOrders;
+  final int completedOrders;
   
   RestaurantStats({
     required this.totalTables,
@@ -141,5 +143,7 @@ class RestaurantStats {
     required this.readyOrders,
     required this.dailySales,
     required this.averageServiceTime,
+    required this.totalOrders,
+    required this.completedOrders,
   });
 }

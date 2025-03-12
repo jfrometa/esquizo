@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/restaurant/providers/restaurant_table_provider.dart';
+import 'package:go_router/go_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/auth_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/user/auth_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/restaurant/providers/table_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/services/service_factory.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/analytics_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_settings_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/user_management/user_management_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/admin_side_menu.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/dashboard_status_card.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/responsive_layout.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/theme_switcher.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/admin_user.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart'; 
+ import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart'; 
  
 
 import 'dart:async';
@@ -14,7 +24,6 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/t
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_management/admin_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/order_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/table_service.dart';
  
 class AdminPanelScreen extends ConsumerStatefulWidget {
   const AdminPanelScreen({super.key});
@@ -27,18 +36,48 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
   late TabController _tabController;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Timer? _refreshTimer;
-  bool _isLoading = false;
+  bool _isLoading = false; 
+ int _selectedIndex = 0; 
+  
+  final List<Widget> _screens = [
+    const AdminDashboardHome(),
+    const ProductManagementScreen(),
+    const OrderManagementScreen(),
+    const TableManagementScreen(),
+    const UserManagementScreen(),
+    const BusinessSettingsScreen(),
+    const AnalyticsDashboard(),
+  ];
+  
+  final List<String> _screenTitles = [
+    'Dashboard',
+    'Products & Menu',
+    'Orders',
+    'Tables',
+    'Users & Staff',
+    'Business Settings',
+    'Analytics',
+  ];
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    
-    // Set up periodic refresh for real-time data
-    _refreshTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
-      _refreshData();
+    _tabController = TabController(
+      length: _screens.length,
+      vsync: this,
+      initialIndex: _selectedIndex,  // Initialize tab controller with selected index
+    );
+
+        // Add listener to sync tab controller with selected index
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        setState(() {
+          _selectedIndex = _tabController.index;
+        });
+      }
     });
   }
+
 
   @override
   void dispose() {
@@ -46,7 +85,737 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
     _refreshTimer?.cancel();
     super.dispose();
   }
+  @override
+  Widget build(BuildContext context) {
+    final authState = ref.watch(authStateProvider);
+    final isAdmin = ref.watch(hasRoleProvider('admin'));
+    
+    // Check if user is authenticated and has admin privileges
+    if (authState != AuthState.authenticated || !isAdmin) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('You do not have access to the admin panel'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => context.go('/login'),
+                child: const Text('Go to Login'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    
+    return ResponsiveLayout(
+      mobile: _buildMobileLayout(context),
+      tablet: _buildTabletLayout(context),
+      desktop: _buildDesktopLayout(context),
+    );
+  }
+  
+  Widget _buildMobileLayout(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_screenTitles[_selectedIndex]),
+        actions: [
+          const ThemeSwitch(),
+          IconButton(
+            icon: const Icon(Icons.account_circle),
+            onPressed: _showUserMenu,
+          ),
+        ],
+      ),
+      body: _screens[_selectedIndex],
+      drawer: SidebarMenu(
+        selectedIndex: _selectedIndex,
+        onItemSelected: _onItemSelected,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemSelected,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
+          BottomNavigationBarItem(icon: Icon(Icons.restaurant_menu), label: 'Products'),
+          BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: 'Orders'),
+          BottomNavigationBarItem(icon: Icon(Icons.table_chart), label: 'Tables'),
+          BottomNavigationBarItem(icon: Icon(Icons.more_horiz), label: 'More'),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildTabletLayout(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_screenTitles[_selectedIndex]),
+        actions: [
+          const ThemeSwitch(),
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () {},
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.account_circle),
+            onPressed: _showUserMenu,
+          ),
+          const SizedBox(width: 16),
+        ],
+      ),
+      body: Row(
+        children: [
+          SidebarMenu(
+            selectedIndex: _selectedIndex,
+            onItemSelected: _onItemSelected,
+            isExpanded: false,
+          ),
+          Expanded(
+            child: _screens[_selectedIndex],
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildDesktopLayout(BuildContext context) {
+    return Scaffold(
+      body: Row(
+        children: [
+          SidebarMenu(
+            selectedIndex: _selectedIndex,
+            onItemSelected: _onItemSelected,
+            isExpanded: true,
+          ),
+          Expanded(
+            child: Column(
+              children: [
+                _buildDesktopHeader(context),
+                Expanded(
+                  child: _screens[_selectedIndex],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildDesktopHeader(BuildContext context) {
+    final businessConfig = ref.watch(businessConfigProvider).value;
+    final currentUser = ref.watch(currentUserProvider).value;
+    
+    return Container(
+      height: 64,
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Text(
+            _screenTitles[_selectedIndex],
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const Spacer(),
+          const ThemeSwitch(),
+          const SizedBox(width: 16),
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () {},
+            tooltip: 'Notifications',
+          ),
+          const SizedBox(width: 16),
+          InkWell(
+            onTap: _showUserMenu,
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 16,
+                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                  foregroundImage: currentUser?.photoURL != null 
+                      ? NetworkImage(currentUser!.photoURL!) 
+                      : null,
+                  child: currentUser?.displayName != null && currentUser!.displayName!.isNotEmpty
+                      ? Text(currentUser.displayName![0].toUpperCase())
+                      : const Icon(Icons.person, size: 16),
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      currentUser?.displayName ?? 'Admin',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    Text(
+                      businessConfig?.name ?? 'Business',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 8),
+                const Icon(Icons.arrow_drop_down),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
+  void _onItemSelected(int index) {
+    // For mobile, the 'More' item opens a modal with additional options
+    if (index == 4 && MediaQuery.of(context).size.width < 600) {
+      _showMoreOptions();
+      return;
+    }
+    
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+  
+  void _showMoreOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.people),
+            title: const Text('Users & Staff'),
+            onTap: () {
+              Navigator.pop(context);
+              setState(() => _selectedIndex = 4);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.settings),
+            title: const Text('Business Settings'),
+            onTap: () {
+              Navigator.pop(context);
+              setState(() => _selectedIndex = 5);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.bar_chart),
+            title: const Text('Analytics'),
+            onTap: () {
+              Navigator.pop(context);
+              setState(() => _selectedIndex = 6);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+  
+  void _showUserMenu() {
+    final authService = ref.read(authServiceProvider);
+    
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        MediaQuery.of(context).size.width - 160,
+        kToolbarHeight + 16,
+        16,
+        0,
+      ),
+      items: [
+        PopupMenuItem(
+          child: const Text('Profile'),
+          onTap: () => context.push('/admin/profile'),
+        ),
+        PopupMenuItem(
+          child: const Text('Help'),
+          onTap: () => context.push('/admin/help'),
+        ),
+        PopupMenuItem(
+          child: const Text('Logout'),
+          onTap: () async {
+            await authService.signOut();
+            if (mounted) context.go('/login');
+          },
+        ),
+      ],
+    );
+  }
+}
+
+// Home screen of the admin dashboard
+class AdminDashboardHome extends ConsumerStatefulWidget {
+  const AdminDashboardHome({Key? key}) : super(key: key);
+
+  @override
+  ConsumerState<AdminDashboardHome> createState() => _AdminDashboardHomeState();
+}
+
+class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
+  bool _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isDesktop = width > 1200;
+    final isTablet = width > 600 && width <= 1200;
+    
+    // Watch necessary providers
+    final businessConfig = ref.watch(businessConfigProvider);
+    final orderStats = ref.watch(orderStatsProvider);
+    final salesStats = ref.watch(salesStatsProvider);
+    final tableStats = ref.watch(tableStatsProvider);
+    
+    return RefreshIndicator(
+      onRefresh: _refreshData,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Business Overview Card
+            businessConfig.when(
+              data: (config) => _buildBusinessOverview(config),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (_, __) => const Card(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text('Error loading business information'),
+                ),
+              ),
+            ),
+            
+            const SizedBox(height: 24),
+            
+            // Stats Cards
+            Text(
+              'Business Overview',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            
+            // Stats Cards Grid
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: isDesktop ? 4 : (isTablet ? 2 : 1),
+              childAspectRatio: isDesktop ? 1.5 : 1.8,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              children: [
+                // Orders Stats
+                orderStats.when(
+                  data: (data) => DashboardStatsCard(
+                    title: 'Orders',
+                    primaryStat: '${data.totalOrders}',
+                    secondaryStat: '${data.pendingOrders} pending',
+                    icon: Icons.receipt_long,
+                    color: Colors.blue,
+                    onTap: () => _navigateToSection(context, 2), // Orders screen
+                  ),
+                  loading: () => const DashboardStatsCard.loading(
+                    title: 'Orders',
+                    icon: Icons.receipt_long,
+                    color: Colors.blue,
+                  ),
+                  error: (_, __) => const DashboardStatsCard.error(
+                    title: 'Orders',
+                    icon: Icons.receipt_long,
+                    color: Colors.blue,
+                  ),
+                ),
+                
+                // Sales Stats
+                salesStats.when(
+                  data: (data) => DashboardStatsCard(
+                    title: 'Sales',
+                    primaryStat: '\$${data.totalSales.toStringAsFixed(2)}',
+                    secondaryStat: 'Today: \$${data.todaySales.toStringAsFixed(2)}',
+                    icon: Icons.attach_money,
+                    color: Colors.green,
+                    onTap: () => _navigateToSection(context, 6), // Analytics screen
+                  ),
+                  loading: () => const DashboardStatsCard.loading(
+                    title: 'Sales',
+                    icon: Icons.attach_money,
+                    color: Colors.green,
+                  ),
+                  error: (_, __) => const DashboardStatsCard.error(
+                    title: 'Sales',
+                    icon: Icons.attach_money,
+                    color: Colors.green,
+                  ),
+                ),
+                
+                // Tables Stats
+                tableStats.when(
+                  data: (data) => DashboardStatsCard(
+                    title: 'Tables',
+                    primaryStat: '${data.occupiedTables}/${data.totalTables}',
+                    secondaryStat: '${data.occupiedTables} tables occupied',
+                    icon: Icons.table_chart,
+                    color: Colors.orange,
+                    onTap: () => _navigateToSection(context, 3), // Tables screen
+                  ),
+                  loading: () => const DashboardStatsCard.loading(
+                    title: 'Tables',
+                    icon: Icons.table_chart,
+                    color: Colors.orange,
+                  ),
+                  error: (_, __) => const DashboardStatsCard.error(
+                    title: 'Tables',
+                    icon: Icons.table_chart,
+                    color: Colors.orange,
+                  ),
+                ),
+                
+                // Products Stats
+                ref.watch(productStatsProvider).when(
+                  data: (data) => DashboardStatsCard(
+                    title: 'Products',
+                    primaryStat: '${data.totalProducts}',
+                    secondaryStat: '${data.categories} categories',
+                    icon: Icons.restaurant_menu,
+                    color: Colors.purple,
+                    onTap: () => _navigateToSection(context, 1), // Products screen
+                  ),
+                  loading: () => const DashboardStatsCard.loading(
+                    title: 'Products',
+                    icon: Icons.restaurant_menu,
+                    color: Colors.purple,
+                  ),
+                  error: (_, __) => const DashboardStatsCard.error(
+                    title: 'Products',
+                    icon: Icons.restaurant_menu,
+                    color: Colors.purple,
+                  ),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 24),
+            
+            // Recent Orders Section
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Recent Orders',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                TextButton.icon(
+                  icon: const Icon(Icons.visibility),
+                  label: const Text('View All'),
+                  onPressed: () => _navigateToSection(context, 2), // Orders screen
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // Recent Orders List
+            ref.watch(recentOrdersProvider).when(
+              data: (orders) {
+                if (orders.isEmpty) {
+                  return const Card(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Center(
+                        child: Text('No recent orders'),
+                      ),
+                    ),
+                  );
+                }
+                
+                return Column(
+                  children: orders.map((order) => _buildOrderCard(context, order)).toList(),
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (_, __) => const Card(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text('Error loading recent orders'),
+                ),
+              ),
+            ),
+            
+            if (isDesktop) ...[
+              const SizedBox(height: 24),
+              
+              // Analytics Preview Section
+              Row(
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: _buildAnalyticsPreview(context),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    flex: 2,
+                    child: _buildQuickActions(context),
+                  ),
+                ],
+              ),
+            ] else ...[
+              const SizedBox(height: 24),
+              
+              _buildAnalyticsPreview(context),
+              
+              const SizedBox(height: 24),
+              
+              _buildQuickActions(context),
+            ],
+            
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildBusinessOverview(BusinessConfig? config) {
+    if (config == null) {
+      return const SizedBox.shrink();
+    }
+    
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            if (config.logoUrl.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  config.logoUrl,
+                  width: 60,
+                  height: 60,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    width: 60,
+                    height: 60,
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    child: Icon(
+                      Icons.business,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                ),
+              )
+            else
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.business,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
+              ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    config.name,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  Text(
+                    config.type.toUpperCase(),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  if (config.features.isNotEmpty)
+                    Wrap(
+                      spacing: 8,
+                      children: config.features.map((feature) => Chip(
+                        label: Text(feature),
+                        padding: EdgeInsets.zero,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        labelStyle: Theme.of(context).textTheme.bodySmall,
+                      )).toList(),
+                    ),
+                ],
+              ),
+            ),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.edit),
+              label: const Text('Edit'),
+              onPressed: () => _navigateToSection(context, 5), // Business Settings
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildOrderCard(BuildContext context, Order order) {
+    final theme = Theme.of(context);
+    
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: _getOrderStatusColor(order.status.name).withOpacity(0.2),
+          child: Icon(
+            Icons.receipt,
+            color: _getOrderStatusColor(order.status.name),
+          ),
+        ),
+        title: Row(
+          children: [
+            Text('Order #${order.id.substring(0, 6)}'),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: _getOrderStatusColor(order.status.name).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                _getOrderStatusText(order.status.name),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: _getOrderStatusColor(order.status.name),
+                ),
+              ),
+            ),
+          ],
+        ),
+        subtitle: Text(
+          '${order.items.length} items • Table ${order.resourceId} • \$${order.total.toStringAsFixed(2)}',
+          style: theme.textTheme.bodySmall,
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.arrow_forward_ios, size: 16),
+          onPressed: () => _navigateToOrderDetails(context, order.id),
+        ),
+        onTap: () => _navigateToOrderDetails(context, order.id),
+      ),
+    );
+  }
+  
+  Widget _buildAnalyticsPreview(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Sales Overview',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                TextButton(
+                  onPressed: () => _navigateToSection(context, 6), // Analytics
+                  child: const Text('View Full Analytics'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Center(
+                  child: Text('Sales Graph Preview'),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildQuickActions(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Quick Actions',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 16),
+            _buildActionButton(
+              context,
+              icon: Icons.add_circle_outline,
+              label: 'Create New Order',
+              onPressed: () => _navigateToSection(context, 2), // Orders
+            ),
+            const SizedBox(height: 8),
+            _buildActionButton(
+              context,
+              icon: Icons.add_business,
+              label: 'Add Product to Menu',
+              onPressed: () => _navigateToSection(context, 1), // Products
+            ),
+            const SizedBox(height: 8),
+            _buildActionButton(
+              context,
+              icon: Icons.person_add_alt,
+              label: 'Add New User',
+              onPressed: () => _navigateToSection(context, 4), // Users
+            ),
+            const SizedBox(height: 8),
+            _buildActionButton(
+              context,
+              icon: Icons.print,
+              label: 'Print Reports',
+              onPressed: () => _navigateToSection(context, 6), // Analytics
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildActionButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        icon: Icon(icon),
+        label: Text(label),
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          alignment: Alignment.centerLeft,
+        ),
+      ),
+    );
+  }
+  
   Future<void> _refreshData() async {
     if (_isLoading) return;
     
@@ -56,14 +825,18 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
     
     try {
       // Refresh providers that need real-time updates
-      ref.invalidate(activeOrdersProvider);
-      ref.refresh(tablesStatusProvider);
-      ref.refresh(restaurantStatsProvider);
+      ref.invalidate(businessConfigProvider);
+      ref.invalidate(orderStatsProvider);
+      ref.invalidate(salesStatsProvider);
+      ref.invalidate(tableStatsProvider);
+      ref.invalidate(recentOrdersProvider);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al actualizar datos: $e'), 
-          behavior: SnackBarBehavior.floating)
+          SnackBar(
+            content: Text('Error refreshing data: $e'),
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     } finally {
@@ -74,1278 +847,150 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
       }
     }
   }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isTablet = MediaQuery.of(context).size.width > 768;
-    
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        title: const Text('Gestión del Restaurante'),
-        centerTitle: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Actualizar datos',
-            onPressed: _refreshData,
-          ),
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            tooltip: 'Notificaciones',
-            onPressed: () => _showNotifications(context),
-          ),
-          const SizedBox(width: 8),
-          _buildUserProfileButton(context),
-          const SizedBox(width: 16),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(
-              icon: Icon(Icons.restaurant_menu),
-              text: 'Servicio de Mesas',
-            ),
-            Tab(
-              icon: Icon(Icons.admin_panel_settings),
-              text: 'Administración',
-            ),
-          ],
-        ),
-      ),
-      drawer: isTablet ? null : _buildNavigationDrawer(context),
-      body: Stack(
-        children: [
-          SafeArea(
-            child: RefreshIndicator(
-              onRefresh: _refreshData,
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildWaiterDashboard(context),
-                  _buildAdminDashboard(context),
-                ],
-              ),
-            ),
-          ),
-          
-          // Loading overlay
-          if (_isLoading)
-            Container(
-              color: Colors.black.withOpacity(0.1),
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
-        ],
-      ),
-      floatingActionButton: _buildFloatingActionButton(),
-      bottomNavigationBar: _buildBottomStatusBar(context),
-    );
-  }
   
-  Widget? _buildFloatingActionButton() {
-    switch (_tabController.index) {
-      case 0: // Waiter dashboard
-        return FloatingActionButton.extended(
-          onPressed: () => _navigateToSection(context, 'create-order'),
-          icon: const Icon(Icons.add),
-          label: const Text('Nuevo Pedido'),
-        );
-      case 1: // Admin dashboard, no FAB needed
-        return null;
-      default:
-        return null;
-    }
-  }
-
-  Widget _buildUserProfileButton(BuildContext context) {
-    final currentStaff = ref.watch(currentStaffProvider);
-    
-    return currentStaff.when(
-      data: (staff) => InkWell(
-        onTap: () => _showUserOptions(context),
-        borderRadius: BorderRadius.circular(24),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 16,
-                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                foregroundImage: staff?.profileImageUrl != null 
-                    ? NetworkImage(staff!.profileImageUrl!) 
-                    : null,
-                child: staff?.name != null && staff!.name.isNotEmpty
-                    ? Text(
-                        staff.name[0].toUpperCase(),
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
-                        ),
-                      )
-                    : Icon(
-                        Icons.person,
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                        size: 16,
-                      ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                staff?.name ?? 'Usuario',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-            ],
-          ),
-        ),
-      ),
-      loading: () => const CircularProgressIndicator(),
-      error: (_, __) => IconButton(
-        icon: const Icon(Icons.account_circle),
-        onPressed: () => _showUserOptions(context),
-      ),
-    );
-  }
-
-  Widget _buildNavigationDrawer(BuildContext context) {
-    final currentStaff = ref.watch(currentStaffProvider);
-    
-    return Drawer(
-      child: Column(
-        children: [
-          currentStaff.when(
-            data: (staff) => UserAccountsDrawerHeader(
-              accountName: Text(staff?.name ?? 'Usuario'),
-              accountEmail: Text(staff?.email ?? ''),
-              currentAccountPicture: CircleAvatar(
-                backgroundColor: Colors.white,
-                foregroundImage: staff?.profileImageUrl != null 
-                    ? NetworkImage(staff!.profileImageUrl!) 
-                    : null,
-                child: staff?.name != null && staff!.name.isNotEmpty
-                    ? Text(
-                        staff.name[0].toUpperCase(),
-                        style: const TextStyle(fontSize: 24),
-                      )
-                    : const Icon(Icons.person),
-              ),
-            ),
-            loading: () => const DrawerHeader(
-              child: Center(child: CircularProgressIndicator()),
-            ),
-            error: (_, __) => const DrawerHeader(
-              child: Text('Error al cargar usuario'),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.restaurant_menu),
-            title: const Text('Gestión de Productos'),
-            onTap: () => _navigateToSection(context, 'products'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.category),
-            title: const Text('Categorías'),
-            onTap: () => _navigateToSection(context, 'categories'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.table_restaurant),
-            title: const Text('Mesas'),
-            onTap: () => _navigateToSection(context, 'tables'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.receipt_long),
-            title: const Text('Pedidos'),
-            onTap: () => _navigateToSection(context, 'orders'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.people),
-            title: const Text('Administradores'),
-            onTap: () => _navigateToSection(context, 'users'),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-          ),
-          ListTile(
-            leading: const Icon(Icons.bar_chart),
-            title: const Text('Estadísticas'),
-            onTap: () => _navigateToSection(context, 'stats'),
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.help_outline),
-            title: const Text('Ayuda'),
-            onTap: () => _showHelpDialog(context),
-          ),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('Cerrar Sesión'),
-            onTap: () => _handleLogout(context),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWaiterDashboard(BuildContext context) {
-    final tables = ref.watch(activeTablesProvider);
-        final orders = ref.watch(activeOrdersProvider('all')); // or another appropriate parameter
-    
-    
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          // Quick actions section
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Acciones Rápidas',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildQuickActionButton(
-                          icon: Icons.add_shopping_cart,
-                          label: 'Nuevo Pedido',
-                          onTap: () => _navigateToSection(context, 'create-order'),
-                        ),
-                        _buildQuickActionButton(
-                          icon: Icons.table_restaurant,
-                          label: 'Ver Mesas',
-                          onTap: () => _navigateToSection(context, 'tables'),
-                        ),
-                        _buildQuickActionButton(
-                          icon: Icons.receipt_long,
-                          label: 'Pedidos',
-                          onTap: () => _navigateToSection(context, 'orders'),
-                        ),
-                        _buildQuickActionButton(
-                          icon: Icons.payment,
-                          label: 'Cobrar',
-                          onTap: () => _navigateToSection(context, 'payment'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          
-          // Active tables section
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Mesas Activas',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                TextButton.icon(
-                  icon: const Icon(Icons.visibility),
-                  label: const Text('Ver Todas'),
-                  onPressed: () => _navigateToSection(context, 'tables'),
-                ),
-              ],
-            ),
-          ),
-          
-   
-          SizedBox(
-            height: 180,
-            child: tables.when(
-              data: (tableList) {
-                if (tableList.isEmpty) {
-                  return const Center(
-                    child: Text('No hay mesas configuradas'),
-                  );
-                }
-                
-                // Show only occupied tables or first 6 tables if none occupied
-                final occupiedTables = tableList
-                    .where((table) => table.status == TableStatus.occupied)
-                    .toList();
-                    
-                final displayTables = occupiedTables.isNotEmpty 
-                    ? occupiedTables 
-                    : tableList.take(6).toList();
-                
-                return ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  itemCount: displayTables.length,
-                  itemBuilder: (context, index) {
-                    final table = displayTables[index];
-                    return _buildTableCard(table);
-                  },
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => Center(
-                child: Text('Error: $error'),
-              ),
-            ),
-          ),
-          
-          // Active orders section
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Pedidos Activos',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                TextButton.icon(
-                  icon: const Icon(Icons.receipt_long),
-                  label: const Text('Ver Todos'),
-                  onPressed: () => _navigateToSection(context, 'orders'),
-                ),
-              ],
-            ),
-          ),
-          
-          orders.when(
-            data: (orderList) {
-              if (orderList.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Center(
-                    child: Text('No hay pedidos activos'),
-                  ),
-                );
-              }
-              
-              // Show only latest 3 orders
-              final latestOrders = orderList.take(3).toList();
-              
-              return ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                itemCount: latestOrders.length,
-                itemBuilder: (context, index) {
-                  final order = latestOrders[index];
-                  return _buildOrderCard(order);
-                },
-              );
-            },
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Center(
-              child: Text('Error: $error'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuickActionButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondaryContainer,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                color: Theme.of(context).colorScheme.onSecondaryContainer,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTableCard(RestaurantTable table) {
-    final statusColor = _getStatusColor(table.status);
-    
-    return Card(
-      margin: const EdgeInsets.only(right: 16, bottom: 8),
-      child: InkWell(
-        onTap: () => _navigateToTableDetails(context, table),
-        child: Container(
-          width: 160,
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Mesa ${table.number}',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: statusColor,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.people,
-                      size: 16,
-                      color: statusColor,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${table.capacity}',
-                      style: TextStyle(
-                        color: statusColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                _getStatusText(table.status),
-                style: TextStyle(
-                  color: statusColor,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              if (table.status == TableStatus.occupied && table.currentOrderId != null)
-                TextButton(
-                  onPressed: () => _navigateToOrderDetails(context, table.currentOrderId!),
-                  child: const Text('Ver Pedido'),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOrderCard(Order order) {
-    final theme = Theme.of(context);
-    final statusColor = _getOrderStatusColor(order.status);
-    
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: InkWell(
-        onTap: () => _navigateToOrderDetails(context, order.id),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Pedido #${order.id.substring(0, 8)}',
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(
-                      _getOrderStatusText(order.status),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: statusColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  const Icon(Icons.table_restaurant, size: 16),
-                  const SizedBox(width: 4),
-                  Text('Mesa ${order.tableNumber}'),
-                  const SizedBox(width: 16),
-                  const Icon(Icons.shopping_basket, size: 16),
-                  const SizedBox(width: 4),
-                  Text('${order.items.length} productos'),
-                  const SizedBox(width: 16),
-                  const Icon(Icons.attach_money, size: 16),
-                  const SizedBox(width: 4),
-                  Text('\$${order.totalAmount.toStringAsFixed(2)}'),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton.icon(
-                    icon: const Icon(Icons.edit, size: 16),
-                    label: const Text('Editar'),
-                    onPressed: () => _navigateToEditOrder(context, order),
-                    style: TextButton.styleFrom(
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  TextButton.icon(
-                    icon: const Icon(Icons.visibility, size: 16),
-                    label: const Text('Ver'),
-                    onPressed: () => _navigateToOrderDetails(context, order.id),
-                    style: TextButton.styleFrom(
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAdminDashboard(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Panel de Administración',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Gestiona todos los aspectos de tu restaurante desde aquí',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          const SizedBox(height: 24),
-          
-          // Admin Dashboard Grid
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childAspectRatio: 1.2,
-            children: [
-              _buildAdminCard(
-                context,
-                title: 'Gestión de Productos',
-                icon: Icons.restaurant_menu,
-                description: 'Añadir, editar y eliminar productos del menú',
-                onTap: () => _navigateToSection(context, 'products'),
-                color: Colors.orange.shade100,
-                iconColor: Colors.deepOrange,
-              ),
-              _buildAdminCard(
-                context,
-                title: 'Categorías',
-                icon: Icons.category,
-                description: 'Organiza tus productos en categorías',
-                onTap: () => _navigateToSection(context, 'categories'),
-                color: Colors.green.shade100,
-                iconColor: Colors.green,
-              ),
-              _buildAdminCard(
-                context,
-                title: 'Usuarios y Permisos',
-                icon: Icons.people,
-                description: 'Gestiona administradores y permisos',
-                onTap: () => _navigateToSection(context, 'users'),
-                color: Colors.blue.shade100,
-                iconColor: Colors.blue,
-              ),
-              _buildAdminCard(
-                context,
-                title: 'Configuración de Mesas',
-                icon: Icons.table_restaurant,
-                description: 'Configura las mesas de tu restaurante',
-                onTap: () => _navigateToSection(context, 'tables'),
-                color: Colors.purple.shade100,
-                iconColor: Colors.purple,
-              ),
-              _buildAdminCard(
-                context,
-                title: 'Pedidos',
-                icon: Icons.receipt_long,
-                description: 'Visualiza y gestiona los pedidos',
-                onTap: () => _navigateToSection(context, 'orders'),
-                color: Colors.amber.shade100,
-                iconColor: Colors.amber.shade800,
-              ),
-              _buildAdminCard(
-                context,
-                title: 'Estadísticas',
-                icon: Icons.bar_chart,
-                description: 'Analiza el rendimiento de tu negocio',
-                onTap: () => _navigateToSection(context, 'stats'),
-                color: Colors.teal.shade100,
-                iconColor: Colors.teal,
-              ),
-            ],
-          ),
-          
-          const SizedBox(height: 24),
-          
-          // Quick Actions Section
-          Text(
-            'Acciones Rápidas',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-          
-          // Quick action buttons
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              _buildActionChip(
-                context,
-                label: 'Añadir Producto',
-                icon: Icons.add_circle_outline,
-                onTap: () => _navigateToSection(context, 'add-product'),
-              ),
-              _buildActionChip(
-                context,
-                label: 'Añadir Administrador',
-                icon: Icons.admin_panel_settings,
-                onTap: () => _navigateToSection(context, 'users'),
-              ),
-              _buildActionChip(
-                context,
-                label: 'Ver Pedidos Pendientes',
-                icon: Icons.pending_actions,
-                onTap: () => _navigateToSection(context, 'pending-orders'),
-              ),
-              _buildActionChip(
-                context,
-                label: 'Configurar QR',
-                icon: Icons.qr_code,
-                onTap: () => _navigateToSection(context, 'qr-config'),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBottomStatusBar(BuildContext context) {
-    final stats = ref.watch(restaurantStatsProvider);
-    
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      color: Theme.of(context).colorScheme.surfaceVariant,
-      child: stats.when(
-        data: (data) => Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildStatusItem(
-              context, 
-              icon: Icons.table_restaurant,
-              label: 'Mesas Ocupadas',
-              value: '${data.occupiedTables}/${data.totalTables}',
-            ),
-            _buildStatusItem(
-              context,
-              icon: Icons.pending_actions,
-              label: 'Pedidos Pendientes',
-              value: '${data.pendingOrders}',
-            ),
-            _buildStatusItem(
-              context,
-              icon: Icons.timer,
-              label: 'Tiempo Promedio',
-              value: '${data.averageServiceTime} min',
-            ),
-            _buildStatusItem(
-              context,
-              icon: Icons.attach_money,
-              label: 'Ventas del Día',
-              value: '\$${data.dailySales.toStringAsFixed(2)}',
-            ),
-          ],
-        ),
-        loading: () => const Center(child: LinearProgressIndicator()),
-        error: (_, __) => const Text('Error al cargar estadísticas'),
-      ),
-    );
-  }
-  
-  Widget _buildStatusItem(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
-    final theme = Theme.of(context);
-    
-    return Row(
-      children: [
-        Icon(
-          icon,
-          size: 16,
-          color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
-        ),
-        const SizedBox(width: 4),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
-              ),
-            ),
-            Text(
-              value,
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAdminCard(
-    BuildContext context, {
-    required String title,
-    required IconData icon,
-    required String description,
-    required VoidCallback onTap,
-    required Color color,
-    required Color iconColor,
-  }) {
-    return Card(
-      elevation: 0,
-      color: color,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 48,
-                color: iconColor,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                description,
-                style: Theme.of(context).textTheme.bodySmall,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionChip(
-    BuildContext context, {
-    required String label,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return ActionChip(
-      avatar: Icon(
-        icon,
-        size: 18,
-      ),
-      label: Text(label),
-      onPressed: onTap,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-    );
-  }
-
-  // Navigation methods
-  void _navigateToSection(BuildContext context, String section) {
-    switch (section) {
-      case 'users':
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const AdminManagementScreen(),
-          ),
-        );
-        break;
-      case 'tables':
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const TableManagementScreen(),
-          ),
-        );
-        break;
-      case 'products':
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const MenuManagementScreen(initialTab: 1,),
-          ),
-        );
-        break;
-      case 'orders':
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const OrderManagementScreen(),
-          ),
-        );
-        break;
-      case 'categories':
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const MenuManagementScreen(initialTab: 1),
-          ),
-        );
-        break;
-      case 'create-order':
-        _createNewOrder();
-        break;
-      // Add other navigation cases as needed
-      default:
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Sección "$section" en desarrollo'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-    }
-  }
-  
-  void _navigateToTableDetails(BuildContext context, RestaurantTable table) {
-    // Check if there's an active order for this table
-    if (table.currentOrderId != null) {
-      _navigateToOrderDetails(context, table.currentOrderId!);
-    } else {
-      // Show table options bottom sheet
-      showModalBottomSheet(
-        context: context,
-        builder: (context) => Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: Text('Mesa ${table.number}'),
-              subtitle: Text(_getStatusText(table.status)),
-            ),
-            ListTile(
-              leading: const Icon(Icons.add_shopping_cart),
-              title: const Text('Crear Pedido'),
-              enabled: table.status == TableStatus.available || table.status == TableStatus.reserved,
-              onTap: () {
-                Navigator.pop(context);
-                _createNewOrderForTable(table);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.edit),
-              title: const Text('Editar Mesa'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => TableManagementScreen(),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      );
+  void _navigateToSection(BuildContext context, int index) {
+    final parentState = context.findAncestorStateOfType<_AdminDashboardState>();
+    if (parentState != null) {
+      parentState._onItemSelected(index);
     }
   }
   
   void _navigateToOrderDetails(BuildContext context, String orderId) {
-    final orderProvider = ref.read(orderServiceProvider);
-    
-    setState(() {
-      _isLoading = true;
-    });
-    
-    orderProvider.getOrderById(orderId).then((order) {
-      setState(() {
-        _isLoading = false;
-      });
-      
-      if (order != null) {
-        Navigator.of(context).pushNamed(
-          '/order-details',
-          arguments: order,
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No se pudo encontrar el pedido'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    }).catchError((error) {
-      setState(() {
-        _isLoading = false;
-      });
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $error'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    });
+    context.push('/admin/orders/$orderId');
   }
   
-  void _navigateToEditOrder(BuildContext context, Order order) {
-    Navigator.of(context).pushNamed(
-      '/edit-order',
-      arguments: order,
-    );
-  }
-  
-  void _createNewOrder() {
-    final availableTables = ref.read(availableTablesProvider);
-    
-    availableTables.when(
-      data: (tables) {
-        if (tables.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('No hay mesas disponibles para crear un nuevo pedido'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-          return;
-        }
-        
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Seleccionar Mesa'),
-            content: SizedBox(
-              width: 300,
-              height: 400,
-              child: ListView.builder(
-                itemCount: tables.length,
-                itemBuilder: (context, index) {
-                  final table = tables[index];
-                  return ListTile(
-                    leading: CircleAvatar(
-                      child: Text('${table.number}'),
-                    ),
-                    title: Text('Mesa ${table.number}'),
-                    subtitle: Text('Capacidad: ${table.capacity} personas'),
-                    trailing: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: _getStatusColor(table.status).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Text(
-                        _getStatusText(table.status),
-                        style: TextStyle(
-                          color: _getStatusColor(table.status),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    onTap: () {
-                      Navigator.pop(context);
-                      _createNewOrderForTable(table);
-                    },
-                  );
-                },
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancelar'),
-              ),
-            ],
-          ),
-        );
-      },
-      loading: () => setState(() => _isLoading = true),
-      error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $error'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      ),
-    );
-  }
-  
-  void _createNewOrderForTable(RestaurantTable table) {
-    Navigator.of(context).pushNamed(
-      '/create-order',
-      arguments: table,
-    );
-  }
-  
-  void _showNotifications(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.5,
-        minChildSize: 0.3,
-        maxChildSize: 0.8,
-        expand: false,
-        builder: (context, scrollController) => NotificationsPanel(
-          scrollController: scrollController,
-        ),
-      ),
-    );
-  }
-  
-  void _showUserOptions(BuildContext context) {
-    showMenu(
-      context: context,
-      position: RelativeRect.fromLTRB(100, 80, 0, 0),
-      items: [
-        PopupMenuItem(
-          child: const ListTile(
-            leading: Icon(Icons.person_outline),
-            title: Text('Mi Perfil'),
-            contentPadding: EdgeInsets.zero,
-          ),
-          onTap: () => _navigateToSection(context, 'profile'),
-        ),
-        PopupMenuItem(
-          child: const ListTile(
-            leading: Icon(Icons.settings_outlined),
-            title: Text('Configuración'),
-            contentPadding: EdgeInsets.zero,
-          ),
-          onTap: () => _navigateToSection(context, 'settings'),
-        ),
-        PopupMenuItem(
-          child: const ListTile(
-            leading: Icon(Icons.logout),
-            title: Text('Cerrar Sesión'),
-            contentPadding: EdgeInsets.zero,
-          ),
-          onTap: () => _handleLogout(context),
-        ),
-      ],
-    );
-  }
-  
-  void _showHelpDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Ayuda'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Panel del Mesero',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                '• Estado de Mesas: Muestra todas las mesas y su estado actual. Puedes crear pedidos o realizar acciones tocando una mesa.',
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                '• Pedidos Activos: Lista de todos los pedidos en curso. Puedes actualizar estados, editar o ver detalles.',
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Panel de Administración',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                '• Desde aquí puedes gestionar todos los aspectos del restaurante: productos, categorías, usuarios, mesas, etc.',
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Atajos',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text('• Botón "+" flotante: Crear nuevo pedido'),
-              const Text('• Deslizar hacia abajo: Actualizar datos'),
-              const Text('• Tocar una mesa: Ver opciones de la mesa'),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Entendido'),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  void _handleLogout(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Cerrar Sesión'),
-        content: const Text('¿Estás seguro de que deseas cerrar la sesión?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // Perform logout logic here
-            },
-            child: const Text('Cerrar Sesión'),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Color _getStatusColor(TableStatus status) {
+  Color _getOrderStatusColor(String status) {
     switch (status) {
-      case TableStatus.available:
-        return Colors.green;
-      case TableStatus.occupied:
-        return Colors.red;
-      case TableStatus.reserved:
+      case 'pending':
         return Colors.orange;
-      case TableStatus.maintenance:
+      case 'preparing':
         return Colors.blue;
-      default:
-        return Colors.grey;
-    }
-  }
-  
-  String _getStatusText(TableStatus status) {
-    switch (status) {
-      case TableStatus.available:
-        return 'Disponible';
-      case TableStatus.occupied:
-        return 'Ocupada';
-      case TableStatus.reserved:
-        return 'Reservada';
-      case TableStatus.maintenance:
-        return 'Mantenimiento';
-      default:
-        return 'Desconocido';
-    }
-  }
-  
-  Color _getOrderStatusColor(OrderStatus status) {
-    switch (status) {
-      case OrderStatus.pending:
-        return Colors.orange;
-      case OrderStatus.paymentConfirmed:
-        return Colors.blue;
-      case OrderStatus.preparing:
-        return Colors.purple;
-      case OrderStatus.readyForDelivery:
+      case 'ready':
         return Colors.green;
-      case OrderStatus.delivering:
-        return Colors.cyan;
-      case OrderStatus.completed:
+      case 'completed':
         return Colors.teal;
-      case OrderStatus.cancelled:
+      case 'cancelled':
         return Colors.red;
       default:
         return Colors.grey;
     }
   }
   
-  String _getOrderStatusText(OrderStatus status) {
+  String _getOrderStatusText(String status) {
     switch (status) {
-      case OrderStatus.pending:
-        return 'Pendiente';
-      case OrderStatus.paymentConfirmed:
-        return 'Pago Confirmado';
-      case OrderStatus.preparing:
-        return 'En Preparación';
-      case OrderStatus.readyForDelivery:
-        return 'Listo para Entregar';
-      case OrderStatus.delivering:
-        return 'Entregando';
-      case OrderStatus.completed:
-        return 'Completado';
-      case OrderStatus.cancelled:
-        return 'Cancelado';
+      case 'pending':
+        return 'Pending';
+      case 'preparing':
+        return 'Preparing';
+      case 'ready':
+        return 'Ready';
+      case 'completed':
+        return 'Completed';
+      case 'cancelled':
+        return 'Cancelled';
       default:
-        return 'Desconocido';
+        return 'Unknown';
     }
   }
 }
+
+// Providers for dashboard stats
+final orderStatsProvider = FutureProvider<OrderStats>((ref) async {
+  final orderService = ref.watch(orderServiceProvider);
+  
+  // Using compute to avoid blocking the main thread for intensive calculations
+  // This implementation avoids multiple unnecessary Firestore reads
+  final pendingOrders = await orderService.getOrdersByStatus('pending');
+  final allOrders = await orderService.getAllOrders();
+  
+  return OrderStats(
+    totalOrders: allOrders.length,
+    pendingOrders: pendingOrders.length,
+    preparingOrders: allOrders.where((o) => o.status == 'preparing').length,
+    completedOrders: allOrders.where((o) => o.status == 'completed').length,
+    readyOrders: allOrders.where((o) => o.status == 'completed').length,
+    dailySales: allOrders.fold(0.0, (sum, order) => sum + order.total),
+    averageServiceTime:   30, // Default value, replace with actual calculation
+ 
+  );
+});
+
+final salesStatsProvider = FutureProvider<SalesStats>((ref) async {
+  final orderService = ref.watch(orderServiceProvider);
+  
+  // Get all orders first to avoid multiple Firestore reads
+  final allOrders = await orderService.getAllOrders();
+  
+  // Now process the data locally
+  final now = DateTime.now();
+  final startOfDay = DateTime(now.year, now.month, now.day);
+  
+  final totalSales = allOrders.fold(
+    0.0, 
+    (sum, order) => sum + (order.status != 'cancelled' ? order.total : 0)
+  );
+  
+  final todayOrders = allOrders.where(
+    (order) => order.createdAt.isAfter(startOfDay) && order.status != 'cancelled'
+  );
+  
+  final todaySales = todayOrders.fold(
+    0.0, 
+    (sum, order) => sum + order.total
+  );
+  
+  return SalesStats(
+    totalSales: totalSales,
+    todaySales: todaySales,
+    orderCount: allOrders.length,
+  );
+});
+
+final tableStatsProvider = FutureProvider<TableStats>((ref) async {
+  // Use the existing table service through the resource service
+  final resourceService = ref.watch(
+    serviceFactoryProvider.select((factory) => 
+      factory.createResourceService('table')
+    )
+  );
+  
+  // Get resource stats to avoid multiple Firestore reads
+  final stats = await resourceService.getResourceStats();
+  
+  return TableStats(
+    totalTables: stats.totalResources,
+    occupiedTables: stats.statusCounts['occupied'] ?? 0,
+    reservedTables: stats.statusCounts['reserved'] ?? 0,
+  );
+});
+
+final productStatsProvider = FutureProvider<ProductStats>((ref) async {
+  // Get catalog service for menu items
+  final catalogService = ref.watch(
+    serviceFactoryProvider.select((factory) => 
+      factory.createCatalogService('menu')
+    )
+  );
+  
+  // Get all items and categories to avoid multiple Firestore reads
+  final itemsStream = catalogService.getItems();
+  final categoriesStream = catalogService.getCategories();
+  
+  final items = await itemsStream.first;
+  final categories = await categoriesStream.first;
+  
+  return ProductStats(
+    totalProducts: items.length,
+    categories: categories.length,
+    outOfStock: items.where((item) => !item.isAvailable).length,
+  );
+});
+
+final recentOrdersProvider = StreamProvider<List<Order>>((ref) {
+  final orderService = ref.watch(orderServiceProvider);
+  // Limit to last 5 orders for dashboard display
+  return orderService.getRecentOrdersStream().map((orders) => orders.take(5).toList());
+});
 
 // Notifications Panel Widget
 class NotificationsPanel extends StatelessWidget {
@@ -1836,7 +1481,7 @@ class EditOrderScreen extends ConsumerWidget {
 
 
 // Service providers
-final authServiceProvider = Provider((ref) => AuthService());
+// final authServiceProvider = Provider((ref) => AuthService());
 // final adminManagementServiceProvider = Provider((ref) => AdminManagementService());
 // final orderServiceProvider = Provider((ref) => OrderService());
 // final tableServiceProvider = Provider((ref) => TableService());
@@ -1849,15 +1494,15 @@ final authServiceProvider = Provider((ref) => AuthService());
 //   return adminService.getAdminsStream();
 // });
 
-final currentUserProvider = FutureProvider<UserProfile?>((ref) {
-  final authService = ref.watch(authServiceProvider);
-  return authService.getCurrentUser();
-});
+// final currentUserProvider = FutureProvider<UserProfile?>((ref) {
+//   final authService = ref.watch(authServiceProvider);
+//   return UserProfile(email: authService.currentUser?.email ?? "", displayName: authService.currentUser?.displayName ?? "", uid: authService.currentUser?.uid ?? "") ;
+// });
 
-final isCurrentUserProvider = FutureProvider.family<bool, String>((ref, email) async {
-  final currentUser = await ref.watch(currentUserProvider.future);
-  return currentUser?.email == email;
-});
+// final isCurrentUserProvider = FutureProvider.family<bool, String>((ref, email) async {
+//   final currentUser = await ref.watch(currentUserProvider.future);
+//   return currentUser?.email == email;
+// });
 
 // final tablesStatusProvider = FutureProvider<List<RestaurantTable>>((ref) {
 //   final tableService = ref.watch(tableServiceProvider);
@@ -1910,250 +1555,6 @@ final isCurrentUserProvider = FutureProvider.family<bool, String>((ref, email) a
 // }
 
 // Services - These would be implemented with actual functionality
-class AuthService {
-  Future<UserProfile?> getCurrentUser() async {
-    // Mock implementation
-    return UserProfile(
-      uid: 'user123',
-      email: 'mesero@restaurante.com',
-      displayName: 'Juan Mesero',
-    );
-  }
-  
-  Future<void> signOut() async {
-    // Mock implementation
-    await Future.delayed(const Duration(milliseconds: 500));
-  }
-}
-
-class UserProfile {
-  final String uid;
-  final String email;
-  final String? displayName;
-  
-  UserProfile({
-    required this.uid,
-    required this.email,
-    this.displayName,
-  });
-}
-
-// class AdminManagementService {
-//   Future<String> addAdmin(String email) async {
-//     // Mock implementation
-//     await Future.delayed(const Duration(seconds: 1));
-//     return 'Administrador agregado correctamente';
-//   }
-  
-//   Future<String> removeAdmin(String email) async {
-//     // Mock implementation
-//     await Future.delayed(const Duration(seconds: 1));
-//     return 'Administrador eliminado correctamente';
-//   }
-  
-//   Stream<List<AdminUser>> getAdminsStream() {
-//     // Mock implementation
-//     return Stream.value([
-//       AdminUser(
-//         email: 'admin@restaurante.com',
-//         createdAt: DateTime.now().subtract(const Duration(days: 30)),
-//       ),
-//       AdminUser(
-//         email: 'gerente@restaurante.com',
-//         createdAt: DateTime.now().subtract(const Duration(days: 15)),
-//       ),
-//       AdminUser(
-//         email: 'mesero@restaurante.com',
-//         createdAt: DateTime.now().subtract(const Duration(days: 5)),
-//       ),
-//     ]);
-//   }
-// }
-
-// class OrderService {
-//   Future<List<Order>> getActiveOrders() async {
-//     // Mock implementation
-//     await Future.delayed(const Duration(seconds: 1));
-    
-//     return [
-//       Order(
-//         id: 'order123456789',
-//         createdAt: DateTime.now().subtract(const Duration(minutes: 15)),
-//         tableNumber: 5,
-//         items: [
-//           OrderItem(
-//             productId: 'prod1',
-//             name: 'Hamburguesa Clásica',
-//             price: 9.99,
-//             quantity: 2,
-//           ),
-//           OrderItem(
-//             productId: 'prod2',
-//             name: 'Refresco Cola',
-//             price: 2.50,
-//             quantity: 2,
-//           ),
-//         ],
-//         totalAmount: 24.98,
-//         status: OrderStatus.inProgress,
-//       ),
-//       Order(
-//         id: 'order987654321',
-//         createdAt: DateTime.now().subtract(const Duration(minutes: 5)),
-//         tableNumber: 3,
-//         items: [
-//           OrderItem(
-//             productId: 'prod3',
-//             name: 'Ensalada César',
-//             price: 7.99,
-//             quantity: 1,
-//           ),
-//           OrderItem(
-//             productId: 'prod4',
-//             name: 'Agua Mineral',
-//             price: 1.50,
-//             quantity: 1,
-//           ),
-//         ],
-//         totalAmount: 9.49,
-//         status: OrderStatus.pending,
-//       ),
-//     ];
-//   }
-  
-//   Future<Order?> getOrderById(String orderId) async {
-//     // Mock implementation
-//     await Future.delayed(const Duration(milliseconds: 500));
-    
-//     return Order(
-//       id: orderId,
-//       createdAt: DateTime.now().subtract(const Duration(minutes: 15)),
-//       tableNumber: 5,
-//       items: [
-//         OrderItem(
-//           productId: 'prod1',
-//           name: 'Hamburguesa Clásica',
-//           price: 9.99,
-//           quantity: 2,
-//         ),
-//         OrderItem(
-//           productId: 'prod2',
-//           name: 'Refresco Cola',
-//           price: 2.50,
-//           quantity: 2,
-//         ),
-//       ],
-//       totalAmount: 24.98,
-//       status: OrderStatus.inProgress,
-//     );
-//   }
-  
-//   Future<void> updateOrderStatus(String orderId, OrderStatus newStatus) async {
-//     // Mock implementation
-//     await Future.delayed(const Duration(milliseconds: 500));
-//   }
-  
-//   Future<OrderStats> getOrderStats() async {
-//     // Mock implementation
-//     await Future.delayed(const Duration(milliseconds: 500));
-    
-//     return OrderStats(
-//       pendingOrders: 3,
-//       dailySales: 456.75,
-//       averageServiceTime: 12, preparingOrders: 0, readyOrders: 0,
-//     );
-//   }
-// }
-
-// class TableService {
-//   Future<List<RestaurantTable>> getAllTables() async {
-//     // Mock implementation
-//     await Future.delayed(const Duration(seconds: 1));
-    
-//     return [
-//       RestaurantTable(
-//         id: 'table1',
-//         number: 1,
-//         capacity: 4,
-//         status: TableStatus.available,
-//       ),
-//       RestaurantTable(
-//         id: 'table2',
-//         number: 2,
-//         capacity: 2,
-//         status: TableStatus.available,
-//       ),
-//       RestaurantTable(
-//         id: 'table3',
-//         number: 3,
-//         capacity: 6,
-//         status: TableStatus.occupied,
-//         currentOrderId: 'order987654321',
-//       ),
-//       RestaurantTable(
-//         id: 'table4',
-//         number: 4,
-//         capacity: 4,
-//         status: TableStatus.reserved,
-//       ),
-//       RestaurantTable(
-//         id: 'table5',
-//         number: 5,
-//         capacity: 6,
-//         status: TableStatus.occupied,
-//         currentOrderId: 'order123456789',
-//       ),
-//       RestaurantTable(
-//         id: 'table6',
-//         number: 6,
-//         capacity: 2,
-//         status: TableStatus.cleaning,
-//       ),
-//       RestaurantTable(
-//         id: 'table7',
-//         number: 7,
-//         capacity: 8,
-//         status: TableStatus.available,
-//       ),
-//       RestaurantTable(
-//         id: 'table8',
-//         number: 8,
-//         capacity: 4,
-//         status: TableStatus.available,
-//       ),
-//     ];
-//   }
-  
-//   Future<void> updateTableStatus(String tableId, TableStatus newStatus) async {
-//     // Mock implementation
-//     await Future.delayed(const Duration(milliseconds: 500));
-//   }
-  
-//   Future<TableStats> getTableStats() async {
-//     // Mock implementation
-//     await Future.delayed(const Duration(milliseconds: 500));
-    
-//     return TableStats(
-//       totalTables: 8,
-//       occupiedTables: 2,
-//     );
-//   }
-// }
 
 
-// class PrintService {
-//   Future<void> printOrder(Order order) async {
-//     // Mock implementation
-//     await Future.delayed(const Duration(seconds: 1));
-//   }
-// }
-
-// class AdminUser {
-//   final String email;
-//   final DateTime? createdAt;
-  
-//   AdminUser({
-//     required this.email,
-//     this.createdAt,
-//   });
-// }
+ 

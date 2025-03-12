@@ -310,7 +310,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
     ref.read(tabsEnabledProvider.notifier).state = false;
     
     // Calculate proper position
-    final appBarHeight = AppBar().preferredSize.height + MediaQuery.of(context).padding.top;
+    final appBarHeight = AppBar().preferredSize.height + MediaQuery.paddingOf(context).top;
     
     showModalBottomSheet(
       context: context,
@@ -393,7 +393,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
             duration: const Duration(milliseconds: 200),
             height: 2,
             color: colorScheme.onPrimary.withOpacity(0.5),
-            width: MediaQuery.of(context).size.width * (_scrollOffset / 1000).clamp(0.0, 1.0),
+            width: MediaQuery.sizeOf(context).width * (_scrollOffset / 1000).clamp(0.0, 1.0),
           ),
         ),
       ),

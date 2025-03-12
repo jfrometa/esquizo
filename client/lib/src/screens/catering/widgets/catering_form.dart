@@ -80,7 +80,7 @@
 //     return SingleChildScrollView(
 //       child: Padding(
 //         padding: EdgeInsets.only(
-//           bottom: MediaQuery.of(context).viewInsets.bottom,
+//           bottom: MediaQuery.sizeOf(context).viewInsets.bottom,
 //           left: 20.0,
 //           right: 20.0,
 //           top: 20.0,

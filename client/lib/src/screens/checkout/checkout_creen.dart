@@ -149,7 +149,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final colorScheme = theme.colorScheme;
     
     // Responsive layout sizing
-    final screenSize = MediaQuery.of(context).size;
+    final screenSize = MediaQuery.sizeOf(context);
     final isDesktop = screenSize.width > 1200;
     final isTablet = screenSize.width > 600 && screenSize.width <= 1200;
     

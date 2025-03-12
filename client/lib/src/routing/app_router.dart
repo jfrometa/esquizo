@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/app_config/app_config_services.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/authenticated_profile_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/screens/catering_menu/catering_menu_screen.dart';
@@ -35,6 +36,7 @@ import 'package:starter_architecture_flutter_firebase/src/routing/scaffold_with_
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_panel_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/unauthorized_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/orders/presentation/in_progress_orders_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_setup_screen.dart'; // Add import for AdminSetupScreen
 
 part 'app_router.g.dart';
 
@@ -71,6 +73,7 @@ enum AppRoute {
   landing,
   local,
   adminPanel,
+  adminSetup, // Add this route for admin setup
   inProgressOrders,
   manualQuote
 }
@@ -160,6 +163,14 @@ GoRouter goRouter(Ref ref) {
           child: CustomSignInScreen(),
         ),
       ),
+      // Add a root-level admin setup route that can be accessed from anywhere
+      GoRoute(
+        path: '/admin-setup',
+        name: AppRoute.adminSetup.name,
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: AdminSetupScreen(),
+        ),
+      ),
       StatefulShellRoute.indexedStack(
         pageBuilder: (context, state, navigationShell) => NoTransitionPage(
           child: ScaffoldWithNestedNavigation(navigationShell: navigationShell),
@@ -176,18 +187,18 @@ GoRouter goRouter(Ref ref) {
 List<RouteBase> _getNestedRoutes(String path) {
   switch (path) {
     case '/':
-  return [     // ... your existing routes
-    GoRoute(
-      path: '/catering-menu',
-      name: AppRoute.cateringMenuE.name,
-      builder: (context, state) => const CateringMenuScreen(),
-    ),
-    GoRoute(
-      path: '/catering-quote',
-      name: AppRoute.cateringQuote.name, 
-      builder: (context, state) => const QuoteScreen(),
-    ),
-  ];
+      return [     // ... your existing routes
+        GoRoute(
+          path: '/catering-menu',
+          name: AppRoute.cateringMenuE.name,
+          builder: (context, state) => const CateringMenuScreen(),
+        ),
+        GoRoute(
+          path: '/catering-quote',
+          name: AppRoute.cateringQuote.name, 
+          builder: (context, state) => const QuoteScreen(),
+        ),
+      ];
     case '/menu':
       return [
         GoRoute(
@@ -294,18 +305,6 @@ List<RouteBase> _getNestedRoutes(String path) {
           ],
         ),
       ];
-    // case '/locales':
-    //   return [
-    //     GoRoute(
-    //       path: 'localese',
-    //       name: AppRoute.local.name,
-    //       pageBuilder: (context, state) {
-    //         return MaterialPage(
-    //           child: QRCodeScreen(),
-    //         );
-    //       },
-    //     ),
-    //   ];
     
     case '/carrito':
       return [
@@ -324,7 +323,14 @@ List<RouteBase> _getNestedRoutes(String path) {
       ];
     case '/admin':
       return [
-        // Add any nested routes for admin here
+        // Add the setup route to the admin nested routes as well
+        GoRoute(
+          path: 'setup',
+          name: 'adminSetupNested', // Different name to avoid conflict
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: AdminSetupScreen(),
+          ),
+        ),
       ];
     case '/cuenta':
       return [
@@ -379,11 +385,9 @@ String _getRouteName(String path) {
 Widget _getDestinationScreen(String path) {
   switch (path) {
     case '/':
-      return const ResponsiveLandingPage(); //const ResponsiveLandingPage();
-    // case '/local':
-    //   return const QRCodeScreen(); //const ResponsiveLandingPage();
+      return const ResponsiveLandingPage();
     case '/menu':
-      return const MenuScreen(); //const MenuHome();
+      return const MenuScreen();
     case '/carrito':
       return const CartScreen(isAuthenticated: true);
     case '/cuenta':

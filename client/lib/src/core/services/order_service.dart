@@ -1,141 +1,20 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
-class OrderItem {
-  final String id;
-  final String name;
-  final double price;
-  final int quantity;
-  final Map<String, dynamic> options;
-  final String? notes;
-  
-  OrderItem({
-    required this.id,
-    required this.name,
-    required this.price,
-    required this.quantity,
-    this.options = const {},
-    this.notes,
-  });
-  
-  double get totalPrice => price * quantity;
-  
-  factory OrderItem.fromFirestore(Map<String, dynamic> data) {
-    return OrderItem(
-      id: data['id'] ?? '',
-      name: data['name'] ?? '',
-      price: (data['price'] ?? 0).toDouble(),
-      quantity: data['quantity'] ?? 1,
-      options: data['options'] ?? {},
-      notes: data['notes'],
-    );
-  }
-  
-  Map<String, dynamic> toFirestore() {
-    return {
-      'id': id,
-      'name': name,
-      'price': price,
-      'quantity': quantity,
-      'options': options,
-      'notes': notes,
-    };
-  }
-}
-
-class Order {
-  final String id;
-  final String businessId;
-  final String userId;
-  final String? resourceId; // Table ID, delivery address, etc.
-  final List<OrderItem> items;
-  final String status;
-  final double subtotal;
-  final double tax;
-  final double total;
-  final String? specialInstructions;
-  final bool isDelivery;
-  final int peopleCount;
-  final DateTime createdAt;
-  final DateTime? updatedAt;
-  
-  Order({
-    required this.id,
-    required this.businessId,
-    required this.userId,
-    this.resourceId,
-    required this.items,
-    required this.status,
-    required this.subtotal,
-    required this.tax,
-    required this.total,
-    this.specialInstructions,
-    this.isDelivery = false,
-    this.peopleCount = 1,
-    DateTime? createdAt,
-    this.updatedAt,
-  }) : createdAt = createdAt ?? DateTime.now();
-  
-  factory Order.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    
-    final itemsList = (data['items'] as List<dynamic>? ?? [])
-        .map((item) => OrderItem.fromFirestore(item as Map<String, dynamic>))
-        .toList();
-    
-    return Order(
-      id: doc.id,
-      businessId: data['businessId'] ?? '',
-      userId: data['userId'] ?? '',
-      resourceId: data['resourceId'],
-      items: itemsList,
-      status: data['status'] ?? 'pending',
-      subtotal: (data['subtotal'] ?? 0).toDouble(),
-      tax: (data['tax'] ?? 0).toDouble(),
-      total: (data['total'] ?? 0).toDouble(),
-      specialInstructions: data['specialInstructions'],
-      isDelivery: data['isDelivery'] ?? false,
-      peopleCount: data['peopleCount'] ?? 1,
-      createdAt: data['createdAt'] != null 
-          ? (data['createdAt'] as Timestamp).toDate() 
-          : DateTime.now(),
-      updatedAt: data['updatedAt'] != null 
-          ? (data['updatedAt'] as Timestamp).toDate() 
-          : null,
-    );
-  }
-  
-  Map<String, dynamic> toFirestore() {
-    return {
-      'businessId': businessId,
-      'userId': userId,
-      'resourceId': resourceId,
-      'items': items.map((item) => item.toFirestore()).toList(),
-      'status': status,
-      'subtotal': subtotal,
-      'tax': tax,
-      'total': total,
-      'specialInstructions': specialInstructions,
-      'isDelivery': isDelivery,
-      'peopleCount': peopleCount,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': FieldValue.serverTimestamp(),
-    };
-  }
-}
+import 'package:cloud_firestore/cloud_firestore.dart' as CloudFireStore; 
+import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
 
 class OrderService {
-  final FirebaseFirestore _firestore;
+  final CloudFireStore.FirebaseFirestore _firestore;
   final String _businessId;
   
   OrderService({
-    FirebaseFirestore? firestore,
+    CloudFireStore.FirebaseFirestore? firestore,
     required String businessId,
   }) : 
-    _firestore = firestore ?? FirebaseFirestore.instance,
+    _firestore = firestore ?? CloudFireStore.FirebaseFirestore.instance,
     _businessId = businessId;
   
   // Collection reference
-  CollectionReference get _ordersCollection => 
+  CloudFireStore.CollectionReference get _ordersCollection => 
       _firestore.collection('businesses').doc(_businessId).collection('orders');
   
   // Create a new order
@@ -167,7 +46,7 @@ class OrderService {
   Future<void> updateOrderStatus(String orderId, String status) async {
     await _ordersCollection.doc(orderId).update({
       'status': status,
-      'updatedAt': FieldValue.serverTimestamp(),
+      'updatedAt': CloudFireStore.FieldValue.serverTimestamp(),
     });
   }
   
@@ -209,11 +88,86 @@ class OrderService {
     final yesterday = DateTime.now().subtract(const Duration(days: 1));
     
     return _ordersCollection
-        .where('createdAt', isGreaterThan: Timestamp.fromDate(yesterday))
+        .where('createdAt', isGreaterThan: CloudFireStore.Timestamp.fromDate(yesterday))
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs
             .map((doc) => Order.fromFirestore(doc))
             .toList());
+  }
+}
+
+// Extension methods for Order class to handle Firestore conversion
+extension OrderFirestoreExtension on Order {
+  // Convert Order to Firestore data
+  Map<String, dynamic> toFirestore() {
+    return {
+      'id': id,
+      'businessId': businessId,
+      'userId': userId,
+      'userName': userName,
+      'userEmail': userEmail,
+      'userPhone': userPhone,
+      'items': items.map((item) => item is Map ? item : item.toMap()).toList(),
+      'subtotal': subtotal,
+      'tax': tax,
+      'total': total,
+      'status': status.name,
+      'createdAt': CloudFireStore.Timestamp.fromDate(createdAt),
+      'resourceId': resourceId,
+      'specialInstructions': specialInstructions,
+      'isDelivery': isDelivery,
+      'deliveryAddress': deliveryAddress,
+      'deliveryFee': deliveryFee,
+      'discount': discount,
+      'peopleCount': peopleCount,
+      'paymentMethod': paymentMethod,
+      'lastUpdated': lastUpdated != null 
+          ? CloudFireStore.Timestamp.fromDate(lastUpdated!) 
+          : null,
+    };
+  }
+
+  // Create Order from Firestore document
+  static Order fromFirestore(CloudFireStore.DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    
+    return Order(
+      id: data['id'] ?? doc.id,
+      businessId: data['businessId'],
+      userId: data['userId'] ?? '',
+      userName: data['userName'],
+      userEmail: data['userEmail'],
+      userPhone: data['userPhone'],
+      items: (data['items'] as List?)?.map((item) => item as Map<String, dynamic>).toList() ?? [],
+      subtotal: (data['subtotal'] as num?)?.toDouble() ?? 0.0,
+      tax: (data['tax'] as num?)?.toDouble() ?? 0.0,
+      total: (data['total'] as num?)?.toDouble() ?? 0.0,
+      status: _parseOrderStatus(data['status']),
+      createdAt: (data['createdAt'] as CloudFireStore.Timestamp?)?.toDate() ?? DateTime.now(),
+      resourceId: data['resourceId'],
+      specialInstructions: data['specialInstructions'],
+      isDelivery: data['isDelivery'] ?? false,
+      deliveryAddress: data['deliveryAddress'],
+      deliveryFee: (data['deliveryFee'] as num?)?.toDouble() ?? 0.0,
+      discount: (data['discount'] as num?)?.toDouble() ?? 0.0,
+      peopleCount: data['peopleCount'],
+      paymentMethod: data['paymentMethod'] ?? 'cash',
+      lastUpdated: (data['lastUpdated'] as CloudFireStore.Timestamp?)?.toDate(),
+    );
+  }
+  
+  // Helper method to parse order status
+  static OrderStatus _parseOrderStatus(String? status) {
+    if (status == null) return OrderStatus.pending;
+    
+    switch (status.toLowerCase()) {
+      case 'pending': return OrderStatus.pending;
+      case 'preparing': return OrderStatus.preparing;
+      case 'ready': return OrderStatus.ready;
+      case 'completed': return OrderStatus.completed;
+      case 'cancelled': return OrderStatus.cancelled;
+      default: return OrderStatus.pending;
+    }
   }
 }

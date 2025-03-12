@@ -10,4 +10,5 @@ enum OrderStatus {
   preparing,
   readyForDelivery,
   delivering,  
+  confirmed
 }

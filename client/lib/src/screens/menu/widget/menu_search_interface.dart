@@ -74,7 +74,7 @@ class MenuSearchInterface extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final mediaQuery = MediaQuery.of(context);
+    final mediaQuery = MediaQuery.sizeOf(context);
     
     // Only watch recent searches when needed
     final bool hasFocus = focusNode.hasFocus;
@@ -102,7 +102,7 @@ class MenuSearchInterface extends ConsumerWidget {
     
     return Container(
       constraints: BoxConstraints(
-        maxHeight: mediaQuery.size.height * 0.9,
+        maxHeight: mediaQuery.height * 0.9,
       ),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,

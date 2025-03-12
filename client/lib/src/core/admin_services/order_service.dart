@@ -117,7 +117,7 @@ class OrderService {
             : order.id;
         
         // If table is specified, check and update table status
-        if (order.tableId.isNotEmpty) {
+        if (order.tableId?.isNotEmpty ?? false) {
           final tableDoc = await transaction.get(_firestore.collection('tables').doc(order.tableId));
           
           if (!tableDoc.exists) {
@@ -194,7 +194,7 @@ class OrderService {
         
         // If order is completed or cancelled, update table status
         if ((newStatus == OrderStatus.completed || newStatus == OrderStatus.cancelled) && 
-            order.tableId.isNotEmpty) {
+            (order.tableId?.isNotEmpty ?? false)) {
           final tableDoc = await transaction.get(_firestore.collection('tables').doc(order.tableId));
           
           if (tableDoc.exists) {
@@ -248,7 +248,7 @@ class OrderService {
             'paidAt': CloudFireStore.FieldValue.serverTimestamp(),
             'paymentMethod': paymentMethod,
             'tipAmount': tipAmount,
-            'totalAmount': order.subtotal + order.taxAmount + tipAmount,
+            'totalAmount': (order.subtotal ?? 0) + (order.taxAmount ?? 0) + tipAmount,
             'cashierId': cashierId,
             'cashierName': cashierName,
             'lastUpdated': CloudFireStore.FieldValue.serverTimestamp(),
@@ -256,7 +256,7 @@ class OrderService {
         );
         
         // Update table status if applicable
-        if (order.tableId.isNotEmpty) {
+        if (order.tableId?.isNotEmpty ?? false) {
           final tableDoc = await transaction.get(_firestore.collection('tables').doc(order.tableId));
           
           if (tableDoc.exists) {
@@ -332,7 +332,7 @@ class OrderService {
         preparingOrders: preparingSnapshot.count ?? 0,
         readyOrders: readySnapshot.count ?? 0,
         dailySales: dailySales,
-        averageServiceTime: averageServiceTime,
+        averageServiceTime: averageServiceTime, totalOrders: 0, completedOrders: 0,
       );
     } catch (e) {
       print('Error calculating order stats: $e');
@@ -342,6 +342,8 @@ class OrderService {
         readyOrders: 0,
         dailySales: 0,
         averageServiceTime: 0,
+        totalOrders: 0,
+        completedOrders: 0,
       );
     }
   }

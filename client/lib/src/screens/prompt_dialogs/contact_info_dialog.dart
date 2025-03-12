@@ -126,7 +126,7 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
     final colorScheme = theme.colorScheme;
     
     // Responsive width calculation
-    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenWidth = MediaQuery.sizeOf(context).width;
     final double dialogWidth = screenWidth > 600 ? 500 : screenWidth * 0.85;
 
     return Dialog(
@@ -138,7 +138,7 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: dialogWidth,
-          maxHeight: MediaQuery.of(context).size.height * 0.8,
+          maxHeight: MediaQuery.sizeOf(context).height * 0.8,
         ),
         child: Padding(
           padding: const EdgeInsets.all(24.0),

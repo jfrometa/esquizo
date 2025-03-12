@@ -62,7 +62,7 @@ class _CateringMenuScreenState extends ConsumerState<CateringMenuScreen> {
       builder: (context) {
         return Padding(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+            bottom: MediaQuery.viewInsetsOf(context).bottom,
             left: 20.0,
             right: 20.0,
             top: 20.0,
@@ -328,7 +328,7 @@ class _QuoteScreenState extends ConsumerState<QuoteScreen> {
       builder: (context) {
         return Padding(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+            bottom: MediaQuery.viewInsetsOf(context).bottom,
             left: 20,
             right: 20,
             top: 20,

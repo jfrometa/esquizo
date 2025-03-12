@@ -3,8 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/widgets/catering_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/providers/catering_order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/cathering_order_item.dart';
-import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
-
+ 
 class CateringCartItemView extends ConsumerWidget {
   final CateringOrderItem order;
   final VoidCallback onRemoveFromCart;
@@ -295,7 +294,7 @@ class CateringCartItemView extends ConsumerWidget {
         builder: (context) {
           return Padding(
             padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
+              bottom: MediaQuery.viewInsetsOf(context).bottom,
               left: 20.0,
               right: 20.0,
               top: 20.0,

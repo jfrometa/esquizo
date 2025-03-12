@@ -118,7 +118,7 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
       builder: (context) {
         return Padding(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+            bottom: MediaQuery.viewInsetsOf(context).bottom,
             left: 20.0,
             right: 20.0,
             top: 20.0,
@@ -177,7 +177,7 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
       builder: (context) {
         return Padding(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+            bottom: MediaQuery.viewInsetsOf(context).bottom,
             left: 20,
             right: 20,
             top: 20,

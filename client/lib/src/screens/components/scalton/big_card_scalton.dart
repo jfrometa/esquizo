@@ -19,7 +19,7 @@ class BigCardScalton extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         ScaltonLine(
-          width: MediaQuery.of(context).size.width * 0.8,
+          width: MediaQuery.sizeOf(context).width * 0.8,
         ),
         const SizedBox(height: 16),
         const ScaltonLine(),

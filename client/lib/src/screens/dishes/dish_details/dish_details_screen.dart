@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/ordering_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/providers/cart_provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/landing_page_home.dart';
 
 /// Enhanced Dish Details Screen with system theming support
 class DishDetailsScreen extends ConsumerStatefulWidget {

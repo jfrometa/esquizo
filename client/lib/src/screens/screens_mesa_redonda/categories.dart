@@ -35,8 +35,8 @@ class CategoriesState extends State<Categories> {
                     children: <Widget>[
                       Image.asset(
                         cat["img"],
-                        height: MediaQuery.of(context).size.height,
-                        width: MediaQuery.of(context).size.height,
+                        height: MediaQuery.sizeOf(context).height,
+                        width: MediaQuery.sizeOf(context).height,
                         fit: BoxFit.cover,
                       ),
                       Container(
@@ -53,13 +53,13 @@ class CategoriesState extends State<Categories> {
                             // stops: [0.0, 0.1],
                           ),
                         ),
-                        height: MediaQuery.of(context).size.height,
-                        width: MediaQuery.of(context).size.height,
+                        height: MediaQuery.sizeOf(context).height,
+                        width: MediaQuery.sizeOf(context).height,
                       ),
                       Center(
                         child: Container(
-                          height: MediaQuery.of(context).size.height,
-                          width: MediaQuery.of(context).size.height,
+                          height: MediaQuery.sizeOf(context).height,
+                          width: MediaQuery.sizeOf(context).height,
                           padding: const EdgeInsets.all(1),
                           // constraints: BoxConstraints(
                           //   minWidth: 20,

@@ -14,12 +14,12 @@ class ResponsiveWidget extends StatelessWidget {
   final Widget desktopScreen;
 
   static bool isMobileScreen(BuildContext context) {
-    return MediaQuery.of(context).size.width <=
+    return MediaQuery.sizeOf(context).width <=
         maxMobileScreenWidth;
   }
 
   static bool isDesktopScreen(BuildContext context) {
-    return MediaQuery.of(context).size.width >
+    return MediaQuery.sizeOf(context).width >
         maxMobileScreenWidth;
   }
 

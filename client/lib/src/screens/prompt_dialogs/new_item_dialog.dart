@@ -11,7 +11,7 @@ class NewItemDialog {
     final TextEditingController itemDescriptionController = TextEditingController();
 
     try {
-      final isDesktop = MediaQuery.of(context).size.width > 600;
+      final isDesktop = MediaQuery.sizeOf(context).width > 600;
 
       if (isDesktop) {
         return showDialog(
@@ -69,7 +69,7 @@ class NewItemDialog {
         isScrollControlled: true,
         builder: (context) => Padding(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+            bottom: MediaQuery.viewInsetsOf(context).bottom,
             left: 16,
             right: 16,
             top: 16,

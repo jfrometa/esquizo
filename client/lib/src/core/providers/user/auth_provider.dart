@@ -30,6 +30,12 @@ final currentUserProvider = StreamProvider<AppUser?>((ref) {
   return authService.streamUserData(userId);
 });
 
+
+final isCurrentUserProvider = FutureProvider.family<bool, String>((ref, email) async {
+  final currentUser = await ref.watch(currentUserProvider.future);
+  return currentUser?.email == email;
+});
+
 // Provider to check if user has a specific role
 final hasRoleProvider = Provider.family<bool, String>((ref, role) {
   final userAsync = ref.watch(currentUserProvider);

@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 // Import for web settings
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
-import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
-// Add to imports
+import 'package:http/http.dart' as http; 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/delivery_location_provider.dart';
 
@@ -193,7 +191,7 @@ class LocationCaptureBottomSheetState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final isDesktop = size.width > 1024;
     final isTablet = size.width > 600 && size.width <= 1024;
 

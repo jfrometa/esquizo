@@ -279,4 +279,4 @@ final dishProvider = Provider<List<Map<String, dynamic>>>((ref) {
 });
 
 // Meal Plan Options
-enum MealPlan { twelveLunch, tenLunch, eightLunch }
+enum MealPlansEnum { twelveLunch, tenLunch, eightLunch }

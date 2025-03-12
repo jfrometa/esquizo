@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_providers.dart';
-import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
+ import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
 class CustomSignInScreen extends ConsumerStatefulWidget {
   const CustomSignInScreen({super.key});
@@ -34,9 +34,7 @@ class _CustomSignInScreenState extends ConsumerState<CustomSignInScreen> {
             // Handle sign out case to reset admin status
             if (state.toString().contains('SignedOut') || 
                 FirebaseAuth.instance.currentUser == null) {
-              // Reset admin status in cache
-              ref.read(cachedAdminStatusProvider.notifier).state = false;
-              
+                          
               // Force refresh the admin provider
               ref.invalidate(isAdminProvider);
               

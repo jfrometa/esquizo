@@ -12,9 +12,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/auth_services/fir
 import 'package:starter_architecture_flutter_firebase/src/localization/string_hardcoded.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/providers/user_preference/user_preference_provider.dart';
-
-// Shared variables
-late final ValueNotifier<int> notifier;
+ 
 // Using dynamic type to handle different device info types across platforms
 late final dynamic deviceInfo;
 late final CameraDescription? camera;
@@ -51,10 +49,7 @@ Future<void> main() async {
   
   // Register global error handlers
   registerErrorHandlers();
-  
-  // Initialize notifier
-  notifier = ValueNotifier<int>(0);
-  
+   
   // Run the application
   runApp(
     UncontrolledProviderScope(
@@ -86,11 +81,11 @@ Future<void> _configureSystemUI() async {
 Future<void> _initializeAuth(ProviderContainer container) async {
   // Check if the user is already signed in
   final authRepo = container.read(authRepositoryProvider);
-  final currentUser = FirebaseAuth.instance.currentUser;
-  
+  final currentUser = FirebaseAuth.instance.currentUser; 
+ 
   // Sign in anonymously if no user is signed in
   if (currentUser == null) {
-    await authRepo.signInAnonymously();
+      await authRepo.initialize();
   }
   
   // Initialize theme system from user preferences (if any)
