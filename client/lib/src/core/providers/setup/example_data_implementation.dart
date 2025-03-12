@@ -1,11 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart' as CloudFireStore;
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/core/services/business_config_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/resource_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/core/services/reservation_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/admin_user.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 
 // part 'example_data_implementation.g.dart';
@@ -681,7 +682,7 @@ class ExampleDataService {
         userId: 'sample_user',
         resourceId: roomId,
         items: orderItems,
-        status: OrderStatus.confirmed,
+        status: OrderStatus.completed,
         subtotal: subtotal,
         tax: tax,
         total: total,
@@ -689,7 +690,7 @@ class ExampleDataService {
         isDelivery: false,
         peopleCount: 2,
         createdAt: now.subtract(Duration(days: 5 - i)),
-        paymentMethod: '',
+         paymentMethod: 'paypal',
       );
       
       await _firestore

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart' as restairant_table;
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart' ;
 import 'package:uuid/uuid.dart'; 
 
 class TableForm extends ConsumerStatefulWidget {
-  final restairant_table.RestaurantTable? table;
-  final Function(restairant_table.RestaurantTable) onSave;
+  final RestaurantTable? table;
+  final Function(RestaurantTable) onSave;
   final VoidCallback onCancel;
 
   const TableForm({
@@ -26,7 +26,7 @@ class _TableFormState extends ConsumerState<TableForm> {
   // Form state
   int _tableNumber = 1;
   int _capacity = 4;
-  restairant_table.TableStatus _status = restairant_table.TableStatusEnum.available;
+  TableStatusEnum _status = TableStatusEnum.available;
   Map<String, double> _position = {'x': 0, 'y': 0};
   String? _currentOrderId;
 
@@ -137,14 +137,14 @@ class _TableFormState extends ConsumerState<TableForm> {
             const SizedBox(height: 16),
             
             // Status dropdown
-            DropdownButtonFormField<restairant_table.TableStatus>(
+            DropdownButtonFormField<TableStatusEnum>(
               value: _status,
               decoration: const InputDecoration(
                 labelText: 'Status',
                 border: OutlineInputBorder(),
               ),
-              items: restairant_table.TableStatusEnum.values.map((status) {
-                return DropdownMenuItem<restairant_table.TableStatus>(
+              items: TableStatusEnum.values.map((status) {
+                return DropdownMenuItem<TableStatusEnum>(
                   value: status,
                   child: Text(_getStatusText(status)),
                 );
@@ -330,33 +330,33 @@ class _TableFormState extends ConsumerState<TableForm> {
     );
   }
   
-  Color _getStatusColor(restairant_table.TableStatus status) {
+  Color _getStatusColor(TableStatusEnum status) {
     switch (status) {
-      case restairant_table.TableStatusEnum.available:
+      case TableStatusEnum.available:
         return Colors.green;
-      case restairant_table.TableStatusEnum.occupied:
+      case TableStatusEnum.occupied:
         return Colors.red;
-      case restairant_table.TableStatusEnum.reserved:
+      case TableStatusEnum.reserved:
         return Colors.orange;
-      case restairant_table.TableStatusEnum.maintenance:
+      case TableStatusEnum.maintenance:
         return Colors.blue;
-      case restairant_table.TableStatusEnum.cleaning:
+      case TableStatusEnum.cleaning:
         // TODO: Handle this case.
        return Colors.yellow;
     }
   }
   
-  String _getStatusText(restairant_table.TableStatus status) {
+  String _getStatusText(TableStatusEnum status) {
     switch (status) {
-      case restairant_table.TableStatusEnum.available:
+      case TableStatusEnum.available:
         return 'Available';
-      case restairant_table.TableStatusEnum.occupied:
+      case TableStatusEnum.occupied:
         return 'Occupied';
-      case restairant_table.TableStatusEnum.reserved:
+      case TableStatusEnum.reserved:
         return 'Reserved';
-      case restairant_table.TableStatusEnum.maintenance:
+      case TableStatusEnum.maintenance:
         return 'Maintenance';
-      case restairant_table.TableStatusEnum.cleaning:
+      case TableStatusEnum.cleaning:
         // TODO: Handle this case.
         return 'Cleaning';
     }
@@ -368,7 +368,7 @@ class _TableFormState extends ConsumerState<TableForm> {
     }
     
     // Create table object
-    final table = restairant_table.RestaurantTable(
+    final table = RestaurantTable(
       id: _isEditMode ? widget.table!.id : const Uuid().v4(),
       businessId: _businessId,
       number: _tableNumber,
