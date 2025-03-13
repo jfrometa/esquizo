@@ -1,19 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/user/auth_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import '../../services/order_service.dart';
 import '../business/business_config_provider.dart';
 
-// Provider for order service
-final orderServiceProvider = Provider<OrderService>((ref) {
-  final businessId = ref.watch(currentBusinessIdProvider);
-  return OrderService(businessId: businessId);
-});
+
 
 // Provider for orders by status
-final ordersByStatusProvider = StreamProvider.family<List<Order>, String>((ref, status) {
+final ordersByStatusStringProvider = StreamProvider.family<List<Order>, String>((ref, status) {
   final orderService = ref.watch(orderServiceProvider);
-  return orderService.getOrdersByStatusStream(status);
+  return orderService.getOrdersByStatusStringStream(status);
 });
 
 // Provider for orders by resource

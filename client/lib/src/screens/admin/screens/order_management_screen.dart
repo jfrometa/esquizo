@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/create_order.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/order_details_widget.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
@@ -9,7 +10,7 @@ import '../../../core/providers/order/order_provider.dart';
 import '../widgets/responsive_layout.dart'; 
 
 class OrderManagementScreen extends ConsumerStatefulWidget {
-  const OrderManagementScreen({Key? key}) : super(key: key);
+  const OrderManagementScreen({super.key});
 
   @override
   ConsumerState<OrderManagementScreen> createState() => _OrderManagementScreenState();
@@ -218,7 +219,7 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
   Widget _buildOrdersList() {
     final ordersStream = _selectedStatus == 'all'
         ? ref.watch(ordersByDateProvider(_selectedDate))
-        : ref.watch(ordersByStatusProvider(_selectedStatus));
+        : ref.watch(ordersByStatusStringProvider(_selectedStatus));
     
     return ordersStream.when(
       data: (orders) {
@@ -230,7 +231,7 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
           if (order.id.toLowerCase().contains(_searchQuery)) return true;
           
           // Search by table number or customer name
-          final resourceId = order.id.toLowerCase() ?? '';
+          final resourceId = order.id.toLowerCase();
           final userName = order.customerName?.toLowerCase() ?? '';
           
           return resourceId.contains(_searchQuery) || 
@@ -461,15 +462,14 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
   }
   
   Future<void> _updateOrderStatus(Order order) async {
-    final nextStatus = _getNextStatus(order.status.name);
     
     try {
       final orderService = ref.read(orderServiceProvider);
-      await orderService.updateOrderStatus(order.id, nextStatus);
+      await orderService.updateOrderStatus(order.id, order.status);
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Order status updated to ${_capitalizeFirst(nextStatus)}')),
+          SnackBar(content: Text('Order status updated to ${_capitalizeFirst(order.status.name)}')),
         );
       }
     } catch (e) {
@@ -480,21 +480,7 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
       }
     }
   }
-  
-  String _getNextStatus(String currentStatus) {
-    switch (currentStatus) {
-      case 'pending':
-        return 'preparing';
-      case 'preparing':
-        return 'ready';
-      case 'ready':
-        return 'delivering';
-      case 'delivering':
-        return 'completed';
-      default:
-        return 'pending';
-    }
-  }
+ 
   
   String _getNextStatusLabel(String currentStatus) {
     switch (currentStatus) {

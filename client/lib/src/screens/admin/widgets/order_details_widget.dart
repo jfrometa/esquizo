@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
  
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 
@@ -172,7 +174,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
     final statusColor = _getStatusColor(order.status.name);
     
     // Available next statuses based on current status
-    final nextStatuses = _getNextPossibleStatuses(order.status.name);
+    final nextStatuses = _getNextPossibleStatuses(order.status);
     
     return Card(
       child: Padding(
@@ -516,7 +518,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
               const SizedBox(height: 16),
               _buildInfoRow(
                 label: 'Payment Method',
-                value: _capitalizeFirst(order.paymentMethod!),
+                value: _capitalizeFirst(order.paymentMethod),
                 icon: Icons.payment,
               ),
             ],
@@ -695,7 +697,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
     );
   }
   
-  Future<void> _updateOrderStatus(Order order, String newStatus) async {
+  Future<void> _updateOrderStatus(Order order, OrderStatus newStatus) async {
     setState(() {
       _isUpdatingStatus = true;
     });
@@ -707,7 +709,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Order status updated to ${_capitalizeFirst(newStatus)}'),
+            content: Text('Order status updated to ${_capitalizeFirst(newStatus.name)}'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -753,7 +755,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
     );
     
     if (confirmed == true) {
-      await _updateOrderStatus(order, 'cancelled');
+      await _updateOrderStatus(order, OrderStatus.cancelled);
     }
   }
   
@@ -805,37 +807,37 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
     Navigator.of(context).pushNamed('/admin/customers/$userId');
   }
   
-  List<String> _getNextPossibleStatuses(String currentStatus) {
+  List<OrderStatus> _getNextPossibleStatuses(OrderStatus currentStatus) {
     switch (currentStatus) {
-      case 'pending':
-        return ['preparing'];
-      case 'preparing':
-        return ['ready'];
-      case 'ready':
-        return ['delivering', 'completed'];
-      case 'delivering':
-        return ['completed'];
-      case 'completed':
+      case OrderStatus.pending:
+        return [OrderStatus.preparing];
+      case OrderStatus.preparing:
+        return [OrderStatus.ready];
+      case OrderStatus.ready:
+        return [OrderStatus.delivering, OrderStatus.completed];
+      case OrderStatus.delivering:
+        return [OrderStatus.completed];
+      case OrderStatus.completed:
         return [];
-      case 'cancelled':
+      case OrderStatus.cancelled:
         return [];
       default:
         return [];
     }
   }
   
-  String _getStatusActionText(String status) {
+  String _getStatusActionText(OrderStatus status) {
     switch (status) {
-      case 'preparing':
+      case OrderStatus.preparing:
         return 'Start Preparing';
-      case 'ready':
+      case OrderStatus.ready:
         return 'Mark as Ready';
-      case 'delivering':
+      case OrderStatus.delivering:
         return 'Start Delivery';
-      case 'completed':
+      case OrderStatus.completed:
         return 'Mark as Completed';
       default:
-        return _capitalizeFirst(status);
+        return _capitalizeFirst(status.name);
     }
   }
   

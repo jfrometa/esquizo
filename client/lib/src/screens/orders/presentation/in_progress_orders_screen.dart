@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart';
  
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/order_history_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/order_service.dart';
+ 
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/catering_card.dart';
 // Remove ColorsPaletteRedonda import
  

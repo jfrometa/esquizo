@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/core/providers/user/auth_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/services/restaurant/restaurant_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
@@ -1482,33 +1484,14 @@ class DashboardStats {
     required this.productStats,
   });
 }
-
-/// Order statistics
-class OrderStats {
-  final int totalOrders;
-  final int pendingOrders;
-  final int preparingOrders;
-  final int completedOrders;
-  final double orderCompletionRate;
-  final double avgPrepTime; // in minutes
-  
-  const OrderStats({
-    required this.totalOrders,
-    required this.pendingOrders,
-    required this.preparingOrders,
-    required this.completedOrders,
-    this.orderCompletionRate = 0,
-    this.avgPrepTime = 0,
-  });
-}
-
-/// Sales statistics
-class SalesStats {
+ class SalesStats {
   final double totalSales;
   final double todaySales;
   final int orderCount;
   final Map<String, double>? salesByDay;
   final double averageOrderValue;
+
+  
   
   const SalesStats({
     required this.totalSales,
@@ -1532,11 +1515,14 @@ class TableStats {
   final int availableTables;
   final double occupancyRate;
   final double turnoverRate; // average times a table is used per day
-  
+ 
+  final int cleaningTables;
+
   const TableStats({
     required this.totalTables,
     required this.occupiedTables,
     required this.reservedTables,
+    required this.cleaningTables,
     this.availableTables = 0,
     this.occupancyRate = 0,
     this.turnoverRate = 0,

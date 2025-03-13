@@ -70,18 +70,18 @@ class ServiceFactory {
     switch (businessType) {
       case 'restaurant':
         return OrderService(
-          businessId: businessId,
-          firestore: firestore,
+           firestore,
+            businessId,
         );
       case 'retail':
         return OrderService(
-          businessId: businessId,
-          firestore: firestore,
+           firestore,
+            businessId,
         );
       default:
         return OrderService(
-          businessId: businessId,
-          firestore: firestore,
+           firestore,
+            businessId,
         );
     }
   }

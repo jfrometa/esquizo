@@ -3,17 +3,17 @@ import 'package:cloud_firestore/cloud_firestore.dart' as CloudFireStore;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/restaurant/services/restaurant_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/services/restaurant/restaurant_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/firebase_providers.dart';
  
 // Order Service Implementation
-class OrderService {
+class OrderServiceClientSide {
   final CloudFireStore.FirebaseFirestore _firestore;
   final CloudFireStore.CollectionReference _ordersCollection;
   
-  OrderService(this._firestore) : _ordersCollection = _firestore.collection('orders');
-  
+  OrderServiceClientSide(this._firestore) : _ordersCollection = _firestore.collection('orders');
+ 
   // Stream active orders (real-time updates)
   Stream<List<Order>> getActiveOrdersStream() {
     return _ordersCollection
@@ -358,55 +358,6 @@ Stream<List<Order>> getRecentOrdersStream() {
       );
     }
   }
+
 }
 
-
-// Update the providers to use OrderService instead of direct Firebase calls
-final activeOrdersProvider = StreamProvider.family<List<Order>, String>((ref, userId) {
-  final orderService = ref.watch(orderServiceProvider);
-  // Use the service to get orders by status for the specific user
-  return orderService._ordersCollection
-      .where('userId', isEqualTo: userId)
-      .where('status', whereIn: [
-        OrderStatus.pending.toString().split('.').last,
-        OrderStatus.paymentConfirmed.toString().split('.').last,
-        OrderStatus.preparing.toString().split('.').last,
-        OrderStatus.readyForDelivery.toString().split('.').last,
-        OrderStatus.delivering.toString().split('.').last,
-      ])
-      .orderBy('orderDate', descending: true)
-      .snapshots()
-      .map((snapshot) => snapshot.docs
-          .map((doc) => Order.fromFirestore(doc))
-          .toList());
-});
-
-// Add a provider for all active orders (no user filter)
-final allActiveOrdersProvider = StreamProvider<List<Order>>((ref) {
-  final orderService = ref.watch(orderServiceProvider);
-  // Use the service's existing method to get all active orders
-  return orderService.getActiveOrdersStream();
-});
-
-// Create a provider for completed orders pagination using OrderService
-final completedOrdersProvider = StreamProvider.family<List<Order>, String>((ref, userId) {
-  final orderService = ref.watch(orderServiceProvider);
-  // Use the service to get completed orders for the specific user
-  return orderService._ordersCollection
-      .where('userId', isEqualTo: userId)
-      .where('status', whereIn: [
-        OrderStatus.delivered.toString().split('.').last,
-        OrderStatus.cancelled.toString().split('.').last,
-      ])
-      .orderBy('orderDate', descending: true)
-      .snapshots()
-      .map((snapshot) => snapshot.docs
-          .map((doc) => Order.fromFirestore(doc))
-          .toList());
-});
-
-
-final orderServiceProvider = Provider<OrderService>((ref) {
-  final firestore = ref.watch(firebaseFirestoreProvider);
-  return OrderService(firestore);
-});

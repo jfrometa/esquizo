@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/restaurant/services/restaurant_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/services/restaurant/restaurant_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/create_order.dart';
 
 class DashboardStatsCard extends StatelessWidget {
   final String title;
@@ -190,39 +191,4 @@ class DashboardStats {
     required this.productStats,
   });
 }
- 
-class SalesStats {
-  final double totalSales;
-  final double todaySales;
-  final int orderCount;
-  
-  SalesStats({
-    required this.totalSales,
-    required this.todaySales,
-    required this.orderCount,
-  });
-}
 
-class TableStats {
-  final int totalTables;
-  final int occupiedTables;
-  final int reservedTables;
-  
-  TableStats({
-    required this.totalTables,
-    required this.occupiedTables,
-    required this.reservedTables,
-  });
-}
-
-class ProductStats {
-  final int totalProducts;
-  final int categories;
-  final int outOfStock;
-  
-  ProductStats({
-    required this.totalProducts,
-    required this.categories,
-    required this.outOfStock,
-  });
-}
