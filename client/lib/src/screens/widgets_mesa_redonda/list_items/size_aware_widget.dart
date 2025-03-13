@@ -76,14 +76,7 @@ class ResponsiveSection extends StatelessWidget {
   }
 }
 
-// 4. Example usage - Convert your features section to use this pattern
-Widget _buildFeaturesSection(BuildContext context) {
-  return ResponsiveSection(
-    mobileBuilder: const FeaturesSectionMobile(),
-    tabletBuilder: const FeaturesSectionTablet(),
-    desktopBuilder: const FeaturesSectionDesktop(),
-  );
-}
+
 
 // 5. Size-aware configuration for grid layouts
 class GridConfig {

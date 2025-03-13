@@ -8,8 +8,8 @@ import 'package:starter_architecture_flutter_firebase/src/core/admin_services/ad
 import 'package:starter_architecture_flutter_firebase/src/core/app_config/app_config_services.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/authenticated_profile_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/screens/catering_menu/catering_menu_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/landing/landing-page-home.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/menu_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/cart_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering_entry/catering_entry_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/catering_selection_screen.dart';
@@ -21,7 +21,6 @@ import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal
 import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_subscription.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/categories.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/home/home.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/landing_page_home.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/all_dishes_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_startup.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';

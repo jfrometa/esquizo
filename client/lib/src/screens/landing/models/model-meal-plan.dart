@@ -1,0 +1,14 @@
+// Meal Plan data class
+class MealPlan {
+  final String id;
+  final String title;
+  final String description;
+  final String price;
+  
+  const MealPlan({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.price,
+  });
+}
