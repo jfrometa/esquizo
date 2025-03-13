@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter/material.dart';
+
 /// Panel that displays notifications in the admin interface
 class NotificationsPanel extends StatelessWidget {
   final ScrollController scrollController;
@@ -11,91 +13,97 @@ class NotificationsPanel extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Handle bar
-        Container(
-          width: 40,
-          height: 5,
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade300,
-            borderRadius: BorderRadius.circular(8),
+    // Use ConstrainedBox to set a maximum height
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.8,
+      ),
+      child: Column(
+        children: [
+          // Handle bar
+          Container(
+            width: 40,
+            height: 5,
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
-        ),
-        
-        // Header
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Notifications',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.mark_email_read),
-                    tooltip: 'Mark all as read',
-                    onPressed: () {},
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.settings),
-                    tooltip: 'Notification settings',
-                    onPressed: () {},
-                  ),
-                ],
-              ),
-            ],
+          
+          // Header
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Notifications',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.mark_email_read),
+                      tooltip: 'Mark all as read',
+                      onPressed: () {},
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.settings),
+                      tooltip: 'Notification settings',
+                      onPressed: () {},
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
-        
-        const Divider(),
-        
-        // Notification list
-        Expanded(
-          child: ListView(
-            controller: scrollController,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            children: const [
-              NotificationItem(
-                title: 'Order ready for delivery',
-                message: 'Order #12345 is ready for delivery at Table 3',
-                time: '2 min',
-                icon: Icons.restaurant,
-                color: Colors.green,
-                isUnread: true,
-              ),
-              NotificationItem(
-                title: 'New order received',
-                message: 'A new order has been received for Table 5',
-                time: '15 min',
-                icon: Icons.receipt,
-                color: Colors.blue,
-                isUnread: true,
-              ),
-              NotificationItem(
-                title: 'Reservation confirmed',
-                message: 'Table 8 reserved for 8:00 PM',
-                time: '30 min',
-                icon: Icons.event_available,
-                color: Colors.orange,
-                isUnread: false,
-              ),
-              NotificationItem(
-                title: 'Product out of stock',
-                message: 'The "Caesar Salad" product is out of stock',
-                time: '1h',
-                icon: Icons.warning,
-                color: Colors.red,
-                isUnread: false,
-              ),
-            ],
+          
+          const Divider(),
+          
+          // Notification list - now inside Expanded with a parent that has a defined size constraint
+          Expanded(
+            child: ListView(
+              controller: scrollController,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              children: const [
+                NotificationItem(
+                  title: 'Order ready for delivery',
+                  message: 'Order #12345 is ready for delivery at Table 3',
+                  time: '2 min',
+                  icon: Icons.restaurant,
+                  color: Colors.green,
+                  isUnread: true,
+                ),
+                NotificationItem(
+                  title: 'New order received',
+                  message: 'A new order has been received for Table 5',
+                  time: '15 min',
+                  icon: Icons.receipt,
+                  color: Colors.blue,
+                  isUnread: true,
+                ),
+                NotificationItem(
+                  title: 'Reservation confirmed',
+                  message: 'Table 8 reserved for 8:00 PM',
+                  time: '30 min',
+                  icon: Icons.event_available,
+                  color: Colors.orange,
+                  isUnread: false,
+                ),
+                NotificationItem(
+                  title: 'Product out of stock',
+                  message: 'The "Caesar Salad" product is out of stock',
+                  time: '1h',
+                  icon: Icons.warning,
+                  color: Colors.red,
+                  isUnread: false,
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

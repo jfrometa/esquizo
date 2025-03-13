@@ -12,7 +12,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/catering/cater
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart'
     as auth_models;
  
-import '../../admin/models/order_status_enum.dart';
+import '../admin/models/order_status_enum.dart';
 
 
 class InProgressOrdersScreen extends ConsumerStatefulWidget {

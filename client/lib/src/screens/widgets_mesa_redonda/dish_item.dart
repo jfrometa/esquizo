@@ -38,141 +38,147 @@ class DishItem extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     
-    // Define the card content
-    Widget cardContent = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Image
-        AspectRatio(
-          aspectRatio: 16 / 9,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              img,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                color: colorScheme.primaryContainer.withOpacity(0.3),
-                child: Icon(
-                  Icons.image_not_supported,
-                  size: 40,
-                  color: colorScheme.primary.withOpacity(0.5),
+    // Define the card content - using LayoutBuilder to get constraints
+    Widget cardContent = LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image
+              AspectRatio(
+                aspectRatio: 16 / 9,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    img,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      color: colorScheme.primaryContainer.withOpacity(0.3),
+                      child: Icon(
+                        Icons.image_not_supported,
+                        size: 40,
+                        color: colorScheme.primary.withOpacity(0.5),
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-        ),
-        
-        const SizedBox(height: 12),
-        
-        // Title and price
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-                maxLines: 1,
+              
+              const SizedBox(height: 12),
+              
+              // Title and price
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Text(
+                    pricing,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 8),
+              
+              // Description
+              Text(
+                description,
+                style: theme.textTheme.bodyMedium,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-            ),
-            Text(
-              pricing,
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: colorScheme.primary,
-              ),
-            ),
-          ],
-        ),
-        
-        const SizedBox(height: 8),
-        
-        // Description
-        Text(
-          description,
-          style: theme.textTheme.bodyMedium,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        
-        // Ingredients if not hidden
-        if (!hideIngredients) ...[
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 4,
-            runSpacing: 4,
-            children: ingredients.map((ingredient) {
-              return Chip(
-                label: Text(
-                  ingredient,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontSize: 10,
-                  ),
-                ),
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                padding: EdgeInsets.zero,
-                labelPadding: const EdgeInsets.symmetric(horizontal: 8),
-                visualDensity: VisualDensity.compact,
-                backgroundColor: colorScheme.primaryContainer.withOpacity(0.3),
-              );
-            }).toList(),
-          ),
-        ],
-        
-        const Spacer(),
-        
-        // Buttons
-        if (showDetailsButton || showAddButton) ...[
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              if (showDetailsButton)
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {},
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
+              
+              // Ingredients if not hidden
+              if (!hideIngredients) ...[
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 4,
+                  runSpacing: 4,
+                  children: ingredients.map((ingredient) {
+                    return Chip(
+                      label: Text(
+                        ingredient,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: 10,
+                        ),
+                      ),
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      padding: EdgeInsets.zero,
+                      labelPadding: const EdgeInsets.symmetric(horizontal: 8),
                       visualDensity: VisualDensity.compact,
-                    ),
-                    child: const Text('Detalles'),
-                  ),
+                      backgroundColor: colorScheme.primaryContainer.withOpacity(0.3),
+                    );
+                  }).toList(),
                 ),
-              if (showDetailsButton && showAddButton)
-                const SizedBox(width: 8),
-              if (showAddButton)
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.add_shopping_cart, size: 16),
-                    label: const Text('Pedir'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      visualDensity: VisualDensity.compact,
-                      backgroundColor: colorScheme.primary,
-                      foregroundColor: colorScheme.onPrimary,
-                    ),
-                  ),
+              ],
+              
+              // Buttons - no Spacer in scrollable column
+              SizedBox(height: 12),
+              
+              // Buttons
+              if (showDetailsButton || showAddButton) ...[
+                Row(
+                  children: [
+                    if (showDetailsButton)
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {},
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          child: const Text('Detalles'),
+                        ),
+                      ),
+                    if (showDetailsButton && showAddButton)
+                      const SizedBox(width: 8),
+                    if (showAddButton)
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {},
+                          icon: Icon(Icons.add_shopping_cart, size: 16),
+                          label: const Text('Pedir'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            visualDensity: VisualDensity.compact,
+                            backgroundColor: colorScheme.primary,
+                            foregroundColor: colorScheme.onPrimary,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
+              ],
             ],
           ),
-        ],
-      ],
+        );
+      }
     );
     
     // Use a different layout for horizontal mode
     if (useHorizontalLayout) {
-      return SizedBox(
-        height: 120, // Explicitly set height for horizontal layout
-        child: Card(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
+      return Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 80, maxHeight: 120),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -203,6 +209,7 @@ class DishItem extends StatelessWidget {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min, // Important to prevent expansion
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -236,15 +243,17 @@ class DishItem extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       
-                      const Spacer(),
+                      // const Spacer(),
+                      const SizedBox(height: 12,),
                       
                       // Action buttons
                       if (showAddButton)
                         SizedBox(
+                          width: double.infinity,
                           height: 28,
                           child: ElevatedButton.icon(
                             onPressed: () {},
-                            icon: const Icon(Icons.add_shopping_cart, size: 14),
+                            icon: Icon(Icons.add_shopping_cart, size: 14),
                             label: const Text('Pedir'),
                             style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.zero,
@@ -264,13 +273,16 @@ class DishItem extends StatelessWidget {
       );
     }
     
-    // Regular card layout with fixed height for vertical layout
-    return SizedBox(
-      height: hideIngredients ? 290 : 360, // Explicit height based on content
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+    // Regular card layout for vertical layout
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: hideIngredients ? 260 : 320,
+          maxHeight: hideIngredients ? 320 : 400,
         ),
         child: Padding(
           padding: const EdgeInsets.all(12),

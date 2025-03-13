@@ -35,7 +35,7 @@ import 'package:starter_architecture_flutter_firebase/src/routing/not_found_scre
 import 'package:starter_architecture_flutter_firebase/src/routing/scaffold_with_nested_navigation.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_panel_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/unauthorized_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/orders/presentation/in_progress_orders_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/orders/in_progress_orders_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_setup_screen.dart'; // Add import for AdminSetupScreen
 
 part 'app_router.g.dart';

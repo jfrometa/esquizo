@@ -1,15 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart' as CloudFireStore;
-import 'package:firebase_auth/firebase_auth.dart'; 
-import 'package:starter_architecture_flutter_firebase/src/core/services/business_config_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+ import 'package:starter_architecture_flutter_firebase/src/core/services/business_config_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/resource_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart'; 
-import 'package:starter_architecture_flutter_firebase/src/core/services/reservation_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';
+ import 'package:starter_architecture_flutter_firebase/src/core/services/reservation_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/admin_user.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
-
-// part 'example_data_implementation.g.dart';
+ 
 
 /// Service for initializing example data for different business types
 class ExampleDataService {
@@ -370,90 +368,7 @@ class ExampleDataService {
     return tableIds;
   }
 
-  /// Create sample restaurant orders
-  Future<void> _createRestaurantOrders(String businessId, List<String> tableIds) async {
-    // Create some sample orders
-      final now = DateTime.now();
-      final statuses = ['pending', 'preparing', 'readyForDelivery', 'completed'];
-      
-      for (int i = 0; i < 5; i++) {
-        final orderId = 'sample_order_$i';
-        final tableId = tableIds[i % tableIds.length];
-        final status = statuses[i % statuses.length];
-        final createdAt = now.subtract(Duration(hours: i * 2));
-        
-        final orderItems = <OrderItem>[
-          OrderItem(
-            id: 'bruschetta',
-            productId: 'bruschetta',
-            name: 'Bruschetta',
-            price: 8.99,
-            quantity: 1,
-          ),
-          OrderItem(
-            id: 'margherita',
-            productId: 'margherita',
-            name: 'Pizza Margherita',
-            price: 14.99,
-            quantity: 1,
-          ),
-          OrderItem(
-            id: 'soda',
-            productId: 'soda',
-            name: 'Soda',
-            price: 2.99,
-            quantity: 2,
-          ),
-        ];
-        
-        final subtotal = orderItems.fold(0.0, (sum, item) => sum + (item.price * item.quantity));
-        final tax = subtotal * 0.08;
-        final total = subtotal + tax;
-        
-        final order = Order(
-          orderNumber: 'ORD-${now.millisecondsSinceEpoch}-$i',
-          id: orderId,
-          email: 'customer@example.com',
-          userId: 'sample_user',
-          orderType: 'dine-in',
-          address: '123 Main St',
-          latitude: '37.7749',
-          longitude: '-122.4194',
-          items: orderItems,
-          paymentMethod: 'cash',
-          paymentStatus: 'pending',
-          totalAmount: total,
-          // timestamp: CloudFireStore.Timestamp.now(),
-          tableNumber: i + 1,
-          tableId: tableId,
-          createdAt: createdAt,
-          status: OrderStatus.values.firstWhere(
-            (s) => s.toString().split('.').last == status,
-            orElse: () => OrderStatus.pending,
-          ),
-          orderDate: createdAt,
-          location: {
-            'address': '123 Main St',
-            'latitude': '37.7749',
-            'longitude': '-122.4194',
-          },
-          customerName: 'John Doe',
-          customerCount: 2,
-          waiterNotes: i == 0 ? 'No onions please' : null,
-          subtotal: subtotal,
-          taxAmount: tax,
-          businessId: businessId,
-        );
-      
-      await _firestore
-          .collection('businesses')
-          .doc(businessId)
-          .collection('orders')
-          .doc(orderId)
-          .set(order.toFirestore());
-    }
-  }
-
+ 
   /// Create sample restaurant reservations
   Future<void> _createRestaurantReservations(String businessId, List<String> tableIds) async {
     final now = DateTime.now();
@@ -648,88 +563,7 @@ class ExampleDataService {
     return roomIds;
   }
 
-  /// Create hotel bookings
-  Future<void> _createHotelBookings(String businessId, List<String> roomIds) async {
-    final now = DateTime.now();
-    
-    for (int i = 0; i < 5; i++) {
-      final bookingId = 'sample_booking_$i';
-      final roomId = roomIds[i % roomIds.length];
-      
-      // Create bookings for the next few days
-      final checkInDate = now.add(Duration(days: i + 1));
-      final checkOutDate = checkInDate.add(Duration(days: 2 + (i % 3)));
-      
-      // Create an order for the booking
-      final orderId = 'booking_order_$i';
-      
-      final orderItems = <OrderItem>[
-        OrderItem(
-          id: roomId,
-          name: 'Room Booking',
-          price: 149.99,
-          quantity: checkOutDate.difference(checkInDate).inDays, productId: '',
-        ),
-      ];
-      
-      final subtotal = orderItems.fold(0.0, (sum, item) => sum + item.price);
-      final tax = subtotal * 0.08;
-      final total = subtotal + tax;
-      
-      final order = Order(
-        id: orderId,
-        businessId: businessId,
-        userId: 'sample_user',
-        resourceId: roomId,
-        items: orderItems,
-        status: OrderStatus.completed,
-        subtotal: subtotal,
-        tax: tax,
-        total: total,
-        specialInstructions: i == 0 ? 'Late check-in (after 8pm)' : null,
-        isDelivery: false,
-        peopleCount: 2,
-        createdAt: now.subtract(Duration(days: 5 - i)),
-         paymentMethod: 'paypal',
-      );
-      
-      await _firestore
-          .collection('businesses')
-          .doc(businessId)
-          .collection('orders')
-          .doc(orderId)
-          .set(order.toFirestore());
-      
-      // Create a reservation/booking
-      final reservation = Reservation(
-        id: bookingId,
-        businessId: businessId,
-        resourceId: roomId,
-        userId: 'sample_user',
-        userName: 'Jane Smith',
-        userEmail: 'jane.smith@example.com',
-        userPhone: '+1234567890',
-        date: checkInDate,
-        timeSlot: 'booking',
-        partySize: 2,
-        status: 'confirmed',
-        specialRequests: i == 0 ? 'High floor requested' : '',
-      );
-      
-      await _firestore
-          .collection('businesses')
-          .doc(businessId)
-          .collection('reservations')
-          .doc(bookingId)
-          .set({
-            ...reservation.toFirestore(),
-            'checkOutDate': CloudFireStore.Timestamp.fromDate(checkOutDate),
-            'orderId': orderId,
-            'numberOfNights': checkOutDate.difference(checkInDate).inDays,
-          });
-    }
-  }
-
+ 
   /// Create generic categories
   Future<Map<String, String>> _createGenericCategories(String businessId) async {
     final categories = {
@@ -942,4 +776,172 @@ class ExampleDataService {
         ];
     }
   }
+
+  /// Create sample restaurant orders
+Future<void> _createRestaurantOrders(String businessId, List<String> tableIds) async {
+  // Create some sample orders
+  final now = DateTime.now();
+  final statuses = [
+    OrderStatus.pending,
+    OrderStatus.preparing,
+    OrderStatus.readyForDelivery,
+    OrderStatus.completed
+  ];
+  
+  for (int i = 0; i < 5; i++) {
+    final orderId = 'sample_order_$i';
+    final tableId = tableIds[i % tableIds.length];
+    final status = statuses[i % statuses.length];
+    final createdAt = now.subtract(Duration(hours: i * 2));
+    
+    final orderItems = <OrderItem>[
+      OrderItem(
+        id: 'bruschetta',
+        productId: 'bruschetta',
+        name: 'Bruschetta',
+        price: 8.99,
+        quantity: 1,
+      ),
+      OrderItem(
+        id: 'margherita',
+        productId: 'margherita',
+        name: 'Pizza Margherita',
+        price: 14.99,
+        quantity: 1,
+      ),
+      OrderItem(
+        id: 'soda',
+        productId: 'soda',
+        name: 'Soda',
+        price: 2.99,
+        quantity: 2,
+      ),
+    ];
+    
+    final subtotal = orderItems.fold(0.0, (sum, item) => sum + (item.price * item.quantity));
+    final tax = subtotal * 0.08;
+    final total = subtotal + tax;
+    
+    final order = Order(
+      orderNumber: 'ORD-${now.millisecondsSinceEpoch}-$i',
+      id: orderId,
+      email: 'customer@example.com',
+      userId: 'sample_user',
+      orderType: 'dine-in',
+      address: '123 Main St',
+      latitude: '37.7749',
+      longitude: '-122.4194',
+      items: orderItems,
+      paymentMethod: 'cash',
+      paymentStatus: 'pending',
+      totalAmount: total,
+      // timestamp: CloudFireStore.Timestamp.now(),
+      tableNumber: i + 1,
+      tableId: tableId,
+      createdAt: createdAt,
+      status: status, // Using the OrderStatus enum directly
+      orderDate: createdAt,
+      location: {
+        'address': '123 Main St',
+        'latitude': '37.7749',
+        'longitude': '-122.4194',
+      },
+      customerName: 'John Doe',
+      customerCount: 2,
+      waiterNotes: i == 0 ? 'No onions please' : null,
+      subtotal: subtotal,
+      taxAmount: tax,
+      businessId: businessId,
+    );
+  
+    await _firestore
+      .collection('businesses')
+      .doc(businessId)
+      .collection('orders')
+      .doc(orderId)
+      .set(order.toFirestore());
+  }
+}
+
+/// Create hotel bookings
+Future<void> _createHotelBookings(String businessId, List<String> roomIds) async {
+  final now = DateTime.now();
+  
+  for (int i = 0; i < 5; i++) {
+    final bookingId = 'sample_booking_$i';
+    final roomId = roomIds[i % roomIds.length];
+    
+    // Create bookings for the next few days
+    final checkInDate = now.add(Duration(days: i + 1));
+    final checkOutDate = checkInDate.add(Duration(days: 2 + (i % 3)));
+    
+    // Create an order for the booking
+    final orderId = 'booking_order_$i';
+    
+    final orderItems = <OrderItem>[
+      OrderItem(
+        id: roomId,
+        name: 'Room Booking',
+        price: 149.99,
+        quantity: checkOutDate.difference(checkInDate).inDays, 
+        productId: '',
+      ),
+    ];
+    
+    final subtotal = orderItems.fold(0.0, (sum, item) => sum + item.price);
+    final tax = subtotal * 0.08;
+    final total = subtotal + tax;
+    
+    final order = Order(
+      id: orderId,
+      businessId: businessId,
+      userId: 'sample_user',
+      resourceId: roomId,
+      items: orderItems,
+      status: OrderStatus.confirmed, // Using OrderStatus enum instead of string
+      subtotal: subtotal,
+      tax: tax,
+      total: total,
+      specialInstructions: i == 0 ? 'Late check-in (after 8pm)' : null,
+      isDelivery: false,
+      peopleCount: 2,
+      createdAt: now.subtract(Duration(days: 5 - i)), paymentMethod: '',
+    );
+    
+    await _firestore
+        .collection('businesses')
+        .doc(businessId)
+        .collection('orders')
+        .doc(orderId)
+        .set(order.toFirestore());
+    
+    // Create a reservation/booking
+    final reservation = Reservation(
+      id: bookingId,
+      businessId: businessId,
+      resourceId: roomId,
+      userId: 'sample_user',
+      userName: 'Jane Smith',
+      userEmail: 'jane.smith@example.com',
+      userPhone: '+1234567890',
+      date: checkInDate,
+      timeSlot: 'booking',
+      partySize: 2,
+      status: 'confirmed',
+      specialRequests: i == 0 ? 'High floor requested' : '',
+    );
+    
+    await _firestore
+        .collection('businesses')
+        .doc(businessId)
+        .collection('reservations')
+        .doc(bookingId)
+        .set({
+          ...reservation.toFirestore(),
+          'checkOutDate': CloudFireStore.Timestamp.fromDate(checkOutDate),
+          'orderId': orderId,
+          'numberOfNights': checkOutDate.difference(checkInDate).inDays,
+        });
+  }
+}
 }

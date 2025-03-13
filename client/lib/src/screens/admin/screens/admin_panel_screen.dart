@@ -1,28 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/admin_panel/admin_stats_provider.dart';
 import 'dart:async';
-
 import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/user/auth_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/restaurant/restaurant_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/business_config_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/service_factory.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_dashboard_home.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/analytics_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_settings_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/order_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/product_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/user_management/user_management_screen.dart';
-
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/admin_side_menu.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/create_order.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/responsive_layout.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/theme_switcher.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/order_service.dart';
- 
 
 class AdminPanelScreen extends ConsumerStatefulWidget {
   const AdminPanelScreen({super.key});
@@ -75,6 +66,11 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
         });
       }
     });
+    
+    // Set up refresh timer to periodically update data
+    _refreshTimer = Timer.periodic(const Duration(minutes: 5), (_) {
+      _refreshData();
+    });
   }
 
   @override
@@ -82,6 +78,39 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
     _tabController.dispose();
     _refreshTimer?.cancel();
     super.dispose();
+  }
+  
+  // Add a method to refresh data
+  Future<void> _refreshData() async {
+    if (_isLoading) return;
+    
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      // Refresh providers that need real-time updates
+      ref.invalidate(businessConfigProvider);
+      ref.invalidate(orderStatsProvider);
+      ref.invalidate(salesStatsProvider);
+      ref.invalidate(tableStatsProvider);
+      ref.invalidate(recentOrdersProvider);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error refreshing data: $e'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
   
   @override
@@ -117,6 +146,7 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
   }
   Widget _buildMobileLayout(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Text(_screenTitles[_selectedIndex]),
         actions: [
@@ -126,28 +156,36 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
             onPressed: _showUserMenu,
           ),
         ],
+        leading: IconButton(
+          icon: const Icon(Icons.menu),
+          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        ),
       ),
-      body: _screens[_selectedIndex],
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _screens[_selectedIndex],
       drawer: SidebarMenu(
         selectedIndex: _selectedIndex,
         onItemSelected: _onItemSelected,
       ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex > 3 ? 4 : _selectedIndex, // Updated to match new indices
+        currentIndex: _selectedIndex > 3 ? 4 : _selectedIndex,
         onTap: _onItemSelected,
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
           BottomNavigationBarItem(icon: Icon(Icons.restaurant_menu), label: 'Products'),
           BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: 'Orders'),
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Users'), // Changed from Tables to Users
+          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Users'),
           BottomNavigationBarItem(icon: Icon(Icons.more_horiz), label: 'More'),
         ],
       ),
     );
   }
+
   Widget _buildTabletLayout(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Text(_screenTitles[_selectedIndex]),
         actions: [
@@ -172,7 +210,9 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
             isExpanded: false,
           ),
           Expanded(
-            child: _screens[_selectedIndex],
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _screens[_selectedIndex],
           ),
         ],
       ),
@@ -181,6 +221,7 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
   
   Widget _buildDesktopLayout(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       body: Row(
         children: [
           SidebarMenu(
@@ -193,7 +234,9 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
               children: [
                 _buildDesktopHeader(context),
                 Expanded(
-                  child: _screens[_selectedIndex],
+                  child: _isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : _screens[_selectedIndex],
                 ),
               ],
             ),
@@ -283,6 +326,7 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
     
     setState(() {
       _selectedIndex = index;
+      _refreshData(); // Refresh data when changing sections
     });
   }
   

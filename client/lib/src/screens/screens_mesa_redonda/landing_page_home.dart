@@ -7,6 +7,8 @@ import 'package:starter_architecture_flutter_firebase/src/screens/ordering_provi
 import 'package:starter_architecture_flutter_firebase/src/screens/plans/plans.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/screens/widgets_mesa_redonda/dish_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/widgets_mesa_redonda/list_items/size_aware_widget.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/widgets_mesa_redonda/optimized_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 
@@ -118,7 +120,7 @@ class PlanCard extends StatelessWidget {
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
-            const Spacer(),
+            const SizedBox(height:16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -492,6 +494,14 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
     );
   }
 
+  Widget _buildFeaturesSection(BuildContext context) {
+  return ResponsiveSection(
+    mobileBuilder: const FeaturesSectionMobile(),
+    tabletBuilder: const FeaturesSectionTablet(),
+    desktopBuilder: const FeaturesSectionDesktop(),
+  );
+}
+
   Widget _buildResponsiveLayout(bool isMobile, bool isTablet, bool isDesktop) {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -521,12 +531,14 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
                       ),
                       
                       // Restaurant features section
-                      if (isMobile) 
-                        const FeaturesSectionMobile()
-                      else if (isTablet) 
-                        const FeaturesSectionTablet()
-                      else 
-                        const FeaturesSectionDesktop(),
+                      // if (isMobile) 
+                      //   const FeaturesSectionMobile()
+                      // else if (isTablet) 
+                      //   const FeaturesSectionTablet()
+                      // else 
+                      //   const FeaturesSectionDesktop(),
+
+                      _buildFeaturesSection(context),
                       
                       // Main tabbed content section
                       ContentSections(
@@ -585,7 +597,7 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
   }
 }
 
-/// Enhanced Hero Section with parallax effect
+// 1. Optimize ParallaxHeader with RepaintBoundary
 class EnhancedHeroSection extends StatelessWidget {
   final double scrollOffset;
   
@@ -614,42 +626,40 @@ class EnhancedHeroSection extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Background image with parallax effect
-          Positioned(
-            top: -parallaxOffset.clamp(0.0, 100.0),
-            left: 0,
-            right: 0,
-            height: heroHeight + 100, // Extra height for parallax
-            child: ShaderMask(
-              shaderCallback: (Rect bounds) {
-                return LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.7),
-                    Colors.black.withOpacity(0.5),
-                  ],
-                ).createShader(bounds);
-              },
-              blendMode: BlendMode.srcOver,
-              child: Image.network(
-                'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4',
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  color: colorScheme.primary,
-                  child: const Center(
-                    child: Icon(
-                      Icons.image_not_supported,
-                      size: 64,
-                      color: Colors.white54,
-                    ),
-                  ),
+          // Background image with parallax effect - Wrapped in RepaintBoundary for better performance
+          
+             Positioned(
+              top: -parallaxOffset.clamp(0.0, 100.0),
+              left: 0,
+              right: 0,
+              height: heroHeight + 100, // Extra height for parallax
+              child: RepaintBoundary(
+                child: ShaderMask(
+                  shaderCallback: (Rect bounds) {
+                    return LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.7),
+                        Colors.black.withOpacity(0.5),
+                      ],
+                    ).createShader(bounds);
+                  },
+                  blendMode: BlendMode.srcOver,
+                  // Use the OptimizedNetworkImage for better image loading
+                  child: SizedBox.shrink()
+                  
+                  //  OptimizedNetworkImage(
+                  //   imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4',
+                  //   width: double.infinity,
+                  //   height: double.infinity,
+                  //   fit: BoxFit.cover,
+                  //   backgroundColor: colorScheme.primary,
+                  // ),
                 ),
               ),
             ),
-          ),
+          
           
           // Gradient overlay
           Container(
@@ -687,10 +697,18 @@ class EnhancedHeroSection extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Icon(
-                      Icons.restaurant,
-                      size: 60,
-                      color: colorScheme.primary,
+                    // child: Icon(
+                    //   Icons.restaurant,
+                    //   size: 60,
+                    //   color: colorScheme.primary,
+                    // ),
+                      child: ClipOval(
+                      child: Image.asset(
+                        'assets/appicon.png',
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -747,40 +765,42 @@ class EnhancedHeroSection extends StatelessWidget {
             ),
           ),
           
-          // Scroll indicator at bottom
-          Positioned(
-            bottom: 20,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: AnimatedOpacity(
-                opacity: scrollOffset < 10 ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 300),
-                child: Column(
-                  children: [
-                    Text(
-                      'Explorar',
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: Colors.white,
+          // Scroll indicator at bottom - Only build if needed (performance optimization)
+          if (scrollOffset < 10)
+            Positioned(
+              bottom: 20,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: AnimatedOpacity(
+                  opacity: scrollOffset < 10 ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Explorar',
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Icon(
-                      Icons.keyboard_arrow_down,
-                      color: Colors.white,
-                      size: 30,
-                    ),
-                  ],
+                      const SizedBox(height: 8),
+                      const Icon(
+                        Icons.keyboard_arrow_down,
+                        color: Colors.white,
+                        size: 30,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
+        
         ],
       ),
     );
+    
   }
 }
-
 /// Quick access section with cards for main features
 class QuickAccessSection extends StatelessWidget {
   final VoidCallback onReserveTap;
@@ -813,38 +833,45 @@ class QuickAccessSection extends StatelessWidget {
             runSpacing: 16,
             alignment: WrapAlignment.center,
             children: [
+              
               _buildQuickAccessCard(
-                context,
-                title: 'Reservar Mesa',
-                icon: Icons.calendar_today,
-                description: 'Reserve su mesa para una experiencia gastronómica inolvidable',
-                onTap: onReserveTap,
-                color: colorScheme.primaryContainer,
-              ),
+                  context,
+                  title: 'Reservar Mesa',
+                  icon: Icons.calendar_today,
+                  description: 'Reserve su mesa para una experiencia gastronómica inolvidable',
+                  onTap: onReserveTap,
+                  color: colorScheme.primaryContainer,
+                ),
+               
+               
+                  _buildQuickAccessCard(
+                  context,
+                  title: 'Nuestro Menú',
+                  icon: Icons.restaurant_menu,
+                  description: 'Descubra nuestra variedad de platos exquisitos',
+                  onTap: () => context.goNamed(AppRoute.home.name),
+                  color: colorScheme.secondaryContainer,
+                ),
+               
               _buildQuickAccessCard(
-                context,
-                title: 'Nuestro Menú',
-                icon: Icons.restaurant_menu,
-                description: 'Descubra nuestra variedad de platos exquisitos',
-                onTap: () => context.goNamed(AppRoute.home.name),
-                color: colorScheme.secondaryContainer,
+                  context,
+                  title: 'Catering',
+                  icon: Icons.celebration,
+                  description: 'Servicios de catering para eventos especiales',
+                  onTap: () => context.goNamed(AppRoute.cateringMenuE.name),
+                  color: colorScheme.tertiaryContainer,
+             
               ),
-              _buildQuickAccessCard(
-                context,
-                title: 'Catering',
-                icon: Icons.celebration,
-                description: 'Servicios de catering para eventos especiales',
-                onTap: () => context.goNamed(AppRoute.cateringMenuE.name),
-                color: colorScheme.tertiaryContainer,
-              ),
-              _buildQuickAccessCard(
-                context,
-                title: 'Información',
-                icon: Icons.info_outline,
-                description: 'Conozca más sobre nosotros, ubicación y horarios',
-                onTap: onInfoTap,
-                color: colorScheme.surfaceVariant,
-              ),
+              
+                 _buildQuickAccessCard(
+                  context,
+                  title: 'Información',
+                  icon: Icons.info_outline,
+                  description: 'Conozca más sobre nosotros, ubicación y horarios',
+                  onTap: onInfoTap,
+                  color: colorScheme.surfaceVariant,
+                ),
+              
             
             
             ],
@@ -854,62 +881,71 @@ class QuickAccessSection extends StatelessWidget {
     );
   }
   
-  Widget _buildQuickAccessCard(
-    BuildContext context, {
-    required String title,
-    required IconData icon,
-    required String description,
-    required VoidCallback onTap,
-    required Color color,
-  }) {
-    final theme = Theme.of(context);
-    final size = MediaQuery.sizeOf(context);
-    final isMobile = size.width < 600;
-    
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        width: isMobile ? double.infinity : 220,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.3),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: color.withOpacity(0.5),
-            width: 1,
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              icon,
-              size: 36,
-              color: color,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              description,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.7),
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+Widget _buildQuickAccessCard(
+  BuildContext context, {
+  required String title,
+  required IconData icon,
+  required String description,
+  required VoidCallback onTap,
+  required Color color,
+}) {
+  final theme = Theme.of(context);
+  final size = MediaQuery.sizeOf(context);
+  final isMobile = size.width < 600;
+  
+  return InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(16),
+    child: Container(
+       width: isMobile ? double.infinity : 220,
+      // ADD THIS HEIGHT CONSTRAINT:
+       
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: color.withOpacity(0.5),
+          width: 1,
         ),
       ),
-    );
-  }
+      child: Column(
+        mainAxisSize: MainAxisSize.min, // This is important!
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            icon,
+            size: 36,
+            color: color,
+          ),
+          const SizedBox(height: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                description,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+
 }
 
 /// Features section showcasing restaurant perks/values for mobile
@@ -1233,6 +1269,7 @@ class FeaturesSectionDesktop extends StatelessWidget {
 }
 
 /// Main content sections with tabs (Menu, Meal Plans, Catering, Reservations)
+/// Main content sections with tabs (Menu, Meal Plans, Catering, Reservations)
 class ContentSections extends StatelessWidget {
   final TabController tabController;
   final int currentTab;
@@ -1283,22 +1320,59 @@ class ContentSections extends StatelessWidget {
               labelColor: colorScheme.onPrimary,
               unselectedLabelColor: colorScheme.onSurfaceVariant,
               dividerHeight: 0,
+              isScrollable: false, // Make sure tabs are not scrollable
+              tabAlignment: TabAlignment.fill, // Make tabs take up equal space
+              padding: EdgeInsets.zero, // Remove padding around the TabBar
+              labelPadding: EdgeInsets.zero, // Remove padding around each tab label
               tabs: const [
+                // Use SizedBox.expand to make the whole tab area clickable
                 Tab(
-                  icon: Icon(Icons.restaurant_menu),
-                  text: 'Menú',
+                  child: SizedBox.expand(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.restaurant_menu),
+                        SizedBox(height: 4),
+                        Text('Menú'),
+                      ],
+                    ),
+                  ),
                 ),
                 Tab(
-                  icon: Icon(Icons.food_bank),
-                  text: 'Planes',
+                  child: SizedBox.expand(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.food_bank),
+                        SizedBox(height: 4),
+                        Text('Planes'),
+                      ],
+                    ),
+                  ),
                 ),
                 Tab(
-                  icon: Icon(Icons.celebration),
-                  text: 'Catering',
+                  child: SizedBox.expand(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.celebration),
+                        SizedBox(height: 4),
+                        Text('Catering'),
+                      ],
+                    ),
+                  ),
                 ),
                 Tab(
-                  icon: Icon(Icons.event_available),
-                  text: 'Eventos',
+                  child: SizedBox.expand(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.event_available),
+                        SizedBox(height: 4),
+                        Text('Eventos'),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -1351,7 +1425,6 @@ class ContentSections extends StatelessWidget {
     );
   }
 }
-
 /// Menu section showing featured dishes
 class MenuSection extends StatelessWidget {
   final List<Map<String, dynamic>>? randomDishes;
@@ -1366,183 +1439,320 @@ class MenuSection extends StatelessWidget {
     required this.isTablet,
     required this.isDesktop,
   });
+ 
+// Usage in the MenuSection class:
+// Replace current grid implementations with:
+@override
+Widget build(BuildContext context) {
+  final theme = Theme.of(context);
+  final colorScheme = theme.colorScheme;
   
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    
-    if (randomDishes == null || randomDishes!.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(color: colorScheme.primary),
-            const SizedBox(height: 16),
-            Text(
-              'Cargando platos...',
-              style: theme.textTheme.titleMedium,
-            ),
-          ],
-        ),
-      );
-    }
-    
-    return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 16 : 32,
-        vertical: 20,
-      ),
+  if (randomDishes == null || randomDishes!.isEmpty) {
+    return Center(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Center(
-            child: Column(
-              children: [
-                Text(
-                  'Nuestros Platos',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Descubra nuestra deliciosa selección de platos preparados con ingredientes frescos y de alta calidad',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.onSurface.withOpacity(0.7),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 32),
-          
-          // Menu items grid
-          if (isMobile) 
-            _buildMobileMenuGrid(context)
-          else if (isTablet) 
-            _buildTabletMenuGrid(context)
-          else 
-            _buildDesktopMenuGrid(context),
-          
-          const SizedBox(height: 32),
-          
-          // View all button
-          Center(
-            child: ElevatedButton.icon(
-              onPressed: () => GoRouter.of(context).goNamed(AppRoute.home.name),
-              icon: const Icon(Icons.restaurant_menu),
-              label: const Text('Ver Menú Completo'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-              ),
-            ),
+          CircularProgressIndicator(color: colorScheme.primary),
+          const SizedBox(height: 16),
+          Text(
+            'Cargando platos...',
+            style: theme.textTheme.titleMedium,
           ),
         ],
       ),
     );
   }
   
-  Widget _buildMobileMenuGrid(BuildContext context) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: randomDishes!.length > 4 ? 4 : randomDishes!.length,
-      itemBuilder: (context, index) {
-        final dish = randomDishes![index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: DishItem(
-            key: Key('dish_$index'),
-            index: index,
-            img: dish['img'],
-            title: dish['title'],
-            description: dish['description'],
-            pricing: dish['pricing'],
-            ingredients: List<String>.from(dish['ingredients']),
-            isSpicy: dish['isSpicy'],
-            foodType: dish['foodType'],
-            dishData: dish,
-            hideIngredients: true,
-            showDetailsButton: true,
-            showAddButton: true,
-            useHorizontalLayout: true,
+  return SingleChildScrollView(
+    padding: EdgeInsets.symmetric(
+      horizontal: isMobile ? 16 : 32,
+      vertical: 20,
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Center(
+          child: Column(
+            children: [
+              Text(
+                'Nuestros Platos',
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.primary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Descubra nuestra deliciosa selección de platos preparados con ingredientes frescos y de alta calidad',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.onSurface.withOpacity(0.7),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
+        ),
+        const SizedBox(height: 32),
+        
+        // Use the fully responsive grid for all screen sizes
+        _buildResponsiveMenuGrid(context),
+        
+        const SizedBox(height: 32),
+        
+        // View all button
+        Center(
+          child: ElevatedButton.icon(
+            onPressed: () => GoRouter.of(context).goNamed(AppRoute.home.name),
+            icon: const Icon(Icons.restaurant_menu),
+            label: const Text('Ver Menú Completo'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+// Widget _buildMobileMenuGrid(BuildContext context) {
+//   return ListView.builder(
+//     shrinkWrap: true,
+//     physics: const NeverScrollableScrollPhysics(),
+//     itemCount: randomDishes!.length > 4 ? 4 : randomDishes!.length,
+//     itemBuilder: (context, index) {
+//       final dish = randomDishes![index];
+//       return Padding(
+//         padding: const EdgeInsets.only(bottom: 16),
+//         child: SizedBox(
+//           // Increase the height to accommodate the content (8px more than constraint)
+//           // height: 90, // Original constraint was 80px and overflowed by 8px
+//           child: DishItem(
+//             key: Key('dish_$index'),
+//             index: index,
+//             img: dish['img'],
+//             title: dish['title'],
+//             description: dish['description'],
+//             pricing: dish['pricing'],
+//             ingredients: List<String>.from(dish['ingredients']),
+//             isSpicy: dish['isSpicy'],
+//             foodType: dish['foodType'],
+//             dishData: dish,
+//             hideIngredients: true,
+//             showDetailsButton: true,
+//             showAddButton: true,
+//             useHorizontalLayout: true,
+//           ),
+//         ),
+//       );
+//     },
+//   );
+// }
+//   // Updated tablet menu grid implementation to use full available width
+// Widget _buildTabletMenuGrid(BuildContext context) {
+//   return LayoutBuilder(
+//     builder: (context, constraints) {
+//       final columnCount = 2; // Two columns for tablet
+//       final spacing = 16.0;
+//       final availableWidth = constraints.maxWidth;
+      
+//       // Calculate card width including spacing
+//       final totalSpacingWidth = spacing * (columnCount - 1);
+//       final cardWidth = (availableWidth - totalSpacingWidth) / columnCount;
+      
+//       return Container(
+//         width: double.infinity, // Force full width
+//         child: Wrap(
+//           spacing: spacing,
+//           runSpacing: 24, // Increased vertical spacing for better visual separation
+//           alignment: WrapAlignment.start,
+//           children: List.generate(
+//             randomDishes!.length > 4 ? 4 : randomDishes!.length,
+//             (index) {
+//               final dish = randomDishes![index];
+//               return SizedBox(
+//                 width: cardWidth,
+//                 child: DishItem(
+//                   key: Key('dish_$index'),
+//                   index: index,
+//                   img: dish['img'],
+//                   title: dish['title'],
+//                   description: dish['description'],
+//                   pricing: dish['pricing'],
+//                   ingredients: List<String>.from(dish['ingredients']),
+//                   isSpicy: dish['isSpicy'],
+//                   foodType: dish['foodType'],
+//                   dishData: dish,
+//                   hideIngredients: false,
+//                   showDetailsButton: true,
+//                   showAddButton: true,
+//                 ),
+//               );
+//             },
+//           ),
+//         ),
+//       );
+//     }
+//   );
+// }
+
+// // Updated desktop menu grid implementation to use full available width
+// Widget _buildDesktopMenuGrid(BuildContext context) {
+//   return LayoutBuilder(
+//     builder: (context, constraints) {
+//       final columnCount = 4; // Four columns for desktop
+//       final spacing = 20.0;
+//       final availableWidth = constraints.maxWidth;
+      
+//       // Calculate card width including spacing
+//       final totalSpacingWidth = spacing * (columnCount - 1);
+//       final cardWidth = (availableWidth - totalSpacingWidth) / columnCount;
+      
+//       return Container(
+//         width: double.infinity, // Force full width
+//         child: Wrap(
+//           spacing: spacing,
+//           runSpacing: 30, // Increased vertical spacing for better visual separation
+//           alignment: WrapAlignment.start,
+//           children: List.generate(
+//             randomDishes!.length > 8 ? 8 : randomDishes!.length,
+//             (index) {
+//               final dish = randomDishes![index];
+//               return SizedBox(
+//                 width: cardWidth,
+//                 child: DishItem(
+//                   key: Key('dish_$index'),
+//                   index: index,
+//                   img: dish['img'],
+//                   title: dish['title'],
+//                   description: dish['description'],
+//                   pricing: dish['pricing'],
+//                   ingredients: List<String>.from(dish['ingredients']),
+//                   isSpicy: dish['isSpicy'],
+//                   foodType: dish['foodType'],
+//                   dishData: dish,
+//                   hideIngredients: false,
+//                   showDetailsButton: true,
+//                   showAddButton: true,
+//                 ),
+//               );
+//             },
+//           ),
+//         ),
+//       );
+//     }
+//   );
+// }
+
+Widget _buildResponsiveMenuGrid(BuildContext context) {
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      final screenWidth = constraints.maxWidth;
+      int columnCount;
+      double spacing;
+      int itemCount;
+      
+      // Determine column count and spacing based on available width
+      if (screenWidth > 1200) {
+        columnCount = 4; // Desktop - 4 columns
+        spacing = 24;
+        itemCount = randomDishes!.length > 8 ? 8 : randomDishes!.length;
+      } else if (screenWidth > 800) {
+        columnCount = 3; // Large tablet - 3 columns
+        spacing = 20;
+        itemCount = randomDishes!.length > 6 ? 6 : randomDishes!.length;
+      } else if (screenWidth > 600) {
+        columnCount = 2; // Tablet - 2 columns
+        spacing = 16;
+        itemCount = randomDishes!.length > 4 ? 4 : randomDishes!.length;
+      } else {
+        // For mobile, we use a more efficient ListView
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: randomDishes!.length > 4 ? 4 : randomDishes!.length,
+          itemBuilder: (context, index) {
+            final dish = randomDishes![index];
+            
+            // Use RepaintBoundary to optimize painting performance
+            return RepaintBoundary(
+              // Add key for more efficient reconciliation
+              key: ValueKey('dish_item_$index'),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: DishItem(
+                  key: Key('dish_$index'),
+                  index: index,
+                  img: dish['img'],
+                  title: dish['title'],
+                  description: dish['description'],
+                  pricing: dish['pricing'],
+                  ingredients: List<String>.from(dish['ingredients']),
+                  isSpicy: dish['isSpicy'],
+                  foodType: dish['foodType'],
+                  dishData: dish,
+                  hideIngredients: true,
+                  showDetailsButton: true,
+                  showAddButton: true,
+                  useHorizontalLayout: true,
+                ),
+              ),
+            );
+          },
         );
-      },
-    );
-  }
-  
-  Widget _buildTabletMenuGrid(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.85,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-      ),
-      itemCount: randomDishes!.length > 4 ? 4 : randomDishes!.length,
-      itemBuilder: (context, index) {
-        final dish = randomDishes![index];
-        return DishItem(
-          key: Key('dish_$index'),
-          index: index,
-          img: dish['img'],
-          title: dish['title'],
-          description: dish['description'],
-          pricing: dish['pricing'],
-          ingredients: List<String>.from(dish['ingredients']),
-          isSpicy: dish['isSpicy'],
-          foodType: dish['foodType'],
-          dishData: dish,
-          hideIngredients: false,
-          showDetailsButton: true,
-          showAddButton: true,
-        );
-      },
-    );
-  }
-  
-  Widget _buildDesktopMenuGrid(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        childAspectRatio: 0.75,
-        crossAxisSpacing: 20,
-        mainAxisSpacing: 20,
-      ),
-      itemCount: randomDishes!.length > 8 ? 8 : randomDishes!.length,
-      itemBuilder: (context, index) {
-        final dish = randomDishes![index];
-        return DishItem(
-          key: Key('dish_$index'),
-          index: index,
-          img: dish['img'],
-          title: dish['title'],
-          description: dish['description'],
-          pricing: dish['pricing'],
-          ingredients: List<String>.from(dish['ingredients']),
-          isSpicy: dish['isSpicy'],
-          foodType: dish['foodType'],
-          dishData: dish,
-          hideIngredients: false,
-          showDetailsButton: true,
-          showAddButton: true,
-        );
-      },
-    );
-  }
+      }
+      
+      // Create an efficient grid using LayoutBuilder + Wrap for larger screens
+      // This is more performant than GridView in some cases
+      final totalSpacingWidth = spacing * (columnCount - 1);
+      final cardWidth = (screenWidth - totalSpacingWidth) / columnCount;
+      
+      // Precalculate indices to avoid repeated calculations
+      final indices = List<int>.generate(itemCount, (i) => i);
+      
+      return Column(  // Using Column instead of Container for cleaner hierarchy
+        children: [
+          Wrap(
+            spacing: spacing,
+            runSpacing: spacing * 1.5,
+            children: indices.map((index) {
+              final dish = randomDishes![index];
+              
+              // Use RepaintBoundary to optimize painting
+              return RepaintBoundary(
+                key: ValueKey('dish_grid_item_$index'),
+                child: SizedBox(
+                  width: cardWidth,
+                  child: DishItem(
+                    key: Key('dish_$index'),
+                    index: index,
+                    img: dish['img'],
+                    title: dish['title'],
+                    description: dish['description'],
+                    pricing: dish['pricing'],
+                    ingredients: List<String>.from(dish['ingredients']),
+                    isSpicy: dish['isSpicy'],
+                    foodType: dish['foodType'],
+                    dishData: dish,
+                    hideIngredients: screenWidth < 800, // Hide ingredients on smaller screens
+                    showDetailsButton: true,
+                    showAddButton: true,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      );
+    }
+  );
+}
+
 }
 
 /// Meal plans section
@@ -1756,9 +1966,9 @@ class MealPlansSection extends ConsumerWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 0.85,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
+        // childAspectRatio: 0.85,
+        // crossAxisSpacing: 16,
+        // mainAxisSpacing: 16,
       ),
       itemCount: mealPlans.length,
       itemBuilder: (context, index) {
@@ -1779,9 +1989,9 @@ class MealPlansSection extends ConsumerWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        childAspectRatio: 0.85,
-        crossAxisSpacing: 20,
-        mainAxisSpacing: 20,
+        // childAspectRatio: 0.85,
+        // crossAxisSpacing: 20,
+        // mainAxisSpacing: 20,
       ),
       itemCount: mealPlans.length,
       itemBuilder: (context, index) {
@@ -1984,108 +2194,115 @@ class CateringSection extends StatelessWidget {
     );
   }
   
-  Widget _buildMobileCateringPackages(BuildContext context) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: cateringPackages.length,
-      itemBuilder: (context, index) {
-        final package = cateringPackages[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 16),
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: InkWell(
-            onTap: () => onPackageTap(index),
-            borderRadius: BorderRadius.circular(16),
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          package['icon'],
-                          color: Theme.of(context).colorScheme.primary,
-                          size: 32,
-                        ),
+
+Widget _buildMobileCateringPackages(BuildContext context) {
+  return ListView.builder(
+    shrinkWrap: true,
+    physics: const NeverScrollableScrollPhysics(),
+    itemCount: cateringPackages.length,
+    itemBuilder: (context, index) {
+      final package = cateringPackages[index];
+      return Card(
+        margin: const EdgeInsets.only(bottom: 16),
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: InkWell(
+          onTap: () => onPackageTap(index),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start, // Ensure proper alignment
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              package['title'],
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              package['price'],
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
+                      child: Icon(
+                        package['icon'],
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 32,
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    package['description'],
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => onPackageTap(index),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
                     ),
-                    child: const Text('Ver Detalles'),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            package['title'],
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 2, // Limit lines
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            package['price'],
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  package['description'],
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  maxLines: 2, // Limit the description to 2 lines
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => onPackageTap(index),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   ),
-                ],
-              ),
+                  child: const Text('Ver Detalles'),
+                ),
+              ],
             ),
           ),
-        );
-      },
-    );
-  }
-  
-  Widget _buildTabletCateringPackages(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 1.1,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-      ),
-      itemCount: cateringPackages.length,
-      itemBuilder: (context, index) {
-        final package = cateringPackages[index];
-        return Card(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: InkWell(
-            onTap: () => onPackageTap(index),
-            borderRadius: BorderRadius.circular(16),
+        ),
+      );
+    },
+  );
+}
+
+Widget _buildTabletCateringPackages(BuildContext context) {
+  return GridView.builder(
+    shrinkWrap: true,
+    physics: const NeverScrollableScrollPhysics(),
+    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 2,
+      childAspectRatio: 1.1, // Keep as is, but we'll make content scrollable if needed
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 16,
+    ),
+    itemCount: cateringPackages.length,
+    itemBuilder: (context, index) {
+      final package = cateringPackages[index];
+      return Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: InkWell(
+          onTap: () => onPackageTap(index),
+          borderRadius: BorderRadius.circular(16),
+          child: SingleChildScrollView( // Make the content scrollable
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -2132,11 +2349,13 @@ class CateringSection extends StatelessWidget {
               ),
             ),
           ),
-        );
-      },
-    );
-  }
-  
+        ),
+      );
+    },
+  );
+}
+
+
   Widget _buildDesktopCateringPackages(BuildContext context) {
     return GridView.builder(
       shrinkWrap: true,
@@ -2199,7 +2418,7 @@ class CateringSection extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const Spacer(),
+                  const SizedBox(height:16),
                   ElevatedButton(
                     onPressed: () => onPackageTap(index),
                     style: ElevatedButton.styleFrom(
@@ -2422,119 +2641,133 @@ class EventsSection extends StatelessWidget {
     );
   }
   
-  Widget _buildMobileEventsList(BuildContext context, List<Map<String, dynamic>> events) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: events.length,
-      itemBuilder: (context, index) {
-        final event = events[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 16),
-          clipBehavior: Clip.antiAlias,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AspectRatio(
-                aspectRatio: 16 / 9,
-                child: Image.network(
-                  event['image'] as String,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
-                    child: Icon(
-                      Icons.image_not_supported,
-                      size: 48,
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
-                    ),
+Widget _buildMobileEventsList(BuildContext context, List<Map<String, dynamic>> events) {
+  return ListView.builder(
+    shrinkWrap: true,
+    physics: const NeverScrollableScrollPhysics(),
+    itemCount: events.length,
+    itemBuilder: (context, index) {
+      final event = events[index];
+      return Card(
+        margin: const EdgeInsets.only(bottom: 16),
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Image.network(
+                event['image'] as String,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                  child: Icon(
+                    Icons.image_not_supported,
+                    size: 48,
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      event['title'] as String,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    event['title'] as String,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.calendar_today,
-                          size: 16,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          event['date'] as String,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        const SizedBox(width: 16),
-                        Icon(
-                          Icons.access_time,
-                          size: 16,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          event['time'] as String,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      event['description'] as String,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      event['price'] as String,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () {},
-                            child: const Text('Más Información'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap( // Use Wrap instead of Row for date and time
+                    spacing: 16,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.calendar_today,
+                            size: 16,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).colorScheme.primary,
-                              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                            ),
-                            child: const Text('Reservar'),
+                          const SizedBox(width: 8),
+                          Text(
+                            event['date'] as String,
+                            style: Theme.of(context).textTheme.bodyMedium,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.access_time,
+                            size: 16,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            event['time'] as String,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    event['description'] as String,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    event['price'] as String,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {},
+                          child: const Text('Más Información'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                          child: const Text('Reservar'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-  
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
   Widget _buildTabletEventsList(BuildContext context, List<Map<String, dynamic>> events) {
     return ListView.builder(
       shrinkWrap: true,
@@ -2621,7 +2854,7 @@ class EventsSection extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const Spacer(),
+                            const SizedBox(height:16),
                             OutlinedButton(
                               onPressed: () {},
                               child: const Text('Más Información'),
@@ -2732,7 +2965,7 @@ class EventsSection extends StatelessWidget {
                         event['description'] as String,
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
-                      const Spacer(),
+                      const SizedBox(height:16),
                       Text(
                         event['price'] as String,
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -2810,28 +3043,28 @@ class EnhancedContactSection extends StatelessWidget {
           const SizedBox(height: 40),
           
           // Social media
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildSocialButton(
-                context,
-                icon: Icons.facebook,
-                label: 'Facebook',
-              ),
-              const SizedBox(width: 16),
-              _buildSocialButton(
-                context,
-                icon: Icons.social_distance,
-                label: 'Instagram',
-              ),
-              const SizedBox(width: 16),
-              _buildSocialButton(
-                context,
-                icon: Icons.social_distance,
-                label: 'Twitter',
-              ),
-            ],
-          ),
+       Wrap(
+  alignment: WrapAlignment.center,
+  spacing: 16,
+  runSpacing: 16,
+  children: [
+    _buildSocialButton(
+      context,
+      icon: Icons.facebook,
+      label: 'Facebook',
+    ),
+    _buildSocialButton(
+      context,
+      icon: Icons.social_distance,
+      label: 'Instagram',
+    ),
+    _buildSocialButton(
+      context,
+      icon: Icons.social_distance,
+      label: 'Twitter',
+    ),
+  ],
+)
         ],
       ),
     );
@@ -2925,9 +3158,9 @@ class EnhancedContactSection extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       InkWell(
-                        onTap: () => _launchUrl('mailto:info@laredonda.pe'),
+                        onTap: () => _launchUrl('mailto:info@upgrade.do'),
                         child: Text(
-                          'info@laredonda.pe',
+                          'info@upgrade.do',
                           style: theme.textTheme.bodyLarge?.copyWith(
                             color: colorScheme.primary,
                           ),
@@ -3182,9 +3415,9 @@ class EnhancedContactSection extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         InkWell(
-                          onTap: () => _launchUrl('mailto:info@laredonda.pe'),
+                          onTap: () => _launchUrl('mailto:info@upgrade.do'),
                           child: Text(
-                            'info@laredonda.pe',
+                            'info@upgrade.do',
                             style: theme.textTheme.bodyLarge?.copyWith(
                               color: colorScheme.primary,
                             ),
@@ -3378,8 +3611,8 @@ class EnhancedContactSection extends StatelessWidget {
       ],
     );
   }
-  
-  Widget _buildBusinessHourRow(BuildContext context, String day, String hours) {
+
+Widget _buildBusinessHourRow(BuildContext context, String day, String hours) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -3397,6 +3630,15 @@ class EnhancedContactSection extends StatelessWidget {
     );
   }
   
+  void _launchUrl(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    }
+  }
+}
+
+
+
   Widget _buildSocialButton(
     BuildContext context, {
     required IconData icon,
@@ -3422,7 +3664,7 @@ class EnhancedContactSection extends StatelessWidget {
       await launch(url);
     }
   }
-}
+
 
 /// Enhanced Footer Section with links and information
 class EnhancedFooterSection extends StatelessWidget {
@@ -3456,41 +3698,43 @@ class EnhancedFooterSection extends StatelessWidget {
           
           const SizedBox(height: 20),
           
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '© 2025 Kako. Todos los derechos reservados.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.7),
-                ),
+Wrap(
+  alignment: WrapAlignment.spaceBetween,
+  runSpacing: 10,
+  children: [
+    Text(
+      '© 2025 Kako. Todos los derechos reservados.',
+      style: theme.textTheme.bodyMedium?.copyWith(
+        color: colorScheme.onSurface.withOpacity(0.7),
+      ),
+    ),
+    if (!isMobile)
+      Wrap(
+        spacing: 16,
+        children: [
+          InkWell(
+            onTap: () {},
+            child: Text(
+              'Términos y Condiciones',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.primary,
               ),
-              if (!isMobile)
-                Row(
-                  children: [
-                    InkWell(
-                      onTap: () {},
-                      child: Text(
-                        'Términos y Condiciones',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.primary,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    InkWell(
-                      onTap: () {},
-                      child: Text(
-                        'Política de Privacidad',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.primary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-            ],
+            ),
           ),
+          InkWell(
+            onTap: () {},
+            child: Text(
+              'Política de Privacidad',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.primary,
+              ),
+            ),
+          ),
+        ],
+      ),
+  ],
+)
+,
           
           if (isMobile) ...[
             const SizedBox(height: 16),
@@ -3549,11 +3793,19 @@ class EnhancedFooterSection extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Icon(
-                Icons.restaurant,
-                size: 40,
-                color: colorScheme.primary,
-              ),
+              // child: Icon(
+              //   Icons.restaurant,
+              //   size: 40,
+              //   color: colorScheme.primary,
+              // ),
+                child: ClipOval(
+                      child: Image.asset(
+                        'assets/appicon.png',
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
             ),
             const SizedBox(height: 16),
             Text(
@@ -3670,10 +3922,18 @@ class EnhancedFooterSection extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Icon(
-                      Icons.restaurant,
-                      size: 30,
-                      color: colorScheme.primary,
+                    // child: Icon(
+                    //   Icons.restaurant,
+                    //   size: 30,
+                    //   color: colorScheme.primary,
+                    // ),
+                      child: ClipOval(
+                      child: Image.asset(
+                        'assets/appicon.png',
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -3695,7 +3955,7 @@ class EnhancedFooterSection extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                'Av. La Marina 2000, San Miguel, Lima\nTeléfono: +51 123 456 789\nEmail: info@laredonda.pe',
+                'Av. La Marina 2000, San Miguel, Lima\nTeléfono: +51 123 456 789\nEmail: info@upgrade.do',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   height: 1.6,
                 ),
@@ -4406,18 +4666,20 @@ class _ReservationSectionState extends State<ReservationSection> {
   }
   
   Widget _buildReservationInfoItem(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('• '),
-          Expanded(
-            child: Text(text),
-          ),
-        ],
-      ),
-    );
+    return SizedBox(
+  width: double.infinity, // Ensure full width
+  child: Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('• '),
+        Expanded(
+          child: Text(text),
+        ),
+      ],
+    ),
+  ));
   }
 }
 
@@ -4702,9 +4964,9 @@ class RestaurantInfoSection extends StatelessWidget {
               const SizedBox(height: 12),
               _buildContactItem(context, Icons.phone, 'Teléfono', '+51 123 456 789'),
               const SizedBox(height: 8),
-              _buildContactItem(context, Icons.email, 'Email', 'info@laredonda.pe'),
+              _buildContactItem(context, Icons.email, 'Email', 'info@upgrade.do'),
               const SizedBox(height: 8),
-              _buildContactItem(context, Icons.language, 'Web', 'www.laredonda.pe'),
+              _buildContactItem(context, Icons.language, 'Web', 'www.upgrade.do'),
             ],
           ),
         ),
@@ -4813,9 +5075,9 @@ class RestaurantInfoSection extends StatelessWidget {
         const SizedBox(height: 12),
         _buildContactItem(context, Icons.phone, 'Teléfono', '+51 123 456 789'),
         const SizedBox(height: 8),
-        _buildContactItem(context, Icons.email, 'Email', 'info@laredonda.pe'),
+        _buildContactItem(context, Icons.email, 'Email', 'info@upgrade.do'),
         const SizedBox(height: 8),
-        _buildContactItem(context, Icons.language, 'Web', 'www.laredonda.pe'),
+        _buildContactItem(context, Icons.language, 'Web', 'www.upgrade.do'),
       ],
     );
   }
