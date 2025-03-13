@@ -107,9 +107,37 @@ flutter:
   assets:
     # - assets/fonts/
     - assets/
+    - assets/appIcon.png
+    - assets/kako-logo.png
     - assets/dishes/
     - assets/catering/
     - assets/onboarding_3.svg
     - assets/onboarding_2.svg
     - assets/onboarding_1.svg
     - assets/animations/
+    # Include all catering images
+    - assets/catering/
+    - assets/catering/arroz_maduro_tocineta.jpg
+    - assets/catering/croquetas_2.jpg
+    - assets/catering/croquetas.jpg
+    - assets/catering/IMG_1618.jpg
+    - assets/catering/kipes.jpg
+    - assets/catering/lasagna_blanca.jpg
+    - assets/catering/lasagna.jpg
+    - assets/catering/pastelitos.jpg
+    - assets/catering/pierna.jpg
+    - assets/catering/pollo_cordonblue.jpg
+    - assets/catering/pulled_p0ork.jpg
+    - assets/catering/pulled_pork_sanwich.jpg
+    
+    # Include all dishes images
+    - assets/dishes/
+    - assets/dishes/flap_meat_arroz_box.jpg
+    - assets/dishes/mechada_maduro_arroz_box.jpg
+    - assets/dishes/mechada_nuez_box.jpg
+    - assets/dishes/molida_hongos_maduro_box.jpg
+    - assets/dishes/molida_tacos.jpg
+    - assets/dishes/oglio_hongos_pasta_box.jpg
+    - assets/dishes/pollo_arroz_ensalada_box.jpg
+    - assets/dishes/pollo_camaron_arroz_box.jpg
+    - assets/dishes/pollo_papas_ensalada_box.jpg

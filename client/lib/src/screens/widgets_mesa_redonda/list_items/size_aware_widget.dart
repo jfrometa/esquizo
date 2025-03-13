@@ -1,6 +1,5 @@
 // 1. Create a class to represent different screen sizes
 import 'package:flutter/material.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/landing_page_home.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/widgets_mesa_redonda/dish_item.dart';
 
 class ScreenSize {

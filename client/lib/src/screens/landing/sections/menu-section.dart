@@ -68,6 +68,7 @@ Widget build(BuildContext context) {
             ],
           ),
         ),
+        
         const SizedBox(height: 32),
         
         // Use the fully responsive grid for all screen sizes

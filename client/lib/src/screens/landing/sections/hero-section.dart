@@ -104,10 +104,14 @@ class EnhancedHeroSection extends StatelessWidget {
                     ),
                       child: ClipOval(
                       child: Image.asset(
-                        'assets/appicon.png',
+                        'assets/appIcon.png',
                         width: 80,
                         height: 80,
                         fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                          print('Error loading image: $error');
+                          return const Icon(Icons.image_not_supported, size: 80);
+                        },
                       ),
                     ),
                   ),
