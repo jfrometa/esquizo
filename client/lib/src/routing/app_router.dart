@@ -6,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/app_config/app_config_services.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/QR/qr_code_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/authenticated_profile_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/screens/catering_menu/catering_menu_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/landing-page-home.dart';
@@ -46,8 +47,8 @@ final _accountNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'account');
 final _landingNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'landing');
 final _cartNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'cart');
 final _adminNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'admin');
-final _OrdersNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'orders');
-
+final _OrdersNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'local');
+final _localNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'orders');
 enum AppRoute {
   authenticatedProfile,
   onboarding,
@@ -198,6 +199,19 @@ List<RouteBase> _getNestedRoutes(String path) {
           builder: (context, state) => const QuoteScreen(),
         ),
       ];
+      //     case '/local':
+      // return [     // ... your existing routes
+      //   GoRoute(
+      //     path: '/locales',
+      //     name: AppRoute.local.name,
+      //     builder: (context, state) => const QRCodeScreen(),
+      //   ),
+        // GoRoute(
+        //   path: '/catering-quote',
+        //   name: AppRoute.cateringQuote.name, 
+        //   builder: (context, state) => const QuoteScreen(),
+        // ),
+      // ];
     case '/menu':
       return [
         GoRoute(
@@ -351,8 +365,8 @@ GlobalKey<NavigatorState> _getNavigatorKey(String path) {
   switch (path) {
     case '/':
       return _landingNavigatorKey;
-    // case '/local':
-    //   return _localNavigatorKey;
+    case '/local':
+      return _localNavigatorKey;
     case '/menu':
       return _homeNavigatorKey;
     case '/carrito':
@@ -371,7 +385,7 @@ GlobalKey<NavigatorState> _getNavigatorKey(String path) {
 String _getRouteName(String path) {
   final pathToRoute = {
     '/': AppRoute.landing.name,
-    // '/local': AppRoute.local.name,
+    '/local': AppRoute.local.name,
     '/menu': AppRoute.home.name,
     '/carrito': AppRoute.homecart.name,
     '/cuenta': AppRoute.profile.name,
@@ -385,6 +399,8 @@ Widget _getDestinationScreen(String path) {
   switch (path) {
     case '/':
       return const ResponsiveLandingPage();
+          case '/local':
+    return const QRCodeScreen();
     case '/menu':
       return const MenuScreen();
     case '/carrito':

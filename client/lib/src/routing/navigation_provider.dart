@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_management_service.dart';
-import '../core/admin_services/admin_providers.dart';
+
 
 class NavigationDestinationItem {
   final IconData icon;
@@ -26,11 +26,11 @@ final navigationDestinationsProvider = Provider<List<NavigationDestinationItem>>
       label: 'Inicio',
       path: '/',
     ),
-    //     NavigationDestinationItem(
-    //   icon: Icons.home,
-    //   label: 'Local',
-    //   path: '/local',
-    // ),
+        NavigationDestinationItem(
+      icon: Icons.home,
+      label: 'Local',
+      path: '/local',
+    ),
     NavigationDestinationItem(
       icon: Icons.restaurant_menu,
       label: 'Menu',
