@@ -6,6 +6,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_
  import 'package:starter_architecture_flutter_firebase/src/core/services/reservation_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/admin_user.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
  
 
@@ -345,7 +346,7 @@ class ExampleDataService {
         type: 'table',
         name: 'Table $i',
         description: 'Seating capacity: $capacity',
-        status: 'available',
+        status:  TableStatusEnum.available ,
         attributes: {
           'capacity': capacity,
           'location': location,
@@ -539,7 +540,7 @@ class ExampleDataService {
           type: 'room',
           name: 'Room $roomNumber',
           description: 'Type: ${type.replaceAll('_', ' ').toUpperCase()}',
-          status: 'available',
+          status:  TableStatusEnum.available ,
           attributes: {
             'roomType': type,
             'floor': floor,
@@ -674,7 +675,7 @@ class ExampleDataService {
         type: 'generic',
         name: 'Resource $i',
         description: 'Generic resource $i',
-        status: 'available',
+        status:  TableStatusEnum.available ,
         attributes: {
           'attribute1': 'value1',
           'attribute2': 'value2',

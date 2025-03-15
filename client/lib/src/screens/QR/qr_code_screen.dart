@@ -165,12 +165,12 @@ class QRCodeScreen extends StatelessWidget {
                 const SizedBox(height: 40),
                 
                 // Admin Section (would be shown only to staff in a real app)
-                Text(
-                  'Restaurant Staff',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                // Text(
+                //   'Restaurant Staff',
+                //   style: theme.textTheme.titleMedium?.copyWith(
+                //     fontWeight: FontWeight.w600,
+                //   ),
+                // ),
                 
                 const SizedBox(height: 20),
                 

@@ -10,6 +10,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_settings_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/order_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/product_management_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/table_management/table_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/user_management/user_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/admin_side_menu.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/responsive_layout.dart';
@@ -32,6 +33,7 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
   final List<Widget> _screens = [
     const AdminDashboardHome(),
     const ProductManagementScreen(),
+    const TableManagementScreen(), // Added TableManagementScreen
     const OrderManagementScreen(),
     const UserManagementScreen(),
     const BusinessSettingsScreen(),
@@ -41,13 +43,12 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
   final List<String> _screenTitles = [
     'Dashboard',
     'Products & Menu',
+    'Tables', // Added title for tables
     'Orders',
     'Users & Staff',
     'Business Settings',
     'Analytics',
   ];  
-
-
 
   @override
   void initState() {
@@ -169,14 +170,14 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
         onItemSelected: _onItemSelected,
       ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex > 3 ? 4 : _selectedIndex,
+        currentIndex: _selectedIndex > 4 ? 4 : _selectedIndex,
         onTap: _onItemSelected,
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
           BottomNavigationBarItem(icon: Icon(Icons.restaurant_menu), label: 'Products'),
+          BottomNavigationBarItem(icon: Icon(Icons.table_bar), label: 'Tables'), // Added Tables navigation item
           BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: 'Orders'),
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Users'),
           BottomNavigationBarItem(icon: Icon(Icons.more_horiz), label: 'More'),
         ],
       ),
@@ -341,7 +342,7 @@ void _showMoreOptions() {
             title: const Text('Users & Staff'),
             onTap: () {
               Navigator.pop(context);
-              setState(() => _selectedIndex = 3); // Was 4, now 3
+              setState(() => _selectedIndex = 4); // Updated index
             },
           ),
           ListTile(
@@ -349,7 +350,7 @@ void _showMoreOptions() {
             title: const Text('Business Settings'),
             onTap: () {
               Navigator.pop(context);
-              setState(() => _selectedIndex = 4); // Was 5, now 4
+              setState(() => _selectedIndex = 5); // Updated index
             },
           ),
           ListTile(
@@ -357,7 +358,7 @@ void _showMoreOptions() {
             title: const Text('Analytics'),
             onTap: () {
               Navigator.pop(context);
-              setState(() => _selectedIndex = 5); // Was 6, now 5
+              setState(() => _selectedIndex = 6); // Updated index
             },
           ),
         ],
@@ -395,7 +396,6 @@ void _showMoreOptions() {
     );
   }
 }
-
 // Notifications Panel Widget
 class NotificationsPanel extends StatelessWidget {
   final ScrollController scrollController;

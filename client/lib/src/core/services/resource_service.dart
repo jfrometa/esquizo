@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart';
 
 // Generic resource model that can be extended for specific use cases
 class Resource {
@@ -6,9 +7,9 @@ class Resource {
   final String businessId;
   final String type;
   final String name;
-  final String description;
+  final String? description;
   final Map<String, dynamic> attributes;
-  final String status;
+  final TableStatusEnum status;
   final bool isActive;
   
   Resource({
@@ -18,7 +19,7 @@ class Resource {
     required this.name,
     this.description = '',
     this.attributes = const {},
-    this.status = 'available',
+    this.status = TableStatusEnum.available,
     this.isActive = true,
   });
   
@@ -152,7 +153,7 @@ class ResourceService {
       // Count resources by status
       final statusCounts = <String, int>{};
       for (final resource in resources.where((r) => r.isActive)) {
-        statusCounts[resource.status] = (statusCounts[resource.status] ?? 0) + 1;
+        statusCounts[resource.status.name] = (statusCounts[resource.status.name] ?? 0) + 1;
       }
       
       return ResourceStats(

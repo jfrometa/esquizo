@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/services/resource_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/table_management/table_management_scren_new.dart';
 
  
 
@@ -20,7 +22,7 @@ enum TableShape {
 }
 
 // Restaurant table model
-class RestaurantTable {
+class RestaurantTable extends Resource {
   final String id;
   final String businessId;
   final int number;
@@ -37,6 +39,7 @@ class RestaurantTable {
   final Map<String, double> position; // Position on floor plan {x, y}
 
   RestaurantTable({
+    super.type = 'table',
     required this.id,
     required this.businessId,
     required this.number,
@@ -50,8 +53,8 @@ class RestaurantTable {
     this.updatedAt,
     this.name = '',
     this.isAvailable = true,
-    this.position = const {'x': 50.0, 'y': 50.0}, // Default to center
-  });
+    this.position = const {'x': 50.0, 'y': 50.0},// Default to center
+  }) : super(id: id, businessId: businessId, name: name);
 
  static TableShape _parseTableShape(dynamic shape) {
     if (shape == null) return TableShape.rectangle;
@@ -156,7 +159,28 @@ class RestaurantTable {
       position: position ?? this.position,
     );
   }
+
+  factory RestaurantTable.fromResource(Resource resource) {
+    final attributes = resource.attributes;
+    return RestaurantTable(
+      id: resource.id,
+      businessId: resource.businessId,
+      number: int.tryParse(resource.name.replaceAll('Table ', '')) ?? 0,
+      capacity: attributes['capacity'] ?? 4,
+      status: TableStatusExtension.fromString(resource.status.name),
+      position: (attributes['position'] as Map<dynamic, dynamic>?)?.map(
+        (key, value) => MapEntry(key.toString(), (value as num).toDouble()),
+      ) ?? {'x': 0, 'y': 0},
+      currentOrderId: attributes['currentOrderId'],
+    );
+  }
+  
+ 
+  
+
+
 }
+
 
 
 

@@ -1616,30 +1616,30 @@ class HourlyDataPoint {
   });
 }
 
-/// Restaurant stats (combined for dashboard)
-class RestaurantStats {
-  final int totalTables;
-  final int occupiedTables;
-  final int reservedTables;
-  final int cleaningTables;
-  final int pendingOrders;
-  final int preparingOrders;
-  final int readyOrders;
-  final double dailySales;
-  final double averageServiceTime;
+// /// Restaurant stats (combined for dashboard)
+// class RestaurantStats {
+//   final int totalTables;
+//   final int occupiedTables;
+//   final int reservedTables;
+//   final int cleaningTables;
+//   final int pendingOrders;
+//   final int preparingOrders;
+//   final int readyOrders;
+//   final double dailySales;
+//   final double averageServiceTime;
   
-  const RestaurantStats({
-    required this.totalTables,
-    required this.occupiedTables,
-    required this.reservedTables,
-    required this.cleaningTables,
-    required this.pendingOrders,
-    required this.preparingOrders,
-    required this.readyOrders,
-    required this.dailySales,
-    required this.averageServiceTime,
-  });
-}
+//   const RestaurantStats({
+//     required this.totalTables,
+//     required this.occupiedTables,
+//     required this.reservedTables,
+//     required this.cleaningTables,
+//     required this.pendingOrders,
+//     required this.preparingOrders,
+//     required this.readyOrders,
+//     required this.dailySales,
+//     required this.averageServiceTime,
+//   });
+// }
 
 /// Customer statistics
 class CustomerStats {

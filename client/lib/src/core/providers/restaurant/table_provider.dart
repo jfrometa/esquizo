@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/table_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/create_order.dart';
 import '../../services/restaurant/table_service.dart';
 import '../catalog/catalog_provider.dart';
@@ -53,4 +52,11 @@ final availableTablesProvider = FutureProvider<List<RestaurantTable>>((ref) asyn
 final tableByIdProvider = FutureProvider.family<RestaurantTable?, String>((ref, tableId) {
   final tableService = ref.watch(tableServiceProvider);
   return tableService.getTableById(tableId);
+});
+
+
+// Provider for a single table
+final tableProvider = FutureProvider.family<RestaurantTable?, String>((ref, tableId) {
+  final tableService = ref.watch(tableServiceProvider);
+  return tableService.getTable(tableId);
 });
