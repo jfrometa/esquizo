@@ -6,9 +6,9 @@ class ActiveHoursChart extends StatefulWidget {
   final List<HourlyDataPoint> hourlyData;
 
   const ActiveHoursChart({
-    Key? key,
+    super.key,
     required this.hourlyData,
-  }) : super(key: key);
+  });
 
   @override
   State<ActiveHoursChart> createState() => _ActiveHoursChartState();
