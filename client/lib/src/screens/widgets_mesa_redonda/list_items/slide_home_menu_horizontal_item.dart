@@ -170,10 +170,17 @@ class MenuDishCardHorizontal extends StatelessWidget {
               bottomRight: Radius.circular(8.0),
             ),
             child: SizedBox.expand(
-              child: Image.network(
+              child: img.isNotEmpty ? Image.network(
                 img,
                 fit: BoxFit.cover,
-              ),
+              ) :   Image.asset(
+                 'assets/appIcon.png', 
+                  height: 40,
+                  width: 40,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const Icon(Icons.business),
+               
+            ),
             ),
           ),
           Positioned(

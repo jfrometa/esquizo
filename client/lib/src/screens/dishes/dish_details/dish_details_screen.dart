@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_provider.dart'; // Add this import
-import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/providers/cart_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart'; 
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/landing_page_home.dart';
 
 /// Enhanced Dish Details Screen with system theming support
 class DishDetailsScreen extends ConsumerStatefulWidget {
@@ -57,7 +54,7 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
       'title': item.name,
       'description': item.description,
       'pricing': item.price,
-      'img': item.imageUrl ?? 'assets/images/placeholder_food.png',
+      'img': item.imageUrl.isEmpty ? 'assets/appIcon.png' : item.imageUrl,
       'foodType': item.metadata['foodType'] ?? 'Main Course',
       'isSpicy': item.metadata['isSpicy'] ?? false,
       'ingredients': item.metadata['ingredients'] ?? ['Ingredient 1', 'Ingredient 2'],

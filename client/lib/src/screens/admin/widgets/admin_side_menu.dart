@@ -110,14 +110,23 @@ class SidebarMenu extends ConsumerWidget {
             ? ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
-                  config.logoUrl,
+                  config.logoUrl, 
                   height: 40,
                   width: 40,
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => const Icon(Icons.business),
                 ),
               )
-            : const Icon(Icons.business),
+            : ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                 'assets/appIcon.png', 
+                  height: 40,
+                  width: 40,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const Icon(Icons.business),
+                ),
+              ),
       );
     }
 
@@ -138,7 +147,16 @@ class SidebarMenu extends ConsumerWidget {
               ),
             )
           else
-            const Icon(Icons.business),
+             ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                 'assets/appIcon.png', 
+                  height: 40,
+                  width: 40,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const Icon(Icons.business),
+                ),
+            ),
           if (isExpanded) ...[
             const SizedBox(width: 16),
             Expanded(

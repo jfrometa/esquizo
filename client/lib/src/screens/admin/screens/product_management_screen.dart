@@ -9,7 +9,7 @@ import '../widgets/responsive_layout.dart';
 
 
 class ProductManagementScreen extends ConsumerStatefulWidget {
-  const ProductManagementScreen({super.key});
+  const ProductManagementScreen({Key? key}) : super(key: key);
 
   @override
   ConsumerState<ProductManagementScreen> createState() => _ProductManagementScreenState();
@@ -17,7 +17,7 @@ class ProductManagementScreen extends ConsumerStatefulWidget {
 
 class _ProductManagementScreenState extends ConsumerState<ProductManagementScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final TextEditingController _searchController = TextEditingController();
+  TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _selectedCategoryId = '';
   
@@ -262,6 +262,7 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
       child: InkWell(
         onTap: () => _showEditProductDialog(product),
         child: Column(
+          mainAxisSize: MainAxisSize.min, // Add this line
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Product image
@@ -375,39 +376,42 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
   }
   
   Widget _buildCategoryCard(CatalogCategory category) {
-    final theme = Theme.of(context);
-    
-    return Card(
-      child: InkWell(
-        onTap: () => _showEditCategoryDialog(category),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Category image
-              if (category.imageUrl.isNotEmpty)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    category.imageUrl,
+  final theme = Theme.of(context);
+  
+  return Card(
+    // Remove any fixed height constraints here
+    child: InkWell(
+      onTap: () => _showEditCategoryDialog(category),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        // Add mainAxisSize.min to minimize height while still showing all content
+        child: Column(
+          mainAxisSize: MainAxisSize.min, // Add this line
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Category image with fixed height is fine
+            if (category.imageUrl.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  category.imageUrl,
+                  height: 80,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
                     height: 80,
                     width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      height: 80,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.category,
-                        color: theme.colorScheme.onPrimaryContainer,
-                      ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.category,
+                      color: theme.colorScheme.onPrimaryContainer,
                     ),
                   ),
-                )
+                ),
+              )
               else
                 Container(
                   height: 80,
@@ -572,10 +576,10 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
               Navigator.pop(context);
               _deleteProduct(product);
             },
+            child: const Text('Delete'),
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
-            child: const Text('Delete'),
           ),
         ],
       ),
@@ -625,10 +629,10 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
                 Navigator.pop(context);
                 _deleteCategory(category);
               },
+              child: const Text('Delete'),
               style: TextButton.styleFrom(
                 foregroundColor: Colors.red,
               ),
-              child: const Text('Delete'),
             ),
           ],
         ),

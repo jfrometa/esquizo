@@ -355,11 +355,19 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
                           color: theme.colorScheme.primary.withOpacity(0.5),
                         ),
                       )
-                    : Icon(
-                        Icons.restaurant,
-                        size: 48,
-                        color: theme.colorScheme.primary.withOpacity(0.5),
-                      ),
+                    :  Image.asset(
+                 'assets/appIcon.png', 
+                  height: 40,
+                  width: 40,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const Icon(Icons.business),
+                ),
+                    
+                    // Icon(
+                    //     Icons.restaurant,
+                    //     size: 48,
+                    //     color: theme.colorScheme.primary.withOpacity(0.5),
+                    //   ),
               ),
             ),
             

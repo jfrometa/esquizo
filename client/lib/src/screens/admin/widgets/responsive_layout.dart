@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class ResponsiveLayout extends StatelessWidget {
@@ -42,45 +44,53 @@ class ResponsiveLayout extends StatelessWidget {
 class ResponsiveGridView extends StatelessWidget {
   final List<Widget> children;
   final double spacing;
-  final EdgeInsetsGeometry? padding;
+  final double runSpacing;
+  final EdgeInsetsGeometry padding;
 
   const ResponsiveGridView({
-    super.key,
+    Key? key,
     required this.children,
     this.spacing = 16.0,
-    this.padding,
-  });
+    this.runSpacing = 16.0,
+    this.padding = const EdgeInsets.all(16.0),
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        int crossAxisCount;
-        if (constraints.maxWidth >= 1200) {
-          crossAxisCount = 4; // Desktop: 4 items per row
-        } else if (constraints.maxWidth >= 600) {
-          crossAxisCount = 2; // Tablet: 2 items per row
-        } else {
-          crossAxisCount = 1; // Mobile: 1 item per row
-        }
-
-        return GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
+        // Calculate columns based on available width
+        final width = constraints.maxWidth;
+        
+        // Use different card widths based on screen size
+        // Smaller cards on mobile, larger on desktop
+        final cardWidth = width < 600 ? 150.0 : 250.0;
+        
+        // Calculate columns (minimum 1)
+        final crossAxisCount = max(1, (width / (cardWidth + spacing)).floor());
+        
+        return SingleChildScrollView(
           padding: padding,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            crossAxisSpacing: spacing,
-            mainAxisSpacing: spacing,
-            childAspectRatio: crossAxisCount == 1 ? 2.5 : (crossAxisCount == 2 ? 1.8 : 1.5),
+          child: Wrap(
+            spacing: spacing,
+            runSpacing: runSpacing,
+            alignment: WrapAlignment.start,
+            children: children.map((child) => 
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: (width / crossAxisCount) - spacing,
+                  minWidth: 150.0, // Minimum width for any card
+                ),
+                child: child,
+              )
+            ).toList(),
           ),
-          itemCount: children.length,
-          itemBuilder: (context, index) => children[index],
         );
       },
     );
   }
 }
+
 
 // Helper class for responsive wrapping of widgets
 class ResponsiveWrap extends StatelessWidget {

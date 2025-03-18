@@ -100,8 +100,8 @@ class EnhancedHeroSection extends ConsumerWidget {
                       data: (config) {
                         if (config?.logoUrl != null && config!.logoUrl.isNotEmpty) {
                           return ClipOval(
-                            child: Image.network(
-                              config.logoUrl,
+                            child: Image.asset(
+                            'assets/appIcon.png',  // config.logoUrl,
                               width: 80,
                               height: 80,
                               fit: BoxFit.cover,

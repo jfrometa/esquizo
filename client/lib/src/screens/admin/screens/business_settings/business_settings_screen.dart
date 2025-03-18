@@ -850,7 +850,16 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
                             errorBuilder: (_, __, ___) => const Icon(Icons.business),
                           ),
                         )
-                      : const Icon(Icons.business),
+                      :  ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                 'assets/appIcon.png', 
+                  height: 40,
+                  width: 40,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const Icon(Icons.business),
+                ),
+            )
                 ),
                 const SizedBox(width: 16),
                 
