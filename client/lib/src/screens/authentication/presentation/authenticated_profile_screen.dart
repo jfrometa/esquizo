@@ -206,8 +206,8 @@ class SettingsTabContent extends ConsumerStatefulWidget {
 
   const SettingsTabContent({
     required this.user,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   ConsumerState<SettingsTabContent> createState() => _SettingsTabContentState();

@@ -54,7 +54,7 @@ extension TableStatusExtension on TableStatusEnum  {
 }
 
 class TableManagementScreen extends ConsumerStatefulWidget {
-  const TableManagementScreen({Key? key}) : super(key: key);
+  const TableManagementScreen({super.key});
 
   @override
   ConsumerState<TableManagementScreen> createState() => _TableManagementScreenState();
@@ -647,10 +647,10 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
               Navigator.pop(context);
               _deleteTable(table);
             },
-            child: const Text('Delete'),
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
+            child: const Text('Delete'),
           ),
         ],
       ),

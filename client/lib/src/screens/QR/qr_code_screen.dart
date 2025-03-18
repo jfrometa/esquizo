@@ -7,7 +7,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/reservation/re
 import 'package:starter_architecture_flutter_firebase/src/screens/restaurant_info/restaurant_info_screen.dart';
 
 class QRCodeScreen extends StatelessWidget {
-  const QRCodeScreen({Key? key}) : super(key: key);
+  const QRCodeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

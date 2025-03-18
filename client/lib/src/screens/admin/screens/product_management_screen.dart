@@ -9,7 +9,7 @@ import '../widgets/responsive_layout.dart';
 
 
 class ProductManagementScreen extends ConsumerStatefulWidget {
-  const ProductManagementScreen({Key? key}) : super(key: key);
+  const ProductManagementScreen({super.key});
 
   @override
   ConsumerState<ProductManagementScreen> createState() => _ProductManagementScreenState();
@@ -17,7 +17,7 @@ class ProductManagementScreen extends ConsumerStatefulWidget {
 
 class _ProductManagementScreenState extends ConsumerState<ProductManagementScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _selectedCategoryId = '';
   
@@ -173,7 +173,7 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
                           },
                         ),
                       );
-                    }).toList(),
+                    }),
                   ],
                 ),
               ),
@@ -572,10 +572,10 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
               Navigator.pop(context);
               _deleteProduct(product);
             },
-            child: const Text('Delete'),
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
+            child: const Text('Delete'),
           ),
         ],
       ),
@@ -625,10 +625,10 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
                 Navigator.pop(context);
                 _deleteCategory(category);
               },
-              child: const Text('Delete'),
               style: TextButton.styleFrom(
                 foregroundColor: Colors.red,
               ),
+              child: const Text('Delete'),
             ),
           ],
         ),

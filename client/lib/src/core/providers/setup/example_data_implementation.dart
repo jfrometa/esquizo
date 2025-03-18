@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart' as CloudFireStore;
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
  import 'package:starter_architecture_flutter_firebase/src/core/services/business_config_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/resource_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';
@@ -27,7 +28,7 @@ class ExampleDataService {
       final businessDoc = await _firestore.collection('businesses').doc(businessId).get();
       return businessDoc.exists;
     } catch (e) {
-      print('Error checking if example data is initialized: $e');
+      debugPrint('Error checking if example data is initialized: $e');
       return false;
     }
   }
@@ -42,7 +43,7 @@ class ExampleDataService {
       // Check if example data already exists
       final businessDoc = await _firestore.collection('businesses').doc(businessId).get();
       if (businessDoc.exists) {
-        print('Business already exists, skipping example data creation');
+        debugPrint('Business already exists, skipping example data creation');
         return;
       }
 
@@ -64,9 +65,9 @@ class ExampleDataService {
           await _createGenericExample(businessId);
       }
       
-      print('Example data initialized for $businessType business');
+      debugPrint('Example data initialized for $businessType business');
     } catch (e) {
-      print('Error initializing example data: $e');
+      debugPrint('Error initializing example data: $e');
       throw Exception('Failed to initialize example data: $e');
     }
   }
@@ -721,7 +722,7 @@ class ExampleDataService {
         }
       }
     } catch (e) {
-      print('Error finding user: $e');
+      debugPrint('Error finding user: $e');
       throw Exception('Failed to find user: $e');
     }
     

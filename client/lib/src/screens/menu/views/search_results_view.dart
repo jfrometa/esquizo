@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/cards/dish_card_small.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/providers/cart_provider.dart';
 
 // SEARCH RESULTS VIEW
 class SearchResultsView extends ConsumerWidget {

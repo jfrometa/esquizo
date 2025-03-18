@@ -61,7 +61,7 @@ class MenuSearchInterface extends ConsumerWidget {
 
   // Constructor with const for optimization
   const MenuSearchInterface({
-    Key? key,
+    super.key,
     required this.controller,
     required this.focusNode,
     required this.onSubmitted,
@@ -69,7 +69,7 @@ class MenuSearchInterface extends ConsumerWidget {
     required this.onClear,
     required this.isSearching,
     this.searchResults,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

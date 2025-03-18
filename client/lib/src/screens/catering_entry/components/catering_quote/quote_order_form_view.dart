@@ -57,7 +57,7 @@ class QuoteOrderFormView extends ConsumerWidget {
         // Quote details card
         Card(
           elevation: 0,
-          color: colorScheme.surfaceVariant.withOpacity(0.3),
+          color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -199,7 +199,7 @@ class QuoteOrderFormView extends ConsumerWidget {
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),

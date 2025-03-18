@@ -26,7 +26,7 @@ class StatsSummaryCard extends StatelessWidget {
     final trendColor = trend >= 0 ? Colors.green : Colors.red;
     final trendIcon = trend >= 0 ? Icons.trending_up : Icons.trending_down;
     final trendSign = trend >= 0 ? '+' : '';
-    final trendPercentage = '${trendSign}${(trend * 100).toStringAsFixed(1)}%';
+    final trendPercentage = '$trendSign${(trend * 100).toStringAsFixed(1)}%';
     
     return Card(
       child: InkWell(
@@ -113,11 +113,11 @@ class LoadingStatsSummaryCard extends StatelessWidget {
   final Color color;
 
   const LoadingStatsSummaryCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.icon,
     required this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +164,7 @@ class LoadingStatsSummaryCard extends StatelessWidget {
                 height: 30,
                 width: 120,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceVariant,
+                  color: theme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -175,7 +175,7 @@ class LoadingStatsSummaryCard extends StatelessWidget {
                 height: 16,
                 width: 150,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                  color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -195,12 +195,12 @@ class ErrorStatsSummaryCard extends StatelessWidget {
   final VoidCallback? onRetry;
 
   const ErrorStatsSummaryCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.icon,
     required this.color,
     this.onRetry,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

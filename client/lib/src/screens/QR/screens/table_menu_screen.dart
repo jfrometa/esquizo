@@ -15,9 +15,9 @@ class TableMenuScreen extends ConsumerWidget {
   final QRCodeData tableData;
   
   const TableMenuScreen({
-    Key? key,
+    super.key,
     required this.tableData,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -106,7 +106,7 @@ class TableMenuScreen extends ConsumerWidget {
                                   width: 80,
                                   height: 80,
                                   decoration: BoxDecoration(
-                                    color: theme.colorScheme.surfaceVariant,
+                                    color: theme.colorScheme.surfaceContainerHighest,
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Icon(

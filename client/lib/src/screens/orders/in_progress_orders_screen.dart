@@ -135,7 +135,7 @@ class _OrdersList extends ConsumerWidget {
 class OrderCard extends StatelessWidget {
   final auth_models.Order order;
 
-  const OrderCard({required this.order, Key? key}) : super(key: key);
+  const OrderCard({required this.order, super.key});
   
   // Update the status color method to use theme colors
   Color _getStatusColor(String status, ColorScheme colorScheme) {
@@ -211,22 +211,22 @@ class OrderCard extends StatelessWidget {
                   valueColor: _getStatusColor(order.status.name, colorScheme),
                 ),
                 const SizedBox(height: 8),
-                if (order.items != null) ...[
-                  Divider(color: colorScheme.outlineVariant),
-                  Text(
-                    'Artículos:',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.onSurface,
-                    ),
+                ...[
+                Divider(color: colorScheme.outlineVariant),
+                Text(
+                  'Artículos:',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
                   ),
-                  const SizedBox(height: 8),
-                  ...order.items!.map((item) => ListTile(
-                        dense: true,
-                        title: Text(item.name),
-                        trailing: Text('x${item.quantity}'),
-                      )),
-                ],
+                ),
+                const SizedBox(height: 8),
+                ...order.items!.map((item) => ListTile(
+                      dense: true,
+                      title: Text(item.name),
+                      trailing: Text('x${item.quantity}'),
+                    )),
+              ],
               ],
             ),
           ),

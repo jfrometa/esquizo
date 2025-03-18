@@ -11,7 +11,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/providers/caterin
 
 /// A screen that displays the catering menu with different package options.
 class CateringMenuScreen extends ConsumerStatefulWidget {
-  const CateringMenuScreen({Key? key}) : super(key: key);
+  const CateringMenuScreen({super.key});
 
   @override
   ConsumerState<CateringMenuScreen> createState() => _CateringMenuScreenState();
@@ -270,7 +270,7 @@ class _CateringMenuScreenState extends ConsumerState<CateringMenuScreen> {
 
 /// A screen for creating and managing catering quote requests.
 class QuoteScreen extends ConsumerStatefulWidget {
-  const QuoteScreen({Key? key}) : super(key: key);
+  const QuoteScreen({super.key});
 
   @override
   ConsumerState<QuoteScreen> createState() => _QuoteScreenState();
@@ -525,7 +525,7 @@ class _QuoteScreenState extends ConsumerState<QuoteScreen> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: colorScheme.surfaceVariant,
+                color: colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -574,7 +574,7 @@ class _QuoteScreenState extends ConsumerState<QuoteScreen> {
     final quote = ref.watch(manualQuoteProvider);
     final hasItems = quote != null && 
                      ((quote.dishes.isNotEmpty) || 
-                     ((quote.peopleCount ?? 0) > 0 && !quote.eventType.isEmpty));
+                     ((quote.peopleCount ?? 0) > 0 && quote.eventType.isNotEmpty));
     
     return Scaffold(
       appBar: AppBar(

@@ -64,7 +64,7 @@ class CateringCheckout extends ConsumerWidget {
           labelText: 'Ubicación de entrega',
           prefixIcon: Icon(Icons.location_on_outlined, color: colorScheme.primary),
           filled: true,
-          fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+          fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12.0),
             borderSide: BorderSide(
@@ -108,7 +108,7 @@ class CateringCheckout extends ConsumerWidget {
                 labelText: 'Fecha de entrega',
                 prefixIcon: Icon(Icons.calendar_today, color: colorScheme.primary),
                 filled: true,
-                fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+                fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
                   borderSide: BorderSide(
@@ -142,7 +142,7 @@ class CateringCheckout extends ConsumerWidget {
                 labelText: 'Hora de entrega',
                 prefixIcon: Icon(Icons.access_time, color: colorScheme.primary),
                 filled: true,
-                fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+                fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
                   borderSide: BorderSide(

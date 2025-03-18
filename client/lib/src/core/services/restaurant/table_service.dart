@@ -1,4 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart'; 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/create_order.dart';
  
@@ -123,7 +124,7 @@ class TableService {
       }
       return null;
     } catch (e) {
-      print('Error fetching table: $e');
+      debugPrint('Error fetching table: $e');
       return null;
     }
   }
@@ -136,7 +137,7 @@ class TableService {
           .map((doc) => RestaurantTable.fromFirestore(doc))
           .toList();
     } catch (e) {
-      print('Error fetching tables: $e');
+      debugPrint('Error fetching tables: $e');
       return [];
     }
   }
@@ -156,8 +157,8 @@ class TableService {
       
       await _tablesCollection.doc(table.id).set(table.toFirestore());
     } catch (e) {
-      print('Error adding table: $e');
-      throw e;
+      debugPrint('Error adding table: $e');
+      rethrow;
     }
 
   }
@@ -180,7 +181,7 @@ class TableService {
         cleaningTables: cleaningTables,
       );
     } catch (e) {
-      print('Error calculating table stats: $e');
+      debugPrint('Error calculating table stats: $e');
       return TableStats(
         totalTables: 0,
         occupiedTables: 0,

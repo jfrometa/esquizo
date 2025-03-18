@@ -240,7 +240,7 @@ class _EnhancedCateringItemCardState extends State<EnhancedCateringItemCard> {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceVariant.withOpacity(0.3),
+        color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
         border: Border(
           top: BorderSide(color: colorScheme.outline.withOpacity(0.2)),
           bottom: BorderSide(color: colorScheme.outline.withOpacity(0.2)),

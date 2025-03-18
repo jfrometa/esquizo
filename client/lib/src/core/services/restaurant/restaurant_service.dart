@@ -1,9 +1,7 @@
  
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/restaurant/table_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/restaurant/table_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/create_order.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
@@ -12,7 +10,6 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/t
 
 import 'dart:async';
 
- import 'package:starter_architecture_flutter_firebase/src/core/admin_services/order_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/product_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/staff_service.dart';
 

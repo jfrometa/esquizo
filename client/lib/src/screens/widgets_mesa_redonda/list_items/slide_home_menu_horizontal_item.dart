@@ -24,7 +24,7 @@ class MenuDishCardHorizontal extends StatelessWidget {
   final double? rating; // e.g. 80 for "80% (24)"
 
   const MenuDishCardHorizontal({
-    Key? key,
+    super.key,
     required this.img,
     required this.title,
     required this.description,
@@ -38,7 +38,7 @@ class MenuDishCardHorizontal extends StatelessWidget {
     this.actionButton,
     this.bestSeller = false,
     this.rating,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

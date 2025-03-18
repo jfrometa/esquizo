@@ -1,5 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/QR/models/food_dish.dart';
  
 // final dishesProvider = FutureProvider<List<Dish>>((ref) async {
 //   // In a real app, fetch from an API

@@ -13,7 +13,7 @@ class EnhancedContactSection extends StatelessWidget {
     final isMobile = size.width < 600;
     
     return Container(
-      color: colorScheme.surfaceVariant.withOpacity(0.3),
+      color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
       padding: EdgeInsets.symmetric(
         vertical: 60,
         horizontal: isMobile ? 16 : 32,
@@ -478,7 +478,7 @@ class EnhancedContactSection extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceVariant.withOpacity(0.5),
+                    color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -646,7 +646,7 @@ class EnhancedContactSection extends StatelessWidget {
       icon: Icon(icon),
       label: Text(label),
       style: ElevatedButton.styleFrom(
-        backgroundColor: colorScheme.surfaceVariant,
+        backgroundColor: colorScheme.surfaceContainerHighest,
         foregroundColor: colorScheme.primary,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       ),

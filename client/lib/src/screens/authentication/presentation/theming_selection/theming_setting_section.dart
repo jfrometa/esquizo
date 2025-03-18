@@ -5,7 +5,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/providers/user_pr
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class ThemeSettingsSection extends ConsumerWidget {
-  const ThemeSettingsSection({Key? key}) : super(key: key);
+  const ThemeSettingsSection({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -74,17 +74,17 @@ class ThemeSettingsSection extends ConsumerWidget {
           _updateThemeMode(ref, selection.first);
         },
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.resolveWith<Color>(
+          backgroundColor: WidgetStateProperty.resolveWith<Color>(
             (states) {
-              if (states.contains(MaterialState.selected)) {
+              if (states.contains(WidgetState.selected)) {
                 return Theme.of(context).colorScheme.primary;
               }
               return Colors.transparent;
             },
           ),
-          foregroundColor: MaterialStateProperty.resolveWith<Color>(
+          foregroundColor: WidgetStateProperty.resolveWith<Color>(
             (states) {
-              if (states.contains(MaterialState.selected)) {
+              if (states.contains(WidgetState.selected)) {
                 return Colors.white;
               }
               return Theme.of(context).colorScheme.onSurface;
@@ -124,7 +124,7 @@ class ThemeSettingsSection extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(

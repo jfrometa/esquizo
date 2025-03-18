@@ -70,7 +70,7 @@ class QuickAccessSection extends StatelessWidget {
                   icon: Icons.info_outline,
                   description: 'Conozca más sobre nosotros, ubicación y horarios',
                   onTap: onInfoTap,
-                  color: colorScheme.surfaceVariant,
+                  color: colorScheme.surfaceContainerHighest,
                 ),
               
             

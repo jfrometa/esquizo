@@ -221,7 +221,7 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
-                    color: theme.colorScheme.surfaceVariant,
+                    color: theme.colorScheme.surfaceContainerHighest,
                     child: Icon(
                       Icons.image_not_supported_outlined,
                       color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
@@ -547,7 +547,7 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
       labelStyle: theme.textTheme.bodyMedium?.copyWith(
         color: theme.colorScheme.onSurface,
       ),
-      backgroundColor: theme.colorScheme.surfaceVariant,
+      backgroundColor: theme.colorScheme.surfaceContainerHighest,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -631,7 +631,7 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: Card(
         elevation: 0,
-        color: theme.colorScheme.surfaceVariant,
+        color: theme.colorScheme.surfaceContainerHighest,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
         ),

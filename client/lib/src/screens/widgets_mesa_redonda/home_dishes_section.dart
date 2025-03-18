@@ -5,7 +5,6 @@ import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/ca
 import 'package:starter_architecture_flutter_firebase/src/helpers/scroll_bahaviour.dart';
 // Replace ordering_providers import with catalog provider
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/providers/cart_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/widgets_mesa_redonda/list_items/slide_home_menu_horizontal_item.dart';
 
  

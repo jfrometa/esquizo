@@ -12,9 +12,9 @@ class ThemeSwitch extends ConsumerWidget {
   final bool showLabel;
   
   const ThemeSwitch({
-    Key? key,
+    super.key,
     this.showLabel = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -117,9 +117,9 @@ class ThemeConfigWrapper extends ConsumerWidget {
   final Widget child;
   
   const ThemeConfigWrapper({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
   
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -144,10 +144,10 @@ class ThemeSwitchAnimation extends StatelessWidget {
   final Duration duration;
   
   const ThemeSwitchAnimation({
-    Key? key,
+    super.key,
     required this.child,
     this.duration = const Duration(milliseconds: 300),
-  }) : super(key: key);
+  });
   
   @override
   Widget build(BuildContext context) {

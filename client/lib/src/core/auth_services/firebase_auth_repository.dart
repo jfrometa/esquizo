@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'firebase_auth_repository.g.dart';
@@ -15,9 +16,9 @@ class AuthRepository {
       // Refreshes the current user, forcing a re-evaluation of auth state
       await _auth.currentUser?.reload();
       // Access currentUser again to trigger the auth state change
-      print("User state refreshed: ${_auth.currentUser?.uid}");
+      debugPrint("User state refreshed: ${_auth.currentUser?.uid}");
     } on FirebaseAuthException catch (e) {
-      print('Error refreshing auth state: ${e.code} - ${e.message}');
+      debugPrint('Error refreshing auth state: ${e.code} - ${e.message}');
     }
   }
 
@@ -25,9 +26,9 @@ class AuthRepository {
     try {
       await _auth.signInAnonymously();
       FirebaseAuth.instance.setPersistence(Persistence.SESSION);
-      print('Signed in anonymously as ${_auth.currentUser!.uid}');
+      debugPrint('Signed in anonymously as ${_auth.currentUser!.uid}');
     } on FirebaseAuthException catch (e) {
-      print('Failed to sign in anonymously: ${e.code} - ${e.message}');
+      debugPrint('Failed to sign in anonymously: ${e.code} - ${e.message}');
     }
   }
 
@@ -40,10 +41,10 @@ class AuthRepository {
       await signInAnonymously();
     } else if (_auth.currentUser!.isAnonymous) {
       // User is signed in anonymously
-      print('User is signed in anonymously: ${_auth.currentUser!.uid}');
+      debugPrint('User is signed in anonymously: ${_auth.currentUser!.uid}');
     } else {
       // User is signed in with a non-anonymous account
-      print('User is signed in: ${_auth.currentUser!.uid}');
+      debugPrint('User is signed in: ${_auth.currentUser!.uid}');
     }
   }
 }

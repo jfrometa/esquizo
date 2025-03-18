@@ -20,10 +20,10 @@ class TableOrderScreen extends ConsumerStatefulWidget {
   final Order? existingOrder;
 
   const TableOrderScreen({
-    Key? key,
+    super.key,
     required this.table,
     this.existingOrder,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<TableOrderScreen> createState() => _TableOrderScreenState();
@@ -344,7 +344,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
             Expanded(
               child: Container(
                 width: double.infinity,
-                color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
                 child: product.imageUrl != null && product.imageUrl!.isNotEmpty
                     ? Image.network(
                         product.imageUrl!,
@@ -1226,10 +1226,10 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
               Navigator.pop(context);
               _updateOrderStatus(OrderStatus.cancelled);
             },
-            child: const Text('Sí, Cancelar'),
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
+            child: const Text('Sí, Cancelar'),
           ),
         ],
       ),
@@ -1399,7 +1399,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
 
 // Menu Management Screen
 class MenuManagementScreen extends ConsumerStatefulWidget {
-  const MenuManagementScreen({Key? key, required int initialTab}) : super(key: key);
+  const MenuManagementScreen({super.key, required int initialTab});
 
   @override
   ConsumerState<MenuManagementScreen> createState() => _MenuManagementScreenState();
@@ -1407,7 +1407,7 @@ class MenuManagementScreen extends ConsumerStatefulWidget {
 
 class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool _isLoading = false;
+  final bool _isLoading = false;
   
   @override
   void initState() {
@@ -1526,7 +1526,7 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
                                   width: 80,
                                   height: 80,
                                   decoration: BoxDecoration(
-                                    color: theme.colorScheme.surfaceVariant,
+                                    color: theme.colorScheme.surfaceContainerHighest,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: product.imageUrl != null && product.imageUrl!.isNotEmpty
@@ -1694,10 +1694,10 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
                       ),
                       TextButton(
                         onPressed: () => Navigator.pop(context, true),
-                        child: const Text('Eliminar'),
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.red,
                         ),
+                        child: const Text('Eliminar'),
                       ),
                     ],
                   ),
@@ -1909,11 +1909,11 @@ class AddEditProductDialog extends StatefulWidget {
   final Function(MenuItem) onSave;
 
   const AddEditProductDialog({
-    Key? key,
+    super.key,
     this.product,
     required this.categories,
     required this.onSave,
-  }) : super(key: key);
+  });
 
   @override
   State<AddEditProductDialog> createState() => _AddEditProductDialogState();
@@ -2112,10 +2112,10 @@ class AddEditCategoryDialog extends StatefulWidget {
   final Function(MenuCategory) onSave;
 
   const AddEditCategoryDialog({
-    Key? key,
+    super.key,
     this.category,
     required this.onSave,
-  }) : super(key: key);
+  });
 
   @override
   State<AddEditCategoryDialog> createState() => _AddEditCategoryDialogState();

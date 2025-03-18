@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
  
 /// Generic catalog item model that can be extended for specific use cases
 class CatalogItem {
@@ -172,8 +173,8 @@ Future<void> addItem(CatalogItem item) async {
     
     await docRef.set(newItem.toFirestore());
   } catch (e) {
-    print('Error adding item: $e');
-    throw e;
+    debugPrint('Error adding item: $e');
+    rethrow;
   }
 }
 
@@ -182,8 +183,8 @@ Future<void> updateItem(CatalogItem item) async {
   try {
     await _itemsCollection.doc(item.id).update(item.toFirestore());
   } catch (e) {
-    print('Error updating item: $e');
-    throw e;
+    debugPrint('Error updating item: $e');
+    rethrow;
   }
 }
 
@@ -192,8 +193,8 @@ Future<void> deleteItem(String itemId) async {
   try {
     await _itemsCollection.doc(itemId).delete();
   } catch (e) {
-    print('Error deleting item: $e');
-    throw e;
+    debugPrint('Error deleting item: $e');
+    rethrow;
   }
 }
 
@@ -216,8 +217,8 @@ Future<void> addCategory(CatalogCategory category) async {
     
     await docRef.set(newCategory.toFirestore());
   } catch (e) {
-    print('Error adding category: $e');
-    throw e;
+    debugPrint('Error adding category: $e');
+    rethrow;
   }
 }
 
@@ -226,8 +227,8 @@ Future<void> updateCategory(CatalogCategory category) async {
   try {
     await _categoriesCollection.doc(category.id).update(category.toFirestore());
   } catch (e) {
-    print('Error updating category: $e');
-    throw e;
+    debugPrint('Error updating category: $e');
+    rethrow;
   }
 }
 
@@ -236,8 +237,8 @@ Future<void> deleteCategory(String categoryId) async {
   try {
     await _categoriesCollection.doc(categoryId).delete();
   } catch (e) {
-    print('Error deleting category: $e');
-    throw e;
+    debugPrint('Error deleting category: $e');
+    rethrow;
   }
 }
 

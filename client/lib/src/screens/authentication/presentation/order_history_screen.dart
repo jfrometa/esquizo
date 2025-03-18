@@ -62,8 +62,8 @@ class OrderHistoryCard extends StatelessWidget {
 
   const OrderHistoryCard({
     required this.order,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -160,8 +160,8 @@ class OrderDetailRow extends StatelessWidget {
     required this.label,
     required this.value,
     this.valueColor,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -3,7 +3,6 @@ import 'package:starter_architecture_flutter_firebase/src/core/providers/busines
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/create_order.dart';
 import '../../services/restaurant/table_service.dart';
-import '../catalog/catalog_provider.dart';
 
 // Provider for restaurant ID (could use the same as business ID or be different)
 final restaurantIdProvider = Provider<String>((ref) {

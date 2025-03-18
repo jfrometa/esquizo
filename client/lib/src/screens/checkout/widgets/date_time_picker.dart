@@ -21,7 +21,6 @@ class DateTimePicker2 {
         builder: (context, child) {
           return Theme(
             data: Theme.of(context).copyWith(
-              useMaterial3: true,
               colorScheme: colorScheme,
             ),
             child: child!,
@@ -38,14 +37,13 @@ class DateTimePicker2 {
         builder: (context, child) {
           return Theme(
             data: Theme.of(context).copyWith(
-              useMaterial3: true,
               colorScheme: colorScheme,
               timePickerTheme: TimePickerThemeData(
                 backgroundColor: colorScheme.surface,
                 hourMinuteTextColor: colorScheme.onSurface,
                 dayPeriodTextColor: colorScheme.onSurface,
                 dialHandColor: colorScheme.primary,
-                dialBackgroundColor: colorScheme.surfaceVariant,
+                dialBackgroundColor: colorScheme.surfaceContainerHighest,
               ),
             ),
             child: child!,

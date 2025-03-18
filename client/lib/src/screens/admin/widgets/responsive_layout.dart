@@ -6,11 +6,11 @@ class ResponsiveLayout extends StatelessWidget {
   final Widget desktop;
 
   const ResponsiveLayout({
-    Key? key,
+    super.key,
     required this.mobile,
     required this.tablet,
     required this.desktop,
-  }) : super(key: key);
+  });
 
   static bool isMobile(BuildContext context) =>
       MediaQuery.of(context).size.width < 600;
@@ -45,11 +45,11 @@ class ResponsiveGridView extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
 
   const ResponsiveGridView({
-    Key? key,
+    super.key,
     required this.children,
     this.spacing = 16.0,
     this.padding,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -92,14 +92,14 @@ class ResponsiveWrap extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
 
   const ResponsiveWrap({
-    Key? key,
+    super.key,
     required this.children,
     this.spacing = 16.0,
     this.runSpacing = 16.0,
     this.alignment = WrapAlignment.start,
     this.runAlignment = WrapAlignment.start,
     this.padding,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -127,7 +127,7 @@ class ResponsiveContainer extends StatelessWidget {
   final double? desktopHeight;
 
   const ResponsiveContainer({
-    Key? key,
+    super.key,
     required this.child,
     this.mobileWidth = double.infinity,
     this.tabletWidth = 600,
@@ -135,7 +135,7 @@ class ResponsiveContainer extends StatelessWidget {
     this.mobileHeight,
     this.tabletHeight,
     this.desktopHeight,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -153,7 +153,7 @@ class ResponsiveContainer extends StatelessWidget {
       height = mobileHeight;
     }
 
-    return Container(
+    return SizedBox(
       width: width,
       height: height,
       child: child,

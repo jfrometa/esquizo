@@ -11,12 +11,12 @@ class MenuHeader extends StatelessWidget {
 
   // Use const constructor for better performance
   const MenuHeader({
-    Key? key,
+    super.key,
     required this.scrollOffset,
     required this.isScrolling,
     this.parallaxFactor = 0.5,
     required this.opacityAnimation,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -8,9 +8,9 @@ class OrderScreen extends StatelessWidget {
   final QRCodeData tableData;
   
   const OrderScreen({
-    Key? key,
+    super.key,
     required this.tableData,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

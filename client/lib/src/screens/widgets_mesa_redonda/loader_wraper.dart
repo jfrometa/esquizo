@@ -5,10 +5,10 @@ class LoadingStateWrapper extends StatefulWidget {
   final Duration loadingDelay;
 
   const LoadingStateWrapper({
-    Key? key, 
+    super.key, 
     required this.child,
     this.loadingDelay = const Duration(milliseconds: 300),
-  }) : super(key: key);
+  });
 
   @override
   State<LoadingStateWrapper> createState() => _LoadingStateWrapperState();
@@ -59,7 +59,7 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
                   width: 180,
                   height: 28,
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceVariant.withOpacity(0.5),
+                    color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -68,7 +68,7 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
                   width: 260,
                   height: 16,
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceVariant.withOpacity(0.3),
+                    color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -87,7 +87,7 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
               width: 160,
               height: 40,
               decoration: BoxDecoration(
-                color: colorScheme.surfaceVariant.withOpacity(0.5),
+                color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(20),
               ),
             ),
@@ -120,7 +120,7 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
       itemBuilder: (context, index) {
         return Container(
           decoration: BoxDecoration(
-            color: colorScheme.surfaceVariant.withOpacity(0.3),
+            color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
             borderRadius: BorderRadius.circular(16),
           ),
           child: isMobile
@@ -143,7 +143,7 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: colorScheme.surfaceVariant.withOpacity(0.6),
+              color: colorScheme.surfaceContainerHighest.withOpacity(0.6),
               shape: BoxShape.circle,
             ),
           ),
@@ -152,7 +152,7 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
             width: 110,
             height: 20,
             decoration: BoxDecoration(
-              color: colorScheme.surfaceVariant.withOpacity(0.6),
+              color: colorScheme.surfaceContainerHighest.withOpacity(0.6),
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -161,7 +161,7 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
             width: double.infinity,
             height: 12,
             decoration: BoxDecoration(
-              color: colorScheme.surfaceVariant.withOpacity(0.4),
+              color: colorScheme.surfaceContainerHighest.withOpacity(0.4),
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -170,7 +170,7 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
             width: 140,
             height: 12,
             decoration: BoxDecoration(
-              color: colorScheme.surfaceVariant.withOpacity(0.4),
+              color: colorScheme.surfaceContainerHighest.withOpacity(0.4),
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -179,7 +179,7 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
             width: 90,
             height: 30,
             decoration: BoxDecoration(
-              color: colorScheme.surfaceVariant.withOpacity(0.6),
+              color: colorScheme.surfaceContainerHighest.withOpacity(0.6),
               borderRadius: BorderRadius.circular(15),
             ),
           ),
@@ -199,7 +199,7 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
             width: 70,
             height: 70,
             decoration: BoxDecoration(
-              color: colorScheme.surfaceVariant.withOpacity(0.6),
+              color: colorScheme.surfaceContainerHighest.withOpacity(0.6),
               borderRadius: BorderRadius.circular(8),
             ),
           ),
@@ -213,7 +213,7 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
                   width: 100,
                   height: 18,
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceVariant.withOpacity(0.6),
+                    color: colorScheme.surfaceContainerHighest.withOpacity(0.6),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -222,7 +222,7 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
                   width: 140,
                   height: 12,
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceVariant.withOpacity(0.4),
+                    color: colorScheme.surfaceContainerHighest.withOpacity(0.4),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -233,7 +233,7 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: colorScheme.surfaceVariant.withOpacity(0.5),
+              color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
               shape: BoxShape.circle,
             ),
           ),

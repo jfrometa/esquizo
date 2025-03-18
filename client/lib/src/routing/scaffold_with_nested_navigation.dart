@@ -39,7 +39,7 @@ final totalCartQuantityProvider = Provider<int>((ref) {
 /// --------------------------------------------------------------------------
 class CartBadge extends ConsumerWidget {
   final IconData icon;
-  const CartBadge({Key? key, required this.icon}) : super(key: key);
+  const CartBadge({super.key, required this.icon});
   
   @override
   Widget build(BuildContext context, WidgetRef ref) {

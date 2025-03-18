@@ -20,7 +20,7 @@ class MenuDishCard extends StatelessWidget {
   final Widget? actionButton;
 
   const MenuDishCard({
-    Key? key,
+    super.key,
     required this.img,
     required this.title,
     required this.description,
@@ -32,7 +32,7 @@ class MenuDishCard extends StatelessWidget {
     this.isMealPlan = false,
     required this.index,
     this.actionButton,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

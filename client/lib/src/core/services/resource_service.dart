@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart';
 
 // Generic resource model that can be extended for specific use cases
@@ -124,7 +125,7 @@ class ResourceService {
       }
       return null;
     } catch (e) {
-      print('Error fetching resource: $e');
+      debugPrint('Error fetching resource: $e');
       return null;
     }
   }
@@ -161,7 +162,7 @@ class ResourceService {
         statusCounts: statusCounts,
       );
     } catch (e) {
-      print('Error calculating resource stats: $e');
+      debugPrint('Error calculating resource stats: $e');
       return ResourceStats(
         totalResources: 0,
         statusCounts: {},

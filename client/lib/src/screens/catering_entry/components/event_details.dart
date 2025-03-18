@@ -10,11 +10,11 @@ class EventDetails extends StatelessWidget {
   final TextEditingController adicionalesController;
 
   const EventDetails({
-    Key? key,
+    super.key,
     required this.eventTypeController,
     required this.customPersonasController,
     required this.adicionalesController,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

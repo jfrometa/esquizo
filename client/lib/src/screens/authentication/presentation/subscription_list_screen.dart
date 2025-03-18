@@ -40,8 +40,8 @@ class _SubscriptionCard extends StatelessWidget {
   const _SubscriptionCard({
     required this.subscription,
     required this.onConsumeMeal,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   IconData _getPlanIcon() {
     switch (subscription.planName.toLowerCase()) {
@@ -67,7 +67,7 @@ class _SubscriptionCard extends StatelessWidget {
         width: 280,
         margin: const EdgeInsets.symmetric(horizontal: 10),
         child: Card(
-          color: colorScheme.surfaceVariant,
+          color: colorScheme.surfaceContainerHighest,
           elevation: 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -161,7 +161,7 @@ class _SubscriptionCard extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30.0),
         ),
-        disabledBackgroundColor: colorScheme.surfaceVariant.withOpacity(0.5),
+        disabledBackgroundColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
         disabledForegroundColor: colorScheme.onSurfaceVariant.withOpacity(0.5),
       ),
       child: Text(
@@ -330,7 +330,7 @@ class SubscriptionShimmer extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 10),
             child: Card(
               elevation: 2,
-              color: colorScheme.surfaceVariant,
+              color: colorScheme.surfaceContainerHighest,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),

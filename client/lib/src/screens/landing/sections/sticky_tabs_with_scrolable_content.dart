@@ -1,9 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/catering-section.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/events-section.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/meal-plans-section.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/menu-section.dart';
 
 
 // Custom scroll view to fix nested scroll behavior

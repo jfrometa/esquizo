@@ -82,9 +82,9 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
 
   // Validation state
-  bool _isNameValid = true;
-  bool _isPhoneValid = true;
-  bool _isEmailValid = true;
+  final bool _isNameValid = true;
+  final bool _isPhoneValid = true;
+  final bool _isEmailValid = true;
 
   @override
   void dispose() {
@@ -269,7 +269,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     }
 
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -310,7 +310,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           decoration: BoxDecoration(
             color: _currentStep >= index
                 ? colorScheme.primary
-                : colorScheme.surfaceVariant,
+                : colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -341,7 +341,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       style: TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.bold,
-        color: colorScheme.onBackground,
+        color: colorScheme.onSurface,
       ),
     );
   }

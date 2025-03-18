@@ -6,9 +6,9 @@ class CategoryBreakdownChart extends StatefulWidget {
   final List<CategoryDataPoint> categoryData;
   
   const CategoryBreakdownChart({
-    Key? key,
+    super.key,
     required this.categoryData,
-  }) : super(key: key);
+  });
 
   @override
   State<CategoryBreakdownChart> createState() => _CategoryBreakdownChartState();

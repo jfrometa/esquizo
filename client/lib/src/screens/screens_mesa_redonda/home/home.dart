@@ -310,7 +310,7 @@ class _MainHomeView extends ConsumerWidget {
                               ),
                               child: Container(
                                 height: 100,
-                                color: colorScheme.surfaceVariant,
+                                color: colorScheme.surfaceContainerHighest,
                                 // Replace with actual restaurant image
                               ),
                             ),

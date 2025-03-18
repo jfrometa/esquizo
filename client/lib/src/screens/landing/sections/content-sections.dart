@@ -44,7 +44,7 @@ class ContentSections extends StatelessWidget {
               horizontal: isMobile ? 16 : 32,
             ),
             decoration: BoxDecoration(
-              color: colorScheme.surfaceVariant.withOpacity(0.5),
+              color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
               borderRadius: BorderRadius.circular(30),
             ),
             child: TabBar(

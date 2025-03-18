@@ -146,7 +146,7 @@ class MealPlanCard extends StatelessWidget {
       width: 280,
       margin: const EdgeInsets.symmetric(horizontal: 10),
       child: Card(
-        color: colorScheme.surfaceVariant,
+        color: colorScheme.surfaceContainerHighest,
         elevation: 5,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),

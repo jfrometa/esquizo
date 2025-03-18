@@ -9,11 +9,11 @@ class HomeSearchResults extends StatelessWidget {
   final VoidCallback? onClearSearch;
 
   const HomeSearchResults({
-    Key? key,
+    super.key,
     required this.filteredDishes,
     required this.searchQuery,
     this.onClearSearch,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +95,7 @@ class HomeSearchResults extends StatelessWidget {
 class DishCard extends StatelessWidget {
   final Map<String, dynamic> dish;
 
-  const DishCard({Key? key, required this.dish}) : super(key: key);
+  const DishCard({super.key, required this.dish});
 
   @override
   Widget build(BuildContext context) {

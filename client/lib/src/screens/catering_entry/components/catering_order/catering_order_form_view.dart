@@ -62,7 +62,7 @@ class CateringOrderForm extends ConsumerWidget {
         // Order details card
         Card(
           elevation: 0,
-          color: colorScheme.surfaceVariant.withOpacity(0.3),
+          color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -229,7 +229,7 @@ class CateringOrderForm extends ConsumerWidget {
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
                   
                   const Divider(),
                   
@@ -280,7 +280,7 @@ class CateringOrderForm extends ConsumerWidget {
   String _calculateTotal(List<CateringDish> items) {
     double total = 0;
     for (var item in items) {
-      total += (item.pricing?.toDouble() ?? 0);
+      total += (item.pricing.toDouble() ?? 0);
     }
     return total.toStringAsFixed(2);
   }

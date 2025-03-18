@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 
 class AdditionalNotesInput extends StatelessWidget {
   final TextEditingController controller;
-  const AdditionalNotesInput({Key? key, required this.controller})
-      : super(key: key);
+  const AdditionalNotesInput({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {

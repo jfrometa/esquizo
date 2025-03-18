@@ -162,7 +162,7 @@ class _CateringFormState extends ConsumerState<CateringForm> {
             // People count slider for better UX
             Card(
               elevation: 0,
-              color: colorScheme.surfaceVariant.withOpacity(0.3),
+              color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -344,7 +344,7 @@ class _CateringFormState extends ConsumerState<CateringForm> {
               elevation: 0,
               color: hasChef
                   ? colorScheme.primaryContainer.withOpacity(0.6)
-                  : colorScheme.surfaceVariant.withOpacity(0.3),
+                  : colorScheme.surfaceContainerHighest.withOpacity(0.3),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -383,7 +383,7 @@ class _CateringFormState extends ConsumerState<CateringForm> {
             // Allergies chips with better visual style
             Container(
               decoration: BoxDecoration(
-                color: colorScheme.surfaceVariant.withOpacity(0.3),
+                color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: colorScheme.outline.withOpacity(0.2),

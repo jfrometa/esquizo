@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';
@@ -33,7 +34,7 @@ class MealOrderNotifier extends StateNotifier<List<CartItem>> {
 
   // Add meal subscription to meal orders
   void addMealSubscription(Map<String, dynamic> item, int totalMeals) {
-    print('Adding Meal Subscription: ${item['title']}');
+    debugPrint('Adding Meal Subscription: ${item['title']}');
     // Prevent duplicates in meal subscriptions
     if (state.any((meal) => meal.id == item['id'] && meal.isMealSubscription)) {
       return;
@@ -56,7 +57,7 @@ class MealOrderNotifier extends StateNotifier<List<CartItem>> {
     );
 
     state = [...state, newMeal];
-    print('Meal Subscription added successfully.');
+    debugPrint('Meal Subscription added successfully.');
   }
 
   // Deserialize method
@@ -89,7 +90,7 @@ class MealOrderNotifier extends StateNotifier<List<CartItem>> {
   // Clear all meal subscriptions from the cart
   void clearCart() {
     state = [];
-    print('Meal subscriptions cleared from the cart.');
+    debugPrint('Meal subscriptions cleared from the cart.');
   }
 }
 

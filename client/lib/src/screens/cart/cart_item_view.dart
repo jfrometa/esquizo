@@ -66,7 +66,7 @@ class CartItemView extends StatelessWidget {
                       return Container(
                         width: 80,
                         height: 80,
-                        color: colorScheme.surfaceVariant,
+                        color: colorScheme.surfaceContainerHighest,
                         child: Icon(
                           Icons.broken_image,
                           size: 30,
@@ -198,7 +198,7 @@ class CartItemView extends StatelessWidget {
                 // Quantity Controls
                 Container(
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceVariant,
+                    color: colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(

@@ -114,9 +114,7 @@ class NewItemDialog {
       );
     } finally {
       // Dispose controllers if they were created internally
-      if (itemNameController == null) itemNameController.dispose();
       if (quantityController == null) quantityController.dispose();
-      if (itemDescriptionController == null) itemDescriptionController.dispose();
     }
   }
 }

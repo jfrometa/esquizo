@@ -8,7 +8,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/authentication
  
 
 class UserManagementScreen extends ConsumerStatefulWidget {
-  const UserManagementScreen({Key? key}) : super(key: key);
+  const UserManagementScreen({super.key});
 
   @override
   ConsumerState<UserManagementScreen> createState() => _UserManagementScreenState();

@@ -63,7 +63,7 @@ class QuoteCheckout extends ConsumerWidget {
           labelText: 'Ubicación del evento',
           prefixIcon: Icon(Icons.location_on_outlined, color: colorScheme.primary),
           filled: true,
-          fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+          fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12.0),
             borderSide: BorderSide(
@@ -107,7 +107,7 @@ class QuoteCheckout extends ConsumerWidget {
                 labelText: 'Fecha del evento',
                 prefixIcon: Icon(Icons.calendar_today, color: colorScheme.primary),
                 filled: true,
-                fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+                fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
                   borderSide: BorderSide(
@@ -141,7 +141,7 @@ class QuoteCheckout extends ConsumerWidget {
                 labelText: 'Hora del evento',
                 prefixIcon: Icon(Icons.access_time, color: colorScheme.primary),
                 filled: true,
-                fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+                fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
                   borderSide: BorderSide(

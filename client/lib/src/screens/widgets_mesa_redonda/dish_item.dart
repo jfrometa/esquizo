@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class DishItem extends StatelessWidget {
+  @override
   final Key? key;
   final int index;
   final String img;

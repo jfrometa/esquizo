@@ -33,9 +33,9 @@ class SizeAwareBuilder extends StatelessWidget {
   final Widget Function(BuildContext context, ScreenType screenType) builder;
   
   const SizeAwareBuilder({
-    Key? key,
+    super.key,
     required this.builder,
-  }) : super(key: key);
+  });
   
   @override
   Widget build(BuildContext context) {
@@ -52,11 +52,11 @@ class ResponsiveSection extends StatelessWidget {
   final Widget desktopBuilder;
   
   const ResponsiveSection({
-    Key? key,
+    super.key,
     required this.mobileBuilder,
     required this.tabletBuilder,
     required this.desktopBuilder,
-  }) : super(key: key);
+  });
   
   @override
   Widget build(BuildContext context) {

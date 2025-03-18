@@ -415,7 +415,7 @@ class LocationCaptureBottomSheetState
         labelText: required ? '$label *' : label,
         prefixIcon: Icon(icon, color: colorScheme.primary),
         filled: true,
-        fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+        fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,

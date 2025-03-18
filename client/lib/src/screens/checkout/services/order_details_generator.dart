@@ -73,7 +73,7 @@ Total: RD \$${grandTotal.toStringAsFixed(2)}
     if (itemsBuffer.isNotEmpty) {
       buffer.writeln('''
 *Platos Regulares*:
-Ubicación: ${address}
+Ubicación: $address
 Google Maps: ${_generateGoogleMapsLink(latitude, longitude)}
 Fecha y Hora de Entrega: $date - $time
 $itemsBuffer

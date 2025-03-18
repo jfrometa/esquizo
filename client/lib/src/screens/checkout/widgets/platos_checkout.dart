@@ -66,7 +66,7 @@ class PlatosCheckout extends ConsumerWidget {
           labelText: 'Ubicación de entrega',
           prefixIcon: Icon(Icons.location_on_outlined, color: colorScheme.primary),
           filled: true,
-          fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+          fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12.0),
             borderSide: BorderSide(

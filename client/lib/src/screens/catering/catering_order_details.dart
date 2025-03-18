@@ -252,7 +252,7 @@ class CateringOrderDetailsScreenState
             const Spacer(),
             if (isEditing) 
               Switch(
-                inactiveTrackColor: colorScheme.surfaceVariant,
+                inactiveTrackColor: colorScheme.surfaceContainerHighest,
                 activeColor: colorScheme.primary,
                 value: value,
                 onChanged: isEditing ? (bool newValue) => onChanged(newValue) : null,

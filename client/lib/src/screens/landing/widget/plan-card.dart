@@ -8,12 +8,12 @@ class PlanCard extends StatelessWidget {
   final String planId;
 
   const PlanCard({
-    Key? key,
+    super.key,
     required this.planName,
     required this.description,
     required this.price,
     required this.planId,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

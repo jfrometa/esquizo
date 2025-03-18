@@ -11,11 +11,11 @@ class ProductForm extends ConsumerStatefulWidget {
   final VoidCallback onCancel;
 
   const ProductForm({
-    Key? key,
+    super.key,
     this.product,
     required this.onSave,
     required this.onCancel,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<ProductForm> createState() => _ProductFormState();
@@ -31,7 +31,7 @@ class _ProductFormState extends ConsumerState<ProductForm> {
   bool _isAvailable = true;
   final Map<String, dynamic> _metadata = {};
 
-  bool _isLoading = false;
+  final bool _isLoading = false;
   bool _isEditMode = false;
 
   @override
@@ -264,7 +264,7 @@ class _ProductFormState extends ConsumerState<ProductForm> {
       aspectRatio: 16 / 9,
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(8),
         ),
         child: _imageUrlController.text.isNotEmpty

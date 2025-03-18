@@ -2,12 +2,10 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
  
-import 'package:starter_architecture_flutter_firebase/src/core/providers/user/auth_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Main Cart Class
 class Cart {
   final List<CartItem> items;
@@ -766,7 +764,7 @@ class CartService {
           .collection('consumptions')
           .add(consumptionRecord);
     } catch (e) {
-      print('Failed to record to Firebase: $e');
+      debugPrint('Failed to record to Firebase: $e');
     }
   }
   

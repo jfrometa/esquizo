@@ -21,7 +21,7 @@ import 'views/search_results_view.dart';
 import 'views/special_offers_view.dart';
 
 class MenuScreen extends ConsumerStatefulWidget {
-  const MenuScreen({Key? key}) : super(key: key);
+  const MenuScreen({super.key});
 
   @override
   ConsumerState<MenuScreen> createState() => _MenuScreenState();
@@ -105,10 +105,6 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
   
   void _initCachedTabViews() {
     // Ensure _tableData is initialized
-    if (_tableData == null) {
-      return;
-    }
-    
     setState(() {
       _cachedTabViews[0] = CategoryView(
         scrollController: _tabScrollControllers[0]!,

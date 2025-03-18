@@ -20,7 +20,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/providers/menu/me
  
 
 class MenuScreen extends ConsumerStatefulWidget {
-  const MenuScreen({Key? key}) : super(key: key);
+  const MenuScreen({super.key});
 
   @override
   ConsumerState<MenuScreen> createState() => _MenuScreenState();

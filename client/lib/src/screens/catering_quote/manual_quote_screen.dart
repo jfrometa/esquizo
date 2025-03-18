@@ -5,7 +5,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/providers/caterin
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class ManualQuoteScreen extends ConsumerStatefulWidget {
-  const ManualQuoteScreen({Key? key}) : super(key: key);
+  const ManualQuoteScreen({super.key});
 
   @override
   ConsumerState<ManualQuoteScreen> createState() => _ManualQuoteScreenState();

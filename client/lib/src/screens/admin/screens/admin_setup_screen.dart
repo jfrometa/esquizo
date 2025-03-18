@@ -9,7 +9,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/auth_services/fir
 
 /// First-time setup screen for admins
 class AdminSetupScreen extends ConsumerStatefulWidget {
-  const AdminSetupScreen({Key? key}) : super(key: key);
+  const AdminSetupScreen({super.key});
 
   @override
   ConsumerState<AdminSetupScreen> createState() => _AdminSetupScreenState();
@@ -237,7 +237,7 @@ Future<void> main() async {
 
 /// Main app widget
 class MyApp extends ConsumerWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -4,7 +4,6 @@
 
 // Providers for dashboard stats - FIXED
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/order_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/restaurant/restaurant_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/service_factory.dart';

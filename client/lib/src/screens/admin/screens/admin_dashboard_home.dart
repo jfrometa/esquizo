@@ -396,7 +396,7 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
               aspectRatio: 16 / 9,
               child: Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Center(

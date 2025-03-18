@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class AppUser {
   final String uid;
@@ -88,8 +89,8 @@ class AuthService {
         password: password,
       );
     } catch (e) {
-      print('Error signing in: $e');
-      throw e;
+      debugPrint('Error signing in: $e');
+      rethrow;
     }
   }
   
@@ -115,8 +116,8 @@ class AuthService {
       
       return userCredential;
     } catch (e) {
-      print('Error creating user: $e');
-      throw e;
+      debugPrint('Error creating user: $e');
+      rethrow;
     }
   }
   
@@ -134,7 +135,7 @@ class AuthService {
       }
       return null;
     } catch (e) {
-      print('Error fetching user data: $e');
+      debugPrint('Error fetching user data: $e');
       return null;
     }
   }
@@ -175,8 +176,8 @@ class AuthService {
         'updatedAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print('Error updating user profile: $e');
-      throw e;
+      debugPrint('Error updating user profile: $e');
+      rethrow;
     }
   }
   
@@ -193,7 +194,7 @@ class AuthService {
         'updatedAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print('Error updating user metadata: $e');
-      throw e;
+      debugPrint('Error updating user metadata: $e');
+      rethrow;
     }}
 }

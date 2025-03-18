@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 // Reservation Screen
 class ReservationScreen extends StatelessWidget {
-  const ReservationScreen({Key? key}) : super(key: key);
+  const ReservationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -244,9 +244,9 @@ class ReservationScreen extends StatelessWidget {
               // In a real app, this would update the selected time
             }
           : null,
-      backgroundColor: theme.colorScheme.surfaceVariant,
+      backgroundColor: theme.colorScheme.surfaceContainerHighest,
       selectedColor: theme.colorScheme.primaryContainer,
-      disabledColor: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+      disabledColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
       labelStyle: TextStyle(
         color: isAvailable
             ? time == '7:30 PM'

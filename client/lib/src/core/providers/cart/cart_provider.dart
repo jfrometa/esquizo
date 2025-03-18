@@ -1,12 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart'; 
  
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_providers.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/user/auth_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/cart_service.dart';

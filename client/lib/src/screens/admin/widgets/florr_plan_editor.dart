@@ -7,11 +7,11 @@ class FloorPlanEditor extends StatefulWidget {
   final Function(RestaurantTable) onTableTapped;
 
   const FloorPlanEditor({
-    Key? key,
+    super.key,
     required this.tables,
     required this.onTableMoved,
     required this.onTableTapped,
-  }) : super(key: key);
+  });
 
   @override
   State<FloorPlanEditor> createState() => _FloorPlanEditorState();

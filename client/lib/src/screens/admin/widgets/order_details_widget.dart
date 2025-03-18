@@ -12,10 +12,10 @@ class OrderDetailView extends ConsumerStatefulWidget {
   final VoidCallback? onClose;
   
   const OrderDetailView({
-    Key? key,
+    super.key,
     required this.orderId,
     this.onClose,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<OrderDetailView> createState() => _OrderDetailViewState();
@@ -514,14 +514,14 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
             ),
             
             // Payment method (if available)
-            if (order.paymentMethod != null) ...[
-              const SizedBox(height: 16),
-              _buildInfoRow(
-                label: 'Payment Method',
-                value: _capitalizeFirst(order.paymentMethod),
-                icon: Icons.payment,
-              ),
-            ],
+            ...[
+            const SizedBox(height: 16),
+            _buildInfoRow(
+              label: 'Payment Method',
+              value: _capitalizeFirst(order.paymentMethod),
+              icon: Icons.payment,
+            ),
+          ],
           ],
         ),
       ),
@@ -745,10 +745,10 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Yes, Cancel Order'),
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
+            child: const Text('Yes, Cancel Order'),
           ),
         ],
       ),
@@ -871,9 +871,9 @@ class OrderDetailScreen extends StatelessWidget {
   final String orderId;
 
   const OrderDetailScreen({
-    Key? key,
+    super.key,
     required this.orderId,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

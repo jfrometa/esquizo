@@ -1,14 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/app_config/app_config_services.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/local_storage_service.dart';
 import '../constants/app_sizes.dart';
-import '../core/onboarding/onboarding_repository.dart';
-import '../../firebase_options.dart';
-import '../core/providers/business/business_config_provider.dart';
-import '../core/services/business_config_service.dart';
 
 
 /// Widget class to manage asynchronous app initialization

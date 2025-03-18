@@ -10,11 +10,11 @@ class SidebarMenu extends ConsumerWidget {
   final bool isExpanded;
 
   const SidebarMenu({
-    Key? key,
+    super.key,
     required this.selectedIndex,
     required this.onItemSelected,
     this.isExpanded = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -7,12 +7,12 @@ class NewItemForm extends StatelessWidget {
   final TextEditingController quantityController;
   final TextEditingController itemDescriptionController;
   const NewItemForm({
-    Key? key,
+    super.key,
     required this.onAddItem,
     required this.itemNameController,
     required this.quantityController,
     required this.itemDescriptionController,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

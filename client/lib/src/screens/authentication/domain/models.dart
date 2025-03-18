@@ -180,9 +180,9 @@ class Order {
     this.adminMetadata,
   }) : 
     // Initialize orderDate and location with default values if not provided
-    this.timestamp =  Timestamp.now(),
-    this.orderDate = orderDate ?? DateTime.now(),
-    this.location = location ?? {
+    timestamp =  Timestamp.now(),
+    orderDate = orderDate ?? DateTime.now(),
+    location = location ?? {
       'address': address,
       'latitude': latitude,
       'longitude': longitude,

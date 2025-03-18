@@ -12,7 +12,7 @@ class OptimizedNetworkImage extends StatelessWidget {
   final bool enableMemoryCache;
 
   const OptimizedNetworkImage({
-    Key? key,
+    super.key,
     required this.imageUrl,
     this.width,
     this.height,
@@ -22,14 +22,14 @@ class OptimizedNetworkImage extends StatelessWidget {
     this.errorWidget,
     this.backgroundColor,
     this.enableMemoryCache = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     final defaultPlaceholder = Container(
       width: width,
       height: height,
-      color: backgroundColor ?? Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+      color: backgroundColor ?? Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
       child: Center(
         child: Icon(
           Icons.image,
@@ -42,7 +42,7 @@ class OptimizedNetworkImage extends StatelessWidget {
     final defaultError = Container(
       width: width,
       height: height,
-      color: backgroundColor ?? Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.2),
+      color: backgroundColor ?? Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.2),
       child: Center(
         child: Icon(
           Icons.broken_image,

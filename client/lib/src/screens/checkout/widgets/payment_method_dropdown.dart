@@ -37,7 +37,7 @@ class PaymentMethodDropdown extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: colorScheme.outline),
-              color: colorScheme.surfaceVariant.withOpacity(0.3),
+              color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),

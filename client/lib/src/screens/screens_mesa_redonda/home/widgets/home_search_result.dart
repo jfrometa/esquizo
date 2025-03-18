@@ -9,11 +9,11 @@ class HomeSearchResults extends StatelessWidget {
   final VoidCallback? onClearSearch;
 
   const HomeSearchResults({
-    Key? key,
+    super.key,
     required this.filteredDishes,
     required this.searchQuery,
     this.onClearSearch,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

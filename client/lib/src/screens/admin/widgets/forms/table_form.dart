@@ -10,11 +10,11 @@ class TableForm extends ConsumerStatefulWidget {
   final VoidCallback onCancel;
 
   const TableForm({
-    Key? key,
+    super.key,
     this.table,
     required this.onSave,
     required this.onCancel,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<TableForm> createState() => _TableFormState();
@@ -262,7 +262,7 @@ class _TableFormState extends ConsumerState<TableForm> {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(

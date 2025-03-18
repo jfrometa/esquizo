@@ -197,7 +197,7 @@ class CateringDetailsContent extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: item['included']
                       ? colorScheme.primaryContainer
-                      : colorScheme.surfaceVariant,
+                      : colorScheme.surfaceContainerHighest,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -256,10 +256,10 @@ class CateringDetailsContent extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: colorScheme.surfaceVariant.withOpacity(0.3),
+            color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: colorScheme.surfaceVariant,
+              color: colorScheme.surfaceContainerHighest,
               width: 1,
             ),
           ),
@@ -289,7 +289,7 @@ class CateringDetailsContent extends StatelessWidget {
     return FilterChip(
       label: Text(label),
       onSelected: (bool selected) {},
-      backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
       checkmarkColor: Theme.of(context).colorScheme.primary,
     );
   }

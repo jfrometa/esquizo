@@ -1,5 +1,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart' as CloudFireStore;
+import 'package:flutter/foundation.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
@@ -24,7 +25,7 @@ class OrderServiceClientSide {
               try {
                 return Order.fromFirestore(doc);
               } catch (e) {
-                print('Error parsing order document: $e');
+                debugPrint('Error parsing order document: $e');
                 // Return a placeholder or null based on your error handling strategy
                 return Order.empty(); // Assuming there's an empty constructor or factory method
               }
@@ -76,7 +77,7 @@ Stream<List<Order>> getRecentOrdersStream() {
       }
       return null;
     } catch (e) {
-      print('Error fetching order: $e');
+      debugPrint('Error fetching order: $e');
       return null;
     }
   }
@@ -93,7 +94,7 @@ Stream<List<Order>> getRecentOrdersStream() {
           .map((doc) => Order.fromFirestore(doc))
           .toList();
     } catch (e) {
-      print('Error fetching active orders: $e');
+      debugPrint('Error fetching active orders: $e');
       return [];
     }
   }
@@ -111,7 +112,7 @@ Stream<List<Order>> getRecentOrdersStream() {
           .map((doc) => Order.fromFirestore(doc))
           .toList();
     } catch (e) {
-      print('Error fetching orders by date range: $e');
+      debugPrint('Error fetching orders by date range: $e');
       return [];
     }
   }
@@ -165,8 +166,8 @@ Stream<List<Order>> getRecentOrdersStream() {
         return orderId;
       });
     } catch (e) {
-      print('Error creating order: $e');
-      throw e;
+      debugPrint('Error creating order: $e');
+      rethrow;
     }
   }
   
@@ -175,8 +176,8 @@ Stream<List<Order>> getRecentOrdersStream() {
     try {
       await _ordersCollection.doc(order.id).update(order.toFirestore());
     } catch (e) {
-      print('Error updating order: $e');
-      throw e;
+      debugPrint('Error updating order: $e');
+      rethrow;
     }
   }
   
@@ -227,8 +228,8 @@ Stream<List<Order>> getRecentOrdersStream() {
         }
       });
     } catch (e) {
-      print('Error updating order status: $e');
-      throw e;
+      debugPrint('Error updating order status: $e');
+      rethrow;
     }
   }
   
@@ -287,8 +288,8 @@ Stream<List<Order>> getRecentOrdersStream() {
         }
       });
     } catch (e) {
-      print('Error completing order with payment: $e');
-      throw e;
+      debugPrint('Error completing order with payment: $e');
+      rethrow;
     }
   }
   
@@ -328,7 +329,7 @@ Stream<List<Order>> getRecentOrdersStream() {
       int orderCount = 0;
       
       for (var order in completedOrders) {
-        if (order.createdAt != null && order.lastUpdated != null) {
+        if (order.lastUpdated != null) {
           final duration = order.lastUpdated!.difference(order.createdAt);
           totalMinutes += duration.inMinutes;
           orderCount++;
@@ -345,7 +346,7 @@ Stream<List<Order>> getRecentOrdersStream() {
         averageServiceTime: averageServiceTime, totalOrders: 0, completedOrders: 0,
       );
     } catch (e) {
-      print('Error calculating order stats: $e');
+      debugPrint('Error calculating order stats: $e');
       return OrderStats(
         pendingOrders: 0,
         preparingOrders: 0,

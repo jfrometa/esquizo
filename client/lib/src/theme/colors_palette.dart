@@ -159,8 +159,8 @@ class AppTheme {
       
       // Scrollbars for desktop
       scrollbarTheme: const ScrollbarThemeData(
-        thickness: MaterialStatePropertyAll(8.0),
-        thumbVisibility: MaterialStatePropertyAll(true),
+        thickness: WidgetStatePropertyAll(8.0),
+        thumbVisibility: WidgetStatePropertyAll(true),
         radius: Radius.circular(8.0),
       ),
     );
@@ -187,11 +187,9 @@ class AppTheme {
         onError: textOnPrimary,
         errorContainer: errorLight,
         onErrorContainer: errorDark,
-        background: neutralLightest,
-        onBackground: textPrimary,
         surface: Colors.white,
         onSurface: textPrimary,
-        surfaceVariant: brandPrimaryLightest,
+        surfaceContainerHighest: brandPrimaryLightest,
         onSurfaceVariant: textSecondary,
         outline: outlineMain,
         outlineVariant: outlineLight,
@@ -221,11 +219,9 @@ class AppTheme {
         onError: Color(0xFF690005),
         errorContainer: Color(0xFF93000A),
         onErrorContainer: errorLight,
-        background: darkModeBackground,
-        onBackground: darkModeOnBackground,
         surface: darkModeSurface,
         onSurface: darkModeOnSurface,
-        surfaceVariant: darkModeSurfaceVariant,
+        surfaceContainerHighest: darkModeSurfaceVariant,
         onSurfaceVariant: darkModeOnSurfaceVariant,
         outline: Color(0xFF8C8C8C),
         outlineVariant: darkModeSurfaceVariant,
@@ -569,9 +565,9 @@ class AppTheme {
   /// Creates chip theme
   static ChipThemeData _createChipTheme(ColorScheme colorScheme) {
     return ChipThemeData(
-      backgroundColor: colorScheme.surfaceVariant,
+      backgroundColor: colorScheme.surfaceContainerHighest,
       deleteIconColor: colorScheme.onSurfaceVariant,
-      disabledColor: colorScheme.surfaceVariant.withOpacity(0.5),
+      disabledColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
       selectedColor: colorScheme.primaryContainer,
       secondarySelectedColor: colorScheme.secondaryContainer,
       padding: const EdgeInsets.all(8),
@@ -597,8 +593,8 @@ class AppTheme {
       backgroundColor: colorScheme.surface,
       indicatorColor: colorScheme.primaryContainer,
       height: 80,
-      labelTextStyle: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected)) {
+      labelTextStyle: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
           return TextStyle(
             fontFamily: fontBody,
             fontSize: labelSmallSize,
@@ -613,8 +609,8 @@ class AppTheme {
           color: colorScheme.onSurfaceVariant,
         );
       }),
-      iconTheme: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected)) {
+      iconTheme: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
           return IconThemeData(
             size: 24,
             color: colorScheme.onPrimaryContainer,

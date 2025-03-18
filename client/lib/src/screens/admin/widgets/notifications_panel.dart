@@ -116,14 +116,14 @@ class NotificationItem extends StatelessWidget {
   final bool isUnread;
   
   const NotificationItem({
-    Key? key,
+    super.key,
     required this.title,
     required this.message,
     required this.time,
     required this.icon,
     required this.color,
     this.isUnread = false,
-  }) : super(key: key);
+  });
   
   @override
   Widget build(BuildContext context) {

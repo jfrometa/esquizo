@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AdminService {
@@ -23,13 +24,13 @@ class AdminService {
         final idTokenResult = await user.getIdTokenResult(true);
         isAdminClaim = idTokenResult.claims?['admin'] == true;
       } catch (tokenError) {
-        print('Error getting token claims: $tokenError');
+        debugPrint('Error getting token claims: $tokenError');
         // Continue execution - we'll fall back to Firestore check
       }
 
       return adminDoc.exists || isAdminClaim;
     } catch (e) {
-      print('Error checking admin status: $e');
+      debugPrint('Error checking admin status: $e');
       return false;
     }
   }

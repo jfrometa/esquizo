@@ -33,7 +33,7 @@ class FeaturesSectionMobile extends StatelessWidget {
     ];
     
     return Container(
-      color: colorScheme.background,
+      color: colorScheme.surface,
       padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
       child: Column(
         children: [
@@ -141,7 +141,7 @@ class FeaturesSectionTablet extends StatelessWidget {
     ];
     
     return Container(
-      color: colorScheme.background,
+      color: colorScheme.surface,
       padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 32),
       child: Column(
         children: [
@@ -249,7 +249,7 @@ class FeaturesSectionDesktop extends StatelessWidget {
     ];
     
     return Container(
-      color: colorScheme.background,
+      color: colorScheme.surface,
       padding: const EdgeInsets.symmetric(vertical: 80, horizontal: 48),
       child: Column(
         children: [
@@ -265,7 +265,7 @@ class FeaturesSectionDesktop extends StatelessWidget {
           Text(
             'Nos esforzamos por ofrecer experiencias gastronómicas excepcionales',
             style: theme.textTheme.titleLarge?.copyWith(
-              color: colorScheme.onBackground.withOpacity(0.7),
+              color: colorScheme.onSurface.withOpacity(0.7),
             ),
             textAlign: TextAlign.center,
           ),

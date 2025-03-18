@@ -8,8 +8,8 @@ class LocationsSection extends ConsumerStatefulWidget {
 
   const LocationsSection({
     required this.userId,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   ConsumerState<LocationsSection> createState() => _LocationsSectionState();
@@ -128,10 +128,10 @@ class _LocationsSectionState extends ConsumerState<LocationsSection> {
                     ),
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(true),
-                      child: const Text('Eliminar'),
                       style: TextButton.styleFrom(
                         foregroundColor: Colors.red,
                       ),
+                      child: const Text('Eliminar'),
                     ),
                   ],
                 ),
@@ -397,8 +397,8 @@ class LocationCard extends StatelessWidget {
     required this.onEdit,
     required this.onDelete,
     required this.onSetDefault,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -9,7 +9,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/services/restaura
 import 'dart:math' as math;
  
 class TableManagementScreen extends ConsumerStatefulWidget {
-  const TableManagementScreen({Key? key}) : super(key: key);
+  const TableManagementScreen({super.key});
 
   @override
   ConsumerState<TableManagementScreen> createState() => _TableManagementScreenState();
@@ -105,8 +105,8 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
       floatingActionButton: _isEditMode
           ? FloatingActionButton(
               onPressed: _showAddTableDialog,
-              child: const Icon(Icons.add),
               tooltip: 'Agregar Mesa',
+              child: const Icon(Icons.add),
             )
           : null,
       bottomNavigationBar: _buildLegend(theme),
@@ -118,7 +118,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
     
     return Container(
       padding: const EdgeInsets.all(16),
-      color: theme.colorScheme.surfaceVariant,
+      color: theme.colorScheme.surfaceContainerHighest,
       child: stats.when(
         data: (data) => Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -255,10 +255,10 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(context, true),
-                    child: const Text('Eliminar'),
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.red,
                     ),
+                    child: const Text('Eliminar'),
                   ),
                 ],
               ),
@@ -992,9 +992,9 @@ class AddEditTableDialog extends ConsumerStatefulWidget {
   final RestaurantTable? table;
   
   const AddEditTableDialog({
-    Key? key,
+    super.key,
     this.table,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<AddEditTableDialog> createState() => _AddEditTableDialogState();

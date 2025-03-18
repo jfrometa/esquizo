@@ -13,7 +13,7 @@ import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dar
 
 /// The complete entry screen with two tabs: one for Catering and one for Cotización.
 class CateringEntryScreen extends ConsumerStatefulWidget {
-  const CateringEntryScreen({Key? key}) : super(key: key);
+  const CateringEntryScreen({super.key});
 
   @override
   CateringEntryScreenState createState() => CateringEntryScreenState();
@@ -391,7 +391,7 @@ Widget _buildCateringOrderForm() {
   String _calculateTotal(List<CateringDish> items) {
     double total = 0;
     for (var item in items) {
-      total += (item.pricing?.toDouble() ?? 0);
+      total += (item.pricing.toDouble() ?? 0);
     }
     return total.toStringAsFixed(2);
   }
@@ -463,7 +463,7 @@ Widget _buildQuoteOrderForm() {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: colorScheme.surfaceVariant,
+                color: colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -534,7 +534,7 @@ Widget _buildQuoteOrderForm() {
     final currentOrder = _tabController.index == 0 ? cateringOrder : quoteOrder;
     final hasItems = currentOrder != null && 
                      ((currentOrder.dishes.isNotEmpty) || 
-                     ((currentOrder.peopleCount ?? 0) > 0 && !currentOrder.eventType.isEmpty));
+                     ((currentOrder.peopleCount ?? 0) > 0 && currentOrder.eventType.isNotEmpty));
 
     return Scaffold(
       appBar: AppBar(

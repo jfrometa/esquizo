@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 class BusinessConfig {
   final String id;
@@ -96,7 +97,7 @@ class BusinessConfigService {
       }
       return null;
     } catch (e) {
-      print('Error fetching business config: $e');
+      debugPrint('Error fetching business config: $e');
       return null;
     }
   }

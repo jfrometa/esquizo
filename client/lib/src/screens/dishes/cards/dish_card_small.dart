@@ -10,10 +10,10 @@ class DishCardSmall extends StatelessWidget {
   final VoidCallback? onAddToCart;
 
   const DishCardSmall({
-    Key? key,
+    super.key,
     required this.dish,
     this.onAddToCart,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +58,7 @@ class DishCardSmall extends StatelessWidget {
                     fit: StackFit.expand,
                     children: [
                       Container(
-                        color: colorScheme.surfaceVariant,
+                        color: colorScheme.surfaceContainerHighest,
                         child: Icon(
                           Icons.restaurant,
                           size: 48,
@@ -135,7 +135,7 @@ class DishCardSmall extends StatelessWidget {
               vertical: 2,
             ),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceVariant,
+              color: theme.colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(

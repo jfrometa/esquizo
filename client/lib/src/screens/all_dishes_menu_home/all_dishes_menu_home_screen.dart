@@ -196,7 +196,7 @@ class _AllDishesMenuHomeScreenState extends ConsumerState<AllDishesMenuHomeScree
                     });
                   }
                 },
-                backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                 selectedColor: Theme.of(context).colorScheme.primaryContainer,
                 checkmarkColor: Theme.of(context).colorScheme.primary,
               ),

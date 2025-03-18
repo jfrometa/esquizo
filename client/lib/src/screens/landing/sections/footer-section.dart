@@ -133,7 +133,7 @@ class EnhancedFooterSection extends StatelessWidget {
                   height: 80,
                   fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
-                    print('Error loading image: $error');
+                    debugPrint('Error loading image: $error');
                     return const Icon(Icons.image_not_supported, size: 80);
                   },
                 ),
@@ -261,7 +261,7 @@ class EnhancedFooterSection extends StatelessWidget {
                         height: 80,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
-                        print('Error loading image: $error');
+                        debugPrint('Error loading image: $error');
                         return const Icon(Icons.image_not_supported, size: 80);
                         },
                       ),

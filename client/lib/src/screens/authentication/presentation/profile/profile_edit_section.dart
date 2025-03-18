@@ -10,8 +10,8 @@ class ProfileEditSection extends ConsumerStatefulWidget {
 
   const ProfileEditSection({
     required this.user,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   ConsumerState<ProfileEditSection> createState() => _ProfileEditSectionState();

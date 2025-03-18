@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/util_mesa_redonda/categories.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/widgets_mesa_redonda/category_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class HomeCategoriesSection extends StatelessWidget {
   const HomeCategoriesSection({super.key});

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/admin_user.dart';
 
@@ -21,7 +22,7 @@ class AdminManagementService {
 
       return adminDoc.exists;
     } catch (e) {
-      print('Error checking admin status: $e');
+      debugPrint('Error checking admin status: $e');
       return false;
     }
   }
@@ -130,7 +131,7 @@ class AdminManagementService {
                   try {
                     return AdminUser.fromMap(doc.id, doc.data());
                   } catch (e) {
-                    print('Error parsing admin document: $e');
+                   debugPrint('Error parsing admin document: $e');
                     return null;
                   }
                 })
@@ -138,7 +139,7 @@ class AdminManagementService {
                 .cast<AdminUser>()
                 .toList();
           } catch (e) {
-            print('Error processing admin snapshot: $e');
+           debugPrint('Error processing admin snapshot: $e');
             return <AdminUser>[];
           }
         });
@@ -157,7 +158,7 @@ class AdminManagementService {
       }
       return null;
     } catch (e) {
-      print('Error getting admin: $e');
+     debugPrint('Error getting admin: $e');
       return null;
     }
   }

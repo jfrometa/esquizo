@@ -8,10 +8,10 @@ class MenuTabBar extends ConsumerStatefulWidget {
   final Function(int) onTabChanged;
 
   const MenuTabBar({
-    Key? key,
+    super.key,
     required this.tabController,
     required this.onTabChanged,
-  }) : super(key: key);
+  });
 
   @override
   MenuTabBarState createState() => MenuTabBarState();
@@ -93,7 +93,7 @@ class MenuTabBarState extends ConsumerState<MenuTabBar> {
     // Pre-calculate values to reduce calculations in build
     final labelColor = enabled ? colorScheme.onPrimary : colorScheme.onSurfaceVariant.withOpacity(0.5);
     final unselectedLabelColor = colorScheme.onSurfaceVariant.withOpacity(enabled ? 1.0 : 0.5);
-    final indicatorColor = enabled ? colorScheme.primary : colorScheme.surfaceVariant;
+    final indicatorColor = enabled ? colorScheme.primary : colorScheme.surfaceContainerHighest;
     
     // Use const for unchanging widgets
     final boxShadow = enabled 
@@ -109,7 +109,7 @@ class MenuTabBarState extends ConsumerState<MenuTabBar> {
     return RepaintBoundary(
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: colorScheme.surfaceVariant.withOpacity(0.5),
+          color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
           borderRadius: BorderRadius.circular(100),
           boxShadow: [
             BoxShadow(
@@ -149,13 +149,13 @@ class MenuTabBarState extends ConsumerState<MenuTabBar> {
             labelPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0), // Reduce padding
             tabAlignment: TabAlignment.fill,
             isScrollable: false, // Force equal distribution
-            overlayColor: MaterialStateProperty.resolveWith(
+            overlayColor: WidgetStateProperty.resolveWith(
               (states) {
                 if (!enabled) return Colors.transparent;
-                if (states.contains(MaterialState.hovered)) {
+                if (states.contains(WidgetState.hovered)) {
                   return colorScheme.primary.withOpacity(0.1);
                 }
-                if (states.contains(MaterialState.pressed)) {
+                if (states.contains(WidgetState.pressed)) {
                   return colorScheme.primary.withOpacity(0.2);
                 }
                 return null;

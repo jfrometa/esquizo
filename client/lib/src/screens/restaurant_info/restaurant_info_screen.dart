@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 class RestaurantInfoScreen extends StatelessWidget {
 
 
-  const RestaurantInfoScreen({Key? key}) : super(key: key);
+  const RestaurantInfoScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class RestaurantInfoScreen extends StatelessWidget {
                 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4',
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => Container(
-                  color: theme.colorScheme.surfaceVariant,
+                  color: theme.colorScheme.surfaceContainerHighest,
                   child: Icon(
                     Icons.image_not_supported,
                     size: 64,

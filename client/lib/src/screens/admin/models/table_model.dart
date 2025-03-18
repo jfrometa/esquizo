@@ -23,17 +23,23 @@ enum TableShape {
 
 // Restaurant table model
 class RestaurantTable extends Resource {
+  @override
   final String id;
+  @override
   final String businessId;
   final int number;
   final int capacity;
+  @override
   final TableStatusEnum status;
   final String? currentOrderId;
   final String? area;         // Section of restaurant (e.g., "Terrace", "Indoor")
+  @override
   final String? description;  // Additional description
+  @override
   final bool isActive;        // Whether this table is in active use
   final TableShape? shape;    // Visual shape representation
   final DateTime? updatedAt;  // Last update timestamp
+  @override
   final String name; 
   final bool isAvailable;
   final Map<String, double> position; // Position on floor plan {x, y}
@@ -107,6 +113,7 @@ class RestaurantTable extends Resource {
   }
 
   // Convert to map for Firestore
+  @override
   Map<String, dynamic> toFirestore() {
     return {
       'businessId': businessId,

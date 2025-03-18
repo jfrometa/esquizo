@@ -251,7 +251,7 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
             onPressed: itemCount > 0 ? () => context.pop() : () => _showCateringForm(context),
             backgroundColor: itemCount > 0 
                 ? colorScheme.primaryContainer 
-                : colorScheme.surfaceVariant,
+                : colorScheme.surfaceContainerHighest,
             foregroundColor: itemCount > 0 
                 ? colorScheme.onPrimaryContainer 
                 : colorScheme.onSurfaceVariant,

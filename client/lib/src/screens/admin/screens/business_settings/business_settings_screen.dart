@@ -4,7 +4,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/providers/busines
 import 'package:starter_architecture_flutter_firebase/src/core/services/business_config_service.dart';
  
 class BusinessSettingsScreen extends ConsumerStatefulWidget {
-  const BusinessSettingsScreen({Key? key}) : super(key: key);
+  const BusinessSettingsScreen({super.key});
 
   @override
   ConsumerState<BusinessSettingsScreen> createState() => _BusinessSettingsScreenState();

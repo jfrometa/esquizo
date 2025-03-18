@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 
 // FILTER BOTTOM SHEET
 class FilterBottomSheet extends StatefulWidget {
-  const FilterBottomSheet({Key? key}) : super(key: key);
+  const FilterBottomSheet({super.key});
 
   @override
   State<FilterBottomSheet> createState() => _FilterBottomSheetState();

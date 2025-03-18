@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class Reservation {
@@ -105,8 +106,8 @@ class ReservationService {
       final docRef = await _reservationsCollection.add(reservation.toFirestore());
       return docRef.id;
     } catch (e) {
-      print('Error creating reservation: $e');
-      throw e;
+      debugPrint('Error creating reservation: $e');
+      rethrow;
     }
   }
   
@@ -126,7 +127,7 @@ class ReservationService {
           .map((doc) => Reservation.fromFirestore(doc))
           .toList();
     } catch (e) {
-      print('Error fetching reservations: $e');
+      debugPrint('Error fetching reservations: $e');
       return [];
     }
   }
@@ -181,7 +182,7 @@ class ReservationService {
       // Return available time slots
       return allTimeSlots.where((slot) => !bookedTimeSlots.contains(slot)).toList();
     } catch (e) {
-      print('Error getting available time slots: $e');
+      debugPrint('Error getting available time slots: $e');
       return [];
     }
   }

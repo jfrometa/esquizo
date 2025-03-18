@@ -10,13 +10,13 @@ class HomeSearchSection extends StatefulWidget {
   final bool showRecentSearches;
 
   const HomeSearchSection({
-    Key? key,
+    super.key,
     required this.onSearch,
     this.recentSearches = const [],
     required this.onRecentSearchTap,
     this.onFilterTap,
     this.showRecentSearches = true,
-  }) : super(key: key);
+  });
 
   @override
   State<HomeSearchSection> createState() => _HomeSearchSectionState();
@@ -89,7 +89,7 @@ class _HomeSearchSectionState extends State<HomeSearchSection>
                   padding: const EdgeInsets.only(left: 8.0),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: colorScheme.surfaceVariant,
+                      color: colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: IconButton(
@@ -130,13 +130,13 @@ class _HomeSearchSectionState extends State<HomeSearchSection>
                           onPressed: () {
                             // Implement clear recent searches
                           },
-                          child: Text('Clear',
-                              style: TextStyle(color: colorScheme.primary)),
                           style: TextButton.styleFrom(
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                             minimumSize: Size.zero,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
+                          child: Text('Clear',
+                              style: TextStyle(color: colorScheme.primary)),
                         ),
                       ],
                     ),
@@ -155,7 +155,7 @@ class _HomeSearchSectionState extends State<HomeSearchSection>
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: colorScheme.surfaceVariant.withOpacity(0.7),
+                            color: colorScheme.surfaceContainerHighest.withOpacity(0.7),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(

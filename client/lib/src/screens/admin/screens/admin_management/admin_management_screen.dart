@@ -371,10 +371,10 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
               Navigator.pop(context);
               _removeAdmin(admin);
             },
-            child: const Text('Eliminar'),
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
+            child: const Text('Eliminar'),
           ),
         ],
       ),

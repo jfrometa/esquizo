@@ -27,7 +27,7 @@ class MaterialSearchBar extends StatelessWidget {
   final String? hintText;
 
   const MaterialSearchBar({
-    Key? key,
+    super.key,
     required this.controller,
     required this.focusNode,
     required this.onSubmitted,
@@ -36,7 +36,7 @@ class MaterialSearchBar extends StatelessWidget {
     required this.isSearching,
     this.showFilterButton = true,
     this.hintText,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +51,7 @@ class MaterialSearchBar extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       color: isSearching 
           ? colorScheme.surface 
-          : colorScheme.surfaceVariant.withOpacity(0.9),
+          : colorScheme.surfaceContainerHighest.withOpacity(0.9),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         height: 56,
@@ -134,7 +134,7 @@ class MaterialSearchBar extends StatelessWidget {
                       tooltip: 'Clear search',
                       style: IconButton.styleFrom(
                         foregroundColor: colorScheme.onSurfaceVariant,
-                        backgroundColor: colorScheme.surfaceVariant.withOpacity(0.5),
+                        backgroundColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                         minimumSize: const Size(40, 40),
                         maximumSize: const Size(40, 40),
                       ),
@@ -150,7 +150,7 @@ class MaterialSearchBar extends StatelessWidget {
                           tooltip: 'Filter',
                           style: IconButton.styleFrom(
                             foregroundColor: colorScheme.onSurfaceVariant,
-                            backgroundColor: colorScheme.surfaceVariant,
+                            backgroundColor: colorScheme.surfaceContainerHighest,
                             minimumSize: const Size(40, 40),
                             maximumSize: const Size(40, 40),
                           ),

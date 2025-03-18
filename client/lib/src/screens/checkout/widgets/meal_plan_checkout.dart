@@ -95,7 +95,7 @@ class MealPlanCheckout extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceVariant.withOpacity(0.5),
+                    color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: colorScheme.outlineVariant),
                   ),
@@ -293,7 +293,7 @@ class MealPlanCheckout extends ConsumerWidget {
                   labelText: 'Fecha',
                   prefixIcon: Icon(Icons.calendar_today, color: colorScheme.primary),
                   filled: true,
-                  fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+                  fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
                     borderSide: BorderSide(color: colorScheme.outline),
@@ -326,7 +326,7 @@ class MealPlanCheckout extends ConsumerWidget {
                   labelText: 'Hora',
                   prefixIcon: Icon(Icons.access_time, color: colorScheme.primary),
                   filled: true,
-                  fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+                  fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
                     borderSide: BorderSide(color: colorScheme.outline),
@@ -341,7 +341,7 @@ class MealPlanCheckout extends ConsumerWidget {
                   labelText: 'Notas (opcional)',
                   prefixIcon: Icon(Icons.note, color: colorScheme.primary),
                   filled: true,
-                  fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+                  fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
                     borderSide: BorderSide(color: colorScheme.outline),
@@ -501,7 +501,7 @@ class MealPlanCheckout extends ConsumerWidget {
                 labelText: 'Fecha de entrega',
                 prefixIcon: Icon(Icons.calendar_today, color: colorScheme.primary),
                 filled: true,
-                fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+                fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
                   borderSide: BorderSide(
@@ -535,7 +535,7 @@ class MealPlanCheckout extends ConsumerWidget {
                 labelText: 'Hora de entrega',
                 prefixIcon: Icon(Icons.access_time, color: colorScheme.primary),
                 filled: true,
-                fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+                fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
                   borderSide: BorderSide(
@@ -605,7 +605,7 @@ class MealPlanCheckout extends ConsumerWidget {
             labelText: 'Fecha',
             prefixIcon: Icon(Icons.calendar_today, color: colorScheme.primary),
             filled: true,
-            fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+            fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.0),
               borderSide: BorderSide(color: colorScheme.outline),
@@ -660,7 +660,7 @@ class MealPlanCheckout extends ConsumerWidget {
             labelText: 'Hora',
             prefixIcon: Icon(Icons.access_time, color: colorScheme.primary),
             filled: true,
-            fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+            fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.0),
               borderSide: BorderSide(color: colorScheme.outline),
@@ -687,7 +687,7 @@ class MealPlanCheckout extends ConsumerWidget {
             hintText: 'Instrucciones especiales para esta entrega',
             prefixIcon: Icon(Icons.note, color: colorScheme.primary),
             filled: true,
-            fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+            fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.0),
               borderSide: BorderSide(color: colorScheme.outline),
@@ -723,7 +723,7 @@ class MealPlanCheckout extends ConsumerWidget {
           labelText: 'Ubicación de entrega',
           prefixIcon: Icon(Icons.location_on_outlined, color: colorScheme.primary),
           filled: true,
-          fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+          fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12.0),
             borderSide: BorderSide(

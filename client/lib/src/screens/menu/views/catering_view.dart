@@ -498,7 +498,7 @@ class _CateringViewState extends ConsumerState<CateringView> with SingleTickerPr
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceVariant,
+                  color: colorScheme.surfaceContainerHighest,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -561,7 +561,7 @@ class _CateringViewState extends ConsumerState<CateringView> with SingleTickerPr
     final quoteOrder = ref.watch(manualQuoteProvider);
     final hasQuoteItems = quoteOrder != null && 
                          ((quoteOrder.dishes.isNotEmpty) || 
-                         ((quoteOrder.peopleCount ?? 0) > 0 && !quoteOrder.eventType.isEmpty));
+                         ((quoteOrder.peopleCount ?? 0) > 0 && quoteOrder.eventType.isNotEmpty));
 
     return Scaffold(
       appBar: AppBar(

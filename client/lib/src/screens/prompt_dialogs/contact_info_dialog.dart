@@ -153,7 +153,7 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
               
               // User info banner for logged-in users
               if (isUserLoggedIn && !_isEditingInfo)
-                _buildLoggedInBanner(user!, colorScheme),
+                _buildLoggedInBanner(user, colorScheme),
               
               // Toggle between form modes (only for guests)
               if (!isUserLoggedIn && !_isEditingInfo)
@@ -872,7 +872,7 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
               fontSize: 12,
             ),
             filled: true,
-            fillColor: colorScheme.surfaceVariant.withOpacity(0.3),
+            fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
             enabled: !readOnly,
           ),
         ),

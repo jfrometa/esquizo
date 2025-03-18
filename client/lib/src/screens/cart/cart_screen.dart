@@ -574,7 +574,7 @@ class CartScreen extends ConsumerWidget {
                             child: Text(
                               dish.hasUnitSelection
                                   ? '${dish.quantity} unidades'
-                                  : '${personCount} personas',
+                                  : '$personCount personas',
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: colorScheme.onSurfaceVariant,
                               ),

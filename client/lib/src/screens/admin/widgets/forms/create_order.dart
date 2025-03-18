@@ -23,11 +23,11 @@ class CreateOrderForm extends ConsumerStatefulWidget {
   final VoidCallback onCancel;
 
   const CreateOrderForm({
-    Key? key,
+    super.key,
     this.preselectedTableId,
     required this.onSuccess,
     required this.onCancel,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<CreateOrderForm> createState() => _CreateOrderFormState();
@@ -304,7 +304,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                             ),
                           );
                         })
-                        .toList(),
+                        ,
                   ],
                 );
               },
@@ -927,7 +927,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                       return Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceVariant,
+                          color: theme.colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -1251,10 +1251,10 @@ class ItemOptionsDialog extends StatefulWidget {
   final Function(CatalogItem, {Map<String, dynamic>? options, String? notes, int quantity}) onAddToCart;
 
   const ItemOptionsDialog({
-    Key? key,
+    super.key,
     required this.item,
     required this.onAddToCart,
-  }) : super(key: key);
+  });
 
   @override
   State<ItemOptionsDialog> createState() => _ItemOptionsDialogState();
@@ -1415,7 +1415,7 @@ class _ItemOptionsDialogState extends State<ItemOptionsDialog> {
                       const SizedBox(height: 8),
                     ],
                   );
-                }).toList(),
+                }),
               ],
               
               const SizedBox(height: 16),

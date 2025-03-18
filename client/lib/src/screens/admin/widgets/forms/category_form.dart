@@ -10,11 +10,11 @@ class CategoryForm extends ConsumerStatefulWidget {
   final VoidCallback onCancel;
 
   const CategoryForm({
-    Key? key,
+    super.key,
     this.category,
     required this.onSave,
     required this.onCancel,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<CategoryForm> createState() => _CategoryFormState();
@@ -26,7 +26,7 @@ class _CategoryFormState extends ConsumerState<CategoryForm> {
   final _imageUrlController = TextEditingController();
   int _sortOrder = 0;
   bool _isActive = true;
-  bool _isLoading = false;
+  final bool _isLoading = false;
   bool _isEditMode = false;
 
   @override
@@ -172,7 +172,7 @@ class _CategoryFormState extends ConsumerState<CategoryForm> {
       aspectRatio: 3 / 1,
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(8),
         ),
         child: _imageUrlController.text.isNotEmpty

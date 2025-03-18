@@ -8,11 +8,11 @@ class UserForm extends ConsumerStatefulWidget {
   final VoidCallback onCancel;
 
   const UserForm({
-    Key? key,
+    super.key,
     this.user,
     required this.onSave,
     required this.onCancel,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<UserForm> createState() => _UserFormState();

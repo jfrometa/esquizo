@@ -1,9 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
-import 'package:starter_architecture_flutter_firebase/src/theme/text_styles.dart';
 abstract class MarketplaceTheme {
   static ThemeData theme = ThemeData(
     fontFamily: GoogleFonts.lexend().fontFamily,

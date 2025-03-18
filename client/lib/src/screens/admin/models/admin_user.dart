@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 
 // Admin user model with null safety improvements
@@ -26,7 +27,7 @@ class AdminUser {
         createdDate = (timestamp as Timestamp).toDate();
       }
     } catch (e) {
-      print('Error parsing timestamp: $e');
+      debugPrint('Error parsing timestamp: $e');
     }
     
     return AdminUser(

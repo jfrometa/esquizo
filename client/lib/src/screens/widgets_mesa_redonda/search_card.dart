@@ -79,7 +79,7 @@ class _SearchCardState extends State<SearchCard> {
     final ColorScheme colorScheme = theme.colorScheme;
 
     return Card(
-      color: colorScheme.surfaceVariant,
+      color: colorScheme.surfaceContainerHighest,
       elevation: 3,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16.0),
@@ -119,7 +119,7 @@ class _SearchCardState extends State<SearchCard> {
                 )
               : null,
           filled: true,
-          fillColor: colorScheme.surfaceVariant,
+          fillColor: colorScheme.surfaceContainerHighest,
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           border: OutlineInputBorder(

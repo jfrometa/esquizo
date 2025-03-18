@@ -6,10 +6,10 @@ class DishCard extends StatefulWidget {
   final VoidCallback? onTap;
 
   const DishCard({
-    Key? key,
+    super.key,
     required this.dish,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   State<DishCard> createState() => _DishCardState();
@@ -104,7 +104,7 @@ class _DishCardState extends State<DishCard>
                       child: Container(
                         height: 160,
                         width: double.infinity,
-                        color: colorScheme.surfaceVariant,
+                        color: colorScheme.surfaceContainerHighest,
                         child: widget.dish['image'] != null
                             ? Image.network(
                                 widget.dish['image'],
