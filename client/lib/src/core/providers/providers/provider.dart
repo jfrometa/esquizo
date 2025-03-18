@@ -1,6 +1,6 @@
-export 'table_providers.dart';
-export 'category_provider.dart';
-export '../catalog/dish/dish_providers.dart';
+// export 'table_providers.dart';
+// export 'category_provider.dart';
+// export '../catalog/dish/dish_providers.dart';
 
 // // ------ PROVIDERS ------
 // import 'package:flutter/material.dart';

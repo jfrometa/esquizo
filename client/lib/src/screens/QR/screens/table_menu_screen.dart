@@ -74,7 +74,7 @@ class TableMenuScreen extends ConsumerWidget {
             height: 120,
             child: Consumer(
               builder: (context, ref, child) {
-                final categoriesAsync = ref.watch(categoriesProvider);
+                final categoriesAsync = ref.watch(catalogCategoriesProvider('menu'));
                 
                 return categoriesAsync.when(
                   data: (categories) {
@@ -92,7 +92,7 @@ class TableMenuScreen extends ConsumerWidget {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => CategoryDishesScreen(
-                                    categoryId: category.id,
+                                    categoryId: category.sortOrder,
                                     categoryName: category.name,
                                     tableData: tableData,
                                   ),
@@ -110,7 +110,7 @@ class TableMenuScreen extends ConsumerWidget {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Icon(
-                                    _getCategoryIcon(category.id),
+                                    _getCategoryIcon(category.sortOrder),
                                     size: 32,
                                     color: theme.colorScheme.primary,
                                   ),
