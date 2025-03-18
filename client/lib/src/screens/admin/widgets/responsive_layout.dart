@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 class ResponsiveLayout extends StatelessWidget {
@@ -45,48 +43,30 @@ class ResponsiveGridView extends StatelessWidget {
   final List<Widget> children;
   final double spacing;
   final double runSpacing;
-  final EdgeInsetsGeometry padding;
 
   const ResponsiveGridView({
-    Key? key,
+    super.key,
     required this.children,
     this.spacing = 16.0,
     this.runSpacing = 16.0,
-    this.padding = const EdgeInsets.all(16.0),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Calculate columns based on available width
-        final width = constraints.maxWidth;
-        
-        // Use different card widths based on screen size
-        // Smaller cards on mobile, larger on desktop
-        final cardWidth = width < 600 ? 150.0 : 250.0;
-        
-        // Calculate columns (minimum 1)
-        final crossAxisCount = max(1, (width / (cardWidth + spacing)).floor());
-        
-        return SingleChildScrollView(
-          padding: padding,
-          child: Wrap(
-            spacing: spacing,
-            runSpacing: runSpacing,
-            alignment: WrapAlignment.start,
-            children: children.map((child) => 
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: (width / crossAxisCount) - spacing,
-                  minWidth: 150.0, // Minimum width for any card
-                ),
-                child: child,
-              )
-            ).toList(),
-          ),
-        );
-      },
+    final width = MediaQuery.of(context).size.width;
+    // Calculate how many items can fit per row based on screen width
+    // For simplicity, we'll use fixed card widths
+    final cardWidth = 300.0;
+    final horizontalPadding = 32.0; // 16.0 padding on each side
+    final availableWidth = width - horizontalPadding;
+    final crossAxisCount = (availableWidth / (cardWidth + spacing)).floor();
+    
+    return SingleChildScrollView(
+      child: Wrap(
+        spacing: spacing,
+        runSpacing: runSpacing,
+        children: children,
+      ),
     );
   }
 }

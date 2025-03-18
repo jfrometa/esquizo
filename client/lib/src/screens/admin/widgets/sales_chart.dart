@@ -8,10 +8,10 @@ class SalesChart extends StatefulWidget {
   final DateFormat dateFormat;
 
   const SalesChart({
-    super.key,
+    Key? key,
     required this.salesData,
     required this.dateFormat,
-  });
+  }) : super(key: key);
 
   @override
   State<SalesChart> createState() => _SalesChartState();
@@ -157,7 +157,7 @@ class _SalesChartState extends State<SalesChart> {
             },
           ),
           touchCallback: (event, touchResponse) {
-            if (touchResponse != null) {
+            if (event is FlTouchEvent && touchResponse != null) {
               if (event is FlPanEndEvent || event is FlTapUpEvent) {
                 setState(() {
                   _touchedIndex = -1;

@@ -185,45 +185,27 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
     
     return Container(
       decoration: BoxDecoration(
-        // Replace asset image with a pattern of icons
-        color: theme.colorScheme.surface,
-        // Use a repeating pattern of icons instead of an image
-        backgroundBlendMode: BlendMode.lighten,
+        image: DecorationImage(
+          image: const AssetImage('assets/images/floor_texture.png'),
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(
+            Colors.white.withOpacity(0.1),
+            BlendMode.dstATop,
+          ),
+        ),
       ),
-      child: Stack(
-        children: [
-          // Add a repeating pattern of table icons as background
-          Positioned.fill(
-            child: Opacity(
-              opacity: 0.03, // Very subtle background
-              child: GridView.builder(
-                physics: const NeverScrollableScrollPhysics(), // Prevent scrolling of background
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 8,
-                ),
-                itemBuilder: (context, index) => const Icon(
-                  Icons.table_restaurant,
-                  size: 24,
-                  color: Colors.grey,
-                ),
-              ),
-            ),
-          ),
-          // Main content
-          GridView.builder(
-            padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              childAspectRatio: 0.85,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-            ),
-            itemCount: sortedTables.length,
-            itemBuilder: (context, index) {
-              return _buildTableCard(sortedTables[index]);
-            },
-          ),
-        ],
+      child: GridView.builder(
+        padding: const EdgeInsets.all(16),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
+          childAspectRatio: 0.85,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+        ),
+        itemCount: sortedTables.length,
+        itemBuilder: (context, index) {
+          return _buildTableCard(sortedTables[index]);
+        },
       ),
     );
   }
