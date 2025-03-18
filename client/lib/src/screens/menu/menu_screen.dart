@@ -3,14 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/menu/widget/menu_header.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/widget/menu_search_interface.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/widget/menu_tab_bar.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
 // Import all the necessary files from your project
 import '../QR/models/qr_code_data.dart'; 
-import '../../core/providers/providers/cart_provider.dart';
 import '../../core/providers/menu/menu_providers.dart'; 
 // Views
 import 'views/category_view.dart';
@@ -541,12 +539,18 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                                     ),
                                   ],
                                 ),
-                                padding: const EdgeInsets.all(8.0),
-                                child: Icon(
-                                  Icons.restaurant,
-                                  color: colorScheme.primary,
-                                  size: 24,
-                                ),
+                                padding: const EdgeInsets.all(2.0),
+                                child:  ClipOval(
+                            child: Image.asset(
+                            'assets/appIcon.png',  // config.logoUrl,
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Icon(Icons.restaurant, size: 50);
+                              },
+                            ),
+                          ),
                               ),
                             ),
                           ),
@@ -604,22 +608,22 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
         ),
       ),
       // Scroll to top button - optimize with RepaintBoundary
-      floatingActionButton: RepaintBoundary(
-        child: AnimatedSlide(
-          duration: const Duration(milliseconds: 200),
-          offset: _scrollOffset > 100 ? Offset.zero : const Offset(0, 2),
-          child: AnimatedOpacity(
-            duration: const Duration(milliseconds: 200),
-            opacity: _scrollOffset > 100 ? 1.0 : 0.0,
-            child: FloatingActionButton.small(
-              onPressed: _scrollToTop,
-              elevation: 4,
-              tooltip: 'Scroll to top',
-              child: const Icon(Icons.keyboard_arrow_up),
-            ),
-          ),
-        ),
-      ),
+      // floatingActionButton: RepaintBoundary(
+      //   child: AnimatedSlide(
+      //     duration: const Duration(milliseconds: 200),
+      //     offset: _scrollOffset > 100 ? Offset.zero : const Offset(0, 2),
+      //     child: AnimatedOpacity(
+      //       duration: const Duration(milliseconds: 200),
+      //       opacity: _scrollOffset > 100 ? 1.0 : 0.0,
+      //       child: FloatingActionButton.small(
+      //         onPressed: _scrollToTop,
+      //         elevation: 4,
+      //         tooltip: 'Scroll to top',
+      //         child: const Icon(Icons.keyboard_arrow_up),
+      //       ),
+      //     ),
+      //   ),
+      // ),
     );
   }
 }

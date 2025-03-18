@@ -398,8 +398,8 @@ Widget _getDestinationScreen(String path) {
   switch (path) {
     case '/':
       return const ResponsiveLandingPage();
-          case '/local':
-    return const QRCodeScreen();
+    case '/local':
+      return const QRCodeScreen();
     case '/menu':
       return const MenuScreen();
     case '/carrito':

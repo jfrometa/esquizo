@@ -100,6 +100,18 @@ class EnhancedHeroSection extends ConsumerWidget {
                       data: (config) {
                         if (config?.logoUrl != null && config!.logoUrl.isNotEmpty) {
                           return ClipOval(
+                            child: Image.network(
+                              config.logoUrl,
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Icon(Icons.restaurant, size: 50);
+                              },
+                            ),
+                          );
+                        } else {
+                          return ClipOval(
                             child: Image.asset(
                             'assets/appIcon.png',  // config.logoUrl,
                               width: 80,
@@ -110,8 +122,6 @@ class EnhancedHeroSection extends ConsumerWidget {
                               },
                             ),
                           );
-                        } else {
-                          return const Icon(Icons.restaurant, size: 50);
                         }
                       },
                       loading: () => const CircularProgressIndicator(),

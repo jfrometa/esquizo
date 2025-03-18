@@ -28,8 +28,7 @@ class CategoryView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final categoriesAsync = ref.watch(categoriesProvider);
-    // Replace dishProvider with catalogItemsProvider
+    final categoriesAsync = ref.watch(catalogCategoriesProvider('menu')); 
     final dishesAsync = ref.watch(catalogItemsProvider('menu'));
     
     return ScrollConfiguration(
@@ -37,8 +36,8 @@ class CategoryView extends ConsumerWidget {
       child: RefreshIndicator(
         onRefresh: () async {
           // Refresh data
-          ref.refresh(categoriesProvider);
-          ref.refresh(catalogItemsProvider('menu')); // Update refresh
+          ref.invalidate(catalogCategoriesProvider);
+          ref.invalidate(catalogItemsProvider('menu')); // Update refresh
           HapticFeedback.mediumImpact();
         },
         child: ListView(
@@ -141,7 +140,7 @@ class CategoryView extends ConsumerWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) => CategoryDishesScreen(
-                                categoryId: category.id,
+                                categoryId: category.sortOrder,
                                 categoryName: category.name,
                                 tableData: tableData,
                               ),
@@ -161,7 +160,7 @@ class CategoryView extends ConsumerWidget {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Icon(
-                                  _getCategoryIcon(category.id),
+                                  _getCategoryIcon(category.sortOrder),
                                   size: 40,
                                   color: theme.colorScheme.primary,
                                 ),
@@ -195,7 +194,7 @@ class CategoryView extends ConsumerWidget {
                       Text('Failed to load categories: $error'),
                       const SizedBox(height: 8),
                       ElevatedButton(
-                        onPressed: () => ref.refresh(categoriesProvider),
+                        onPressed: () => ref.invalidate(catalogCategoriesProvider),
                         child: const Text('Retry'),
                       ),
                     ],
