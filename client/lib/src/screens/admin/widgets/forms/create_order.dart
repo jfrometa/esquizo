@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/core/providers/user/auth_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/restaurant/restaurant_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/providers/order/order_provider.dart';
 import '../../../../core/providers/catalog/catalog_provider.dart'; 
@@ -32,7 +35,7 @@ class CreateOrderForm extends ConsumerStatefulWidget {
 
 class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
   // Order creation state
-  final CartService _cartService = CartService();
+  late CartService _cartService;
   String? _selectedTableId;
   bool _isDelivery = false;
   String? _specialInstructions;
@@ -70,7 +73,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
   }
   
   void _initializeCart() {
-    final businessId = ref.read(currentBusinessIdProvider);
+    _cartService = ref.read(cartServiceProvider);
     
     // Initialize cart with business ID and selected table
     _cartService.clearCart();
@@ -909,7 +912,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                item.name,
+                item.title,
                 style: theme.textTheme.titleSmall,
               ),
               
@@ -961,7 +964,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              '\$${item.totalPrice.toStringAsFixed(2)}',
+              '\$${item.numericPrice.toStringAsFixed(2)}',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             IconButton(
@@ -1060,9 +1063,15 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
     }
     
     final cartItem = CartItem(
+      img: item.imageUrl,
+      description: item.description,
+      ingredients: [], // Default empty ingredients list
+      isSpicy: false, // Default not spicy
+      foodType: 'regular', // Default food type
+      isOffer: false, // Default not an offer
       id: item.id,
-      name: item.name,
-      price: item.price,
+      title: item.name,
+      pricing: item.price.toString(),
       quantity: quantity,
       options: options ?? {},
       notes: notes,
@@ -1159,8 +1168,8 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
         userPhone: _contactPhone,
         items: cart.items.map((item) => OrderItem(
           id: item.id,
-          name: item.name,
-          price: item.price,
+          name: item.title,
+          price: item.numericPrice.toDouble(),
           quantity: item.quantity, 
           notes: item.notes,
           productId: item.id, 

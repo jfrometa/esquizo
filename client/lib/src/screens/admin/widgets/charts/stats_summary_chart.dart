@@ -9,14 +9,14 @@ class StatsSummaryCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const StatsSummaryCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.value,
     required this.icon,
     required this.color,
     this.trend = 0,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -123,57 +123,64 @@ class LoadingStatsSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    // Replace the Column with a SizedBox with fixed height or use IntrinsicHeight
+    // The issue is at line 37 where a Column is used
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Card header with icon and title
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundColor: color.withOpacity(0.2),
-                  child: Icon(
-                    icon,
-                    color: color,
-                    size: 16,
+        child: SizedBox(
+          height: 120, // Set a fixed height
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min, // Change to min to prevent expansion
+            children: [
+              // Card header with icon and title
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 16,
+                    backgroundColor: color.withOpacity(0.2),
+                    child: Icon(
+                      icon,
+                      color: color,
+                      size: 16,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: theme.textTheme.titleMedium,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: theme.textTheme.titleMedium,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
+                ],
+              ),
+              
+              const Spacer(),
+              
+              // Shimmer effect for loading
+              Container(
+                height: 30,
+                width: 120,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceVariant,
+                  borderRadius: BorderRadius.circular(4),
                 ),
-              ],
-            ),
-            
-            const Spacer(),
-            
-            // Shimmer effect for loading
-            Container(
-              height: 30,
-              width: 120,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceVariant,
-                borderRadius: BorderRadius.circular(4),
               ),
-            ),
-            
-            const SizedBox(height: 8),
-            
-            Container(
-              height: 16,
-              width: 150,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(4),
+              
+              const SizedBox(height: 8),
+              
+              Container(
+                height: 16,
+                width: 150,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(4),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

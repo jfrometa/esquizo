@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter/material.dart';
-
 /// Panel that displays notifications in the admin interface
 class NotificationsPanel extends StatelessWidget {
   final ScrollController scrollController;
   
   const NotificationsPanel({
-    Key? key,
+    super.key,
     required this.scrollController,
-  }) : super(key: key);
+  });
   
   @override
   Widget build(BuildContext context) {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/cathering_order_item.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/providers/manual_quote_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
 
 class ManualQuoteCartItemView extends ConsumerWidget {

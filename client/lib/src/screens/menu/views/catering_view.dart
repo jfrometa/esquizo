@@ -5,8 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/widgets/catering_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering_entry/components/catering_quote/quote_order_form_view.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/providers/catering_order_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/providers/manual_quote_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
 class CateringView extends ConsumerStatefulWidget {

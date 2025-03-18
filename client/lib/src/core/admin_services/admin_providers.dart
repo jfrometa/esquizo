@@ -57,9 +57,9 @@ class AdminService {
 // });
 
 // Auth state changes provider
-final authStateChangesProvider = StreamProvider<User?>((ref) {
-  return FirebaseAuth.instance.authStateChanges();
-});
+// final authStateChangesProvider = StreamProvider<User?>((ref) {
+//   return FirebaseAuth.instance.authStateChanges();
+// });
 
 // Optional: Provider to cache the admin status
 final cachedAdminStatusProvider = StateProvider<bool>((ref) => false);

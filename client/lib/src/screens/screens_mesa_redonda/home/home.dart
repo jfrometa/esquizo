@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/helpers/scroll_bahaviour.dart';import 'package:starter_architecture_flutter_firebase/src/screens/ordering_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/helpers/scroll_bahaviour.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/home/provider/recent_search_notifier.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/widgets_mesa_redonda/home_search_section.dart';
@@ -90,23 +91,9 @@ class HomeState extends ConsumerState<MenuHome> {
 
   @override
   Widget build(BuildContext context) {
-    // Read the dish list from your provider.
-    final dishes = ref.watch(dishProvider);
+    // Replace dishProvider with catalogItemsProvider
+    final dishesAsync = ref.watch(catalogItemsProvider('menu'));
     final recentSearches = ref.watch(recentSearchesProvider);
-
-    // Filter dishes based on search query.
-    final filteredDishes = _searchQuery.isEmpty
-        ? dishes
-        : dishes.where((dish) {
-            final dishTitle = dish['title']?.toLowerCase() ?? '';
-            final dishDescription = dish['description']?.toLowerCase() ?? '';
-            final dishCategory = dish['category']?.toLowerCase() ?? '';
-
-            final query = _searchQuery.toLowerCase();
-            return dishTitle.contains(query) ||
-                dishDescription.contains(query) ||
-                dishCategory.contains(query);
-          }).toList();
 
     return GestureDetector(
       onTap: () {
@@ -140,19 +127,78 @@ class HomeState extends ConsumerState<MenuHome> {
             ),
             const SizedBox(height: 16.0),
             Expanded(
-              child: _isSearching
-                  ? HomeSearchResults(
-                      filteredDishes: filteredDishes,
-                      searchQuery: _searchQuery,
-                      onClearSearch: () {
-                        _searchController.clear();
-                        setState(() {
-                          _searchQuery = '';
-                          _isSearching = false;
-                        });
-                      },
-                    )
-                  : const _MainHomeView(),
+              child: dishesAsync.when(
+                data: (dishes) {
+                  // Filter dishes based on search query
+                  final filteredDishes = _searchQuery.isEmpty
+                      ? dishes
+                      : dishes.where((dish) {
+                          final dishTitle = dish.name.toLowerCase();
+                          final dishDescription = dish.description.toLowerCase();
+                          final dishCategory = dish.metadata['foodType']?.toString().toLowerCase() ?? '';
+
+                          final query = _searchQuery.toLowerCase();
+                          return dishTitle.contains(query) ||
+                              dishDescription.contains(query) ||
+                              dishCategory.contains(query);
+                        }).toList();
+
+                  // Convert CatalogItems to Maps for HomeSearchResults
+                  final filteredDishMaps = filteredDishes.map((dish) => {
+                        'id': dish.id,
+                        'title': dish.name,
+                        'description': dish.description,
+                        'pricing': dish.price,
+                        'img': dish.imageUrl ?? 'assets/images/placeholder_food.png',
+                        'foodType': dish.metadata['foodType'] ?? 'Main Course',
+                        'isSpicy': dish.metadata['isSpicy'] ?? false,
+                        'category': dish.metadata['foodType'] ?? '',
+                      }).toList();
+
+                  return _isSearching
+                      ? HomeSearchResults(
+                          filteredDishes: filteredDishMaps,
+                          searchQuery: _searchQuery,
+                          onClearSearch: () {
+                            _searchController.clear();
+                            setState(() {
+                              _searchQuery = '';
+                              _isSearching = false;
+                            });
+                          },
+                        )
+                      : const _MainHomeView();
+                },
+                loading: () => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+                error: (error, stackTrace) => Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: Colors.red[400],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Error loading dishes: $error',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: () => ref.refresh(catalogItemsProvider('menu')),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        ),
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -171,8 +217,8 @@ class _MainHomeView extends ConsumerWidget {
       behavior: CustomScrollBehavior(),
       child: RefreshIndicator(
         onRefresh: () async {
-          // Refresh data logic
-          ref.refresh(dishProvider);
+          // Update refresh to use catalogItemsProvider
+          ref.refresh(catalogItemsProvider('menu'));
           HapticFeedback.mediumImpact();
         },
         child: SingleChildScrollView(

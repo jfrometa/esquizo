@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/landing/widget/plan-card.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/plans/plans.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/landing/widget/plan-card.dart'; 
 
-/// Meal plans section
 class MealPlansSection extends ConsumerWidget {
   final bool isMobile;
   final bool isTablet;
@@ -20,7 +20,11 @@ class MealPlansSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final mealPlans = ref.watch(mealPlansProvider);
+    
+    // Use the catalogItemsProvider to get meal plans
+    final mealPlansAsync = ref.watch(
+      catalogItemsProvider('meal_plans')
+    );
     
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(
@@ -53,8 +57,25 @@ class MealPlansSection extends ConsumerWidget {
           ),
           const SizedBox(height: 32),
           
-          if (mealPlans.isEmpty)
-            Center(
+          mealPlansAsync.when(
+            data: (mealPlans) {
+              if (mealPlans.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'No hay planes disponibles',
+                        style: theme.textTheme.titleMedium,
+                      ),
+                    ],
+                  ),
+                );
+              }
+              
+              return _buildMealPlansGrid(context, mealPlans);
+            },
+            loading: () => Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -66,15 +87,31 @@ class MealPlansSection extends ConsumerWidget {
                   ),
                 ],
               ),
-            )
-          else
-            // Meal plans grid
-            if (isMobile) 
-              _buildMobileMealPlansGrid(context, mealPlans)
-            else if (isTablet) 
-              _buildTabletMealPlansGrid(context, mealPlans)
-            else 
-              _buildDesktopMealPlansGrid(context, mealPlans),
+            ),
+            error: (error, _) => Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 48,
+                    color: colorScheme.error,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error: ${error.toString()}',
+                    style: theme.textTheme.titleMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => ref.refresh(catalogItemsProvider('meal_plans')),
+                    child: const Text('Reintentar'),
+                  ),
+                ],
+              ),
+            ),
+          ),
               
           const SizedBox(height: 32),
           
@@ -137,6 +174,16 @@ class MealPlansSection extends ConsumerWidget {
       ),
     );
   }
+
+  Widget _buildMealPlansGrid(BuildContext context, List<CatalogItem> mealPlans) {
+    if (isMobile) {
+      return _buildMobileMealPlansGrid(context, mealPlans);
+    } else if (isTablet) {
+      return _buildTabletMealPlansGrid(context, mealPlans);
+    } else {
+      return _buildDesktopMealPlansGrid(context, mealPlans);
+    }
+  }
   
   Widget _buildBenefitItem(
     BuildContext context, {
@@ -188,67 +235,67 @@ class MealPlansSection extends ConsumerWidget {
     );
   }
   
-  Widget _buildMobileMealPlansGrid(BuildContext context, List<MealPlan> mealPlans) {
+  Widget _buildMobileMealPlansGrid(BuildContext context, List<CatalogItem> mealPlans) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: mealPlans.length,
       itemBuilder: (context, index) {
-        final mealPlan = mealPlans[index];
+        final item = mealPlans[index];
         return Padding(
           padding: const EdgeInsets.only(bottom: 16),
           child: PlanCard(
-            planName: mealPlan.title,
-            description: mealPlan.description,
-            price: mealPlan.price,
-            planId: mealPlan.id,
+            planName: item.name,
+            description: item.description,
+            price: 'S/ ${item.price.toStringAsFixed(2)}',
+            planId: item.id,
           ),
         );
       },
     );
   }
   
-  Widget _buildTabletMealPlansGrid(BuildContext context, List<MealPlan> mealPlans) {
+  Widget _buildTabletMealPlansGrid(BuildContext context, List<CatalogItem> mealPlans) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        // childAspectRatio: 0.85,
-        // crossAxisSpacing: 16,
-        // mainAxisSpacing: 16,
+        childAspectRatio: 1.1,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
       ),
       itemCount: mealPlans.length,
       itemBuilder: (context, index) {
-        final mealPlan = mealPlans[index];
+        final item = mealPlans[index];
         return PlanCard(
-          planName: mealPlan.title,
-          description: mealPlan.description,
-          price: mealPlan.price,
-          planId: mealPlan.id,
+          planName: item.name,
+          description: item.description,
+          price: 'S/ ${item.price.toStringAsFixed(2)}',
+          planId: item.id,
         );
       },
     );
   }
   
-  Widget _buildDesktopMealPlansGrid(BuildContext context, List<MealPlan> mealPlans) {
+  Widget _buildDesktopMealPlansGrid(BuildContext context, List<CatalogItem> mealPlans) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        // childAspectRatio: 0.85,
-        // crossAxisSpacing: 20,
-        // mainAxisSpacing: 20,
+        childAspectRatio: 1.2,
+        crossAxisSpacing: 20,
+        mainAxisSpacing: 20,
       ),
       itemCount: mealPlans.length,
       itemBuilder: (context, index) {
-        final mealPlan = mealPlans[index];
+        final item = mealPlans[index];
         return PlanCard(
-          planName: mealPlan.title,
-          description: mealPlan.description,
-          price: mealPlan.price,
-          planId: mealPlan.id,
+          planName: item.name,
+          description: item.description,
+          price: 'S/ ${item.price.toStringAsFixed(2)}',
+          planId: item.id,
         );
       },
     );

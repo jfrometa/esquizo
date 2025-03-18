@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/checkout/providers/validation_provider.dart';
@@ -16,9 +20,10 @@ import 'package:starter_architecture_flutter_firebase/src/screens/checkout/widge
 import 'package:starter_architecture_flutter_firebase/src/screens/location/location_capture.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/prompt_dialogs/contact_info_dialog.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/providers/cart_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/providers/catering_order_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/providers/manual_quote_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/providers/cart_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/manual_quote_provider.dart';
+import 'package:uuid/uuid.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   final String displayType; // 'platos', 'catering', 'subscriptions', or 'quote'
@@ -154,7 +159,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final isTablet = screenSize.width > 600 && screenSize.width <= 1200;
     
     // Fetch items based on displayType
-    final List<CartItem> cartItems = ref.watch(cartProvider) ?? [];
+    final List<CartItem> cartItems = ref.watch(cartProvider).items ;
     final CateringOrderItem? cateringOrder = ref.watch(cateringOrderProvider);
     final CateringOrderItem? cateringQuote = ref.watch(manualQuoteProvider);
     final List<CartItem> mealItems = ref.watch(mealOrderProvider) ?? [];
@@ -493,7 +498,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   Widget _buildFinalSummaryStep(ColorScheme colorScheme) {
     // Fetch items based on displayType
-    final List<CartItem> cartItems = ref.watch(cartProvider) ?? [];
+    final List<CartItem> cartItems = ref.watch(cartProvider).items;
     final CateringOrderItem? cateringOrder = ref.watch(cateringOrderProvider);
     final CateringOrderItem? cateringQuote = ref.watch(manualQuoteProvider);
     final List<CartItem> mealItems = ref.watch(mealOrderProvider) ?? [];
@@ -921,7 +926,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   Widget _buildCheckoutContent() {
     // Fetch items based on displayType
-    final List<CartItem> cartItems = ref.watch(cartProvider) ?? [];
+    final List<CartItem> cartItems = ref.watch(cartProvider).items  ;
     final CateringOrderItem? cateringOrder = ref.watch(cateringOrderProvider);
     final CateringOrderItem? cateringQuote = ref.watch(manualQuoteProvider);
     final List<CartItem> mealItems = ref.watch(mealOrderProvider) ?? [];
@@ -1011,7 +1016,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     );
   }
 
-  Future<void> _processOrder(
+Future<void> _processOrder(
     BuildContext context, 
     List<CartItem> items,
     CateringOrderItem? cateringOrder, 
@@ -1030,6 +1035,153 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       final processor = OrderProcessor(ref, context);
       final paymentMethod = _paymentMethods[_selectedPaymentMethod];
 
+      // Save order to database
+      try {
+        final orderService = ref.read(orderServiceProvider);
+   Order order;
+        // Create OrderItems from CartItems
+        List<OrderItem> orderItems = items.map((item) => OrderItem(
+          id: item.id,
+          productId: item.id,
+          name: item.title,
+          price: double.tryParse(item.pricing) ?? 0.0,
+          quantity: item.quantity,
+          notes: item.notes,
+          imageUrl: item.img,
+        )).toList();
+        
+        // Generate a unique order ID
+        final orderId = const Uuid().v4();
+        
+        // Prepare order data based on order type
+        if (widget.displayType == 'platos') {
+          order = Order(
+            orderNumber: OrderNumberGenerator.generateOrderNumber(),
+            id: orderId,
+            userId: ref.read(authStateChangesProvider).value?.uid ?? '',
+            orderType: 'regular',
+            items: orderItems,
+            paymentMethod: paymentMethod,
+            address: regularAddress ?? '',
+            latitude: _regularDishesLatitude ?? '',
+            longitude: _regularDishesLongitude ?? '',
+            location: {
+              'address': regularAddress ?? '',
+              'latitude': _regularDishesLatitude ?? '',
+              'longitude': _regularDishesLongitude ?? '',
+            },
+            deliveryDate: _mealSubscriptionDateController.text,
+            deliveryTime: _mealSubscriptionTimeController.text,
+            createdAt: DateTime.now(),
+            customerName: contactInfo['name'],
+            userPhone: contactInfo['phone'],
+            userEmail: contactInfo['email'],
+            isDelivery: true,
+            totalAmount: _calculateTotalPrice(items),
+          );
+        } else if (widget.displayType == 'subscriptions') {
+          order = Order(
+            orderNumber: OrderNumberGenerator.generateOrderNumber(),
+            id: orderId,
+            userId: ref.read(authStateChangesProvider).value?.uid ?? '',
+            orderType: 'subscription',
+            items: orderItems,
+            paymentMethod: paymentMethod,
+            address: mealSubscriptionAddress ?? '',
+            latitude: _mealSubscriptionLatitude ?? '',
+            longitude: _mealSubscriptionLongitude ?? '',
+            location: {
+              'address': mealSubscriptionAddress ?? '',
+              'latitude': _mealSubscriptionLatitude ?? '',
+              'longitude': _mealSubscriptionLongitude ?? '',
+            },
+            deliveryDate: _mealSubscriptionDateController.text,
+            deliveryTime: _mealSubscriptionTimeController.text,
+            createdAt: DateTime.now(),
+            customerName: contactInfo['name'],
+            userPhone: contactInfo['phone'],
+            userEmail: contactInfo['email'],
+            isDelivery: true,
+            totalAmount: _calculateTotalPrice(items),
+          );
+        } else if (widget.displayType == 'catering' && cateringOrder != null) {
+          order = Order(
+            orderNumber: OrderNumberGenerator.generateOrderNumber(),
+            id: orderId,
+            userId: ref.read(authStateChangesProvider).value?.uid ?? '',
+            orderType: 'catering',
+            items: orderItems,
+            paymentMethod: paymentMethod,
+            address: cateringAddress ?? '',
+            latitude: _cateringLatitude ?? '',
+            longitude: _cateringLongitude ?? '',
+            location: {
+              'address': cateringAddress ?? '',
+              'latitude': _cateringLatitude ?? '',
+              'longitude': _cateringLongitude ?? '',
+            },
+            deliveryDate: _cateringDateController.text,
+            deliveryTime: _cateringTimeController.text,
+            createdAt: DateTime.now(),
+            customerName: contactInfo['name'],
+            userPhone: contactInfo['phone'],
+            userEmail: contactInfo['email'],
+            isDelivery: true,
+            peopleCount: cateringOrder.peopleCount,
+            totalAmount: cateringOrder.totalPrice,
+            specialInstructions: cateringOrder.adicionales,
+          );
+        } else if (widget.displayType == 'quote' && cateringQuote != null) {
+          order = Order(
+            orderNumber: OrderNumberGenerator.generateOrderNumber(),
+            id: orderId,
+            userId: ref.read(authStateChangesProvider).value?.uid ?? '',
+            orderType: 'quote',
+            items: orderItems,
+            paymentMethod: paymentMethod,
+            address: cateringAddress ?? '',
+            latitude: _cateringLatitude ?? '',
+            longitude: _cateringLongitude ?? '',
+            location: {
+              'address': cateringAddress ?? '',
+              'latitude': _cateringLatitude ?? '',
+              'longitude': _cateringLongitude ?? '',
+            },
+            deliveryDate: _cateringDateController.text,
+            deliveryTime: _cateringTimeController.text,
+            createdAt: DateTime.now(),
+            customerName: contactInfo['name'],
+            userPhone: contactInfo['phone'],
+            userEmail: contactInfo['email'],
+            isDelivery: true,
+            peopleCount: cateringQuote.peopleCount,
+            totalAmount: cateringQuote.totalPrice,
+            specialInstructions: cateringQuote.adicionales,
+          );
+        } else {
+          throw Exception('Invalid order type or missing data');
+        }
+
+         // Save order to database
+        final newOrder = await orderService.createOrder(order);  
+          scaffoldMessenger.showSnackBar(SnackBar(
+          content: Text('Order: $newOrder'),
+          backgroundColor: colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 4),
+        ));
+        
+      } catch (error) {
+        if (!mounted) return;
+        scaffoldMessenger.showSnackBar(SnackBar(
+          content: Text('Error saving order to database: $error'),
+          backgroundColor: colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 4),
+        ));
+        return;
+      }
+
       try {
         if (widget.displayType == 'platos') {
           await processor.processRegularOrder(
@@ -1046,54 +1198,6 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               'time': _mealSubscriptionTimeController.text,
             },
             _generateOrderDetails(items, contactInfo),
-          );
-        } else if (widget.displayType == 'subscriptions') {
-          await processor.processSubscriptionOrder(
-            items,
-            contactInfo,
-            paymentMethod,
-            {
-              'address': mealSubscriptionAddress ?? '',
-              'latitude': _mealSubscriptionLatitude ?? '',
-              'longitude': _mealSubscriptionLongitude ?? '',
-            },
-            {
-              'date': _mealSubscriptionDateController.text,
-              'time': _mealSubscriptionTimeController.text,
-            },
-            _generateSubscriptionOrderDetails(items, contactInfo),
-          );
-        } else if (widget.displayType == 'catering' && cateringOrder != null) {
-          await processor.processCateringOrder(
-            cateringOrder,
-            contactInfo,
-            paymentMethod,
-            {
-              'address': cateringAddress ?? '',
-              'latitude': _cateringLatitude ?? '',
-              'longitude': _cateringLongitude ?? '',
-            },
-            {
-              'date': _cateringDateController.text,
-              'time': _cateringTimeController.text,
-            },
-            _generateCateringOrderDetails(cateringOrder, contactInfo),
-          );
-        } else if (widget.displayType == 'quote' && cateringQuote != null) {
-          await processor.processQuoteOrder(
-            cateringQuote,
-            contactInfo,
-            paymentMethod,
-            {
-              'address': cateringAddress ?? '',
-              'latitude': _cateringLatitude ?? '',
-              'longitude': _cateringLongitude ?? '',
-            },
-            {
-              'date': _cateringDateController.text,
-              'time': _cateringTimeController.text,
-            },
-            _generateCateringQuoteOrderDetails(cateringQuote, contactInfo),
           );
         }
 

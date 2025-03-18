@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/admin_panel/admin_stats_provider.dart';
 import 'dart:async';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
@@ -20,21 +21,21 @@ class AdminPanelScreen extends ConsumerStatefulWidget {
   const AdminPanelScreen({super.key});
 
   @override
-  ConsumerState<AdminPanelScreen> createState() => _AdminPanelScreenState();
+  ConsumerState<AdminPanelScreen> createState() => AdminPanelScreenState();
 }
 
-class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with SingleTickerProviderStateMixin {
+class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Timer? _refreshTimer;
   bool _isLoading = false; 
-  int _selectedIndex = 0; 
+  int selectedIndex = 0; 
 
   final List<Widget> _screens = [
     const AdminDashboardHome(),
     const ProductManagementScreen(),
-    const TableManagementScreen(), // Added TableManagementScreen
     const OrderManagementScreen(),
+    const TableManagementScreen(), // Added TableManagementScree
     const UserManagementScreen(),
     const BusinessSettingsScreen(),
     const AnalyticsDashboard(),
@@ -56,14 +57,14 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
     _tabController = TabController(
       length: _screens.length,
       vsync: this,
-      initialIndex: _selectedIndex,
+      initialIndex: selectedIndex,
     );
 
     // Add listener to sync tab controller with selected index
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
         setState(() {
-          _selectedIndex = _tabController.index;
+          selectedIndex = _tabController.index;
         });
       }
     });
@@ -117,11 +118,14 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
-    final isAdmin = ref.watch(hasRoleProvider('admin'));
+    
+    // final isAdmin = ref.watch(hasRoleProvider('admin'));
     
     // Check if user is authenticated and has admin privileges
     // if (authState != AuthState.authenticated || !isAdmin) {
-    if (authState != AuthState.authenticated || isAdmin) {
+final isAdmin = ref.watch(isAdminProvider).value;
+    
+    if (authState != AuthState.authenticated || isAdmin != null && !isAdmin) {
       return Scaffold(
         body: Center(
           child: Column(
@@ -149,7 +153,7 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text(_screenTitles[_selectedIndex]),
+        title: Text(_screenTitles[selectedIndex]),
         actions: [
           const ThemeSwitch(),
           IconButton(
@@ -164,13 +168,13 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _screens[_selectedIndex],
+          : _screens[selectedIndex],
       drawer: SidebarMenu(
-        selectedIndex: _selectedIndex,
+        selectedIndex: selectedIndex,
         onItemSelected: _onItemSelected,
       ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex > 4 ? 4 : _selectedIndex,
+        currentIndex: selectedIndex > 4 ? 4 : selectedIndex,
         onTap: _onItemSelected,
         type: BottomNavigationBarType.fixed,
         items: const [
@@ -188,7 +192,7 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text(_screenTitles[_selectedIndex]),
+        title: Text(_screenTitles[selectedIndex]),
         actions: [
           const ThemeSwitch(),
           IconButton(
@@ -206,14 +210,14 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
       body: Row(
         children: [
           SidebarMenu(
-            selectedIndex: _selectedIndex,
+            selectedIndex: selectedIndex,
             onItemSelected: _onItemSelected,
             isExpanded: false,
           ),
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : _screens[_selectedIndex],
+                : _screens[selectedIndex],
           ),
         ],
       ),
@@ -226,7 +230,7 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
       body: Row(
         children: [
           SidebarMenu(
-            selectedIndex: _selectedIndex,
+            selectedIndex: selectedIndex,
             onItemSelected: _onItemSelected,
             isExpanded: true,
           ),
@@ -237,7 +241,7 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
                 Expanded(
                   child: _isLoading
                       ? const Center(child: CircularProgressIndicator())
-                      : _screens[_selectedIndex],
+                      : _screens[selectedIndex],
                 ),
               ],
             ),
@@ -267,7 +271,7 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
       child: Row(
         children: [
           Text(
-            _screenTitles[_selectedIndex],
+            _screenTitles[selectedIndex],
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const Spacer(),
@@ -326,7 +330,7 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with Single
     }
     
     setState(() {
-      _selectedIndex = index;
+      selectedIndex = index;
       _refreshData(); // Refresh data when changing sections
     });
   }
@@ -342,7 +346,7 @@ void _showMoreOptions() {
             title: const Text('Users & Staff'),
             onTap: () {
               Navigator.pop(context);
-              setState(() => _selectedIndex = 4); // Updated index
+              setState(() => selectedIndex = 4); // Updated index
             },
           ),
           ListTile(
@@ -350,7 +354,7 @@ void _showMoreOptions() {
             title: const Text('Business Settings'),
             onTap: () {
               Navigator.pop(context);
-              setState(() => _selectedIndex = 5); // Updated index
+              setState(() => selectedIndex = 5); // Updated index
             },
           ),
           ListTile(
@@ -358,7 +362,7 @@ void _showMoreOptions() {
             title: const Text('Analytics'),
             onTap: () {
               Navigator.pop(context);
-              setState(() => _selectedIndex = 6); // Updated index
+              setState(() => selectedIndex = 6); // Updated index
             },
           ),
         ],

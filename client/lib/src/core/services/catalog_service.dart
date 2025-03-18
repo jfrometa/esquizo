@@ -1,8 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/firebase_providers.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_provider.dart';
-
+ 
 /// Generic catalog item model that can be extended for specific use cases
 class CatalogItem {
   final String id;

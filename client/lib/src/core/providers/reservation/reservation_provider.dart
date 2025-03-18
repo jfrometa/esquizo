@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/user/auth_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_panel_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/user/auth_provider.dart'; 
 import '../../services/reservation_service.dart';
 
 // Provider for reservation service

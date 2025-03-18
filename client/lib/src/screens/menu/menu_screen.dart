@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/widget/menu_header.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/widget/menu_search_interface.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/widget/menu_tab_bar.dart';
@@ -9,8 +10,8 @@ import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dar
 
 // Import all the necessary files from your project
 import '../QR/models/qr_code_data.dart'; 
-import '../providers/cart_provider.dart';
-import '../providers/menu/menu_providers.dart'; 
+import '../../core/providers/providers/cart_provider.dart';
+import '../../core/providers/menu/menu_providers.dart'; 
 // Views
 import 'views/category_view.dart';
 import 'views/catering_view.dart';
@@ -405,7 +406,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final activeTabIndex = ref.watch(menuActiveTabProvider);
-    final cartItemCount = ref.watch(cartProvider).length;
+    final cartItemCount = ref.watch(cartProvider).items.length;
     
     // Update TabController when activeTabIndex changes
     if (_tabController.index != activeTabIndex) {

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
-// Optimize ParallaxHeader with RepaintBoundary
-class EnhancedHeroSection extends StatelessWidget {
+
+class EnhancedHeroSection extends ConsumerWidget {
   final double scrollOffset;
   
   const EnhancedHeroSection({
@@ -12,11 +14,14 @@ class EnhancedHeroSection extends StatelessWidget {
   });
   
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final size = MediaQuery.sizeOf(context);
     final isMobile = size.width < 600;
+    
+    // Get business config for restaurant name and logo
+    final businessConfigAsync = ref.watch(businessConfigProvider);
     
     // Height calculation with parallax effect
     final heroHeight = isMobile ? size.height * 0.85 : size.height * 0.75;
@@ -31,40 +36,29 @@ class EnhancedHeroSection extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Background image with parallax effect - Wrapped in RepaintBoundary for better performance
-          
-             Positioned(
-              top: -parallaxOffset.clamp(0.0, 100.0),
-              left: 0,
-              right: 0,
-              height: heroHeight + 100, // Extra height for parallax
-              child: RepaintBoundary(
-                child: ShaderMask(
-                  shaderCallback: (Rect bounds) {
-                    return LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withOpacity(0.7),
-                        Colors.black.withOpacity(0.5),
-                      ],
-                    ).createShader(bounds);
-                  },
-                  blendMode: BlendMode.srcOver,
-                  // Use the OptimizedNetworkImage for better image loading
-                  child: SizedBox.shrink()
-                  
-                  //  OptimizedNetworkImage(
-                  //   imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4',
-                  //   width: double.infinity,
-                  //   height: double.infinity,
-                  //   fit: BoxFit.cover,
-                  //   backgroundColor: colorScheme.primary,
-                  // ),
-                ),
+          // Background image with parallax effect
+          Positioned(
+            top: -parallaxOffset.clamp(0.0, 100.0),
+            left: 0,
+            right: 0,
+            height: heroHeight + 100, // Extra height for parallax
+            child: RepaintBoundary(
+              child: ShaderMask(
+                shaderCallback: (Rect bounds) {
+                  return LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withOpacity(0.7),
+                      Colors.black.withOpacity(0.5),
+                    ],
+                  ).createShader(bounds);
+                },
+                blendMode: BlendMode.srcOver,
+                child: const SizedBox.shrink()
               ),
             ),
-          
+          ),
           
           // Gradient overlay
           Container(
@@ -102,38 +96,71 @@ class EnhancedHeroSection extends StatelessWidget {
                         ),
                       ],
                     ),
-                      child: ClipOval(
-                      child: Image.asset(
-                        'assets/appIcon.png',
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                          print('Error loading image: $error');
-                          return const Icon(Icons.image_not_supported, size: 80);
-                        },
-                      ),
+                    child: businessConfigAsync.when(
+                      data: (config) {
+                        if (config?.logoUrl != null && config!.logoUrl.isNotEmpty) {
+                          return ClipOval(
+                            child: Image.network(
+                              config.logoUrl,
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Icon(Icons.restaurant, size: 50);
+                              },
+                            ),
+                          );
+                        } else {
+                          return const Icon(Icons.restaurant, size: 50);
+                        }
+                      },
+                      loading: () => const CircularProgressIndicator(),
+                      error: (_, __) => const Icon(Icons.restaurant, size: 50),
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Text(
-                    'Kako',
-                    style: textTheme.displaySmall?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: isMobile ? 36 : 48,
+                  businessConfigAsync.when(
+                    data: (config) => Text(
+                      config?.name ?? 'Restaurant',
+                      style: textTheme.displaySmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: isMobile ? 36 : 48,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
+                    loading: () => const CircularProgressIndicator(),
+                    error: (_, __) => Text(
+                      'Restaurant',
+                      style: textTheme.displaySmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: isMobile ? 36 : 48,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    'Experiencia Gastronómica Excepcional',
-                    style: textTheme.headlineSmall?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w300,
-                      fontSize: isMobile ? 18 : 24,
+                  businessConfigAsync.when(
+                    data: (config) => Text(
+                      config?.description ?? 'Experiencia Gastronómica Excepcional',
+                      style: textTheme.headlineSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w300,
+                        fontSize: isMobile ? 18 : 24,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
+                    loading: () => const SizedBox(),
+                    error: (_, __) => Text(
+                      'Experiencia Gastronómica Excepcional',
+                      style: textTheme.headlineSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w300,
+                        fontSize: isMobile ? 18 : 24,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   Text(
@@ -149,7 +176,7 @@ class EnhancedHeroSection extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ElevatedButton.icon(
-                        onPressed: () => context.goNamed(AppRoute.home.name),
+                        onPressed: () => GoRouter.of(context).goNamed(AppRoute.home.name),
                         icon: const Icon(Icons.restaurant_menu),
                         label: const Text('Ver Menú'),
                         style: ElevatedButton.styleFrom(
@@ -169,7 +196,7 @@ class EnhancedHeroSection extends StatelessWidget {
             ),
           ),
           
-          // Scroll indicator at bottom - Only build if needed (performance optimization)
+          // Scroll indicator at bottom
           if (scrollOffset < 10)
             Positioned(
               bottom: 20,
@@ -203,3 +230,4 @@ class EnhancedHeroSection extends StatelessWidget {
     );
   }
 }
+

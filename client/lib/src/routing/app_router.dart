@@ -258,7 +258,7 @@ List<RouteBase> _getNestedRoutes(String path) {
           path: 'populares',
           name: AppRoute.allDishes.name,
           pageBuilder: (context, state) => const MaterialPage(
-            child: AllDishesScreen(),
+            child: AllDishesMenuHomeScreen(),
           ),
         ),
         GoRoute(

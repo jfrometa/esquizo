@@ -5,7 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http; 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/delivery_location_provider.dart';
+import '../../core/providers/providers/delivery_location_provider.dart';
 
 class LocationCaptureBottomSheet extends ConsumerStatefulWidget {
   final Function(String latitude, String longitude, String address)

@@ -13,7 +13,7 @@ class DashboardStatsCard extends StatelessWidget {
   final bool hasError;
 
   const DashboardStatsCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.icon,
     required this.color,
@@ -22,7 +22,7 @@ class DashboardStatsCard extends StatelessWidget {
     this.onTap,
     this.isLoading = false,
     this.hasError = false,
-  }) : super(key: key);
+  });
   
   // Constructor for loading state
   const DashboardStatsCard.loading({

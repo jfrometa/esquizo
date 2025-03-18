@@ -1,9 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/providers/dish_providers.dart'; 
+import 'package:flutter_riverpod/flutter_riverpod.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/cards/dish_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/dish_details/dish_details_screen.dart';
 import '../../QR/models/qr_code_data.dart';
+
+// Create a provider that filters catalog items by category
+final filteredCatalogItemsProvider = Provider.family<AsyncValue<List<CatalogItem>>, int>(
+  (ref, categoryId) {
+    final catalogItemsAsyncValue = ref.watch(catalogItemsProvider('menu'));
+    
+    return catalogItemsAsyncValue.when(
+      data: (items) {
+        final filtered = items.where((item) {
+          // Check if the item belongs to the specified category
+          return item.metadata['categoryId'] == categoryId;
+        }).toList();
+        return AsyncValue.data(filtered);
+      },
+      loading: () => const AsyncValue.loading(),
+      error: (error, stackTrace) => AsyncValue.error(error, stackTrace),
+    );
+  },
+);
 
 // Category Dishes Screen
 class CategoryDishesScreen extends ConsumerWidget {
@@ -21,7 +41,8 @@ class CategoryDishesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final filteredDishesAsync = ref.watch(filteredDishesProvider(categoryId));
+    // Use the new filteredCatalogItemsProvider instead of filteredDishesProvider
+    final filteredDishesAsync = ref.watch(filteredCatalogItemsProvider(categoryId));
     
     return Scaffold(
       appBar: AppBar(
@@ -56,17 +77,34 @@ class CategoryDishesScreen extends ConsumerWidget {
             itemCount: dishes.length,
             itemBuilder: (context, index) {
               final dish = dishes[index];
+              // Convert CatalogItem to Map for DishCard
+              final dishMap = {
+                'id': dish.id,
+                'title': dish.name,
+                'description': dish.description,
+                'pricing': dish.price,
+                'img': dish.imageUrl ?? 'assets/images/placeholder_food.png',
+                'foodType': dish.metadata['foodType'] ?? 'Main Course',
+                'isSpicy': dish.metadata['isSpicy'] ?? false,
+                'ingredients': dish.metadata['ingredients'] ?? ['Ingredient 1', 'Ingredient 2'],
+                'nutritionalInfo': dish.metadata['nutritionalInfo'],
+              };
+              
               return Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: DishCard(
-                  dish: dish.toJson(),
+                  dish: dishMap,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DishDetailsScreen(index: 1 ),
-                      ),
-                    );
+                    // Find the index of this dish in the full catalog
+                    ref.read(catalogItemsProvider('menu')).whenData((allDishes) {
+                      final fullIndex = allDishes.indexWhere((item) => item.id == dish.id);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DishDetailsScreen(index: fullIndex != -1 ? fullIndex : index),
+                        ),
+                      );
+                    });
                   },
                 ),
               );

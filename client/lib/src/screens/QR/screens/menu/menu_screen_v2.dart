@@ -15,7 +15,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/menu/views/spe
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/widget/menu_header.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/widget/menu_search_interface.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/widget/menu_tab_bar.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/providers/menu/menu_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/menu/menu_providers.dart';
 
  
 

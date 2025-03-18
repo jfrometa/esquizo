@@ -7,11 +7,11 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/charts/stats_summary_chart.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/responsive_layout.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/sales_chart.dart';
-import '../../../core/providers/order/order_provider.dart';
+ 
 
 
 class AnalyticsDashboard extends ConsumerStatefulWidget {
-  const AnalyticsDashboard({Key? key}) : super(key: key);
+  const AnalyticsDashboard({super.key});
 
   @override
   ConsumerState<AnalyticsDashboard> createState() => _AnalyticsDashboardState();
@@ -203,102 +203,111 @@ class _AnalyticsDashboardState extends ConsumerState<AnalyticsDashboard> {
   }
 
   Widget _buildStatsCardsDesktop(AnalyticsData data) {
-    return Row(
-      children: [
-        Expanded(
-          child: StatsSummaryCard(
-            title: 'Total Sales',
-            value: '\$${data.totalSales.toStringAsFixed(2)}',
-            icon: Icons.monetization_on,
-            color: Colors.green,
-            trend: data.salesTrend,
+    return SizedBox(
+      height: 120, // Set a fixed height for the row
+      child: Row(
+        children: [
+          Expanded(
+            child: StatsSummaryCard(
+              title: 'Total Sales',
+              value: '\$${data.totalSales.toStringAsFixed(2)}',
+              icon: Icons.monetization_on,
+              color: Colors.green,
+              trend: data.salesTrend,
+            ),
           ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: StatsSummaryCard(
-            title: 'Orders',
-            value: '${data.totalOrders}',
-            icon: Icons.receipt_long,
-            color: Colors.blue,
-            trend: data.ordersTrend,
+          const SizedBox(width: 16),
+          Expanded(
+            child: StatsSummaryCard(
+              title: 'Orders',
+              value: '${data.totalOrders}',
+              icon: Icons.receipt_long,
+              color: Colors.blue,
+              trend: data.ordersTrend,
+            ),
           ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: StatsSummaryCard(
-            title: 'Avg. Order Value',
-            value: '\$${data.avgOrderValue.toStringAsFixed(2)}',
-            icon: Icons.shopping_cart,
-            color: Colors.purple,
-            trend: data.avgOrderTrend,
+          const SizedBox(width: 16),
+          Expanded(
+            child: StatsSummaryCard(
+              title: 'Avg. Order Value',
+              value: '\$${data.avgOrderValue.toStringAsFixed(2)}',
+              icon: Icons.shopping_cart,
+              color: Colors.purple,
+              trend: data.avgOrderTrend,
+            ),
           ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: StatsSummaryCard(
-            title: 'Customers',
-            value: '${data.uniqueCustomers}',
-            icon: Icons.people,
-            color: Colors.orange,
-            trend: data.customersTrend,
+          const SizedBox(width: 16),
+          Expanded(
+            child: StatsSummaryCard(
+              title: 'Customers',
+              value: '${data.uniqueCustomers}',
+              icon: Icons.people,
+              color: Colors.orange,
+              trend: data.customersTrend,
+            ),
           ),
-        ),
-      ],
-    );
+        ],
+      ),);
   }
 
   Widget _buildStatsCardsMobile(AnalyticsData data) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: StatsSummaryCard(
-                title: 'Total Sales',
-                value: '\$${data.totalSales.toStringAsFixed(2)}',
-                icon: Icons.monetization_on,
-                color: Colors.green,
-                trend: data.salesTrend,
-              ),
+    return SizedBox(
+      height: 240, // Set a fixed height for the column (double the desktop height)
+      child: Column(
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: StatsSummaryCard(
+                    title: 'Total Sales',
+                    value: '\$${data.totalSales.toStringAsFixed(2)}',
+                    icon: Icons.monetization_on,
+                    color: Colors.green,
+                    trend: data.salesTrend,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: StatsSummaryCard(
+                    title: 'Orders',
+                    value: '${data.totalOrders}',
+                    icon: Icons.receipt_long,
+                    color: Colors.blue,
+                    trend: data.ordersTrend,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: StatsSummaryCard(
-                title: 'Orders',
-                value: '${data.totalOrders}',
-                icon: Icons.receipt_long,
-                color: Colors.blue,
-                trend: data.ordersTrend,
-              ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: StatsSummaryCard(
+                    title: 'Avg. Order Value',
+                    value: '\$${data.avgOrderValue.toStringAsFixed(2)}',
+                    icon: Icons.shopping_cart,
+                    color: Colors.purple,
+                    trend: data.avgOrderTrend,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: StatsSummaryCard(
+                    title: 'Customers',
+                    value: '${data.uniqueCustomers}',
+                    icon: Icons.people,
+                    color: Colors.orange,
+                    trend: data.customersTrend,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: StatsSummaryCard(
-                title: 'Avg. Order Value',
-                value: '\$${data.avgOrderValue.toStringAsFixed(2)}',
-                icon: Icons.shopping_cart,
-                color: Colors.purple,
-                trend: data.avgOrderTrend,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: StatsSummaryCard(
-                title: 'Customers',
-                value: '${data.uniqueCustomers}',
-                icon: Icons.people,
-                color: Colors.orange,
-                trend: data.customersTrend,
-              ),
-            ),
-          ],
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 

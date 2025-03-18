@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_provider.dart';
 
-/// Events section
-class EventsSection extends StatelessWidget {
+class EventsSection extends ConsumerWidget {
   final bool isMobile;
   final bool isTablet;
   final bool isDesktop;
@@ -14,37 +15,12 @@ class EventsSection extends StatelessWidget {
   });
   
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     
-    // Sample events
-    final events = [
-      {
-        'title': 'Noche de Degustación',
-        'date': '15 de Marzo, 2025',
-        'time': '19:00 - 22:00',
-        'description': 'Degustación de vinos y tapas con nuestro chef ejecutivo',
-        'image': 'https://images.unsplash.com/photo-1528605248644-14dd04022da1',
-        'price': 'S/ 120.00 por persona',
-      },
-      {
-        'title': 'Clase de Cocina',
-        'date': '22 de Marzo, 2025',
-        'time': '15:00 - 17:30',
-        'description': 'Aprenda a preparar platos peruanos tradicionales',
-        'image': 'https://images.unsplash.com/photo-1556910103-1c02745aae4d',
-        'price': 'S/ 150.00 por persona',
-      },
-      {
-        'title': 'Cena con el Chef',
-        'date': '5 de Abril, 2025',
-        'time': '20:00 - 23:00',
-        'description': 'Menú degustación especial con maridaje de vinos',
-        'image': 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0',
-        'price': 'S/ 200.00 por persona',
-      },
-    ];
+    // We're using catalogItemsProvider with 'events' type
+    final eventsAsync = ref.watch(catalogItemsProvider('events'));
     
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(
@@ -77,17 +53,68 @@ class EventsSection extends StatelessWidget {
           ),
           const SizedBox(height: 32),
           
-          // Events list
-          if (isMobile) 
-            _buildMobileEventsList(context, events)
-          else if (isTablet) 
-            _buildTabletEventsList(context, events)
-          else 
-            _buildDesktopEventsList(context, events),
+          // Display events using the provider
+          eventsAsync.when(
+            data: (events) {
+              if (events.isEmpty) {
+                return Center(
+                  child: Text(
+                    'No hay eventos disponibles actualmente',
+                    style: theme.textTheme.titleMedium,
+                  ),
+                );
+              }
+              
+              // Convert catalog items to event format
+              final mappedEvents = events.map((item) => {
+                'id': item.id,
+                'title': item.name,
+                'date': item.metadata['date'] ?? 'Próximamente',
+                'time': item.metadata['time'] ?? 'Por confirmar',
+                'description': item.description,
+                'image': item.imageUrl,
+                'price': 'S/ ${item.price.toStringAsFixed(2)}',
+              }).toList();
+              
+              if (isMobile) {
+                return _buildMobileEventsList(context, mappedEvents);
+              } else if (isTablet) {
+                return _buildTabletEventsList(context, mappedEvents);
+              } else {
+                return _buildDesktopEventsList(context, mappedEvents);
+              }
+            },
+            loading: () => Center(
+              child: CircularProgressIndicator(color: colorScheme.primary),
+            ),
+            error: (error, _) => Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 48,
+                    color: colorScheme.error,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error: ${error.toString()}',
+                    style: theme.textTheme.titleMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => ref.refresh(catalogItemsProvider('events')),
+                    child: const Text('Reintentar'),
+                  ),
+                ],
+              ),
+            ),
+          ),
           
           const SizedBox(height: 32),
           
-          // Event space rental
+          // Event space rental section - this remains unchanged
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(24),
@@ -168,6 +195,7 @@ class EventsSection extends StatelessWidget {
     );
   }
   
+  // Helper method to build event space features
   Widget _buildEventSpaceFeature(
     BuildContext context,
     String title,
@@ -203,133 +231,137 @@ class EventsSection extends StatelessWidget {
     );
   }
   
-Widget _buildMobileEventsList(BuildContext context, List<Map<String, dynamic>> events) {
-  return ListView.builder(
-    shrinkWrap: true,
-    physics: const NeverScrollableScrollPhysics(),
-    itemCount: events.length,
-    itemBuilder: (context, index) {
-      final event = events[index];
-      return Card(
-        margin: const EdgeInsets.only(bottom: 16),
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: Image.network(
-                event['image'] as String,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
-                  child: Icon(
-                    Icons.image_not_supported,
-                    size: 48,
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+  // Building mobile event list
+  Widget _buildMobileEventsList(BuildContext context, List<Map<String, dynamic>> events) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: events.length,
+      itemBuilder: (context, index) {
+        final event = events[index];
+        return RepaintBoundary(
+          child: Card(
+            margin: const EdgeInsets.only(bottom: 16),
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: Image.network(
+                    event['image'] as String,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                      child: Icon(
+                        Icons.image_not_supported,
+                        size: 48,
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    event['title'] as String,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap( // Use Wrap instead of Row for date and time
-                    spacing: 16,
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
+                      Text(
+                        event['title'] as String,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 16,
                         children: [
-                          Icon(
-                            Icons.calendar_today,
-                            size: 16,
-                            color: Theme.of(context).colorScheme.primary,
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.calendar_today,
+                                size: 16,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                event['date'] as String,
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            event['date'] as String,
-                            style: Theme.of(context).textTheme.bodyMedium,
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.access_time,
+                                size: 16,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                event['time'] as String,
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
                           ),
                         ],
                       ),
+                      const SizedBox(height: 12),
+                      Text(
+                        event['description'] as String,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        event['price'] as String,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
                       Row(
-                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            Icons.access_time,
-                            size: 16,
-                            color: Theme.of(context).colorScheme.primary,
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {},
+                              child: const Text('Más Información'),
+                            ),
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            event['time'] as String,
-                            style: Theme.of(context).textTheme.bodyMedium,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {},
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Theme.of(context).colorScheme.primary,
+                                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                              child: const Text('Reservar'),
+                            ),
                           ),
                         ],
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  Text(
-                    event['description'] as String,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    event['price'] as String,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {},
-                          child: const Text('Más Información'),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.primary,
-                            foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                          child: const Text('Reservar'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-      );
-    },
-  );
-}
+          ),
+        );
+      },
+    );
+  }
 
+  // Building tablet event list
   Widget _buildTabletEventsList(BuildContext context, List<Map<String, dynamic>> events) {
     return ListView.builder(
       shrinkWrap: true,
@@ -337,18 +369,142 @@ Widget _buildMobileEventsList(BuildContext context, List<Map<String, dynamic>> e
       itemCount: events.length,
       itemBuilder: (context, index) {
         final event = events[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 16),
-          clipBehavior: Clip.antiAlias,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+        return RepaintBoundary(
+          child: Card(
+            margin: const EdgeInsets.only(bottom: 16),
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    width: 200,
+                    child: Image.network(
+                      event['image'] as String,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                        child: Icon(
+                          Icons.image_not_supported,
+                          size: 48,
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            event['title'] as String,
+                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.calendar_today,
+                                size: 16,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                event['date'] as String,
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              const SizedBox(width: 16),
+                              Icon(
+                                Icons.access_time,
+                                size: 16,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                event['time'] as String,
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            event['description'] as String,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const Spacer(),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                event['price'] as String,
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Spacer(),
+                              OutlinedButton(
+                                onPressed: () {},
+                                child: const Text('Más Información'),
+                              ),
+                              const SizedBox(width: 12),
+                              ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Theme.of(context).colorScheme.primary,
+                                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                                ),
+                                child: const Text('Reservar'),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+        );
+      },
+    );
+  }
+  
+  // Building desktop event list (grid layout)
+  Widget _buildDesktopEventsList(BuildContext context, List<Map<String, dynamic>> events) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        childAspectRatio: 0.85,
+        crossAxisSpacing: 20,
+        mainAxisSpacing: 20,
+      ),
+      itemCount: events.length,
+      itemBuilder: (context, index) {
+        final event = events[index];
+        return RepaintBoundary(
+          child: Card(
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  width: 200,
+                AspectRatio(
+                  aspectRatio: 16 / 9,
                   child: Image.network(
                     event['image'] as String,
                     fit: BoxFit.cover,
@@ -364,73 +520,82 @@ Widget _buildMobileEventsList(BuildContext context, List<Map<String, dynamic>> e
                 ),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           event['title'] as String,
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 8),
                         Row(
                           children: [
                             Icon(
                               Icons.calendar_today,
-                              size: 16,
+                              size: 14,
                               color: Theme.of(context).colorScheme.primary,
                             ),
-                            const SizedBox(width: 8),
-                            Text(
-                              event['date'] as String,
-                              style: Theme.of(context).textTheme.bodyMedium,
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                event['date'] as String,
+                                style: Theme.of(context).textTheme.bodySmall,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                            const SizedBox(width: 16),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
                             Icon(
                               Icons.access_time,
-                              size: 16,
+                              size: 14,
                               color: Theme.of(context).colorScheme.primary,
                             ),
-                            const SizedBox(width: 8),
-                            Text(
-                              event['time'] as String,
-                              style: Theme.of(context).textTheme.bodyMedium,
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                event['time'] as String,
+                                style: Theme.of(context).textTheme.bodySmall,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 8),
+                        Expanded(
+                          child: Text(
+                            event['description'] as String,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                         Text(
-                          event['description'] as String,
-                          style: Theme.of(context).textTheme.bodyLarge,
+                          event['price'] as String,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              event['price'] as String,
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {},
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).colorScheme.primary,
+                              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
-                            const SizedBox(height:16),
-                            OutlinedButton(
-                              onPressed: () {},
-                              child: const Text('Más Información'),
-                            ),
-                            const SizedBox(width: 12),
-                            ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Theme.of(context).colorScheme.primary,
-                                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                              ),
-                              child: const Text('Reservar'),
-                            ),
-                          ],
+                            child: const Text('Reservar'),
+                          ),
                         ),
                       ],
                     ),
@@ -438,120 +603,6 @@ Widget _buildMobileEventsList(BuildContext context, List<Map<String, dynamic>> e
                 ),
               ],
             ),
-          ),
-        );
-      },
-    );
-  }
-  
-  Widget _buildDesktopEventsList(BuildContext context, List<Map<String, dynamic>> events) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        childAspectRatio: 0.85,
-        crossAxisSpacing: 20,
-        mainAxisSpacing: 20,
-      ),
-      itemCount: events.length,
-      itemBuilder: (context, index) {
-        final event = events[index];
-        return Card(
-          clipBehavior: Clip.antiAlias,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AspectRatio(
-                aspectRatio: 16 / 9,
-                child: Image.network(
-                  event['image'] as String,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
-                    child: Icon(
-                      Icons.image_not_supported,
-                      size: 48,
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        event['title'] as String,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today,
-                            size: 14,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            event['date'] as String,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.access_time,
-                            size: 14,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            event['time'] as String,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        event['description'] as String,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      const SizedBox(height:16),
-                      Text(
-                        event['price'] as String,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.primary,
-                            foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                          child: const Text('Reservar'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
           ),
         );
       },

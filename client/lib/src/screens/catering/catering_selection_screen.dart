@@ -9,7 +9,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/catering/widge
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/widgets/catering_selection/category_items_list.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/widgets/catering_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/widgets/catering_tab_bar.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/providers/catering_order_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart';
 
 final localCateringItemCountProvider = StateProvider<int>((ref) {
   final cateringOrder = ref.watch(cateringOrderProvider);

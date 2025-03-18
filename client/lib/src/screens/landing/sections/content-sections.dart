@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_packages_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/catering-section.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/events-section.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/meal-plans-section.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/menu-section.dart';
 
-/// Main content sections with tabs (Menu, Meal Plans, Catering, Reservations)
 class ContentSections extends StatelessWidget {
   final TabController tabController;
   final int currentTab;
-  final List<Map<String, dynamic>>? randomDishes;
-  final List<Map<String, dynamic>> cateringPackages;
+  final List<CatalogItem>? randomDishes;
+  final List<CateringPackage> cateringPackages;
   final Function(int) onCateringPackageTap;
   final bool isMobile;
   final bool isTablet;

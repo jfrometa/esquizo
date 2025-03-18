@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart'; 
-import 'package:starter_architecture_flutter_firebase/src/screens/providers/cart_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/providers/catering_order_provider.dart'; 
-import 'package:starter_architecture_flutter_firebase/src/screens/providers/manual_quote_provider.dart';
+import 'package:go_router/go_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/core/providers/providers/cart_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/navigation_provider.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_providers.dart';
@@ -27,7 +29,7 @@ final totalCartQuantityProvider = Provider<int>((ref) {
   final cartItems = ref.watch(cartProvider);
   final mealItems = ref.watch(mealOrderProvider);
   final cateringCount = ref.watch(cateringItemCountProvider);
-  final cartTotal = cartItems.fold(0, (total, item) => total + item.quantity);
+  final cartTotal = cartItems.items.fold(0, (total, item) => total + item.quantity);
   final mealTotal = mealItems.length;
   return cartTotal + mealTotal + cateringCount;
 });

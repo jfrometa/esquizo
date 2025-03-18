@@ -1,9 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/firebase_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
 import '../../services/catalog_service.dart';
 
-/// Provider for the current business ID
-final currentBusinessIdProvider = StateProvider<String>((ref) => 'default');
 
 /// Provider for the current catalog type
 final currentCatalogTypeProvider = StateProvider<String>((ref) => 'menu');

@@ -2,22 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_provider.dart'; // Add this import
 import 'package:starter_architecture_flutter_firebase/src/helpers/scroll_bahaviour.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/QR/models/qr_code_data.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/providers/provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/providers/provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/cards/dish_card_small.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/dish_caterogy/category_dishes_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/ordering_providers.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/providers/cart_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/providers/cart_provider.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/reservation/reservation_screen.dart';
+
+import '../../../core/providers/cart/cart_provider.dart';
 
 class CategoryView extends ConsumerWidget {
   final ScrollController scrollController;
   final QRCodeData tableData;
 
   const CategoryView({
+    super.key,
     required this.scrollController,
     required this.tableData,
   });
@@ -26,7 +29,8 @@ class CategoryView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final categoriesAsync = ref.watch(categoriesProvider);
-    final featuredDishes = ref.watch(dishProvider);
+    // Replace dishProvider with catalogItemsProvider
+    final dishesAsync = ref.watch(catalogItemsProvider('menu'));
     
     return ScrollConfiguration(
       behavior: CustomScrollBehavior(),
@@ -34,7 +38,7 @@ class CategoryView extends ConsumerWidget {
         onRefresh: () async {
           // Refresh data
           ref.refresh(categoriesProvider);
-          ref.refresh(dishProvider);
+          ref.refresh(catalogItemsProvider('menu')); // Update refresh
           HapticFeedback.mediumImpact();
         },
         child: ListView(
@@ -78,6 +82,7 @@ class CategoryView extends ConsumerWidget {
                     );
                   }
                   
+                  // Rest of the categories code remains the same
                   return ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     scrollDirection: Axis.horizontal,
@@ -225,51 +230,94 @@ class CategoryView extends ConsumerWidget {
             
             const SizedBox(height: 16),
             
-            // Adaptive grid based on screen width for featured dishes
-            if (featuredDishes.isEmpty)
-              const Padding(
+            // Updated featured dishes section with AsyncValue handling
+            dishesAsync.when(
+              data: (dishes) {
+                if (dishes.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.all(20.0),
+                    child: Center(
+                      child: Text('No featured dishes available'),
+                    ),
+                  );
+                }
+                
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    final screenWidth = constraints.maxWidth;
+                    return GridView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: screenWidth > 800 ? 3 : 2,
+                        childAspectRatio: screenWidth > 800 ? 1.0 : 0.75,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                      ),
+                      itemCount: dishes.length,
+                      itemBuilder: (context, index) {
+                        final dish = dishes[index];
+                        // Convert CatalogItem to Map<String, dynamic> for DishCardSmall
+                        final dishMap = <String, dynamic>{
+                          'id': dish.id,
+                          'title': dish.name,
+                          'description': dish.description,
+                          'pricing': dish.price.toString(),
+                          'img': dish.imageUrl ?? 'assets/images/placeholder_food.png',
+                          'foodType': dish.metadata['foodType'] ?? 'Main Course',
+                          'isSpicy': dish.metadata['isSpicy'] ?? false,
+                          'bestSeller': dish.metadata['bestSeller'] ?? false,
+                          'offertPricing': dish.metadata['offertPricing']?.toString(),
+                          'ingredients': dish.metadata['ingredients'] ?? ['Ingredient 1', 'Ingredient 2'],
+                        };
+                        
+                        return DishCardSmall(
+                          dish: dishMap,
+                          onAddToCart: () {
+                            ref.read(cartProvider.notifier).addToCart(
+                              dishMap,
+                              1,
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${dish.name} added to cart'),
+                                duration: const Duration(seconds: 1),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+              loading: () => const Padding(
                 padding: EdgeInsets.all(20.0),
                 child: Center(
-                  child: Text('No featured dishes available'),
+                  child: CircularProgressIndicator(),
                 ),
-              )
-            else
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final screenWidth = constraints.maxWidth;
-                  return GridView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: screenWidth > 800 ? 3 : 2,
-                      childAspectRatio: screenWidth > 800 ? 1.0 : 0.75,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                    ),
-                    itemCount: featuredDishes.length,
-                    itemBuilder: (context, index) {
-                      final dish = featuredDishes[index];
-                      return DishCardSmall(
-                        dish: dish,
-                        onAddToCart: () {
-                          ref.read(cartProvider.notifier).addToCart(
-                            dish.cast<String, dynamic>(),
-                            1,
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('${dish['title']} added to cart'),
-                              duration: const Duration(seconds: 1),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
               ),
+              error: (error, stackTrace) => Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                      const SizedBox(height: 16),
+                      Text('Failed to load dishes: $error'),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        onPressed: () => ref.refresh(catalogItemsProvider('menu')),
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
             
             const SizedBox(height: 30),
           ],

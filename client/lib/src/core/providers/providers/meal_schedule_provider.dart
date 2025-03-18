@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/scheduled_meal.dart';
+import '../../../screens/models/scheduled_meal.dart';
 
 class MealScheduleNotifier extends StateNotifier<List<ScheduledMeal>> {
   MealScheduleNotifier() : super([]);

@@ -5,6 +5,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/providers/admin_p
 
 import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
  import 'package:starter_architecture_flutter_firebase/src/core/services/business_config_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_panel_screen.dart';
  import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/dashboard_status_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 
@@ -12,7 +13,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/authentication
 
 // Home screen of the admin dashboard
 class AdminDashboardHome extends ConsumerStatefulWidget {
-  const AdminDashboardHome({Key? key}) : super(key: key);
+  const AdminDashboardHome({super.key});
 
   @override
   ConsumerState<AdminDashboardHome> createState() => _AdminDashboardHomeState();
@@ -100,7 +101,10 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
                     secondaryStat: 'Today: \$${data.todaySales.toStringAsFixed(2)}',
                     icon: Icons.attach_money,
                     color: Colors.green,
-                    onTap: () => _navigateToSection(context, 6), // Analytics screen
+                    onTap: () => {
+
+                      _navigateToSection(context, 6)
+                      }, // Analytics screen
                   ),
                   loading: () => const DashboardStatsCard.loading(
                     title: 'Sales',
@@ -504,12 +508,12 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
   }
   
   void _navigateToSection(BuildContext context, int index) {
-    // final parentState = context.findAncestorStateOfType<_AdminPanelScreenState>();
-    // if (parentState != null) {
-    //   parentState.setState(() {
-    //     parentState._selectedIndex = index;
-    //   });
-    // }
+    final parentState = context.findAncestorStateOfType<AdminPanelScreenState>();
+    if (parentState != null) {
+      parentState.setState(() {
+        parentState.selectedIndex = index;
+      });
+    }
   }
   
   void _navigateToOrderDetails(BuildContext context, String orderId) {

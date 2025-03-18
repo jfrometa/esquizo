@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/plans/plans.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/providers/cart_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/plans/plans.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 // Remove ColorsPaletteRedonda import
 
@@ -33,7 +33,7 @@ class MealPlansScreen extends ConsumerWidget {
                     );
                   },
                 ),
-                if (cart.isNotEmpty)
+                if (cart.items.isNotEmpty)
                   Positioned(
                     top: 0,
                     right: 0,
@@ -41,7 +41,7 @@ class MealPlansScreen extends ConsumerWidget {
                       radius: 8,
                       backgroundColor: colorScheme.error,
                       child: Text(
-                        '${cart.length}',
+                        '${cart.items.length}',
                         style: TextStyle(
                           color: colorScheme.onError,
                           fontSize: 10,

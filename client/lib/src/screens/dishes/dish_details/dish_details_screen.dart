@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/ordering_providers.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/providers/cart_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_provider.dart'; // Add this import
+import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/providers/cart_provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/landing_page_home.dart';
 
@@ -16,7 +18,7 @@ class DishDetailsScreen extends ConsumerStatefulWidget {
 }
 
 class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
-  late Map<String, dynamic> selectedItem;
+  Map<String, dynamic>? selectedItem;
   int quantity = 1;
   bool isLoading = true;
   String? errorMessage;
@@ -24,34 +26,7 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadDishDetails();
-  }
-
-  // Load dish details with error handling
-  Future<void> _loadDishDetails() async {
-    try {
-      setState(() => isLoading = true);
-      
-      final dishes = ref.read(dishProvider);
-      if (dishes.isEmpty || widget.index >= dishes.length) {
-        setState(() {
-          errorMessage = 'Dish not found. Please try again later.';
-          isLoading = false;
-        });
-        return;
-      }
-      
-      setState(() {
-        selectedItem = dishes[widget.index];
-        isLoading = false;
-        errorMessage = null;
-      });
-    } catch (e) {
-      setState(() {
-        errorMessage = 'Error loading dish details: $e';
-        isLoading = false;
-      });
-    }
+    // We'll handle loading in the build method with AsyncValue
   }
 
   // Format price as currency
@@ -67,11 +42,27 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
   // Calculate total price
   String _calculateTotal() {
     try {
-      final double itemPrice = double.tryParse(selectedItem['pricing'].toString()) ?? 0.0;
+      if (selectedItem == null) return '\$0.00';
+      final double itemPrice = double.tryParse(selectedItem!['pricing'].toString()) ?? 0.0;
       return '\$${(itemPrice * quantity).toStringAsFixed(2)}';
     } catch (e) {
       return '\$0.00';
     }
+  }
+
+  // Convert CatalogItem to Map<String, dynamic>
+  Map<String, dynamic> _catalogItemToMap(CatalogItem item) {
+    return {
+      'id': item.id,
+      'title': item.name,
+      'description': item.description,
+      'pricing': item.price,
+      'img': item.imageUrl ?? 'assets/images/placeholder_food.png',
+      'foodType': item.metadata['foodType'] ?? 'Main Course',
+      'isSpicy': item.metadata['isSpicy'] ?? false,
+      'ingredients': item.metadata['ingredients'] ?? ['Ingredient 1', 'Ingredient 2'],
+      'nutritionalInfo': item.metadata['nutritionalInfo'],
+    };
   }
 
   @override
@@ -80,20 +71,41 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     
+    // Use catalogItemsProvider instead of dishProvider
+    final dishesAsync = ref.watch(catalogItemsProvider('menu'));
+    
     // Check for active subscriptions in the cart
     final cartItems = ref.watch(cartProvider);
-    bool hasActiveSubscription = cartItems.any((item) => 
+    bool hasActiveSubscription = cartItems.items.any((item) => 
         item.isMealSubscription && item.remainingMeals > 0);
 
     return Scaffold(
-      body: isLoading
-          ? _buildLoadingState(colorScheme)
-          : errorMessage != null
-              ? _buildErrorState(theme)
-              : _buildDetailContent(hasActiveSubscription, theme),
-      bottomSheet: isLoading || errorMessage != null 
-          ? null 
-          : _buildBottomActionBar(hasActiveSubscription, theme),
+      body: dishesAsync.when(
+        data: (dishes) {
+          if (dishes.isEmpty || widget.index >= dishes.length) {
+            return _buildErrorState(theme, 'Dish not found. Please try again later.');
+          }
+          
+          // Set the selected item
+          selectedItem = _catalogItemToMap(dishes[widget.index]);
+          
+          return _buildDetailContent(hasActiveSubscription, theme);
+        },
+        loading: () => _buildLoadingState(colorScheme),
+        error: (error, stackTrace) => _buildErrorState(
+          theme, 
+          'Error loading dish details: $error'
+        ),
+      ),
+      bottomSheet: dishesAsync.maybeWhen(
+        data: (dishes) {
+          if (dishes.isEmpty || widget.index >= dishes.length) {
+            return null;
+          }
+          return _buildBottomActionBar(hasActiveSubscription, theme);
+        },
+        orElse: () => null,
+      ),
     );
   }
 
@@ -107,7 +119,7 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
   }
 
   // Error state UI
-  Widget _buildErrorState(ThemeData theme) {
+  Widget _buildErrorState(ThemeData theme, [String? message]) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -121,18 +133,15 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
             ).animate().scale(duration: 400.ms),
             const SizedBox(height: 16),
             Text(
-              errorMessage ?? 'An error occurred',
+              message ?? 'An error occurred',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyLarge,
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () {
-                setState(() {
-                  isLoading = true;
-                  errorMessage = null;
-                });
-                _loadDishDetails();
+                // Force refresh the provider
+                ref.refresh(catalogItemsProvider('menu'));
               },
               icon: const Icon(Icons.refresh),
               label: const Text('Retry'),
@@ -150,6 +159,10 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
 
   // Main detail content
   Widget _buildDetailContent(bool hasActiveSubscription, ThemeData theme) {
+    if (selectedItem == null) {
+      return _buildErrorState(theme, 'Dish information not available');
+    }
+    
     return CustomScrollView(
       slivers: [
         // App bar with image
@@ -175,7 +188,7 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
                 _buildIngredientsSection(theme),
                 
                 // Nutritional info (if available)
-                if (selectedItem.containsKey('nutritionalInfo'))
+                if (selectedItem?.containsKey('nutritionalInfo') ?? false)
                   _buildNutritionalInfoSection(theme),
                 
                 // Serving suggestion
@@ -204,7 +217,7 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
             fit: StackFit.expand,
             children: [
               Image.asset(
-                selectedItem['img'],
+                selectedItem?['img'] ?? 'assets/images/placeholder_food.png',
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
@@ -251,7 +264,7 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
                     ],
                   ),
                   child: Text(
-                    _formatPrice(selectedItem['pricing']),
+                    _formatPrice(selectedItem?['pricing']),
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: theme.colorScheme.onPrimary,
                       fontWeight: FontWeight.bold,
@@ -311,7 +324,7 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  selectedItem['title'],
+                  selectedItem?['title'] ?? 'Untitled Dish',
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.primary,
@@ -319,7 +332,7 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _formatPrice(selectedItem['pricing']),
+                  _formatPrice(selectedItem?['pricing']),
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.secondary,
@@ -396,7 +409,7 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            selectedItem['description'],
+            selectedItem?['description'] ?? 'No description available',
             style: theme.textTheme.bodyLarge?.copyWith(
               height: 1.5,
             ),
@@ -430,7 +443,7 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  selectedItem['foodType'],
+                  selectedItem?['foodType'] ?? 'Unknown',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.onPrimaryContainer,
@@ -440,7 +453,7 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
             ),
           ),
           const SizedBox(width: 12),
-          if (selectedItem['isSpicy'])
+          if (selectedItem?['isSpicy'] == true)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
@@ -475,6 +488,8 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
 
   // Ingredients section
   Widget _buildIngredientsSection(ThemeData theme) {
+    final ingredients = selectedItem?['ingredients'] as List<dynamic>? ?? [];
+    
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: Column(
@@ -501,9 +516,9 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
             spacing: 8.0,
             runSpacing: 8.0,
             children: List<Widget>.generate(
-              selectedItem['ingredients'].length,
+              ingredients.length,
               (index) => _buildIngredientChip(
-                selectedItem['ingredients'][index],
+                ingredients[index].toString(),
                 index,
                 theme,
               ),
@@ -830,18 +845,18 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
                 onPressed: () {
                   if (hasActiveSubscription) {
                     // Consume from subscription
-                    ref.read(cartProvider.notifier).consumeMeal(selectedItem['title']);
+                    ref.read(cartProvider.notifier).consumeMeal(selectedItem?['title'] ?? 'Unknown Item');
                   } else {
                     // Add to cart
-                    ref.read(cartProvider.notifier).addToCart(selectedItem, quantity);
+                    ref.read(cartProvider.notifier).addToCart(selectedItem!, quantity);
                   }
                   
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
                         hasActiveSubscription
-                            ? 'Se consumió ${selectedItem['title']} del plan'
-                            : 'Se agregó ${selectedItem['title']} al carrito',
+                            ? 'Se consumió ${selectedItem?['title']} del plan'
+                            : 'Se agregó ${selectedItem?['title']} al carrito',
                       ),
                       backgroundColor: theme.colorScheme.tertiary,
                       behavior: SnackBarBehavior.floating,

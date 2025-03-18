@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/QR/models/food_dish.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/providers/provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/providers/provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/QR/screens/order/order_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/dish_details/dish_details_screen.dart';
 
@@ -154,7 +155,7 @@ class TableMenuScreen extends ConsumerWidget {
           Expanded(
             child: Consumer(
               builder: (context, ref, child) {
-                final dishesAsync = ref.watch(dishesProvider);
+                final dishesAsync = ref.watch(catalogItemsProvider('menu'));
                 
                 return dishesAsync.when(
                   data: (dishes) {
