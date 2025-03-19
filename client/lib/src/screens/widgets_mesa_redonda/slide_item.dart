@@ -14,9 +14,11 @@ class SlideItem extends StatelessWidget {
   final bool isMealPlan; // Indicates if the dish is part of a meal plan
   final int index;
   final Widget? actionButton; // Custom action button (e.g., Add to Cart)
+  final String id;
 
   const SlideItem({
     super.key,
+    required this.id,
     required this.img,
     required this.title,
     required this.description,
@@ -165,7 +167,7 @@ class SlideItem extends StatelessWidget {
                                 GoRouter.of(context).pushNamed(
                                   AppRoute.addToOrder.name,
                                   pathParameters: {
-                                    "itemId": index.toString(),
+                                    "itemId": id,
                                   },
                                 );
                               },

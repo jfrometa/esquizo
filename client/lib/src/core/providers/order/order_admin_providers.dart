@@ -1,8 +1,6 @@
 
 // Update the providers to use OrderService instead of direct Firebase calls
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/firebase_providers.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/order_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/service_factory.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
@@ -30,9 +28,6 @@ final completedOrdersProvider = StreamProvider.family<List<Order>, String>((ref,
 
 
 final orderServiceProvider = Provider<OrderService>((ref) {
-  final businessId = ref.watch(currentBusinessIdProvider);
-  final firestore = ref.watch(firebaseFirestoreProvider);
-
 
   // Get catalog service for menu items
   final orderService = ref.watch(

@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; 
 import 'package:go_router/go_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart';
 
-class DishCard extends StatefulWidget {
+class DishCard extends ConsumerStatefulWidget {
   final Map<String, dynamic> dish;
   final VoidCallback? onTap;
 
@@ -12,10 +14,10 @@ class DishCard extends StatefulWidget {
   });
 
   @override
-  State<DishCard> createState() => _DishCardState();
+  ConsumerState<DishCard> createState() => _DishCardState();
 }
 
-class _DishCardState extends State<DishCard>
+class _DishCardState extends ConsumerState<DishCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
@@ -102,7 +104,7 @@ class _DishCardState extends State<DishCard>
                         topRight: Radius.circular(16),
                       ),
                       child: Container(
-                        height: 160,
+                        height: 130,
                         width: double.infinity,
                         color: colorScheme.surfaceContainerHighest,
                         child: widget.dish['image'] != null
@@ -307,14 +309,32 @@ class _DishCardState extends State<DishCard>
                           ),
                         ),
                         child: Center(
-                          child: Text(
-                            "Add to Order",
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: _isHovered
-                                  ? colorScheme.onPrimary
-                                  : colorScheme.primary,
+                          child: InkWell(
+                            onTap: () => {
+                            ref.read(cartProvider.notifier).addToCart(
+                              widget.dish,
+                              1,
+                            ),
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${widget.dish['title']} Agregado al carrito'),
+                                duration: const Duration(milliseconds: 700),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            ),
+
+
+                            },
+                            child: Text(
+                              "Agregado al carrito",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: _isHovered
+                                    ? colorScheme.onPrimary
+                                    : colorScheme.primary,
+                              ),
                             ),
                           ),
                         ),

@@ -71,7 +71,7 @@ class HomeDishesSection extends StatelessWidget {
       onTap: () {
         context.goNamed(
           AppRoute.addToOrder.name,
-          pathParameters: {"itemId": index.toString()},
+          pathParameters: {"itemId": dish['id']},
           extra: dish,
         );
       },
@@ -79,6 +79,7 @@ class HomeDishesSection extends StatelessWidget {
         margin: const EdgeInsets.all(5),
         child: SlideItem(
           key: Key('dish_$index'),
+          id: dish["id"],
           index: index,
           img: dish["img"],
           title: dish["title"],

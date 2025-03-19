@@ -6,6 +6,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog
 import 'package:starter_architecture_flutter_firebase/src/helpers/scroll_bahaviour.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/QR/models/qr_code_data.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/providers/provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/dishes/cards/dish_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/cards/dish_card_small.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/dish_caterogy/category_dishes_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/providers/cart_provider.dart';
@@ -140,9 +141,12 @@ class CategoryView extends ConsumerWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) => CategoryDishesScreen(
-                                categoryId: category.sortOrder,
+                                 
+                                categoryId: category.id,
                                 categoryName: category.name,
                                 tableData: tableData,
+                                 sortIndex: category.sortOrder,
+                                
                               ),
                             ),
                           );
@@ -244,15 +248,29 @@ class CategoryView extends ConsumerWidget {
                 return LayoutBuilder(
                   builder: (context, constraints) {
                     final screenWidth = constraints.maxWidth;
+                    // Determine grid layout based on screen width
+                    int crossAxisCount;
+                    
+                    if (screenWidth > 1200) {
+                      // Desktop - 3 columns
+                      crossAxisCount = 3;
+                    } else if (screenWidth > 800) {
+                      // Tablet - 2 columns
+                      crossAxisCount = 2;
+                    } else {
+                      // Mobile - 1 column
+                      crossAxisCount = 1;
+                    }
+                    
                     return GridView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: screenWidth > 800 ? 3 : 2,
-                        childAspectRatio: screenWidth > 800 ? 1.0 : 0.75,
+                        crossAxisCount: crossAxisCount,
                         crossAxisSpacing: 16,
                         mainAxisSpacing: 16,
+                        mainAxisExtent: 320, // Fixed height for each card
                       ),
                       itemCount: dishes.length,
                       itemBuilder: (context, index) {
@@ -271,19 +289,13 @@ class CategoryView extends ConsumerWidget {
                           'ingredients': dish.metadata['ingredients'] ?? ['Ingredient 1', 'Ingredient 2'],
                         };
                         
-                        return DishCardSmall(
+                        return DishCard(
                           dish: dishMap,
-                          onAddToCart: () {
-                            ref.read(cartProvider.notifier).addToCart(
-                              dishMap,
-                              1,
-                            );
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('${dish.name} added to cart'),
-                                duration: const Duration(seconds: 1),
-                                behavior: SnackBarBehavior.floating,
-                              ),
+                          onTap: () {
+
+                            context.pushNamed(
+                              AppRoute.addDishToOrder.name, 
+                              pathParameters: {'dishId': dish.id},
                             );
                           },
                         );

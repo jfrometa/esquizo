@@ -7,15 +7,15 @@ import 'package:starter_architecture_flutter_firebase/src/screens/dishes/dish_de
 import '../../QR/models/qr_code_data.dart';
 
 // Create a provider that filters catalog items by category
-final filteredCatalogItemsProvider = Provider.family<AsyncValue<List<CatalogItem>>, int>(
+final filteredCatalogItemsProvider = Provider.family<AsyncValue<List<CatalogItem>>, String>(
   (ref, categoryId) {
-    final catalogItemsAsyncValue = ref.watch(catalogItemsProvider('menu'));
-    
+    final catalogItemsAsyncValue = ref.watch(catalogItemsProvider('menu')); ;
     return catalogItemsAsyncValue.when(
       data: (items) {
         final filtered = items.where((item) {
-          // Check if the item belongs to the specified category
-          return item.metadata['categoryId'] == categoryId;
+          // Log item IDs for debugging
+          debugPrint('Filtering - Item ID: ${item.id}, Category ID: $categoryId, Match: ${item.id == categoryId}');
+          return item.categoryId == categoryId;
         }).toList();
         return AsyncValue.data(filtered);
       },
@@ -27,15 +27,17 @@ final filteredCatalogItemsProvider = Provider.family<AsyncValue<List<CatalogItem
 
 // Category Dishes Screen
 class CategoryDishesScreen extends ConsumerWidget {
-  final int categoryId;
+  final String categoryId;
+  final int sortIndex;
   final String categoryName;
   final QRCodeData tableData;
   
-  const CategoryDishesScreen({
+  const CategoryDishesScreen( {
     super.key,
     required this.categoryId,
     required this.categoryName,
     required this.tableData,
+    required this.sortIndex,
   });
 
   @override
@@ -97,11 +99,11 @@ class CategoryDishesScreen extends ConsumerWidget {
                   onTap: () {
                     // Find the index of this dish in the full catalog
                     ref.read(catalogItemsProvider('menu')).whenData((allDishes) {
-                      final fullIndex = allDishes.indexWhere((item) => item.id == dish.id);
+                      
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => DishDetailsScreen(index: fullIndex != -1 ? fullIndex : index),
+                          builder: (context) => DishDetailsScreen(id: dish.id),
                         ),
                       );
                     });

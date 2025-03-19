@@ -4,6 +4,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog
 import 'package:starter_architecture_flutter_firebase/src/screens/QR/models/food_dish.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/providers/provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/QR/screens/order/order_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/dish_details/dish_details_screen.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/cards/dish_card.dart';
@@ -92,9 +93,10 @@ class TableMenuScreen extends ConsumerWidget {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => CategoryDishesScreen(
-                                    categoryId: category.sortOrder,
+                                    categoryId: category.id,
                                     categoryName: category.name,
                                     tableData: tableData,
+                                     sortIndex: category.sortOrder,
                                   ),
                                 ),
                               );
@@ -160,8 +162,8 @@ class TableMenuScreen extends ConsumerWidget {
                 return dishesAsync.when(
                   data: (dishes) {
                     // Sort dishes by rating
-                    final popularDishes = List<Dish>.from(dishes)
-                      ..sort((a, b) => b.rating.compareTo(a.rating));
+                    // TODO: Implement sorting logic
+                   final popularDishes = dishes.where((dish) => dish.isAvailable).take(5).toList();
                     
                     return ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -169,12 +171,12 @@ class TableMenuScreen extends ConsumerWidget {
                       itemBuilder: (context, index) {
                         final dish = popularDishes[index];
                         return DishCard(
-                          dish: dish.toJson(),
+                          dish: dish.toFirestore(),
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => DishDetailsScreen(index:index)
+                                builder: (context) => DishDetailsScreen(id: dish.id)
                               ),
                             );
                           },

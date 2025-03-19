@@ -267,7 +267,7 @@ List<RouteBase> _getNestedRoutes(String path) {
             final itemId = state.pathParameters['itemId']!;
             return MaterialPage(
               child: DishDetailsScreen(
-                index: int.parse(itemId),
+                id: itemId,
               ),
             );
           },
@@ -309,7 +309,7 @@ List<RouteBase> _getNestedRoutes(String path) {
                 final itemId = state.pathParameters['dishId']!;
                 return MaterialPage(
                   child: DishDetailsScreen(
-                    index: int.parse(itemId),
+                    id: itemId,
                   ),
                 );
               },

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart'; 
 
 /// -----------------------------------------
 /// MENU DISH CARD (VERTICAL)
@@ -18,9 +17,11 @@ class MenuDishCard extends StatelessWidget {
   final bool isMealPlan;
   final int index;
   final Widget? actionButton;
+  final String id;
 
   const MenuDishCard({
     super.key,
+    required this.id,
     required this.img,
     required this.title,
     required this.description,
@@ -148,7 +149,7 @@ class MenuDishCard extends StatelessWidget {
                               // Default navigation: navigate to AddToOrder screen.
                               GoRouter.of(context).pushNamed(
                                 AppRoute.addToOrder.name,
-                                pathParameters: {"itemId": index.toString()},
+                                pathParameters: {"itemId": id},
                               );
                             },
                           ),

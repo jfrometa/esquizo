@@ -7,8 +7,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 /// Enhanced Dish Details Screen with system theming support
 class DishDetailsScreen extends ConsumerStatefulWidget {
-  const DishDetailsScreen({super.key, required this.index});
-  final int index;
+  const DishDetailsScreen({super.key, required this.id});
+  final String id;
 
   @override
   ConsumerState<DishDetailsScreen> createState() => _DishDetailsScreenState();
@@ -79,12 +79,14 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
     return Scaffold(
       body: dishesAsync.when(
         data: (dishes) {
-          if (dishes.isEmpty || widget.index >= dishes.length) {
+          if (dishes.isEmpty) {
             return _buildErrorState(theme, 'Dish not found. Please try again later.');
           }
           
           // Set the selected item
-          selectedItem = _catalogItemToMap(dishes[widget.index]);
+          selectedItem = _catalogItemToMap(
+            dishes.firstWhere((dish) => dish.id == widget.id)
+          );
           
           return _buildDetailContent(hasActiveSubscription, theme);
         },
@@ -96,7 +98,7 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
       ),
       bottomSheet: dishesAsync.maybeWhen(
         data: (dishes) {
-          if (dishes.isEmpty || widget.index >= dishes.length) {
+          if (dishes.isEmpty) {
             return null;
           }
           return _buildBottomActionBar(hasActiveSubscription, theme);
@@ -138,7 +140,7 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
             ElevatedButton.icon(
               onPressed: () {
                 // Force refresh the provider
-                ref.refresh(catalogItemsProvider('menu'));
+                ref.invalidate(catalogItemsProvider('menu'));
               },
               icon: const Icon(Icons.refresh),
               label: const Text('Retry'),
@@ -209,7 +211,7 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
       backgroundColor: theme.colorScheme.surface,
       flexibleSpace: FlexibleSpaceBar(
         background: Hero(
-          tag: 'dish_image_${widget.index}',
+          tag: 'dish_image_${widget.id}',
           child: Stack(
             fit: StackFit.expand,
             children: [

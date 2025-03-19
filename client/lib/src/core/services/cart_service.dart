@@ -352,23 +352,29 @@ class Cart {
         return copyWith(items: updatedItems);
       } else {
         // Add new regular dish
-        final newDish = CartItem(
-          id: item['id'] ?? 'no id',
-          img: item['img'],
-          title: item['title'],
-          description: item['description'],
-          pricing: item['pricing'],
-          offertPricing: item['offertPricing'],
-          ingredients: List<String>.from(item['ingredients']),
-          isSpicy: item['isSpicy'],
-          foodType: item['foodType'],
-          hasChef: item['hasChef'],
-          quantity: quantity,
-          isOffer: item.containsKey('offertPricing') && item['offertPricing'] != null,
-          options: options,
-          notes: notes,
-        );
-        return copyWith(items: [...items, newDish]);
+        try {
+          final newDish = CartItem(
+            id: item['id'] ?? 'no id',
+            img: item['img'],
+            title: item['title'],
+            description: item['description'],
+            pricing: item['pricing'].toString(),
+            offertPricing: item['offertPricing'] ?? '',
+            ingredients: List<String>.from(item['ingredients'] ?? []),
+            isSpicy: item['isSpicy'] ?? false,
+            foodType: item['foodType'] ?? '',
+            hasChef: item['hasChef'] ?? false,
+            quantity: quantity,
+            isOffer: item.containsKey('offertPricing') && item['offertPricing'] != null,
+            options: options,
+            notes: notes,
+          );
+          return copyWith(items: [...items, newDish]);
+        } catch (e) {
+          debugPrint('Error adding item to cart: $e');
+          // Return the cart unchanged if there was an error
+          return this;
+        }
       }
     }
   }
@@ -877,3 +883,16 @@ class CartService {
     saveCart();
   }
 }
+
+// Helper method to safely convert various types to a List<String>
+  List<String> _safelyConvertToStringList(dynamic value) {
+    if (value == null) {
+      return [];
+    } else if (value is List) {
+      return value.map((item) => item?.toString() ?? '').toList();
+    } else if (value is String) {
+      return [value];
+    } else {
+      return [value.toString()];
+    }
+  }
