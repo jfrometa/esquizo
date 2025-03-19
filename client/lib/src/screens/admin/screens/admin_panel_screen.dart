@@ -9,6 +9,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/providers/user/au
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_dashboard_home.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/analytics_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_settings_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/meal_plan_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/order_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/product_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/table_management/table_management_screen.dart';
@@ -39,6 +40,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with SingleT
     const UserManagementScreen(),
     const BusinessSettingsScreen(),
     const AnalyticsDashboard(),
+    const MealPlanManagementScreen(),
   ];
   
   final List<String> _screenTitles = [
@@ -49,6 +51,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with SingleT
     'Users & Staff',
     'Business Settings',
     'Analytics',
+    'Meal Plans'
   ];  
 
   @override
@@ -363,6 +366,14 @@ void _showMoreOptions() {
             onTap: () {
               Navigator.pop(context);
               setState(() => selectedIndex = 6); // Updated index
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.restaurant),
+            title: const Text('Meal Plans'),
+            onTap: () {
+              Navigator.pop(context);
+              setState(() => selectedIndex = 7); // Meal Plans index
             },
           ),
         ],

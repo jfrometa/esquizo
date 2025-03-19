@@ -76,6 +76,12 @@ class SidebarMenu extends ConsumerWidget {
                   icon: Icons.bar_chart,
                   title: 'Analytics',
                 ),
+                _buildMenuItem(
+                  context,
+                  index: 7,
+                  icon: Icons.restaurant,
+                  title: 'Meal Plans',
+                ),
                 const Divider(),
                 _buildMenuItem(
                   context,

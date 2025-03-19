@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/services/meal_plan_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/plans/plans.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 // Remove ColorsPaletteRedonda import
@@ -13,7 +14,7 @@ class MealPlansScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mealPlans = ref.watch(mealPlansProvider);
+    final mealPlansAsync = ref.watch(mealPlansProvider);
     final cart = ref.watch(cartProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -68,14 +69,42 @@ class MealPlansScreen extends ConsumerWidget {
               maxWidth: 1200,
               minWidth: 300,
             ),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                if (constraints.maxWidth > 600) {
-                  return _buildPlansGrid(context, mealPlans);
-                } else {
-                  return _buildPlansList(context, mealPlans);
-                }
+            child: mealPlansAsync.when(
+              data: (mealPlans) {
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    if (constraints.maxWidth > 600) {
+                      return _buildPlansGrid(context, mealPlans);
+                    } else {
+                      return _buildPlansList(context, mealPlans);
+                    }
+                  },
+                );
               },
+              loading: () => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32.0),
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+              error: (error, stackTrace) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                      const SizedBox(height: 16),
+                      Text('Failed to load meal plans: $error'),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        onPressed: () => ref.refresh(mealPlansProvider),
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -96,7 +125,7 @@ class MealPlansScreen extends ConsumerWidget {
       itemCount: mealPlans.length,
       itemBuilder: (context, index) {
         final mealPlan = mealPlans[index];
-        return MealPlanCard(mealPlan: mealPlan);
+        return MealPlanSubscriptionCard(mealPlan: mealPlan);
       },
     );
   }
@@ -110,17 +139,17 @@ class MealPlansScreen extends ConsumerWidget {
         final mealPlan = mealPlans[index];
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-          child: MealPlanCard(mealPlan: mealPlan),
+          child: MealPlanSubscriptionCard(mealPlan: mealPlan),
         );
       },
     );
   }
 }
 
-class MealPlanCard extends StatelessWidget {
+class MealPlanSubscriptionCard extends StatelessWidget {
   final MealPlan mealPlan;
 
-  const MealPlanCard({super.key, required this.mealPlan});
+  const MealPlanSubscriptionCard({super.key, required this.mealPlan});
 
   @override
   Widget build(BuildContext context) {
