@@ -9,7 +9,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/menu/views/cat
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/views/catering/_show_catering_quote_dialog.dart';
 
 /// A view for creating and managing custom catering quotes
-class CustomQuoteView extends ConsumerWidget {
+class CustomQuoteView extends ConsumerStatefulWidget {
   /// Scroll controller for the list view
   final ScrollController scrollController;
   
@@ -23,7 +23,12 @@ class CustomQuoteView extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CustomQuoteView> createState() => _CustomQuoteViewState();
+}
+
+class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final quote = ref.watch(manualQuoteProvider);
@@ -35,7 +40,7 @@ class CustomQuoteView extends ConsumerWidget {
     
     // Active quote exists
     return ListView(
-      controller: scrollController,
+      controller: widget.scrollController,
       padding: const EdgeInsets.all(20),
       physics: const AlwaysScrollableScrollPhysics(),
       children: [
@@ -412,7 +417,7 @@ class CustomQuoteView extends ConsumerWidget {
   void _initializeQuote(BuildContext context, WidgetRef ref) {
     // Initialize a new quote if needed
     if (ref.read(manualQuoteProvider) == null) {
-      ref.read(manualQuoteProvider.notifier);
+      ref.read(manualQuoteProvider.notifier).createEmptyQuote();
     }
     
     // Show the quote form
@@ -426,9 +431,11 @@ class CustomQuoteView extends ConsumerWidget {
       title: 'Detalles de la Cotización',
       isQuote: true,
       onSuccess: (data) {
-        if (onQuoteSubmitted != null) {
-          onQuoteSubmitted!(ref.read(manualQuoteProvider));
+        if (widget.onQuoteSubmitted != null) {
+          widget.onQuoteSubmitted!(ref.read(manualQuoteProvider));
         }
+        // Force UI refresh
+        setState(() {});
       },
     );
   }
@@ -459,6 +466,9 @@ class CustomQuoteView extends ConsumerWidget {
             pricing: 0,
           ),
         );
+        
+        // Force UI to refresh
+        setState(() {});
       },
     );
   }
@@ -477,16 +487,15 @@ class CustomQuoteView extends ConsumerWidget {
   void _proceedToCheckout(BuildContext context, WidgetRef ref) {
     // Validate quote
     final quote = ref.read(manualQuoteProvider);
-    final theme = Theme.of(context);
+            final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-
     if (quote == null) {
-      _showErrorSnackBar(context, 'Error: No hay datos de la cotización',  colorScheme);
+      _showErrorSnackBar(context, 'Error: No hay datos de la cotización', colorScheme);
       return;
     }
     
     if ((quote.peopleCount ?? 0) <= 0) {
-      _showErrorSnackBar(context, 'La cantidad de personas es requerida',  colorScheme);
+      _showErrorSnackBar(context, 'La cantidad de personas es requerida', colorScheme);
       return;
     }
     
@@ -496,13 +505,13 @@ class CustomQuoteView extends ConsumerWidget {
     }
     
     if (quote.dishes.isEmpty) {
-      _showErrorSnackBar(context, 'Debe agregar al menos un item', colorScheme);
+      _showErrorSnackBar(context, 'Debe agregar al menos un item',  colorScheme);
       return;
     }
     
     // All validation passed, submit the quote
-    if (onQuoteSubmitted != null) {
-      onQuoteSubmitted!(quote);
+    if (widget.onQuoteSubmitted != null) {
+      widget.onQuoteSubmitted!(quote);
     }
     
     // Navigate to cart with quote

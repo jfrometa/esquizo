@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/cathering_order_item.dart';
@@ -11,6 +12,9 @@ final manualQuoteProvider =
 
 class ManualQuoteNotifier extends StateNotifier<CateringOrderItem?> {
   Timer? _saveDebounce;
+  
+  // For UI styling consistency with error messages
+  final ColorScheme colorScheme = ColorScheme.light(); 
 
   ManualQuoteNotifier() : super(null) {
     _loadManualQuote();
@@ -22,22 +26,24 @@ class ManualQuoteNotifier extends StateNotifier<CateringOrderItem?> {
     String? serializedQuote = prefs.getString('manualQuote');
     if (serializedQuote != null) {
       state = CateringOrderItem.fromJson(jsonDecode(serializedQuote));
-    } else {
-      // Optionally, you can initialize a blank quote here.
-      // state = CateringOrderItem(
-      //   title: 'Quote',
-      //   img: '',
-      //   description: '',
-      //   dishes: [],
-      //   hasChef: false,
-      //   alergias: '',
-      //   eventType: '',
-      //   preferencia: '',
-      //   adicionales: '',
-      //   peopleCount: 0,
-      //   isQuote: true,
-      // );
     }
+  }
+
+  /// Create a new empty quote with default values.
+  void createEmptyQuote() {
+    state = CateringOrderItem(
+      title: 'Quote',
+      img: '',
+      description: '',
+      dishes: [],
+      hasChef: false,
+      alergias: '',
+      eventType: '',
+      preferencia: '',
+      adicionales: '',
+      peopleCount: 0,
+      isQuote: true,
+    );
   }
 
   /// Save the current quote to SharedPreferences.
@@ -148,7 +154,6 @@ class ManualQuoteNotifier extends StateNotifier<CateringOrderItem?> {
   void removeFromCart(int index) {
     if (state != null && index >= 0 && index < state!.dishes.length) {
       final updatedDishes = List<CateringDish>.from(state!.dishes)..removeAt(index);
-
       
       state = state!.copyWith(dishes: updatedDishes);
     }

@@ -8,19 +8,78 @@ import 'package:starter_architecture_flutter_firebase/src/screens/cart/meal_subs
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/widgets/catering_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/prompt_dialogs/new_item_dialog.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart';
-
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'cart_item_view.dart';
 
-class CartScreen extends ConsumerWidget {
+class CartScreen extends ConsumerStatefulWidget {
   const CartScreen({super.key, required this.isAuthenticated});
   final bool isAuthenticated;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CartScreen> createState() => _CartScreenState();
+}
+
+class _CartScreenState extends ConsumerState<CartScreen> with SingleTickerProviderStateMixin {
+  TabController? _tabController;
+  bool _isLoading = false;
+  String? _errorMessage;
+  List<String> _availableTabs = [];
+  
+  @override
+  void initState() {
+    super.initState();
+    // Initialize tabs and controller in initState
+    _availableTabs = _getAvailableTabs();
+    _initializeTabController();
+  }
+  
+  @override
+  void dispose() {
+    _tabController?.dispose();
+    super.dispose();
+  }
+  
+  void _initializeTabController() {
+    if (_availableTabs.isEmpty) {
+      _availableTabs = ['Platos']; // Default tab if nothing is available
+    }
+    
+    // If there are available tabs, create the controller
+    _tabController = TabController(length: _availableTabs.length, vsync: this);
+    
+    // Add listener only if controller is initialized
+    _tabController?.addListener(() {
+      // This ensures we rebuild when the tab changes
+      if (_tabController?.indexIsChanging == true) {
+        setState(() {});
+      }
+    });
+  }
+  
+  List<String> _getAvailableTabs() {
+    final List<String> tabs = [];
+    final cartItems = ref.read(cartProvider);
+    final cateringOrder = ref.read(cateringOrderProvider);
+    final manualQuote = ref.read(manualQuoteProvider);
+    final mealItems = ref.read(mealOrderProvider);
+    
+    // Add tabs in order of priority
+    if (mealItems.isNotEmpty) tabs.add('Subscripciones');
+    if (manualQuote != null) tabs.add('Cotizar Catering');
+    if (cateringOrder != null) tabs.add('Catering');
+    
+    // Regular dishes should always be available as an option
+    tabs.add('Platos');
+    
+    return tabs;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Watch providers to rebuild when they change
     final cartItems = ref.watch(cartProvider);
     final cateringOrder = ref.watch(cateringOrderProvider);
     final manualQuote = ref.watch(manualQuoteProvider);
@@ -43,12 +102,28 @@ class CartScreen extends ConsumerWidget {
      
     final List<CartItem> mealSubscriptions = mealItems;
 
-    // Create tabs dynamically based on available items
-    List<String> availableTabs = [];
+    // Update available tabs
+    _availableTabs = _getAvailableTabs();
+    
+    // If we have no items at all, show empty state
+    if (_availableTabs.isEmpty || (_availableTabs.length == 1 && dishes.isEmpty)) {
+      return _buildEmptyCartScreen(context);
+    }
+    
+    // Check if we need to reinitialize the tab controller due to tab count change
+    if (_tabController == null || _tabController?.length != _availableTabs.length) {
+      // Reinitialize the controller
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          _initializeTabController();
+        });
+      });
+      return _buildLoadingScreen();
+    }
+
     final List<Widget> tabContent = [];
 
     if (mealSubscriptions.isNotEmpty) {
-      availableTabs.add('Subscripciones');
       tabContent.add(_buildTabWithCheckoutButton(
         context,
         ref,
@@ -59,7 +134,6 @@ class CartScreen extends ConsumerWidget {
     }
     
     if (quoteItems.isNotEmpty) {
-      availableTabs.add('Cotizar Catering');
       tabContent.add(_buildTabWithCheckoutButton(
         context,
         ref,
@@ -70,7 +144,6 @@ class CartScreen extends ConsumerWidget {
     }
 
     if (cateringItems.isNotEmpty) {
-      availableTabs.add('Catering');
       tabContent.add(_buildTabWithCheckoutButton(
         context,
         ref,
@@ -80,73 +153,141 @@ class CartScreen extends ConsumerWidget {
       ));
     }
     
-    if (dishes.isNotEmpty) {
-      availableTabs.add('Platos');
-      tabContent.add(_buildTabWithCheckoutButton(
-        context,
-        ref,
-        'platos',
-        dishes,
-        _buildPlatosTab(ref, dishes),
-      ));
-    }
+    tabContent.add(_buildTabWithCheckoutButton(
+      context,
+      ref,
+      'platos',
+      dishes,
+      _buildPlatosTab(ref, dishes),
+    ));
 
-    if (availableTabs.isEmpty) {
-      return Scaffold(
+    return Scaffold(
         appBar: AppBar(
           title: const Text('Carrito'),
           surfaceTintColor: Colors.transparent,
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.shopping_cart_outlined,
-                size: 64,
-                color: colorScheme.outline,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Tu carrito está vacío',
-                style: theme.textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Agrega platos o servicios para comenzar',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 24),
-              FilledButton.icon(
-                onPressed: () => context.goNamed(AppRoute.home.name),
-                icon: const Icon(Icons.restaurant_menu),
-                label: const Text('Ver menú'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return DefaultTabController(
-      length: availableTabs.length,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Carrito'),
-          surfaceTintColor: Colors.transparent,
-          bottom: TabBar(
+          elevation: 0,
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.more_vert),
+              onPressed: () => _showCartOptions(context),
+              tooltip: 'Opciones de carrito',
+            ),
+          ],
+          bottom: _tabController == null ? null : TabBar(
+            controller: _tabController,
             isScrollable: true,
             tabAlignment: TabAlignment.start,
             dividerColor: colorScheme.outlineVariant,
-            tabs: availableTabs.map((title) {
-              return Tab(text: title);
+            indicatorColor: colorScheme.primary,
+            indicatorWeight: 3,
+            labelColor: colorScheme.primary,
+            unselectedLabelColor: colorScheme.onSurfaceVariant,
+            tabs: _availableTabs.map((title) {
+              IconData tabIcon;
+              switch (title) {
+                case 'Subscripciones':
+                  tabIcon = Icons.calendar_today;
+                  break;
+                case 'Cotizar Catering':
+                  tabIcon = Icons.request_quote;
+                  break;
+                case 'Catering':
+                  tabIcon = Icons.restaurant;
+                  break;
+                case 'Platos':
+                default:
+                  tabIcon = Icons.restaurant_menu;
+              }
+              
+              return Tab(
+                icon: Icon(tabIcon),
+                text: title,
+                iconMargin: const EdgeInsets.only(bottom: 4),
+              );
             }).toList(),
           ),
         ),
-        body: TabBarView(
-          children: tabContent,
+        body: _errorMessage != null
+            ? _buildErrorState(_errorMessage!)
+            : _isLoading || _tabController == null
+                ? _buildLoadingState()
+                : TabBarView(
+                    controller: _tabController,
+                    children: tabContent,
+                  ),
+      );
+  }
+
+  Widget _buildEmptyCartScreen(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Carrito'),
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceVariant.withOpacity(0.5),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.shopping_cart_outlined,
+                size: 64,
+                color: colorScheme.primary.withOpacity(0.7),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Tu carrito está vacío',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: Text(
+                'Agrega platos, servicios de catering o solicita una cotización para comenzar',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            FilledButton.icon(
+              onPressed: () => context.goNamed(AppRoute.home.name),
+              icon: const Icon(Icons.restaurant_menu),
+              label: const Text('Explorar Menú'),
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              ),
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: () {
+                final tabController = DefaultTabController.of(context);
+                tabController?.animateTo(2); // Go to catering tab
+              },
+              icon: const Icon(Icons.event_available),
+              label: const Text('Ver Servicios de Catering'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -163,7 +304,17 @@ class CartScreen extends ConsumerWidget {
 
     return Column(
       children: [
-        Expanded(child: tabContent),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              setState(() => _isLoading = true);
+              await Future.delayed(const Duration(milliseconds: 800));
+              setState(() => _isLoading = false);
+              // Could add actual data refresh logic here if needed
+            },
+            child: tabContent,
+          ),
+        ),
         if (tabTitle != 'quote') _buildTotalSection(totalPrice, context),
         _buildCheckoutButton(context, ref, totalPrice, items, tabTitle),
       ],
@@ -173,20 +324,26 @@ class CartScreen extends ConsumerWidget {
   double _calculateTabTotalPrice(List<dynamic> items) {
     if (items.isEmpty) return 0.0;
 
-    if (items.first is CateringOrderItem) {
-      return items.fold<double>(
-        0.0,
-        (sum, item) => sum + (item as CateringOrderItem).dishes
-          .fold(0.0, (sum, dish) => sum + dish.pricing * dish.peopleCount),
-      );
-    } else {
-      return items.fold<double>(
-        0.0,
-        (sum, item) =>
-            sum +
-            ((double.tryParse((item as CartItem).pricing) ?? 0.0) *
-                item.quantity),
-      );
+    try {
+      if (items.first is CateringOrderItem) {
+        return items.fold<double>(
+          0.0,
+          (sum, item) => sum + (item as CateringOrderItem).dishes
+            .fold(0.0, (sum, dish) => sum + (dish.pricing * dish.quantity)),
+        );
+      } else {
+        return items.fold<double>(
+          0.0,
+          (sum, item) =>
+              sum +
+              ((double.tryParse((item as CartItem).pricing) ?? 0.0) *
+                  item.quantity),
+        );
+      }
+    } catch (e) {
+      // Handle calculation errors gracefully
+      debugPrint('Error calculating price: $e');
+      return 0.0;
     }
   }
 
@@ -197,45 +354,88 @@ class CartScreen extends ConsumerWidget {
     List<dynamic> items, 
     String type
   ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final bool hasItemsInCurrentTab = items.isNotEmpty;
     bool isDisabled = false;
     String buttonLabel = 'Ir a Pagar';
-    final theme = Theme.of(context);
+    IconData buttonIcon = Icons.payment;
+    Color buttonColor = colorScheme.primary;
 
     if (type.toLowerCase() == 'catering') {
-      final cateringOrder = ref.watch(cateringOrderProvider);
+      final cateringOrder = ref.read(cateringOrderProvider);
       final isPersonasSelected = cateringOrder?.peopleCount != null &&
           ((cateringOrder!.peopleCount ?? 0) > 0);
       isDisabled = !isPersonasSelected;
+      buttonIcon = Icons.room_service;
     }
 
     if (type.toLowerCase() == 'quote') {
-      final cateringQuote = ref.watch(manualQuoteProvider);
+      final cateringQuote = ref.read(manualQuoteProvider);
       final isPersonasSelected = cateringQuote?.peopleCount != null &&
           ((cateringQuote!.peopleCount ?? 0) > 0);
       isDisabled = !isPersonasSelected;
       buttonLabel = 'Solicitar Cotización';
+      buttonIcon = Icons.request_quote;
+      buttonColor = colorScheme.secondary;
     }
 
     return SafeArea(
-      child: Padding(
+      child: Container(
         padding: const EdgeInsets.all(16.0),
-        child: FilledButton(
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.shadow.withOpacity(0.08),
+              blurRadius: 8,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: FilledButton.icon(
           onPressed: !isDisabled && hasItemsInCurrentTab
-              ? () {
-                  GoRouter.of(context).goNamed(AppRoute.checkout.name, extra: type);
-                }
+              ? () => _proceedToCheckout(context, type)
               : null,
+          icon: Icon(buttonIcon),
+          label: Text(buttonLabel),
           style: FilledButton.styleFrom(
             minimumSize: const Size(double.infinity, 56),
+            backgroundColor: buttonColor,
+            disabledBackgroundColor: colorScheme.surfaceVariant,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          child: Text(buttonLabel),
         ),
       ),
     );
+  }
+
+  void _proceedToCheckout(BuildContext context, String type) {
+    try {
+      // Show loading indicator
+      setState(() => _isLoading = true);
+      
+      // Add a small delay to show animation
+      Future.delayed(const Duration(milliseconds: 300), () {
+        setState(() => _isLoading = false);
+        GoRouter.of(context).goNamed(AppRoute.checkout.name, extra: type);
+      });
+    } catch (e) {
+      // Handle navigation errors
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Error al proceder al pago. Por favor, inténtalo de nuevo.';
+      });
+      
+      // Clear error after delay
+      Future.delayed(const Duration(seconds: 3), () {
+        if (mounted) {
+          setState(() => _errorMessage = null);
+        }
+      });
+    }
   }
 
   Widget _buildTotalSection(double totalPrice, BuildContext context) {
@@ -245,7 +445,7 @@ class CartScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHigh,
+        color: colorScheme.surfaceVariant.withOpacity(0.5),
         border: Border(
           top: BorderSide(
             color: colorScheme.outlineVariant,
@@ -256,13 +456,25 @@ class CartScreen extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            'Subtotal',
-            style: theme.textTheme.titleMedium,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Subtotal',
+                style: theme.textTheme.titleMedium,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Sin impuestos ni envío',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
           ),
           Text(
-            NumberFormat.currency(symbol: '\$', decimalDigits: 2).format(totalPrice),
-            style: theme.textTheme.titleLarge?.copyWith(
+            NumberFormat.currency(symbol: 'S/ ', decimalDigits: 2).format(totalPrice),
+            style: theme.textTheme.headlineSmall?.copyWith(
               color: colorScheme.primary,
               fontWeight: FontWeight.bold,
             ),
@@ -274,7 +486,11 @@ class CartScreen extends ConsumerWidget {
 
   Widget _buildSubscripcionesTab(WidgetRef ref, List<CartItem> mealItems) {
     if (mealItems.isEmpty) {
-      return _buildEmptyState('No hay subscripciones');
+      return _buildEmptyTabState(
+        'No hay subscripciones activas',
+        'Adquiere un plan de comidas para disfrutar de nuestros platillos regularmente',
+        Icons.calendar_today,
+      );
     }
     
     return ListView.builder(
@@ -282,14 +498,19 @@ class CartScreen extends ConsumerWidget {
       itemCount: mealItems.length,
       itemBuilder: (context, index) {
         final item = mealItems[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12.0),
-          child: MealSubscriptionItemView(
-            item: item,
-            onConsumeMeal: () =>
-                ref.read(mealOrderProvider.notifier).consumeMeal(item.title),
-            onRemoveFromCart: () =>
-                ref.read(mealOrderProvider.notifier).removeFromCart(item.id),
+        return AnimatedContainer(
+          duration: Duration(milliseconds: 300 + (index * 50)),
+          curve: Curves.easeOut,
+          transform: Matrix4.translationValues(0, 0, 0),
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: MealSubscriptionItemView(
+              item: item,
+              onConsumeMeal: () =>
+                  ref.read(mealOrderProvider.notifier).consumeMeal(item.title),
+              onRemoveFromCart: () =>
+                  ref.read(mealOrderProvider.notifier).removeFromCart(item.id),
+            ),
           ),
         );
       },
@@ -298,7 +519,11 @@ class CartScreen extends ConsumerWidget {
 
   Widget _buildCateringTab(WidgetRef ref, CateringOrderItem? cateringOrder) {
     if (cateringOrder == null) {
-      return _buildEmptyState('No hay pedidos de catering');
+      return _buildEmptyTabState(
+        'No hay pedidos de catering',
+        'Crea una orden para tus eventos especiales',
+        Icons.food_bank_outlined,
+      );
     }
     
     return SingleChildScrollView(
@@ -308,8 +533,12 @@ class CartScreen extends ConsumerWidget {
         children: [
           _buildSectionCard(
             title: 'Detalles de la Orden',
-            onEdit: () => _showCateringForm(ref.context, ref),
-            onDelete: () => ref.read(cateringOrderProvider.notifier).clearCateringOrder(),
+            onEdit: () => _showCateringForm(context, ref),
+            onDelete: () => _confirmDelete(
+              context, 
+              'orden de catering',
+              () => ref.read(cateringOrderProvider.notifier).clearCateringOrder(),
+            ),
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -346,8 +575,12 @@ class CartScreen extends ConsumerWidget {
         children: [
           _buildSectionCard(
             title: 'Detalles de la Cotización',
-            onEdit: () => _showQuoteForm(ref.context, ref),
-            onDelete: () => ref.read(manualQuoteProvider.notifier).clearManualQuote(),
+            onEdit: () => _showQuoteForm(context, ref),
+            onDelete: () => _confirmDelete(
+              context, 
+              'cotización',
+              () => ref.read(manualQuoteProvider.notifier).clearManualQuote(),
+            ),
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -372,6 +605,14 @@ class CartScreen extends ConsumerWidget {
             onAdd: () => _showNewItemDialog(ref),
             isQuote: true,
           ),
+          
+          // Additional info card for quote process
+          const SizedBox(height: 16),
+          _buildInformationCard(
+            title: 'Información de Cotización',
+            description: 'Tu solicitud será enviada a nuestro equipo para generar un presupuesto detallado. Te contactaremos en un plazo de 24-48 horas.',
+            icon: Icons.info_outline,
+          ),
         ],
       ),
     );
@@ -379,7 +620,11 @@ class CartScreen extends ConsumerWidget {
 
   Widget _buildPlatosTab(WidgetRef ref, List<CartItem> platosItems) {
     if (platosItems.isEmpty) {
-      return _buildEmptyState('No hay platos en el carrito');
+      return _buildEmptyTabState(
+        'No hay platos en el carrito',
+        'Agrega platos de nuestro menú para comenzar tu pedido',
+        Icons.restaurant_menu,
+      );
     }
     
     return ListView.builder(
@@ -471,6 +716,62 @@ class CartScreen extends ConsumerWidget {
     );
   }
 
+  Widget _buildInformationCard({
+    required String title,
+    required String description,
+    required IconData icon,
+  }) {
+    return Builder(
+      builder: (context) {
+        final theme = Theme.of(context);
+        final colorScheme = theme.colorScheme;
+        
+        return Card(
+          elevation: 0,
+          color: colorScheme.secondaryContainer.withOpacity(0.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  icon,
+                  color: colorScheme.secondary,
+                  size: 24,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSecondaryContainer,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        description,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSecondaryContainer.withOpacity(0.8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    );
+  }
+
   Widget _buildDishesCard({
     required WidgetRef ref,
     required List<CateringDish> items,
@@ -483,6 +784,7 @@ class CartScreen extends ConsumerWidget {
       builder: (context) {
         final theme = Theme.of(context);
         final colorScheme = theme.colorScheme;
+        final accentColor = isQuote ? colorScheme.secondary : colorScheme.primary;
         
         return Card(
           elevation: 0,
@@ -500,7 +802,7 @@ class CartScreen extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Platos',
+                      items.isEmpty ? 'Agregar Platos' : 'Platos (${items.length})',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -511,6 +813,8 @@ class CartScreen extends ConsumerWidget {
                       label: const Text('Agregar'),
                       style: FilledButton.styleFrom(
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        backgroundColor: accentColor.withOpacity(0.1),
+                        foregroundColor: accentColor,
                         minimumSize: const Size(40, 40),
                         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                       ),
@@ -541,6 +845,9 @@ class CartScreen extends ConsumerWidget {
                             onPressed: onAdd,
                             icon: const Icon(Icons.add),
                             label: const Text('Agregar Plato'),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: accentColor,
+                            ),
                           ),
                         ],
                       ),
@@ -556,18 +863,30 @@ class CartScreen extends ConsumerWidget {
                       return Card(
                         elevation: 0,
                         margin: const EdgeInsets.only(bottom: 8),
+                        color: colorScheme.surfaceVariant.withOpacity(0.3),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(color: colorScheme.outlineVariant.withOpacity(0.5)),
                         ),
                         child: ListTile(
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 16.0,
                             vertical: 8.0,
                           ),
+                          leading: CircleAvatar(
+                            backgroundColor: accentColor.withOpacity(0.2),
+                            foregroundColor: accentColor,
+                            child: Text(
+                              '${dish.quantity}',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                           title: Text(
                             dish.title,
-                            style: theme.textTheme.titleMedium,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                           subtitle: Padding(
                             padding: const EdgeInsets.only(top: 4.0),
@@ -580,13 +899,29 @@ class CartScreen extends ConsumerWidget {
                               ),
                             ),
                           ),
-                          trailing: IconButton(
-                            icon: Icon(
-                              Icons.delete_outline,
-                              color: colorScheme.error,
-                            ),
-                            onPressed: () => onRemove(index),
-                            tooltip: 'Eliminar',
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (dish.pricing > 0) 
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 12.0),
+                                  child: Text(
+                                    'S/ ${(dish.pricing * dish.quantity).toStringAsFixed(2)}',
+                                    style: theme.textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: accentColor,
+                                    ),
+                                  ),
+                                ),
+                              IconButton(
+                                icon: Icon(
+                                  Icons.delete_outline,
+                                  color: colorScheme.error,
+                                ),
+                                onPressed: () => onRemove(index),
+                                tooltip: 'Eliminar',
+                              ),
+                            ],
                           ),
                         ),
                       );
@@ -636,29 +971,129 @@ class CartScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyState(String message) {
+  Widget _buildEmptyTabState(String message, String description, IconData icon) {
     return Builder(
       builder: (context) {
         final theme = Theme.of(context);
         final colorScheme = theme.colorScheme;
         
         return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.shopping_bag_outlined,
-                size: 64,
-                color: colorScheme.outline,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                message,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceVariant.withOpacity(0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 40,
+                    color: colorScheme.outline,
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 24),
+                Text(
+                  message,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  description,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    );
+  }
+
+  Widget _buildLoadingScreen() {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Carrito'),
+        surfaceTintColor: Colors.transparent,
+      ),
+      body: _buildLoadingState(),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(),
+          const SizedBox(height: 16),
+          Text(
+            'Cargando carrito...',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String errorMessage) {
+    return Builder(
+      builder: (context) {
+        final theme = Theme.of(context);
+        final colorScheme = theme.colorScheme;
+        
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 48,
+                  color: colorScheme.error,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Ha ocurrido un error',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  errorMessage,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                FilledButton(
+                  onPressed: () {
+                    setState(() {
+                      _errorMessage = null;
+                      _isLoading = false;
+                    });
+                  },
+                  child: const Text('Intentar de nuevo'),
+                ),
+              ],
+            ),
           ),
         );
       }
@@ -668,30 +1103,43 @@ class CartScreen extends ConsumerWidget {
   void _showNewItemDialog(WidgetRef ref) {
     void addItem(String name, String description, int? quantity) {
       if (name.trim().isEmpty) return;
-      final quoteOrder = ref.watch(manualQuoteProvider);
+      final quoteOrder = ref.read(manualQuoteProvider);
+      
+      if (quoteOrder == null) {
+        // Create a new quote if none exists
+        ref.read(manualQuoteProvider.notifier).createEmptyQuote();
+      }
 
       ref.read(manualQuoteProvider.notifier).addManualItem(
         CateringDish(
           title: name.trim(),
-          quantity: quantity ?? 0,
+          quantity: quantity ?? 1,
           hasUnitSelection: false,
-          peopleCount: quantity ?? quoteOrder?.peopleCount ?? 0,
+          peopleCount: quoteOrder?.peopleCount ?? 0,
           pricePerUnit: 0,
           pricePerPerson: 0,
           ingredients: [],
           pricing: 0,
         ),
       );
+      
+      // Force a UI refresh
+      setState(() {});
     }
 
     NewItemDialog.show(
-      context: ref.context,
+      context: context,
       onAddItem: addItem,
     );
   }
 
   void _showQuoteForm(BuildContext context, WidgetRef ref) {
     final quote = ref.read(manualQuoteProvider);
+    if (quote == null) {
+      // Create empty quote first
+      ref.read(manualQuoteProvider.notifier).createEmptyQuote();
+    }
+    
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -709,28 +1157,33 @@ class CartScreen extends ConsumerWidget {
             top: 20,
           ),
           child: CateringForm(
-            initialData: quote,
+            initialData: ref.read(manualQuoteProvider),
             onSubmit: (formData) {
+              final currentQuote = ref.read(manualQuoteProvider);
               ref.read(manualQuoteProvider.notifier).finalizeManualQuote(
-                title: quote?.title ?? 'Cotización',
-                img: quote?.img ?? '',
-                description: quote?.description ?? '',
+                title: currentQuote?.title ?? 'Cotización',
+                img: currentQuote?.img ?? '',
+                description: currentQuote?.description ?? '',
                 hasChef: formData.hasChef,
                 alergias: formData.allergies.join(','),
                 eventType: formData.eventType,
-                preferencia: quote?.preferencia ?? '',
+                preferencia: currentQuote?.preferencia ?? '',
                 adicionales: formData.additionalNotes,
                 cantidadPersonas: formData.peopleCount,
               );
+              
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: const Text('Se actualizó la Cotización'),
-                  backgroundColor: Theme.of(context).colorScheme.tertiary,
+                  backgroundColor: Theme.of(context).colorScheme.secondary,
                   behavior: SnackBarBehavior.floating,
                   duration: const Duration(milliseconds: 1500),
                 ),
               );
-              GoRouter.of(context).pop();
+              Navigator.pop(context);
+              
+              // Force a UI refresh
+              setState(() {});
             },
           ),
         );
@@ -759,31 +1212,173 @@ class CartScreen extends ConsumerWidget {
           child: CateringForm(
             initialData: order,
             onSubmit: (formData) {
-              ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(
-                title: order?.title ?? '',
-                img: order?.img ?? '',
-                description: order?.title ?? '',
-                hasChef: formData.hasChef,
-                alergias: formData.allergies.join(','),
-                eventType: formData.eventType,
-                preferencia: order?.preferencia ?? '',
-                adicionales: formData.additionalNotes,
-                cantidadPersonas: formData.peopleCount,
-              );
+              try {
+                ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(
+                  title: order?.title ?? '',
+                  img: order?.img ?? '',
+                  description: order?.title ?? '',
+                  hasChef: formData.hasChef,
+                  alergias: formData.allergies.join(','),
+                  eventType: formData.eventType,
+                  preferencia: order?.preferencia ?? '',
+                  adicionales: formData.additionalNotes,
+                  cantidadPersonas: formData.peopleCount,
+                );
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('Se actualizó el Catering'),
-                  backgroundColor: Theme.of(context).colorScheme.tertiary,
-                  behavior: SnackBarBehavior.floating,
-                  duration: const Duration(milliseconds: 1500),
-                ),
-              );
-              Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Se actualizó el Catering'),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    behavior: SnackBarBehavior.floating,
+                    duration: const Duration(milliseconds: 1500),
+                  ),
+                );
+                Navigator.pop(context);
+                
+                // Force a UI refresh
+                setState(() {});
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Error: ${e.toString()}'),
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
             },
           ),
         );
       },
+    );
+  }
+  
+  void _showCartOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.delete_sweep),
+                title: const Text('Vaciar carrito'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _confirmClearCart(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.history),
+                title: const Text('Ver historial de pedidos'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // Add navigation to order history
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.help_outline),
+                title: const Text('Ayuda con mi pedido'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // Add help functionality
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+  
+  void _confirmClearCart(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Vaciar carrito'),
+        content: const Text('¿Estás seguro de que deseas eliminar todos los items de tu carrito?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancelar', style: TextStyle(color: colorScheme.primary)),
+          ),
+          FilledButton(
+            onPressed: () {
+              // Clear all cart items
+              ref.read(cartProvider.notifier).clearCart();
+              ref.read(cateringOrderProvider.notifier).clearCateringOrder();
+              ref.read(manualQuoteProvider.notifier).clearManualQuote();
+              ref.read(mealOrderProvider.notifier).clearCart();
+              
+              Navigator.pop(context);
+              
+              // Show confirmation
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Carrito vaciado con éxito'),
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: colorScheme.secondary,
+                ),
+              );
+              
+              // Force a UI refresh and reset tab controller
+              setState(() {});
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.error,
+              foregroundColor: colorScheme.onError,
+            ),
+            child: const Text('Vaciar carrito'),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  void _confirmDelete(BuildContext context, String itemType, VoidCallback onConfirm) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Eliminar $itemType'),
+        content: Text('¿Estás seguro de que deseas eliminar esta $itemType?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancelar', style: TextStyle(color: colorScheme.primary)),
+          ),
+          FilledButton(
+            onPressed: () {
+              onConfirm();
+              Navigator.pop(context);
+              
+              // Show confirmation
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('$itemType eliminada'),
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: colorScheme.secondary,
+                ),
+              );
+              
+              // Force a UI refresh
+              setState(() {});
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.error,
+              foregroundColor: colorScheme.onError,
+            ),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
     );
   }
 }
