@@ -28,7 +28,8 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
   @override
   Widget build(BuildContext context) {
     final customerPlansAsync = ref.watch(customerMealPlansProvider);
-    final selectedPlanAsync = _selectedMealPlanId != null
+    // Use a StreamProvider for the selected meal plan instead of a FutureProvider
+    final  selectedPlanAsync = _selectedMealPlanId != null
         ? ref.watch(mealPlanProvider(_selectedMealPlanId!))
         : const AsyncValue.loading();
     
@@ -72,7 +73,7 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
                     const VerticalDivider(width: 1),
                     Expanded(
                       child: _selectedMealPlanId != null
-                          ? _buildMealPlanDetails(selectedPlanAsync as AsyncValue<MealPlan?>)
+                          ? _buildMealPlanDetails(selectedPlanAsync as AsyncValue<MealPlan>)
                           : Center(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -97,7 +98,7 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
                 )
               : _selectedMealPlanId == null
                   ? _buildMealPlansList(plans)
-                  : _buildMealPlanDetails(selectedPlanAsync as AsyncValue<MealPlan?>);
+                  : _buildMealPlanDetails(selectedPlanAsync as AsyncValue<MealPlan>);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: SelectableText('Error: $error')),
@@ -262,7 +263,7 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
     );
   }
   
-  Widget _buildMealPlanDetails(AsyncValue<MealPlan?> planAsync) {
+  Widget _buildMealPlanDetails(AsyncValue<MealPlan> planAsync) {
     final isDesktop = ResponsiveLayout.isDesktop(context);
     
     return planAsync.when(

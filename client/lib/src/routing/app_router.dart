@@ -400,7 +400,7 @@ Widget _getDestinationScreen(String path) {
     case '/':
       return const ResponsiveLandingPage();
     case '/local':
-      return const QRCodeScreen();
+      return const MenuHome(); // QRCodeScreen();
     case '/menu':
       return const MenuScreen();
     case '/carrito':
