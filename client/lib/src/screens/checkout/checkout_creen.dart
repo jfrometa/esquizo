@@ -19,8 +19,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/checkout/widge
 import 'package:starter_architecture_flutter_firebase/src/screens/checkout/widgets/quote_checkout.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/location/location_capture.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_cart.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/prompt_dialogs/contact_info_dialog.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/providers/cart_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/prompt_dialogs/contact_info_dialog.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/manual_quote_provider.dart';
 import 'package:uuid/uuid.dart';
@@ -80,11 +79,6 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   
   // Animation
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
-
-  // Validation state
-  final bool _isNameValid = true;
-  final bool _isPhoneValid = true;
-  final bool _isEmailValid = true;
 
   @override
   void dispose() {
@@ -366,15 +360,12 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   Widget _buildDeliveryStep(ColorScheme colorScheme) {
     return Card(
-      elevation: 2,
+      elevation: 0,
       color: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: _buildCheckoutContent(),
-      ),
+      child: _buildCheckoutContent(),
     );
   }
 

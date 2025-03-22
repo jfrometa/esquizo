@@ -168,67 +168,64 @@ class MealPlanCheckout extends ConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: colorScheme.primaryContainer,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.restaurant,
-              color: colorScheme.onPrimaryContainer,
-              size: 20,
-            ),
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: colorScheme.primaryContainer,
+            shape: BoxShape.circle,
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+          child: Icon(
+            Icons.restaurant,
+            color: colorScheme.onPrimaryContainer,
+            size: 20,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                DateFormat('EEEE, d MMMM', 'es').format(meal.deliveryDate),
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                DateFormat('HH:mm').format(meal.deliveryDate),
+                style: theme.textTheme.bodyMedium,
+              ),
+              if (meal.notes.isNotEmpty)
                 Text(
-                  DateFormat('EEEE, d MMMM', 'es').format(meal.deliveryDate),
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+                  meal.notes,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
-                Text(
-                  DateFormat('HH:mm').format(meal.deliveryDate),
-                  style: theme.textTheme.bodyMedium,
-                ),
-                if (meal.notes.isNotEmpty)
-                  Text(
-                    meal.notes,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-              ],
-            ),
+            ],
           ),
-          IconButton(
-            icon: Icon(
-              Icons.edit_outlined,
-              color: colorScheme.primary,
-              size: 20,
-            ),
-            onPressed: () => _editScheduledMeal(context, ref, meal),
-            tooltip: 'Editar',
+        ),
+        IconButton(
+          icon: Icon(
+            Icons.edit_outlined,
+            color: colorScheme.primary,
+            size: 20,
           ),
-          IconButton(
-            icon: Icon(
-              Icons.delete_outline,
-              color: colorScheme.error,
-              size: 20,
-            ),
-            onPressed: () => _deleteScheduledMeal(context, ref, meal),
-            tooltip: 'Eliminar',
+          onPressed: () => _editScheduledMeal(context, ref, meal),
+          tooltip: 'Editar',
+        ),
+        IconButton(
+          icon: Icon(
+            Icons.delete_outline,
+            color: colorScheme.error,
+            size: 20,
           ),
-        ],
-      ),
+          onPressed: () => _deleteScheduledMeal(context, ref, meal),
+          tooltip: 'Eliminar',
+        ),
+      ],
     );
   }
 
@@ -713,37 +710,34 @@ class MealPlanCheckout extends ConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextField(
-        controller: locationController,
-        readOnly: true,
-        onTap: () => onLocationTap(context, locationController, 'catering'),
-        decoration: InputDecoration(
-          labelText: 'Ubicación de entrega',
-          prefixIcon: Icon(Icons.location_on_outlined, color: colorScheme.primary),
-          filled: true,
-          fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12.0),
-            borderSide: BorderSide(
-              color: colorScheme.outline,
-              width: 1.0,
-            ),
+    return TextField(
+      controller: locationController,
+      readOnly: true,
+      onTap: () => onLocationTap(context, locationController, 'catering'),
+      decoration: InputDecoration(
+        labelText: 'Ubicación de entrega',
+        prefixIcon: Icon(Icons.location_on_outlined, color: colorScheme.primary),
+        filled: true,
+        fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: BorderSide(
+            color: colorScheme.outline,
+            width: 1.0,
           ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12.0),
-            borderSide: BorderSide(
-              color: colorScheme.outline,
-              width: 1.0,
-            ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: BorderSide(
+            color: colorScheme.outline,
+            width: 1.0,
           ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12.0),
-            borderSide: BorderSide(
-              color: colorScheme.primary,
-              width: 2.0,
-            ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: BorderSide(
+            color: colorScheme.primary,
+            width: 2.0,
           ),
         ),
       ),

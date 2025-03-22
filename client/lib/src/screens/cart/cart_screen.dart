@@ -14,6 +14,8 @@ import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'cart_item_view.dart';
 
+
+
 class CartScreen extends ConsumerStatefulWidget {
   const CartScreen({super.key, required this.isAuthenticated});
   final bool isAuthenticated;
@@ -216,8 +218,51 @@ class _CartScreenState extends ConsumerState<CartScreen> with SingleTickerProvid
                     controller: _tabController,
                     children: tabContent,
                   ),
-      );
+     
+    );
   }
+
+
+// Empty cart action button handlers
+  void _handleEmptyCartAction(String type) {
+    if (type.toLowerCase() == 'catering') {
+      _showCateringForm(context, ref);
+    } else if (type.toLowerCase() == 'quote') {
+      _showQuoteForm(context, ref);
+    }
+  }  void _showNewItemDialog(WidgetRef ref) {
+    void addItem(String name, String description, int? quantity) {
+      if (name.trim().isEmpty) return;
+      final quoteOrder = ref.read(manualQuoteProvider);
+      
+      if (quoteOrder == null) {
+        // Create a new quote if none exists
+        ref.read(manualQuoteProvider.notifier).createEmptyQuote();
+      }
+
+      ref.read(manualQuoteProvider.notifier).addManualItem(
+        CateringDish(
+          title: name.trim(),
+          quantity: quantity ?? 1,
+          hasUnitSelection: false,
+          peopleCount: quoteOrder?.peopleCount ?? 0,
+          pricePerUnit: 0,
+          pricePerPerson: 0,
+          ingredients: [],
+          pricing: 0,
+        ),
+      );
+      
+      // Force a UI refresh
+      setState(() {});
+    }
+
+    NewItemDialog.show(
+      context: context,
+      onAddItem: addItem,
+    );
+  }
+
 
   Widget _buildEmptyCartScreen(BuildContext context) {
     final theme = Theme.of(context);
@@ -277,10 +322,7 @@ class _CartScreenState extends ConsumerState<CartScreen> with SingleTickerProvid
             ),
             const SizedBox(height: 16),
             OutlinedButton.icon(
-              onPressed: () {
-                final tabController = DefaultTabController.of(context);
-                tabController?.animateTo(2); // Go to catering tab
-              },
+              onPressed: () => _handleEmptyCartAction('catering'),
               icon: const Icon(Icons.event_available),
               label: const Text('Ver Servicios de Catering'),
               style: OutlinedButton.styleFrom(
@@ -560,7 +602,7 @@ class _CartScreenState extends ConsumerState<CartScreen> with SingleTickerProvid
             items: cateringOrder.dishes,
             personCount: cateringOrder.peopleCount,
             onRemove: (index) => ref.read(cateringOrderProvider.notifier).removeFromCart(index),
-            onAdd: () => {}, // This functionality needs to be implemented
+            onAdd: () => _handleAddItemPressed('catering'),
           ),
         ],
       ),
@@ -602,7 +644,7 @@ class _CartScreenState extends ConsumerState<CartScreen> with SingleTickerProvid
             items: quote.dishes,
             personCount: quote.peopleCount,
             onRemove: (index) => ref.read(manualQuoteProvider.notifier).removeFromCart(index),
-            onAdd: () => _showNewItemDialog(ref),
+            onAdd: () => _handleAddItemPressed('quote'),
             isQuote: true,
           ),
           
@@ -1100,37 +1142,26 @@ class _CartScreenState extends ConsumerState<CartScreen> with SingleTickerProvid
     );
   }
 
-  void _showNewItemDialog(WidgetRef ref) {
-    void addItem(String name, String description, int? quantity) {
-      if (name.trim().isEmpty) return;
-      final quoteOrder = ref.read(manualQuoteProvider);
-      
-      if (quoteOrder == null) {
-        // Create a new quote if none exists
-        ref.read(manualQuoteProvider.notifier).createEmptyQuote();
+  void _handleAddItemPressed(String type) {
+    if (type.toLowerCase() == 'catering') {
+      final order = ref.read(cateringOrderProvider);
+      if (order == null || (order.peopleCount ?? 0) <= 0) {
+        // Show catering form first
+        _showCateringForm(context, ref);
+      } else {
+        // Allow adding items
+        GoRouter.of(context).pushNamed(AppRoute.cateringMenu.name);
       }
-
-      ref.read(manualQuoteProvider.notifier).addManualItem(
-        CateringDish(
-          title: name.trim(),
-          quantity: quantity ?? 1,
-          hasUnitSelection: false,
-          peopleCount: quoteOrder?.peopleCount ?? 0,
-          pricePerUnit: 0,
-          pricePerPerson: 0,
-          ingredients: [],
-          pricing: 0,
-        ),
-      );
-      
-      // Force a UI refresh
-      setState(() {});
+    } else if (type.toLowerCase() == 'quote') {
+      final quote = ref.read(manualQuoteProvider);
+      if (quote == null || (quote.peopleCount ?? 0) <= 0) {
+        // Show quote form first
+        _showQuoteForm(context, ref);
+      } else {
+        // Allow adding items
+        _showNewItemDialog(ref);
+      }
     }
-
-    NewItemDialog.show(
-      context: context,
-      onAddItem: addItem,
-    );
   }
 
   void _showQuoteForm(BuildContext context, WidgetRef ref) {
