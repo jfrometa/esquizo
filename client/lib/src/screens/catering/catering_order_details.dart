@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/cathering_order_item.dart';
@@ -16,12 +17,16 @@ class CateringOrderDetailsScreenState
   bool isEditing = false;
 
   // Temporary variables to store changes before applying
-  late bool temphasChef;
+  late bool tempHasChef;
   late String tempAlergias;
   late String tempEventType;
   late String tempPreferencia;
   late String tempAdicionales;
   late int tempCantidadPersonas;
+  
+  // Controller for animated transitions
+  late final AnimationController _controller;
+  late final Animation<double> _fadeAnimation;
 
   @override
   void initState() {
@@ -29,7 +34,7 @@ class CateringOrderDetailsScreenState
     final cateringOrders = ref.read(cateringOrderProvider)!;
 
     // Initialize temporary values with the existing order values
-    temphasChef = cateringOrders.hasChef ?? false;
+    tempHasChef = cateringOrders.hasChef ?? false;
     tempAlergias = cateringOrders.alergias;
     tempEventType = cateringOrders.eventType;
     tempPreferencia = cateringOrders.preferencia;
@@ -37,121 +42,214 @@ class CateringOrderDetailsScreenState
     tempCantidadPersonas = cateringOrders.peopleCount ?? 0;
   }
 
+  void _saveChanges() {
+    final cateringOrders = ref.read(cateringOrderProvider)!;
+    // Save changes to the provider
+    ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(
+      title: cateringOrders.title,
+      img: cateringOrders.img,
+      cantidadPersonas: tempCantidadPersonas,
+      hasChef: tempHasChef,
+      alergias: tempAlergias,
+      eventType: tempEventType,
+      preferencia: tempPreferencia,
+      adicionales: tempAdicionales,
+      description: cateringOrders.description,
+    );
+    
+    HapticFeedback.mediumImpact();
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Order details updated'),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
+    
+    setState(() {
+      isEditing = false; // Exit edit mode
+    });
+  }
+
+  void _cancelEditing() {
+    final cateringOrders = ref.read(cateringOrderProvider)!;
+    // Revert temporary values to original
+    setState(() {
+      tempHasChef = cateringOrders.hasChef ?? false;
+      tempAlergias = cateringOrders.alergias;
+      tempEventType = cateringOrders.eventType;
+      tempPreferencia = cateringOrders.preferencia;
+      tempAdicionales = cateringOrders.adicionales;
+      tempCantidadPersonas = cateringOrders.peopleCount ?? 0;
+      isEditing = false;
+    });
+    
+    HapticFeedback.lightImpact();
+  }
+
   @override
   Widget build(BuildContext context) {
     final CateringOrderItem cateringOrders = ref.watch(cateringOrderProvider)!;
-    final bool isNotWithoutDishes = cateringOrders.dishes.isNotEmpty;
+    final bool hasItems = cateringOrders.dishes.isNotEmpty;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     
-    final orders = cateringOrders.dishes.asMap().entries.map((entry) {
-      int index = entry.key;
-      var dish = entry.value;
-
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                dish.title,
-                style: theme.textTheme.bodyMedium,
-              ),
-            ),
-            Text(
-              // Update price calculation based on hasUnitSelection
-              '\$${(dish.hasUnitSelection ? dish.quantity : dish.peopleCount * tempCantidadPersonas).toStringAsFixed(2)}',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            if (isEditing)
-              Row(
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.edit,
-                        color: colorScheme.secondary),
-                    onPressed: () => _editDishDialog(context, dish),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.delete_forever, 
-                        size: 20, 
-                        color: colorScheme.error),
-                    onPressed: () => _removeDish(index),
-                  ),
-                ],
-              ),
-          ],
-        ),
-      );
-    }).toList();
-
     return Scaffold(
       appBar: AppBar(
-        forceMaterialTransparency: true,
-        title: const Text('Detalles de la Orden'),
+        scrolledUnderElevation: 2,
+        title: Text(
+          isEditing ? 'Edit Order Details' : 'Order Details', 
+          style: theme.textTheme.titleLarge,
+        ),
         actions: [
-          IconButton(
-            icon: Icon(isEditing ? Icons.check : Icons.edit),
-            onPressed: () {
-              if (isEditing) {
-                // Save changes to the provider only when the checkmark is hit
-                ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(
-                      title: cateringOrders.title,
-                      img: cateringOrders.img,
-                      cantidadPersonas: tempCantidadPersonas, // Updated value
-                      hasChef: temphasChef, // Updated value
-                      alergias: tempAlergias, // Updated value
-                      eventType: tempEventType, // Updated value
-                      preferencia: tempPreferencia, // Updated value
-                      adicionales: tempAdicionales, // Updated value
-                      description: cateringOrders.description,
-                    );
-              }
-
-              setState(() {
-                isEditing = !isEditing; // Toggle edit mode
-              });
-            },
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: isEditing
+                ? Row(
+                    key: const ValueKey('editing_actions'),
+                    children: [
+                      TextButton.icon(
+                        onPressed: _cancelEditing,
+                        icon: const Icon(Icons.close),
+                        label: const Text('Cancel'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: colorScheme.error,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton.icon(
+                        onPressed: _saveChanges,
+                        icon: const Icon(Icons.check),
+                        label: const Text('Save'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: colorScheme.primary,
+                          foregroundColor: colorScheme.onPrimary,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                  )
+                : IconButton(
+                    key: const ValueKey('edit_button'),
+                    icon: const Icon(Icons.edit),
+                    tooltip: 'Edit Order',
+                    onPressed: () {
+                      setState(() {
+                        isEditing = true;
+                      });
+                      HapticFeedback.selectionClick();
+                    },
+                  ),
           ),
-          if (isEditing)
-            IconButton(
-              icon: const Icon(Icons.cancel),
-              onPressed: () {
-                // Cancel editing, revert values, and pop the screen
-                setState(() {
-                  temphasChef = cateringOrders.hasChef ?? false;
-                  tempAlergias = cateringOrders.alergias;
-                  tempEventType = cateringOrders.eventType;
-                  tempPreferencia = cateringOrders.preferencia;
-                  tempAdicionales = cateringOrders.adicionales;
-                  tempCantidadPersonas =
-                      cateringOrders.peopleCount ?? 0; // Revert values
-                  isEditing = false;
-                });
-              },
-            ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: isNotWithoutDishes
-            ? Card(
-                margin: const EdgeInsets.all(8.0),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+      body: !hasItems
+          ? _buildEmptyState(theme, colorScheme)
+          : _buildOrderDetails(cateringOrders, theme, colorScheme),
+    );
+  }
+  
+  Widget _buildEmptyState(ThemeData theme, ColorScheme colorScheme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.no_food,
+            size: 64,
+            color: colorScheme.error.withOpacity(0.7),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No Items in Order',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Your catering order has no items',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 32),
+          FilledButton.icon(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.arrow_back),
+            label: const Text('Back to Catering'),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildOrderDetails(CateringOrderItem order, ThemeData theme, ColorScheme colorScheme) {
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Order title card
+                Card(
+                  elevation: 0,
+                  color: colorScheme.surfaceVariant.withOpacity(0.7),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: colorScheme.primary,
+                          radius: 24,
+                          child: Icon(Icons.restaurant, color: colorScheme.onPrimary, size: 24),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                order.title,
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              if (order.description.isNotEmpty)
+                                Text(
+                                  order.description,
+                                  style: theme.textTheme.bodyMedium,
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // Order details section
+                _buildSectionHeader(theme, 'Order Information'),
+                const SizedBox(height: 8),
+                
+                Card(
+                  elevation: 0,
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Orden de Catering',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          )),
-                      const SizedBox(height: 8),
-                      _buildEditableTextField(
-                        'Cantidad de Personas',
-                        tempCantidadPersonas.toString(),
-                        (newValue) {
+                      _buildEditableField(
+                        icon: Icons.people,
+                        label: 'Number of People',
+                        value: tempCantidadPersonas.toString(),
+                        onChanged: (newValue) {
                           int? updatedValue = int.tryParse(newValue);
                           if (updatedValue != null) {
                             setState(() {
@@ -159,196 +257,522 @@ class CateringOrderDetailsScreenState
                             });
                           }
                         },
+                        keyboardType: TextInputType.number,
+                        theme: theme,
+                        colorScheme: colorScheme,
                       ),
-                      _buildEditableTextField(
-                        'hasChef',
-                        temphasChef,
-                        (newValue) {
-                          setState(() {
-                            temphasChef = newValue;
-                          });
-                        },
-                      ),
-                      _buildEditableTextField(
-                        'Alergias',
-                        tempAlergias,
-                        (newValue) {
-                          setState(() {
-                            tempAlergias = newValue;
-                          });
-                        },
-                      ),
-                      _buildEditableTextField(
-                        'Tipo de evento',
-                        tempEventType,
-                        (newValue) {
+                      const Divider(height: 1, indent: 56),
+                      
+                      _buildEditableField(
+                        icon: Icons.event,
+                        label: 'Event Type',
+                        value: tempEventType,
+                        onChanged: (newValue) {
                           setState(() {
                             tempEventType = newValue;
                           });
                         },
+                        placeholder: 'E.g. Wedding, Birthday Party, Corporate',
+                        theme: theme,
+                        colorScheme: colorScheme,
                       ),
-                      // _buildEditableTextField(
-                      //   'Preferencia',
-                      //   tempPreferencia,
-                      //   (newValue) {
-                      //     setState(() {
-                      //       tempPreferencia = newValue;
-                      //     });
-                      //   },
-                      // ),
-                      _buildEditableTextField(
-                        'Adicionales',
-                        tempAdicionales,
-                        (newValue) {
+                      const Divider(height: 1, indent: 56),
+                      
+                      _buildEditableField(
+                        icon: Icons.warning_amber,
+                        label: 'Allergies',
+                        value: tempAlergias,
+                        onChanged: (newValue) {
+                          setState(() {
+                            tempAlergias = newValue;
+                          });
+                        },
+                        placeholder: 'Any food allergies or restrictions',
+                        theme: theme,
+                        colorScheme: colorScheme,
+                      ),
+                      const Divider(height: 1, indent: 56),
+                      
+                      _buildEditableField(
+                        icon: Icons.note,
+                        label: 'Additional Notes',
+                        value: tempAdicionales,
+                        onChanged: (newValue) {
                           setState(() {
                             tempAdicionales = newValue;
                           });
                         },
+                        placeholder: 'Special requests or additional information',
+                        multiline: true,
+                        theme: theme,
+                        colorScheme: colorScheme,
                       ),
-                      const SizedBox(height: 16),
-                      Text('Items:',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          )),
-                      SingleChildScrollView(
-                        child: Column(
-                          children: [...orders],
-                        ),
-                      ),
-                      Divider(color: colorScheme.outline),
-                      Text(
-                          'Total Order Price: \$${cateringOrders.totalPrice.toStringAsFixed(2)}',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          )),
+                      const Divider(height: 1, indent: 56),
+                      
+                      // Chef service option
+                      _buildChefToggle(theme, colorScheme),
                     ],
                   ),
                 ),
-              )
-            : Center(
-                child: Text(
-                  'No catering orders available',
-                  style: theme.textTheme.bodyLarge,
-                ),
-              ),
-      ),
-    );
-  }
-
-  Widget _buildEditableTextField(
-      String label, dynamic value, Function(dynamic) onChanged) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    
-    if (value is bool) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 8.0),
-        child: Row(
-          children: [
-            Text(
-              '$label: ${value ? ' Si ' : ' No '}', 
-              style: theme.textTheme.bodyMedium,
+                
+                const SizedBox(height: 24),
+                
+                // Order items section
+                _buildSectionHeader(theme, 'Order Items'),
+                const SizedBox(height: 8),
+              ],
             ),
-            const Spacer(),
-            if (isEditing) 
-              Switch(
-                inactiveTrackColor: colorScheme.surfaceContainerHighest,
-                activeColor: colorScheme.primary,
-                value: value,
-                onChanged: isEditing ? (bool newValue) => onChanged(newValue) : null,
-              ) 
-            else 
-              const SizedBox(),
-          ],
+          ),
         ),
-      );
-    }
-    
-    return isEditing
-        ? Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Row(
+        
+        // Order items list
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final dish = order.dishes[index];
+                return _buildOrderItemCard(
+                  dish: dish, 
+                  index: index, 
+                  theme: theme, 
+                  colorScheme: colorScheme,
+                );
+              },
+              childCount: order.dishes.length,
+            ),
+          ),
+        ),
+        
+        // Total price and summary
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('$label: ', style: theme.textTheme.bodyMedium),
-                Expanded(
-                  child: TextFormField(
-                    initialValue: value.toString(),
-                    onChanged: onChanged,
-                    decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
-                      contentPadding:
-                          const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: colorScheme.primary),
-                      ),
+                const SizedBox(height: 8),
+                Card(
+                  elevation: 2,
+                  color: colorScheme.primaryContainer,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Total Order Price',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: colorScheme.onPrimaryContainer,
+                              ),
+                            ),
+                            Text(
+                              '\$${order.totalPrice.toStringAsFixed(2)}',
+                              style: theme.textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.onPrimaryContainer,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+                        FilledButton.icon(
+                          onPressed: () {
+                            // Proceed to checkout action
+                            Navigator.pop(context);
+                          },
+                          icon: const Icon(Icons.shopping_cart),
+                          label: const Text('Checkout'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: colorScheme.primary,
+                            foregroundColor: colorScheme.onPrimary,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
+                const SizedBox(height: 24),
               ],
             ),
-          )
-        : Text('$label: $value', style: theme.textTheme.bodyMedium);
+          ),
+        ),
+      ],
+    );
   }
-
-  void _editDishDialog(BuildContext context, CateringDish dish) {
+  
+  Widget _buildSectionHeader(ThemeData theme, String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Text(
+        title,
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildEditableField({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Function(String) onChanged,
+    required ThemeData theme,
+    required ColorScheme colorScheme,
+    String placeholder = '',
+    bool multiline = false,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: InkWell(
+        onTap: isEditing ? () {} : null,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Row(
+            crossAxisAlignment: multiline ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+            children: [
+              Icon(icon, color: colorScheme.primary),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    if (isEditing)
+                      TextField(
+                        controller: TextEditingController(text: value)..selection = TextSelection.fromPosition(
+                          TextPosition(offset: value.length),
+                        ),
+                        onChanged: onChanged,
+                        keyboardType: keyboardType,
+                        maxLines: multiline ? 3 : 1,
+                        decoration: InputDecoration(
+                          hintText: placeholder,
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide(
+                              color: colorScheme.primary,
+                              width: 2.0,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      Text(
+                        value.isEmpty ? placeholder : value,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: value.isEmpty ? colorScheme.onSurfaceVariant.withOpacity(0.7) : colorScheme.onSurface,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildChefToggle(ThemeData theme, ColorScheme colorScheme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        child: Row(
+          children: [
+            Icon(Icons.restaurant, color: colorScheme.primary),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Chef Service',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Include a professional chef for your event',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            Switch(
+              value: tempHasChef,
+              onChanged: isEditing
+                  ? (value) {
+                      setState(() {
+                        tempHasChef = value;
+                      });
+                      HapticFeedback.selectionClick();
+                    }
+                  : null,
+              activeColor: colorScheme.primary,
+              inactiveTrackColor: isEditing 
+                  ? colorScheme.surfaceVariant 
+                  : colorScheme.surfaceVariant.withOpacity(0.5),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildOrderItemCard({
+    required CateringDish dish,
+    required int index,
+    required ThemeData theme,
+    required ColorScheme colorScheme,
+  }) {
+    return Card(
+      elevation: 0,
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: colorScheme.outlineVariant,
+          width: 1,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Quantity indicator
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '× ${dish.quantity}',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                
+                // Item details
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        dish.title,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if ((dish.pricePerUnit ?? 0) > 0)
+                        Text(
+                          '\$${(dish.pricePerUnit ?? 0).toStringAsFixed(2)} per unit',
+                          style: theme.textTheme.bodySmall,
+                        ),
+                    ],
+                  ),
+                ),
+                
+                // Item price
+                Text(
+                  '\$${(dish.hasUnitSelection ? dish.quantity * (dish.pricePerUnit ?? 0) : dish.peopleCount * tempCantidadPersonas * (dish.pricePerPerson)).toStringAsFixed(2)}',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.primary,
+                  ),
+                ),
+                
+                // Edit/delete buttons when in edit mode
+                if (isEditing)
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.edit, color: colorScheme.primary, size: 20),
+                        onPressed: () => _editDishDialog(context, dish, index),
+                        tooltip: 'Edit item',
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.delete, color: colorScheme.error, size: 20),
+                        onPressed: () => _showDeleteConfirmation(context, index),
+                        tooltip: 'Remove item',
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  void _editDishDialog(BuildContext context, CateringDish dish, int index) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    String updatedValue = dish.hasUnitSelection 
-        ? dish.pricePerUnit.toString()
-        : dish.peopleCount.toString();
-        
+    final quantityController = TextEditingController(
+      text: dish.hasUnitSelection
+          ? dish.quantity.toString()
+          : dish.peopleCount.toString()
+    );
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Editar', style: theme.textTheme.titleLarge),
+        title: Text('Edit Item', style: theme.textTheme.titleLarge),
+        icon: const Icon(Icons.edit),
+        iconColor: colorScheme.primary,
         content: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextFormField(
-              initialValue: updatedValue,
+            Text(
+              dish.title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: quantityController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: dish.hasUnitSelection ? 'Unidades' : 'Cantidad por Persona',
+                labelText: dish.hasUnitSelection ? 'Quantity' : 'Servings per Person',
                 labelStyle: TextStyle(color: colorScheme.onSurface),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                prefixIcon: dish.hasUnitSelection
+                    ? const Icon(Icons.format_list_numbered)
+                    : const Icon(Icons.person),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: colorScheme.primary),
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: colorScheme.primary, width: 2),
                 ),
               ),
-              onChanged: (value) => updatedValue = value,
             ),
           ],
         ),
         actions: [
-          TextButton(
+          OutlinedButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancelar', style: TextStyle(color: colorScheme.primary)),
+            child: const Text('Cancel'),
           ),
-          FilledButton(
+          FilledButton.icon(
             onPressed: () {
-              setState(() {
-                final parsedValue = int.parse(updatedValue);
-                if (dish.hasUnitSelection) {
-                  ref.read(cateringOrderProvider.notifier).addCateringItem(
-                    dish.copyWith(quantity: parsedValue)
-                  );
-                } else {
-                  ref.read(cateringOrderProvider.notifier).addCateringItem(
-                    dish.copyWith(peopleCount: parsedValue)
-                  );
-                }
-              });
+              final parsedValue = int.tryParse(quantityController.text) ?? 1;
+              
+              if (parsedValue <= 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Quantity must be greater than zero'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+                return;
+              }
+              
+              if (dish.hasUnitSelection) {
+                ref.read(cateringOrderProvider.notifier).updateDish(
+                  index,
+                  dish.copyWith(quantity: parsedValue),
+                );
+              } else {
+                ref.read(cateringOrderProvider.notifier).updateDish(
+                  index,
+                  dish.copyWith(peopleCount: parsedValue),
+                );
+              }
+              
               Navigator.pop(context);
+              HapticFeedback.mediumImpact();
+              
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Item updated'),
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  margin: const EdgeInsets.all(16),
+                ),
+              );
             },
-            child: const Text('Guardar'),
+            icon: const Icon(Icons.check),
+            label: const Text('Update'),
           ),
         ],
       ),
     );
   }
-
-  void _removeDish(int dishIndex) {
-    setState(() {
-      ref.read(cateringOrderProvider.notifier).removeFromCart(dishIndex);
-    });
+  
+  void _showDeleteConfirmation(BuildContext context, int index) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Remove Item'),
+        icon: Icon(Icons.delete, color: colorScheme.error),
+        content: const Text('Are you sure you want to remove this item from your order?'),
+        actions: [
+          OutlinedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton.icon(
+            onPressed: () {
+              ref.read(cateringOrderProvider.notifier).removeFromCart(index);
+              Navigator.pop(context);
+              HapticFeedback.mediumImpact();
+              
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Item removed'),
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  margin: const EdgeInsets.all(16),
+                ),
+              );
+            },
+            icon: const Icon(Icons.delete),
+            label: const Text('Remove'),
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.error,
+              foregroundColor: colorScheme.onError,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
