@@ -7,6 +7,7 @@ import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/app_config/app_config_services.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/QR/qr_code_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/screens/customer_meal_plan_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/authenticated_profile_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/screens/catering_menu/catering_menu_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/landing-page-home.dart';
@@ -217,7 +218,7 @@ List<RouteBase> _getNestedRoutes(String path) {
           path: 'subscripciones',
           name: AppRoute.mealPlan.name,
           pageBuilder: (context, state) => const MaterialPage(
-            child: MealPlansScreen(),
+            child: CustomerMealPlanScreen(),
           ),
           routes: [
             GoRoute(
@@ -283,7 +284,7 @@ List<RouteBase> _getNestedRoutes(String path) {
               path: 'subscripciones',
               name: AppRoute.mealPlans.name,
               pageBuilder: (context, state) => const MaterialPage(
-                child: MealPlansScreen(),
+                child: CustomerMealPlanScreen(),
               ),
             ),
             GoRoute(

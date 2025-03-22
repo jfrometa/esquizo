@@ -1,26 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/user/auth_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/meal_plan_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/responsive_layout.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/plans/plans.dart';
  
-
-// Active customer ID provider - gets the ID from the current authenticated user
-final activeCustomerIdProvider = Provider<String>((ref) {
-  final authState = ref.watch(authStateChangesProvider);
-  return authState.when(
-    data: (user) => user?.uid ?? 'guest',
-    loading: () => 'loading',
-    error: (_, __) => 'error',
-  );
-});
+ 
 
 // Provider for customer's meal plans - change to StreamProvider
 final customerMealPlansProvider = StreamProvider<List<MealPlan>>((ref) {
   final service = ref.watch(mealPlanServiceProvider);
-  final customerId = ref.watch(activeCustomerIdProvider);
+  final customerId = ref.watch(currentUserIdProvider) ?? 'no ide';
   return service.getMealPlansByOwner(customerId).asStream();
 });
 
@@ -37,7 +28,9 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
   @override
   Widget build(BuildContext context) {
     final customerPlansAsync = ref.watch(customerMealPlansProvider);
-
+    final selectedPlanAsync = _selectedMealPlanId != null
+        ? ref.watch(mealPlanProvider(_selectedMealPlanId!))
+        : const AsyncValue.loading();
     
     final isDesktop = ResponsiveLayout.isDesktop(context);
     
@@ -53,16 +46,12 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
         ],
       ),
       body: customerPlansAsync.when(
-        data: (plans,) {
+        data: (plans) {
           if (plans.isEmpty) {
             return const Center(
               child: Text('You don\'t have any active meal plans'),
             );
           }
-
-
-      final selectedPlanAsync =   ref.watch(mealPlanProvider(_selectedMealPlanId!));
-         
           
           if (_selectedMealPlanId == null && plans.isNotEmpty) {
             // Auto-select the first meal plan
@@ -82,16 +71,36 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
                     ),
                     const VerticalDivider(width: 1),
                     Expanded(
-                      child: _buildMealPlanDetails(selectedPlanAsync),
+                      child: _selectedMealPlanId != null
+                          ? _buildMealPlanDetails(selectedPlanAsync as AsyncValue<MealPlan?>)
+                          : Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.restaurant_menu,
+                                    size: 48,
+                                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'Select a meal plan to view details',
+                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                     ),
                   ],
                 )
               : _selectedMealPlanId == null
                   ? _buildMealPlansList(plans)
-                  : _buildMealPlanDetails(selectedPlanAsync);
+                  : _buildMealPlanDetails(selectedPlanAsync as AsyncValue<MealPlan?>);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: SelectableText('Error: $error')),
       ),
     );
   }
@@ -626,7 +635,7 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
             ElevatedButton(
               onPressed: () {
                 if (selectedItem != null) {
-                  final customerId = ref.read(activeCustomerIdProvider);
+                  final customerId = ref.watch(currentUserIdProvider) ?? 'no ide';
                   
                   final consumedItem = ConsumedItem(
                     id: '',

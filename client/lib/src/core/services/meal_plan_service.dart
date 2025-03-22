@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/user/auth_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/screens/customer_meal_plan_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/plans/plans.dart';
  
 
@@ -330,6 +332,12 @@ final mealPlanServiceProvider = Provider<MealPlanService>((ref) {
 final mealPlansProvider = StreamProvider<List<MealPlan>>((ref) {
   final mealPlanService = ref.watch(mealPlanServiceProvider);
   return mealPlanService.getAllMealPlansStream();
+});
+
+final customerMealPlansProvider = StreamProvider<List<MealPlan>>((ref) {
+  final service = ref.watch(mealPlanServiceProvider);
+  final customerId = ref.watch(currentUserIdProvider) ?? 'no ide';
+  return service.getMealPlansByOwner(customerId).asStream();
 });
 
 final activeMealPlansProvider = StreamProvider<List<MealPlan>>((ref) {
