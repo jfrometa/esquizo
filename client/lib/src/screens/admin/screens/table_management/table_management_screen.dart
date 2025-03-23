@@ -186,7 +186,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
     return Container(
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: const AssetImage('assets/images/floor_texture.png'),
+          image: const AssetImage('assets/kako-logo.png'),
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
             Colors.white.withOpacity(0.1),

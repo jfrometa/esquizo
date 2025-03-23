@@ -82,13 +82,19 @@ class SidebarMenu extends ConsumerWidget {
                   icon: Icons.restaurant,
                   title: 'Meal Plans',
                 ),
+                ListTile(
+                  leading: Icon(Icons.restaurant_outlined),
+                  title: isExpanded ? const Text('Catering Management') : null,
+                  selected: selectedIndex == 8,
+                  onTap: () => onItemSelected(8),
+                ),
                 const Divider(),
                 _buildMenuItem(
                   context,
                   index: -1, // Special index for profile
                   icon: Icons.person,
                   title: 'Profile',
-                  onTap: () => Navigator.pushNamed(context, '/admin/profile'),
+                  onTap: () => onItemSelected(4), // Updated index,
                 ),
                 _buildMenuItem(
                   context,

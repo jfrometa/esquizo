@@ -9,6 +9,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/providers/user/au
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_dashboard_home.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/analytics_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_settings_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/catering_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/meal_plan_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/order_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/product_management_screen.dart';
@@ -41,6 +42,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with SingleT
     const BusinessSettingsScreen(),
     const AnalyticsDashboard(),
     const MealPlanManagementScreen(),
+    const CateringManagementScreen(), // Add this line
   ];
   
   final List<String> _screenTitles = [
@@ -51,7 +53,8 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with SingleT
     'Users & Staff',
     'Business Settings',
     'Analytics',
-    'Meal Plans'
+    'Meal Plans',
+    'Catering Management',
   ];  
 
   @override
@@ -376,6 +379,14 @@ void _showMoreOptions() {
               setState(() => selectedIndex = 7); // Meal Plans index
             },
           ),
+         ListTile(
+          leading: const Icon(Icons.restaurant_outlined),
+          title: const Text('Catering Management'),
+          onTap: () {
+            Navigator.pop(context);
+            setState(() => selectedIndex = 8);
+          },
+        ),
         ],
       ),
     );
