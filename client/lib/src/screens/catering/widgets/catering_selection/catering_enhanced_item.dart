@@ -1,10 +1,7 @@
 // COMPONENT 3: EnhancedCateringItemCard
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/catering/catering_card.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/catering/catering_item.dart';
+import 'package:flutter/rendering.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_item_model.dart';  
 
 
 // COMPONENT 3: EnhancedCateringItemCard
@@ -70,7 +67,7 @@ class _EnhancedCateringItemCardState extends State<EnhancedCateringItemCard> {
                         fit: StackFit.expand,
                         children: [
                           Image.asset(
-                            widget.item.img,
+                            widget.item.imageUrl,
                             fit: BoxFit.cover,
                           ),
                           if (widget.isSelected)
@@ -104,14 +101,14 @@ class _EnhancedCateringItemCardState extends State<EnhancedCateringItemCard> {
                           children: [
                             Expanded(
                               child: Text(
-                                widget.item.title,
+                                widget.item.name,
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
                             Text(
-                              '\$${widget.item.pricing}',
+                              '\$${widget.item.price}',
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: colorScheme.primary,
@@ -138,7 +135,7 @@ class _EnhancedCateringItemCardState extends State<EnhancedCateringItemCard> {
                           children: [
                             // Cuisine type tag
                             _buildTag(
-                              widget.item.category,
+                              widget.item.name,
                               Icons.category,
                               colorScheme.secondary,
                               colorScheme.onSecondary,

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/available_items_for_packages_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_packages_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/featured_dishes_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/catering-details-content.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/contact-section.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/content-sections.dart';
@@ -132,7 +134,7 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    package.title,
+                    package.name,
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.primary,
@@ -156,7 +158,7 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
                 child: Row(
                   children: [
                     Icon(
-                      package.icon,
+                      Icons.food_bank,
                       size: 40,
                       color: theme.colorScheme.primary,
                     ),
@@ -171,7 +173,7 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            package.price,
+                            package.basePrice.toStringAsFixed(2),
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: theme.colorScheme.primary,
@@ -188,7 +190,7 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
               
               Expanded(
                 child: CateringDetailsContent(
-                  packageTitle: package.title,
+                  packageTitle: package.name,
                   scrollController: scrollController,
                 ),
               ),
@@ -346,7 +348,7 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
                 // Main tabbed content section
                 Consumer(
                   builder: (context, ref, child) {
-                    final cateringPackagesAsync = ref.watch(cateringPackagesProvider);
+                    final cateringPackagesAsync = ref.watch(activePackagesProvider);
                     
                     return cateringPackagesAsync.when(
                       data: (cateringPackages) => ContentSections(

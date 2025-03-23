@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_packages_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart';
 
 
 
@@ -110,7 +111,7 @@ class CateringSection extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
-                          package.icon,
+                          Icons.restaurant_menu_outlined,
                           color: Theme.of(context).colorScheme.primary,
                           size: 32,
                         ),
@@ -121,7 +122,7 @@ class CateringSection extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              package.title,
+                              package.name,
                               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -129,7 +130,7 @@ class CateringSection extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
-                              package.price,
+                              package.basePrice.toString(),
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 color: Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.bold,
@@ -196,13 +197,13 @@ Widget _buildTabletCateringPackages(BuildContext context) {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    package.icon,
+                    Icons.restaurant_menu_outlined,
                     size: 48,
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    package.title,
+                    package.name,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -218,7 +219,7 @@ Widget _buildTabletCateringPackages(BuildContext context) {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    package.price,
+                    package.basePrice.toStringAsFixed(2),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.bold,
@@ -276,14 +277,14 @@ Widget _buildTabletCateringPackages(BuildContext context) {
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      package.icon,
+                      Icons.restaurant_menu_outlined,
                       size: 40,
                       color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    package.title,
+                    package.name,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -299,7 +300,7 @@ Widget _buildTabletCateringPackages(BuildContext context) {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    package.price,
+                    package.basePrice.toStringAsFixed(2),
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.bold,

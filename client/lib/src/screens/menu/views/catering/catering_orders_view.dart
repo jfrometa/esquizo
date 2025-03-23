@@ -367,10 +367,12 @@ class CateringOrdersView extends ConsumerWidget {
   }
   
   void _viewOrderDetails(BuildContext context, WidgetRef ref) {
+
+    final id = ref.watch(cateringOrderProvider)?.id ?? "no id";
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const CateringOrderDetailsScreen(),
+        builder: (context) =>  CateringOrderDetailsScreen(orderId: id),
       ),
     );
   }

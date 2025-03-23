@@ -21,7 +21,7 @@ class CartButton extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const CateringOrderDetailsScreen(),
+                  builder: (_) => const CateringOrderDetailsScreen(orderId: '',),
                 ),
               );
             },

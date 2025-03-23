@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/catering_order_details.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/views/catering/_show_catering_form_sheet.dart';
@@ -479,7 +480,7 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const CateringOrderDetailsScreen(),
+        builder: (context) => const CateringOrderDetailsScreen(orderId: '',), // TODO: Replace with actual order ID
       ),
     );
   }

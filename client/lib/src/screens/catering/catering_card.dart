@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/catering/catering_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_item_model.dart'; 
 
 class CateringItemCard extends StatefulWidget {
   final CateringItem item;
@@ -44,7 +44,7 @@ class CateringItemCardState extends State<CateringItemCard> {
             borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0)),
             child: Image.asset(
-              widget.item.img,
+              widget.item.imageUrl,
               height: 150,
               width: double.infinity,
               fit: BoxFit.fitWidth,
@@ -65,7 +65,7 @@ class CateringItemCardState extends State<CateringItemCard> {
               children: [
                 const SizedBox(height: 12),
                 Text(
-                  widget.item.title,
+                  widget.item.name,
                   style: const TextStyle(
                       fontSize: 18, fontWeight: FontWeight.bold),
                 ),
@@ -114,7 +114,7 @@ class CateringItemCardState extends State<CateringItemCard> {
                           selectedUnits = value;
                         }
                         // Save the selected units back to the CateringItem model
-                        widget.item.quantity = selectedUnits ?? 25;
+                        // widget.item.quantity = selectedUnits ?? 25;
                       });
                     },
                   ),
@@ -179,16 +179,16 @@ class CateringItemCardState extends State<CateringItemCard> {
 
                           // For unit items: price * units
                           // For non-unit items: price * 1 (peopleCount will be applied later)
-                          final basePrice = widget.item.pricePerUnit * units;
+                          // final basePrice = widget.item.pricePerUnit * units;
 
                           // Save the selected units and base price to the CateringItem model
-                          widget.item.quantity = units;
-                          widget.item.pricing = basePrice;
+                          // widget.item.quantity = units;
+                          // widget.item.price = basePrice;
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'Se agregó ${widget.item.title} al carrito${widget.item.hasUnitSelection ? ' ($units unidades)' : ''}',
+                                'Se agregó ${widget.item.name} al carrito${widget.item.hasUnitSelection ? ' ($units unidades)' : ''}',
                                 style: TextStyle(color: Colors.white),
                               ),
                               backgroundColor: Colors.black,

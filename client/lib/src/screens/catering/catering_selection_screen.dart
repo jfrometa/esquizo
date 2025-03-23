@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_item_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_item_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/widgets/catering_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/catering_card.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/catering/catering_item.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/catering/widgets/cart_button.dart';
+ import 'package:starter_architecture_flutter_firebase/src/screens/catering/widgets/cart_button.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/widgets/catering_selection/category_items_list.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/widgets/catering_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/widgets/catering_tab_bar.dart';
@@ -51,8 +52,8 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final cateringOptions = ref.watch(cateringProvider);
-    final categorizedItems = groupCateringItemsByCategory(cateringOptions);
+    final cateringOptions = ref.watch(cateringItemRepositoryProvider).valueOrNull;
+    final categorizedItems = groupCateringItemsByCategory(cateringOptions ?? []) ;
     _tabController = TabController(
       length: categorizedItems.keys.length,
       vsync: this,
@@ -129,8 +130,8 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
 
   @override
   Widget build(BuildContext context) {
-    final cateringOptions = ref.watch(cateringProvider);
-    final categorizedItems = groupCateringItemsByCategory(cateringOptions);
+    final cateringOptions = ref.watch(cateringItemRepositoryProvider).valueOrNull;
+    final categorizedItems = groupCateringItemsByCategory(cateringOptions ?? []);
     final itemCount = ref.watch(localCateringItemCountProvider);
     
     final theme = Theme.of(context);
@@ -296,7 +297,7 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
     Map<String, List<CateringItem>> categorizedItems = {};
     for (var item in items) {
       String category =
-          item.category.isNotEmpty ? item.category : 'Uncategorized';
+          item.id.isNotEmpty ? item.id : 'Uncategorized';
       categorizedItems.putIfAbsent(category, () => []).add(item);
     }
     return categorizedItems;

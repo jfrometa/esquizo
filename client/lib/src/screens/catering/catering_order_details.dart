@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/catering/cathering_order_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
 
 class CateringOrderDetailsScreen extends ConsumerStatefulWidget {
-  const CateringOrderDetailsScreen({super.key});
+  final String orderId;
+  
+  const CateringOrderDetailsScreen({
+    required this.orderId,
+    super.key,
+  });
 
   @override
   CateringOrderDetailsScreenState createState() =>
@@ -23,39 +28,40 @@ class CateringOrderDetailsScreenState
   late String tempPreferencia;
   late String tempAdicionales;
   late int tempCantidadPersonas;
-  
-  // Controller for animated transitions
-  late final AnimationController _controller;
-  late final Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
-    final cateringOrders = ref.read(cateringOrderProvider)!;
-
-    // Initialize temporary values with the existing order values
-    tempHasChef = cateringOrders.hasChef ?? false;
-    tempAlergias = cateringOrders.alergias;
-    tempEventType = cateringOrders.eventType;
-    tempPreferencia = cateringOrders.preferencia;
-    tempAdicionales = cateringOrders.adicionales;
-    tempCantidadPersonas = cateringOrders.peopleCount ?? 0;
+    // We'll initialize these values when the order data is available
+    tempHasChef = false;
+    tempAlergias = '';
+    tempEventType = '';
+    tempPreferencia = 'salado';
+    tempAdicionales = '';
+    tempCantidadPersonas = 0;
   }
 
-  void _saveChanges() {
-    final cateringOrders = ref.read(cateringOrderProvider)!;
-    // Save changes to the provider
-    ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(
-      title: cateringOrders.title,
-      img: cateringOrders.img,
-      cantidadPersonas: tempCantidadPersonas,
-      hasChef: tempHasChef,
-      alergias: tempAlergias,
-      eventType: tempEventType,
-      preferencia: tempPreferencia,
-      adicionales: tempAdicionales,
-      description: cateringOrders.description,
-    );
+  void _initTempValues(CateringOrder order) {
+    tempHasChef = order.hasChef;
+    tempAlergias = order.alergias;
+    tempEventType = order.eventType;
+    tempPreferencia = order.preferencia;
+    tempAdicionales = order.adicionales;
+    tempCantidadPersonas = order.guestCount;
+  }
+
+  void _saveChanges(CateringOrder order) {
+    // Save changes to Firestore using the provider
+    ref.read(cateringOrderProvider.notifier).updateFirestoreOrder(
+          order.copyWith(
+            guestCount: tempCantidadPersonas,
+            hasChef: tempHasChef,
+            alergias: tempAlergias,
+            eventType: tempEventType,
+            preferencia: tempPreferencia,
+            adicionales: tempAdicionales,
+          ),
+        );
     
     HapticFeedback.mediumImpact();
     
@@ -73,16 +79,10 @@ class CateringOrderDetailsScreenState
     });
   }
 
-  void _cancelEditing() {
-    final cateringOrders = ref.read(cateringOrderProvider)!;
+  void _cancelEditing(CateringOrder order) {
     // Revert temporary values to original
     setState(() {
-      tempHasChef = cateringOrders.hasChef ?? false;
-      tempAlergias = cateringOrders.alergias;
-      tempEventType = cateringOrders.eventType;
-      tempPreferencia = cateringOrders.preferencia;
-      tempAdicionales = cateringOrders.adicionales;
-      tempCantidadPersonas = cateringOrders.peopleCount ?? 0;
+      _initTempValues(order);
       isEditing = false;
     });
     
@@ -91,8 +91,54 @@ class CateringOrderDetailsScreenState
 
   @override
   Widget build(BuildContext context) {
-    final CateringOrderItem cateringOrders = ref.watch(cateringOrderProvider)!;
-    final bool hasItems = cateringOrders.dishes.isNotEmpty;
+    // Use StreamProvider to get the order stream
+    final orderStream = ref.watch(cateringOrderStreamProvider(widget.orderId));
+    
+    return Scaffold(
+      body: FutureBuilder<CateringOrder>(
+        future: orderStream.first,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
+                  const SizedBox(height: 16),
+                  Text('Error loading order: ${snapshot.error}'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Go Back'),
+                  ),
+                ],
+              ),
+            );
+          } else if (!snapshot.hasData) {
+            return const Center(
+              child: Text('Order not found'),
+            );
+          }
+          
+          final order = snapshot.data!;
+          
+          // Initialize temp values if not editing
+          if (!isEditing) {
+            _initTempValues(order);
+          }
+          
+          return _buildScreenWithOrder(context, order);
+        },
+      ),
+    );
+  }
+  
+  Widget _buildScreenWithOrder(BuildContext context, CateringOrder order) {
+    final bool hasItems = order.items.isNotEmpty;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     
@@ -111,7 +157,7 @@ class CateringOrderDetailsScreenState
                     key: const ValueKey('editing_actions'),
                     children: [
                       TextButton.icon(
-                        onPressed: _cancelEditing,
+                        onPressed: () => _cancelEditing(order),
                         icon: const Icon(Icons.close),
                         label: const Text('Cancel'),
                         style: TextButton.styleFrom(
@@ -120,7 +166,7 @@ class CateringOrderDetailsScreenState
                       ),
                       const SizedBox(width: 8),
                       FilledButton.icon(
-                        onPressed: _saveChanges,
+                        onPressed: () => _saveChanges(order),
                         icon: const Icon(Icons.check),
                         label: const Text('Save'),
                         style: FilledButton.styleFrom(
@@ -147,7 +193,7 @@ class CateringOrderDetailsScreenState
       ),
       body: !hasItems
           ? _buildEmptyState(theme, colorScheme)
-          : _buildOrderDetails(cateringOrders, theme, colorScheme),
+          : _buildOrderDetails(order, theme, colorScheme),
     );
   }
   
@@ -170,7 +216,7 @@ class CateringOrderDetailsScreenState
           ),
           const SizedBox(height: 8),
           Text(
-            'Your catering order has no items',
+            'This catering order has no items',
             style: theme.textTheme.bodyLarge?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
@@ -179,14 +225,14 @@ class CateringOrderDetailsScreenState
           FilledButton.icon(
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back),
-            label: const Text('Back to Catering'),
+            label: const Text('Back'),
           ),
         ],
       ),
     );
   }
   
-  Widget _buildOrderDetails(CateringOrderItem order, ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildOrderDetails(CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
@@ -217,14 +263,14 @@ class CateringOrderDetailsScreenState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                order.title,
+                                order.id.isNotEmpty ? order.id : "Catering Order",
                                 style: theme.textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              if (order.description.isNotEmpty)
+                              if (order.adicionales.isNotEmpty)
                                 Text(
-                                  order.description,
+                                  order.adicionales,
                                   style: theme.textTheme.bodyMedium,
                                 ),
                             ],
@@ -331,15 +377,15 @@ class CateringOrderDetailsScreenState
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) {
-                final dish = order.dishes[index];
+                final item = order.items[index];
                 return _buildOrderItemCard(
-                  dish: dish, 
+                  item: item, 
                   index: index, 
                   theme: theme, 
                   colorScheme: colorScheme,
                 );
               },
-              childCount: order.dishes.length,
+              childCount: order.items.length,
             ),
           ),
         ),
@@ -372,7 +418,7 @@ class CateringOrderDetailsScreenState
                               ),
                             ),
                             Text(
-                              '\$${order.totalPrice.toStringAsFixed(2)}',
+                              '\$${order.total.toStringAsFixed(2)}',
                               style: theme.textTheme.headlineMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: colorScheme.onPrimaryContainer,
@@ -381,18 +427,25 @@ class CateringOrderDetailsScreenState
                           ],
                         ),
                         const Spacer(),
-                        FilledButton.icon(
-                          onPressed: () {
-                            // Proceed to checkout action
-                            Navigator.pop(context);
-                          },
-                          icon: const Icon(Icons.shopping_cart),
-                          label: const Text('Checkout'),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: colorScheme.primary,
-                            foregroundColor: colorScheme.onPrimary,
+                        // Only show checkout button for non-completed orders
+                        if (!order.status.isTerminal)
+                          FilledButton.icon(
+                            onPressed: () {
+                              // Handle checkout based on order status
+                              // For now, just go back
+                              Navigator.pop(context);
+                            },
+                            icon: order.status == CateringOrderStatus.pending 
+                                ? const Icon(Icons.payment) 
+                                : const Icon(Icons.visibility),
+                            label: order.status == CateringOrderStatus.pending 
+                                ? const Text('Checkout') 
+                                : const Text('View Status'),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: colorScheme.primary,
+                              foregroundColor: colorScheme.onPrimary,
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -544,7 +597,7 @@ class CateringOrderDetailsScreenState
   }
   
   Widget _buildOrderItemCard({
-    required CateringDish dish,
+    required CateringOrderItem item,
     required int index,
     required ThemeData theme,
     required ColorScheme colorScheme,
@@ -575,7 +628,7 @@ class CateringOrderDetailsScreenState
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '× ${dish.quantity}',
+                    '× ${item.quantity}',
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: colorScheme.onPrimaryContainer,
@@ -590,14 +643,14 @@ class CateringOrderDetailsScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        dish.title,
+                        item.name,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      if ((dish.pricePerUnit ?? 0) > 0)
+                      if (item.price > 0)
                         Text(
-                          '\$${(dish.pricePerUnit ?? 0).toStringAsFixed(2)} per unit',
+                          '\$${item.price.toStringAsFixed(2)} per unit',
                           style: theme.textTheme.bodySmall,
                         ),
                     ],
@@ -606,7 +659,7 @@ class CateringOrderDetailsScreenState
                 
                 // Item price
                 Text(
-                  '\$${(dish.hasUnitSelection ? dish.quantity * (dish.pricePerUnit ?? 0) : dish.peopleCount * tempCantidadPersonas * (dish.pricePerPerson)).toStringAsFixed(2)}',
+                  '\$${item.totalPrice.toStringAsFixed(2)}',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: colorScheme.primary,
@@ -619,7 +672,7 @@ class CateringOrderDetailsScreenState
                     children: [
                       IconButton(
                         icon: Icon(Icons.edit, color: colorScheme.primary, size: 20),
-                        onPressed: () => _editDishDialog(context, dish, index),
+                        onPressed: () => _editItemDialog(context, item, index),
                         tooltip: 'Edit item',
                       ),
                       IconButton(
@@ -637,14 +690,10 @@ class CateringOrderDetailsScreenState
     );
   }
   
-  void _editDishDialog(BuildContext context, CateringDish dish, int index) {
+  void _editItemDialog(BuildContext context, CateringOrderItem item, int index) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final quantityController = TextEditingController(
-      text: dish.hasUnitSelection
-          ? dish.quantity.toString()
-          : dish.peopleCount.toString()
-    );
+    final quantityController = TextEditingController(text: item.quantity.toString());
     
     showDialog(
       context: context,
@@ -657,7 +706,7 @@ class CateringOrderDetailsScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              dish.title,
+              item.name,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -667,14 +716,12 @@ class CateringOrderDetailsScreenState
               controller: quantityController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: dish.hasUnitSelection ? 'Quantity' : 'Servings per Person',
+                labelText: 'Quantity',
                 labelStyle: TextStyle(color: colorScheme.onSurface),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                prefixIcon: dish.hasUnitSelection
-                    ? const Icon(Icons.format_list_numbered)
-                    : const Icon(Icons.person),
+                prefixIcon: const Icon(Icons.format_list_numbered),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(color: colorScheme.primary, width: 2),
@@ -689,7 +736,7 @@ class CateringOrderDetailsScreenState
             child: const Text('Cancel'),
           ),
           FilledButton.icon(
-            onPressed: () {
+            onPressed:  () async {
               final parsedValue = int.tryParse(quantityController.text) ?? 1;
               
               if (parsedValue <= 0) {
@@ -702,17 +749,20 @@ class CateringOrderDetailsScreenState
                 return;
               }
               
-              if (dish.hasUnitSelection) {
-                ref.read(cateringOrderProvider.notifier).updateDish(
-                  index,
-                  dish.copyWith(quantity: parsedValue),
+              // Get the current order from the stream's value
+              final orderAsyncValue = await ref.read(cateringOrderStreamProvider(widget.orderId)).first;
+              
+              // Use the AsyncValue.when pattern to safely access the data
+               
+                // Create a new list of items with the updated quantity
+                final updatedItems = List<CateringOrderItem>.from(orderAsyncValue.items);
+                updatedItems[index] = item.copyWith(quantity: parsedValue);
+                
+                // Update the order with the new items
+                ref.read(cateringOrderProvider.notifier).updateFirestoreOrder(
+                  orderAsyncValue.copyWith(items: updatedItems),
                 );
-              } else {
-                ref.read(cateringOrderProvider.notifier).updateDish(
-                  index,
-                  dish.copyWith(peopleCount: parsedValue),
-                );
-              }
+              
               
               Navigator.pop(context);
               HapticFeedback.mediumImpact();
@@ -743,15 +793,27 @@ class CateringOrderDetailsScreenState
       builder: (context) => AlertDialog(
         title: const Text('Remove Item'),
         icon: Icon(Icons.delete, color: colorScheme.error),
-        content: const Text('Are you sure you want to remove this item from your order?'),
+        content: const Text('Are you sure you want to remove this item from the order?'),
         actions: [
           OutlinedButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
           ),
           FilledButton.icon(
-            onPressed: () {
-              ref.read(cateringOrderProvider.notifier).removeFromCart(index);
+            onPressed: () async {
+              // Get the current order
+              final order = await ref.read(cateringOrderStreamProvider(widget.orderId)).first;
+              
+                // Create a new list of items without the removed item
+                final updatedItems = List<CateringOrderItem>.from(order.items)
+                  ..removeAt(index);
+                
+                // Update the order with the new items
+                ref.read(cateringOrderProvider.notifier).updateFirestoreOrder(
+                  order.copyWith(items: updatedItems),
+                );
+            
+              
               Navigator.pop(context);
               HapticFeedback.mediumImpact();
               
