@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
+import 'package:starter_architecture_flutter_firebase/src/theme/app_theme.dart';
 
 class PaymentMethodDropdown extends StatelessWidget {
   final int selectedMethod;
