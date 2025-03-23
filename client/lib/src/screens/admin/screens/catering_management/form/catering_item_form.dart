@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_item_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_item_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_category_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/utils/icon_mapper.dart';
 
 class CateringItemForm extends ConsumerStatefulWidget {
   final CateringItem? item;
@@ -199,11 +200,8 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                     ),
                     child: Center(
                       child: _iconCodePoint != null
-                          ? Icon(
-                              IconData(
-                                _iconCodePoint!,
-                                fontFamily: _iconFontFamily,
-                              ),
+                          ? Icon( 
+                              IconMapper.getIconData(_iconCodePoint.toString()),
                               size: 40,
                               color: colorScheme.onPrimaryContainer,
                             )
@@ -570,11 +568,8 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                         ),
                         secondary: category.iconName != null
                             ? Icon(
-                                IconData(
-                                  int.parse(category.iconName!),
-                                  fontFamily: 'MaterialIcons',
-                                ),
-                                color: isSelected ? colorScheme.primary : null,
+                            IconMapper.getIconData(_iconCodePoint.toString()),
+                            color: isSelected ? colorScheme.onPrimary : null,
                               )
                             : null,
                         value: isSelected,

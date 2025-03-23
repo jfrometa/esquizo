@@ -5,6 +5,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/providers/caterin
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/form/catering_item_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_category_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_item_model.dart';
+import 'package:starter_architecture_flutter_firebase/src/utils/icon_mapper.dart';
  
 class CateringItemScreen extends ConsumerStatefulWidget {
   const CateringItemScreen({super.key});
@@ -314,12 +315,11 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                                   Padding(
                                     padding: const EdgeInsets.only(right: 8.0),
                                     child: Icon(
-                                      IconData(
-                                        item.iconCodePoint!,
-                                        fontFamily: item.iconFontFamily,
-                                      ),
-                                      color: colorScheme.primary,
-                                    ),
+                                  categories.first.iconName != null
+                                      ? IconMapper.getIconData(categories.first.iconName)
+                                      : Icons.category_outlined,
+                                  color: colorScheme.primary,
+                                ),
                                   ),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -488,12 +488,11 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                                   color: colorScheme.primaryContainer,
                                   shape: BoxShape.circle,
                                 ),
-                                child: Icon(
-                                  IconData(
-                                    item.iconCodePoint!,
-                                    fontFamily: item.iconFontFamily,
-                                  ),
-                                  color: colorScheme.onPrimaryContainer,
+                                child:  Icon(
+                                   categories.first.iconName != null
+                                  ? IconMapper.getIconData(categories.first.iconName)
+                                  : Icons.category_outlined,
+                                  color: colorScheme.primary,
                                 ),
                               ),
                             const SizedBox(width: 8),
@@ -617,13 +616,11 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(
-                            IconData(
-                              item.iconCodePoint!,
-                              fontFamily: item.iconFontFamily,
-                            ),
-                            color: colorScheme.onPrimaryContainer,
-                            size: 28,
-                          ),
+                                   categories.first.iconName != null
+                                  ? IconMapper.getIconData(categories.first.iconName)
+                                  : Icons.category_outlined,
+                                  color: colorScheme.primary,
+                                ),
                         ),
                       
                       // Details

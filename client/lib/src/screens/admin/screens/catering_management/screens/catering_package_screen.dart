@@ -9,6 +9,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/providers/caterin
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/form/catering_package_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_category_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart';
+import 'package:starter_architecture_flutter_firebase/src/utils/icon_mapper.dart';
  
 class CateringPackageScreen extends ConsumerStatefulWidget {
   const CateringPackageScreen({super.key});
@@ -59,8 +60,13 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
           Expanded(
             child: packageAsyncValue.when(
               data: (packages) {
+                // Ensure we're working with CateringPackage objects
+                final List<CateringPackage> validPackages = packages
+                    .whereType<CateringPackage>()
+                    .toList();
+                
                 // Apply filters
-                var filteredPackages = List<CateringPackage>.from(packages);
+                var filteredPackages = List<CateringPackage>.from(validPackages);
                 if (_selectedCategoryId != null) {
                   filteredPackages = filteredPackages
                       .where((package) => package.categoryIds.contains(_selectedCategoryId))
@@ -251,13 +257,10 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                                 if (package.iconCodePoint != null)
                                   Padding(
                                     padding: const EdgeInsets.only(right: 8.0),
-                                    child: Icon(
-                                      IconData(
-                                        package.iconCodePoint!,
-                                        fontFamily: package.iconFontFamily,
-                                      ),
-                                      color: colorScheme.primary,
-                                    ),
+                                    child:  Icon(
+                                    IconMapper.getIconData(package.iconCodePoint.toString()),
+                                    color: colorScheme.primary,
+                                  ),
                                   ),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -427,12 +430,10 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
-                                  IconData(
-                                    package.iconCodePoint!,
-                                    fontFamily: package.iconFontFamily,
+                                    IconMapper.getIconData(package.iconCodePoint.toString()),
+                                    color:   colorScheme.onPrimaryContainer,
+                                    size: 28,
                                   ),
-                                  color: colorScheme.onPrimaryContainer,
-                                ),
                               ),
                             const SizedBox(width: 8),
                             Column(
@@ -563,11 +564,18 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                             color: colorScheme.primaryContainer,
                             borderRadius: BorderRadius.circular(12),
                           ),
+                          // child: Icon(
+                          //   IconData(
+                          //     package.iconCodePoint!,
+                          //     fontFamily: package.iconFontFamily,
+                          //   ),
+                          //   color: colorScheme.onPrimaryContainer,
+                          //   size: 28,
+                          // ),
+                          
+                          // Replace with:
                           child: Icon(
-                            IconData(
-                              package.iconCodePoint!,
-                              fontFamily: package.iconFontFamily,
-                            ),
+                            IconMapper.getIconData(package.iconCodePoint.toString()),
                             color: colorScheme.onPrimaryContainer,
                             size: 28,
                           ),

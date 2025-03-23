@@ -137,10 +137,7 @@ class _CateringCategoryScreenState extends ConsumerState<CateringCategoryScreen>
                           children: [
                             if (category.iconName != null)
                               Icon(
-                                IconData(
-                                  int.parse(category.iconName!),
-                                  fontFamily: 'MaterialIcons',
-                                ),
+                                _getIconData(category.iconName),
                                 color: colorScheme.primary,
                               ),
                             const SizedBox(width: 8),
@@ -233,10 +230,7 @@ class _CateringCategoryScreenState extends ConsumerState<CateringCategoryScreen>
               ),
               child: Icon(
                 category.iconName != null
-                    ? IconData(
-                        int.parse(category.iconName!),
-                        fontFamily: 'MaterialIcons',
-                      )
+                    ? _getIconData(category.iconName)
                     : Icons.category_outlined,
                 color: colorScheme.onPrimaryContainer,
               ),
@@ -294,6 +288,30 @@ class _CateringCategoryScreenState extends ConsumerState<CateringCategoryScreen>
         );
       },
     );
+  }
+  
+  // Helper method to safely convert icon name to IconData
+  IconData _getIconData(String? iconName) {
+    // Default icon if parsing fails
+    if (iconName == null) return Icons.category_outlined;
+    
+    // Map of common icon names to their corresponding IconData constants
+    final Map<String, IconData> iconMap = {
+      '0xe318': Icons.restaurant, // Example mapping
+      '0xe5d2': Icons.menu_book,
+      '0xe25a': Icons.fastfood,
+      '0xe57f': Icons.local_bar,
+      '0xe544': Icons.icecream,
+      '0xe532': Icons.cake,
+      '0xe532': Icons.breakfast_dining,
+      '0xe574': Icons.lunch_dining,
+      '0xe574': Icons.dinner_dining,
+      '0xe3f8': Icons.category_outlined,
+      // Add more mappings as needed
+    };
+    
+    // Try to find the icon in our map
+    return iconMap[iconName] ?? Icons.category_outlined;
   }
 
   void _showDeleteConfirmation(CateringCategory category) {

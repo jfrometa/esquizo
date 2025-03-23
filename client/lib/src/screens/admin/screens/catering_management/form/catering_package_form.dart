@@ -4,6 +4,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/providers/caterin
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/unified_catering_package_providers.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_item_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart';
+import 'package:starter_architecture_flutter_firebase/src/utils/icon_mapper.dart';
  
 class CateringPackageForm extends ConsumerStatefulWidget {
   final CateringPackage? package;
@@ -194,10 +195,8 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                     child: Center(
                       child: _iconCodePoint != null
                           ? Icon(
-                              IconData(
-                                _iconCodePoint!,
-                                fontFamily: _iconFontFamily,
-                              ),
+                              IconMapper.getIconData( _iconCodePoint?.toString() ?? ''),
+            
                               size: 40,
                               color: colorScheme.onPrimaryContainer,
                             )
@@ -537,11 +536,8 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                         ),
                         secondary: category.iconName != null
                             ? Icon(
-                                IconData(
-                                  int.parse(category.iconName!),
-                                  fontFamily: 'MaterialIcons',
-                                ),
-                                color: isSelected ? colorScheme.primary : null,
+                                IconMapper.getIconData( _iconCodePoint?.toString() ?? ''),
+                                color: isSelected ? colorScheme.onPrimary : null,
                               )
                             : null,
                         value: isSelected,

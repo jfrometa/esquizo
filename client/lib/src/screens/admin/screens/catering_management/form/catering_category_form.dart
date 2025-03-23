@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_category_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_category_model.dart';
+import 'package:starter_architecture_flutter_firebase/src/utils/icon_mapper.dart';
  
 class CateringCategoryForm extends ConsumerStatefulWidget {
   final CateringCategory? category;
@@ -156,10 +157,7 @@ class _CateringCategoryFormState extends ConsumerState<CateringCategoryForm> {
                   child: Center(
                     child: _selectedIcon != null
                         ? Icon(
-                            IconData(
-                              int.parse(_selectedIcon!),
-                              fontFamily: 'MaterialIcons',
-                            ),
+                            IconMapper.getIconData(_selectedIcon),
                             size: 40,
                             color: colorScheme.onPrimaryContainer,
                           )

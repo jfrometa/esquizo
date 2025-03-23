@@ -1,11 +1,11 @@
 {
-    "name": "starter_architecture_flutter_firebase",
-    "short_name": "starter_architecture_flutter_firebase",
+    "name": "kako",
+    "short_name": "kako",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#FFFFFF",
     "theme_color": "#FF5722",
-    "description": "A new Flutter project.",
+    "description": "Kako digitaliza tu negocio",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

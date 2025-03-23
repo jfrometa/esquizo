@@ -1,7 +1,9 @@
+import 'dart:js_interop_unsafe';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
+import 'dart:js_util' as js_util;
 class LocationCaptureWidget extends StatefulWidget {
   const LocationCaptureWidget({super.key});
 
@@ -39,6 +41,7 @@ class LocationCaptureWidgetState extends State<LocationCaptureWidget> {
       if (!await Geolocator.isLocationServiceEnabled()) {
         throw Exception('Location services are disabled');
       }
+      await _initGoogleMaps();
 
       // Get the current location
       Position position = await Geolocator.getCurrentPosition(
@@ -60,6 +63,23 @@ class LocationCaptureWidgetState extends State<LocationCaptureWidget> {
         duration:
             const Duration(milliseconds: 500), // Display for half a second),
       ));
+    }
+  }
+
+  Future<void> _initGoogleMaps() async {
+    try {
+      // Call our optimized maps loading function from index.html
+           await js_util.promiseToFuture(
+      js_util.callMethod(js_util.globalThis, 'initMapsWhenNeeded', [])
+    );
+    
+      // if (mounted) {
+      //   setState(() {
+      //     _isLoading = false;
+      //   });
+      // }
+    } catch (e) {
+      print('Error initializing Google Maps: $e');
     }
   }
 
