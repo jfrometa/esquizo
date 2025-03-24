@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/app.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';  
+import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_analitics.dart';
 import 'package:starter_architecture_flutter_firebase/src/localization/string_hardcoded.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/user_preference/user_preference_provider.dart';
@@ -32,6 +34,9 @@ Future<void> main() async {
   
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  
+  // Initialize Analytics (should be done early to track other initialization events)
+  await _initializeAnalytics();
   
   // Initialize Crashlytics
   await _initializeCrashlytics();
@@ -72,6 +77,46 @@ Future<void> main() async {
       child: const KakoApp(),
     ),
   );
+}
+
+// Initialize Firebase Analytics
+Future<void> _initializeAnalytics() async {
+  try {
+    // Initialize Analytics service with debug mode in development
+    await AnalyticsService.instance.init(
+      debugMode: kDebugMode,
+    );
+    
+    // Configure Firebase Analytics settings
+    final analytics = FirebaseAnalytics.instance;
+    
+    // Enable analytics collection (can be toggled based on user consent)
+    await analytics.setAnalyticsCollectionEnabled(true);
+    
+    // Set default session timeout to 30 minutes
+    await analytics.setSessionTimeoutDuration(const Duration(minutes: 30));
+    
+    // Log app_open event for non-web platforms (automatically tracked on mobile)
+    if (!kIsWeb) {
+      await analytics.logAppOpen();
+    }
+    
+    // Set common user properties that apply to all users
+    await AnalyticsService.instance.setUserProperty(
+      name: 'app_version',
+      value: '1.0.0', // Replace with your actual app version
+    );
+    
+    await AnalyticsService.instance.setUserProperty(
+      name: 'platform',
+      value: kIsWeb ? 'web' : defaultTargetPlatform.toString().split('.').last,
+    );
+    
+    debugPrint('✅ Firebase Analytics initialized successfully');
+  } catch (e) {
+    // Don't let analytics initialization failure crash the app
+    debugPrint('⚠️ Failed to initialize Firebase Analytics: $e');
+  }
 }
 
 // Initialize Crashlytics
@@ -214,6 +259,14 @@ Future<void> _initializeAuth(ProviderContainer container) async {
     // Sign in anonymously if no user is signed in
     if (currentUser == null) {
       await authRepo.initialize();
+    } else {
+      // Log login event if user is already signed in
+      AnalyticsService.instance.logLogin(method: 'auto');
+      
+      // Set user ID for analytics if available
+      if (currentUser.uid.isNotEmpty) {
+        AnalyticsService.instance.setUserId(currentUser.uid);
+      }
     }
     
     // Initialize theme system from user preferences (if any)
@@ -221,7 +274,15 @@ Future<void> _initializeAuth(ProviderContainer container) async {
       try {
         // Pre-fetch user preferences to initialize theme
         final prefsRepo = container.read(userPreferencesRepositoryProvider);
-        await prefsRepo.getUserPreferences(FirebaseAuth.instance.currentUser!.uid);
+        final prefs = await prefsRepo.getUserPreferences(FirebaseAuth.instance.currentUser!.uid);
+        
+        // Track user preferences as user properties for analytics segmentation
+        if (prefs.themeMode != null) {
+          await AnalyticsService.instance.setUserProperty(
+            name: 'preferred_theme',
+            value: prefs.themeMode.toString().split('.').last,
+          );
+        }
       } catch (e) {
         // Silently handle error - we'll fall back to system theme
         debugPrint('Error loading user preferences: $e');
@@ -263,13 +324,31 @@ Future<void> _initializeDeviceInfo() async {
     if (defaultTargetPlatform == TargetPlatform.android) {
       final androidInfo = deviceInfo as AndroidDeviceInfo;
       hasCamera = !androidInfo.isPhysicalDevice ? false : true;
+      
+      // Set device properties for analytics
+      await AnalyticsService.instance.setUserProperty(
+        name: 'device_model',
+        value: androidInfo.model,
+      );
     } else if (defaultTargetPlatform == TargetPlatform.iOS) {
       final iosInfo = deviceInfo as IosDeviceInfo;
       hasCamera = !iosInfo.isPhysicalDevice ? false : true;
+      
+      // Set device properties for analytics
+      await AnalyticsService.instance.setUserProperty(
+        name: 'device_model',
+        value: iosInfo.model,
+      );
     } else {
       // Assume other platforms might have a camera
       hasCamera = true;
     }
+    
+    // Set has_camera property for segmentation
+    await AnalyticsService.instance.setUserProperty(
+      name: 'has_camera',
+      value: hasCamera ? 'true' : 'false',
+    );
     
     if (hasCamera) {
       try {
@@ -305,6 +384,15 @@ class CustomErrorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Log error to analytics
+    AnalyticsService.instance.logCustomEvent(
+      eventName: 'ui_error',
+      parameters: {
+        'error_message': errorDetails.exception.toString(),
+        'error_location': errorDetails.library ?? 'unknown',
+      },
+    );
+    
     return Scaffold(
       appBar: AppBar(
         forceMaterialTransparency: true,

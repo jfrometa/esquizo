@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/app_config/app_config_services.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/QR/qr_code_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_analitics.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/screens/customer_meal_plan_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/authenticated_profile_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/screens/catering_menu/catering_menu_screen.dart';
@@ -19,8 +20,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/catering_quote
 import 'package:starter_architecture_flutter_firebase/src/screens/checkout/checkout_creen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/all_dishes_menu_home/all_dishes_menu_home_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/dish_details/dish_details_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_details.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_subscription.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_details.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/categories.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/home/home.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_startup.dart';
@@ -139,6 +139,34 @@ GoRouter goRouter(Ref ref) {
       }
       return null;
     },
+    observers: [
+      // Firebase Analytics Observer
+      FirebaseAnalyticsObserver(
+        analytics: FirebaseAnalytics.instance,
+        nameExtractor: (RouteSettings settings) {
+          // Extract meaningful names from route settings
+          final String? name = settings.name;
+          
+          // Log custom screen_view event with additional parameters
+          if (name != null && name.isNotEmpty) {
+            AnalyticsService.instance.logCustomEvent(
+              eventName: 'screen_view',
+              parameters: {
+                'screen_name': name,
+                'screen_class': settings.arguments?.runtimeType.toString() ?? 'unknown',
+              },
+            );
+          }
+          
+          return name;
+        },
+        onError: (Object error) {
+          // Handle any observer errors
+          debugPrint('Analytics navigation observer error: $error');
+          return true; // Allow navigation to continue
+        },
+      ),
+    ],
     refreshListenable: GoRouterRefreshStream(authRepository.authStateChanges()),
     routes: [
       GoRoute(
