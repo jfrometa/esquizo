@@ -3,6 +3,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,6 +33,9 @@ Future<void> main() async {
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   
+  // Initialize Crashlytics
+  await _initializeCrashlytics();
+  
   // For development only - completely bypass AppCheck if needed
   // Set this to true if you need to completely skip AppCheck during development
   bool bypassAppCheck = kDebugMode; // Set to true to bypass in debug mode
@@ -59,9 +63,8 @@ Future<void> main() async {
     camera = null;
   }
   
-  // Register global error handlers
-  registerErrorHandlers();
-   
+  // Register global error handlers - Now handled by Crashlytics
+  
   // Run the application
   runApp(
     UncontrolledProviderScope(
@@ -69,6 +72,50 @@ Future<void> main() async {
       child: const KakoApp(),
     ),
   );
+}
+
+// Initialize Crashlytics
+Future<void> _initializeCrashlytics() async {
+  if (kIsWeb) {
+    // Crashlytics is not available for web
+    debugPrint('📊 Crashlytics not available for web platform');
+    return;
+  }
+  
+  try {
+    // Set Crashlytics collection enabled (disable during development if needed)
+    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(!kDebugMode);
+    
+    // Pass all Flutter errors to Crashlytics
+    FlutterError.onError = (FlutterErrorDetails details) {
+      // Report to console in debug mode
+      if (kDebugMode) {
+        // Print to console
+        FlutterError.presentError(details);
+        debugPrint(details.toString());
+      }
+      
+      // Report to Crashlytics
+      FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+    };
+    
+    // Pass all uncaught asynchronous errors to Crashlytics
+    PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+      // Report to console in debug mode
+      if (kDebugMode) {
+        debugPrint('Platform error: $error');
+        debugPrint('Stack trace: $stack');
+      }
+      
+      // Report to Crashlytics
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+    
+    debugPrint('✅ Crashlytics initialized successfully');
+  } catch (e) {
+    debugPrint('❌ Failed to initialize Crashlytics: $e');
+  }
 }
 
 // Initialize Firebase App Check with proper error handling and fallback
@@ -81,7 +128,6 @@ Future<void> _initializeAppCheckWithFallback() async {
       try {
         await FirebaseAppCheck.instance.activate(
           webProvider: ReCaptchaEnterpriseProvider('6LeGBv4qAAAAACKUiHAJEFBsUDmbTyMPZwb-T8N6'),
-          
         );
         debugPrint('✅ Firebase AppCheck initialized with ReCaptchaEnterpriseProvider');
         return; // Early return if successful
@@ -94,7 +140,6 @@ Future<void> _initializeAppCheckWithFallback() async {
       try {
         await FirebaseAppCheck.instance.activate(
           webProvider: ReCaptchaV3Provider('6LeGBv4qAAAAACKUiHAJEFBsUDmbTyMPZwb-T8N6'),
-      
         );
         debugPrint('✅ Firebase AppCheck initialized with ReCaptchaV3Provider');
         return; // Early return if successful
@@ -109,8 +154,7 @@ Future<void> _initializeAppCheckWithFallback() async {
           // For web in debug mode, try with debug provider as last resort
           await FirebaseAppCheck.instance.activate(
             // Use debug provider for web - requires debug token
-            webProvider: ReCaptchaV3Provider('6LeGBv4qAAAAACKUiHAJEFBsUDmbTyMPZwb-T8N6', )
-           
+            webProvider: ReCaptchaV3Provider('6LeGBv4qAAAAACKUiHAJEFBsUDmbTyMPZwb-T8N6'),
           );
           debugPrint('✅ Firebase AppCheck initialized with debug configuration');
         } catch (debugError) {
@@ -124,7 +168,6 @@ Future<void> _initializeAppCheckWithFallback() async {
         await FirebaseAppCheck.instance.activate(
           androidProvider: AndroidProvider.debug,
           appleProvider: AppleProvider.debug,
-      
         );
         debugPrint('✅ Firebase AppCheck initialized with debug providers for mobile');
       } else {
@@ -132,7 +175,6 @@ Future<void> _initializeAppCheckWithFallback() async {
         await FirebaseAppCheck.instance.activate(
           androidProvider: AndroidProvider.playIntegrity,
           appleProvider: AppleProvider.deviceCheck,
-         
         );
         debugPrint('✅ Firebase AppCheck initialized with production providers for mobile');
       }
@@ -252,23 +294,17 @@ Future<void> _initializeDeviceInfo() async {
   }
 }
 
-// Register global error handlers
-void registerErrorHandlers() {
-  // Handle Flutter framework errors
-  FlutterError.onError = (FlutterErrorDetails details) {
-    FlutterError.presentError(details);
-    debugPrint(details.toString());
-  };
-  
-  // Handle platform-level errors
-  PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
-    debugPrint('Platform error: $error');
-    debugPrint('Stack trace: $stack');
-    return true;
-  };
-  
-  // Customize error widget appearance
-  ErrorWidget.builder = (FlutterErrorDetails details) {
+// Custom error widget - Will be shown when an error occurs in the app UI
+class CustomErrorWidget extends StatelessWidget {
+  final FlutterErrorDetails errorDetails;
+
+  const CustomErrorWidget({
+    Key? key,
+    required this.errorDetails,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         forceMaterialTransparency: true,
@@ -295,7 +331,7 @@ void registerErrorHandlers() {
               Expanded(
                 child: SingleChildScrollView(
                   child: Text(
-                    kDebugMode ? details.toString() : 'Please try again later'.hardcoded,
+                    kDebugMode ? errorDetails.toString() : 'Please try again later'.hardcoded,
                   ),
                 ),
               ),
@@ -304,5 +340,5 @@ void registerErrorHandlers() {
         ),
       ),
     );
-  };
+  }
 }

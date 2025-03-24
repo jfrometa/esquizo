@@ -27,7 +27,7 @@ dependencies:
 
   fl_chart: ^0.70.2
   cloud_firestore: ^5.0.2
-  firebase_analytics: ^11.3.3
+  firebase_analytics: ^11.4.4
   firebase_auth: ^5.0.0
   firebase_auth_web: ^5.12.3
   firebase_storage: ^12.1.1
@@ -80,6 +80,7 @@ dependencies:
   logger: ^2.0.2 
   qr: ^3.0.2
   firebase_app_check: ^0.3.2+4
+  firebase_crashlytics: ^4.3.4
   
 dev_dependencies:
   flutter_test:
