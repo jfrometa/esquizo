@@ -22,7 +22,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.10.0'  # Specify your Flutter version
+          flutter-version: '3.13.0'  # Using Flutter 3.13.0 which includes Dart 3.1.0
           channel: 'stable'
       
       - name: Install dependencies
