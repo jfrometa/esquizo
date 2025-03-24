@@ -1,0 +1,50 @@
+name: Deploy Flutter Web
+
+on:
+  push:
+    branches:
+      - firebase_no_mocks_v2  # Your deployment branch
+      - master  # Your main branch
+  pull_request:
+    types: [closed]
+    branches:
+      - master  # Run when PRs are merged into master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    # Only run the workflow on pushes to specified branches or when PRs are merged to master
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.10.0'  # Specify your Flutter version
+          channel: 'stable'
+      
+      - name: Install dependencies
+        working-directory: ./client
+        run: flutter pub get
+      
+      - name: Setup Firebase CLI
+        uses: w9jds/firebase-action@master
+        with:
+          args: setup:ci
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      
+      - name: Run Cache Busting Build Script
+        run: |
+          cd ./client
+          chmod +x ./build-deploy.sh
+          ./build-deploy.sh
+      
+      - name: Deploy to Firebase
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only hosting --cwd=./client
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
