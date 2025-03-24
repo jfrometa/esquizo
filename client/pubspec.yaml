@@ -79,6 +79,7 @@ dependencies:
   path_provider: ^2.1.2
   logger: ^2.0.2 
   qr: ^3.0.2
+  firebase_app_check: ^0.3.2+4
   
 dev_dependencies:
   flutter_test:

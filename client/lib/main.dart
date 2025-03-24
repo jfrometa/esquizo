@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
@@ -30,7 +31,11 @@ Future<void> main() async {
   
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  
+    await FirebaseAppCheck.instance.activate(
+    webProvider: ReCaptchaV3Provider('6Ld9Af4qAAAAAFEsCKDm9Gr4yYAgrL0jLtJadb1z'),
+    androidProvider: AndroidProvider.debug,
+    appleProvider: AppleProvider.appAttest,
+  );
   // Create a provider container for dependency injection
   final container = ProviderContainer();
   
