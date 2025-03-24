@@ -32,7 +32,7 @@ Future<void> main() async {
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     await FirebaseAppCheck.instance.activate(
-    webProvider: ReCaptchaV3Provider('6Ld9Af4qAAAAAFEsCKDm9Gr4yYAgrL0jLtJadb1z'),
+    webProvider: ReCaptchaV3Provider('6LeGBv4qAAAAACKUiHAJEFBsUDmbTyMPZwb-T8N6'),
     androidProvider: AndroidProvider.debug,
     appleProvider: AppleProvider.appAttest,
   );
