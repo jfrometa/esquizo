@@ -8,10 +8,10 @@ class SalesChart extends StatefulWidget {
   final DateFormat dateFormat;
 
   const SalesChart({
-    Key? key,
+    super.key,
     required this.salesData,
     required this.dateFormat,
-  }) : super(key: key);
+  });
 
   @override
   State<SalesChart> createState() => _SalesChartState();
