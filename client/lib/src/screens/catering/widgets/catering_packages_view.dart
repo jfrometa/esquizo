@@ -74,6 +74,7 @@ class CateringPackagesView extends ConsumerWidget {
 
             return LayoutBuilder(builder: (context, constraints) {
               final screenWidth = constraints.maxWidth;
+
               return GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
