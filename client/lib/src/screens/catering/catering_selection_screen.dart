@@ -32,7 +32,7 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateItemCount(ref);
     });
@@ -48,8 +48,10 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final cateringOptions = ref.watch(cateringItemRepositoryProvider).valueOrNull;
-    final categorizedItems = groupCateringItemsByCategory(cateringOptions ?? []) ;
+    final cateringOptions =
+        ref.watch(cateringItemRepositoryProvider).valueOrNull;
+    final categorizedItems =
+        groupCateringItemsByCategory(cateringOptions ?? []);
     _tabController = TabController(
       length: categorizedItems.keys.length,
       vsync: this,
@@ -57,14 +59,16 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
   }
 
   void _scrollListener() {
-    if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
+    if (_scrollController.position.userScrollDirection ==
+        ScrollDirection.reverse) {
       if (_isTabBarVisible) {
         setState(() {
           _isTabBarVisible = false; // Hide TabBar when scrolling down
           _showFAB = false; // Hide FAB when scrolling down
         });
       }
-    } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
+    } else if (_scrollController.position.userScrollDirection ==
+        ScrollDirection.forward) {
       if (!_isTabBarVisible) {
         setState(() {
           _isTabBarVisible = true; // Show TabBar when scrolling up
@@ -84,7 +88,7 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
   void _showCateringForm(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-     final order = ref.read(cateringOrderProvider);
+    final order = ref.read(cateringOrderProvider);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -92,47 +96,46 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => 
-      
- CateringForm(
-            title: 'Detalles de la Orden',
-            initialData: order,
-            onSubmit: (formData) {
-              ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(
-                    title: order?.title ?? '',
-                    img: order?.img ?? '',
-                    description: order?.title ?? '',
-                    hasChef: formData.hasChef,
-                    alergias: formData.allergies.join(','),
-                    eventType: formData.eventType,
-                    preferencia: order?.preferencia ?? '',
-                    adicionales: formData.additionalNotes,
-                    cantidadPersonas: formData.peopleCount,
-                  );
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Se actualizó el Catering'),
-                  backgroundColor: Colors.brown,
-                  duration: Duration(milliseconds: 500),
-                ),
+      builder: (context) => CateringForm(
+        title: 'Detalles de la Orden',
+        initialData: order,
+        onSubmit: (formData) {
+          ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(
+                title: order?.title ?? '',
+                img: order?.img ?? '',
+                description: order?.title ?? '',
+                hasChef: formData.hasChef,
+                alergias: formData.allergies.join(','),
+                eventType: formData.eventType,
+                preferencia: order?.preferencia ?? '',
+                adicionales: formData.additionalNotes,
+                cantidadPersonas: formData.peopleCount,
               );
-              Navigator.pop(context);
-            },
-          ),
-        
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Se actualizó el Catering'),
+              backgroundColor: Colors.brown,
+              duration: Duration(milliseconds: 500),
+            ),
+          );
+          Navigator.pop(context);
+        },
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final cateringOptions = ref.watch(cateringItemRepositoryProvider).valueOrNull;
-    final categorizedItems = groupCateringItemsByCategory(cateringOptions ?? []);
+    final cateringOptions =
+        ref.watch(cateringItemRepositoryProvider).valueOrNull;
+    final categorizedItems =
+        groupCateringItemsByCategory(cateringOptions ?? []);
     final itemCount = ref.watch(localCateringItemCountProvider);
-    
+
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
- 
+
     return Scaffold(
       appBar: AppBar(
         title: Column(
@@ -162,7 +165,7 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
               icon: const Icon(Icons.shopping_cart_outlined),
               tooltip: 'Ver selecciones',
               onPressed: () {
-                if (itemCount > 0) {
+                if (itemCount <= 0) {
                   // Navigate to cart or show selections
                   _showCateringForm(context);
                 } else {
@@ -178,44 +181,45 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
           ),
           const SizedBox(width: 8),
         ],
-        bottom: _isTabBarVisible ? PreferredSize(
-          preferredSize: const Size.fromHeight(56.0),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: colorScheme.outline.withOpacity(0.2),
-                  width: 1.0,
-                ),
-              ),
-            ),
-            child: TabBar(
-              controller: _tabController,
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              indicatorSize: TabBarIndicatorSize.label,
-              dividerColor: Colors.transparent,
-              labelColor: colorScheme.primary,
-              unselectedLabelColor: colorScheme.onSurfaceVariant,
-              indicatorColor: colorScheme.primary,
-              tabs: categorizedItems.keys.map((category) {
-                return Tab(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text(
-                      category,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
+        bottom: _isTabBarVisible
+            ? PreferredSize(
+                preferredSize: const Size.fromHeight(56.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: colorScheme.outline.withOpacity(0.2),
+                        width: 1.0,
                       ),
                     ),
                   ),
-                );
-              }).toList(),
-            ),
-          ),
-        ) : null,
+                  child: TabBar(
+                    controller: _tabController,
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.start,
+                    indicatorSize: TabBarIndicatorSize.label,
+                    dividerColor: Colors.transparent,
+                    labelColor: colorScheme.primary,
+                    unselectedLabelColor: colorScheme.onSurfaceVariant,
+                    indicatorColor: colorScheme.primary,
+                    tabs: categorizedItems.keys.map((category) {
+                      return Tab(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                            category,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              )
+            : null,
       ),
-      
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -237,7 +241,6 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
           ],
         ),
       ),
-      
       floatingActionButton: AnimatedSlide(
         duration: const Duration(milliseconds: 300),
         offset: _showFAB ? Offset.zero : const Offset(0, 2),
@@ -245,16 +248,17 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
           duration: const Duration(milliseconds: 300),
           opacity: _showFAB ? 1.0 : 0.0,
           child: FloatingActionButton.extended(
-            onPressed: itemCount > 0 ? () => context.pop() : () => _showCateringForm(context),
-            backgroundColor: itemCount > 0 
-                ? colorScheme.primaryContainer 
+            onPressed: itemCount > 0
+                ? () => context.pop()
+                : () => _showCateringForm(context),
+            backgroundColor: itemCount > 0
+                ? colorScheme.primaryContainer
                 : colorScheme.surfaceContainerHighest,
-            foregroundColor: itemCount > 0 
-                ? colorScheme.onPrimaryContainer 
+            foregroundColor: itemCount > 0
+                ? colorScheme.onPrimaryContainer
                 : colorScheme.onSurfaceVariant,
-            label: Text(itemCount > 0
-                ? 'Continuar ($itemCount)' 
-                : 'Selecciona platos',
+            label: Text(
+              itemCount > 0 ? 'Continuar ($itemCount)' : 'Selecciona platos',
             ),
             icon: const Icon(Icons.restaurant_menu),
           ),
@@ -274,7 +278,7 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
       int cantidadPersonas) {
     final cateringOrderProviderNotifier =
         ref.read(cateringOrderProvider.notifier);
-    
+
     cateringOrderProviderNotifier.finalizeCateringOrder(
       title: 'Orden de Catering',
       img: 'assets/image.png',
@@ -292,8 +296,7 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
       List<CateringItem> items) {
     Map<String, List<CateringItem>> categorizedItems = {};
     for (var item in items) {
-      String category =
-          item.id.isNotEmpty ? item.id : 'Uncategorized';
+      String category = item.id.isNotEmpty ? item.id : 'Uncategorized';
       categorizedItems.putIfAbsent(category, () => []).add(item);
     }
     return categorizedItems;
@@ -305,7 +308,8 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
         _isTabBarVisible = false;
         _showFAB = false;
       });
-    } else if (notification.direction == ScrollDirection.forward && !_isTabBarVisible) {
+    } else if (notification.direction == ScrollDirection.forward &&
+        !_isTabBarVisible) {
       setState(() {
         _isTabBarVisible = true;
         _showFAB = true;

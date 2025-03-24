@@ -1,8 +1,10 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/available_items_for_packages_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_packages_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_analitics.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/views/catering/_show_catering_form_sheet.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/views/catering/catering_prackages_view.dart';
 
@@ -27,7 +29,6 @@ class CateringPackagesView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final cateringPackagesAsync = ref.watch(activePackagesProvider);
 
     return ListView(
@@ -58,6 +59,19 @@ class CateringPackagesView extends ConsumerWidget {
               return _buildEmptyState(theme);
             }
 
+            // Track view in analytics (optional)
+            AnalyticsService.instance.logViewItemList(
+              listId: 'catering_packages',
+              listName: 'Catering Packages',
+              items: cateringPackages
+                  .map((package) => AnalyticsEventItem(
+                        itemId: package.id,
+                        itemName: package.name,
+                        price: package.basePrice,
+                      ))
+                  .toList(),
+            );
+
             return LayoutBuilder(builder: (context, constraints) {
               final screenWidth = constraints.maxWidth;
               return GridView.builder(
@@ -67,14 +81,14 @@ class CateringPackagesView extends ConsumerWidget {
                   crossAxisCount: screenWidth > 600 ? 2 : 1,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: screenWidth > 600 ? 0.85 : 1.2,
+                  childAspectRatio: screenWidth > 600 ? 2.7 : 2.3,
                 ),
                 itemCount: cateringPackages.length,
                 itemBuilder: (context, index) {
                   final package = cateringPackages[index];
 
                   return CateringPackageCard(
-                    package: package.toJson(),
+                    package: package,
                     // onTap: () =>
                     //     _showCateringForm(context, ref, package.toJson()),
                   );

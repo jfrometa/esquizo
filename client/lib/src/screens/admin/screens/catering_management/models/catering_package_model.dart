@@ -33,11 +33,11 @@ class CateringPackage {
 
   // Empty constructor
   factory CateringPackage.empty() => const CateringPackage(
-    id: '',
-    name: '',
-    description: '',
-    basePrice: 0,
-  );
+        id: '',
+        name: '',
+        description: '',
+        basePrice: 0,
+      );
 
   // From JSON constructor
   factory CateringPackage.fromJson(Map<String, dynamic> json) {
@@ -48,11 +48,13 @@ class CateringPackage {
       basePrice: (json['basePrice'] as num).toDouble(),
       imageUrl: json['imageUrl'] as String? ?? '',
       categoryIds: (json['categoryIds'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ?? [],
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
       items: (json['items'] as List<dynamic>?)
-          ?.map((e) => PackageItem.fromJson(e as Map<String, dynamic>))
-          .toList() ?? [],
+              ?.map((e) => PackageItem.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       isActive: json['isActive'] as bool? ?? false,
       isPromoted: json['isPromoted'] as bool? ?? false,
       minPeople: json['minPeople'] as int? ?? 0,
@@ -111,8 +113,10 @@ class CateringPackage {
       isPromoted: isPromoted ?? this.isPromoted,
       minPeople: minPeople ?? this.minPeople,
       maxPeople: maxPeople ?? this.maxPeople,
-      iconCodePoint: clearIconCodePoint ? null : (iconCodePoint ?? this.iconCodePoint),
-      iconFontFamily: clearIconFontFamily ? null : (iconFontFamily ?? this.iconFontFamily),
+      iconCodePoint:
+          clearIconCodePoint ? null : (iconCodePoint ?? this.iconCodePoint),
+      iconFontFamily:
+          clearIconFontFamily ? null : (iconFontFamily ?? this.iconFontFamily),
     );
   }
 
@@ -120,39 +124,39 @@ class CateringPackage {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-  
+
     return other is CateringPackage &&
-      other.id == id &&
-      other.name == name &&
-      other.description == description &&
-      other.basePrice == basePrice &&
-      other.imageUrl == imageUrl &&
-      listEquals(other.categoryIds, categoryIds) &&
-      listEquals(other.items, items) &&
-      other.isActive == isActive &&
-      other.isPromoted == isPromoted &&
-      other.minPeople == minPeople &&
-      other.maxPeople == maxPeople &&
-      other.iconCodePoint == iconCodePoint &&
-      other.iconFontFamily == iconFontFamily;
+        other.id == id &&
+        other.name == name &&
+        other.description == description &&
+        other.basePrice == basePrice &&
+        other.imageUrl == imageUrl &&
+        listEquals(other.categoryIds, categoryIds) &&
+        listEquals(other.items, items) &&
+        other.isActive == isActive &&
+        other.isPromoted == isPromoted &&
+        other.minPeople == minPeople &&
+        other.maxPeople == maxPeople &&
+        other.iconCodePoint == iconCodePoint &&
+        other.iconFontFamily == iconFontFamily;
   }
 
   // Hash code
   @override
   int get hashCode {
     return id.hashCode ^
-      name.hashCode ^
-      description.hashCode ^
-      basePrice.hashCode ^
-      imageUrl.hashCode ^
-      categoryIds.hashCode ^
-      items.hashCode ^
-      isActive.hashCode ^
-      isPromoted.hashCode ^
-      minPeople.hashCode ^
-      maxPeople.hashCode ^
-      iconCodePoint.hashCode ^
-      iconFontFamily.hashCode;
+        name.hashCode ^
+        description.hashCode ^
+        basePrice.hashCode ^
+        imageUrl.hashCode ^
+        categoryIds.hashCode ^
+        items.hashCode ^
+        isActive.hashCode ^
+        isPromoted.hashCode ^
+        minPeople.hashCode ^
+        maxPeople.hashCode ^
+        iconCodePoint.hashCode ^
+        iconFontFamily.hashCode;
   }
 
   // String representation
@@ -162,75 +166,63 @@ class CateringPackage {
   }
 }
 
+/// Represents an item included in a catering package
 class PackageItem {
-  final String itemId;
+  final String id;
   final String name;
+  final String category;
+  final double price;
+  final String? description;
   final int quantity;
-  final double pricePerUnit;
-  final String description;
-  final bool isRequired;
-  final int minQuantity;
-  final int maxQuantity;
 
   const PackageItem({
-    required this.itemId,
+    required this.id,
     required this.name,
+    required this.category,
+    required this.price,
+    this.description,
     this.quantity = 1,
-    this.pricePerUnit = 0,
-    this.description = '',
-    this.isRequired = false,
-    this.minQuantity = 0,
-    this.maxQuantity = 0,
   });
 
-  // From JSON constructor
   factory PackageItem.fromJson(Map<String, dynamic> json) {
     return PackageItem(
-      itemId: json['itemId'] as String,
+      id: json['id'] as String,
       name: json['name'] as String,
+      category: json['category'] as String? ?? 'Other',
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      description: json['description'] as String?,
       quantity: json['quantity'] as int? ?? 1,
-      pricePerUnit: (json['pricePerUnit'] as num?)?.toDouble() ?? 0,
-      description: json['description'] as String? ?? '',
-      isRequired: json['isRequired'] as bool? ?? false,
-      minQuantity: json['minQuantity'] as int? ?? 0,
-      maxQuantity: json['maxQuantity'] as int? ?? 0,
     );
   }
 
-  // To JSON method
   Map<String, dynamic> toJson() {
     return {
-      'itemId': itemId,
+      'id': id,
       'name': name,
+      'category': category,
+      'price': price,
+      if (description != null) 'description': description,
       'quantity': quantity,
-      'pricePerUnit': pricePerUnit,
-      'description': description,
-      'isRequired': isRequired,
-      'minQuantity': minQuantity,
-      'maxQuantity': maxQuantity,
     };
   }
 
   // Copy with method
   PackageItem copyWith({
-    String? itemId,
+    String? id,
     String? name,
-    int? quantity,
-    double? pricePerUnit,
+    String? category,
+    double? price,
     String? description,
-    bool? isRequired,
-    int? minQuantity,
-    int? maxQuantity,
+    bool clearDescription = false,
+    int? quantity,
   }) {
     return PackageItem(
-      itemId: itemId ?? this.itemId,
+      id: id ?? this.id,
       name: name ?? this.name,
+      category: category ?? this.category,
+      price: price ?? this.price,
+      description: clearDescription ? null : (description ?? this.description),
       quantity: quantity ?? this.quantity,
-      pricePerUnit: pricePerUnit ?? this.pricePerUnit,
-      description: description ?? this.description,
-      isRequired: isRequired ?? this.isRequired,
-      minQuantity: minQuantity ?? this.minQuantity,
-      maxQuantity: maxQuantity ?? this.maxQuantity,
     );
   }
 
@@ -238,34 +230,28 @@ class PackageItem {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-  
+
     return other is PackageItem &&
-      other.itemId == itemId &&
-      other.name == name &&
-      other.quantity == quantity &&
-      other.pricePerUnit == pricePerUnit &&
-      other.description == description &&
-      other.isRequired == isRequired &&
-      other.minQuantity == minQuantity &&
-      other.maxQuantity == maxQuantity;
+        other.id == id &&
+        other.name == name &&
+        other.category == category &&
+        other.price == price &&
+        other.description == description &&
+        other.quantity == quantity;
   }
 
-  // Hash code
   @override
   int get hashCode {
-    return itemId.hashCode ^
-      name.hashCode ^
-      quantity.hashCode ^
-      pricePerUnit.hashCode ^
-      description.hashCode ^
-      isRequired.hashCode ^
-      minQuantity.hashCode ^
-      maxQuantity.hashCode;
+    return id.hashCode ^
+        name.hashCode ^
+        category.hashCode ^
+        price.hashCode ^
+        description.hashCode ^
+        quantity.hashCode;
   }
 
-  // String representation
   @override
   String toString() {
-    return 'PackageItem(itemId: $itemId, name: $name, quantity: $quantity, isRequired: $isRequired)';
+    return 'PackageItem(id: $id, name: $name, category: $category, price: $price, quantity: $quantity)';
   }
 }

@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_category_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/unified_catering_package_providers.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/unified_catering_package_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_item_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/utils/icon_mapper.dart';
- 
+
 class CateringPackageForm extends ConsumerStatefulWidget {
   final CateringPackage? package;
-  
+
   const CateringPackageForm({
-    super.key, 
+    super.key,
     this.package,
   });
 
   @override
-  ConsumerState<CateringPackageForm> createState() => _CateringPackageFormState();
+  ConsumerState<CateringPackageForm> createState() =>
+      _CateringPackageFormState();
 }
 
 class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
@@ -26,7 +27,7 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
   late TextEditingController _minPeopleController;
   late TextEditingController _maxPeopleController;
   late TextEditingController _imageUrlController;
-  
+
   List<String> _selectedCategoryIds = [];
   List<PackageItem> _packageItems = [];
   bool _isActive = false;
@@ -115,7 +116,7 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
         );
 
         final repository = ref.read(cateringPackageRepositoryProvider);
-        
+
         if (package.id.isEmpty) {
           await repository.addPackage(package);
         } else {
@@ -161,7 +162,7 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
     final mediaQuery = MediaQuery.of(context);
     final viewInsets = mediaQuery.viewInsets;
     final isDesktop = mediaQuery.size.width >= 1100;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(isEdit ? 'Edit Package' : 'New Package'),
@@ -195,8 +196,8 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                     child: Center(
                       child: _iconCodePoint != null
                           ? Icon(
-                              IconMapper.getIconData( _iconCodePoint?.toString() ?? ''),
-            
+                              IconMapper.getIconData(
+                                  _iconCodePoint?.toString() ?? ''),
                               size: 40,
                               color: colorScheme.onPrimaryContainer,
                             )
@@ -239,9 +240,9 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Tab view for different sections
             DefaultTabController(
               length: 3,
@@ -272,7 +273,7 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              
+
                               // Name field
                               TextFormField(
                                 controller: _nameController,
@@ -291,7 +292,7 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                                 },
                               ),
                               const SizedBox(height: 16),
-                              
+
                               // Description field
                               TextFormField(
                                 controller: _descriptionController,
@@ -303,10 +304,11 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                                   alignLabelWithHint: true,
                                 ),
                                 maxLines: 3,
-                                textCapitalization: TextCapitalization.sentences,
+                                textCapitalization:
+                                    TextCapitalization.sentences,
                               ),
                               const SizedBox(height: 16),
-                              
+
                               // Price field
                               TextFormField(
                                 controller: _priceController,
@@ -328,7 +330,7 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                                 },
                               ),
                               const SizedBox(height: 16),
-                              
+
                               // Min/Max People fields
                               Row(
                                 children: [
@@ -360,7 +362,7 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                                 ],
                               ),
                               const SizedBox(height: 16),
-                              
+
                               // Image URL field
                               TextFormField(
                                 controller: _imageUrlController,
@@ -372,26 +374,29 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                                 ),
                               ),
                               const SizedBox(height: 24),
-                              
+
                               // Status toggles
                               Card(
                                 child: Padding(
                                   padding: const EdgeInsets.all(16),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Package Status',
-                                        style: theme.textTheme.titleMedium?.copyWith(
+                                        style: theme.textTheme.titleMedium
+                                            ?.copyWith(
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                       const SizedBox(height: 8),
-                                      
+
                                       // Active switch
                                       SwitchListTile(
                                         title: const Text('Active'),
-                                        subtitle: const Text('Package is available for selection'),
+                                        subtitle: const Text(
+                                            'Package is available for selection'),
                                         value: _isActive,
                                         onChanged: (value) {
                                           setState(() {
@@ -402,14 +407,17 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                                           _isActive
                                               ? Icons.toggle_on_outlined
                                               : Icons.toggle_off_outlined,
-                                          color: _isActive ? colorScheme.primary : null,
+                                          color: _isActive
+                                              ? colorScheme.primary
+                                              : null,
                                         ),
                                       ),
-                                      
+
                                       // Promoted switch
                                       SwitchListTile(
                                         title: const Text('Promoted'),
-                                        subtitle: const Text('Feature this package in promotions'),
+                                        subtitle: const Text(
+                                            'Feature this package in promotions'),
                                         value: _isPromoted,
                                         onChanged: (value) {
                                           setState(() {
@@ -417,8 +425,12 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                                           });
                                         },
                                         secondary: Icon(
-                                          _isPromoted ? Icons.star : Icons.star_border,
-                                          color: _isPromoted ? colorScheme.primary : null,
+                                          _isPromoted
+                                              ? Icons.star
+                                              : Icons.star_border,
+                                          color: _isPromoted
+                                              ? colorScheme.primary
+                                              : null,
                                         ),
                                       ),
                                     ],
@@ -428,10 +440,10 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                             ],
                           ),
                         ),
-                        
+
                         // Categories Tab
                         _buildCategoriesTab(colorScheme),
-                        
+
                         // Items Tab
                         _buildItemsTab(colorScheme),
                       ],
@@ -440,9 +452,9 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Submit button
             SizedBox(
               width: double.infinity,
@@ -473,8 +485,9 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
   Widget _buildCategoriesTab(ColorScheme colorScheme) {
     return Consumer(
       builder: (context, ref, child) {
-        final categoriesAsyncValue = ref.watch(cateringCategoryRepositoryProvider);
-        
+        final categoriesAsyncValue =
+            ref.watch(cateringCategoryRepositoryProvider);
+
         return categoriesAsyncValue.when(
           data: (categories) {
             if (categories.isEmpty) {
@@ -500,7 +513,7 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                 ),
               );
             }
-            
+
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -509,15 +522,15 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                   child: Text(
                     'Select Categories',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ),
                 Text(
                   'Choose which categories this package belongs to',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                 ),
                 const SizedBox(height: 16),
                 Expanded(
@@ -525,8 +538,9 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                     itemCount: categories.length,
                     itemBuilder: (context, index) {
                       final category = categories[index];
-                      final isSelected = _selectedCategoryIds.contains(category.id);
-                      
+                      final isSelected =
+                          _selectedCategoryIds.contains(category.id);
+
                       return CheckboxListTile(
                         title: Text(category.name),
                         subtitle: Text(
@@ -536,8 +550,10 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                         ),
                         secondary: category.iconName != null
                             ? Icon(
-                                IconMapper.getIconData( _iconCodePoint?.toString() ?? ''),
-                                color: isSelected ? colorScheme.onPrimary : null,
+                                IconMapper.getIconData(
+                                    _iconCodePoint?.toString() ?? ''),
+                                color:
+                                    isSelected ? colorScheme.onPrimary : null,
                               )
                             : null,
                         value: isSelected,
@@ -577,8 +593,8 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
               Text(
                 'Package Items',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               ElevatedButton.icon(
                 onPressed: _showAddItemDialog,
@@ -591,8 +607,8 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
         Text(
           'Configure the items included in this package',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-          ),
+                color: colorScheme.onSurfaceVariant,
+              ),
         ),
         const SizedBox(height: 16),
         if (_packageItems.isEmpty)
@@ -633,9 +649,9 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
               },
               itemBuilder: (context, index) {
                 final item = _packageItems[index];
-                
+
                 return Card(
-                  key: ValueKey(item.itemId),
+                  key: ValueKey(item.id),
                   margin: const EdgeInsets.only(bottom: 8),
                   child: ListTile(
                     leading: Container(
@@ -658,31 +674,32 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                     title: Text(item.name),
                     subtitle: Row(
                       children: [
-                        if (item.isRequired)
-                          Container(
-                            margin: const EdgeInsets.only(right: 8),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: colorScheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              'Required',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: colorScheme.onPrimaryContainer,
-                              ),
-                            ),
-                          ),
+                        // if (item.isRequired)
+                        //   Container(
+                        //     margin: const EdgeInsets.only(right: 8),
+                        //     padding: const EdgeInsets.symmetric(
+                        //       horizontal: 6,
+                        //       vertical: 2,
+                        //     ),
+                        //     decoration: BoxDecoration(
+                        //       color: colorScheme.primaryContainer,
+                        //       borderRadius: BorderRadius.circular(4),
+                        //     ),
+                        //     child: Text(
+                        //       'Required',
+                        //       style: TextStyle(
+                        //         fontSize: 10,
+                        //         color: colorScheme.onPrimaryContainer,
+                        //       ),
+                        //     ),
+                        //   ),
+
                         Expanded(
                           child: Text(
-                            item.description.isNotEmpty
-                                ? item.description
-                                : (item.pricePerUnit > 0
-                                    ? '\$${item.pricePerUnit.toStringAsFixed(2)} per unit'
+                            item.description != null
+                                ? item.description ?? ''
+                                : (item.price > 0
+                                    ? '\$${item.price.toStringAsFixed(2)} per unit'
                                     : ''),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -734,7 +751,10 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                   width: 32,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurfaceVariant
+                        .withOpacity(0.4),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -756,7 +776,8 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                 Expanded(
                   child: GridView.builder(
                     controller: scrollController,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 4,
                       mainAxisSpacing: 16,
                       crossAxisSpacing: 16,
@@ -768,7 +789,7 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                       final iconData = iconOption['icon'] as IconData;
                       final iconName = iconOption['name'] as String;
                       final isSelected = _iconCodePoint == iconData.codePoint;
-                      
+
                       return InkWell(
                         onTap: () {
                           setState(() {
@@ -782,11 +803,15 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? Theme.of(context).colorScheme.primaryContainer
-                                : Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest
+                                    .withOpacity(0.3),
                             borderRadius: BorderRadius.circular(12),
                             border: isSelected
                                 ? Border.all(
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
                                     width: 2,
                                   )
                                 : null,
@@ -799,16 +824,23 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                                 size: 32,
                                 color: isSelected
                                     ? Theme.of(context).colorScheme.primary
-                                    : Theme.of(context).colorScheme.onSurfaceVariant,
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 iconName,
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: isSelected
-                                      ? Theme.of(context).colorScheme.primary
-                                      : null,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: isSelected
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                          : null,
+                                    ),
                                 textAlign: TextAlign.center,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -827,74 +859,76 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
     );
   }
 
-void _showAddItemDialog() {
-  showDialog(
-    context: context,
-    builder: (context) => Consumer(
-      builder: (context, ref, child) {
-        // Use the unified provider to access available items
-        final itemsAsyncValue = ref.watch(unifiedCateringPackageRepositoryProvider.select(
-          (value) => value.whenData((packages) => 
-            ref.read(availableItemsProvider)
-          ),
-        ));
-        
-        return itemsAsyncValue.when(
-          data: (items) {
-            if (items.isEmpty) {
-              return AlertDialog(
-                title: const Text('No Items Available'),
-                content: const Text('There are no catering items available. Please create some items first.'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('OK'),
-                  ),
-                ],
-              );
-            }
-            
-            return _ItemSelectionDialog(
-              items: items,
-              onItemSelected: (item, quantity, isRequired) {
-                _addPackageItem(item, quantity, isRequired);
-                Navigator.pop(context);
-              },
-            );
-          },
-          loading: () => const AlertDialog(
-            content: Center(
-              child: CircularProgressIndicator(),
-            ),
-          ),
-          error: (error, stack) => AlertDialog(
-            title: const Text('Error'),
-            content: Text('Failed to load items: $error'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
-      },
-    ),
-  );
-}
+  void _showAddItemDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => Consumer(
+        builder: (context, ref, child) {
+          // Use the unified provider to access available items
+          final itemsAsyncValue =
+              ref.watch(unifiedCateringPackageRepositoryProvider.select(
+            (value) =>
+                value.whenData((packages) => ref.read(availableItemsProvider)),
+          ));
 
-void _showEditItemDialog(PackageItem item, int index) {
-    final quantityController = TextEditingController(text: item.quantity.toString());
-    final priceController = TextEditingController(text: item.pricePerUnit.toString());
+          return itemsAsyncValue.when(
+            data: (items) {
+              if (items.isEmpty) {
+                return AlertDialog(
+                  title: const Text('No Items Available'),
+                  content: const Text(
+                      'There are no catering items available. Please create some items first.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('OK'),
+                    ),
+                  ],
+                );
+              }
+
+              return _ItemSelectionDialog(
+                items: items,
+                onItemSelected: (item, quantity, isRequired) {
+                  _addPackageItem(item, quantity, isRequired);
+                  Navigator.pop(context);
+                },
+              );
+            },
+            loading: () => const AlertDialog(
+              content: Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+            error: (error, stack) => AlertDialog(
+              title: const Text('Error'),
+              content: Text('Failed to load items: $error'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _showEditItemDialog(PackageItem item, int index) {
+    final quantityController =
+        TextEditingController(text: item.quantity.toString());
+    final priceController = TextEditingController(text: item.price.toString());
     final descriptionController = TextEditingController(text: item.description);
-    final minQuantityController = TextEditingController(
-      text: item.minQuantity > 0 ? item.minQuantity.toString() : '',
-    );
-    final maxQuantityController = TextEditingController(
-      text: item.maxQuantity > 0 ? item.maxQuantity.toString() : '',
-    );
-    bool isRequired = item.isRequired;
-    
+    // final minQuantityController = TextEditingController(
+    //   text: item.minQuantity > 0 ? item.minQuantity.toString() : '',
+    // );
+    // final maxQuantityController = TextEditingController(
+    //   text: item.maxQuantity > 0 ? item.maxQuantity.toString() : '',
+    // );
+    // bool isRequired = item.isRequired;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -910,8 +944,8 @@ void _showEditItemDialog(PackageItem item, int index) {
                     child: Text(
                       item.name,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ),
                 ],
@@ -949,47 +983,47 @@ void _showEditItemDialog(PackageItem item, int index) {
               ),
               const SizedBox(height: 16),
               // Min & Max quantity
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: minQuantityController,
-                      decoration: const InputDecoration(
-                        labelText: 'Min Quantity',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextFormField(
-                      controller: maxQuantityController,
-                      decoration: const InputDecoration(
-                        labelText: 'Max Quantity',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                    ),
-                  ),
-                ],
-              ),
+              // Row(
+              //   children: [
+              //     Expanded(
+              //       child: TextFormField(
+              //         controller: minQuantityController,
+              //         decoration: const InputDecoration(
+              //           labelText: 'Min Quantity',
+              //           border: OutlineInputBorder(),
+              //         ),
+              //         keyboardType: TextInputType.number,
+              //       ),
+              //     ),
+              //     const SizedBox(width: 16),
+              //     Expanded(
+              //       child: TextFormField(
+              //         controller: maxQuantityController,
+              //         decoration: const InputDecoration(
+              //           labelText: 'Max Quantity',
+              //           border: OutlineInputBorder(),
+              //         ),
+              //         keyboardType: TextInputType.number,
+              //       ),
+              //     ),
+              //   ],
+              // ),
               const SizedBox(height: 16),
               // Required switch
-              StatefulBuilder(
-                builder: (context, setState) {
-                  return SwitchListTile(
-                    title: const Text('Required Item'),
-                    subtitle: const Text('Must be included in the package'),
-                    value: isRequired,
-                    onChanged: (value) {
-                      setState(() {
-                        isRequired = value;
-                      });
-                    },
-                  );
-                },
-              ),
+              // StatefulBuilder(
+              //   builder: (context, setState) {
+              //     return SwitchListTile(
+              //       title: const Text('Required Item'),
+              //       subtitle: const Text('Must be included in the package'),
+              //       value: isRequired,
+              //       onChanged: (value) {
+              //         setState(() {
+              //           isRequired = value;
+              //         });
+              //       },
+              //     );
+              //   },
+              // ),
             ],
           ),
         ),
@@ -1003,22 +1037,19 @@ void _showEditItemDialog(PackageItem item, int index) {
               final quantity = int.tryParse(quantityController.text) ?? 1;
               final price = double.tryParse(priceController.text) ?? 0.0;
               final description = descriptionController.text.trim();
-              final minQuantity = int.tryParse(minQuantityController.text) ?? 0;
-              final maxQuantity = int.tryParse(maxQuantityController.text) ?? 0;
-              
+              // final minQuantity = int.tryParse(minQuantityController.text) ?? 0;
+              // final maxQuantity = int.tryParse(maxQuantityController.text) ?? 0;
+
               final updatedItem = item.copyWith(
                 quantity: quantity,
-                pricePerUnit: price,
+                price: price,
                 description: description,
-                isRequired: isRequired,
-                minQuantity: minQuantity,
-                maxQuantity: maxQuantity,
               );
-              
+
               setState(() {
                 _packageItems[index] = updatedItem;
               });
-              
+
               Navigator.pop(context);
             },
             child: const Text('Update'),
@@ -1030,32 +1061,34 @@ void _showEditItemDialog(PackageItem item, int index) {
       quantityController.dispose();
       priceController.dispose();
       descriptionController.dispose();
-      minQuantityController.dispose();
-      maxQuantityController.dispose();
+      // minQuantityController.dispose();
+      // maxQuantityController.dispose();
     });
   }
 
-  void _addPackageItem(CateringItem cateringItem, int quantity, bool isRequired) {
+  void _addPackageItem(
+      CateringItem cateringItem, int quantity, bool isRequired) {
     final newItem = PackageItem(
-      itemId: cateringItem.id,
+      id: cateringItem.id,
       name: cateringItem.name,
       quantity: quantity,
-      pricePerUnit: cateringItem.price,
       description: cateringItem.description,
-      isRequired: isRequired,
+      category: cateringItem.categoryIds.first,
+      price: cateringItem.price,
     );
-    
+
     setState(() {
       // Check if item already exists
-      final existingIndex = _packageItems.indexWhere((item) => item.itemId == cateringItem.id);
-      
+      final existingIndex =
+          _packageItems.indexWhere((item) => item.id == cateringItem.id);
+
       if (existingIndex >= 0) {
         // Update existing item
         final existingItem = _packageItems[existingIndex];
         _packageItems[existingIndex] = existingItem.copyWith(
           quantity: existingItem.quantity + quantity,
         );
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Updated quantity for ${cateringItem.name}'),
@@ -1065,7 +1098,7 @@ void _showEditItemDialog(PackageItem item, int index) {
       } else {
         // Add new item
         _packageItems.add(newItem);
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Added ${cateringItem.name} to package'),
@@ -1075,14 +1108,14 @@ void _showEditItemDialog(PackageItem item, int index) {
       }
     });
   }
-  
+
   void _removeItem(int index) {
     final item = _packageItems[index];
-    
+
     setState(() {
       _packageItems.removeAt(index);
     });
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Removed ${item.name} from package'),
@@ -1103,7 +1136,7 @@ void _showEditItemDialog(PackageItem item, int index) {
 class _ItemSelectionDialog extends StatefulWidget {
   final List<CateringItem> items;
   final Function(CateringItem, int, bool) onItemSelected;
-  
+
   const _ItemSelectionDialog({
     required this.items,
     required this.onItemSelected,
@@ -1118,17 +1151,18 @@ class _ItemSelectionDialogState extends State<_ItemSelectionDialog> {
   int _quantity = 1;
   bool _isRequired = false;
   CateringItem? _selectedItem;
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     // Filter items based on search
     final filteredItems = widget.items
-        .where((item) => item.name.toLowerCase().contains(_searchQuery.toLowerCase()))
+        .where((item) =>
+            item.name.toLowerCase().contains(_searchQuery.toLowerCase()))
         .toList();
-    
+
     return AlertDialog(
       title: const Text('Add Item to Package'),
       content: SizedBox(
@@ -1151,7 +1185,7 @@ class _ItemSelectionDialogState extends State<_ItemSelectionDialog> {
               },
             ),
             const SizedBox(height: 16),
-            
+
             // Items list
             SizedBox(
               height: 300,
@@ -1167,7 +1201,7 @@ class _ItemSelectionDialogState extends State<_ItemSelectionDialog> {
                       itemBuilder: (context, index) {
                         final item = filteredItems[index];
                         final isSelected = _selectedItem?.id == item.id;
-                        
+
                         return ListTile(
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -1213,14 +1247,14 @@ class _ItemSelectionDialogState extends State<_ItemSelectionDialog> {
                       },
                     ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Item options (only shown when an item is selected)
             if (_selectedItem != null) ...[
               const Divider(),
               const SizedBox(height: 16),
-              
+
               Row(
                 children: [
                   Expanded(
@@ -1252,9 +1286,9 @@ class _ItemSelectionDialogState extends State<_ItemSelectionDialog> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Quantity selector
               Row(
                 children: [
@@ -1290,11 +1324,12 @@ class _ItemSelectionDialogState extends State<_ItemSelectionDialog> {
                   ),
                 ],
               ),
-              
+
               // Required switch
               SwitchListTile(
                 title: const Text('Required Item'),
-                subtitle: const Text('This item must be included in the package'),
+                subtitle:
+                    const Text('This item must be included in the package'),
                 value: _isRequired,
                 onChanged: (value) {
                   setState(() {
@@ -1313,7 +1348,8 @@ class _ItemSelectionDialogState extends State<_ItemSelectionDialog> {
         ),
         FilledButton(
           onPressed: _selectedItem != null
-              ? () => widget.onItemSelected(_selectedItem!, _quantity, _isRequired)
+              ? () =>
+                  widget.onItemSelected(_selectedItem!, _quantity, _isRequired)
               : null,
           child: const Text('Add to Package'),
         ),
