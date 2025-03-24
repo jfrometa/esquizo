@@ -641,20 +641,20 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
         ),
       ),
       // Scroll to top button - visible when scrolling down
-      floatingActionButton: AnimatedSlide(
-        duration: const Duration(milliseconds: 200),
-        offset: scrollOffset > 100 ? Offset.zero : const Offset(0, 2),
-        child: AnimatedOpacity(
-          duration: const Duration(milliseconds: 200),
-          opacity: scrollOffset > 100 ? 1.0 : 0.0,
-          child: FloatingActionButton.small(
-            onPressed: _scrollToTop,
-            elevation: 4,
-            tooltip: 'Scroll to top',
-            child: const Icon(Icons.keyboard_arrow_up),
-          ),
-        ),
-      ),
+      // floatingActionButton: AnimatedSlide(
+      //   duration: const Duration(milliseconds: 200),
+      //   offset: scrollOffset > 100 ? Offset.zero : const Offset(0, 2),
+      //   child: AnimatedOpacity(
+      //     duration: const Duration(milliseconds: 200),
+      //     opacity: scrollOffset > 100 ? 1.0 : 0.0,
+      //     child: FloatingActionButton.small(
+      //       onPressed: _scrollToTop,
+      //       elevation: 4,
+      //       tooltip: 'Scroll to top ',
+      //       child: const Icon(Icons.keyboard_arrow_up),
+      //     ),
+      //   ),
+      // ),
     );
   }
 }
