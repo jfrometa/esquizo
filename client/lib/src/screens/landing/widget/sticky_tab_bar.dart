@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/catering-section.dart';
@@ -39,6 +40,7 @@ class StickyTabsContainer extends StatefulWidget {
 
 class _StickyTabsContainerState extends State<StickyTabsContainer> {
   final ScrollController _mainScrollController = ScrollController();
+  bool _isPinned = true;
   
   @override
   void dispose() {
@@ -46,6 +48,24 @@ class _StickyTabsContainerState extends State<StickyTabsContainer> {
     super.dispose();
   }
 
+  void _handleScroll() {
+    if (_mainScrollController.position.userScrollDirection == ScrollDirection.reverse) {
+      if (_isPinned) {
+        setState(() => _isPinned = false);
+      }
+    } else if (_mainScrollController.position.userScrollDirection == ScrollDirection.forward) {
+      if (!_isPinned) {
+        setState(() => _isPinned = true);
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _mainScrollController.addListener(_handleScroll);
+  }
+  
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -62,7 +82,7 @@ class _StickyTabsContainerState extends State<StickyTabsContainer> {
         slivers: [
           // Sticky header with tabs
           SliverPersistentHeader(
-            pinned: true,
+            pinned: _isPinned,
             delegate: _StickyTabBarDelegate(
               colorScheme: colorScheme,
               child: Material(
@@ -82,18 +102,22 @@ class _StickyTabsContainerState extends State<StickyTabsContainer> {
                     Tab(
                       icon: Icon(Icons.restaurant_menu),
                       text: 'Menú',
+                      iconMargin: EdgeInsets.symmetric(horizontal: 4.0),
                     ),
                     Tab(
                       icon: Icon(Icons.food_bank),
                       text: 'Planes',
+                      iconMargin: EdgeInsets.symmetric(horizontal: 4.0),
                     ),
                     Tab(
                       icon: Icon(Icons.celebration),
                       text: 'Catering',
+                      iconMargin: EdgeInsets.symmetric(horizontal: 4.0),
                     ),
                     Tab(
                       icon: Icon(Icons.event_available),
                       text: 'Eventos',
+                      iconMargin: EdgeInsets.symmetric(horizontal: 4.0),
                     ),
                   ],
                 ),
