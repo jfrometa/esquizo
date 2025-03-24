@@ -2,10 +2,8 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/available_items_for_packages_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_packages_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_analitics.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/menu/views/catering/_show_catering_form_sheet.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/views/catering/catering_prackages_view.dart';
 
 /// A view displaying available catering packages

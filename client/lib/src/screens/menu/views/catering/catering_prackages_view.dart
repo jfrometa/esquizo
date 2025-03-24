@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_analitics.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart';
+import 'package:starter_architecture_flutter_firebase/src/utils/icon_mapper.dart';
 
 /// A horizontal card component displaying a catering package
 class CateringPackageCard extends StatelessWidget {
@@ -40,10 +41,7 @@ class CateringPackageCard extends StatelessWidget {
     // Get icon from code point or use a default icon
     IconData packageIcon = Icons.restaurant;
     if (package.iconCodePoint != null && package.iconFontFamily != null) {
-      packageIcon = IconData(
-        package.iconCodePoint!,
-        fontFamily: package.iconFontFamily,
-      );
+      packageIcon = IconMapper.getIconData(package.iconCodePoint.toString());
     }
 
     return Card(
@@ -315,10 +313,7 @@ class CateringPackageDetailScreen extends StatelessWidget {
     // Get icon from code point or use a default icon
     IconData packageIcon = Icons.restaurant;
     if (package.iconCodePoint != null && package.iconFontFamily != null) {
-      packageIcon = IconData(
-        package.iconCodePoint!,
-        fontFamily: package.iconFontFamily,
-      );
+      packageIcon = IconMapper.getIconData(package.iconCodePoint.toString());
     }
 
     // Group items by category
