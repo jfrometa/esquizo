@@ -1,15 +1,12 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_category_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_item_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_category_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_item_model.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart';
 
  part 'unified_catering_package_providers.g.dart';
@@ -338,7 +335,7 @@ extension UnifiedCateringPackageRepositoryX on
     AutoDisposeStreamNotifierProviderImpl<UnifiedCateringPackageRepository, List<CateringPackage>> {
   /// Provider that gives access to the repository instance
   Provider<UnifiedCateringPackageRepository> get repositoryProvider => 
-      Provider<UnifiedCateringPackageRepository>((ref) => ref.watch(this.notifier));
+      Provider<UnifiedCateringPackageRepository>((ref) => ref.watch(notifier));
 }
 
 /// Legacy provider that wraps unifiedCateringPackageRepositoryProvider

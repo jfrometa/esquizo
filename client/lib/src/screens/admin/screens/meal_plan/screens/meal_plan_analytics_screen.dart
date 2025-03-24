@@ -154,7 +154,7 @@ final mealPlanAnalyticsProvider = FutureProvider<MealPlanAnalyticsData>((ref) as
 });
 
 class MealPlanAnalyticsScreen extends ConsumerWidget {
-  const MealPlanAnalyticsScreen({Key? key}) : super(key: key);
+  const MealPlanAnalyticsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -485,7 +485,7 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: colorScheme.surfaceVariant,
+                        color: colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -586,7 +586,7 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
             ),
             
             // Action buttons
-            ButtonBar(
+            OverflowBar(
               children: [
                 TextButton.icon(
                   icon: const Icon(Icons.remove_red_eye),

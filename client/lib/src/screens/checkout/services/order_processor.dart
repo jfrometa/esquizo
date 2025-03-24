@@ -5,7 +5,6 @@ import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/ca
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/catering/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/providers/order_storage_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_cart.dart';

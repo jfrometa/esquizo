@@ -8,8 +8,8 @@ import 'package:starter_architecture_flutter_firebase/src/screens/menu/widget/me
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
 // Import all the necessary files from your project
-import '../QR/models/qr_code_data.dart'; 
-import '../../core/providers/menu/menu_providers.dart'; 
+import '../QR/models/qr_code_data.dart';
+import '../../core/providers/menu/menu_providers.dart';
 // Views
 import 'views/category_view.dart';
 import 'views/catering_view.dart';
@@ -17,6 +17,9 @@ import 'views/filter_bottom_sheet.dart';
 import 'views/meal_plans_view.dart';
 import 'views/search_results_view.dart';
 import 'views/special_offers_view.dart';
+
+// Provider to share scroll position across the entire menu
+final menuScrollOffsetProvider = StateProvider<double>((ref) => 0.0);
 
 class MenuScreen extends ConsumerStatefulWidget {
   const MenuScreen({super.key});
@@ -30,80 +33,92 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
   // Controllers
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
-  
+
   // State variables
   bool _isSearching = false;
-  double _scrollOffset = 0;
-  bool _isScrolling = false;
+  final double _headerThreshold = 80.0; // Threshold for header animation
   final double _parallaxFactor = 0.5;
-  
+
   // Tab and scroll controllers
   late final TabController _tabController;
   final ScrollController _mainScrollController = ScrollController();
   final Map<int, ScrollController> _tabScrollControllers = {};
-  
+
   // Animation controllers
   late final AnimationController _headerAnimationController;
   late final Animation<double> _headerOpacityAnimation;
-  
+
   // Table data
   late final QRCodeData _tableData;
-  
+
   // Cached widget references for preventing unnecessary rebuilds
   final Map<int, Widget> _cachedTabViews = {};
   bool _areTabViewsInitialized = false;
-  
+
   @override
   void initState() {
     super.initState();
-    
+
     // Initialize table data
     _initializeTableData();
-    
+
     // Setup controllers
     _tabController = TabController(length: 4, vsync: this);
     _tabController.addListener(_handleTabChange);
-    
+
     // Setup scroll controllers for each tab
     for (int i = 0; i < 4; i++) {
-      _tabScrollControllers[i] = ScrollController()
-        ..addListener(() => _handleScroll(_tabScrollControllers[i]!));
+      _tabScrollControllers[i] = ScrollController();
+
+      // Add a listener to update the shared scroll position provider
+      _tabScrollControllers[i]!.addListener(() {
+        if (_tabScrollControllers[i]!.hasClients) {
+          ref.read(menuScrollOffsetProvider.notifier).state =
+              _tabScrollControllers[i]!.offset;
+        }
+      });
     }
-    
+
     // Main scroll controller
-    _mainScrollController.addListener(() => _handleScroll(_mainScrollController));
-    
+    _mainScrollController.addListener(() {
+      if (_mainScrollController.hasClients) {
+        ref.read(menuScrollOffsetProvider.notifier).state =
+            _mainScrollController.offset;
+      }
+    });
+
     // Setup animation controller
     _headerAnimationController = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    
+
     _headerOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _headerAnimationController,
         curve: Curves.easeOut,
       ),
     );
-    
+
     // Setup listeners
     _searchController.addListener(_handleSearchChanges);
     _searchFocusNode.addListener(_handleFocusChanges);
   }
-  
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    
+
     // Initialize tab views after dependencies are available
     if (!_areTabViewsInitialized) {
       _initCachedTabViews();
     }
   }
-  
+
   void _initCachedTabViews() {
     // Ensure _tableData is initialized
     setState(() {
+      // Create each tab view with a separate scroll controller
       _cachedTabViews[0] = CategoryView(
         scrollController: _tabScrollControllers[0]!,
         tableData: _tableData,
@@ -117,11 +132,11 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       _cachedTabViews[3] = SpecialOffersView(
         scrollController: _tabScrollControllers[3]!,
       );
-      
+
       _areTabViewsInitialized = true;
     });
   }
-  
+
   @override
   void dispose() {
     // Clean up controllers
@@ -132,73 +147,30 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
     _tabController.removeListener(_handleTabChange);
     _tabController.dispose();
     _mainScrollController.dispose();
-    
+
     // Dispose all tab scroll controllers
     for (final controller in _tabScrollControllers.values) {
       controller.dispose();
     }
-    
+
     _headerAnimationController.dispose();
     super.dispose();
   }
-  
-  // Throttle scroll updates to improve performance
-  DateTime _lastScrollUpdate = DateTime.now();
-  
-  void _handleScroll(ScrollController controller) {
-    if (!controller.hasClients) return;
-    
-    final now = DateTime.now();
-    if (now.difference(_lastScrollUpdate).inMilliseconds < 16) {
-      // Skip updates that happen too quickly (more than 60fps)
-      return;
-    }
-    
-    _lastScrollUpdate = now;
-    final newOffset = controller.offset;
-    
-    // Only update state if there's a meaningful change to avoid unnecessary rebuilds
-    if ((newOffset - _scrollOffset).abs() > 1.0) {
-      final wasScrolling = _isScrolling;
-      final isNowScrolling = newOffset > 10.0;
-      
-      if (wasScrolling != isNowScrolling || (newOffset - _scrollOffset).abs() > 5) {
-        setState(() {
-          _scrollOffset = newOffset;
-          _isScrolling = isNowScrolling;
-        });
-        
-        // Handle header animation
-        if (isNowScrolling && !_headerAnimationController.isCompleted) {
-          _headerAnimationController.forward();
-        } else if (!isNowScrolling && _headerAnimationController.value > 0) {
-          _headerAnimationController.reverse();
-        }
-        
-        // Update Riverpod state - use debouncing for smoother performance
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            ref.read(scrollStateProvider.notifier).state = newOffset;
-          }
-        });
-      }
-    }
-  }
-  
+
   void _handleTabChange() {
     if (!_tabController.indexIsChanging) {
       ref.read(menuActiveTabProvider.notifier).state = _tabController.index;
     }
   }
-  
+
   void _handleFocusChanges() {
     ref.read(searchFocusProvider.notifier).state = _searchFocusNode.hasFocus;
   }
-  
+
   void _handleSearchChanges() {
     final newText = _searchController.text;
     final isNowSearching = newText.isNotEmpty;
-    
+
     if (_isSearching != isNowSearching) {
       setState(() {
         _isSearching = isNowSearching;
@@ -206,7 +178,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       ref.read(searchQueryProvider.notifier).state = newText;
     }
   }
-  
+
   void _initializeTableData() {
     try {
       _tableData = QRCodeData(
@@ -227,7 +199,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
           );
         }
       });
-      
+
       // Fallback data
       _tableData = QRCodeData(
         tableId: 'default',
@@ -237,18 +209,18 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       );
     }
   }
-  
+
   Future<void> _handleSearchSubmitted(String query) async {
     if (query.isEmpty) return;
-    
+
     try {
       // Add to recent searches
       ref.read(menuRecentSearchesProvider.notifier).addSearch(query);
-      
+
       setState(() {
         _isSearching = true;
       });
-      
+
       ref.read(searchQueryProvider.notifier).state = query;
       FocusScope.of(context).unfocus();
       await HapticFeedback.selectionClick();
@@ -263,7 +235,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       }
     }
   }
-  
+
   void _clearSearch() {
     _searchController.clear();
     setState(() {
@@ -271,11 +243,11 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
     });
     ref.read(searchQueryProvider.notifier).state = '';
   }
-  
+
   Future<void> _handleFilterTap() async {
     await HapticFeedback.selectionClick();
     if (!mounted) return;
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -284,11 +256,11 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       builder: (context) => const FilterBottomSheet(),
     );
   }
-  
+
   void _scrollToTop() {
     final activeIndex = _tabController.index;
     final controller = _tabScrollControllers[activeIndex];
-    
+
     if (controller != null && controller.hasClients) {
       controller.animateTo(
         0,
@@ -297,16 +269,17 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       );
     }
   }
-  
+
   void _showSearchInterface() {
     if (!mounted) return;
-    
+
     // Enable tabs when search interface is dismissed
     ref.read(tabsEnabledProvider.notifier).state = false;
-    
+
     // Calculate proper position
-    final appBarHeight = AppBar().preferredSize.height + MediaQuery.paddingOf(context).top;
-    
+    final appBarHeight =
+        AppBar().preferredSize.height + MediaQuery.paddingOf(context).top;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -342,79 +315,122 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       ref.read(tabsEnabledProvider.notifier).state = true;
     });
   }
-  
+
   Widget _buildTabView(int index) {
     // If tab views aren't initialized yet, try to initialize them
     if (!_areTabViewsInitialized) {
       _initCachedTabViews();
     }
-    
-    // Return cached view if available
-    if (_cachedTabViews.containsKey(index)) {
-      return _cachedTabViews[index]!;
-    }
-    
-    // Fallback loading indicator
-    return Center(
-      child: CircularProgressIndicator(
-        color: Theme.of(context).colorScheme.primary,
-      ),
-    );
+
+    // Return cached view if available, using a notification listener to capture scroll events
+    return _cachedTabViews.containsKey(index)
+        ? _cachedTabViews[index]!
+        : Center(
+            child: CircularProgressIndicator(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          );
   }
-  
-  // Simplified header without parallax effect to prevent freezing
-  Widget _buildSimpleHeader() {
+
+  // Improved header with smooth transitions, using the global scroll provider
+  Widget _buildHeader() {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
-    return AnimatedOpacity(
-      opacity: _isScrolling ? 0.0 : 1.0,
-      duration: const Duration(milliseconds: 200),
-      child: Container(
-        height: 200,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              colorScheme.primary,
-              colorScheme.primary.withOpacity(0.8),
+
+    // Get the current scroll offset from the shared provider
+    final scrollOffset = ref.watch(menuScrollOffsetProvider);
+
+    // Calculate opacity based on scroll position
+    // Header starts hiding immediately as scrolling begins
+    final headerOpacity =
+        1.0 - (scrollOffset / _headerThreshold).clamp(0.0, 1.0);
+
+    // Calculate header offset for parallax effect
+    final headerOffset = -scrollOffset * _parallaxFactor;
+
+    return Opacity(
+      opacity: headerOpacity,
+      child: Transform.translate(
+        offset: Offset(0, headerOffset),
+        child: Container(
+          height: 180,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                colorScheme.primary,
+                colorScheme.primary.withOpacity(0.8),
+              ],
+            ),
+          ),
+          child: Stack(
+            children: [
+              // Background design elements
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: 30,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        colorScheme.onPrimary.withOpacity(0.1),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // Progress indicator
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 100),
+                  height: 2,
+                  color: colorScheme.onPrimary.withOpacity(0.5),
+                  width: MediaQuery.of(context).size.width *
+                      (scrollOffset / (_headerThreshold * 2)).clamp(0.0, 1.0),
+                ),
+              ),
             ],
           ),
         ),
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            height: 2,
-            color: colorScheme.onPrimary.withOpacity(0.5),
-            width: MediaQuery.sizeOf(context).width * (_scrollOffset / 1000).clamp(0.0, 1.0),
-          ),
-        ),
       ),
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final activeTabIndex = ref.watch(menuActiveTabProvider);
     final cartItemCount = ref.watch(cartProvider).items.length;
-    
+
+    // Get scroll offset from the shared provider
+    final scrollOffset = ref.watch(menuScrollOffsetProvider);
+
     // Update TabController when activeTabIndex changes
     if (_tabController.index != activeTabIndex) {
       _tabController.animateTo(activeTabIndex);
     }
-    
-    // Pre-calculate UI state to avoid calculations in layout
-    final appBarBgColor = _isScrolling
-        ? colorScheme.surface.withOpacity(0.97)
-        : Colors.transparent;
-    final appBarFgColor = _isScrolling
-        ? colorScheme.onSurface
-        : colorScheme.onPrimary;
-    
+
+    // Calculate app bar properties based on scroll position
+    final scrollProgress = (scrollOffset / _headerThreshold).clamp(0.0, 1.0);
+    final appBarBgColor = ColorTween(
+      begin: Colors.transparent,
+      end: colorScheme.surface.withOpacity(0.97),
+    ).transform(scrollProgress)!;
+
+    final appBarFgColor = ColorTween(
+      begin: colorScheme.onPrimary,
+      end: colorScheme.onSurface,
+    ).transform(scrollProgress)!;
+
     // Define our main scaffold
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -422,7 +438,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
         // Use SafeArea to prevent UI elements from being blocked by system UI
         top: false, // Let the content extend behind the status bar
         child: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: _isScrolling
+          value: scrollProgress > 0.5
               ? SystemUiOverlayStyle.dark.copyWith(
                   statusBarColor: Colors.transparent,
                   systemNavigationBarColor: colorScheme.surface,
@@ -431,61 +447,105 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                   statusBarColor: Colors.transparent,
                   systemNavigationBarColor: colorScheme.surface,
                 ),
-          child: GestureDetector(
-            onTap: () => FocusScope.of(context).unfocus(),
-            child: Stack(
-              children: [
-                // Header background - placed at bottom of stack
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: _buildSimpleHeader(),
-                ),
-                
-                // Use CustomScrollView instead of NestedScrollView for better control
-                CustomScrollView(
-                  controller: _mainScrollController,
-                  physics: const BouncingScrollPhysics(),
-                  slivers: [
-                    // App bar with search and cart buttons
-                    SliverAppBar(
-                      pinned: true,
-                      floating: true,
-                      snap: false,
-                      elevation: 0,
-                      scrolledUnderElevation: 2,
-                      expandedHeight: 120,
-                      backgroundColor: appBarBgColor,
-                      foregroundColor: appBarFgColor,
-                      title: AnimatedOpacity(
-                        opacity: _isScrolling ? 1.0 : 0.0,
-                        duration: const Duration(milliseconds: 200),
-                        child: Text(
-                          'Menu',
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
+          child: Stack(
+            children: [
+              // Header background - placed at bottom of stack
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: _buildHeader(),
+              ),
+
+              // Use a simple Column layout with CustomScrollView
+              Column(
+                children: [
+                  // App bar with search and cart buttons
+                  Container(
+                    height: kToolbarHeight + MediaQuery.of(context).padding.top,
+                    padding: EdgeInsets.only(
+                        top: MediaQuery.of(context).padding.top),
+                    decoration: BoxDecoration(
+                      color: appBarBgColor,
+                      boxShadow: scrollProgress > 0.5
+                          ? [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Row(
+                      children: [
+                        // Title with icon
+                        Expanded(
+                          child: Row(
+                            children: [
+                              const SizedBox(width: 16),
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 300),
+                                height: 32 + ((1 - scrollProgress) * 4),
+                                width: 32 + ((1 - scrollProgress) * 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(
+                                          0.1 + ((1 - scrollProgress) * 0.1)),
+                                      blurRadius:
+                                          4 + ((1 - scrollProgress) * 4),
+                                      spreadRadius:
+                                          scrollProgress > 0.5 ? 0 : 1,
+                                    ),
+                                  ],
+                                ),
+                                padding: const EdgeInsets.all(2.0),
+                                child: ClipOval(
+                                  child: Image.asset(
+                                    'assets/appIcon.png',
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return const Icon(Icons.restaurant,
+                                          size: 24);
+                                    },
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Opacity(
+                                opacity: scrollProgress,
+                                child: Text(
+                                  'Menu',
+                                  style: theme.textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: appBarFgColor,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                      actions: [
-                        // Search button
+
+                        // Actions
                         IconButton(
-                          icon: const Icon(Icons.search),
+                          icon: Icon(Icons.search, color: appBarFgColor),
                           tooltip: 'Search',
                           onPressed: _showSearchInterface,
                         ),
-                        // Cart button with badge
                         Padding(
                           padding: const EdgeInsets.only(right: 8.0),
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
                               IconButton(
-                                icon: const Icon(Icons.shopping_cart_outlined),
+                                icon: Icon(Icons.shopping_cart_outlined,
+                                    color: appBarFgColor),
                                 tooltip: 'View cart',
                                 onPressed: () {
-                                  context.pushNamed(AppRoute.homecart.name);
+                                  context.goNamed(AppRoute.homecart.name);
                                   HapticFeedback.selectionClick();
                                 },
                               ),
@@ -518,109 +578,80 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                           ),
                         ),
                       ],
-                      flexibleSpace: FlexibleSpaceBar(
-                        background: Container(
-                          color: Colors.transparent,
-                          child: SafeArea(
-                            bottom: false,
-                            child: Center(
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 300),
-                                height: _isScrolling ? 48 : 56,
-                                width: _isScrolling ? 48 : 56,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(_isScrolling ? 0.1 : 0.2),
-                                      blurRadius: _isScrolling ? 4 : 8,
-                                      spreadRadius: _isScrolling ? 0 : 1,
-                                    ),
-                                  ],
-                                ),
-                                padding: const EdgeInsets.all(2.0),
-                                child:  ClipOval(
-                            child: Image.asset(
-                            'assets/appIcon.png',  // config.logoUrl,
-                              width: 80,
-                              height: 80,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return const Icon(Icons.restaurant, size: 50);
-                              },
-                            ),
-                          ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
                     ),
-                    
-                    // Tab bar
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-                        child: MenuTabBar(
-                          tabController: _tabController,
-                          onTabChanged: (index) {
-                            ref.read(menuActiveTabProvider.notifier).state = index;
+                  ),
+
+                  // Tab bar
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 4.0),
+                    child: MenuTabBar(
+                      tabController: _tabController,
+                      onTabChanged: (index) {
+                        ref.read(menuActiveTabProvider.notifier).state = index;
+                      },
+                    ),
+                  ),
+
+                  // Tab content area
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface,
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(28),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.shadow.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, -2),
+                          ),
+                        ],
+                      ),
+                      // Add padding to top for more content space
+                      padding: const EdgeInsets.only(top: 4),
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(28),
+                        ),
+                        child: NotificationListener<ScrollNotification>(
+                          onNotification: (notification) {
+                            // Update the shared scroll provider from any scroll events inside tabs
+                            if (notification is ScrollUpdateNotification) {
+                              ref
+                                  .read(menuScrollOffsetProvider.notifier)
+                                  .state = notification.metrics.pixels;
+                            }
+                            return false; // Continue propagating the notification
                           },
-                        ),
-                      ),
-                    ),
-                    
-                    // Content area (tabs)
-                    SliverFillRemaining(
-                      hasScrollBody: true,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: colorScheme.surface,
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(28),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: colorScheme.shadow.withOpacity(0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, -2),
-                            ),
-                          ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(28),
-                          ),
                           child: TabBarView(
                             controller: _tabController,
                             physics: const BouncingScrollPhysics(),
-                            children: List.generate(4, (index) => _buildTabView(index)),
+                            children: List.generate(
+                                4, (index) => _buildTabView(index)),
                           ),
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
-      // Scroll to top button - optimize with RepaintBoundary
-      // floatingActionButton: RepaintBoundary(
-      //   child: AnimatedSlide(
+      // Scroll to top button - visible when scrolling down
+      // floatingActionButton: AnimatedSlide(
+      //   duration: const Duration(milliseconds: 200),
+      //   offset: scrollOffset > 100 ? Offset.zero : const Offset(0, 2),
+      //   child: AnimatedOpacity(
       //     duration: const Duration(milliseconds: 200),
-      //     offset: _scrollOffset > 100 ? Offset.zero : const Offset(0, 2),
-      //     child: AnimatedOpacity(
-      //       duration: const Duration(milliseconds: 200),
-      //       opacity: _scrollOffset > 100 ? 1.0 : 0.0,
-      //       child: FloatingActionButton.small(
-      //         onPressed: _scrollToTop,
-      //         elevation: 4,
-      //         tooltip: 'Scroll to top',
-      //         child: const Icon(Icons.keyboard_arrow_up),
-      //       ),
+      //     opacity: scrollOffset > 100 ? 1.0 : 0.0,
+      //     child: FloatingActionButton.small(
+      //       onPressed: _scrollToTop,
+      //       elevation: 4,
+      //       tooltip: 'Scroll to top ',
+      //       child: const Icon(Icons.keyboard_arrow_up),
       //     ),
       //   ),
       // ),

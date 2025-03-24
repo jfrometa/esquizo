@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/menu_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/QR/screens/qr_generator_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/QR/screens/qr_scanner/qr_scanner_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/reservation/reservation_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/restaurant_info/restaurant_info_screen.dart';
 

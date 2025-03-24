@@ -40,7 +40,6 @@ class _SubscriptionCard extends StatelessWidget {
   const _SubscriptionCard({
     required this.subscription,
     required this.onConsumeMeal,
-    super.key,
   });
 
   IconData _getPlanIcon() {

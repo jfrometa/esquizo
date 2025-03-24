@@ -1,13 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/available_items_for_packages_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_packages_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/featured_dishes_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/catering-details-content.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/contact-section.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/content-sections.dart';
@@ -21,22 +21,23 @@ import 'package:starter_architecture_flutter_firebase/src/screens/widgets_mesa_r
 
 class ResponsiveLandingPage extends ConsumerStatefulWidget {
   const ResponsiveLandingPage({super.key});
- 
+
   @override
-  ConsumerState<ResponsiveLandingPage> createState() => _EnhancedLandingPageState();
+  ConsumerState<ResponsiveLandingPage> createState() =>
+      _EnhancedLandingPageState();
 }
 
-class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage> 
+class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
     with SingleTickerProviderStateMixin {
   // For parallax header effect
   final ScrollController _scrollController = ScrollController();
   double _scrollOffset = 0;
   bool _isScrolling = false;
-  
+
   // For the tabs in the sections
   late TabController _sectionTabController;
   int _currentSectionTab = 0;
-  
+
   @override
   void initState() {
     super.initState();
@@ -110,9 +111,10 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
   }
 
   // Show catering details sheet
-  void _showCateringDetails(BuildContext context, int packageIndex, CateringPackage package) {
+  void _showCateringDetails(
+      BuildContext context, int packageIndex, CateringPackage package) {
     final theme = Theme.of(context);
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -146,9 +148,7 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
                   ),
                 ],
               ),
-              
               const SizedBox(height: 20),
-              
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -185,18 +185,14 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
                   ],
                 ),
               ),
-              
               const SizedBox(height: 24),
-              
               Expanded(
                 child: CateringDetailsContent(
                   packageTitle: package.name,
                   scrollController: scrollController,
                 ),
               ),
-              
               const SizedBox(height: 16),
-              
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -231,13 +227,12 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    // Setup app bar styling 
+    // Setup app bar styling
     final appBarBgColor = _isScrolling
         ? colorScheme.surface.withOpacity(0.97)
         : Colors.transparent;
-    final appBarFgColor = _isScrolling
-        ? colorScheme.onSurface
-        : colorScheme.onPrimary;
+    final appBarFgColor =
+        _isScrolling ? colorScheme.onSurface : colorScheme.onPrimary;
 
     // Get business config
     final businessConfigAsync = ref.watch(businessConfigProvider);
@@ -287,10 +282,11 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
         ],
       ),
       body: ref.watch(featuredDishesProvider).when(
-        data: (dishes) => _buildResponsiveLayout(isMobile, isTablet, isDesktop, dishes),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => _buildErrorView(error.toString()),
-      ),
+            data: (dishes) =>
+                _buildResponsiveLayout(isMobile, isTablet, isDesktop, dishes),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stackTrace) => _buildErrorView(error.toString()),
+          ),
       floatingActionButton: AnimatedSlide(
         duration: const Duration(milliseconds: 200),
         offset: _scrollOffset > 100 ? Offset.zero : const Offset(0, 2),
@@ -316,7 +312,8 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
     );
   }
 
-  Widget _buildResponsiveLayout(bool isMobile, bool isTablet, bool isDesktop, List<CatalogItem> dishes) {
+  Widget _buildResponsiveLayout(
+      bool isMobile, bool isTablet, bool isDesktop, List<CatalogItem> dishes) {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: RefreshIndicator(
@@ -335,21 +332,22 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
               children: [
                 // Enhanced hero section with parallax effect
                 EnhancedHeroSection(scrollOffset: _scrollOffset),
-                
+
                 // Quick access section
                 QuickAccessSection(
                   onReserveTap: () => _navigateToReservation(context),
                   onInfoTap: () => _showRestaurantInfo(context),
                 ),
-                
+
                 // Restaurant features section
                 _buildFeaturesSection(context),
-                
+
                 // Main tabbed content section
                 Consumer(
                   builder: (context, ref, child) {
-                    final cateringPackagesAsync = ref.watch(activePackagesProvider);
-                    
+                    final cateringPackagesAsync =
+                        ref.watch(activePackagesProvider);
+
                     return cateringPackagesAsync.when(
                       data: (cateringPackages) => ContentSections(
                         tabController: _sectionTabController,
@@ -357,10 +355,7 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
                         randomDishes: dishes,
                         cateringPackages: cateringPackages,
                         onCateringPackageTap: (index) => _showCateringDetails(
-                          context, 
-                          index, 
-                          cateringPackages[index]
-                        ),
+                            context, index, cateringPackages[index]),
                         isMobile: isMobile,
                         isTablet: isTablet,
                         isDesktop: isDesktop,
@@ -369,19 +364,28 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
                         height: 200,
                         child: Center(child: CircularProgressIndicator()),
                       ),
-                      error: (error, _) => SizedBox(
-                        height: 200,
-                        child: Center(
-                          child: Text('Error loading data: ${error.toString()}'),
-                        ),
-                      ),
+                      error: (error, stackTrace) {
+                        // Log the error for debugging purposes
+                        debugPrint('Error loading catering packages: $error');
+                        if (kDebugMode) {
+                          debugPrintStack(stackTrace: stackTrace);
+                        }
+
+                        return SizedBox(
+                          height: 200,
+                          child: Center(
+                            child:
+                                Text('Error loading data: ${error.toString()}'),
+                          ),
+                        );
+                      },
                     );
                   },
                 ),
-                
+
                 // Contact section
                 const EnhancedContactSection(),
-                
+
                 // Footer section
                 const EnhancedFooterSection(),
               ],

@@ -1,7 +1,10 @@
 import 'package:camera/camera.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/app.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';  
+import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_analitics.dart';
 import 'package:starter_architecture_flutter_firebase/src/localization/string_hardcoded.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/user_preference/user_preference_provider.dart';
@@ -31,6 +35,23 @@ Future<void> main() async {
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   
+  // Initialize Analytics (should be done early to track other initialization events)
+  await _initializeAnalytics();
+  
+  // Initialize Crashlytics
+  await _initializeCrashlytics();
+  
+  // For development only - completely bypass AppCheck if needed
+  // Set this to true if you need to completely skip AppCheck during development
+  bool bypassAppCheck = kDebugMode; // Set to true to bypass in debug mode
+  
+  if (!bypassAppCheck) {
+    // Try to initialize AppCheck with fallback
+    await _initializeAppCheckWithFallback();
+  } else {
+    debugPrint('⚠️ Firebase AppCheck is BYPASSED in development mode');
+  }
+  
   // Create a provider container for dependency injection
   final container = ProviderContainer();
   
@@ -47,9 +68,8 @@ Future<void> main() async {
     camera = null;
   }
   
-  // Register global error handlers
-  registerErrorHandlers();
-   
+  // Register global error handlers - Now handled by Crashlytics
+  
   // Run the application
   runApp(
     UncontrolledProviderScope(
@@ -57,6 +77,158 @@ Future<void> main() async {
       child: const KakoApp(),
     ),
   );
+}
+
+// Initialize Firebase Analytics
+Future<void> _initializeAnalytics() async {
+  try {
+    // Initialize Analytics service with debug mode in development
+    await AnalyticsService.instance.init(
+      debugMode: kDebugMode,
+    );
+    
+    // Configure Firebase Analytics settings
+    final analytics = FirebaseAnalytics.instance;
+    
+    // Enable analytics collection (can be toggled based on user consent)
+    await analytics.setAnalyticsCollectionEnabled(true);
+    
+    // Set default session timeout to 30 minutes
+    await analytics.setSessionTimeoutDuration(const Duration(minutes: 30));
+    
+    // Log app_open event for non-web platforms (automatically tracked on mobile)
+    if (!kIsWeb) {
+      await analytics.logAppOpen();
+    }
+    
+    // Set common user properties that apply to all users
+    await AnalyticsService.instance.setUserProperty(
+      name: 'app_version',
+      value: '1.0.0', // Replace with your actual app version
+    );
+    
+    await AnalyticsService.instance.setUserProperty(
+      name: 'platform',
+      value: kIsWeb ? 'web' : defaultTargetPlatform.toString().split('.').last,
+    );
+    
+    debugPrint('✅ Firebase Analytics initialized successfully');
+  } catch (e) {
+    // Don't let analytics initialization failure crash the app
+    debugPrint('⚠️ Failed to initialize Firebase Analytics: $e');
+  }
+}
+
+// Initialize Crashlytics
+Future<void> _initializeCrashlytics() async {
+  if (kIsWeb) {
+    // Crashlytics is not available for web
+    debugPrint('📊 Crashlytics not available for web platform');
+    return;
+  }
+  
+  try {
+    // Set Crashlytics collection enabled (disable during development if needed)
+    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(!kDebugMode);
+    
+    // Pass all Flutter errors to Crashlytics
+    FlutterError.onError = (FlutterErrorDetails details) {
+      // Report to console in debug mode
+      if (kDebugMode) {
+        // Print to console
+        FlutterError.presentError(details);
+        debugPrint(details.toString());
+      }
+      
+      // Report to Crashlytics
+      FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+    };
+    
+    // Pass all uncaught asynchronous errors to Crashlytics
+    PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+      // Report to console in debug mode
+      if (kDebugMode) {
+        debugPrint('Platform error: $error');
+        debugPrint('Stack trace: $stack');
+      }
+      
+      // Report to Crashlytics
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+    
+    debugPrint('✅ Crashlytics initialized successfully');
+  } catch (e) {
+    debugPrint('❌ Failed to initialize Crashlytics: $e');
+  }
+}
+
+// Initialize Firebase App Check with proper error handling and fallback
+Future<void> _initializeAppCheckWithFallback() async {
+  try {
+    if (kIsWeb) {
+      debugPrint('🔒 Initializing Firebase AppCheck for web');
+      
+      // Try using enterprise provider first
+      try {
+        await FirebaseAppCheck.instance.activate(
+          webProvider: ReCaptchaEnterpriseProvider('6LeGBv4qAAAAACKUiHAJEFBsUDmbTyMPZwb-T8N6'),
+        );
+        debugPrint('✅ Firebase AppCheck initialized with ReCaptchaEnterpriseProvider');
+        return; // Early return if successful
+      } catch (enterpriseError) {
+        debugPrint('⚠️ ReCaptchaEnterpriseProvider failed: $enterpriseError');
+        // Fall through to try V3 provider
+      }
+      
+      // Try V3 provider if enterprise failed
+      try {
+        await FirebaseAppCheck.instance.activate(
+          webProvider: ReCaptchaV3Provider('6LeGBv4qAAAAACKUiHAJEFBsUDmbTyMPZwb-T8N6'),
+        );
+        debugPrint('✅ Firebase AppCheck initialized with ReCaptchaV3Provider');
+        return; // Early return if successful
+      } catch (v3Error) {
+        debugPrint('⚠️ ReCaptchaV3Provider failed: $v3Error');
+        // Fall through to try debug provider
+      }
+
+      // Final fallback for dev environments - use debug provider
+      if (kDebugMode) {
+        try {
+          // For web in debug mode, try with debug provider as last resort
+          await FirebaseAppCheck.instance.activate(
+            // Use debug provider for web - requires debug token
+            webProvider: ReCaptchaV3Provider('6LeGBv4qAAAAACKUiHAJEFBsUDmbTyMPZwb-T8N6'),
+          );
+          debugPrint('✅ Firebase AppCheck initialized with debug configuration');
+        } catch (debugError) {
+          // If debug mode also fails, log and proceed without AppCheck
+          debugPrint('❌ All AppCheck providers failed. Proceeding without AppCheck: $debugError');
+        }
+      }
+    } else {
+      // For mobile platforms - try with appropriate debug provider first
+      if (kDebugMode) {
+        await FirebaseAppCheck.instance.activate(
+          androidProvider: AndroidProvider.debug,
+          appleProvider: AppleProvider.debug,
+        );
+        debugPrint('✅ Firebase AppCheck initialized with debug providers for mobile');
+      } else {
+        // For production mobile
+        await FirebaseAppCheck.instance.activate(
+          androidProvider: AndroidProvider.playIntegrity,
+          appleProvider: AppleProvider.deviceCheck,
+        );
+        debugPrint('✅ Firebase AppCheck initialized with production providers for mobile');
+      }
+    }
+  } catch (e) {
+    // Global error handler - if all attempts fail, log error and proceed without AppCheck
+    debugPrint('❌ Firebase AppCheck failed completely: $e');
+    debugPrint('⚠️ Proceeding without Firebase AppCheck');
+  }
 }
 
 // Configure system UI appearance
@@ -79,25 +251,44 @@ Future<void> _configureSystemUI() async {
 
 // Initialize authentication
 Future<void> _initializeAuth(ProviderContainer container) async {
-  // Check if the user is already signed in
-  final authRepo = container.read(authRepositoryProvider);
-  final currentUser = FirebaseAuth.instance.currentUser; 
- 
-  // Sign in anonymously if no user is signed in
-  if (currentUser == null) {
+  try {
+    // Check if the user is already signed in
+    final authRepo = container.read(authRepositoryProvider);
+    final currentUser = FirebaseAuth.instance.currentUser;
+   
+    // Sign in anonymously if no user is signed in
+    if (currentUser == null) {
       await authRepo.initialize();
-  }
-  
-  // Initialize theme system from user preferences (if any)
-  if (FirebaseAuth.instance.currentUser != null) {
-    try {
-      // Pre-fetch user preferences to initialize theme
-      final prefsRepo = container.read(userPreferencesRepositoryProvider);
-      await prefsRepo.getUserPreferences(FirebaseAuth.instance.currentUser!.uid);
-    } catch (e) {
-      // Silently handle error - we'll fall back to system theme
-      debugPrint('Error loading user preferences: $e');
+    } else {
+      // Log login event if user is already signed in
+      AnalyticsService.instance.logLogin(method: 'auto');
+      
+      // Set user ID for analytics if available
+      if (currentUser.uid.isNotEmpty) {
+        AnalyticsService.instance.setUserId(currentUser.uid);
+      }
     }
+    
+    // Initialize theme system from user preferences (if any)
+    if (FirebaseAuth.instance.currentUser != null) {
+      try {
+        // Pre-fetch user preferences to initialize theme
+        final prefsRepo = container.read(userPreferencesRepositoryProvider);
+        final prefs = await prefsRepo.getUserPreferences(FirebaseAuth.instance.currentUser!.uid);
+        
+        // Track user preferences as user properties for analytics segmentation
+        await AnalyticsService.instance.setUserProperty(
+          name: 'preferred_theme',
+          value: prefs.themeMode.toString().split('.').last,
+        );
+            } catch (e) {
+        // Silently handle error - we'll fall back to system theme
+        debugPrint('Error loading user preferences: $e');
+      }
+    }
+  } catch (e) {
+    debugPrint('❌ Error during authentication initialization: $e');
+    // Continue anyway - anonymous auth might fail but app should still work
   }
 }
 
@@ -131,13 +322,31 @@ Future<void> _initializeDeviceInfo() async {
     if (defaultTargetPlatform == TargetPlatform.android) {
       final androidInfo = deviceInfo as AndroidDeviceInfo;
       hasCamera = !androidInfo.isPhysicalDevice ? false : true;
+      
+      // Set device properties for analytics
+      await AnalyticsService.instance.setUserProperty(
+        name: 'device_model',
+        value: androidInfo.model,
+      );
     } else if (defaultTargetPlatform == TargetPlatform.iOS) {
       final iosInfo = deviceInfo as IosDeviceInfo;
       hasCamera = !iosInfo.isPhysicalDevice ? false : true;
+      
+      // Set device properties for analytics
+      await AnalyticsService.instance.setUserProperty(
+        name: 'device_model',
+        value: iosInfo.model,
+      );
     } else {
       // Assume other platforms might have a camera
       hasCamera = true;
     }
+    
+    // Set has_camera property for segmentation
+    await AnalyticsService.instance.setUserProperty(
+      name: 'has_camera',
+      value: hasCamera ? 'true' : 'false',
+    );
     
     if (hasCamera) {
       try {
@@ -162,23 +371,26 @@ Future<void> _initializeDeviceInfo() async {
   }
 }
 
-// Register global error handlers
-void registerErrorHandlers() {
-  // Handle Flutter framework errors
-  FlutterError.onError = (FlutterErrorDetails details) {
-    FlutterError.presentError(details);
-    debugPrint(details.toString());
-  };
-  
-  // Handle platform-level errors
-  PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
-    debugPrint('Platform error: $error');
-    debugPrint('Stack trace: $stack');
-    return true;
-  };
-  
-  // Customize error widget appearance
-  ErrorWidget.builder = (FlutterErrorDetails details) {
+// Custom error widget - Will be shown when an error occurs in the app UI
+class CustomErrorWidget extends StatelessWidget {
+  final FlutterErrorDetails errorDetails;
+
+  const CustomErrorWidget({
+    super.key,
+    required this.errorDetails,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Log error to analytics
+    AnalyticsService.instance.logCustomEvent(
+      eventName: 'ui_error',
+      parameters: {
+        'error_message': errorDetails.exception.toString(),
+        'error_location': errorDetails.library ?? 'unknown',
+      },
+    );
+    
     return Scaffold(
       appBar: AppBar(
         forceMaterialTransparency: true,
@@ -205,7 +417,7 @@ void registerErrorHandlers() {
               Expanded(
                 child: SingleChildScrollView(
                   child: Text(
-                    kDebugMode ? details.toString() : 'Please try again later'.hardcoded,
+                    kDebugMode ? errorDetails.toString() : 'Please try again later'.hardcoded,
                   ),
                 ),
               ),
@@ -214,5 +426,5 @@ void registerErrorHandlers() {
         ),
       ),
     );
-  };
+  }
 }

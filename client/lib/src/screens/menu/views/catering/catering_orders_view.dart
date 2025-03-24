@@ -204,7 +204,7 @@ class CateringOrdersView extends ConsumerWidget {
         // Suggestions section
         Card(
           elevation: 1,
-          color: colorScheme.surfaceVariant.withOpacity(0.3),
+          color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -274,10 +274,8 @@ class CateringOrdersView extends ConsumerWidget {
                 onPressed: () {
                   // Switch to catering packages tab
                   final tabController = DefaultTabController.of(context);
-                  if (tabController != null) {
-                    tabController.animateTo(0);
-                  }
-                },
+                  tabController.animateTo(0);
+                                },
                 icon: const Icon(Icons.restaurant_menu),
                 label: const Text('Browse Packages'),
                 style: ElevatedButton.styleFrom(

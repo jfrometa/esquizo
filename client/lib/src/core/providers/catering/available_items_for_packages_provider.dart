@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart'; // Update this import path to your merged models
@@ -80,7 +79,7 @@ class AvailableItemsRepository extends _$AvailableItemsRepository {
     final snapshot = await _firestore
         .collection('cateringDishes')
         .where('title', isGreaterThanOrEqualTo: query)
-        .where('title', isLessThanOrEqualTo: query + '\uf8ff')
+        .where('title', isLessThanOrEqualTo: '$query\uf8ff')
         .get();
     
     return snapshot.docs.map((doc) {

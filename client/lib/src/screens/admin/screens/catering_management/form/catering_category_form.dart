@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/services.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_category_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_category_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/utils/icon_mapper.dart';
@@ -433,7 +432,7 @@ class _CateringCategoryFormState extends ConsumerState<CateringCategoryForm> {
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? Theme.of(context).colorScheme.primaryContainer
-                                : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                                : Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
                             borderRadius: BorderRadius.circular(12),
                             border: isSelected
                                 ? Border.all(

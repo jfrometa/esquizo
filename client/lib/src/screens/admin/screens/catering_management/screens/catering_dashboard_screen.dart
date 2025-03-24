@@ -951,7 +951,7 @@ class CateringDashboardScreen extends ConsumerWidget {
                 const SizedBox(height: 4),
                 LinearProgressIndicator(
                   value: percentage / 100,
-                  backgroundColor: colorScheme.surfaceVariant,
+                  backgroundColor: colorScheme.surfaceContainerHighest,
                   valueColor: AlwaysStoppedAnimation<Color>(status.color),
                   borderRadius: BorderRadius.circular(4),
                 ),

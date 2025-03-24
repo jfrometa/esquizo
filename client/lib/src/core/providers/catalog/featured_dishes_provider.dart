@@ -9,15 +9,15 @@ Future<List<CatalogItem>> featuredDishes(FeaturedDishesRef ref) async {
   final catalogType = 'menu';
   final catalogService = ref.watch(catalogServiceProvider(catalogType));
   final itemsStream = catalogService.getItems();
-  
+
   // Get all menu items
   final items = await itemsStream.first;
-  
+
   // Filter for featured items or return all if no featured flag exists
   return items.where((item) {
-    if (item.metadata.containsKey('featured')) {
-      return item.metadata['featured'] == true;
-    }
-    return false;
+    // if (item.metadata.containsKey('featured')) {
+    //   return item.metadata['featured'] == true;
+    // }
+    return true;
   }).toList();
 }

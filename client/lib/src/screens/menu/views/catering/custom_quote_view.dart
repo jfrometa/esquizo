@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/catering/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/catering_order_details.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/views/catering/_show_catering_form_sheet.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/views/catering/_show_catering_quote_dialog.dart';
@@ -216,7 +215,7 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
         // Chef service option
         Card(
           elevation: 1,
-          color: colorScheme.surfaceVariant.withOpacity(0.3),
+          color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -255,7 +254,7 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
         // Suggestions section
         Card(
           elevation: 1,
-          color: colorScheme.surfaceVariant.withOpacity(0.3),
+          color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -325,10 +324,8 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
                 onPressed: () {
                   // Switch to catering packages tab
                   final tabController = DefaultTabController.of(context);
-                  if (tabController != null) {
-                    tabController.animateTo(0);
-                  }
-                },
+                  tabController.animateTo(0);
+                                },
                 icon: const Icon(Icons.restaurant_menu),
                 label: const Text('Browse Packages'),
                 style: ElevatedButton.styleFrom(

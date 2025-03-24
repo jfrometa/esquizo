@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/QR/models/food_dish.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/providers/provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/QR/screens/order/order_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/dish_details/dish_details_screen.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/cards/dish_card.dart';

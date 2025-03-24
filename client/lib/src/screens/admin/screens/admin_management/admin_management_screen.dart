@@ -164,7 +164,7 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
                                 Icon(
                                   Icons.people_outline,
                                   size: 64,
-                                  color: theme.colorScheme.onSurface.withOpacity(0.3),
+                                  color: theme.colorScheme.onSurface.withAlpha(77), // 0.3 * 255 ≈ 77
                                 ),
                                 const SizedBox(height: 16),
                                 Text(

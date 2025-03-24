@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_category_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/form/catering_category_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_category_model.dart';
@@ -13,7 +12,7 @@ class CateringCategoryScreen extends ConsumerStatefulWidget {
 }
 
 class _CateringCategoryScreenState extends ConsumerState<CateringCategoryScreen> {
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   void _showCategoryForm({CateringCategory? category}) {
     showModalBottomSheet(
@@ -155,7 +154,7 @@ class _CateringCategoryScreenState extends ConsumerState<CateringCategoryScreen>
                           decoration: BoxDecoration(
                             color: category.isActive
                                 ? colorScheme.primaryContainer
-                                : colorScheme.surfaceVariant,
+                                : colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -253,7 +252,7 @@ class _CateringCategoryScreenState extends ConsumerState<CateringCategoryScreen>
                   decoration: BoxDecoration(
                     color: category.isActive
                         ? colorScheme.primaryContainer
-                        : colorScheme.surfaceVariant,
+                        : colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(

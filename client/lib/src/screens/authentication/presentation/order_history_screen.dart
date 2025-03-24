@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/constants/app_sizes.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/auth_services/order_history_repository.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/subscription_repository.dart';
-import 'package:starter_architecture_flutter_firebase/src/theme/app_theme.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart'
     as auth_models;
 

@@ -26,11 +26,11 @@ final navigationDestinationsProvider = Provider<List<NavigationDestinationItem>>
       label: 'Inicio',
       path: '/',
     ),
-        NavigationDestinationItem(
-      icon: Icons.home,
-      label: 'Local',
-      path: '/local',
-    ),
+    //     NavigationDestinationItem(
+    //   icon: Icons.home,
+    //   label: 'Local',
+    //   path: '/local',
+    // ),
     NavigationDestinationItem(
       icon: Icons.restaurant_menu,
       label: 'Menu',

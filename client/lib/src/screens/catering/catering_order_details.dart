@@ -244,7 +244,7 @@ class CateringOrderDetailsScreenState
                 // Order title card
                 Card(
                   elevation: 0,
-                  color: colorScheme.surfaceVariant.withOpacity(0.7),
+                  color: colorScheme.surfaceContainerHighest.withOpacity(0.7),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -587,8 +587,8 @@ class CateringOrderDetailsScreenState
                   : null,
               activeColor: colorScheme.primary,
               inactiveTrackColor: isEditing 
-                  ? colorScheme.surfaceVariant 
-                  : colorScheme.surfaceVariant.withOpacity(0.5),
+                  ? colorScheme.surfaceContainerHighest 
+                  : colorScheme.surfaceContainerHighest.withOpacity(0.5),
             ),
           ],
         ),

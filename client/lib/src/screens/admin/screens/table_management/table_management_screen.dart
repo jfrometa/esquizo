@@ -941,7 +941,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
         _isLoading = false;
       });
       
-      ref.refresh(tablesStatusProvider );
+      ref.invalidate(tablesStatusProvider );
       
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Mesa eliminada correctamente')),

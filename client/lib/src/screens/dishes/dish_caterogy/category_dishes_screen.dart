@@ -9,7 +9,7 @@ import '../../QR/models/qr_code_data.dart';
 // Create a provider that filters catalog items by category
 final filteredCatalogItemsProvider = Provider.family<AsyncValue<List<CatalogItem>>, String>(
   (ref, categoryId) {
-    final catalogItemsAsyncValue = ref.watch(catalogItemsProvider('menu')); ;
+    final catalogItemsAsyncValue = ref.watch(catalogItemsProvider('menu'));
     return catalogItemsAsyncValue.when(
       data: (items) {
         final filtered = items.where((item) {

@@ -13,9 +13,9 @@ class MealPlanQRCode extends ConsumerWidget {
   final String mealPlanId;
   
   const MealPlanQRCode({
-    Key? key,
+    super.key,
     required this.mealPlanId,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -366,12 +366,12 @@ class QrCodeWidget extends StatelessWidget {
   final Color foregroundColor;
   
   const QrCodeWidget({
-    Key? key,
+    super.key,
     required this.data,
     required this.size,
     this.backgroundColor = Colors.white,
     this.foregroundColor = Colors.black,
-  }) : super(key: key);
+  });
   
   @override
   Widget build(BuildContext context) {

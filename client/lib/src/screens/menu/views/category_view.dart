@@ -2,19 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_provider.dart'; // Add this import
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/helpers/scroll_bahaviour.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/QR/models/qr_code_data.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/providers/provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/cards/dish_card.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/dishes/cards/dish_card_small.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/dish_caterogy/category_dishes_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/providers/cart_provider.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/reservation/reservation_screen.dart';
-
-import '../../../core/providers/cart/cart_provider.dart';
 
 class CategoryView extends ConsumerWidget {
   final ScrollController scrollController;
@@ -29,9 +24,9 @@ class CategoryView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final categoriesAsync = ref.watch(catalogCategoriesProvider('menu')); 
+    final categoriesAsync = ref.watch(catalogCategoriesProvider('menu'));
     final dishesAsync = ref.watch(catalogItemsProvider('menu'));
-    
+
     return ScrollConfiguration(
       behavior: CustomScrollBehavior(),
       child: RefreshIndicator(
@@ -46,7 +41,7 @@ class CategoryView extends ConsumerWidget {
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
             const SizedBox(height: 20),
-            
+
             // Categories section
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -68,9 +63,9 @@ class CategoryView extends ConsumerWidget {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Categories list with added reservation category
             SizedBox(
               height: 140,
@@ -81,7 +76,7 @@ class CategoryView extends ConsumerWidget {
                       child: Text('No categories available'),
                     );
                   }
-                  
+
                   // Rest of the categories code remains the same
                   return ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -132,7 +127,7 @@ class CategoryView extends ConsumerWidget {
                           ),
                         );
                       }
-                      
+
                       // Regular categories (shifted by 1)
                       final category = categories[index - 1];
                       return GestureDetector(
@@ -141,12 +136,10 @@ class CategoryView extends ConsumerWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) => CategoryDishesScreen(
-                                 
                                 categoryId: category.id,
                                 categoryName: category.name,
                                 tableData: tableData,
-                                 sortIndex: category.sortOrder,
-                                
+                                sortIndex: category.sortOrder,
                               ),
                             ),
                           );
@@ -160,7 +153,8 @@ class CategoryView extends ConsumerWidget {
                                 width: 80,
                                 height: 80,
                                 decoration: BoxDecoration(
-                                  color: theme.colorScheme.surfaceContainerHighest,
+                                  color:
+                                      theme.colorScheme.surfaceContainerHighest,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Icon(
@@ -193,12 +187,14 @@ class CategoryView extends ConsumerWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                      const Icon(Icons.error_outline,
+                          size: 48, color: Colors.red),
                       const SizedBox(height: 16),
                       Text('Failed to load categories: $error'),
                       const SizedBox(height: 8),
                       ElevatedButton(
-                        onPressed: () => ref.invalidate(catalogCategoriesProvider),
+                        onPressed: () =>
+                            ref.invalidate(catalogCategoriesProvider),
                         child: const Text('Retry'),
                       ),
                     ],
@@ -206,9 +202,9 @@ class CategoryView extends ConsumerWidget {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Featured dishes section
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -230,10 +226,10 @@ class CategoryView extends ConsumerWidget {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
-            // Updated featured dishes section with AsyncValue handling
+
+            // Updated featured dishes section with responsive grid
             dishesAsync.when(
               data: (dishes) {
                 if (dishes.isEmpty) {
@@ -244,57 +240,61 @@ class CategoryView extends ConsumerWidget {
                     ),
                   );
                 }
-                
+
                 return LayoutBuilder(
                   builder: (context, constraints) {
                     final screenWidth = constraints.maxWidth;
+
                     // Determine grid layout based on screen width
-                    int crossAxisCount;
-                    
-                    if (screenWidth > 1200) {
-                      // Desktop - 3 columns
-                      crossAxisCount = 3;
-                    } else if (screenWidth > 800) {
-                      // Tablet - 2 columns
-                      crossAxisCount = 2;
-                    } else {
-                      // Mobile - 1 column
-                      crossAxisCount = 1;
+                    int crossAxisCount =
+                        1; // Default to 1 column on small screens
+
+                    if (screenWidth > 600) {
+                      crossAxisCount =
+                          2; // 2 columns on medium screens and larger
                     }
-                    
+
+                    // Calculate main axis extent (height) for the cards
+                    // Keep it fixed at 130 for all screen sizes
+                    const double cardHeight = 130;
+
                     return GridView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: crossAxisCount,
-                        crossAxisSpacing: 16,
                         mainAxisSpacing: 16,
-                        mainAxisExtent: 320, // Fixed height for each card
+                        crossAxisSpacing: 16,
+                        mainAxisExtent: cardHeight, // Fixed height for cards
                       ),
                       itemCount: dishes.length,
                       itemBuilder: (context, index) {
                         final dish = dishes[index];
-                        // Convert CatalogItem to Map<String, dynamic> for DishCardSmall
+                        // Convert CatalogItem to Map<String, dynamic> for DishCard
                         final dishMap = <String, dynamic>{
                           'id': dish.id,
                           'title': dish.name,
                           'description': dish.description,
                           'pricing': dish.price.toString(),
-                          'img': dish.imageUrl ?? 'assets/images/placeholder_food.png',
-                          'foodType': dish.metadata['foodType'] ?? 'Main Course',
+                          'price': dish.price,
+                          'img': dish.imageUrl ?? 'assets/appIcon.png',
+                          'foodType':
+                              dish.metadata['foodType'] ?? 'Main Course',
                           'isSpicy': dish.metadata['isSpicy'] ?? false,
                           'bestSeller': dish.metadata['bestSeller'] ?? false,
-                          'offertPricing': dish.metadata['offertPricing']?.toString(),
-                          'ingredients': dish.metadata['ingredients'] ?? ['Ingredient 1', 'Ingredient 2'],
+                          'offertPricing':
+                              dish.metadata['offertPricing']?.toString(),
+                          'ingredients': dish.metadata['ingredients'] ??
+                              ['Ingredient 1', 'Ingredient 2'],
+                          'rating': 4.5, // Default rating if not available
                         };
-                        
+
                         return DishCard(
                           dish: dishMap,
                           onTap: () {
-
                             context.pushNamed(
-                              AppRoute.addDishToOrder.name, 
+                              AppRoute.addDishToOrder.name,
                               pathParameters: {'dishId': dish.id},
                             );
                           },
@@ -316,12 +316,14 @@ class CategoryView extends ConsumerWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                      const Icon(Icons.error_outline,
+                          size: 48, color: Colors.red),
                       const SizedBox(height: 16),
                       Text('Failed to load dishes: $error'),
                       const SizedBox(height: 8),
                       ElevatedButton(
-                        onPressed: () => ref.refresh(catalogItemsProvider('menu')),
+                        onPressed: () =>
+                            ref.refresh(catalogItemsProvider('menu')),
                         child: const Text('Retry'),
                       ),
                     ],
@@ -329,14 +331,14 @@ class CategoryView extends ConsumerWidget {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 30),
           ],
         ),
       ),
     );
   }
-  
+
   IconData _getCategoryIcon(int categoryId) {
     switch (categoryId) {
       case 1:

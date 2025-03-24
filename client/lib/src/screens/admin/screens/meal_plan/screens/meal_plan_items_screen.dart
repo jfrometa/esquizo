@@ -6,7 +6,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/
 import 'package:starter_architecture_flutter_firebase/src/screens/plans/plans.dart';
  
 class MealPlanItemsScreen extends ConsumerStatefulWidget {
-  const MealPlanItemsScreen({Key? key}) : super(key: key);
+  const MealPlanItemsScreen({super.key});
 
   @override
   ConsumerState<MealPlanItemsScreen> createState() => _MealPlanItemsScreenState();

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:starter_architecture_flutter_firebase/src/theme/app_theme.dart';
 
 class DateTimePicker2 {
   static Future<void> show({

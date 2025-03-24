@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/cart_item_view.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/providers/cart_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/theme/app_theme.dart';
 
 class PlatosCheckout extends ConsumerWidget {
   final List<CartItem> items;

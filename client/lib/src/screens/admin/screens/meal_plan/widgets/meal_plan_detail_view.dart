@@ -11,10 +11,10 @@ class MealPlanDetailView extends ConsumerStatefulWidget {
   final VoidCallback onClose;
   
   const MealPlanDetailView({
-    Key? key,
+    super.key,
     required this.mealPlanId,
     required this.onClose,
-  }) : super(key: key);
+  });
   
   @override
   ConsumerState<MealPlanDetailView> createState() => _MealPlanDetailViewState();

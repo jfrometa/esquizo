@@ -221,7 +221,7 @@ class OrderCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                ...order.items!.map((item) => ListTile(
+                ...order.items.map((item) => ListTile(
                       dense: true,
                       title: Text(item.name),
                       trailing: Text('x${item.quantity}'),

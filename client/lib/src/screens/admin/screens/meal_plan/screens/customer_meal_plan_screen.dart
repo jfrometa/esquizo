@@ -16,7 +16,7 @@ final customerMealPlansProvider = StreamProvider<List<MealPlan>>((ref) {
 });
 
 class CustomerMealPlanScreen extends ConsumerStatefulWidget {
-  const CustomerMealPlanScreen({Key? key}) : super(key: key);
+  const CustomerMealPlanScreen({super.key});
 
   @override
   ConsumerState<CustomerMealPlanScreen> createState() => _CustomerMealPlanScreenState();
@@ -268,12 +268,6 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
     
     return planAsync.when(
       data: (plan) {
-        if (plan == null) {
-          return const Center(
-            child: Text('Meal plan not found'),
-          );
-        }
-        
         return Stack(
           children: [
             SingleChildScrollView(

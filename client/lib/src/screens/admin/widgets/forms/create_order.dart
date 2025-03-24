@@ -11,7 +11,6 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/o
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';
 import 'package:uuid/uuid.dart';
-import '../../../../core/providers/order/order_provider.dart';
 import '../../../../core/providers/catalog/catalog_provider.dart'; 
 import '../../../../core/services/cart_service.dart'; 
 import '../../../../core/services/service_factory.dart';
