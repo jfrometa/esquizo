@@ -485,7 +485,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                                 icon: const Icon(Icons.shopping_cart_outlined),
                                 tooltip: 'View cart',
                                 onPressed: () {
-                                  context.pushNamed(AppRoute.homecart.name);
+                                  context.goNamed(AppRoute.homecart.name);
                                   HapticFeedback.selectionClick();
                                 },
                               ),

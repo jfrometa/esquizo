@@ -393,8 +393,8 @@ GlobalKey<NavigatorState> _getNavigatorKey(String path) {
   switch (path) {
     case '/':
       return _landingNavigatorKey;
-    case '/local':
-      return _localNavigatorKey;
+    // case '/local':
+    //   return _localNavigatorKey;
     case '/menu':
       return _homeNavigatorKey;
     case '/carrito':
@@ -413,7 +413,7 @@ GlobalKey<NavigatorState> _getNavigatorKey(String path) {
 String _getRouteName(String path) {
   final pathToRoute = {
     '/': AppRoute.landing.name,
-    '/local': AppRoute.local.name,
+    // '/local': AppRoute.local.name,
     '/menu': AppRoute.home.name,
     '/carrito': AppRoute.homecart.name,
     '/cuenta': AppRoute.profile.name,
@@ -427,8 +427,8 @@ Widget _getDestinationScreen(String path) {
   switch (path) {
     case '/':
       return const ResponsiveLandingPage();
-    case '/local':
-      return const MenuHome(); // QRCodeScreen();
+    // case '/local':
+    //   return const MenuHome(); // QRCodeScreen();
     case '/menu':
       return const MenuScreen();
     case '/carrito':

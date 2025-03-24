@@ -5,16 +5,12 @@ import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_provider.dart'; // Add this import
 import 'package:starter_architecture_flutter_firebase/src/helpers/scroll_bahaviour.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/QR/models/qr_code_data.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/providers/provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/cards/dish_card.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/dishes/cards/dish_card_small.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/dish_caterogy/category_dishes_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/providers/cart_provider.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/reservation/reservation_screen.dart';
 
-import '../../../core/providers/cart/cart_provider.dart';
 
 class CategoryView extends ConsumerWidget {
   final ScrollController scrollController;
