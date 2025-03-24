@@ -34,12 +34,7 @@ jobs:
         working-directory: ./client
         run: flutter pub get
       
-      - name: Setup Firebase CLI
-        uses: w9jds/firebase-action@master
-        with:
-          args: setup:ci
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      # Skip the separate Firebase setup step as it's not needed
       
       - name: Run Cache Busting Build Script
         run: |
@@ -50,6 +45,7 @@ jobs:
       - name: Deploy to Firebase
         uses: w9jds/firebase-action@master
         with:
-          args: deploy --only hosting --cwd=./client
+          args: deploy --only hosting
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          PROJECT_PATH: ./client
