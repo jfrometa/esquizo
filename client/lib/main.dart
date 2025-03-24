@@ -31,11 +31,10 @@ Future<void> main() async {
   
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-    await FirebaseAppCheck.instance.activate(
-    webProvider: ReCaptchaV3Provider('6LeGBv4qAAAAACKUiHAJEFBsUDmbTyMPZwb-T8N6'),
-    androidProvider: AndroidProvider.debug,
-    appleProvider: AppleProvider.appAttest,
-  );
+  
+  // Setup Firebase App Check with proper error handling
+  await _initializeAppCheck();
+  
   // Create a provider container for dependency injection
   final container = ProviderContainer();
   
@@ -64,6 +63,41 @@ Future<void> main() async {
   );
 }
 
+// Initialize Firebase App Check with proper error handling
+Future<void> _initializeAppCheck() async {
+  try {
+    if (kIsWeb) {
+      // For web platforms
+      debugPrint('Initializing AppCheck for web environment');
+      
+      // Make sure to use site key from Google reCAPTCHA Admin Console
+      // This should be a reCAPTCHA v3 key specifically for your domain
+      await FirebaseAppCheck.instance.activate(
+        // Consider using debug token for development on web
+        webProvider: kDebugMode 
+          ? ReCaptchaEnterpriseProvider('6LeGBv4qAAAAACKUiHAJEFBsUDmbTyMPZwb-T8N6') 
+          : ReCaptchaV3Provider('6LeGBv4qAAAAACKUiHAJEFBsUDmbTyMPZwb-T8N6'),
+       
+      );
+    } else {
+      // For mobile platforms
+      await FirebaseAppCheck.instance.activate(
+        // For Android production, consider using PlayIntegrity instead of debug
+        androidProvider: kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
+        // For iOS, appAttest is good but doesn't work in simulator
+        appleProvider: kDebugMode ? AppleProvider.debug : AppleProvider.appAttest,
+        
+      );
+    }
+    
+    debugPrint('Firebase AppCheck successfully initialized');
+  } catch (e) {
+    // Log the error but continue app initialization
+    debugPrint('Error initializing Firebase AppCheck: $e');
+    // In production, you might want to show a user-friendly message or try alternative approaches
+  }
+}
+
 // Configure system UI appearance
 Future<void> _configureSystemUI() async {
   SystemChrome.setSystemUIOverlayStyle(
@@ -90,7 +124,12 @@ Future<void> _initializeAuth(ProviderContainer container) async {
  
   // Sign in anonymously if no user is signed in
   if (currentUser == null) {
+    try {
       await authRepo.initialize();
+    } catch (e) {
+      debugPrint('Error during auth initialization: $e');
+      // Consider adding fallback authentication strategy here
+    }
   }
   
   // Initialize theme system from user preferences (if any)
