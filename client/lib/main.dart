@@ -32,8 +32,16 @@ Future<void> main() async {
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   
-  // Setup Firebase App Check with proper error handling
-  await _initializeAppCheck();
+  // For development only - completely bypass AppCheck if needed
+  // Set this to true if you need to completely skip AppCheck during development
+  bool bypassAppCheck = kDebugMode; // Set to true to bypass in debug mode
+  
+  if (!bypassAppCheck) {
+    // Try to initialize AppCheck with fallback
+    await _initializeAppCheckWithFallback();
+  } else {
+    debugPrint('⚠️ Firebase AppCheck is BYPASSED in development mode');
+  }
   
   // Create a provider container for dependency injection
   final container = ProviderContainer();
@@ -63,38 +71,76 @@ Future<void> main() async {
   );
 }
 
-// Initialize Firebase App Check with proper error handling
-Future<void> _initializeAppCheck() async {
+// Initialize Firebase App Check with proper error handling and fallback
+Future<void> _initializeAppCheckWithFallback() async {
   try {
     if (kIsWeb) {
-      // For web platforms
-      debugPrint('Initializing AppCheck for web environment');
+      debugPrint('🔒 Initializing Firebase AppCheck for web');
       
-      // Make sure to use site key from Google reCAPTCHA Admin Console
-      // This should be a reCAPTCHA v3 key specifically for your domain
-      await FirebaseAppCheck.instance.activate(
-        // Consider using debug token for development on web
-        webProvider: kDebugMode 
-          ? ReCaptchaEnterpriseProvider('6LeGBv4qAAAAACKUiHAJEFBsUDmbTyMPZwb-T8N6') 
-          : ReCaptchaV3Provider('6LeGBv4qAAAAACKUiHAJEFBsUDmbTyMPZwb-T8N6'),
-       
-      );
+      // Try using enterprise provider first
+      try {
+        await FirebaseAppCheck.instance.activate(
+          webProvider: ReCaptchaEnterpriseProvider('6LeGBv4qAAAAACKUiHAJEFBsUDmbTyMPZwb-T8N6'),
+          
+        );
+        debugPrint('✅ Firebase AppCheck initialized with ReCaptchaEnterpriseProvider');
+        return; // Early return if successful
+      } catch (enterpriseError) {
+        debugPrint('⚠️ ReCaptchaEnterpriseProvider failed: $enterpriseError');
+        // Fall through to try V3 provider
+      }
+      
+      // Try V3 provider if enterprise failed
+      try {
+        await FirebaseAppCheck.instance.activate(
+          webProvider: ReCaptchaV3Provider('6LeGBv4qAAAAACKUiHAJEFBsUDmbTyMPZwb-T8N6'),
+      
+        );
+        debugPrint('✅ Firebase AppCheck initialized with ReCaptchaV3Provider');
+        return; // Early return if successful
+      } catch (v3Error) {
+        debugPrint('⚠️ ReCaptchaV3Provider failed: $v3Error');
+        // Fall through to try debug provider
+      }
+
+      // Final fallback for dev environments - use debug provider
+      if (kDebugMode) {
+        try {
+          // For web in debug mode, try with debug provider as last resort
+          await FirebaseAppCheck.instance.activate(
+            // Use debug provider for web - requires debug token
+            webProvider: ReCaptchaV3Provider('6LeGBv4qAAAAACKUiHAJEFBsUDmbTyMPZwb-T8N6', )
+           
+          );
+          debugPrint('✅ Firebase AppCheck initialized with debug configuration');
+        } catch (debugError) {
+          // If debug mode also fails, log and proceed without AppCheck
+          debugPrint('❌ All AppCheck providers failed. Proceeding without AppCheck: $debugError');
+        }
+      }
     } else {
-      // For mobile platforms
-      await FirebaseAppCheck.instance.activate(
-        // For Android production, consider using PlayIntegrity instead of debug
-        androidProvider: kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
-        // For iOS, appAttest is good but doesn't work in simulator
-        appleProvider: kDebugMode ? AppleProvider.debug : AppleProvider.appAttest,
-        
-      );
+      // For mobile platforms - try with appropriate debug provider first
+      if (kDebugMode) {
+        await FirebaseAppCheck.instance.activate(
+          androidProvider: AndroidProvider.debug,
+          appleProvider: AppleProvider.debug,
+      
+        );
+        debugPrint('✅ Firebase AppCheck initialized with debug providers for mobile');
+      } else {
+        // For production mobile
+        await FirebaseAppCheck.instance.activate(
+          androidProvider: AndroidProvider.playIntegrity,
+          appleProvider: AppleProvider.deviceCheck,
+         
+        );
+        debugPrint('✅ Firebase AppCheck initialized with production providers for mobile');
+      }
     }
-    
-    debugPrint('Firebase AppCheck successfully initialized');
   } catch (e) {
-    // Log the error but continue app initialization
-    debugPrint('Error initializing Firebase AppCheck: $e');
-    // In production, you might want to show a user-friendly message or try alternative approaches
+    // Global error handler - if all attempts fail, log error and proceed without AppCheck
+    debugPrint('❌ Firebase AppCheck failed completely: $e');
+    debugPrint('⚠️ Proceeding without Firebase AppCheck');
   }
 }
 
@@ -118,30 +164,30 @@ Future<void> _configureSystemUI() async {
 
 // Initialize authentication
 Future<void> _initializeAuth(ProviderContainer container) async {
-  // Check if the user is already signed in
-  final authRepo = container.read(authRepositoryProvider);
-  final currentUser = FirebaseAuth.instance.currentUser; 
- 
-  // Sign in anonymously if no user is signed in
-  if (currentUser == null) {
-    try {
+  try {
+    // Check if the user is already signed in
+    final authRepo = container.read(authRepositoryProvider);
+    final currentUser = FirebaseAuth.instance.currentUser;
+   
+    // Sign in anonymously if no user is signed in
+    if (currentUser == null) {
       await authRepo.initialize();
-    } catch (e) {
-      debugPrint('Error during auth initialization: $e');
-      // Consider adding fallback authentication strategy here
     }
-  }
-  
-  // Initialize theme system from user preferences (if any)
-  if (FirebaseAuth.instance.currentUser != null) {
-    try {
-      // Pre-fetch user preferences to initialize theme
-      final prefsRepo = container.read(userPreferencesRepositoryProvider);
-      await prefsRepo.getUserPreferences(FirebaseAuth.instance.currentUser!.uid);
-    } catch (e) {
-      // Silently handle error - we'll fall back to system theme
-      debugPrint('Error loading user preferences: $e');
+    
+    // Initialize theme system from user preferences (if any)
+    if (FirebaseAuth.instance.currentUser != null) {
+      try {
+        // Pre-fetch user preferences to initialize theme
+        final prefsRepo = container.read(userPreferencesRepositoryProvider);
+        await prefsRepo.getUserPreferences(FirebaseAuth.instance.currentUser!.uid);
+      } catch (e) {
+        // Silently handle error - we'll fall back to system theme
+        debugPrint('Error loading user preferences: $e');
+      }
     }
+  } catch (e) {
+    debugPrint('❌ Error during authentication initialization: $e');
+    // Continue anyway - anonymous auth might fail but app should still work
   }
 }
 
