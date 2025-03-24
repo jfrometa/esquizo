@@ -339,7 +339,7 @@ class PlanDetailsScreen extends ConsumerWidget {
           // Long description section
           Card(
             elevation: 0,
-            color: colorScheme.surfaceVariant.withOpacity(0.5),
+            color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -368,7 +368,7 @@ class PlanDetailsScreen extends ConsumerWidget {
           // How it works section
           Card(
             elevation: 0,
-            color: colorScheme.surfaceVariant.withOpacity(0.5),
+            color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -397,7 +397,7 @@ class PlanDetailsScreen extends ConsumerWidget {
           // Features section
           Card(
             elevation: 0,
-            color: colorScheme.surfaceVariant.withOpacity(0.5),
+            color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -595,7 +595,7 @@ class PlanDetailsScreen extends ConsumerWidget {
                                     ),
                                   ],
                                 ),
-                              )).toList(),
+                              )),
                               
                               if (mealPlan.features.length > 4)
                                 Padding(
@@ -644,7 +644,7 @@ class PlanDetailsScreen extends ConsumerWidget {
                   Expanded(
                     child: Card(
                       elevation: 0,
-                      color: colorScheme.surfaceVariant.withOpacity(0.5),
+                      color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -676,7 +676,7 @@ class PlanDetailsScreen extends ConsumerWidget {
                   Expanded(
                     child: Card(
                       elevation: 0,
-                      color: colorScheme.surfaceVariant.withOpacity(0.5),
+                      color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -711,7 +711,7 @@ class PlanDetailsScreen extends ConsumerWidget {
                                   ),
                                 ],
                               ),
-                            )).toList(),
+                            )),
                           ],
                         ),
                       ),
@@ -761,7 +761,7 @@ class PlanDetailsScreen extends ConsumerWidget {
               borderRadius: BorderRadius.circular(8),
               child: LinearProgressIndicator(
                 value: remainingPercentage,
-                backgroundColor: colorScheme.surfaceVariant,
+                backgroundColor: colorScheme.surfaceContainerHighest,
                 color: colorScheme.primary,
                 minHeight: 8,
               ),

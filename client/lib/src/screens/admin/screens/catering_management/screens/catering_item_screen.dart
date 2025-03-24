@@ -440,7 +440,7 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                 Container(
                   color: item.isHighlighted
                       ? colorScheme.primaryContainer
-                      : colorScheme.surfaceVariant,
+                      : colorScheme.surfaceContainerHighest,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 8,
@@ -537,7 +537,7 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                 ),
                 
                 // Actions
-                ButtonBar(
+                OverflowBar(
                   children: [
                     TextButton.icon(
                       icon: const Icon(Icons.edit_outlined),

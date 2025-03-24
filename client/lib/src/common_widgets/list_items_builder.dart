@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/common_widgets/empty_content.dart';
@@ -29,10 +30,18 @@ class ListItemsBuilder<T> extends StatelessWidget {
             )
           : const EmptyContent(),
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, __) => const EmptyContent(
-        title: 'Something went wrong',
-        message: 'Can\'t load items right now',
-      ),
+      error: (error, stackTrace) {
+        // Log the error for debugging purposes
+        debugPrint('Error loading list items: $error');
+        if (kDebugMode) {
+          debugPrintStack(stackTrace: stackTrace);
+        }
+        
+        return const EmptyContent(
+          title: 'Something went wrong',
+          message: 'Can\'t load items right now',
+        );
+      },
     );
   }
 }

@@ -334,7 +334,7 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceVariant.withOpacity(0.5),
+                  color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(order.specialInstructions),
@@ -533,7 +533,7 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
                                   ),
                                   padding: EdgeInsets.zero,
                                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                  backgroundColor: colorScheme.surfaceVariant,
+                                  backgroundColor: colorScheme.surfaceContainerHighest,
                                 ),
                               ).toList(),
                             ),
@@ -549,7 +549,7 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
                           style: theme.textTheme.bodyMedium,
                         ),
                         Text(
-                          '${currencyFormat.format(item.price * item.quantity)}',
+                          currencyFormat.format(item.price * item.quantity),
                           style: theme.textTheme.titleSmall,
                         ),
                       ],
@@ -557,7 +557,7 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
                   ],
                 ),
               ),
-            ).toList(),
+            ),
             const Divider(),
             // Subtotal
             Padding(

@@ -9,7 +9,6 @@ import 'package:starter_architecture_flutter_firebase/src/screens/cart/meal_subs
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/widgets/catering_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/prompt_dialogs/new_item_dialog.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/catering/cathering_order_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
@@ -284,7 +283,7 @@ class _CartScreenState extends ConsumerState<CartScreen> with SingleTickerProvid
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: colorScheme.surfaceVariant.withOpacity(0.5),
+                color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -445,7 +444,7 @@ class _CartScreenState extends ConsumerState<CartScreen> with SingleTickerProvid
           style: FilledButton.styleFrom(
             minimumSize: const Size(double.infinity, 56),
             backgroundColor: buttonColor,
-            disabledBackgroundColor: colorScheme.surfaceVariant,
+            disabledBackgroundColor: colorScheme.surfaceContainerHighest,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -488,7 +487,7 @@ class _CartScreenState extends ConsumerState<CartScreen> with SingleTickerProvid
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceVariant.withOpacity(0.5),
+        color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
         border: Border(
           top: BorderSide(
             color: colorScheme.outlineVariant,
@@ -906,7 +905,7 @@ class _CartScreenState extends ConsumerState<CartScreen> with SingleTickerProvid
                       return Card(
                         elevation: 0,
                         margin: const EdgeInsets.only(bottom: 8),
-                        color: colorScheme.surfaceVariant.withOpacity(0.3),
+                        color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -1030,7 +1029,7 @@ class _CartScreenState extends ConsumerState<CartScreen> with SingleTickerProvid
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceVariant.withOpacity(0.5),
+                    color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(

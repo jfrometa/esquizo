@@ -9,9 +9,9 @@ class MealPlanScanner extends ConsumerStatefulWidget {
   final Function(MealPlan) onMealPlanScanned;
   
   const MealPlanScanner({
-    Key? key,
+    super.key,
     required this.onMealPlanScanned,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<MealPlanScanner> createState() => _MealPlanScannerState();
@@ -208,10 +208,10 @@ class WebQRScanner extends StatelessWidget {
   final BoxConstraints constraints;
   
   const WebQRScanner({
-    Key? key,
+    super.key,
     required this.onScan,
     this.constraints = const BoxConstraints.expand(),
-  }) : super(key: key);
+  });
   
   @override
   Widget build(BuildContext context) {

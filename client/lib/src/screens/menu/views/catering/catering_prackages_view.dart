@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 class CateringPackageCard extends StatelessWidget {
   /// The package data to display
   final Map<String, dynamic> package;
-  
+
   /// Callback when the card is tapped
   final VoidCallback? onTap;
-  
+
   /// Whether this package is currently selected
   final bool isSelected;
 
@@ -22,13 +22,13 @@ class CateringPackageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Card(
       elevation: isSelected ? 3 : 1,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: isSelected 
+        side: isSelected
             ? BorderSide(color: colorScheme.primary, width: 2)
             : BorderSide(color: colorScheme.outline.withOpacity(0.2), width: 1),
       ),
@@ -55,7 +55,7 @@ class CateringPackageCard extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildIcon(ColorScheme colorScheme) {
     return Container(
       width: 72,
@@ -71,17 +71,17 @@ class CateringPackageCard extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildTitle(ThemeData theme) {
     return Text(
-      package['title'],
+      package['name'],
       style: theme.textTheme.titleMedium?.copyWith(
         fontWeight: FontWeight.bold,
       ),
       textAlign: TextAlign.center,
     );
   }
-  
+
   Widget _buildDescription(ThemeData theme, ColorScheme colorScheme) {
     return Text(
       package['description'],
@@ -93,18 +93,19 @@ class CateringPackageCard extends StatelessWidget {
       overflow: TextOverflow.ellipsis,
     );
   }
-  
+
   Widget _buildPrice(ColorScheme colorScheme) {
+    final price = package['basePrice'].toString();
     return Column(
       children: [
-        const Text(
+        Text(
           'Starting from',
           style: TextStyle(
             fontSize: 12,
           ),
         ),
         Text(
-          package['price'],
+          price,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: colorScheme.primary,
@@ -114,7 +115,7 @@ class CateringPackageCard extends StatelessWidget {
       ],
     );
   }
-  
+
   Widget _buildActionButton(ThemeData theme, ColorScheme colorScheme) {
     return SizedBox(
       width: double.infinity,

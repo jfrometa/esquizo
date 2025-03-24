@@ -157,7 +157,7 @@ class _SalesChartState extends State<SalesChart> {
             },
           ),
           touchCallback: (event, touchResponse) {
-            if (event is FlTouchEvent && touchResponse != null) {
+            if (touchResponse != null) {
               if (event is FlPanEndEvent || event is FlTapUpEvent) {
                 setState(() {
                   _touchedIndex = -1;

@@ -238,8 +238,8 @@ class ManualQuoteNotifier extends StateNotifier<CateringOrderItem?> {
     );
     
     // Use Firebase to save the order
-    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-    final docRef = await _firestore.collection('cateringOrders').add(order.toJson()..remove('id'));
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final docRef = await firestore.collection('cateringOrders').add(order.toJson()..remove('id'));
     
     // Clear the quote after submission
     clearManualQuote();

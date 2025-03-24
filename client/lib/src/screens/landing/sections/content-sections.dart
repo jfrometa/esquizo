@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_packages_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/catering-section.dart';
@@ -16,7 +15,7 @@ class ContentSections extends StatelessWidget {
   final bool isMobile;
   final bool isTablet;
   final bool isDesktop;
-  
+
   const ContentSections({
     super.key,
     required this.tabController,
@@ -28,12 +27,12 @@ class ContentSections extends StatelessWidget {
     required this.isTablet,
     required this.isDesktop,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Container(
       color: colorScheme.surface,
       padding: const EdgeInsets.only(top: 40),
@@ -60,7 +59,8 @@ class ContentSections extends StatelessWidget {
               isScrollable: false, // Make sure tabs are not scrollable
               tabAlignment: TabAlignment.fill, // Make tabs take up equal space
               padding: EdgeInsets.zero, // Remove padding around the TabBar
-              labelPadding: EdgeInsets.zero, // Remove padding around each tab label
+              labelPadding:
+                  EdgeInsets.zero, // Remove padding around each tab label
               tabs: const [
                 // Use SizedBox.expand to make the whole tab area clickable
                 Tab(
@@ -114,9 +114,9 @@ class ContentSections extends StatelessWidget {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 40),
-          
+
           // Tab content
           SizedBox(
             // Fixed height makes the layout more stable
@@ -131,14 +131,14 @@ class ContentSections extends StatelessWidget {
                   isTablet: isTablet,
                   isDesktop: isDesktop,
                 ),
-                
+
                 // Meal plans tab
                 MealPlansSection(
                   isMobile: isMobile,
                   isTablet: isTablet,
                   isDesktop: isDesktop,
                 ),
-                
+
                 // Catering tab
                 CateringSection(
                   cateringPackages: cateringPackages,
@@ -147,7 +147,7 @@ class ContentSections extends StatelessWidget {
                   isTablet: isTablet,
                   isDesktop: isDesktop,
                 ),
-                
+
                 // Events tab
                 EventsSection(
                   isMobile: isMobile,

@@ -12,12 +12,12 @@ class AdminMealPlanCard extends ConsumerWidget {
   final VoidCallback onDelete;
   
   const AdminMealPlanCard({
-    Key? key,
+    super.key,
     required this.mealPlan,
     required this.onTap,
     required this.onEdit,
     required this.onDelete,
-  }) : super(key: key);
+  });
   
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -348,7 +348,7 @@ class AdminMealPlanCard extends ConsumerWidget {
               style: theme.textTheme.bodySmall,
             ),
             Text(
-              '${usedMeals}/${totalMeals} used',
+              '$usedMeals/$totalMeals used',
               style: theme.textTheme.bodySmall,
             ),
           ],

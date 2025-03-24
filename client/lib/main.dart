@@ -277,13 +277,11 @@ Future<void> _initializeAuth(ProviderContainer container) async {
         final prefs = await prefsRepo.getUserPreferences(FirebaseAuth.instance.currentUser!.uid);
         
         // Track user preferences as user properties for analytics segmentation
-        if (prefs.themeMode != null) {
-          await AnalyticsService.instance.setUserProperty(
-            name: 'preferred_theme',
-            value: prefs.themeMode.toString().split('.').last,
-          );
-        }
-      } catch (e) {
+        await AnalyticsService.instance.setUserProperty(
+          name: 'preferred_theme',
+          value: prefs.themeMode.toString().split('.').last,
+        );
+            } catch (e) {
         // Silently handle error - we'll fall back to system theme
         debugPrint('Error loading user preferences: $e');
       }
@@ -378,9 +376,9 @@ class CustomErrorWidget extends StatelessWidget {
   final FlutterErrorDetails errorDetails;
 
   const CustomErrorWidget({
-    Key? key,
+    super.key,
     required this.errorDetails,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

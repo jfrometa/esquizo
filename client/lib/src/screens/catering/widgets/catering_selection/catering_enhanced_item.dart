@@ -1,6 +1,5 @@
 // COMPONENT 3: EnhancedCateringItemCard
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_item_model.dart';  
 
 

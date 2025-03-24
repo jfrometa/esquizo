@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/meal_plan_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/plans/plans.dart';
-import 'package:uuid/uuid.dart'; 
 
 class MealPlanForm extends ConsumerStatefulWidget {
   final MealPlan? mealPlan;
@@ -13,11 +12,11 @@ class MealPlanForm extends ConsumerStatefulWidget {
   final VoidCallback onCancel;
 
   const MealPlanForm({
-    Key? key,
+    super.key,
     this.mealPlan,
     required this.onSave,
     required this.onCancel,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<MealPlanForm> createState() => _MealPlanFormState();

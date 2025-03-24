@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/widgets/catering_form.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/catering/cathering_order_item.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/catering_entry/components/catering_quote/quote_order_form_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
@@ -286,7 +284,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                   labelText: 'Nombre del Item',
                   border: const OutlineInputBorder(),
                   filled: true,
-                  fillColor: colorScheme.surfaceVariant.withOpacity(0.3),
+                  fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
                 ),
               ),
               const SizedBox(height: 16),
@@ -296,7 +294,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                   labelText: 'Descripción (Opcional)',
                   border: const OutlineInputBorder(),
                   filled: true,
-                  fillColor: colorScheme.surfaceVariant.withOpacity(0.3),
+                  fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
                 ),
                 maxLines: 2,
               ),
@@ -307,7 +305,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                   labelText: 'Cantidad (Opcional)',
                   border: const OutlineInputBorder(),
                   filled: true,
-                  fillColor: colorScheme.surfaceVariant.withOpacity(0.3),
+                  fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
                   prefixIcon: const Icon(Icons.numbers),
                 ),
                 keyboardType: TextInputType.number,
@@ -947,7 +945,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
   Widget _buildDishItem(CateringDish dish, ThemeData theme, int index, ColorScheme colorScheme) {
     return Card(
       elevation: 0,
-      color: colorScheme.surfaceVariant.withOpacity(0.3),
+      color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
       margin: const EdgeInsets.only(bottom: 8),
       child: Padding(
         padding: const EdgeInsets.all(12),

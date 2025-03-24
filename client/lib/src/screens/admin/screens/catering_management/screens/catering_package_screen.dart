@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/available_items_for_packages_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_category_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/unified_catering_package_providers.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_packages_provider.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/form/catering_package_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_category_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart';
@@ -381,7 +380,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                 Container(
                   color: package.isPromoted
                       ? colorScheme.primaryContainer
-                      : colorScheme.surfaceVariant,
+                      : colorScheme.surfaceContainerHighest,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 8,
@@ -486,7 +485,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                 ),
                 
                 // Actions
-                ButtonBar(
+                OverflowBar(
                   children: [
                     TextButton.icon(
                       icon: const Icon(Icons.edit_outlined),

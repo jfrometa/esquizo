@@ -28,9 +28,9 @@ class POSMealPlanWidget extends ConsumerStatefulWidget {
   final Function(ConsumedItem) onMealPlanUsed;
   
   const POSMealPlanWidget({
-    Key? key,
+    super.key,
     required this.onMealPlanUsed,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<POSMealPlanWidget> createState() => _POSMealPlanWidgetState();

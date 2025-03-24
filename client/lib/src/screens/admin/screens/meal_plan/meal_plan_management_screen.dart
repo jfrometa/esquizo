@@ -7,7 +7,6 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/widgets/meal_plan_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/widgets/meal_plan_detail_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/responsive_layout.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_subscription.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/plans/plans.dart';
  
 
@@ -47,7 +46,7 @@ final filteredMealPlansProvider = Provider<AsyncValue<List<MealPlan>>>((ref) {
 });
 
 class MealPlanManagementScreen extends ConsumerStatefulWidget {
-  const MealPlanManagementScreen({Key? key}) : super(key: key);
+  const MealPlanManagementScreen({super.key});
 
   @override
   ConsumerState<MealPlanManagementScreen> createState() => _MealPlanManagementScreenState();
@@ -55,7 +54,7 @@ class MealPlanManagementScreen extends ConsumerStatefulWidget {
 
 class _MealPlanManagementScreenState extends ConsumerState<MealPlanManagementScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   bool _showFilters = false;
   
   @override

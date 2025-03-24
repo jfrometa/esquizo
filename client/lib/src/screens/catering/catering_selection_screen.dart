@@ -5,11 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_item_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_item_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/widgets/catering_form.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/catering/catering_card.dart';
- import 'package:starter_architecture_flutter_firebase/src/screens/catering/widgets/cart_button.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/widgets/catering_selection/category_items_list.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/catering/widgets/catering_form.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/catering/widgets/catering_tab_bar.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart';
 
 final localCateringItemCountProvider = StateProvider<int>((ref) {

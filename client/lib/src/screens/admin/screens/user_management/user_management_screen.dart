@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/user/auth_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/auth_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/user_form.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/app_user.dart';
  
 
 class UserManagementScreen extends ConsumerStatefulWidget {

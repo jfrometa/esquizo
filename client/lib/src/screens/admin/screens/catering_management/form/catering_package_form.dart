@@ -782,7 +782,7 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? Theme.of(context).colorScheme.primaryContainer
-                                : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                                : Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
                             borderRadius: BorderRadius.circular(12),
                             border: isSelected
                                 ? Border.all(
@@ -1179,7 +1179,7 @@ class _ItemSelectionDialogState extends State<_ItemSelectionDialog> {
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? colorScheme.primaryContainer
-                                  : colorScheme.surfaceVariant,
+                                  : colorScheme.surfaceContainerHighest,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Center(
