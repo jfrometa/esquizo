@@ -1,15 +1,12 @@
 {
   "version": "0.2.0",
   "configurations": [
-    
+  
     {
-      "name": "Start Docker and Run Dart Package",
+      "name": "Flutter",
       "type": "dart",
       "request": "launch",
-      "program": "bin/main.dart", // Replace with your Dart entry point
-      "preLaunchTask": "Start Docker and Prisma Migrate",
-      "cwd": "${workspaceFolder}",
-      "args": []
+      "program": "lib/main.dart"
     }
   ],
   "tasks": {

@@ -2,9 +2,9 @@ import 'package:db/db.dart';
 import 'package:orm/orm.dart'; // Ensure you have the ORM package imported
 
 class UserService {
-  final PrismaClient prisma;
 
   UserService(this.prisma);
+  final PrismaClient prisma;
 
   // Create a new user
   Future<User?> createUser({

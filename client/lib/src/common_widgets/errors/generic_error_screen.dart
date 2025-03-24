@@ -1,10 +1,6 @@
-
-import 'package:starter_architecture_flutter_firebase/src/theme/app_theme.dart';
-
-import 'package:flutter/material.dart';
+ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:starter_architecture_flutter_firebase/src/widgets/button.dart';
+import 'package:flutter_svg/flutter_svg.dart'; 
 
 
 class GenericErrorScreen extends ConsumerWidget {
@@ -22,60 +18,84 @@ class GenericErrorScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    CustomAppTheme customAppTheme = ref.watch(appThemeProvider);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: customAppTheme.colorsPalette.white,
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 92.0, bottom: 32.0),
-              child: SvgPicture.asset('assets/big_icon_error.svg'),
-            ),
-            Text(
-              'An error has ocurred',
-              style: customAppTheme.textStyles.displaySmall,
-              textAlign: TextAlign.center,
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  top: 10,
+      backgroundColor: colorScheme.surface,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: colorScheme.errorContainer.withOpacity(0.3),
+                  shape: BoxShape.circle,
                 ),
-                child: message != null
-                    ? Text(
-                        message!,
-                        style: customAppTheme.textStyles.bodyLarge,
-                        textAlign: TextAlign.center,
-                      )
-                    : Container(),
+                child: SvgPicture.asset(
+                  'assets/big_icon_error.svg',
+                  colorFilter: ColorFilter.mode(
+                    colorScheme.error,
+                    BlendMode.srcIn,
+                  ),
+                  height: 64,
+                  width: 64,
+                ),
               ),
-            ),
-            Button.primary(
-              onPressed: () {
-                Navigator.pop(context);
-                tryAgain();
-              },
-              rounded: true,
-              text: const Text('Let me try again'),
-              wrap: true,
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 32.0, bottom: 40.0),
-              child: TextButton(
+              const SizedBox(height: 32),
+              Text(
+                'An error has occurred',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              if (message != null) ...[
+                const SizedBox(height: 16),
+                Text(
+                  message!,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+              const Spacer(),
+              FilledButton.icon(
+                onPressed: () {
+                  Navigator.pop(context);
+                  tryAgain();
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text('Try Again'),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
                 onPressed: () {
                   Navigator.pop(context);
                   leaveFlow();
                 },
-                child: Text(
-                  'Leave flow',
-                  style: customAppTheme.textStyles.button,
+                icon: const Icon(Icons.arrow_back),
+                label: const Text('Go Back'),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

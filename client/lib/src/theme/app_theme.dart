@@ -1,285 +1,662 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:starter_architecture_flutter_firebase/src/theme/colors_palette.dart';
-import 'package:starter_architecture_flutter_firebase/src/theme/text_styles.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/core/providers/user_preference/user_preference_provider.dart';
 
+ 
+// App theme configuration using Material 3 design system with brand colors
 class AppTheme {
-  static ColorsPalette lightColorsPalette = ColorsPalette.light;
-  static ColorsPalette darkColorsPalette = ColorsPalette.dark;
+  // Private constructor to prevent instantiation
+  AppTheme._();
 
-  static TextStyles textStyles =
-      TextStyles.fromColorsPalette(lightColorsPalette);
+  // Primary color palette - Brand colors
+  // PANTONE Bright Red C
+  static const Color brandPrimaryDark = Color(0xFFD12D14);    // Darker variant of primary
+  static const Color brandPrimary = Color(0xFFFF3A1D);        // Primary brand color #ff3a1d
+  static const Color brandPrimaryMedium = Color(0xFFFF5A40);  // Medium variant
+  static const Color brandPrimaryLight = Color(0xFFFF8A78);   // Light variant
+  static const Color brandPrimaryLightest = Color(0xFFFFEDE9); // Lightest variant for backgrounds
+  
+  // Secondary color palette
+  // PANTONE 151C
+  static const Color brandSecondaryDark = Color(0xFFCC6800);    // Darker variant of secondary
+  static const Color brandSecondary = Color(0xFFFF8300);        // Secondary brand color #ff8300
+  static const Color brandSecondaryMedium = Color(0xFFFF9E3A);  // Medium variant
+  static const Color brandSecondaryLight = Color(0xFFFFBB78);   // Light variant
+  static const Color brandSecondaryLightest = Color(0xFFFFEFDC); // Lightest variant for backgrounds
+  
+  // Neutral color palette - for backgrounds and surfaces
+  static const Color neutralDark = Color(0xFF1E1E1E);        // Dark neutral for text
+  static const Color neutralMedium = Color(0xFF757575);      // Medium neutral for secondary text
+  static const Color neutralLight = Color(0xFFE0E0E0);       // Light neutral for borders
+  static const Color neutralLightest = Color(0xFFF8F8F8);    // Lightest neutral for backgrounds
+  
+  // Text colors
+  static const Color textPrimary = Color(0xFF1E1E1E);         // Main text color
+  static const Color textSecondary = Color(0xFF757575);       // Secondary text
+  static const Color textOnPrimary = Colors.white;            // Text on primary
+  static const Color textOnSecondary = Colors.white;          // Text on secondary
+  
+  // Status colors
+  static const Color successColor = Color(0xFF4CAF50);        // Success
+  static const Color warningColor = Color(0xFFFFC107);        // Warning
+  static const Color errorColor = Color(0xFFE53935);          // Error
+  static const Color infoColor = Color(0xFF2196F3);           // Info
+  
+  // Error and warning colors
+  static const Color errorMain = Color(0xFFE53935);           // Error
+  static const Color errorLight = Color(0xFFFFCDD2);          // Light error
+  static const Color errorDark = Color(0xFFB71C1C);           // Dark error
+  
+  // Border and decoration colors
+  static const Color outlineMain = Color(0xFFBDBDBD);         // Outline
+  static const Color outlineLight = Color(0xFFE0E0E0);        // Light outline
+  
+  // System colors
+  static const Color shadowColor = Color(0x40000000);         // Shadows with 25% opacity
+  static const Color scrimColor = Color(0x80000000);          // Scrim with 50% opacity
+  
+  // Inverse colors (for dark mode/contrast)
+  static const Color inverseSurface = Color(0xFF1E1E1E);
+  static const Color inverseOnSurface = Color(0xFFF8F8F8);
+  static const Color inversePrimary = Color(0xFFFF8A78);
 
-  static ColorScheme lightColorScheme = ThemeData().colorScheme.copyWith(
-        primary: lightColorsPalette.primary,
-        onPrimary: lightColorsPalette.white,
-        primaryContainer: lightColorsPalette.primary40,
-        onPrimaryContainer: lightColorsPalette.black,
-        secondary: lightColorsPalette.secondary,
-        onSecondary: lightColorsPalette.white,
-        secondaryContainer: lightColorsPalette.secondary40,
-        onSecondaryContainer: lightColorsPalette.black,
-        tertiary: lightColorsPalette.tertiary,
-        onTertiary: lightColorsPalette.white,
-        tertiaryContainer: lightColorsPalette.ternary20,
-        onTertiaryContainer: lightColorsPalette.black,
-        error: lightColorsPalette.negativeAction,
-        onError: lightColorsPalette.white,
-        errorContainer: lightColorsPalette.negativeActionSoft,
-        onErrorContainer: lightColorsPalette.black,
-        surface: lightColorsPalette.white,
-        onSurface: lightColorsPalette.neutral9,
-        surfaceContainerHighest: lightColorsPalette.neutral4,
-        onSurfaceVariant: lightColorsPalette.neutral7,
-        surfaceTint: lightColorsPalette.primary,
-        outline: lightColorsPalette.neutral6,
-        shadow: lightColorsPalette.black,
-        inversePrimary: lightColorsPalette.primary70,
-        inverseSurface: lightColorsPalette.neutral9,
-        onInverseSurface: lightColorsPalette.neutral1,
-        // inverseBackground: colorsPalette.darkBG,
-        brightness: Brightness.light,
-      );
+  // Dark mode variants
+  static const Color darkModePrimary = Color(0xFFFF8A78);
+  static const Color darkModeOnPrimary = Color(0xFF690002);
+  static const Color darkModePrimaryContainer = Color(0xFF930005);
+  static const Color darkModeOnPrimaryContainer = Color(0xFFFFDAD5);
+  
+  static const Color darkModeSecondary = Color(0xFFFFB77D);
+  static const Color darkModeOnSecondary = Color(0xFF4B2800);
+  static const Color darkModeSecondaryContainer = Color(0xFF6B3C00);
+  static const Color darkModeOnSecondaryContainer = Color(0xFFFFDCC1);
+  
+  static const Color darkModeBackground = Color(0xFF1E1E1E);
+  static const Color darkModeOnBackground = Color(0xFFE0E0E0);
+  static const Color darkModeSurface = Color(0xFF2D2D2D);
+  static const Color darkModeOnSurface = Color(0xFFE0E0E0);
+  static const Color darkModeSurfaceVariant = Color(0xFF3D3D3D);
+  static const Color darkModeOnSurfaceVariant = Color(0xFFBDBDBD);
 
-  static ColorScheme darkColorScheme = ThemeData().colorScheme.copyWith(
-        primary: darkColorsPalette.primary,
-        onPrimary: darkColorsPalette.black,
-        primaryContainer: darkColorsPalette.primary40,
-        onPrimaryContainer: darkColorsPalette.white,
-        secondary: darkColorsPalette.secondary,
-        onSecondary: darkColorsPalette.black,
-        secondaryContainer: darkColorsPalette.secondary40,
-        onSecondaryContainer: darkColorsPalette.white,
-        tertiary: darkColorsPalette.tertiary,
-        onTertiary: darkColorsPalette.black,
-        tertiaryContainer: darkColorsPalette.ternary20,
-        onTertiaryContainer: darkColorsPalette.white,
-        error: darkColorsPalette.negativeAction,
-        onError: darkColorsPalette.black,
-        errorContainer: darkColorsPalette.negativeActionSoft,
-        onErrorContainer: darkColorsPalette.white,
-        surface: darkColorsPalette.darkBG,
-        onSurface: darkColorsPalette.neutral9,
-        surfaceContainerHighest: darkColorsPalette.neutral4,
-        onSurfaceVariant: darkColorsPalette.neutral7,
-        surfaceTint: darkColorsPalette.primary,
-        outline: darkColorsPalette.neutral6,
-        shadow: darkColorsPalette.black,
-        inversePrimary: darkColorsPalette.primary70,
-        inverseSurface: darkColorsPalette.neutral9,
-        onInverseSurface: darkColorsPalette.neutral1,
-        brightness: Brightness.dark,
-      );
-  static ThemeData getLight() => ThemeData(
-        useMaterial3: true,
-        cardColor: CustomAppTheme(
-          colorsPalette: ColorsPalette.light,
-        ).colorsPalette.primary,
-        cupertinoOverrideTheme: CupertinoThemeData(
-          primaryColor: lightColorsPalette.secondary,
-        ),
-        primaryColor: lightColorsPalette.white,
-        focusColor: lightColorsPalette.secondary,
-        colorScheme: lightColorScheme,
-        appBarTheme: const AppBarTheme(
-          scrolledUnderElevation: 0.0,
-          // backgroundColor: Colors.white,
-          iconTheme: IconThemeData(color: Colors.black),
-          color: Colors.white,
-        ),
-        textTheme: TextTheme(
-          displayLarge: textStyles.displayLarge,
-          displayMedium: textStyles.displayMedium,
-          displaySmall: textStyles.displaySmall,
-          headlineLarge: textStyles.headlineLarge,
-          headlineMedium: textStyles.headlineMedium,
-          headlineSmall: textStyles.headlineSmall,
-          titleLarge: textStyles.titleLarge,
-          titleMedium: textStyles.titleMedium,
-          titleSmall: textStyles.titleSmall,
-          bodyLarge: textStyles.bodyLarge,
-          bodyMedium: textStyles.bodyMedium,
-          bodySmall: textStyles.bodySmall,
-          labelLarge: textStyles.labelLarge,
-          labelMedium: textStyles.labelMedium,
-          labelSmall: textStyles.labelSmall,
-          // button: textStyles.textButton,
-          // caption: textStyles.labelMedium, // Added for completeness
-          // overline: textStyles.labelSmall, // Added for completeness
-        ),
-      );
-  static ThemeData getDark() => ThemeData(
-        useMaterial3: true,
-        cupertinoOverrideTheme: CupertinoThemeData(
-          primaryColor: darkColorsPalette.primary,
-        ),
-        primaryColor: darkColorsPalette.white,
-        focusColor: darkColorsPalette.secondary,
-        colorScheme: darkColorScheme,
-        textTheme: TextTheme(
-          displayLarge: textStyles.displayLarge,
-          displayMedium: textStyles.displayMedium,
-          displaySmall: textStyles.displaySmall,
-          headlineLarge: textStyles.headlineLarge,
-          headlineMedium: textStyles.headlineMedium,
-          headlineSmall: textStyles.headlineSmall,
-          titleLarge: textStyles.titleLarge,
-          titleMedium: textStyles.titleMedium,
-          titleSmall: textStyles.titleSmall,
-          bodyLarge: textStyles.bodyLarge,
-          bodyMedium: textStyles.bodyMedium,
-          bodySmall: textStyles.bodySmall,
-          labelLarge: textStyles.labelLarge,
-          labelMedium: textStyles.labelMedium,
-          labelSmall: textStyles.labelSmall,
-        ),
-      );
-}
+  /// Typography configuration - keeping Montserrat for headings and Roboto for body
+  static const String fontHeadings = 'Montserrat';
+  static const String fontBody = 'Roboto';
+  
+  // Font sizes
+  static const double displayLargeSize = 57.0;
+  static const double displayMediumSize = 45.0;
+  static const double displaySmallSize = 36.0;
+  
+  static const double headlineLargeSize = 32.0;
+  static const double headlineMediumSize = 28.0;
+  static const double headlineSmallSize = 24.0;
+  
+  static const double titleLargeSize = 22.0;
+  static const double titleMediumSize = 16.0;
+  static const double titleSmallSize = 14.0;
+  
+  static const double bodyLargeSize = 16.0;
+  static const double bodyMediumSize = 14.0;
+  static const double bodySmallSize = 12.0;
+  
+  static const double labelLargeSize = 14.0;
+  static const double labelMediumSize = 12.0;
+  static const double labelSmallSize = 11.0;
 
-class CustomAppTheme {
-  CustomAppTheme({required this.colorsPalette}) {
-    textStyles = TextStyles.fromColorsPalette(colorsPalette);
+  /// Returns the light theme configuration
+  static ThemeData get lightTheme {
+    return _buildThemeData(Brightness.light);
   }
-  ColorsPalette colorsPalette;
-  late TextStyles textStyles;
-}
 
-final appThemeProvider = Provider<CustomAppTheme>(
-  (ref) => CustomAppTheme(
-    colorsPalette: ColorsPalette.light,
-  ),
-);
+  /// Returns the dark theme configuration
+  static ThemeData get darkTheme {
+    return _buildThemeData(Brightness.dark);
+  }
 
-abstract class MarketplaceTheme {
-  static ThemeData theme = ThemeData(
-    fontFamily: GoogleFonts.lexend().fontFamily,
-    textTheme: GoogleFonts.lexendTextTheme().copyWith().apply(
-        bodyColor: const Color(0xff000000),
-        displayColor: const Color(0xff000000)),
-    colorScheme: const ColorScheme.light(
-      primary: Color(0xffA2E3F6),
-      secondary: Color(0xff4FAD85),
-      tertiary: Color(0xffDE7A60),
-      scrim: Color(0xffFFABC7),
-      surface: Color(0xffFDF7F0),
-      onSecondary: Color(0xff000000),
-      shadow: Color(0xffAEAEAE),
-      onPrimary: Color(0xffFFFFFF),
-    ),
-    useMaterial3: true,
-    canvasColor: Colors.transparent,
-    navigationBarTheme: NavigationBarThemeData(
-      indicatorColor: const Color(0xffA2E3F6),
-      indicatorShape: CircleBorder(
-        side: BorderSide.lerp(
-            const BorderSide(
-              color: Color(0xff000000),
-              width: 2,
-            ),
-            const BorderSide(
-              color: Color(0xff000000),
-              width: 2,
-            ),
-            1),
+  /// Builds the theme data based on the specified brightness
+  // Fix the rendering issue by ensuring proper constraints in the ThemeData
+  static ThemeData _buildThemeData(Brightness brightness) {
+    final ColorScheme colorScheme = _getColorScheme(brightness);
+    
+    return ThemeData(
+      useMaterial3: true,
+      brightness: brightness,
+      colorScheme: colorScheme,
+      
+      // Apply text theme
+      textTheme: _createTextTheme(colorScheme),
+      
+      // Apply component themes
+      appBarTheme: _createAppBarTheme(colorScheme),
+      cardTheme: _createCardTheme(),
+      elevatedButtonTheme: _createElevatedButtonTheme(colorScheme),
+      outlinedButtonTheme: _createOutlinedButtonTheme(colorScheme),
+      textButtonTheme: _createTextButtonTheme(colorScheme),
+      floatingActionButtonTheme: _createFabTheme(colorScheme),
+      tabBarTheme: _createTabBarTheme(colorScheme),
+      bottomNavigationBarTheme: _createBottomNavBarTheme(colorScheme),
+      dialogTheme: _createDialogTheme(colorScheme),
+      dividerTheme: DividerThemeData(
+        color: colorScheme.outlineVariant,
+        thickness: 1,
       ),
-    ),
-  );
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: colorScheme.inverseSurface,
+        contentTextStyle: TextStyle(
+          fontFamily: fontBody,
+          color: colorScheme.onInverseSurface,
+        ),
+      ),
+      
+      // Material 3 component theming
+      navigationRailTheme: _createNavigationRailTheme(colorScheme),
+      chipTheme: _createChipTheme(colorScheme),
+      navigationBarTheme: _createNavigationBarTheme(colorScheme),
+      
+      // Adaptive properties for cross-platform
+      visualDensity: VisualDensity.adaptivePlatformDensity,
+      
+      // Scrollbars for desktop
+      scrollbarTheme: const ScrollbarThemeData(
+        thickness: WidgetStatePropertyAll(8.0),
+        thumbVisibility: WidgetStatePropertyAll(true),
+        radius: Radius.circular(8.0),
+      ),
+    );
+  }
 
-  static const Color primary = Color(0xffA2E3F6);
-  static const Color scrim = Color(0xffFFABC7);
-  static const Color tertiary = Color(0xffDE7A60);
-  static const Color secondary = Color(0xff4FAD85);
-  static const Color borderColor = Colors.black12;
-  static const Color focusedBorderColor = Colors.black45;
-
-  static const double defaultBorderRadius = 16;
-
-  static const double defaultTextSize = 16;
-
-  static const Color defaultTextColor = Colors.black87;
-
-  static TextStyle get heading1 => theme.textTheme.headlineLarge!.copyWith(
-        fontWeight: FontWeight.bold,
-        fontSize: 28,
-        //height: 36,
-        color: theme.colorScheme.onSecondary,
+  /// Creates color scheme based on brightness
+  static ColorScheme _getColorScheme(Brightness brightness) {
+    if (brightness == Brightness.light) {
+      return ColorScheme(
+        brightness: Brightness.light,
+        primary: brandPrimary,
+        onPrimary: textOnPrimary,
+        primaryContainer: brandPrimaryLight,
+        onPrimaryContainer: brandPrimaryDark,
+        secondary: brandSecondary,
+        onSecondary: textOnSecondary,
+        secondaryContainer: brandSecondaryLight,
+        onSecondaryContainer: brandSecondaryDark,
+        tertiary: brandSecondaryMedium,
+        onTertiary: textOnSecondary,
+        tertiaryContainer: brandPrimaryMedium,
+        onTertiaryContainer: textOnPrimary,
+        error: errorMain,
+        onError: textOnPrimary,
+        errorContainer: errorLight,
+        onErrorContainer: errorDark,
+        surface: Colors.white,
+        onSurface: textPrimary,
+        surfaceContainerHighest: brandPrimaryLightest,
+        onSurfaceVariant: textSecondary,
+        outline: outlineMain,
+        outlineVariant: outlineLight,
+        shadow: shadowColor,
+        scrim: scrimColor,
+        inverseSurface: inverseSurface,
+        onInverseSurface: inverseOnSurface,
+        inversePrimary: inversePrimary,
       );
-
-  static TextStyle get heading2 => theme.textTheme.headlineMedium!.copyWith(
-        fontWeight: FontWeight.bold,
-        fontSize: 24,
-        //height: 32,
-        color: theme.colorScheme.onSecondary,
+    } else {
+      // Dark theme - use dark mode variants
+      return ColorScheme(
+        brightness: Brightness.dark,
+        primary: darkModePrimary,
+        onPrimary: darkModeOnPrimary,
+        primaryContainer: darkModePrimaryContainer,
+        onPrimaryContainer: darkModeOnPrimaryContainer,
+        secondary: darkModeSecondary,
+        onSecondary: darkModeOnSecondary,
+        secondaryContainer: darkModeSecondaryContainer,
+        onSecondaryContainer: darkModeOnSecondaryContainer,
+        tertiary: Color(0xFFFFB77D),
+        onTertiary: Color(0xFF462700),
+        tertiaryContainer: Color(0xFF633B00),
+        onTertiaryContainer: Color(0xFFFFDCC1),
+        error: Color(0xFFFFB4AB),
+        onError: Color(0xFF690005),
+        errorContainer: Color(0xFF93000A),
+        onErrorContainer: errorLight,
+        surface: darkModeSurface,
+        onSurface: darkModeOnSurface,
+        surfaceContainerHighest: darkModeSurfaceVariant,
+        onSurfaceVariant: darkModeOnSurfaceVariant,
+        outline: Color(0xFF8C8C8C),
+        outlineVariant: darkModeSurfaceVariant,
+        shadow: shadowColor,
+        scrim: scrimColor,
+        inverseSurface: Color(0xFFF8F8F8),
+        onInverseSurface: Color(0xFF1E1E1E),
+        inversePrimary: brandPrimary,
       );
+    }
+  }
 
-  static TextStyle get heading3 => theme.textTheme.headlineSmall!.copyWith(
-        fontWeight: FontWeight.bold,
-        fontSize: 18,
-        //height: 24,
-        color: theme.colorScheme.onSecondary,
-      );
-
-  static TextStyle get subheading1 => theme.textTheme.bodyLarge!.copyWith(
-        fontWeight: FontWeight.normal,
-        fontSize: 18,
-        //height: 20,
-        color: theme.colorScheme.onSecondary,
-      );
-
-  static TextStyle get subheading2 => theme.textTheme.bodyMedium!.copyWith(
-        fontWeight: FontWeight.normal,
-        fontSize: 14,
-        //height: 18,
-        color: theme.colorScheme.onSecondary,
-      );
-  static TextStyle get paragraph => theme.textTheme.bodySmall!.copyWith(
-        fontWeight: FontWeight.normal,
-        fontSize: 14,
-        //height: 18,
-        color: theme.colorScheme.onSecondary,
-      );
-
-  static TextStyle get label => theme.textTheme.labelSmall!.copyWith(
+  /// Creates text theme based on color scheme
+  static TextTheme _createTextTheme(ColorScheme colorScheme) {
+    final Color textColor = colorScheme.onSurface;
+    
+    return TextTheme(
+      // Display styles
+      displayLarge: TextStyle(
+        fontFamily: fontHeadings,
+        fontSize: displayLargeSize,
+        fontWeight: FontWeight.w400,
+        color: textColor,
+        letterSpacing: -0.25,
+      ),
+      displayMedium: TextStyle(
+        fontFamily: fontHeadings,
+        fontSize: displayMediumSize,
+        fontWeight: FontWeight.w400,
+        color: textColor,
+        letterSpacing: 0,
+      ),
+      displaySmall: TextStyle(
+        fontFamily: fontHeadings,
+        fontSize: displaySmallSize,
+        fontWeight: FontWeight.w400,
+        color: textColor,
+        letterSpacing: 0,
+      ),
+      
+      // Headline styles
+      headlineLarge: TextStyle(
+        fontFamily: fontHeadings,
+        fontSize: headlineLargeSize,
+        fontWeight: FontWeight.w700,
+        color: textColor,
+        letterSpacing: 0,
+      ),
+      headlineMedium: TextStyle(
+        fontFamily: fontHeadings,
+        fontSize: headlineMediumSize,
         fontWeight: FontWeight.w600,
-        fontSize: 11,
-        //height: 16,
-        color: theme.colorScheme.onSecondary,
-      );
+        color: textColor,
+        letterSpacing: 0,
+      ),
+      headlineSmall: TextStyle(
+        fontFamily: fontHeadings,
+        fontSize: headlineSmallSize,
+        fontWeight: FontWeight.w600,
+        color: textColor,
+        letterSpacing: 0,
+      ),
+      
+      // Title styles
+      titleLarge: TextStyle(
+        fontFamily: fontHeadings,
+        fontSize: titleLargeSize,
+        fontWeight: FontWeight.w600,
+        color: textColor,
+        letterSpacing: 0,
+      ),
+      titleMedium: TextStyle(
+        fontFamily: fontHeadings,
+        fontSize: titleMediumSize,
+        fontWeight: FontWeight.w600,
+        color: textColor,
+        letterSpacing: 0.15,
+      ),
+      titleSmall: TextStyle(
+        fontFamily: fontHeadings,
+        fontSize: titleSmallSize,
+        fontWeight: FontWeight.w500,
+        color: textColor,
+        letterSpacing: 0.1,
+      ),
+      
+      // Body styles
+      bodyLarge: TextStyle(
+        fontFamily: fontBody,
+        fontSize: bodyLargeSize,
+        fontWeight: FontWeight.w400,
+        color: textColor,
+        letterSpacing: 0.5,
+      ),
+      bodyMedium: TextStyle(
+        fontFamily: fontBody,
+        fontSize: bodyMediumSize,
+        fontWeight: FontWeight.w400,
+        color: textColor,
+        letterSpacing: 0.25,
+      ),
+      bodySmall: TextStyle(
+        fontFamily: fontBody,
+        fontSize: bodySmallSize,
+        fontWeight: FontWeight.w400,
+        color: textColor,
+        letterSpacing: 0.4,
+      ),
+      
+      // Label styles
+      labelLarge: TextStyle(
+        fontFamily: fontBody,
+        fontSize: labelLargeSize,
+        fontWeight: FontWeight.w500,
+        color: textColor,
+        letterSpacing: 0.1,
+      ),
+      labelMedium: TextStyle(
+        fontFamily: fontBody,
+        fontSize: labelMediumSize,
+        fontWeight: FontWeight.w500,
+        color: textColor,
+        letterSpacing: 0.5,
+      ),
+      labelSmall: TextStyle(
+        fontFamily: fontBody,
+        fontSize: labelSmallSize,
+        fontWeight: FontWeight.w500,
+        color: textColor,
+        letterSpacing: 0.5,
+      ),
+    );
+  }
 
-  static TextStyle get dossierParagraph => GoogleFonts.anonymousPro().copyWith(
-        fontWeight: FontWeight.normal,
-        fontSize: 14,
-        //height: 18,
-        color: theme.colorScheme.onSecondary,
-      );
+  /// Creates app bar theme
+  static AppBarTheme _createAppBarTheme(ColorScheme colorScheme) {
+    return AppBarTheme(
+      backgroundColor: colorScheme.surface,
+      foregroundColor: colorScheme.onSurface,
+      elevation: 0,
+      centerTitle: false,
+      titleTextStyle: TextStyle(
+        fontFamily: fontHeadings,
+        fontSize: titleLargeSize,
+        fontWeight: FontWeight.w600,
+        color: colorScheme.onSurface,
+      ),
+      iconTheme: IconThemeData(
+        color: colorScheme.onSurface,
+        size: 24,
+      ),
+    );
+  }
 
-  static TextStyle get dossierSubheading => GoogleFonts.anonymousPro().copyWith(
-        fontWeight: FontWeight.normal,
-        fontSize: 18,
-        //height: 18,
-        color: theme.colorScheme.onSecondary,
-      );
+  /// Creates card theme
+  static CardTheme _createCardTheme() {
+    return const CardTheme(
+      elevation: 2,
+      margin: EdgeInsets.all(8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+      ),
+    );
+  }
 
-  static TextStyle get dossierHeading => GoogleFonts.anonymousPro().copyWith(
-        fontWeight: FontWeight.bold,
-        fontSize: 28,
-        //height: 18,
-        color: theme.colorScheme.onSecondary,
-      );
+  /// Creates elevated button theme
+  static ElevatedButtonThemeData _createElevatedButtonTheme(ColorScheme colorScheme) {
+    return ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        foregroundColor: colorScheme.onPrimary,
+        backgroundColor: colorScheme.primary,
+        minimumSize: const Size(64, 48),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        elevation: 2,
+        textStyle: TextStyle(
+          fontFamily: fontBody,
+          fontSize: labelLargeSize,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.1,
+        ),
+      ),
+    );
+  }
 
-  static const double _spacingUnit = 8;
-  static const double spacing8 = _spacingUnit / 2;
-  static const double spacing7 = _spacingUnit;
-  static const double spacing6 = _spacingUnit * 1.5;
-  static const double spacing5 = _spacingUnit * 2;
-  static const double spacing4 = _spacingUnit * 2.5;
-  static const double spacing3 = _spacingUnit * 3;
-  static const double spacing2 = _spacingUnit * 3.5;
-  static const double spacing1 = _spacingUnit * 4;
+  /// Creates outlined button theme
+  static OutlinedButtonThemeData _createOutlinedButtonTheme(ColorScheme colorScheme) {
+    return OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: colorScheme.primary,
+        minimumSize: const Size(64, 48),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        side: BorderSide(color: colorScheme.outline, width: 1),
+        textStyle: TextStyle(
+          fontFamily: fontBody,
+          fontSize: labelLargeSize,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.1,
+        ),
+      ),
+    );
+  }
 
-  static double lineWidth = 1;
+  /// Creates text button theme
+  static TextButtonThemeData _createTextButtonTheme(ColorScheme colorScheme) {
+    return TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: colorScheme.primary,
+        minimumSize: const Size(64, 48),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        textStyle: TextStyle(
+          fontFamily: fontBody,
+          fontSize: labelLargeSize,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.1,
+        ),
+      ),
+    );
+  }
 
-  static const Widget verticalSpacer = SizedBox(height: spacing5);
+  /// Creates floating action button theme
+  static FloatingActionButtonThemeData _createFabTheme(ColorScheme colorScheme) {
+    return FloatingActionButtonThemeData(
+      backgroundColor: colorScheme.primaryContainer,
+      foregroundColor: colorScheme.onPrimaryContainer,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+      ),
+      elevation: 6,
+      highlightElevation: 12,
+    );
+  }
+
+  /// Creates tab bar theme
+  static TabBarTheme _createTabBarTheme(ColorScheme colorScheme) {
+    return TabBarTheme(
+      labelColor: colorScheme.primary,
+      unselectedLabelColor: colorScheme.onSurfaceVariant,
+      indicator: UnderlineTabIndicator(
+        borderSide: BorderSide(
+          width: 2,
+          color: colorScheme.primary,
+        ),
+      ),
+      labelStyle: TextStyle(
+        fontFamily: fontBody,
+        fontSize: labelLargeSize,
+        fontWeight: FontWeight.w500,
+      ),
+      unselectedLabelStyle: TextStyle(
+        fontFamily: fontBody,
+        fontSize: labelLargeSize,
+        fontWeight: FontWeight.w400,
+      ),
+    );
+  }
+
+  /// Creates bottom navigation bar theme
+  static BottomNavigationBarThemeData _createBottomNavBarTheme(ColorScheme colorScheme) {
+    return BottomNavigationBarThemeData(
+      backgroundColor: colorScheme.surface,
+      selectedItemColor: colorScheme.primary,
+      unselectedItemColor: colorScheme.onSurfaceVariant,
+      selectedLabelStyle: TextStyle(
+        fontFamily: fontBody,
+        fontSize: labelSmallSize,
+        fontWeight: FontWeight.w500,
+      ),
+      unselectedLabelStyle: TextStyle(
+        fontFamily: fontBody,
+        fontSize: labelSmallSize,
+        fontWeight: FontWeight.w400,
+      ),
+      showSelectedLabels: true,
+      showUnselectedLabels: true,
+      type: BottomNavigationBarType.fixed,
+      elevation: 8,
+    );
+  }
+
+  /// Creates dialog theme
+  static DialogTheme _createDialogTheme(ColorScheme colorScheme) {
+    return DialogTheme(
+      backgroundColor: colorScheme.surface,
+      elevation: 24,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(28),
+      ),
+      titleTextStyle: TextStyle(
+        fontFamily: fontHeadings,
+        fontSize: headlineSmallSize,
+        fontWeight: FontWeight.w600,
+        color: colorScheme.onSurface,
+      ),
+      contentTextStyle: TextStyle(
+        fontFamily: fontBody,
+        fontSize: bodyMediumSize,
+        fontWeight: FontWeight.w400,
+        color: colorScheme.onSurfaceVariant,
+      ),
+    );
+  }
+
+  /// Creates navigation rail theme (for tablets/desktop)
+  static NavigationRailThemeData _createNavigationRailTheme(ColorScheme colorScheme) {
+    return NavigationRailThemeData(
+      backgroundColor: colorScheme.surface,
+      selectedIconTheme: IconThemeData(
+        color: colorScheme.primary,
+        size: 24,
+      ),
+      unselectedIconTheme: IconThemeData(
+        color: colorScheme.onSurfaceVariant,
+        size: 24,
+      ),
+      selectedLabelTextStyle: TextStyle(
+        fontFamily: fontBody,
+        fontSize: labelMediumSize,
+        fontWeight: FontWeight.w500,
+        color: colorScheme.primary,
+      ),
+      unselectedLabelTextStyle: TextStyle(
+        fontFamily: fontBody,
+        fontSize: labelMediumSize,
+        fontWeight: FontWeight.w400,
+        color: colorScheme.onSurfaceVariant,
+      ),
+      useIndicator: true,
+      indicatorColor: colorScheme.primaryContainer,
+    );
+  }
+
+  /// Creates chip theme
+  static ChipThemeData _createChipTheme(ColorScheme colorScheme) {
+    return ChipThemeData(
+      backgroundColor: colorScheme.surfaceContainerHighest,
+      deleteIconColor: colorScheme.onSurfaceVariant,
+      disabledColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+      selectedColor: colorScheme.primaryContainer,
+      secondarySelectedColor: colorScheme.secondaryContainer,
+      padding: const EdgeInsets.all(8),
+      labelStyle: TextStyle(
+        fontFamily: fontBody,
+        fontSize: bodySmallSize,
+        color: colorScheme.onSurfaceVariant,
+      ),
+      secondaryLabelStyle: TextStyle(
+        fontFamily: fontBody,
+        fontSize: bodySmallSize,
+        color: colorScheme.onSecondaryContainer,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+    );
+  }
+
+  /// Creates navigation bar theme (for bottom navigation in Material 3)
+  static NavigationBarThemeData _createNavigationBarTheme(ColorScheme colorScheme) {
+    return NavigationBarThemeData(
+      backgroundColor: colorScheme.surface,
+      indicatorColor: colorScheme.primaryContainer,
+      height: 80,
+      labelTextStyle: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return TextStyle(
+            fontFamily: fontBody,
+            fontSize: labelSmallSize,
+            fontWeight: FontWeight.w500,
+            color: colorScheme.primary,
+          );
+        }
+        return TextStyle(
+          fontFamily: fontBody,
+          fontSize: labelSmallSize,
+          fontWeight: FontWeight.w400,
+          color: colorScheme.onSurfaceVariant,
+        );
+      }),
+      iconTheme: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return IconThemeData(
+            size: 24,
+            color: colorScheme.onPrimaryContainer,
+          );
+        }
+        return IconThemeData(
+          size: 24,
+          color: colorScheme.onSurfaceVariant,
+        );
+      }),
+      shadowColor: colorScheme.shadow,
+      elevation: 3,
+    );
+  }
 }
+
+// Extension to provide theme-related utilities
+extension ThemeHelpers on BuildContext {
+  // Easy access to current theme
+  ThemeData get theme => Theme.of(this);
+  
+  // Easy access to current color scheme
+  ColorScheme get colorScheme => Theme.of(this).colorScheme;
+  
+  // Easy access to current text theme
+  TextTheme get textTheme => Theme.of(this).textTheme;
+  
+  // Check if current theme is dark
+  bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
+}
+
+// Theme provider that integrates with UserPreferencesRepository
+final appThemeProvider = Provider<ThemeData>((ref) {
+  final themeMode = ref.watch(themeProvider);
+  
+  switch (themeMode) {
+    case ThemeMode.light:
+      return AppTheme.lightTheme;
+    case ThemeMode.dark:
+      return AppTheme.darkTheme;
+    case ThemeMode.system:
+    default:
+      // For system mode, let's determine based on platform brightness
+      final platformBrightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+      return platformBrightness == Brightness.dark 
+          ? AppTheme.darkTheme 
+          : AppTheme.lightTheme;
+  }
+});

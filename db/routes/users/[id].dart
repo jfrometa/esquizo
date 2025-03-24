@@ -56,7 +56,6 @@ Future<Response> onRequest(RequestContext context, String id) async {
       await userService.deleteUser(id);
       return Response.json(
         body: {'message': 'User deleted successfully'},
-        statusCode: 200,
       );
     } catch (e) {
       return Response.json(

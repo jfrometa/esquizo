@@ -3,21 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>224477049501-17ep345dsnbkg87e1ike0oatrt2rgaee.apps.googleusercontent.com</string>
+	<string>1087483483909-almct9101dohm84eatahds8h1hss51ud.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.224477049501-17ep345dsnbkg87e1ike0oatrt2rgaee</string>
+	<string>com.googleusercontent.apps.1087483483909-almct9101dohm84eatahds8h1hss51ud</string>
 	<key>API_KEY</key>
-	<string>AIzaSyC5cVvZYkGD0tK1-omgcfU77WfYRk8xfjs</string>
+	<string>AIzaSyAlk83WpDsAWqaa4RqI4mxa5IYPiuZldek</string>
 	<key>GCM_SENDER_ID</key>
-	<string>224477049501</string>
+	<string>1087483483909</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.example.starterArchitectureFlutterFirebase1</string>
 	<key>PROJECT_ID</key>
-	<string>vaca-esquizofrenica</string>
+	<string>mesa-redonda-fb72e</string>
 	<key>STORAGE_BUCKET</key>
-	<string>vaca-esquizofrenica.appspot.com</string>
+	<string>mesa-redonda-fb72e.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:224477049501:ios:c25944142ede147c725a74</string>
+	<string>1:1087483483909:ios:ff1d60b319f1a19541096c</string>
 </dict>
 </plist>
