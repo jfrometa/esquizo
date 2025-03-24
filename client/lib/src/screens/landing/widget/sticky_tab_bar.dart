@@ -1,10 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/catering-section.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/events-section.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/meal-plans-section.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/menu-section.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/menu-section.dart';
 
 class StickyTabsContainer extends StatefulWidget {
   final TabController tabController;
@@ -49,94 +50,54 @@ class _StickyTabsContainerState extends State<StickyTabsContainer> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    
+    // Use AlwaysScrollableScrollPhysics as the default for all platforms
+    const scrollPhysics = AlwaysScrollableScrollPhysics();
 
     return NotificationListener<ScrollNotification>(
-      onNotification: widget.onScrollUpdate ,
+      onNotification: widget.onScrollUpdate,
       child: CustomScrollView(
         controller: _mainScrollController,
+        physics: scrollPhysics,
         slivers: [
           // Sticky header with tabs
           SliverPersistentHeader(
             pinned: true,
             delegate: _StickyTabBarDelegate(
-              child: Container(
+              colorScheme: colorScheme,
+              child: Material(
                 color: colorScheme.surface,
-                padding: const EdgeInsets.only(top: 20, bottom: 20),
-                child: Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: widget.isMobile ? 16 : 32,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                child: TabBar(
+                  controller: widget.tabController,
+                  indicator: BoxDecoration(
+                    color: colorScheme.primary,
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  child: TabBar(
-                    controller: widget.tabController,
-                    indicator: BoxDecoration(
-                      color: colorScheme.primary,
-                      borderRadius: BorderRadius.circular(30),
+                  labelColor: colorScheme.onPrimary,
+                  unselectedLabelColor: colorScheme.onSurfaceVariant,
+                  dividerHeight: 0,
+                  tabAlignment: TabAlignment.fill,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                  tabs: const [
+                    Tab(
+                      icon: Icon(Icons.restaurant_menu),
+                      text: 'Menú',
                     ),
-                    labelColor: colorScheme.onPrimary,
-                    unselectedLabelColor: colorScheme.onSurfaceVariant,
-                    dividerHeight: 0,
-                    isScrollable: false,
-                    tabAlignment: TabAlignment.fill,
-                    padding: EdgeInsets.zero,
-                    labelPadding: EdgeInsets.zero,
-                    tabs: const [
-                      Tab(
-                        child: SizedBox.expand(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.restaurant_menu),
-                              SizedBox(height: 4),
-                              Text('Menú'),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Tab(
-                        child: SizedBox.expand(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.food_bank),
-                              SizedBox(height: 4),
-                              Text('Planes'),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Tab(
-                        child: SizedBox.expand(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.celebration),
-                              SizedBox(height: 4),
-                              Text('Catering'),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Tab(
-                        child: SizedBox.expand(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.event_available),
-                              SizedBox(height: 4),
-                              Text('Eventos'),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    Tab(
+                      icon: Icon(Icons.food_bank),
+                      text: 'Planes',
+                    ),
+                    Tab(
+                      icon: Icon(Icons.celebration),
+                      text: 'Catering',
+                    ),
+                    Tab(
+                      icon: Icon(Icons.event_available),
+                      text: 'Eventos',
+                    ),
+                  ],
                 ),
               ),
-              colorScheme: colorScheme,
             ),
           ),
           
@@ -146,30 +107,32 @@ class _StickyTabsContainerState extends State<StickyTabsContainer> {
               height: widget.isMobile ? 600 : 700,
               child: TabBarView(
                 controller: widget.tabController,
+                physics: const NeverScrollableScrollPhysics(),
                 children: [
                   // Menu tab
-                  CoordinatedScrollView(
+                  SingleChildScrollView(
+                    physics: scrollPhysics,
                     child: MenuSection(
                       randomDishes: widget.randomDishes,
                       isMobile: widget.isMobile,
                       isTablet: widget.isTablet,
                       isDesktop: widget.isDesktop,
                     ),
-                    mainScrollController: _mainScrollController,
                   ),
 
                   // Meal plans tab
-                  CoordinatedScrollView(
+                  SingleChildScrollView(
+                    physics: scrollPhysics,
                     child: MealPlansSection(
                       isMobile: widget.isMobile,
                       isTablet: widget.isTablet,
                       isDesktop: widget.isDesktop,
                     ),
-                    mainScrollController: _mainScrollController,
                   ),
 
                   // Catering tab
-                  CoordinatedScrollView(
+                  SingleChildScrollView(
+                    physics: scrollPhysics,
                     child: CateringSection(
                       cateringPackages: widget.cateringPackages,
                       onPackageTap: widget.onCateringPackageTap,
@@ -177,17 +140,16 @@ class _StickyTabsContainerState extends State<StickyTabsContainer> {
                       isTablet: widget.isTablet,
                       isDesktop: widget.isDesktop,
                     ),
-                    mainScrollController: _mainScrollController,
                   ),
 
                   // Events tab
-                  CoordinatedScrollView(
+                  SingleChildScrollView(
+                    physics: scrollPhysics,
                     child: EventsSection(
                       isMobile: widget.isMobile,
                       isTablet: widget.isTablet,
                       isDesktop: widget.isDesktop,
                     ),
-                    mainScrollController: _mainScrollController,
                   ),
                 ],
               ),
@@ -202,7 +164,7 @@ class _StickyTabsContainerState extends State<StickyTabsContainer> {
   }
 }
 
-// Delegate for making the tab bar sticky
+// StickyTabBarDelegate implementation
 class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
   final Widget child;
   final ColorScheme colorScheme;
@@ -214,82 +176,17 @@ class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
-      color: colorScheme.surface,
-      child: child,
-    );
+    return child;
   }
 
   @override
-  double get maxExtent => 110; // Adjust based on your tab bar height
+  double get maxExtent => 85.0;
 
   @override
-  double get minExtent => 110; // Keep the same height when pinned
+  double get minExtent => 85.0;
 
   @override
   bool shouldRebuild(covariant _StickyTabBarDelegate oldDelegate) {
-    return true;
-  }
-}
-
-// 3. Create a CoordinatedScrollView to handle the nested scrolling behavior:
-
-class CoordinatedScrollView extends StatefulWidget {
-  final Widget child;
-  final ScrollController mainScrollController;
-
-  const CoordinatedScrollView({
-    Key? key,
-    required this.child,
-    required this.mainScrollController,
-  }) : super(key: key);
-
-  @override
-  State<CoordinatedScrollView> createState() => _CoordinatedScrollViewState();
-}
-
-class _CoordinatedScrollViewState extends State<CoordinatedScrollView> {
-  final ScrollController _innerScrollController = ScrollController();
-  bool _isInnerScrollable = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _innerScrollController.addListener(_handleInnerScroll);
-  }
-
-  @override
-  void dispose() {
-    _innerScrollController.removeListener(_handleInnerScroll);
-    _innerScrollController.dispose();
-    super.dispose();
-  }
-
-  void _handleInnerScroll() {
-    setState(() {
-      _isInnerScrollable = _innerScrollController.position.maxScrollExtent > 0;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        // Handle overscroll at the top to transfer to the main scroll
-        if (notification is OverscrollNotification) {
-          if (notification.overscroll < 0 && _innerScrollController.position.pixels <= 0) {
-            // At top and trying to scroll up more - allow main scroll to take over
-            widget.mainScrollController.position.correctBy(-notification.overscroll);
-            return true;
-          }
-        }
-        return false;
-      },
-      child: SingleChildScrollView(
-        controller: _innerScrollController,
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: widget.child,
-      ),
-    );
+    return oldDelegate.colorScheme != colorScheme;
   }
 }

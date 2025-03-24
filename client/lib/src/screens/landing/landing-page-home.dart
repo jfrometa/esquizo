@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -312,7 +314,6 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
       desktopBuilder: const FeaturesSectionDesktop(),
     );
   }
-
 Widget _buildResponsiveLayout(
     bool isMobile, bool isTablet, bool isDesktop, List<CatalogItem> dishes) {
   return GestureDetector(
@@ -321,6 +322,7 @@ Widget _buildResponsiveLayout(
       onRefresh: () async => ref.refresh(featuredDishesProvider),
       child: NestedScrollView(
         controller: _scrollController,
+        physics: const AlwaysScrollableScrollPhysics(),
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             // Enhanced hero section with parallax effect
@@ -397,10 +399,6 @@ Widget _buildResponsiveLayout(
     ),
   );
 }
-
-
-
-
   Widget _buildErrorView(String errorMessage) {
     return Center(
       child: Column(
