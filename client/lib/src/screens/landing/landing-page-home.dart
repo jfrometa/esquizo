@@ -17,6 +17,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/landing/sectio
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/quick-access-section.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/reservation-section.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/restaurant-info-section.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/landing/widget/sticky_tab_bar.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/widgets_mesa_redonda/list_items/size_aware_widget.dart';
 
 class ResponsiveLandingPage extends ConsumerStatefulWidget {
@@ -312,89 +313,93 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
     );
   }
 
-  Widget _buildResponsiveLayout(
-      bool isMobile, bool isTablet, bool isDesktop, List<CatalogItem> dishes) {
-    return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
-      child: RefreshIndicator(
-        onRefresh: () async => ref.refresh(featuredDishesProvider),
-        child: NotificationListener<ScrollNotification>(
-          onNotification: (notification) {
-            if (notification is ScrollUpdateNotification) {
-              _handleScroll();
-            }
-            return false;
-          },
-          child: SingleChildScrollView(
-            controller: _scrollController,
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
-              children: [
-                // Enhanced hero section with parallax effect
-                EnhancedHeroSection(scrollOffset: _scrollOffset),
-
-                // Quick access section
-                QuickAccessSection(
-                  onReserveTap: () => _navigateToReservation(context),
-                  onInfoTap: () => _showRestaurantInfo(context),
-                ),
-
-                // Restaurant features section
-                _buildFeaturesSection(context),
-
-                // Main tabbed content section
-                Consumer(
-                  builder: (context, ref, child) {
-                    final cateringPackagesAsync =
-                        ref.watch(activePackagesProvider);
-
-                    return cateringPackagesAsync.when(
-                      data: (cateringPackages) => ContentSections(
-                        tabController: _sectionTabController,
-                        currentTab: _currentSectionTab,
-                        randomDishes: dishes,
-                        cateringPackages: cateringPackages,
-                        onCateringPackageTap: (index) => _showCateringDetails(
-                            context, index, cateringPackages[index]),
-                        isMobile: isMobile,
-                        isTablet: isTablet,
-                        isDesktop: isDesktop,
-                      ),
-                      loading: () => const SizedBox(
-                        height: 200,
-                        child: Center(child: CircularProgressIndicator()),
-                      ),
-                      error: (error, stackTrace) {
-                        // Log the error for debugging purposes
-                        debugPrint('Error loading catering packages: $error');
-                        if (kDebugMode) {
-                          debugPrintStack(stackTrace: stackTrace);
-                        }
-
-                        return SizedBox(
-                          height: 200,
-                          child: Center(
-                            child:
-                                Text('Error loading data: ${error.toString()}'),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
-
-                // Contact section
-                const EnhancedContactSection(),
-
-                // Footer section
-                const EnhancedFooterSection(),
-              ],
+Widget _buildResponsiveLayout(
+    bool isMobile, bool isTablet, bool isDesktop, List<CatalogItem> dishes) {
+  return GestureDetector(
+    onTap: () => FocusScope.of(context).unfocus(),
+    child: RefreshIndicator(
+      onRefresh: () async => ref.refresh(featuredDishesProvider),
+      child: NestedScrollView(
+        controller: _scrollController,
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            // Enhanced hero section with parallax effect
+            SliverToBoxAdapter(
+              child: EnhancedHeroSection(scrollOffset: _scrollOffset),
             ),
-          ),
+
+            // Quick access section
+            SliverToBoxAdapter(
+              child: QuickAccessSection(
+                onReserveTap: () => _navigateToReservation(context),
+                onInfoTap: () => _showRestaurantInfo(context),
+              ),
+            ),
+
+            // Restaurant features section
+            SliverToBoxAdapter(
+              child: _buildFeaturesSection(context),
+            ),
+          ];
+        },
+        body: Consumer(
+          builder: (context, ref, child) {
+            final cateringPackagesAsync = ref.watch(activePackagesProvider);
+
+            return cateringPackagesAsync.when(
+              data: (cateringPackages) => StickyTabsContainer(
+                tabController: _sectionTabController,
+                currentTab: _currentSectionTab,
+                randomDishes: dishes,
+                cateringPackages: cateringPackages,
+                onCateringPackageTap: (index) => _showCateringDetails(
+                  context, index, cateringPackages[index],
+                ),
+                isMobile: isMobile,
+                isTablet: isTablet,
+                isDesktop: isDesktop,
+                onScrollUpdate: (notification) {
+                  if (notification is ScrollUpdateNotification) {
+                    _handleScroll();
+                  }
+                  return false;
+                },
+                bottomSections: [
+                  // Contact section
+                  const EnhancedContactSection(),
+
+                  // Footer section
+                  const EnhancedFooterSection(),
+                ],
+              ),
+              loading: () => const SizedBox(
+                height: 200,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (error, stackTrace) {
+                // Log the error for debugging purposes
+                debugPrint('Error loading catering packages: $error');
+                if (kDebugMode) {
+                  debugPrintStack(stackTrace: stackTrace);
+                }
+
+                return SizedBox(
+                  height: 200,
+                  child: Center(
+                    child: Text('Error loading data: ${error.toString()}'),
+                  ),
+                );
+              },
+            );
+          },
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
+
+
 
   Widget _buildErrorView(String errorMessage) {
     return Center(
