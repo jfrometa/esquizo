@@ -159,9 +159,9 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
     final isEdit = widget.package != null;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final mediaQuery = MediaQuery.of(context);
-    final viewInsets = mediaQuery.viewInsets;
-    final isDesktop = mediaQuery.size.width >= 1100;
+    final mediaQuery = MediaQuery.sizeOf(context);
+    final viewInsets = MediaQuery.viewInsetsOf(context);
+    final isDesktop = mediaQuery.width >= 1100;
 
     return Scaffold(
       appBar: AppBar(

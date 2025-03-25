@@ -1,214 +1,220 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
+import 'package:go_router/go_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/user/auth_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/business_config_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/widgets/meal_plan_admin_section.dart';
 
 class SidebarMenu extends ConsumerWidget {
   final int selectedIndex;
   final Function(int) onItemSelected;
-  final bool isExpanded;
+  final List<String> screenTitles;
 
   const SidebarMenu({
     super.key,
     required this.selectedIndex,
     required this.onItemSelected,
-    this.isExpanded = true,
+    required this.screenTitles,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final businessConfig = ref.watch(businessConfigProvider).value;
-    final isAdmin = ref.watch(hasRoleProvider('admin'));
     final theme = Theme.of(context);
-    
+    final user = ref.watch(authRepositoryProvider).currentUser;
+
+    // Check if sidebar is expanded (desktop mode) or collapsed (mobile drawer)
+    final isExpanded = MediaQuery.sizeOf(context).width >= 1100;
+
     return Container(
-      width: isExpanded ? 240 : 80,
       color: theme.colorScheme.surface,
       child: Column(
         children: [
-          _buildHeader(context, businessConfig),
+          // App title and user info
+          Container(
+            padding: const EdgeInsets.all(16),
+            color: theme.colorScheme.surfaceContainerHigh,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (isExpanded) ...[
+                  Text(
+                    'Admin Panel',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  if (user != null) ...[
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: theme.colorScheme.primary,
+                          child: Text(
+                            user.displayName?.isNotEmpty == true
+                                ? user.displayName![0]
+                                : 'A',
+                            style: TextStyle(
+                              color: theme.colorScheme.onPrimary,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user.displayName ?? 'Admin User',
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                user.email ?? '',
+                                style: theme.textTheme.bodySmall,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ] else ...[
+                  // Collapsed header for mobile drawer
+                  Center(
+                    child: Text(
+                      'Admin',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // Menu items
           Expanded(
             child: ListView(
-              padding: EdgeInsets.zero,
+              padding: const EdgeInsets.symmetric(vertical: 8),
               children: [
+                // Dashboard item (always first)
                 _buildMenuItem(
-                  context,
+                  context: context,
                   index: 0,
                   icon: Icons.dashboard,
                   title: 'Dashboard',
+                  isExpanded: isExpanded,
                 ),
-                _buildMenuItem(
-                  context,
-                  index: 1,
-                  icon: Icons.restaurant_menu,
-                  title: 'Products & Menu',
-                ),
-                _buildMenuItem(
-                  context,
-                  index: 2,
-                  icon: Icons.receipt_long,
-                  title: 'Orders',
-                ),
-                _buildMenuItem(
-                  context,
-                  index: 3,
-                  icon: Icons.table_chart,
-                  title: 'Tables',
-                ),
-                if (isAdmin) ...[
-                  _buildMenuItem(
-                    context,
-                    index: 4,
-                    icon: Icons.people,
-                    title: 'Users & Staff',
-                  ),
-                  _buildMenuItem(
-                    context,
-                    index: 5,
-                    icon: Icons.settings,
-                    title: 'Business Settings',
-                  ),
-                ],
-                _buildMenuItem(
-                  context,
-                  index: 6,
-                  icon: Icons.bar_chart,
-                  title: 'Analytics',
-                ),
-                _buildMenuItem(
-                  context,
-                  index: 7,
-                  icon: Icons.restaurant,
-                  title: 'Meal Plans',
-                ),
-                ListTile(
-                  leading: Icon(Icons.restaurant_outlined),
-                  title: isExpanded ? const Text('Catering Management') : null,
-                  selected: selectedIndex == 8,
-                  onTap: () => onItemSelected(8),
-                ),
+
                 const Divider(),
+
+                // Build menu items for the rest of the screens
+                for (int i = 1; i < screenTitles.length; i++)
+                  _buildScreenMenuItem(context, i, screenTitles[i], isExpanded),
+
+                const Divider(),
+
+                // Settings item
                 _buildMenuItem(
-                  context,
-                  index: -1, // Special index for profile
-                  icon: Icons.person,
-                  title: 'Profile',
-                  onTap: () => onItemSelected(4), // Updated index,
-                ),
-                _buildMenuItem(
-                  context,
-                  index: -2, // Special index for help
-                  icon: Icons.help_outline,
-                  title: 'Help & Support',
-                  onTap: () => Navigator.pushNamed(context, '/admin/help'),
+                  context: context,
+                  index: -1, // Special index for settings
+                  icon: Icons.settings,
+                  title: 'Settings',
+                  isExpanded: isExpanded,
+                  onTap: () {
+                    // Navigate to settings
+                    context.go('/admin/settings');
+                  },
                 ),
               ],
             ),
           ),
-          _buildFooter(context, ref),
+
+          // Logout button at the bottom
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.logout),
+                label: Text(isExpanded ? 'Logout' : ''),
+                onPressed: () {
+                  // Sign out and navigate to sign in
+                  ref.read(authServiceProvider).signOut();
+                  context.go('/signIn');
+                },
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: isExpanded ? 16 : 8,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context, BusinessConfig? config) {
-    if (!isExpanded) {
-      return Container(
-        height: 80,
-        padding: const EdgeInsets.all(16),
-        alignment: Alignment.center,
-        child: config?.logoUrl != null && config!.logoUrl.isNotEmpty
-            ? ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  config.logoUrl, 
-                  height: 40,
-                  width: 40,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const Icon(Icons.business),
-                ),
-              )
-            : ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
-                 'assets/appIcon.png', 
-                  height: 40,
-                  width: 40,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const Icon(Icons.business),
-                ),
-              ),
+  Widget _buildScreenMenuItem(
+      BuildContext context, int index, String title, bool isExpanded) {
+    // Check the title to use the appropriate icon and builder
+    if (title == 'Meal Plans') {
+      return buildMealPlanMenuItem(
+        context: context,
+        index: index,
+        selectedIndex: selectedIndex,
+        onItemSelected: onItemSelected,
+        isExpanded: isExpanded,
+      );
+    } else if (title == 'Catering') {
+      return _buildMenuItem(
+        context: context,
+        index: index,
+        icon: Icons.restaurant,
+        title: title,
+        isExpanded: isExpanded,
+      );
+    } else {
+      // Default menu item
+      return _buildMenuItem(
+        context: context,
+        index: index,
+        icon: Icons.business,
+        title: title,
+        isExpanded: isExpanded,
       );
     }
-
-    return Container(
-      height: 80,
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          if (config?.logoUrl != null && config!.logoUrl.isNotEmpty)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                config.logoUrl,
-                height: 40,
-                width: 40,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const Icon(Icons.business),
-              ),
-            )
-          else
-             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                 'assets/appIcon.png', 
-                  height: 40,
-                  width: 40,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const Icon(Icons.business),
-                ),
-            ),
-          if (isExpanded) ...[
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    config?.name ?? 'Business',
-                    style: Theme.of(context).textTheme.titleMedium,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    config?.type ?? 'Admin Panel',
-                    style: Theme.of(context).textTheme.bodySmall,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
   }
 
-  Widget _buildMenuItem(
-    BuildContext context, {
+  Widget _buildMenuItem({
+    required BuildContext context,
     required int index,
     required IconData icon,
     required String title,
+    bool isExpanded = true,
     VoidCallback? onTap,
   }) {
-    final isSelected = index == selectedIndex;
     final theme = Theme.of(context);
-    
+    final isSelected = index == selectedIndex;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: isSelected ? theme.colorScheme.primaryContainer : Colors.transparent,
+        color: isSelected
+            ? theme.colorScheme.primaryContainer
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
       ),
       child: ListTile(
@@ -238,38 +244,6 @@ class SidebarMenu extends ConsumerWidget {
         onTap: onTap ?? () => onItemSelected(index),
         selected: isSelected,
       ),
-    );
-  }
-
-  Widget _buildFooter(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final authService = ref.watch(authServiceProvider);
-    
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: isExpanded
-          ? ListTile(
-              leading: const Icon(Icons.exit_to_app),
-              title: const Text('Logout'),
-              dense: true,
-              minLeadingWidth: 20,
-              onTap: () async {
-                await authService.signOut();
-                if (context.mounted) {
-                  Navigator.pushReplacementNamed(context, '/login');
-                }
-              },
-            )
-          : IconButton(
-              icon: const Icon(Icons.exit_to_app),
-              onPressed: () async {
-                await authService.signOut();
-                if (context.mounted) {
-                  Navigator.pushReplacementNamed(context, '/login');
-                }
-              },
-              tooltip: 'Logout',
-            ),
     );
   }
 }

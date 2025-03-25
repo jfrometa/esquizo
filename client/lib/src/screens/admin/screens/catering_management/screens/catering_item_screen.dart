@@ -6,7 +6,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_category_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_item_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/utils/icon_mapper.dart';
- 
+
 class CateringItemScreen extends ConsumerStatefulWidget {
   const CateringItemScreen({super.key});
 
@@ -19,7 +19,7 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
   bool _showOnlyHighlighted = false;
   bool _showInactiveItems = false;
   String _searchQuery = '';
-  
+
   void _showItemForm({CateringItem? item}) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -35,23 +35,23 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
     final categoriesAsyncValue = ref.watch(cateringCategoryRepositoryProvider);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final isTablet = size.width >= 600;
     final isDesktop = size.width >= 1100;
-    
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Catering Items'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.help_outline),
-            tooltip: 'Help',
-            onPressed: () {
-              // Show help dialog
-            },
-          ),
-        ],
-      ),
+      // appBar: AppBar(
+      //   title: const Text('Catering Items'),
+      //   actions: [
+      //     IconButton(
+      //       icon: const Icon(Icons.help_outline),
+      //       tooltip: 'Help',
+      //       onPressed: () {
+      //         // Show help dialog
+      //       },
+      //     ),
+      //   ],
+      // ),
       body: Column(
         children: [
           _buildFilterBar(categoriesAsyncValue, colorScheme),
@@ -60,42 +60,48 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
               data: (items) {
                 // Apply filters
                 var filteredItems = items;
-                
+
                 // Filter by category
                 if (_selectedCategoryId != null) {
                   filteredItems = filteredItems
-                      .where((item) => item.categoryIds.contains(_selectedCategoryId))
+                      .where((item) =>
+                          item.categoryIds.contains(_selectedCategoryId))
                       .toList();
                 }
-                
+
                 // Filter by highlight
                 if (_showOnlyHighlighted) {
                   filteredItems = filteredItems
                       .where((item) => item.isHighlighted)
                       .toList();
                 }
-                
+
                 // Filter by active status
                 if (!_showInactiveItems) {
-                  filteredItems = filteredItems
-                      .where((item) => item.isActive)
-                      .toList();
+                  filteredItems =
+                      filteredItems.where((item) => item.isActive).toList();
                 }
-                
+
                 // Filter by search
                 if (_searchQuery.isNotEmpty) {
                   filteredItems = filteredItems
-                      .where((item) => 
-                          item.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                          item.description.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                          (item.tags.any((tag) => tag.toLowerCase().contains(_searchQuery.toLowerCase()))))
+                      .where((item) =>
+                          item.name
+                              .toLowerCase()
+                              .contains(_searchQuery.toLowerCase()) ||
+                          item.description
+                              .toLowerCase()
+                              .contains(_searchQuery.toLowerCase()) ||
+                          (item.tags.any((tag) => tag
+                              .toLowerCase()
+                              .contains(_searchQuery.toLowerCase()))))
                       .toList();
                 }
-                
+
                 if (filteredItems.isEmpty) {
                   return _buildEmptyState(colorScheme);
                 }
-                
+
                 if (isDesktop) {
                   return _buildDesktopItemList(filteredItems, colorScheme);
                 } else if (isTablet) {
@@ -118,7 +124,9 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
     );
   }
 
-  Widget _buildFilterBar(AsyncValue<List<CateringCategory>> categoriesAsyncValue, ColorScheme colorScheme) {
+  Widget _buildFilterBar(
+      AsyncValue<List<CateringCategory>> categoriesAsyncValue,
+      ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -142,9 +150,9 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
               });
             },
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Filter options
           Row(
             children: [
@@ -167,12 +175,16 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                       items: [
                         const DropdownMenuItem<String?>(
                           value: null,
-                          child: Text('All Categories'),
+                          child: Expanded(
+                            child: Text('All Categories'),
+                          ),
                         ),
                         ...categories.map(
                           (category) => DropdownMenuItem<String?>(
                             value: category.id,
-                            child: Text(category.name),
+                            child: Expanded(
+                              child: Text(category.name),
+                            ),
                           ),
                         ),
                       ],
@@ -215,10 +227,10 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
   }
 
   Widget _buildEmptyState(ColorScheme colorScheme) {
-    final hasFilters = _selectedCategoryId != null || 
-                       _showOnlyHighlighted || 
-                       _searchQuery.isNotEmpty;
-    
+    final hasFilters = _selectedCategoryId != null ||
+        _showOnlyHighlighted ||
+        _searchQuery.isNotEmpty;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -230,9 +242,7 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            hasFilters
-                ? 'No Items Match Your Filters'
-                : 'No Items Added Yet',
+            hasFilters ? 'No Items Match Your Filters' : 'No Items Added Yet',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 8),
@@ -267,7 +277,8 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
     );
   }
 
-  Widget _buildDesktopItemList(List<CateringItem> items, ColorScheme colorScheme) {
+  Widget _buildDesktopItemList(
+      List<CateringItem> items, ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Card(
@@ -304,8 +315,9 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                       DataColumn(label: Text('Actions')),
                     ],
                     rows: items.map((item) {
-                      final categories = ref.watch(itemCategoriesProvider(item));
-                      
+                      final categories =
+                          ref.watch(itemCategoriesProvider(item));
+
                       return DataRow(
                         cells: [
                           DataCell(
@@ -315,11 +327,12 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                                   Padding(
                                     padding: const EdgeInsets.only(right: 8.0),
                                     child: Icon(
-                                  categories.first.iconName != null
-                                      ? IconMapper.getIconData(categories.first.iconName)
-                                      : Icons.category_outlined,
-                                  color: colorScheme.primary,
-                                ),
+                                      categories.first.iconName != null
+                                          ? IconMapper.getIconData(
+                                              categories.first.iconName)
+                                          : Icons.category_outlined,
+                                      color: colorScheme.primary,
+                                    ),
                                   ),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -327,12 +340,15 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                                   children: [
                                     Text(
                                       item.name,
-                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
                                     ),
                                     if (item.description.isNotEmpty)
                                       Text(
                                         item.description,
-                                        style: Theme.of(context).textTheme.bodySmall,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                   ],
@@ -363,7 +379,8 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                                   ),
                                   backgroundColor: colorScheme.primaryContainer,
                                   padding: EdgeInsets.zero,
-                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
                                 );
                               }).toList(),
                             ),
@@ -372,7 +389,9 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                             Switch(
                               value: item.isActive,
                               onChanged: (value) {
-                                ref.read(cateringItemRepositoryProvider.notifier)
+                                ref
+                                    .read(
+                                        cateringItemRepositoryProvider.notifier)
                                     .toggleItemStatus(item.id, value);
                               },
                             ),
@@ -381,7 +400,9 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                             Switch(
                               value: item.isHighlighted,
                               onChanged: (value) {
-                                ref.read(cateringItemRepositoryProvider.notifier)
+                                ref
+                                    .read(
+                                        cateringItemRepositoryProvider.notifier)
                                     .toggleHighlighted(item.id, value);
                               },
                             ),
@@ -397,7 +418,8 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                                 IconButton(
                                   icon: const Icon(Icons.delete_outline),
                                   tooltip: 'Delete',
-                                  onPressed: () => _showDeleteConfirmation(item),
+                                  onPressed: () =>
+                                      _showDeleteConfirmation(item),
                                 ),
                               ],
                             ),
@@ -415,7 +437,8 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
     );
   }
 
-  Widget _buildTabletItemGrid(List<CateringItem> items, ColorScheme colorScheme) {
+  Widget _buildTabletItemGrid(
+      List<CateringItem> items, ColorScheme colorScheme) {
     return GridView.builder(
       padding: const EdgeInsets.all(16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -428,7 +451,7 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
       itemBuilder: (context, index) {
         final item = items[index];
         final categories = ref.watch(itemCategoriesProvider(item));
-        
+
         return Card(
           clipBehavior: Clip.antiAlias,
           child: InkWell(
@@ -456,22 +479,24 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                       Expanded(
                         child: Text(
                           item.name,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                       ),
                       Switch(
                         value: item.isActive,
                         onChanged: (value) {
-                          ref.read(cateringItemRepositoryProvider.notifier)
+                          ref
+                              .read(cateringItemRepositoryProvider.notifier)
                               .toggleItemStatus(item.id, value);
                         },
                       ),
                     ],
                   ),
                 ),
-                
+
                 // Content
                 Expanded(
                   child: Padding(
@@ -488,10 +513,11 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                                   color: colorScheme.primaryContainer,
                                   shape: BoxShape.circle,
                                 ),
-                                child:  Icon(
-                                   categories.first.iconName != null
-                                  ? IconMapper.getIconData(categories.first.iconName)
-                                  : Icons.category_outlined,
+                                child: Icon(
+                                  categories.first.iconName != null
+                                      ? IconMapper.getIconData(
+                                          categories.first.iconName)
+                                      : Icons.category_outlined,
                                   color: colorScheme.primary,
                                 ),
                               ),
@@ -527,7 +553,8 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                               ),
                               backgroundColor: colorScheme.primaryContainer,
                               padding: EdgeInsets.zero,
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
                             );
                           }).toList(),
                         ),
@@ -535,7 +562,7 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                     ),
                   ),
                 ),
-                
+
                 // Actions
                 OverflowBar(
                   children: [
@@ -559,14 +586,15 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
     );
   }
 
-  Widget _buildMobileItemList(List<CateringItem> items, ColorScheme colorScheme) {
+  Widget _buildMobileItemList(
+      List<CateringItem> items, ColorScheme colorScheme) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
         final categories = ref.watch(itemCategoriesProvider(item));
-        
+
         return Card(
           margin: const EdgeInsets.only(bottom: 16),
           clipBehavior: Clip.antiAlias,
@@ -598,7 +626,7 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                       ],
                     ),
                   ),
-                
+
                 // Content
                 Padding(
                   padding: const EdgeInsets.all(16),
@@ -616,13 +644,14 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(
-                                   categories.first.iconName != null
-                                  ? IconMapper.getIconData(categories.first.iconName)
-                                  : Icons.category_outlined,
-                                  color: colorScheme.primary,
-                                ),
+                            categories.first.iconName != null
+                                ? IconMapper.getIconData(
+                                    categories.first.iconName)
+                                : Icons.category_outlined,
+                            color: colorScheme.primary,
+                          ),
                         ),
-                      
+
                       // Details
                       Expanded(
                         child: Column(
@@ -633,9 +662,12 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                                 Expanded(
                                   child: Text(
                                     item.name,
-                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                   ),
                                 ),
                                 Text(
@@ -668,9 +700,12 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                                   item.preparationTimeMinutes > 0
                                       ? '${item.preparationTimeMinutes} min'
                                       : 'Prep time not set',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
                                 ),
                               ],
                             ),
@@ -704,11 +739,11 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                     ],
                   ),
                 ),
-                
+
                 // Actions
                 Padding(
                   padding: const EdgeInsets.only(
-                    left: 16, 
+                    left: 16,
                     right: 16,
                     bottom: 8,
                   ),
@@ -721,7 +756,8 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                           Switch(
                             value: item.isActive,
                             onChanged: (value) {
-                              ref.read(cateringItemRepositoryProvider.notifier)
+                              ref
+                                  .read(cateringItemRepositoryProvider.notifier)
                                   .toggleItemStatus(item.id, value);
                             },
                           ),
@@ -773,7 +809,9 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
               foregroundColor: Theme.of(context).colorScheme.onError,
             ),
             onPressed: () {
-              ref.read(cateringItemRepositoryProvider.notifier).deleteItem(item.id);
+              ref
+                  .read(cateringItemRepositoryProvider.notifier)
+                  .deleteItem(item.id);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('${item.name} has been deleted')),

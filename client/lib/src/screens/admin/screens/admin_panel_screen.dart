@@ -1,80 +1,147 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/user/auth_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/admin_panel/admin_stats_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.dart';
 import 'dart:async';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/user/auth_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_dashboard_home.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/analytics_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_settings_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/catering_management_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/meal_plan_management_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/order_management_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/product_management_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/table_management/table_management_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/user_management/user_management_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/admin_side_menu.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/responsive_layout.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/theme_switcher.dart';
 
 class AdminPanelScreen extends ConsumerStatefulWidget {
-  const AdminPanelScreen({super.key});
+  final Widget child;
+  final int initialIndex;
+
+  const AdminPanelScreen({
+    super.key,
+    required this.child,
+    this.initialIndex = 0,
+  });
 
   @override
   ConsumerState<AdminPanelScreen> createState() => AdminPanelScreenState();
 }
 
-class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Timer? _refreshTimer;
-  bool _isLoading = false; 
-  int selectedIndex = 0; 
+  bool _isLoading = false;
+  late int selectedIndex;
 
-  final List<Widget> _screens = [
-    const AdminDashboardHome(),
-    const ProductManagementScreen(),
-    const OrderManagementScreen(),
-    const TableManagementScreen(), // Added TableManagementScree
-    const UserManagementScreen(),
-    const BusinessSettingsScreen(),
-    const AnalyticsDashboard(),
-    const MealPlanManagementScreen(),
-    const CateringManagementScreen(), // Add this line
+  // Use AdminRoutes to define navigation items
+  final List<_AdminNavigationItem> _navigationItems = [
+    _AdminNavigationItem(
+      title: 'Dashboard',
+      icon: Icons.dashboard,
+      route: AdminRoutes.getFullPath(AdminRoutes.dashboard),
+    ),
+    _AdminNavigationItem(
+      title: 'Products & Menu',
+      icon: Icons.restaurant_menu,
+      route: AdminRoutes.getFullPath(AdminRoutes.products),
+    ),
+    _AdminNavigationItem(
+      title: 'Orders',
+      icon: Icons.receipt_long,
+      route: AdminRoutes.getFullPath(AdminRoutes.orders),
+    ),
+    _AdminNavigationItem(
+      title: 'Tables',
+      icon: Icons.table_bar,
+      route: AdminRoutes.getFullPath(AdminRoutes.tables),
+    ),
+    _AdminNavigationItem(
+      title: 'Users & Staff',
+      icon: Icons.people,
+      route: AdminRoutes.getFullPath(AdminRoutes.users),
+    ),
+    _AdminNavigationItem(
+      title: 'Business Settings',
+      icon: Icons.settings,
+      route: AdminRoutes.getFullPath(AdminRoutes.settings),
+    ),
+    _AdminNavigationItem(
+      title: 'Analytics',
+      icon: Icons.bar_chart,
+      route: AdminRoutes.getFullPath(AdminRoutes.analytics),
+    ),
+    _AdminNavigationItem(
+      title: 'Meal Plans',
+      icon: Icons.lunch_dining,
+      route: AdminRoutes.getFullPath(AdminRoutes.mealPlans),
+      subroutes: [
+        _SubRoute(
+          title: 'Meal Plans Management',
+          route: AdminRoutes.getFullPath(AdminRoutes.mealPlanManagement),
+          icon: Icons.list,
+        ),
+        _SubRoute(
+          title: 'Meal Plan Items',
+          route: AdminRoutes.getFullPath(AdminRoutes.mealPlanItems),
+          icon: Icons.restaurant_menu,
+        ),
+        _SubRoute(
+          title: 'Analytics',
+          route: AdminRoutes.getFullPath(AdminRoutes.mealPlanAnalytics),
+          icon: Icons.bar_chart,
+        ),
+        _SubRoute(
+          title: 'Export Reports',
+          route: AdminRoutes.getFullPath(AdminRoutes.mealPlanExport),
+          icon: Icons.download,
+        ),
+        _SubRoute(
+          title: 'QR Scanner',
+          route: AdminRoutes.getFullPath(AdminRoutes.mealPlanScanner),
+          icon: Icons.qr_code_scanner,
+        ),
+        _SubRoute(
+          title: 'POS Interface',
+          route: AdminRoutes.getFullPath(AdminRoutes.mealPlanPos),
+          icon: Icons.point_of_sale,
+        ),
+      ],
+    ),
+    _AdminNavigationItem(
+      title: 'Catering Management',
+      icon: Icons.inventory_2,
+      route: AdminRoutes.getFullPath(AdminRoutes.catering),
+      subroutes: [
+        _SubRoute(
+          title: 'Dashboard',
+          route: AdminRoutes.getFullPath(AdminRoutes.cateringDashboard),
+          icon: Icons.dashboard,
+        ),
+        _SubRoute(
+          title: 'Orders',
+          route: AdminRoutes.getFullPath(AdminRoutes.cateringOrders),
+          icon: Icons.receipt_long,
+        ),
+        _SubRoute(
+          title: 'Packages',
+          route: AdminRoutes.getFullPath(AdminRoutes.cateringPackages),
+          icon: Icons.category,
+        ),
+        _SubRoute(
+          title: 'Items',
+          route: AdminRoutes.getFullPath(AdminRoutes.cateringItems),
+          icon: Icons.food_bank,
+        ),
+        _SubRoute(
+          title: 'Categories',
+          route: AdminRoutes.getFullPath(AdminRoutes.cateringCategories),
+          icon: Icons.list,
+        ),
+      ],
+    ),
   ];
-  
-  final List<String> _screenTitles = [
-    'Dashboard',
-    'Products & Menu',
-    'Tables', // Added title for tables
-    'Orders',
-    'Users & Staff',
-    'Business Settings',
-    'Analytics',
-    'Meal Plans',
-    'Catering Management',
-  ];  
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(
-      length: _screens.length,
-      vsync: this,
-      initialIndex: selectedIndex,
-    );
 
-    // Add listener to sync tab controller with selected index
-    _tabController.addListener(() {
-      if (!_tabController.indexIsChanging) {
-        setState(() {
-          selectedIndex = _tabController.index;
-        });
-      }
-    });
-    
+    // Set the initial index from the widget parameter
+    selectedIndex = widget.initialIndex;
+
     // Set up refresh timer to periodically update data
     _refreshTimer = Timer.periodic(const Duration(minutes: 5), (_) {
       _refreshData();
@@ -83,35 +150,24 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with SingleT
 
   @override
   void dispose() {
-    _tabController.dispose();
     _refreshTimer?.cancel();
     super.dispose();
   }
-  
+
   // Add a method to refresh data
   Future<void> _refreshData() async {
     if (_isLoading) return;
-    
+
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       // Refresh providers that need real-time updates
-      ref.invalidate(businessConfigProvider);
       ref.invalidate(orderStatsProvider);
       ref.invalidate(salesStatsProvider);
       ref.invalidate(tableStatsProvider);
       ref.invalidate(recentOrdersProvider);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error refreshing data: $e'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
     } finally {
       if (mounted) {
         setState(() {
@@ -120,206 +176,182 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> with SingleT
       }
     }
   }
-  
+
+  void _onItemSelected(int index) {
+    // Update the selected index
+    setState(() {
+      selectedIndex = index;
+    });
+
+    // Navigate using GoRouter with routes from AdminRoutes
+    context.go(_navigationItems[index].route);
+  }
+
+  void _navigateToSubroute(String route) {
+    context.go(route);
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
-    
-    // final isAdmin = ref.watch(hasRoleProvider('admin'));
-    
+    final isAdmin = ref.watch(isAdminProvider).value;
+
     // Check if user is authenticated and has admin privileges
-    // if (authState != AuthState.authenticated || !isAdmin) {
-final isAdmin = ref.watch(isAdminProvider).value;
-    
     if (authState != AuthState.authenticated || isAdmin != null && !isAdmin) {
-      return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('You do not have access to the admin panel'),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => context.go('/login'),
-                child: const Text('Go to Login'),
-              ),
-            ],
-          ),
-        ),
-      );
+      return const UnauthorizedScreen();
     }
-    
-    return ResponsiveLayout(
-      mobile: _buildMobileLayout(context),
-      tablet: _buildTabletLayout(context),
-      desktop: _buildDesktopLayout(context),
-    );
+
+    final size = MediaQuery.sizeOf(context);
+    final isDesktop = size.width >= 1100;
+    final isTablet = size.width >= 600;
+
+    if (isDesktop) {
+      return _buildDesktopLayout(context);
+    } else if (isTablet) {
+      return _buildTabletLayout(context);
+    } else {
+      return _buildMobileLayout(context);
+    }
   }
-  Widget _buildMobileLayout(BuildContext context) {
+
+  Widget _buildDesktopLayout(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(
-        title: Text(_screenTitles[selectedIndex]),
-        actions: [
-          const ThemeSwitch(),
-          IconButton(
-            icon: const Icon(Icons.account_circle),
-            onPressed: _showUserMenu,
+      body: Row(
+        children: [
+          // Side navigation
+          NavigationRail(
+            extended: true,
+            selectedIndex: selectedIndex,
+            onDestinationSelected: _onItemSelected,
+            destinations: _navigationItems
+                .map(
+                  (item) => NavigationRailDestination(
+                    icon: Icon(item.icon),
+                    label: Text(item.title),
+                  ),
+                )
+                .toList(),
           ),
-        ],
-        leading: IconButton(
-          icon: const Icon(Icons.menu),
-          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-        ),
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _screens[selectedIndex],
-      drawer: SidebarMenu(
-        selectedIndex: selectedIndex,
-        onItemSelected: _onItemSelected,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: selectedIndex > 4 ? 4 : selectedIndex,
-        onTap: _onItemSelected,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
-          BottomNavigationBarItem(icon: Icon(Icons.restaurant_menu), label: 'Products'),
-          BottomNavigationBarItem(icon: Icon(Icons.table_bar), label: 'Tables'), // Added Tables navigation item
-          BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: 'Orders'),
-          BottomNavigationBarItem(icon: Icon(Icons.more_horiz), label: 'More'),
+
+          VerticalDivider(
+            width: 1,
+            thickness: 1,
+            color: Theme.of(context).dividerColor,
+          ),
+
+          // Main content area
+          Expanded(
+            child: Column(
+              children: [
+                _buildDesktopHeader(context),
+
+                // Main content with loading indicator
+                Expanded(
+                  child: Stack(
+                    children: [
+                      // Main content from the router
+                      widget.child,
+
+                      // Loading indicator on top
+                      if (_isLoading)
+                        const Positioned.fill(
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildTabletLayout(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        title: Text(_screenTitles[selectedIndex]),
-        actions: [
-          const ThemeSwitch(),
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {},
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            icon: const Icon(Icons.account_circle),
-            onPressed: _showUserMenu,
-          ),
-          const SizedBox(width: 16),
-        ],
-      ),
-      body: Row(
-        children: [
-          SidebarMenu(
-            selectedIndex: selectedIndex,
-            onItemSelected: _onItemSelected,
-            isExpanded: false,
-          ),
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _screens[selectedIndex],
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildDesktopLayout(BuildContext context) {
+    // Similar to desktop but with collapsed NavigationRail
+    final item = _navigationItems[selectedIndex];
+    final hasSubroutes = item.subroutes != null && item.subroutes!.isNotEmpty;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       key: _scaffoldKey,
       body: Row(
         children: [
-          SidebarMenu(
+          NavigationRail(
+            extended: false,
             selectedIndex: selectedIndex,
-            onItemSelected: _onItemSelected,
-            isExpanded: true,
+            onDestinationSelected: _onItemSelected,
+            destinations: _navigationItems
+                .map(
+                  (item) => NavigationRailDestination(
+                    icon: Icon(item.icon),
+                    label: Text(item.title),
+                  ),
+                )
+                .toList(),
+          ),
+          VerticalDivider(
+            width: 1,
+            thickness: 1,
+            color: Theme.of(context).dividerColor,
           ),
           Expanded(
             child: Column(
               children: [
-                _buildDesktopHeader(context),
-                Expanded(
-                  child: _isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : _screens[selectedIndex],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildDesktopHeader(BuildContext context) {
-    final businessConfig = ref.watch(businessConfigProvider).value;
-    final currentUser = ref.watch(currentUserProvider).value;
-    
-    return Container(
-      height: 64,
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Text(
-            _screenTitles[selectedIndex],
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const Spacer(),
-          const ThemeSwitch(),
-          const SizedBox(width: 16),
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {},
-            tooltip: 'Notifications',
-          ),
-          const SizedBox(width: 16),
-          InkWell(
-            onTap: _showUserMenu,
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                  foregroundImage: currentUser?.photoURL != null 
-                      ? NetworkImage(currentUser!.photoURL!) 
-                      : null,
-                  child: currentUser?.displayName != null && currentUser!.displayName!.isNotEmpty
-                      ? Text(currentUser.displayName![0].toUpperCase())
-                      : const Icon(Icons.person, size: 16),
-                ),
-                const SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      currentUser?.displayName ?? 'Admin',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                AppBar(
+                  title: Text(_navigationItems[selectedIndex].title),
+                  actions: [
+                    IconButton(
+                      icon: const Icon(Icons.refresh),
+                      onPressed: _refreshData,
+                      tooltip: 'Refresh Data',
                     ),
-                    Text(
-                      businessConfig?.name ?? 'Business',
-                      style: Theme.of(context).textTheme.bodySmall,
+                    IconButton(
+                      icon: const Icon(Icons.account_circle),
+                      onPressed: _showUserMenu,
                     ),
                   ],
                 ),
-                const SizedBox(width: 8),
-                const Icon(Icons.arrow_drop_down),
+
+                // Add subroute navigation bar for tablet
+                if (hasSubroutes)
+                  Container(
+                    height: 48,
+                    color: colorScheme.surface,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final availableWidth = constraints.maxWidth;
+                        final itemCount = item.subroutes!.length;
+
+                        // Always use ListView for consistent scrolling behavior
+                        // This ensures it works properly when screen resizes
+                        return ListView(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          children: _buildSubrouteItems(
+                              item.subroutes!, colorScheme, context),
+                        );
+                      },
+                    ),
+                  ),
+
+                Expanded(
+                  child: Stack(
+                    children: [
+                      widget.child,
+                      if (_isLoading)
+                        const Positioned.fill(
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -328,76 +360,399 @@ final isAdmin = ref.watch(isAdminProvider).value;
     );
   }
 
-  void _onItemSelected(int index) {
-    // For mobile, the 'More' item opens a modal with additional options
-    if (index == 4 && MediaQuery.of(context).size.width < 600) {
-      _showMoreOptions();
-      return;
-    }
-    
-    setState(() {
-      selectedIndex = index;
-      _refreshData(); // Refresh data when changing sections
-    });
-  }
-  
-void _showMoreOptions() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            leading: const Icon(Icons.people),
-            title: const Text('Users & Staff'),
-            onTap: () {
-              Navigator.pop(context);
-              setState(() => selectedIndex = 4); // Updated index
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Business Settings'),
-            onTap: () {
-              Navigator.pop(context);
-              setState(() => selectedIndex = 5); // Updated index
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.bar_chart),
-            title: const Text('Analytics'),
-            onTap: () {
-              Navigator.pop(context);
-              setState(() => selectedIndex = 6); // Updated index
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.restaurant),
-            title: const Text('Meal Plans'),
-            onTap: () {
-              Navigator.pop(context);
-              setState(() => selectedIndex = 7); // Meal Plans index
-            },
-          ),
-         ListTile(
-          leading: const Icon(Icons.restaurant_outlined),
-          title: const Text('Catering Management'),
-          onTap: () {
-            Navigator.pop(context);
-            setState(() => selectedIndex = 8);
-          },
+  Widget _buildMobileLayout(BuildContext context) {
+    final item = _navigationItems[selectedIndex];
+    final hasSubroutes = item.subroutes != null && item.subroutes!.isNotEmpty;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        title: Text(_navigationItems[selectedIndex].title),
+        leading: IconButton(
+          icon: const Icon(Icons.menu),
+          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _refreshData,
+            tooltip: 'Refresh Data',
+          ),
+          IconButton(
+            icon: const Icon(Icons.account_circle),
+            onPressed: _showUserMenu,
+          ),
+        ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+              ),
+              child: const Text(
+                'Admin Dashboard',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ..._navigationItems.asMap().entries.map((entry) {
+              final index = entry.key;
+              final item = entry.value;
+              // Check if this item has subroutes to render an expandable section
+              final hasSubroutes =
+                  item.subroutes != null && item.subroutes!.isNotEmpty;
+
+              if (!hasSubroutes) {
+                return ListTile(
+                  leading: Icon(item.icon),
+                  title: Text(item.title),
+                  selected: selectedIndex == index,
+                  onTap: () {
+                    Navigator.pop(context); // Close drawer
+                    _onItemSelected(index);
+                  },
+                );
+              } else {
+                // Use ExpansionTile for sections with subroutes
+                return ExpansionTile(
+                  leading: Icon(item.icon),
+                  title: Text(item.title),
+                  initiallyExpanded: selectedIndex == index,
+                  children: item.subroutes!.map((subroute) {
+                    return ListTile(
+                      leading: Icon(subroute.icon, size: 20),
+                      title: Text(subroute.title),
+                      contentPadding: const EdgeInsets.only(left: 32),
+                      dense: true,
+                      onTap: () {
+                        Navigator.pop(context); // Close drawer
+                        _navigateToSubroute(subroute.route);
+                      },
+                    );
+                  }).toList(),
+                );
+              }
+            }),
+          ],
+        ),
+      ),
+      body: Column(
+        children: [
+          // Add subroute navigation for mobile
+          // if (hasSubroutes)
+          //   Container(
+          //     height: 40, // Slightly smaller for mobile
+          //     color: colorScheme.surface,
+          //     child: ListView(
+          //       scrollDirection: Axis.horizontal,
+          //       padding: const EdgeInsets.symmetric(horizontal: 8),
+          //       children:
+          //           _buildSubrouteItems(item.subroutes!, colorScheme, context),
+          //     ),
+          //   ),
+
+          // Main content
+          Expanded(
+            child: Stack(
+              children: [
+                widget.child,
+                if (_isLoading)
+                  const Positioned.fill(
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: selectedIndex > 4 ? 4 : selectedIndex,
+        onTap: (index) {
+          if (index == 4) {
+            // More menu
+            _showMoreOptions();
+          } else {
+            _onItemSelected(index);
+          }
+        },
+        type: BottomNavigationBarType.fixed,
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(_navigationItems[0].icon),
+            label: 'Dashboard',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(_navigationItems[1].icon),
+            label: 'Products',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(_navigationItems[2].icon),
+            label: 'Orders',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(_navigationItems[3].icon),
+            label: 'Tables',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.more_horiz),
+            label: 'More',
+          ),
         ],
       ),
     );
   }
+
+  Widget _buildDesktopHeader(BuildContext context) {
+    final item = _navigationItems[selectedIndex];
+    final hasSubroutes = item.subroutes != null && item.subroutes!.isNotEmpty;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Column(
+      children: [
+        AppBar(
+          title: Text(item.title),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: _refreshData,
+              tooltip: 'Refresh Data',
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.account_circle),
+              onPressed: _showUserMenu,
+            ),
+            const SizedBox(width: 16),
+          ],
+        ),
+
+        // Add subroute navigation for desktop
+        if (hasSubroutes)
+          Container(
+            height: 48,
+            color: colorScheme.surface,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final availableWidth = constraints.maxWidth;
+                final itemCount = item.subroutes!.length;
+
+                // Calculate if we need scrolling or can fit all items
+                final estimatedItemWidth = 150.0; // Slightly wider for desktop
+                final needsScrolling =
+                    estimatedItemWidth * itemCount > availableWidth;
+
+                return needsScrolling
+                    ? ListView(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        children: _buildSubrouteItems(
+                            item.subroutes!, colorScheme, context),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: _buildSubrouteItems(
+                            item.subroutes!, colorScheme, context),
+                      );
+              },
+            ),
+          ),
+      ],
+    );
+  }
+
+  void _showMoreOptions() {
+    final theme = Theme.of(context);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allow the sheet to be larger
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height *
+              0.7, // Limit height to 70% of screen
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header with handle and title
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: theme.primaryColor,
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(16)),
+              ),
+              child: Column(
+                children: [
+                  // Drag handle
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Admin Dashboard',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Menu items in a scrollable list
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  // Main menu items
+                  _buildMoreMenuTileWithSelection(4), // Users & Staff
+                  _buildMoreMenuTileWithSelection(5), // Business Settings
+                  _buildMoreMenuTileWithSelection(6), // Analytics
+
+                  // Meal Plans with subroutes
+                  _buildExpandableMoreMenuSection(7),
+
+                  // Catering Management with subroutes
+                  _buildExpandableMoreMenuSection(8),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Helper method to build menu tile with selection indicator
+  Widget _buildMoreMenuTileWithSelection(int index) {
+    final item = _navigationItems[index];
+    final isSelected = selectedIndex == index;
+    final theme = Theme.of(context);
+
+    return ListTile(
+      leading: Icon(
+        item.icon,
+        color: isSelected ? theme.colorScheme.primary : null,
+      ),
+      title: Text(
+        item.title,
+        style: TextStyle(
+          color: isSelected ? theme.colorScheme.primary : null,
+          fontWeight: isSelected ? FontWeight.bold : null,
+        ),
+      ),
+      selected: isSelected,
+      selectedTileColor: theme.colorScheme.primaryContainer.withOpacity(0.2),
+      onTap: () {
+        Navigator.pop(context); // Close bottom sheet
+        _onItemSelected(index);
+      },
+    );
+  }
+
+  // Helper method to build expandable sections with subroutes
+  Widget _buildExpandableMoreMenuSection(int index) {
+    final item = _navigationItems[index];
+    final isSelected = selectedIndex == index;
+    final theme = Theme.of(context);
+    final hasSubroutes = item.subroutes != null && item.subroutes!.isNotEmpty;
+
+    if (!hasSubroutes) {
+      return _buildMoreMenuTileWithSelection(index);
+    }
+
+    // Get the current route to check which subroute is selected
+    final currentPath = GoRouterState.of(context).matchedLocation;
+
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        leading: Icon(
+          item.icon,
+          color: isSelected ? theme.colorScheme.primary : null,
+        ),
+        title: Text(
+          item.title,
+          style: TextStyle(
+            color: isSelected ? theme.colorScheme.primary : null,
+            fontWeight: isSelected ? FontWeight.bold : null,
+          ),
+        ),
+        initiallyExpanded: isSelected,
+        backgroundColor: isSelected
+            ? theme.colorScheme.primaryContainer.withOpacity(0.1)
+            : null,
+        children: item.subroutes!.map((subroute) {
+          final isSubrouteSelected = currentPath == subroute.route;
+
+          return ListTile(
+            leading: Icon(
+              subroute.icon,
+              size: 20,
+              color: isSubrouteSelected ? theme.colorScheme.primary : null,
+            ),
+            title: Text(
+              subroute.title,
+              style: TextStyle(
+                fontSize: 14,
+                color: isSubrouteSelected ? theme.colorScheme.primary : null,
+                fontWeight: isSubrouteSelected ? FontWeight.bold : null,
+              ),
+            ),
+            contentPadding: const EdgeInsets.only(left: 48),
+            dense: true,
+            selected: isSubrouteSelected,
+            selectedTileColor:
+                theme.colorScheme.primaryContainer.withOpacity(0.2),
+            onTap: () {
+              Navigator.pop(context); // Close bottom sheet
+              _navigateToSubroute(subroute.route);
+            },
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildMoreMenuTile(int index) {
+    final item = _navigationItems[index];
+    return ListTile(
+      leading: Icon(item.icon),
+      title: Text(item.title),
+      onTap: () {
+        Navigator.pop(context); // Close bottom sheet
+        _onItemSelected(index);
+      },
+    );
+  }
+
   void _showUserMenu() {
     final authService = ref.read(authServiceProvider);
-    
+
     showMenu(
       context: context,
       position: RelativeRect.fromLTRB(
-        MediaQuery.of(context).size.width - 160,
+        MediaQuery.sizeOf(context).width - 160,
         kToolbarHeight + 16,
         16,
         0,
@@ -422,177 +777,105 @@ void _showMoreOptions() {
     );
   }
 }
-// Notifications Panel Widget
-class NotificationsPanel extends StatelessWidget {
-  final ScrollController scrollController;
-  
-  const NotificationsPanel({
-    super.key,
-    required this.scrollController,
+
+class _AdminNavigationItem {
+  final String title;
+  final IconData icon;
+  final String route;
+  final List<_SubRoute>? subroutes;
+
+  const _AdminNavigationItem({
+    required this.title,
+    required this.icon,
+    required this.route,
+    this.subroutes,
   });
-  
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Handle bar
-        Container(
-          width: 40,
-          height: 5,
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade300,
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-        
-        // Header
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Notifications',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.mark_email_read),
-                    tooltip: 'Mark all as read',
-                    onPressed: () {},
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.settings),
-                    tooltip: 'Notification settings',
-                    onPressed: () {},
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        
-        const Divider(),
-        
-        // Notification list
-        Expanded(
-          child: ListView(
-            controller: scrollController,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            children: const [
-              NotificationItem(
-                title: 'Order ready for delivery',
-                message: 'Order #12345 is ready for delivery at Table 3',
-                time: '2 min',
-                icon: Icons.restaurant,
-                color: Colors.green,
-                isUnread: true,
-              ),
-              NotificationItem(
-                title: 'New order received',
-                message: 'A new order has been received for Table 5',
-                time: '15 min',
-                icon: Icons.receipt,
-                color: Colors.blue,
-                isUnread: true,
-              ),
-              NotificationItem(
-                title: 'Reservation confirmed',
-                message: 'Table 8 reserved for 8:00 PM',
-                time: '30 min',
-                icon: Icons.event_available,
-                color: Colors.orange,
-                isUnread: false,
-              ),
-              NotificationItem(
-                title: 'Product out of stock',
-                message: 'The "Caesar Salad" product is out of stock',
-                time: '1h',
-                icon: Icons.warning,
-                color: Colors.red,
-                isUnread: false,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
 }
 
-// Notification Item Widget
-class NotificationItem extends StatelessWidget {
+class _SubRoute {
   final String title;
-  final String message;
-  final String time;
+  final String route;
   final IconData icon;
-  final Color color;
-  final bool isUnread;
-  
-  const NotificationItem({
-    super.key,
+
+  const _SubRoute({
     required this.title,
-    required this.message,
-    required this.time,
+    required this.route,
     required this.icon,
-    required this.color,
-    this.isUnread = false,
   });
-  
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: isUnread ? color.withOpacity(0.1) : null,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: color.withOpacity(0.2),
-          child: Icon(
-            icon,
-            color: color,
-            size: 20,
-          ),
-        ),
-        title: Text(
-          title,
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: isUnread ? FontWeight.bold : FontWeight.normal,
-          ),
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Text(message),
-        ),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              time,
-              style: theme.textTheme.bodySmall,
+}
+
+// Helper method to build subroute items consistently
+List<Widget> _buildSubrouteItems(
+    List<_SubRoute> subroutes, ColorScheme colorScheme, BuildContext context) {
+  return subroutes.map((subroute) {
+    // Check if this subroute is the current route
+    final currentPath = GoRouterState.of(context).matchedLocation;
+    final subroutePath = subroute.route;
+    final isSelected = currentPath == subroutePath;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      child: InkWell(
+        onTap: () => context.go(subroute.route),
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            color:
+                isSelected ? colorScheme.primaryContainer : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isSelected ? colorScheme.primary : Colors.transparent,
+              width: 1,
             ),
-            const SizedBox(height: 4),
-            if (isUnread)
-              Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                subroute.icon,
+                size: 16,
+                color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                subroute.title,
+                style: TextStyle(
+                  fontSize: 13,
+                  color:
+                      isSelected ? colorScheme.primary : colorScheme.onSurface,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }).toList();
+}
+
+// Include bare minimum of UnauthorizedScreen to make the code complete
+class UnauthorizedScreen extends StatelessWidget {
+  const UnauthorizedScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.lock, size: 64),
+            const SizedBox(height: 16),
+            const Text('You do not have access to this area'),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => context.go('/'),
+              child: const Text('Go to Home'),
+            ),
           ],
         ),
-        onTap: () {
-          // Handle notification tap
-        },
       ),
     );
   }

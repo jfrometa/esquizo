@@ -1,37 +1,40 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/catering/catering_order_details.dart';
- 
+
 class CateringDashboardScreen extends ConsumerWidget {
   const CateringDashboardScreen({super.key});
-
 
   // Helper method to extract values from the statistics order
   dynamic _getStatValue(CateringOrder stats, String key) {
     // The statistics are stored in the adicionales field as JSON
     try {
-      final Map<String, dynamic> statsData = 
+      final Map<String, dynamic> statsData =
           stats.items.isNotEmpty && stats.items.first.adicionales.isNotEmpty
-              ? Map<String, dynamic>.from(json.decode(stats.items.first.adicionales))
+              ? Map<String, dynamic>.from(
+                  json.decode(stats.items.first.adicionales))
               : {};
       return statsData[key] ?? 0;
     } catch (e) {
       return 0;
     }
   }
-  
+
   // Helper method to extract map values from the statistics order
   Map<String, dynamic> _getStatMap(CateringOrder stats, String key) {
     try {
-      final Map<String, dynamic> statsData = 
+      final Map<String, dynamic> statsData =
           stats.items.isNotEmpty && stats.items.first.adicionales.isNotEmpty
-              ? Map<String, dynamic>.from(json.decode(stats.items.first.adicionales))
+              ? Map<String, dynamic>.from(
+                  json.decode(stats.items.first.adicionales))
               : {};
       return Map<String, dynamic>.from(statsData[key] ?? {});
     } catch (e) {
@@ -39,39 +42,18 @@ class CateringDashboardScreen extends ConsumerWidget {
     }
   }
 
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboardSummaryAsync = ref.watch(cateringDashboardSummaryProvider);
     final statisticsAsync = ref.watch(cateringOrderStatisticsProvider);
-    
+
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final isDesktop = size.width >= 1100;
     final isTablet = size.width >= 600;
-    
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Catering Dashboard'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh',
-            onPressed: () {
-              ref.invalidate(cateringDashboardSummaryProvider);
-              ref.invalidate(cateringOrderStatisticsProvider);
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.help_outline),
-            tooltip: 'Help',
-            onPressed: () {
-              // Show help dialog
-            },
-          ),
-        ],
-      ),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(cateringDashboardSummaryProvider);
@@ -83,24 +65,27 @@ class CateringDashboardScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (isDesktop)
-                _buildDesktopDashboard(context, ref, dashboardSummaryAsync, statisticsAsync, colorScheme)
+                _buildDesktopDashboard(context, ref, dashboardSummaryAsync,
+                    statisticsAsync, colorScheme)
               else
-                _buildMobileDashboard(context, ref, dashboardSummaryAsync, statisticsAsync, colorScheme, isTablet),
+                _buildMobileDashboard(context, ref, dashboardSummaryAsync,
+                    statisticsAsync, colorScheme, isTablet),
             ],
           ),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // Navigate to create new catering order
+          // Navigate to create new catering order using GoRouter
+          // context.goNamed(AppRoute.createCateringOrder.name);
         },
         icon: const Icon(Icons.add),
         label: const Text('New Order'),
       ),
     );
   }
-  
-    Widget _buildDesktopDashboard(
+
+  Widget _buildDesktopDashboard(
     BuildContext context,
     WidgetRef ref,
     AsyncValue<Map<String, dynamic>> dashboardSummaryAsync,
@@ -162,12 +147,19 @@ class CateringDashboardScreen extends ConsumerWidget {
               ],
             ),
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, stack) => Center(child: Text('Error: $error')),
+            error: (error, stack) {
+              // Log the error for debugging purposes
+              debugPrint('Error loading desktop dashboard: $error');
+              if (kDebugMode) {
+                debugPrintStack(stackTrace: stack);
+              }
+              return Center(child: Text('Error: $error'));
+            },
           ),
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Main content - split into two columns
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -179,30 +171,50 @@ class CateringDashboardScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Today's Events
-                  _buildSectionHeader(context, 'Today\'s Events', 'Events scheduled for today'),
+                  _buildSectionHeader(
+                      context, 'Today\'s Events', 'Events scheduled for today'),
                   const SizedBox(height: 8),
                   dashboardSummaryAsync.when(
-                    data: (summary) => _buildTodayEventsSection(context, ref, summary, colorScheme),
-                    loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (error, stack) => Center(child: Text('Error: $error')),
+                    data: (summary) => _buildTodayEventsSection(
+                        context, ref, summary, colorScheme),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (error, stack) {
+                      // Log the error for debugging purposes
+                      debugPrint('Error loading statistics: $error');
+                      if (kDebugMode) {
+                        debugPrintStack(stackTrace: stack);
+                      }
+                      return Center(child: Text('Error: $error'));
+                    },
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Upcoming Events
-                  _buildSectionHeader(context, 'Upcoming Events', 'Next scheduled events'),
+                  _buildSectionHeader(
+                      context, 'Upcoming Events', 'Next scheduled events'),
                   const SizedBox(height: 8),
                   dashboardSummaryAsync.when(
-                    data: (summary) => _buildUpcomingEventsSection(context, ref, summary, colorScheme),
-                    loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (error, stack) => Center(child: Text('Error: $error')),
+                    data: (summary) => _buildUpcomingEventsSection(
+                        context, ref, summary, colorScheme),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (error, stack) {
+                      // Log the error for debugging purposes
+                      debugPrint('Error loading upcoming events: $error');
+                      if (kDebugMode) {
+                        debugPrintStack(stackTrace: stack);
+                      }
+                      return Center(child: Text('Error: $error'));
+                    },
                   ),
                 ],
               ),
             ),
-            
+
             const SizedBox(width: 24),
-            
+
             // Right column - 1/3 width
             Expanded(
               child: Column(
@@ -212,27 +224,47 @@ class CateringDashboardScreen extends ConsumerWidget {
                   _buildSectionHeader(context, 'Quick Actions', 'Common tasks'),
                   const SizedBox(height: 8),
                   _buildQuickActionsSection(context),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Order Status Overview
-                  _buildSectionHeader(context, 'Order Status Overview', 'Current order distribution'),
+                  _buildSectionHeader(context, 'Order Status Overview',
+                      'Current order distribution'),
                   const SizedBox(height: 8),
                   statisticsAsync.when(
-                    data: (stats) => _buildStatusOverviewSection(context, stats, colorScheme),
-                    loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (error, stack) => Center(child: Text('Error: $error')),
+                    data: (stats) => _buildStatusOverviewSection(
+                        context, stats, colorScheme),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (error, stack) {
+                      // Log the error for debugging purposes
+                      debugPrint('Error loading status overview: $error');
+                      if (kDebugMode) {
+                        debugPrintStack(stackTrace: stack);
+                      }
+                      return Center(child: Text('Error: $error'));
+                    },
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Recent Orders
-                  _buildSectionHeader(context, 'Recent Orders', 'Latest catering orders'),
+                  _buildSectionHeader(
+                      context, 'Recent Orders', 'Latest catering orders'),
                   const SizedBox(height: 8),
                   dashboardSummaryAsync.when(
-                    data: (summary) => _buildRecentOrdersSection(context, ref, summary, colorScheme),
-                    loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (error, stack) => Center(child: Text('Error: $error')),
+                    data: (summary) => _buildRecentOrdersSection(
+                        context, ref, summary, colorScheme),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (error, stack) {
+                      // Log the error for debugging purposes
+                      debugPrint('Error loading recent orders: $error');
+                      if (kDebugMode) {
+                        debugPrintStack(stackTrace: stack);
+                      }
+                      return Center(child: Text('Error: $error'));
+                    },
                   ),
                 ],
               ),
@@ -242,8 +274,8 @@ class CateringDashboardScreen extends ConsumerWidget {
       ],
     );
   }
-  
-    Widget _buildMobileDashboard(
+
+  Widget _buildMobileDashboard(
     BuildContext context,
     WidgetRef ref,
     AsyncValue<Map<String, dynamic>> dashboardSummaryAsync,
@@ -299,63 +331,105 @@ class CateringDashboardScreen extends ConsumerWidget {
             ],
           ),
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(child: Text('Error: $error')),
+          error: (error, stack) {
+            // Log the error for debugging purposes
+            debugPrint('Error loading all stats: $error');
+            if (kDebugMode) {
+              debugPrintStack(stackTrace: stack);
+            }
+            return Center(child: Text('Error: $error'));
+          },
         ),
 
         const SizedBox(height: 24),
-        
+
         // Quick Actions
         _buildSectionHeader(context, 'Quick Actions', 'Common tasks'),
         const SizedBox(height: 8),
         _buildQuickActionsSection(context),
-                  
+
         const SizedBox(height: 24),
-        
+
         // Today's Events
-        _buildSectionHeader(context, 'Today\'s Events', 'Events scheduled for today'),
+        _buildSectionHeader(
+            context, 'Today\'s Events', 'Events scheduled for today'),
         const SizedBox(height: 8),
         dashboardSummaryAsync.when(
-          data: (summary) => _buildTodayEventsSection(context, ref, summary, colorScheme),
+          data: (summary) =>
+              _buildTodayEventsSection(context, ref, summary, colorScheme),
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(child: Text('Error: $error')),
+          error: (error, stack) {
+            // Log the error for debugging purposes
+            debugPrint('Error loading events for today: $error');
+            if (kDebugMode) {
+              debugPrintStack(stackTrace: stack);
+            }
+            return Center(child: Text('Error: $error'));
+          },
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Upcoming Events
-        _buildSectionHeader(context, 'Upcoming Events', 'Next scheduled events'),
+        _buildSectionHeader(
+            context, 'Upcoming Events', 'Next scheduled events'),
         const SizedBox(height: 8),
         dashboardSummaryAsync.when(
-          data: (summary) => _buildUpcomingEventsSection(context, ref, summary, colorScheme),
+          data: (summary) =>
+              _buildUpcomingEventsSection(context, ref, summary, colorScheme),
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(child: Text('Error: $error')),
+          error: (error, stack) {
+            // Log the error for debugging purposes
+            debugPrint('Error loading next scheduled events: $error');
+            if (kDebugMode) {
+              debugPrintStack(stackTrace: stack);
+            }
+            return Center(child: Text('Error: $error'));
+          },
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Order Status Overview
-        _buildSectionHeader(context, 'Order Status Overview', 'Current order distribution'),
+        _buildSectionHeader(
+            context, 'Order Status Overview', 'Current order distribution'),
         const SizedBox(height: 8),
         statisticsAsync.when(
-          data: (stats) => _buildStatusOverviewSection(context, stats, colorScheme),
+          data: (stats) =>
+              _buildStatusOverviewSection(context, stats, colorScheme),
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(child: Text('Error: $error')),
+          error: (error, stack) {
+            // Log the error for debugging purposes
+            debugPrint('Error loading current order distribution: $error');
+            if (kDebugMode) {
+              debugPrintStack(stackTrace: stack);
+            }
+            return Center(child: Text('Error: $error'));
+          },
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Recent Orders
         _buildSectionHeader(context, 'Recent Orders', 'Latest catering orders'),
         const SizedBox(height: 8),
         dashboardSummaryAsync.when(
-          data: (summary) => _buildRecentOrdersSection(context, ref, summary, colorScheme),
+          data: (summary) =>
+              _buildRecentOrdersSection(context, ref, summary, colorScheme),
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(child: Text('Error: $error')),
+          error: (error, stack) {
+            // Log the error for debugging purposes
+            debugPrint('Error loading latest cateriong orders: $error');
+            if (kDebugMode) {
+              debugPrintStack(stackTrace: stack);
+            }
+            return Center(child: Text('Error: $error'));
+          },
         ),
       ],
     );
   }
-  
+
   Widget _buildStatsCard(
     BuildContext context,
     String title,
@@ -365,7 +439,7 @@ class CateringDashboardScreen extends ConsumerWidget {
     Color color,
   ) {
     final theme = Theme.of(context);
-    
+
     return Card(
       elevation: 0,
       color: color.withOpacity(0.1),
@@ -419,10 +493,11 @@ class CateringDashboardScreen extends ConsumerWidget {
       ),
     );
   }
-  
-  Widget _buildSectionHeader(BuildContext context, String title, String subtitle) {
+
+  Widget _buildSectionHeader(
+      BuildContext context, String title, String subtitle) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -437,7 +512,21 @@ class CateringDashboardScreen extends ConsumerWidget {
             const Spacer(),
             TextButton(
               onPressed: () {
-                // Navigate to full section view
+                // Navigate to full section view using GoRouter
+                // This would be implemented based on the section
+                switch (title) {
+                  case 'Today\'s Events':
+                    context.goNamed(AppRoute.cateringOrders.name);
+                    break;
+                  case 'Upcoming Events':
+                    context.goNamed(AppRoute.cateringOrders.name);
+                    break;
+                  case 'Recent Orders':
+                    context.goNamed(AppRoute.cateringOrders.name);
+                    break;
+                  default:
+                    break;
+                }
               },
               child: const Text('View All'),
             ),
@@ -452,15 +541,15 @@ class CateringDashboardScreen extends ConsumerWidget {
       ],
     );
   }
-  
+
   Widget _buildTodayEventsSection(
-    BuildContext context, 
+    BuildContext context,
     WidgetRef ref,
     Map<String, dynamic> summary,
     ColorScheme colorScheme,
   ) {
     final todayEvents = summary['todayEvents'] as int;
-    
+
     if (todayEvents == 0) {
       return Card(
         child: Padding(
@@ -485,12 +574,12 @@ class CateringDashboardScreen extends ConsumerWidget {
         ),
       );
     }
-    
+
     // Get today's orders
     return Consumer(
       builder: (context, ref, child) {
         final ordersAsync = ref.watch(todayCateringOrdersProvider);
-        
+
         return ordersAsync.when(
           data: (orders) {
             if (orders.isEmpty) {
@@ -506,28 +595,37 @@ class CateringDashboardScreen extends ConsumerWidget {
                 ),
               );
             }
-            
+
             return Column(
-              children: orders.map((order) => 
-                _buildEventCard(context, order, colorScheme),
-              ).toList(),
+              children: orders
+                  .map(
+                    (order) => _buildEventCard(context, order, colorScheme),
+                  )
+                  .toList(),
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(child: Text('Error: $error')),
+          error: (error, stack) {
+            // Log the error for debugging purposes
+            debugPrint('Error loading todays orders: $error');
+            if (kDebugMode) {
+              debugPrintStack(stackTrace: stack);
+            }
+            return Center(child: Text('Error: $error'));
+          },
         );
       },
     );
   }
-  
+
   Widget _buildUpcomingEventsSection(
-    BuildContext context, 
+    BuildContext context,
     WidgetRef ref,
     Map<String, dynamic> summary,
     ColorScheme colorScheme,
   ) {
     final upcomingEvents = summary['upcomingEvents'] as List<CateringOrder>;
-    
+
     if (upcomingEvents.isEmpty) {
       return Card(
         child: Padding(
@@ -552,14 +650,16 @@ class CateringDashboardScreen extends ConsumerWidget {
         ),
       );
     }
-    
+
     return Column(
-      children: upcomingEvents.map((order) => 
-        _buildEventCard(context, order, colorScheme),
-      ).toList(),
+      children: upcomingEvents
+          .map(
+            (order) => _buildEventCard(context, order, colorScheme),
+          )
+          .toList(),
     );
   }
-  
+
   Widget _buildEventCard(
     BuildContext context,
     CateringOrder order,
@@ -567,32 +667,30 @@ class CateringDashboardScreen extends ConsumerWidget {
   ) {
     final theme = Theme.of(context);
     final now = DateTime.now();
-    final isToday = order.eventDate.day == now.day && 
-                    order.eventDate.month == now.month && 
-                    order.eventDate.year == now.year;
-    
+    final isToday = order.eventDate.day == now.day &&
+        order.eventDate.month == now.month &&
+        order.eventDate.year == now.year;
+
     // Format event time
     final eventTimeStr = DateFormat('h:mm a').format(order.eventDate);
-    
+
     // Format event date if not today
-    final eventDateStr = isToday 
-        ? 'Today' 
-        : DateFormat('EEE, MMM d').format(order.eventDate);
-    
+    final eventDateStr =
+        isToday ? 'Today' : DateFormat('EEE, MMM d').format(order.eventDate);
+
     final countdown = order.eventDate.difference(now);
-    final urgencyColor = countdown.inHours < 3 
-        ? Colors.red 
+    final urgencyColor = countdown.inHours < 3
+        ? Colors.red
         : (countdown.inHours < 24 ? Colors.orange : colorScheme.primary);
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => CateringOrderDetailsScreen(orderId: order.id),
-            ),
+          // Navigate using GoRouter
+          context.goNamed(
+            AppRoute.cateringOrderDetails.name,
+            pathParameters: {'orderId': order.id},
           );
         },
         child: Padding(
@@ -610,14 +708,17 @@ class CateringDashboardScreen extends ConsumerWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: isToday ? urgencyColor : colorScheme.primaryContainer,
+                      color:
+                          isToday ? urgencyColor : colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
                       eventDateStr,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: isToday ? Colors.white : colorScheme.onPrimaryContainer,
+                        color: isToday
+                            ? Colors.white
+                            : colorScheme.onPrimaryContainer,
                       ),
                     ),
                   ),
@@ -641,9 +742,9 @@ class CateringDashboardScreen extends ConsumerWidget {
                   ],
                 ],
               ),
-              
+
               const SizedBox(width: 16),
-              
+
               // Event details
               Expanded(
                 child: Column(
@@ -653,8 +754,8 @@ class CateringDashboardScreen extends ConsumerWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            order.customerName.isNotEmpty 
-                                ? order.customerName 
+                            order.customerName.isNotEmpty
+                                ? order.customerName
                                 : 'Customer #${order.customerId.substring(0, min(6, order.customerId.length))}',
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
@@ -683,8 +784,8 @@ class CateringDashboardScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      order.eventType.isNotEmpty 
-                          ? order.eventType 
+                      order.eventType.isNotEmpty
+                          ? order.eventType
                           : 'Catering Event',
                       style: theme.textTheme.bodyMedium,
                     ),
@@ -742,7 +843,7 @@ class CateringDashboardScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              
+
               // Price column
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -792,11 +893,11 @@ class CateringDashboardScreen extends ConsumerWidget {
       ),
     );
   }
-  
+
   Widget _buildQuickActionsSection(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -808,7 +909,9 @@ class CateringDashboardScreen extends ConsumerWidget {
               label: 'Create New Order',
               color: colorScheme.primary,
               onPressed: () {
-                // Navigate to create order screen
+                // Navigate to create order screen using GoRouter
+                // Once implemented
+                // context.goNamed(AppRoute.createCateringOrder.name);
               },
             ),
             const SizedBox(height: 12),
@@ -818,7 +921,8 @@ class CateringDashboardScreen extends ConsumerWidget {
               label: 'View Today\'s Events',
               color: Colors.orange,
               onPressed: () {
-                // Navigate to today's events screen
+                // Navigate to today's events screen using GoRouter
+                context.goNamed(AppRoute.cateringOrders.name);
               },
             ),
             const SizedBox(height: 12),
@@ -829,6 +933,7 @@ class CateringDashboardScreen extends ConsumerWidget {
               color: Colors.amber,
               onPressed: () {
                 // Navigate to pending confirmations screen
+                // This would be implemented in GoRouter once available
               },
             ),
             const SizedBox(height: 12),
@@ -838,7 +943,8 @@ class CateringDashboardScreen extends ConsumerWidget {
               label: 'Manage Menu Items',
               color: Colors.green,
               onPressed: () {
-                // Navigate to menu items screen
+                // Navigate to menu items screen using GoRouter
+                context.goNamed(AppRoute.cateringItems.name);
               },
             ),
           ],
@@ -846,7 +952,7 @@ class CateringDashboardScreen extends ConsumerWidget {
       ),
     );
   }
-  
+
   Widget _buildActionButton({
     required BuildContext context,
     required IconData icon,
@@ -870,8 +976,8 @@ class CateringDashboardScreen extends ConsumerWidget {
       ),
     );
   }
-  
-    Widget _buildStatusOverviewSection(
+
+  Widget _buildStatusOverviewSection(
     BuildContext context,
     CateringOrder stats,
     ColorScheme colorScheme,
@@ -879,12 +985,12 @@ class CateringDashboardScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final statusCounts = _getStatMap(stats, 'statusCounts');
     final total = stats.guestCount;
-    
+
     // Filter out statuses with zero orders
     final activeStatuses = CateringOrderStatus.values
         .where((status) => (statusCounts[status.name] ?? 0) > 0)
         .toList();
-    
+
     if (activeStatuses.isEmpty) {
       return Card(
         child: Padding(
@@ -909,8 +1015,7 @@ class CateringDashboardScreen extends ConsumerWidget {
         ),
       );
     }
-  
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -918,7 +1023,7 @@ class CateringDashboardScreen extends ConsumerWidget {
           children: activeStatuses.map((status) {
             final count = statusCounts[status.name] ?? 0;
             final percentage = total > 0 ? (count / total * 100) : 0;
-            
+
             return Column(
               children: [
                 Row(
@@ -963,7 +1068,7 @@ class CateringDashboardScreen extends ConsumerWidget {
       ),
     );
   }
-  
+
   Widget _buildRecentOrdersSection(
     BuildContext context,
     WidgetRef ref,
@@ -972,7 +1077,7 @@ class CateringDashboardScreen extends ConsumerWidget {
   ) {
     final recentOrders = summary['recentOrders'] as List<CateringOrder>;
     final theme = Theme.of(context);
-    
+
     if (recentOrders.isEmpty) {
       return Card(
         child: Padding(
@@ -997,7 +1102,7 @@ class CateringDashboardScreen extends ConsumerWidget {
         ),
       );
     }
-    
+
     return Card(
       child: ListView.separated(
         shrinkWrap: true,
@@ -1069,11 +1174,10 @@ class CateringDashboardScreen extends ConsumerWidget {
               ],
             ),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => CateringOrderDetailsScreen(orderId: order.id),
-                ),
+              // Navigate using GoRouter
+              context.goNamed(
+                AppRoute.cateringOrderDetails.name,
+                pathParameters: {'orderId': order.id},
               );
             },
           );
@@ -1081,13 +1185,13 @@ class CateringDashboardScreen extends ConsumerWidget {
       ),
     );
   }
-  
+
   String _formatCountdown(Duration duration) {
     if (duration.isNegative) {
       // Already past the event time
       return 'Happening now';
     }
-    
+
     if (duration.inDays > 0) {
       return 'in ${duration.inDays} day${duration.inDays > 1 ? 's' : ''}';
     } else if (duration.inHours > 0) {

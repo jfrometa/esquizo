@@ -3,17 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_category_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_category_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/utils/icon_mapper.dart';
- 
+
 class CateringCategoryForm extends ConsumerStatefulWidget {
   final CateringCategory? category;
-  
+
   const CateringCategoryForm({
-    super.key, 
+    super.key,
     this.category,
   });
 
   @override
-  ConsumerState<CateringCategoryForm> createState() => _CateringCategoryFormState();
+  ConsumerState<CateringCategoryForm> createState() =>
+      _CateringCategoryFormState();
 }
 
 class _CateringCategoryFormState extends ConsumerState<CateringCategoryForm> {
@@ -87,8 +88,9 @@ class _CateringCategoryFormState extends ConsumerState<CateringCategoryForm> {
           iconName: _selectedIcon,
         );
 
-        final repository = ref.read(cateringCategoryRepositoryProvider.notifier);
-        
+        final repository =
+            ref.read(cateringCategoryRepositoryProvider.notifier);
+
         if (category.id.isEmpty) {
           await repository.addCategory(category);
         } else {
@@ -131,10 +133,10 @@ class _CateringCategoryFormState extends ConsumerState<CateringCategoryForm> {
     final isEdit = widget.category != null;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final mediaQuery = MediaQuery.of(context);
-    final viewInsets = mediaQuery.viewInsets;
-    final isDesktop = mediaQuery.size.width >= 1100;
-    
+    final mediaQuery = MediaQuery.sizeOf(context);
+    final viewInsets = MediaQuery.viewInsetsOf(context);
+    final isDesktop = mediaQuery.width >= 1100;
+
     final form = Form(
       key: _formKey,
       child: Column(
@@ -199,9 +201,9 @@ class _CateringCategoryFormState extends ConsumerState<CateringCategoryForm> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Basic information
           Text(
             'Basic Information',
@@ -210,7 +212,7 @@ class _CateringCategoryFormState extends ConsumerState<CateringCategoryForm> {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Name field
           TextFormField(
             controller: _nameController,
@@ -229,7 +231,7 @@ class _CateringCategoryFormState extends ConsumerState<CateringCategoryForm> {
             },
           ),
           const SizedBox(height: 16),
-          
+
           // Description field
           TextFormField(
             controller: _descriptionController,
@@ -244,7 +246,7 @@ class _CateringCategoryFormState extends ConsumerState<CateringCategoryForm> {
             textCapitalization: TextCapitalization.sentences,
           ),
           const SizedBox(height: 16),
-          
+
           // Tags field
           TextFormField(
             controller: _tagsController,
@@ -256,7 +258,7 @@ class _CateringCategoryFormState extends ConsumerState<CateringCategoryForm> {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Image URL field
           TextFormField(
             controller: _imageUrlController,
@@ -268,7 +270,7 @@ class _CateringCategoryFormState extends ConsumerState<CateringCategoryForm> {
             ),
           ),
           const SizedBox(height: 24),
-          
+
           // Active status
           SwitchListTile(
             title: const Text('Active'),
@@ -284,9 +286,9 @@ class _CateringCategoryFormState extends ConsumerState<CateringCategoryForm> {
               color: _isActive ? colorScheme.primary : null,
             ),
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           // Submit button
           SizedBox(
             width: double.infinity,
@@ -343,7 +345,7 @@ class _CateringCategoryFormState extends ConsumerState<CateringCategoryForm> {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Close button
           Align(
             alignment: Alignment.topRight,
@@ -352,7 +354,7 @@ class _CateringCategoryFormState extends ConsumerState<CateringCategoryForm> {
               onPressed: () => Navigator.pop(context),
             ),
           ),
-          
+
           Expanded(
             child: SingleChildScrollView(
               child: form,
@@ -385,7 +387,10 @@ class _CateringCategoryFormState extends ConsumerState<CateringCategoryForm> {
                   width: 32,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurfaceVariant
+                        .withOpacity(0.4),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -407,7 +412,8 @@ class _CateringCategoryFormState extends ConsumerState<CateringCategoryForm> {
                 Expanded(
                   child: GridView.builder(
                     controller: scrollController,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 4,
                       mainAxisSpacing: 16,
                       crossAxisSpacing: 16,
@@ -418,8 +424,9 @@ class _CateringCategoryFormState extends ConsumerState<CateringCategoryForm> {
                       final iconOption = _iconOptions[index];
                       final iconData = iconOption['icon'] as IconData;
                       final iconName = iconOption['name'] as String;
-                      final isSelected = _selectedIcon == iconData.codePoint.toString();
-                      
+                      final isSelected =
+                          _selectedIcon == iconData.codePoint.toString();
+
                       return InkWell(
                         onTap: () {
                           setState(() {
@@ -432,11 +439,15 @@ class _CateringCategoryFormState extends ConsumerState<CateringCategoryForm> {
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? Theme.of(context).colorScheme.primaryContainer
-                                : Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest
+                                    .withOpacity(0.3),
                             borderRadius: BorderRadius.circular(12),
                             border: isSelected
                                 ? Border.all(
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
                                     width: 2,
                                   )
                                 : null,
@@ -449,16 +460,23 @@ class _CateringCategoryFormState extends ConsumerState<CateringCategoryForm> {
                                 size: 32,
                                 color: isSelected
                                     ? Theme.of(context).colorScheme.primary
-                                    : Theme.of(context).colorScheme.onSurfaceVariant,
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 iconName,
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: isSelected
-                                      ? Theme.of(context).colorScheme.primary
-                                      : null,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: isSelected
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                          : null,
+                                    ),
                                 textAlign: TextAlign.center,
                                 overflow: TextOverflow.ellipsis,
                               ),

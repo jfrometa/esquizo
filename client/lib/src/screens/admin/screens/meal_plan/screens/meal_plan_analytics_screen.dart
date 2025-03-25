@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/meal_plan_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/responsive_layout.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/plans/plans.dart';
- 
+
 import 'package:fl_chart/fl_chart.dart';
 
 // Date range provider
@@ -26,7 +26,7 @@ class MealPlanAnalyticsData {
   final List<MapEntry<DateTime, int>> usageByDate;
   final List<MapEntry<String, int>> topMealPlans;
   final List<MapEntry<String, int>> topItems;
-  
+
   MealPlanAnalyticsData({
     required this.totalMealPlans,
     required this.activeMealPlans,
@@ -40,36 +40,37 @@ class MealPlanAnalyticsData {
 }
 
 // Provider for analytics data
-final mealPlanAnalyticsProvider = FutureProvider<MealPlanAnalyticsData>((ref) async {
+final mealPlanAnalyticsProvider =
+    FutureProvider<MealPlanAnalyticsData>((ref) async {
   final service = ref.watch(mealPlanServiceProvider);
   final dateRange = ref.watch(dateRangeProvider);
-  
+
   // Get all meal plans
   final allPlans = await service.getAllMealPlansStream().first;
-  
+
   // Active plans
   final activePlans = allPlans.where((plan) => plan.isActive).toList();
-  
+
   // Get all consumed items
   final allConsumedItems = <ConsumedItem>[];
   for (final plan in allPlans) {
     final items = await service.getConsumedItemsStream(plan.id).first;
     allConsumedItems.addAll(items);
   }
-  
+
   // Filter by date range
   final filteredItems = allConsumedItems.where((item) {
-    return item.consumedAt.isAfter(dateRange.start) && 
-           item.consumedAt.isBefore(dateRange.end.add(const Duration(days: 1)));
+    return item.consumedAt.isAfter(dateRange.start) &&
+        item.consumedAt.isBefore(dateRange.end.add(const Duration(days: 1)));
   }).toList();
-  
+
   // Calculate total value
   double totalValue = 0;
   for (final plan in allPlans) {
     final price = double.tryParse(plan.price) ?? 0.0;
     totalValue += price;
   }
-  
+
   // Usage by category
   final usageByCategory = <String, int>{};
   for (final item in filteredItems) {
@@ -87,11 +88,11 @@ final mealPlanAnalyticsProvider = FutureProvider<MealPlanAnalyticsData>((ref) as
         categoryName: 'Unknown',
       ),
     );
-    
+
     final category = plan.categoryName;
     usageByCategory[category] = (usageByCategory[category] ?? 0) + 1;
   }
-  
+
   // Usage by date
   final usageByDate = <DateTime, int>{};
   for (final item in filteredItems) {
@@ -102,16 +103,16 @@ final mealPlanAnalyticsProvider = FutureProvider<MealPlanAnalyticsData>((ref) as
     );
     usageByDate[date] = (usageByDate[date] ?? 0) + 1;
   }
-  
+
   // Top meal plans
   final planUsage = <String, int>{};
   for (final item in filteredItems) {
     planUsage[item.mealPlanId] = (planUsage[item.mealPlanId] ?? 0) + 1;
   }
-  
+
   final topPlanIds = planUsage.entries.toList()
     ..sort((a, b) => b.value.compareTo(a.value));
-  
+
   final topMealPlans = <MapEntry<String, int>>[];
   for (final entry in topPlanIds.take(5)) {
     final plan = allPlans.firstWhere(
@@ -127,19 +128,19 @@ final mealPlanAnalyticsProvider = FutureProvider<MealPlanAnalyticsData>((ref) as
         mealsRemaining: 0,
       ),
     );
-    
+
     topMealPlans.add(MapEntry(plan.title, entry.value));
   }
-  
+
   // Top items
   final itemUsage = <String, int>{};
   for (final item in filteredItems) {
     itemUsage[item.itemName] = (itemUsage[item.itemName] ?? 0) + 1;
   }
-  
+
   final topItems = itemUsage.entries.toList()
     ..sort((a, b) => b.value.compareTo(a.value));
-  
+
   return MealPlanAnalyticsData(
     totalMealPlans: allPlans.length,
     activeMealPlans: activePlans.length,
@@ -162,21 +163,21 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
     final dateRange = ref.watch(dateRangeProvider);
     final analyticsAsync = ref.watch(mealPlanAnalyticsProvider);
     final isDesktop = ResponsiveLayout.isDesktop(context);
-    
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Meal Plan Analytics'),
-        actions: [
-          TextButton.icon(
-            icon: const Icon(Icons.calendar_today, size: 16),
-            label: Text(
-              '${DateFormat.yMMMd().format(dateRange.start)} - ${DateFormat.yMMMd().format(dateRange.end)}',
-            ),
-            onPressed: () => _selectDateRange(context, ref),
-          ),
-          const SizedBox(width: 16),
-        ],
-      ),
+      // appBar: AppBar(
+      //   title: const Text('Meal Plan Analytics'),
+      //   actions: [
+      //     TextButton.icon(
+      //       icon: const Icon(Icons.calendar_today, size: 16),
+      //       label: Text(
+      //         '${DateFormat.yMMMd().format(dateRange.start)} - ${DateFormat.yMMMd().format(dateRange.end)}',
+      //       ),
+      //       onPressed: () => _selectDateRange(context, ref),
+      //     ),
+      //     const SizedBox(width: 16),
+      //   ],
+      // ),
       body: analyticsAsync.when(
         data: (data) {
           return SingleChildScrollView(
@@ -184,13 +185,26 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Date range selector aligned to the right
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    icon: const Icon(Icons.calendar_today, size: 16),
+                    label: Text(
+                      '${DateFormat.yMMMd().format(dateRange.start)} - ${DateFormat.yMMMd().format(dateRange.end)}',
+                    ),
+                    onPressed: () => _selectDateRange(context, ref),
+                  ),
+                ),
+                // const SizedBox(width: 16),
+
                 // Summary cards
                 isDesktop
                     ? _buildSummaryCardsDesktop(context, data)
                     : _buildSummaryCardsMobile(context, data),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Usage over time chart
                 Card(
                   elevation: 2,
@@ -212,9 +226,9 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Usage by category and top items
                 isDesktop
                     ? Row(
@@ -236,9 +250,9 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
                           _buildTopItems(context, data),
                         ],
                       ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Top meal plans
                 Card(
                   elevation: 2,
@@ -253,34 +267,34 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 16),
                         ...data.topMealPlans.map((entry) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(entry.key),
-                              ),
-                              Container(
-                                width: 60,
-                                alignment: Alignment.center,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.primary,
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Text(
-                                  '${entry.value}',
-                                  style: TextStyle(
-                                    color: theme.colorScheme.onPrimary,
-                                    fontWeight: FontWeight.bold,
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(entry.key),
                                   ),
-                                ),
+                                  Container(
+                                    width: 60,
+                                    alignment: Alignment.center,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: theme.colorScheme.primary,
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Text(
+                                      '${entry.value}',
+                                      style: TextStyle(
+                                        color: theme.colorScheme.onPrimary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                        )),
+                            )),
                       ],
                     ),
                   ),
@@ -290,14 +304,19 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, stack) {
+          // Debug print the error and stack trace for troubleshooting
+          debugPrint('Error loading analytics data: $error');
+          debugPrint('Stack trace: $stack');
+          return Center(child: Text('Error: $error'));
+        },
       ),
     );
   }
-  
+
   Future<void> _selectDateRange(BuildContext context, WidgetRef ref) async {
     final currentRange = ref.read(dateRangeProvider);
-    
+
     final newRange = await showDateRangePicker(
       context: context,
       firstDate: DateTime(2020),
@@ -307,22 +326,23 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Theme.of(context).colorScheme.primary,
-            ),
+                  primary: Theme.of(context).colorScheme.primary,
+                ),
           ),
           child: child!,
         );
       },
     );
-    
+
     if (newRange != null) {
       ref.read(dateRangeProvider.notifier).state = newRange;
     }
   }
-  
-  Widget _buildSummaryCardsDesktop(BuildContext context, MealPlanAnalyticsData data) {
+
+  Widget _buildSummaryCardsDesktop(
+      BuildContext context, MealPlanAnalyticsData data) {
     final theme = Theme.of(context);
-    
+
     return Row(
       children: [
         Expanded(
@@ -367,8 +387,9 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
       ],
     );
   }
-  
-  Widget _buildSummaryCardsMobile(BuildContext context, MealPlanAnalyticsData data) {
+
+  Widget _buildSummaryCardsMobile(
+      BuildContext context, MealPlanAnalyticsData data) {
     return Column(
       children: [
         Row(
@@ -421,7 +442,7 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
       ],
     );
   }
-  
+
   Widget _buildSummaryCard(
     BuildContext context, {
     required String title,
@@ -430,7 +451,7 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
     required Color color,
   }) {
     final theme = Theme.of(context);
-    
+
     return Card(
       elevation: 2,
       child: Padding(
@@ -438,7 +459,10 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Replace the Row with a more flexible layout that won't overflow
             Row(
+              mainAxisSize: MainAxisSize.min, // Use minimum space needed
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
@@ -453,9 +477,14 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  title,
-                  style: theme.textTheme.titleMedium,
+                // Wrap the text in Flexible to allow it to shrink if needed
+                Flexible(
+                  child: Text(
+                    title,
+                    style: theme.textTheme.titleMedium,
+                    overflow: TextOverflow
+                        .ellipsis, // Add ellipsis if text is too long
+                  ),
                 ),
               ],
             ),
@@ -464,7 +493,6 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
               value,
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: color,
               ),
             ),
           ],
@@ -472,27 +500,28 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
       ),
     );
   }
-  
+
   Widget _buildUsageChart(BuildContext context, MealPlanAnalyticsData data) {
     final theme = Theme.of(context);
-    
+
     if (data.usageByDate.isEmpty) {
       return const Center(
         child: Text('No data available for the selected date range.'),
       );
     }
-    
+
     // Prepare line chart data
     final spots = data.usageByDate.map((entry) {
       final date = entry.key;
       final count = entry.value;
-      
+
       // Convert date to x value (days since start date)
-      final daysSinceStart = date.difference(data.usageByDate.first.key).inDays.toDouble();
-      
+      final daysSinceStart =
+          date.difference(data.usageByDate.first.key).inDays.toDouble();
+
       return FlSpot(daysSinceStart, count.toDouble());
     }).toList();
-    
+
     return LineChart(
       LineChartData(
         gridData: FlGridData(
@@ -518,10 +547,11 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
                 if (value % 5 != 0 && value != 0) {
                   return const SizedBox.shrink();
                 }
-                
+
                 // Convert back to date
-                final date = data.usageByDate.first.key.add(Duration(days: value.toInt()));
-                
+                final date = data.usageByDate.first.key
+                    .add(Duration(days: value.toInt()));
+
                 return Padding(
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text(
@@ -553,7 +583,10 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
         ),
         minX: 0,
         maxX: data.usageByDate.length > 1
-            ? data.usageByDate.last.key.difference(data.usageByDate.first.key).inDays.toDouble()
+            ? data.usageByDate.last.key
+                .difference(data.usageByDate.first.key)
+                .inDays
+                .toDouble()
             : 1,
         minY: 0,
         maxY: spots.map((spot) => spot.y).reduce((a, b) => a > b ? a : b) + 1,
@@ -578,7 +611,8 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
             // tooltipBgColor: theme.colorScheme.surface,
             getTooltipItems: (touchedSpots) {
               return touchedSpots.map((spot) {
-                final date = data.usageByDate.first.key.add(Duration(days: spot.x.toInt()));
+                final date = data.usageByDate.first.key
+                    .add(Duration(days: spot.x.toInt()));
                 return LineTooltipItem(
                   '${DateFormat.yMMMd().format(date)}\n',
                   const TextStyle(fontWeight: FontWeight.bold),
@@ -599,10 +633,11 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
       ),
     );
   }
-  
-  Widget _buildCategoryBreakdown(BuildContext context, MealPlanAnalyticsData data) {
+
+  Widget _buildCategoryBreakdown(
+      BuildContext context, MealPlanAnalyticsData data) {
     final theme = Theme.of(context);
-    
+
     if (data.usageByCategory.isEmpty) {
       return Card(
         elevation: 2,
@@ -624,14 +659,15 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
         ),
       );
     }
-    
+
     // Calculate total for percentages
-    final total = data.usageByCategory.values.fold(0, (sum, item) => sum + item);
-    
+    final total =
+        data.usageByCategory.values.fold(0, (sum, item) => sum + item);
+
     // Sort by usage (descending)
     final sortedCategories = data.usageByCategory.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
-    
+
     return Card(
       elevation: 2,
       child: Padding(
@@ -646,7 +682,7 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             ...sortedCategories.map((entry) {
               final percentage = total > 0 ? (entry.value / total * 100) : 0;
-              
+
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12.0),
                 child: Column(
@@ -672,7 +708,8 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
                     const SizedBox(height: 4),
                     LinearProgressIndicator(
                       value: percentage / 100,
-                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                      backgroundColor:
+                          theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ],
@@ -684,10 +721,10 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
       ),
     );
   }
-  
+
   Widget _buildTopItems(BuildContext context, MealPlanAnalyticsData data) {
     final theme = Theme.of(context);
-    
+
     if (data.topItems.isEmpty) {
       return Card(
         elevation: 2,
@@ -709,7 +746,7 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
         ),
       );
     }
-    
+
     return Card(
       elevation: 2,
       child: Padding(
@@ -723,58 +760,58 @@ class MealPlanAnalyticsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             ...data.topItems.map((entry) => Padding(
-              padding: const EdgeInsets.only(bottom: 12.0),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Center(
-                      child: Icon(
-                        Icons.restaurant_menu,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          entry.key,
-                          style: theme.textTheme.bodyLarge,
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                        Text(
-                          'Used ${entry.value} times',
-                          style: theme.textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Center(
-                      child: Text(
-                        entry.value.toString(),
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                        child: Center(
+                          child: Icon(
+                            Icons.restaurant_menu,
+                            color: theme.colorScheme.primary,
+                          ),
                         ),
                       ),
-                    ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              entry.key,
+                              style: theme.textTheme.bodyLarge,
+                            ),
+                            Text(
+                              'Used ${entry.value} times',
+                              style: theme.textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Center(
+                          child: Text(
+                            entry.value.toString(),
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            )),
+                )),
           ],
         ),
       ),

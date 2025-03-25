@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/meal_plan_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/plans/plans.dart';
-import 'dart:convert'; 
+import 'dart:convert';
 // Using a web-safe scanner approach
 
 class MealPlanScanner extends ConsumerStatefulWidget {
   final Function(MealPlan) onMealPlanScanned;
-  
+
   const MealPlanScanner({
     super.key,
     required this.onMealPlanScanned,
@@ -21,15 +21,15 @@ class _MealPlanScannerState extends ConsumerState<MealPlanScanner> {
   bool _hasScanned = false;
   String? _errorMessage;
   bool _isLoading = false;
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Scan Meal Plan'),
-      ),
+      // appBar: AppBar(
+      //   title: const Text('Scan Meal Plan'),
+      // ),
       body: Stack(
         children: [
           // QR Scanner - using a web-compatible scanner
@@ -37,7 +37,7 @@ class _MealPlanScannerState extends ConsumerState<MealPlanScanner> {
             onScan: _onScan,
             constraints: const BoxConstraints.expand(),
           ),
-          
+
           // Scanning overlay
           Container(
             decoration: BoxDecoration(
@@ -63,7 +63,7 @@ class _MealPlanScannerState extends ConsumerState<MealPlanScanner> {
                     ),
                   ),
                 ),
-                
+
                 // Loading or error indicator
                 if (_isLoading || _errorMessage != null)
                   Positioned(
@@ -84,7 +84,8 @@ class _MealPlanScannerState extends ConsumerState<MealPlanScanner> {
                                 const SizedBox(
                                   width: 16,
                                   height: 16,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2),
                                 ),
                                 const SizedBox(width: 16),
                                 const Text('Processing...'),
@@ -109,7 +110,7 @@ class _MealPlanScannerState extends ConsumerState<MealPlanScanner> {
                             ),
                     ),
                   ),
-                
+
                 // Instruction text
                 Positioned(
                   top: 100,
@@ -134,61 +135,60 @@ class _MealPlanScannerState extends ConsumerState<MealPlanScanner> {
       ),
     );
   }
-  
+
   void _onScan(String qrValue) async {
     if (_hasScanned || _isLoading) return;
-    
+
     _hasScanned = true;
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
-    
+
     try {
       // Parse the QR data
       final qrData = jsonDecode(qrValue) as Map<String, dynamic>;
-      
+
       if (!qrData.containsKey('id')) {
         throw Exception('Invalid QR code format');
       }
-      
+
       final mealPlanId = qrData['id'] as String;
-      
+
       // Fetch the meal plan
       final mealPlanService = ref.read(mealPlanServiceProvider);
       final mealPlan = await mealPlanService.getMealPlanById(mealPlanId);
-      
+
       if (mealPlan == null) {
         throw Exception('Meal plan not found');
       }
-      
+
       if (!mealPlan.isActive) {
         throw Exception('This meal plan is not active');
       }
-      
+
       if (mealPlan.mealsRemaining <= 0) {
         throw Exception('No meals remaining in this plan');
       }
-      
+
       if (mealPlan.isExpired) {
         throw Exception('This meal plan has expired');
       }
-      
+
       // Return the meal plan
       widget.onMealPlanScanned(mealPlan);
-      
+
       // Close the scanner
       if (mounted) {
         Navigator.pop(context);
       }
-      
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
         _isLoading = false;
         _hasScanned = false; // Allow scanning again
       });
-      
+
       // Clear the error after some time
       Future.delayed(const Duration(seconds: 3), () {
         if (mounted) {
@@ -206,19 +206,19 @@ class _MealPlanScannerState extends ConsumerState<MealPlanScanner> {
 class WebQRScanner extends StatelessWidget {
   final Function(String) onScan;
   final BoxConstraints constraints;
-  
+
   const WebQRScanner({
     super.key,
     required this.onScan,
     this.constraints = const BoxConstraints.expand(),
   });
-  
+
   @override
   Widget build(BuildContext context) {
     // For a real implementation, you would use:
     // - On web: HTML5 getUserMedia API with a <video> element
     // - On mobile: A platform-specific implementation
-    
+
     // This is a simplified placeholder that would be replaced with actual web-compatible code
     return ConstrainedBox(
       constraints: constraints,
@@ -235,7 +235,7 @@ class WebQRScanner extends StatelessWidget {
                 size: 48,
               ),
               const SizedBox(height: 16),
-              
+
               // For demo purposes - manual input option
               ElevatedButton(
                 onPressed: () {
@@ -249,10 +249,10 @@ class WebQRScanner extends StatelessWidget {
       ),
     );
   }
-  
+
   void _showManualEntryDialog(BuildContext context) {
     final controller = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

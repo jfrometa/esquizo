@@ -2,14 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/admin_panel/admin_stats_provider.dart';
-
 import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
- import 'package:starter_architecture_flutter_firebase/src/core/services/business_config_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_panel_screen.dart';
- import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/dashboard_status_card.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/services/business_config_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
-
-// Home screen of the admin dashboard
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/dashboard_status_card.dart';
 
 // Home screen of the admin dashboard
 class AdminDashboardHome extends ConsumerStatefulWidget {
@@ -24,16 +20,16 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = MediaQuery.sizeOf(context).width;
     final isDesktop = width > 1200;
     final isTablet = width > 600 && width <= 1200;
-    
+
     // Watch necessary providers
     final businessConfig = ref.watch(businessConfigProvider);
     final orderStats = ref.watch(orderStatsProvider);
     final salesStats = ref.watch(salesStatsProvider);
     final tableStats = ref.watch(tableStatsProvider);
-    
+
     return RefreshIndicator(
       onRefresh: _refreshData,
       child: SingleChildScrollView(
@@ -52,16 +48,16 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Stats Cards
             Text(
               'Business Overview',
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
-            
+
             // Stats Cards Grid
             GridView.count(
               shrinkWrap: true,
@@ -79,7 +75,7 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
                     secondaryStat: '${data.pendingOrders} pending',
                     icon: Icons.receipt_long,
                     color: Colors.blue,
-                    onTap: () => _navigateToSection(context, 2), // Orders screen
+                    onTap: () => context.go('/admin/orders'), // Use GoRouter
                   ),
                   loading: () => const DashboardStatsCard.loading(
                     title: 'Orders',
@@ -92,19 +88,17 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
                     color: Colors.blue,
                   ),
                 ),
-                
+
                 // Sales Stats
                 salesStats.when(
                   data: (data) => DashboardStatsCard(
                     title: 'Sales',
                     primaryStat: '\$${data.totalSales.toStringAsFixed(2)}',
-                    secondaryStat: 'Today: \$${data.todaySales.toStringAsFixed(2)}',
+                    secondaryStat:
+                        'Today: \$${data.todaySales.toStringAsFixed(2)}',
                     icon: Icons.attach_money,
                     color: Colors.green,
-                    onTap: () => {
-
-                      _navigateToSection(context, 6)
-                      }, // Analytics screen
+                    onTap: () => context.go('/admin/analytics'), // Use GoRouter
                   ),
                   loading: () => const DashboardStatsCard.loading(
                     title: 'Sales',
@@ -117,7 +111,7 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
                     color: Colors.green,
                   ),
                 ),
-                
+
                 // Tables Stats
                 tableStats.when(
                   data: (data) => DashboardStatsCard(
@@ -126,7 +120,7 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
                     secondaryStat: '${data.occupiedTables} tables occupied',
                     icon: Icons.table_chart,
                     color: Colors.orange,
-                    onTap: () => _navigateToSection(context, 3), // Tables screen
+                    onTap: () => context.go('/admin/tables'), // Use GoRouter
                   ),
                   loading: () => const DashboardStatsCard.loading(
                     title: 'Tables',
@@ -139,33 +133,34 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
                     color: Colors.orange,
                   ),
                 ),
-                
+
                 // Products Stats
                 ref.watch(productStatsProvider).when(
-                  data: (data) => DashboardStatsCard(
-                    title: 'Products',
-                    primaryStat: '${data.totalProducts}',
-                    secondaryStat: '${data.categories} categories',
-                    icon: Icons.restaurant_menu,
-                    color: Colors.purple,
-                    onTap: () => _navigateToSection(context, 1), // Products screen
-                  ),
-                  loading: () => const DashboardStatsCard.loading(
-                    title: 'Products',
-                    icon: Icons.restaurant_menu,
-                    color: Colors.purple,
-                  ),
-                  error: (_, __) => const DashboardStatsCard.error(
-                    title: 'Products',
-                    icon: Icons.restaurant_menu,
-                    color: Colors.purple,
-                  ),
-                ),
+                      data: (data) => DashboardStatsCard(
+                        title: 'Products',
+                        primaryStat: '${data.totalProducts}',
+                        secondaryStat: '${data.categories} categories',
+                        icon: Icons.restaurant_menu,
+                        color: Colors.purple,
+                        onTap: () =>
+                            context.go('/admin/products'), // Use GoRouter
+                      ),
+                      loading: () => const DashboardStatsCard.loading(
+                        title: 'Products',
+                        icon: Icons.restaurant_menu,
+                        color: Colors.purple,
+                      ),
+                      error: (_, __) => const DashboardStatsCard.error(
+                        title: 'Products',
+                        icon: Icons.restaurant_menu,
+                        color: Colors.purple,
+                      ),
+                    ),
               ],
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Recent Orders Section
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -177,43 +172,46 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
                 TextButton.icon(
                   icon: const Icon(Icons.visibility),
                   label: const Text('View All'),
-                  onPressed: () => _navigateToSection(context, 2), // Orders screen
+                  onPressed: () => context.go('/admin/orders'), // Use GoRouter
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Recent Orders List
             ref.watch(recentOrdersProvider).when(
-              data: (orders) {
-                if (orders.isEmpty) {
-                  return const Card(
+                  data: (orders) {
+                    if (orders.isEmpty) {
+                      return const Card(
+                        child: Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Center(
+                            child: Text('No recent orders'),
+                          ),
+                        ),
+                      );
+                    }
+
+                    return Column(
+                      children: orders
+                          .map((order) => _buildOrderCard(context, order))
+                          .toList(),
+                    );
+                  },
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (_, __) => const Card(
                     child: Padding(
                       padding: EdgeInsets.all(16.0),
-                      child: Center(
-                        child: Text('No recent orders'),
-                      ),
+                      child: Text('Error loading recent orders'),
                     ),
-                  );
-                }
-                
-                return Column(
-                  children: orders.map((order) => _buildOrderCard(context, order)).toList(),
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, __) => const Card(
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text('Error loading recent orders'),
+                  ),
                 ),
-              ),
-            ),
-            
+
             if (isDesktop) ...[
               const SizedBox(height: 24),
-              
+
               // Analytics Preview Section
               Row(
                 children: [
@@ -230,26 +228,23 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
               ),
             ] else ...[
               const SizedBox(height: 24),
-              
               _buildAnalyticsPreview(context),
-              
               const SizedBox(height: 24),
-              
               _buildQuickActions(context),
             ],
-            
+
             const SizedBox(height: 24),
           ],
         ),
       ),
     );
   }
-  
+
   Widget _buildBusinessOverview(BusinessConfig? config) {
     if (config == null) {
       return const SizedBox.shrink();
     }
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -299,18 +294,22 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
                   Text(
                     config.type.toUpperCase(),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                   ),
                   if (config.features.isNotEmpty)
                     Wrap(
                       spacing: 8,
-                      children: config.features.map((feature) => Chip(
-                        label: Text(feature),
-                        padding: EdgeInsets.zero,
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        labelStyle: Theme.of(context).textTheme.bodySmall,
-                      )).toList(),
+                      children: config.features
+                          .map((feature) => Chip(
+                                label: Text(feature),
+                                padding: EdgeInsets.zero,
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                                labelStyle:
+                                    Theme.of(context).textTheme.bodySmall,
+                              ))
+                          .toList(),
                     ),
                 ],
               ),
@@ -318,22 +317,23 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
             ElevatedButton.icon(
               icon: const Icon(Icons.edit),
               label: const Text('Edit'),
-              onPressed: () => _navigateToSection(context, 5), // Business Settings
+              onPressed: () => context.go('/admin/settings'), // Use GoRouter
             ),
           ],
         ),
       ),
     );
   }
-  
+
   Widget _buildOrderCard(BuildContext context, Order order) {
     final theme = Theme.of(context);
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: _getOrderStatusColor(order.status.name).withOpacity(0.2),
+          backgroundColor:
+              _getOrderStatusColor(order.status.name).withOpacity(0.2),
           child: Icon(
             Icons.receipt,
             color: _getOrderStatusColor(order.status.name),
@@ -370,7 +370,7 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
       ),
     );
   }
-  
+
   Widget _buildAnalyticsPreview(BuildContext context) {
     return Card(
       child: Padding(
@@ -386,7 +386,8 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 TextButton(
-                  onPressed: () => _navigateToSection(context, 6), // Analytics
+                  onPressed: () =>
+                      context.go('/admin/analytics'), // Use GoRouter
                   child: const Text('View Full Analytics'),
                 ),
               ],
@@ -409,7 +410,7 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
       ),
     );
   }
-  
+
   Widget _buildQuickActions(BuildContext context) {
     return Card(
       child: Padding(
@@ -426,35 +427,35 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
               context,
               icon: Icons.add_circle_outline,
               label: 'Create New Order',
-              onPressed: () => _navigateToSection(context, 2), // Orders
+              onPressed: () => context.go('/admin/orders'), // Use GoRouter
             ),
             const SizedBox(height: 8),
             _buildActionButton(
               context,
               icon: Icons.add_business,
               label: 'Add Product to Menu',
-              onPressed: () => _navigateToSection(context, 1), // Products
+              onPressed: () => context.go('/admin/products'), // Use GoRouter
             ),
             const SizedBox(height: 8),
             _buildActionButton(
               context,
               icon: Icons.person_add_alt,
               label: 'Add New User',
-              onPressed: () => _navigateToSection(context, 4), // Users
+              onPressed: () => context.go('/admin/users'), // Use GoRouter
             ),
             const SizedBox(height: 8),
             _buildActionButton(
               context,
               icon: Icons.print,
               label: 'Print Reports',
-              onPressed: () => _navigateToSection(context, 6), // Analytics
+              onPressed: () => context.go('/admin/analytics'), // Use GoRouter
             ),
           ],
         ),
       ),
     );
   }
-  
+
   Widget _buildActionButton(
     BuildContext context, {
     required IconData icon,
@@ -474,14 +475,14 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
       ),
     );
   }
-  
+
   Future<void> _refreshData() async {
     if (_isLoading) return;
-    
+
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       // Refresh providers that need real-time updates
       ref.invalidate(businessConfigProvider);
@@ -506,20 +507,12 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
       }
     }
   }
-  
-  void _navigateToSection(BuildContext context, int index) {
-    final parentState = context.findAncestorStateOfType<AdminPanelScreenState>();
-    if (parentState != null) {
-      parentState.setState(() {
-        parentState.selectedIndex = index;
-      });
-    }
-  }
-  
+
   void _navigateToOrderDetails(BuildContext context, String orderId) {
-    context.push('/admin/orders/$orderId');
+    // Use GoRouter to navigate to order details
+    context.go('/admin/orders/$orderId');
   }
-  
+
   Color _getOrderStatusColor(String status) {
     switch (status) {
       case 'pending':
@@ -536,7 +529,7 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
         return Colors.grey;
     }
   }
-  
+
   String _getOrderStatusText(String status) {
     switch (status) {
       case 'pending':

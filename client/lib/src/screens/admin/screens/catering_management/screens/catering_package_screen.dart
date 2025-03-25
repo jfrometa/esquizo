@@ -1,5 +1,3 @@
- 
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/available_items_for_packages_provider.dart';
@@ -9,18 +7,19 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_category_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/utils/icon_mapper.dart';
- 
+
 class CateringPackageScreen extends ConsumerStatefulWidget {
   const CateringPackageScreen({super.key});
 
   @override
-  ConsumerState<CateringPackageScreen> createState() => _CateringPackageScreenState();
+  ConsumerState<CateringPackageScreen> createState() =>
+      _CateringPackageScreenState();
 }
 
 class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
   String? _selectedCategoryId;
   bool _showOnlyPromoted = false;
-  
+
   void _showPackageForm({CateringPackage? package}) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -36,23 +35,11 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
     final categoriesAsyncValue = ref.watch(cateringCategoryRepositoryProvider);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final isTablet = size.width >= 600;
     final isDesktop = size.width >= 1100;
-    
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Catering Packages'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.help_outline),
-            tooltip: 'Help',
-            onPressed: () {
-              // Show help dialog
-            },
-          ),
-        ],
-      ),
       body: Column(
         children: [
           _buildFilterBar(categoriesAsyncValue, colorScheme),
@@ -60,15 +47,16 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
             child: packageAsyncValue.when(
               data: (packages) {
                 // Ensure we're working with CateringPackage objects
-                final List<CateringPackage> validPackages = packages
-                    .whereType<CateringPackage>()
-                    .toList();
-                
+                final List<CateringPackage> validPackages =
+                    packages.whereType<CateringPackage>().toList();
+
                 // Apply filters
-                var filteredPackages = List<CateringPackage>.from(validPackages);
+                var filteredPackages =
+                    List<CateringPackage>.from(validPackages);
                 if (_selectedCategoryId != null) {
                   filteredPackages = filteredPackages
-                      .where((package) => package.categoryIds.contains(_selectedCategoryId))
+                      .where((package) =>
+                          package.categoryIds.contains(_selectedCategoryId))
                       .toList();
                 }
                 if (_showOnlyPromoted) {
@@ -76,13 +64,14 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                       .where((package) => package.isPromoted)
                       .toList();
                 }
-                
+
                 if (filteredPackages.isEmpty) {
                   return _buildEmptyState(colorScheme);
                 }
-                
+
                 if (isDesktop) {
-                  return _buildDesktopPackageList(filteredPackages, colorScheme);
+                  return _buildDesktopPackageList(
+                      filteredPackages, colorScheme);
                 } else if (isTablet) {
                   return _buildTabletPackageGrid(filteredPackages, colorScheme);
                 } else {
@@ -103,7 +92,9 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
     );
   }
 
-  Widget _buildFilterBar(AsyncValue<List<CateringCategory>> categoriesAsyncValue, ColorScheme colorScheme) {
+  Widget _buildFilterBar(
+      AsyncValue<List<CateringCategory>> categoriesAsyncValue,
+      ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
@@ -209,7 +200,8 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
     );
   }
 
-  Widget _buildDesktopPackageList(List<CateringPackage> packages, ColorScheme colorScheme) {
+  Widget _buildDesktopPackageList(
+      List<CateringPackage> packages, ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Card(
@@ -246,8 +238,9 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                       DataColumn(label: Text('Actions')),
                     ],
                     rows: packages.map((package) {
-                      final categories = ref.watch(packageCategoriesProvider(package));
-                      
+                      final categories =
+                          ref.watch(packageCategoriesProvider(package));
+
                       return DataRow(
                         cells: [
                           DataCell(
@@ -256,10 +249,11 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                                 if (package.iconCodePoint != null)
                                   Padding(
                                     padding: const EdgeInsets.only(right: 8.0),
-                                    child:  Icon(
-                                    IconMapper.getIconData(package.iconCodePoint.toString()),
-                                    color: colorScheme.primary,
-                                  ),
+                                    child: Icon(
+                                      IconMapper.getIconData(
+                                          package.iconCodePoint.toString()),
+                                      color: colorScheme.primary,
+                                    ),
                                   ),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -267,12 +261,15 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                                   children: [
                                     Text(
                                       package.name,
-                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
                                     ),
                                     if (package.description.isNotEmpty)
                                       Text(
                                         package.description,
-                                        style: Theme.of(context).textTheme.bodySmall,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                   ],
@@ -303,7 +300,8 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                                   ),
                                   backgroundColor: colorScheme.primaryContainer,
                                   padding: EdgeInsets.zero,
-                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
                                 );
                               }).toList(),
                             ),
@@ -312,7 +310,10 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                             Switch(
                               value: package.isActive,
                               onChanged: (value) {
-                                ref.read(unifiedCateringPackageRepositoryProvider.notifier)
+                                ref
+                                    .read(
+                                        unifiedCateringPackageRepositoryProvider
+                                            .notifier)
                                     .togglePackageStatus(package.id, value);
                               },
                             ),
@@ -321,7 +322,10 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                             Switch(
                               value: package.isPromoted,
                               onChanged: (value) {
-                                ref.read(unifiedCateringPackageRepositoryProvider.notifier)
+                                ref
+                                    .read(
+                                        unifiedCateringPackageRepositoryProvider
+                                            .notifier)
                                     .togglePromoted(package.id, value);
                               },
                             ),
@@ -332,12 +336,14 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                                 IconButton(
                                   icon: const Icon(Icons.edit_outlined),
                                   tooltip: 'Edit',
-                                  onPressed: () => _showPackageForm(package: package),
+                                  onPressed: () =>
+                                      _showPackageForm(package: package),
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.delete_outline),
                                   tooltip: 'Delete',
-                                  onPressed: () => _showDeleteConfirmation(package),
+                                  onPressed: () =>
+                                      _showDeleteConfirmation(package),
                                 ),
                               ],
                             ),
@@ -355,7 +361,8 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
     );
   }
 
-  Widget _buildTabletPackageGrid(List<CateringPackage> packages, ColorScheme colorScheme) {
+  Widget _buildTabletPackageGrid(
+      List<CateringPackage> packages, ColorScheme colorScheme) {
     return GridView.builder(
       padding: const EdgeInsets.all(16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -368,7 +375,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
       itemBuilder: (context, index) {
         final package = packages[index];
         final categories = ref.watch(packageCategoriesProvider(package));
-        
+
         return Card(
           clipBehavior: Clip.antiAlias,
           child: InkWell(
@@ -396,22 +403,25 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                       Expanded(
                         child: Text(
                           package.name,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                       ),
                       Switch(
                         value: package.isActive,
                         onChanged: (value) {
-                          ref.read(unifiedCateringPackageRepositoryProvider.notifier)
+                          ref
+                              .read(unifiedCateringPackageRepositoryProvider
+                                  .notifier)
                               .togglePackageStatus(package.id, value);
                         },
                       ),
                     ],
                   ),
                 ),
-                
+
                 // Content
                 Expanded(
                   child: Padding(
@@ -429,10 +439,11 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
-                                    IconMapper.getIconData(package.iconCodePoint.toString()),
-                                    color:   colorScheme.onPrimaryContainer,
-                                    size: 28,
-                                  ),
+                                  IconMapper.getIconData(
+                                      package.iconCodePoint.toString()),
+                                  color: colorScheme.onPrimaryContainer,
+                                  size: 28,
+                                ),
                               ),
                             const SizedBox(width: 8),
                             Column(
@@ -475,7 +486,8 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                               ),
                               backgroundColor: colorScheme.primaryContainer,
                               padding: EdgeInsets.zero,
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
                             );
                           }).toList(),
                         ),
@@ -483,7 +495,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                     ),
                   ),
                 ),
-                
+
                 // Actions
                 OverflowBar(
                   children: [
@@ -507,14 +519,15 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
     );
   }
 
-  Widget _buildMobilePackageList(List<CateringPackage> packages, ColorScheme colorScheme) {
+  Widget _buildMobilePackageList(
+      List<CateringPackage> packages, ColorScheme colorScheme) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: packages.length,
       itemBuilder: (context, index) {
         final package = packages[index];
         final categories = ref.watch(packageCategoriesProvider(package));
-        
+
         return Card(
           margin: const EdgeInsets.only(bottom: 16),
           clipBehavior: Clip.antiAlias,
@@ -546,7 +559,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                       ],
                     ),
                   ),
-                
+
                 // Content
                 Padding(
                   padding: const EdgeInsets.all(16),
@@ -571,15 +584,16 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                           //   color: colorScheme.onPrimaryContainer,
                           //   size: 28,
                           // ),
-                          
+
                           // Replace with:
                           child: Icon(
-                            IconMapper.getIconData(package.iconCodePoint.toString()),
+                            IconMapper.getIconData(
+                                package.iconCodePoint.toString()),
                             color: colorScheme.onPrimaryContainer,
                             size: 28,
                           ),
                         ),
-                      
+
                       // Details
                       Expanded(
                         child: Column(
@@ -590,9 +604,12 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                                 Expanded(
                                   child: Text(
                                     package.name,
-                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                   ),
                                 ),
                                 Text(
@@ -623,9 +640,12 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                                 const SizedBox(width: 4),
                                 Text(
                                   '${package.items.length} items',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
                                 ),
                               ],
                             ),
@@ -659,11 +679,11 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                     ],
                   ),
                 ),
-                
+
                 // Actions
                 Padding(
                   padding: const EdgeInsets.only(
-                    left: 16, 
+                    left: 16,
                     right: 16,
                     bottom: 8,
                   ),
@@ -676,7 +696,9 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                           Switch(
                             value: package.isActive,
                             onChanged: (value) {
-                              ref.read(unifiedCateringPackageRepositoryProvider.notifier)
+                              ref
+                                  .read(unifiedCateringPackageRepositoryProvider
+                                      .notifier)
                                   .togglePackageStatus(package.id, value);
                             },
                           ),
@@ -728,7 +750,9 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
               foregroundColor: Theme.of(context).colorScheme.onError,
             ),
             onPressed: () {
-              ref.read(unifiedCateringPackageRepositoryProvider.notifier).deletePackage(package.id);
+              ref
+                  .read(unifiedCateringPackageRepositoryProvider.notifier)
+                  .deletePackage(package.id);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('${package.name} has been deleted')),

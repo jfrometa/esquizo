@@ -1,77 +1,83 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/screens/caterig_order_details_screen.dart';  
- 
+
 class CateringOrdersScreen extends ConsumerStatefulWidget {
   const CateringOrdersScreen({super.key});
 
   @override
-  ConsumerState<CateringOrdersScreen> createState() => _CateringOrdersScreenState();
+  ConsumerState<CateringOrdersScreen> createState() =>
+      _CateringOrdersScreenState();
 }
 
-class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> with SingleTickerProviderStateMixin {
+class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   CateringOrderStatus? _statusFilter;
   DateTime? _dateFilter;
   String _searchQuery = '';
-  
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
   }
-  
+
   @override
   void dispose() {
     _tabController.dispose();
     _searchController.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Catering Orders'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'All Orders'),
-            Tab(text: 'Upcoming'),
-            Tab(text: 'Today'),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.date_range),
-            tooltip: 'Filter by Date',
-            onPressed: _selectDateFilter,
-          ),
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            tooltip: 'Filter by Status',
-            onPressed: _showStatusFilterDialog,
-          ),
-          IconButton(
-            icon: const Icon(Icons.help_outline),
-            tooltip: 'Help',
-            onPressed: () {
-              // Show help dialog
-            },
-          ),
-        ],
-      ),
       body: Column(
         children: [
+          // Tab bar with filter icons on the right
+          Row(
+            children: [
+              Expanded(
+                child: TabBar(
+                  controller: _tabController,
+                  tabs: const [
+                    Tab(text: 'All Orders'),
+                    Tab(text: 'Upcoming'),
+                    Tab(text: 'Today'),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.date_range),
+                tooltip: 'Filter by Date',
+                onPressed: _selectDateFilter,
+              ),
+              IconButton(
+                icon: const Icon(Icons.filter_list),
+                tooltip: 'Filter by Status',
+                onPressed: _showStatusFilterDialog,
+              ),
+              IconButton(
+                icon: const Icon(Icons.help_outline),
+                tooltip: 'Help',
+                onPressed: () {
+                  // Show help dialog
+                },
+              ),
+            ],
+          ),
           // Search and filter bar
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -102,7 +108,7 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
               },
             ),
           ),
-          
+
           // Filter chips
           if (_statusFilter != null || _dateFilter != null)
             Padding(
@@ -124,7 +130,8 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
                     ),
                   if (_dateFilter != null)
                     Chip(
-                      label: Text('Date: ${DateFormat('MMM d, yyyy').format(_dateFilter!)}'),
+                      label: Text(
+                          'Date: ${DateFormat('MMM d, yyyy').format(_dateFilter!)}'),
                       deleteIcon: const Icon(Icons.close, size: 18),
                       onDeleted: () {
                         setState(() {
@@ -148,7 +155,7 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
                 ],
               ),
             ),
-          
+
           // Tab content
           Expanded(
             child: TabBarView(
@@ -157,33 +164,51 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
                 // All Orders
                 Consumer(
                   builder: (context, ref, child) {
-                    final ordersAsync = ref.watch(cateringOrderStatisticsProvider);
+                    final ordersAsync =
+                        ref.watch(cateringOrderStatisticsProvider);
                     return ordersAsync.when(
                       data: (orders) => _buildOrdersList(
                         applyFilters([orders]),
                         colorScheme,
                       ),
-                      loading: () => const Center(child: CircularProgressIndicator()),
-                      error: (error, stackTrace) => Center(child: Text('Error: $error')),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (error, stack) {
+                        // Log the error for debugging purposes
+                        debugPrint('Error loading orders: $error');
+                        if (kDebugMode) {
+                          debugPrintStack(stackTrace: stack);
+                        }
+                        return Center(child: Text('Error: $error'));
+                      },
                     );
                   },
                 ),
-                
+
                 // Upcoming Orders
                 Consumer(
                   builder: (context, ref, child) {
-                    final ordersAsync = ref.watch(upcomingCateringOrdersProvider);
+                    final ordersAsync =
+                        ref.watch(upcomingCateringOrdersProvider);
                     return ordersAsync.when(
                       data: (orders) => _buildOrdersList(
                         applyFilters(orders),
                         colorScheme,
                       ),
-                      loading: () => const Center(child: CircularProgressIndicator()),
-                      error: (error, stackTrace) => Center(child: Text('Error: $error')),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (error, stack) {
+                        // Log the error for debugging purposes
+                        debugPrint('Error loading orders: $error');
+                        if (kDebugMode) {
+                          debugPrintStack(stackTrace: stack);
+                        }
+                        return Center(child: Text('Error: $error'));
+                      },
                     );
                   },
                 ),
-                
+
                 // Today's Orders
                 Consumer(
                   builder: (context, ref, child) {
@@ -193,8 +218,16 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
                         applyFilters(orders),
                         colorScheme,
                       ),
-                      loading: () => const Center(child: CircularProgressIndicator()),
-                      error: (error, stackTrace) => Center(child: Text('Error: $error')),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (error, stack) {
+                        // Log the error for debugging purposes
+                        debugPrint('Error loading statistics: $error');
+                        if (kDebugMode) {
+                          debugPrintStack(stackTrace: stack);
+                        }
+                        return Center(child: Text('Error: $error'));
+                      },
                     );
                   },
                 ),
@@ -210,44 +243,54 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
       ),
     );
   }
-  
+
   List<CateringOrder> applyFilters(List<CateringOrder> orders) {
     var filteredOrders = orders;
-    
+
     // Apply status filter if set
     if (_statusFilter != null) {
       filteredOrders = filteredOrders
           .where((order) => order.status == _statusFilter)
           .toList();
     }
-    
+
     // Apply date filter if set
     if (_dateFilter != null) {
-      final startOfDay = DateTime(_dateFilter!.year, _dateFilter!.month, _dateFilter!.day);
+      final startOfDay =
+          DateTime(_dateFilter!.year, _dateFilter!.month, _dateFilter!.day);
       final endOfDay = startOfDay.add(const Duration(days: 1));
-      
+
       filteredOrders = filteredOrders
-          .where((order) => 
-              order.eventDate.isAfter(startOfDay) && 
+          .where((order) =>
+              order.eventDate.isAfter(startOfDay) &&
               order.eventDate.isBefore(endOfDay))
           .toList();
     }
-    
+
     // Apply search filter if set
     if (_searchQuery.isNotEmpty) {
       filteredOrders = filteredOrders
-          .where((order) => 
-              order.customerName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          .where((order) =>
+              order.customerName
+                  .toLowerCase()
+                  .contains(_searchQuery.toLowerCase()) ||
               order.id.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-              order.eventType.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-              order.eventAddress.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-              (order.packageName?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false))
+              order.eventType
+                  .toLowerCase()
+                  .contains(_searchQuery.toLowerCase()) ||
+              order.eventAddress
+                  .toLowerCase()
+                  .contains(_searchQuery.toLowerCase()) ||
+              (order.packageName
+                      ?.toLowerCase()
+                      .contains(_searchQuery.toLowerCase()) ??
+                  false))
           .toList();
     }
-    
+
     return filteredOrders;
   }
-  
+
   Widget _buildOrdersList(List<CateringOrder> orders, ColorScheme colorScheme) {
     if (orders.isEmpty) {
       return Center(
@@ -261,20 +304,26 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
             ),
             const SizedBox(height: 16),
             Text(
-              _statusFilter != null || _dateFilter != null || _searchQuery.isNotEmpty
+              _statusFilter != null ||
+                      _dateFilter != null ||
+                      _searchQuery.isNotEmpty
                   ? 'No Orders Match Your Filters'
                   : 'No Orders Available',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
             Text(
-              _statusFilter != null || _dateFilter != null || _searchQuery.isNotEmpty
+              _statusFilter != null ||
+                      _dateFilter != null ||
+                      _searchQuery.isNotEmpty
                   ? 'Try adjusting your filters'
                   : 'Create your first catering order',
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             const SizedBox(height: 24),
-            if (_statusFilter != null || _dateFilter != null || _searchQuery.isNotEmpty)
+            if (_statusFilter != null ||
+                _dateFilter != null ||
+                _searchQuery.isNotEmpty)
               ElevatedButton.icon(
                 onPressed: () {
                   setState(() {
@@ -297,7 +346,7 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
         ),
       );
     }
-    
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: orders.length,
@@ -307,10 +356,10 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
       },
     );
   }
-  
+
   Widget _buildOrderCard(CateringOrder order, ColorScheme colorScheme) {
     final statusColor = order.status.color;
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       clipBehavior: Clip.antiAlias,
@@ -378,7 +427,7 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
                 ],
               ),
             ),
-            
+
             // Order details
             Padding(
               padding: const EdgeInsets.all(16),
@@ -396,9 +445,12 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
                             if (order.customerName.isNotEmpty)
                               Text(
                                 order.customerName,
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
                               ),
                             const SizedBox(height: 4),
                             Row(
@@ -459,14 +511,17 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: _getPaymentStatusColor(order.paymentStatus, colorScheme).withOpacity(0.1),
+                              color: _getPaymentStatusColor(
+                                      order.paymentStatus, colorScheme)
+                                  .withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
                               _formatPaymentStatus(order.paymentStatus),
                               style: TextStyle(
                                 fontSize: 12,
-                                color: _getPaymentStatusColor(order.paymentStatus, colorScheme),
+                                color: _getPaymentStatusColor(
+                                    order.paymentStatus, colorScheme),
                               ),
                             ),
                           ),
@@ -474,11 +529,12 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 12),
-                  
+
                   // Package info
-                  if (order.packageName != null && order.packageName!.isNotEmpty)
+                  if (order.packageName != null &&
+                      order.packageName!.isNotEmpty)
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -537,9 +593,9 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
                         ],
                       ),
                     ),
-                  
+
                   const SizedBox(height: 12),
-                  
+
                   // Location and time
                   if (order.eventAddress.isNotEmpty) ...[
                     Row(
@@ -564,7 +620,7 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
                     ),
                     const SizedBox(height: 4),
                   ],
-                  
+
                   Row(
                     children: [
                       Icon(
@@ -584,7 +640,7 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
                 ],
               ),
             ),
-            
+
             // Action buttons
             OverflowBar(
               children: [
@@ -593,8 +649,7 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
                   label: const Text('View Details'),
                   onPressed: () => _navigateToOrderDetails(order.id),
                 ),
-                if (!order.status.isTerminal)
-                  _buildStatusUpdateButton(order),
+                if (!order.status.isTerminal) _buildStatusUpdateButton(order),
               ],
             ),
           ],
@@ -602,21 +657,21 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
       ),
     );
   }
-  
+
   Widget _buildStatusUpdateButton(CateringOrder order) {
     final theme = Theme.of(context);
-    
+
     // Get next logical status
     final nextStatus = order.status.allowedTransitions.isNotEmpty
         ? order.status.allowedTransitions.first
         : null;
-    
+
     if (nextStatus == null) {
       return const SizedBox.shrink();
     }
-    
+
     final buttonColor = nextStatus.color;
-    
+
     return FilledButton.icon(
       icon: Icon(nextStatus.icon),
       label: Text('Mark as ${nextStatus.displayName}'),
@@ -627,7 +682,7 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
       onPressed: () => _updateOrderStatus(order.id, nextStatus),
     );
   }
-  
+
   Color _getPaymentStatusColor(String status, ColorScheme colorScheme) {
     switch (status.toLowerCase()) {
       case 'paid':
@@ -644,7 +699,7 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
         return colorScheme.onSurfaceVariant;
     }
   }
-  
+
   String _formatPaymentStatus(String status) {
     switch (status.toLowerCase()) {
       case 'paid':
@@ -661,22 +716,22 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
         return status.isNotEmpty ? status : 'Not Paid';
     }
   }
-  
+
+  // Updated to use GoRouter
   void _navigateToOrderDetails(String orderId) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CateringOrderDetailsScreen(orderId: orderId),
-      ),
+    context.goNamed(
+      AppRoute.cateringOrderDetails.name,
+      pathParameters: {'orderId': orderId},
     );
   }
-  
+
   void _updateOrderStatus(String orderId, CateringOrderStatus newStatus) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Update to ${newStatus.displayName}?'),
-        content: Text('Are you sure you want to update this order to ${newStatus.displayName} status?'),
+        content: Text(
+            'Are you sure you want to update this order to ${newStatus.displayName} status?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -684,7 +739,8 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
           ),
           FilledButton(
             onPressed: () {
-              ref.read(cateringOrderProvider.notifier)
+              ref
+                  .read(cateringOrderProvider.notifier)
                   .updateOrderStatus(orderId, newStatus);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
@@ -700,7 +756,7 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
       ),
     );
   }
-  
+
   void _selectDateFilter() async {
     final selectedDate = await showDatePicker(
       context: context,
@@ -708,14 +764,14 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
       firstDate: DateTime(2020),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
-    
+
     if (selectedDate != null) {
       setState(() {
         _dateFilter = selectedDate;
       });
     }
   }
-  
+
   void _showStatusFilterDialog() {
     showDialog(
       context: context,
@@ -726,8 +782,8 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
           child: ListView(
             shrinkWrap: true,
             children: [
-              ...CateringOrderStatus.values.map((status) => 
-                RadioListTile<CateringOrderStatus>(
+              ...CateringOrderStatus.values.map(
+                (status) => RadioListTile<CateringOrderStatus>(
                   title: Row(
                     children: [
                       Icon(status.icon, color: status.color, size: 20),
@@ -762,9 +818,10 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen> wit
       ),
     );
   }
-  
+
   void _createNewOrder() {
     // Navigate to order creation screen
-    // This would typically show a form to create a new catering order
+    // This would be updated to use GoRouter once implemented
+    // context.goNamed(AppRoute.createCateringOrder.name);
   }
 }
