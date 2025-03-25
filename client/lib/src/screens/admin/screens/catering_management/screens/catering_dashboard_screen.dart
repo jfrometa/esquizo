@@ -4,10 +4,11 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/catering/catering_order_details.dart';
 
 class CateringDashboardScreen extends ConsumerWidget {
   const CateringDashboardScreen({super.key});
@@ -95,7 +96,8 @@ class CateringDashboardScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // Navigate to create new catering order
+          // Navigate to create new catering order using GoRouter
+          // context.goNamed(AppRoute.createCateringOrder.name);
         },
         icon: const Icon(Icons.add),
         label: const Text('New Order'),
@@ -530,7 +532,21 @@ class CateringDashboardScreen extends ConsumerWidget {
             const Spacer(),
             TextButton(
               onPressed: () {
-                // Navigate to full section view
+                // Navigate to full section view using GoRouter
+                // This would be implemented based on the section
+                switch (title) {
+                  case 'Today\'s Events':
+                    context.goNamed(AppRoute.cateringOrders.name);
+                    break;
+                  case 'Upcoming Events':
+                    context.goNamed(AppRoute.cateringOrders.name);
+                    break;
+                  case 'Recent Orders':
+                    context.goNamed(AppRoute.cateringOrders.name);
+                    break;
+                  default:
+                    break;
+                }
               },
               child: const Text('View All'),
             ),
@@ -691,12 +707,10 @@ class CateringDashboardScreen extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  CateringOrderDetailsScreen(orderId: order.id),
-            ),
+          // Navigate using GoRouter
+          context.goNamed(
+            AppRoute.cateringOrderDetails.name,
+            pathParameters: {'orderId': order.id},
           );
         },
         child: Padding(
@@ -915,7 +929,9 @@ class CateringDashboardScreen extends ConsumerWidget {
               label: 'Create New Order',
               color: colorScheme.primary,
               onPressed: () {
-                // Navigate to create order screen
+                // Navigate to create order screen using GoRouter
+                // Once implemented
+                // context.goNamed(AppRoute.createCateringOrder.name);
               },
             ),
             const SizedBox(height: 12),
@@ -925,7 +941,8 @@ class CateringDashboardScreen extends ConsumerWidget {
               label: 'View Today\'s Events',
               color: Colors.orange,
               onPressed: () {
-                // Navigate to today's events screen
+                // Navigate to today's events screen using GoRouter
+                context.goNamed(AppRoute.cateringOrders.name);
               },
             ),
             const SizedBox(height: 12),
@@ -936,6 +953,7 @@ class CateringDashboardScreen extends ConsumerWidget {
               color: Colors.amber,
               onPressed: () {
                 // Navigate to pending confirmations screen
+                // This would be implemented in GoRouter once available
               },
             ),
             const SizedBox(height: 12),
@@ -945,7 +963,8 @@ class CateringDashboardScreen extends ConsumerWidget {
               label: 'Manage Menu Items',
               color: Colors.green,
               onPressed: () {
-                // Navigate to menu items screen
+                // Navigate to menu items screen using GoRouter
+                context.goNamed(AppRoute.cateringItems.name);
               },
             ),
           ],
@@ -1175,12 +1194,10 @@ class CateringDashboardScreen extends ConsumerWidget {
               ],
             ),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      CateringOrderDetailsScreen(orderId: order.id),
-                ),
+              // Navigate using GoRouter
+              context.goNamed(
+                AppRoute.cateringOrderDetails.name,
+                pathParameters: {'orderId': order.id},
               );
             },
           );

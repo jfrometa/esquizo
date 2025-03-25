@@ -6,7 +6,7 @@ part of 'featured_dishes_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$featuredDishesHash() => r'e47e5543a68dd5eff6c85626afc7831da6ff34e9';
+String _$featuredDishesHash() => r'ae5919a9907f3fadd9cdd706e30fda83400f6801';
 
 /// See also [featuredDishes].
 @ProviderFor(featuredDishes)

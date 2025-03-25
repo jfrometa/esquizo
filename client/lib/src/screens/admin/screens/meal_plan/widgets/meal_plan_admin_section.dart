@@ -1,27 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/meal_plan_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/screens/meal_plan_items_screen.dart';
- 
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/screens/meal_plan_analytics_screen.dart';
 
 // This class is used to integrate meal plan functionality with your existing admin panel
 class MealPlanAdminSection extends ConsumerStatefulWidget {
   const MealPlanAdminSection({super.key});
 
   @override
-  ConsumerState<MealPlanAdminSection> createState() => _MealPlanAdminSectionState();
+  ConsumerState<MealPlanAdminSection> createState() =>
+      _MealPlanAdminSectionState();
 }
 
 class _MealPlanAdminSectionState extends ConsumerState<MealPlanAdminSection>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
-  
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -31,7 +33,7 @@ class _MealPlanAdminSectionState extends ConsumerState<MealPlanAdminSection>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Meal Plan Management'),
@@ -40,14 +42,36 @@ class _MealPlanAdminSectionState extends ConsumerState<MealPlanAdminSection>
           tabs: const [
             Tab(text: 'Meal Plans'),
             Tab(text: 'Items'),
+            Tab(text: 'Analytics'),
           ],
         ),
+        actions: [
+          // Export button
+          IconButton(
+            icon: const Icon(Icons.download),
+            onPressed: () => context.go('/admin/meal-plans/export'),
+            tooltip: 'Export Reports',
+          ),
+          // QR Scanner button
+          IconButton(
+            icon: const Icon(Icons.qr_code_scanner),
+            onPressed: () => context.go('/admin/meal-plans/scanner'),
+            tooltip: 'QR Scanner',
+          ),
+          // POS interface button
+          IconButton(
+            icon: const Icon(Icons.point_of_sale),
+            onPressed: () => context.go('/admin/meal-plans/pos'),
+            tooltip: 'POS Interface',
+          ),
+        ],
       ),
       body: TabBarView(
         controller: _tabController,
         children: const [
           MealPlanManagementScreen(),
           MealPlanItemsScreen(),
+          MealPlanAnalyticsScreen(),
         ],
       ),
     );
@@ -59,7 +83,7 @@ class _MealPlanAdminSectionState extends ConsumerState<MealPlanAdminSection>
 void addMealPlanToAdminPanel(List<Widget> screens, List<String> screenTitles) {
   // Add the meal plan section to the admin panel screens
   screens.add(const MealPlanAdminSection());
-  
+
   // Add the title to the screen titles list
   screenTitles.add('Meal Plans');
 }
@@ -74,11 +98,12 @@ Widget buildMealPlanMenuItem({
 }) {
   final theme = Theme.of(context);
   final isSelected = index == selectedIndex;
-  
+
   return Container(
     margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
     decoration: BoxDecoration(
-      color: isSelected ? theme.colorScheme.primaryContainer : Colors.transparent,
+      color:
+          isSelected ? theme.colorScheme.primaryContainer : Colors.transparent,
       borderRadius: BorderRadius.circular(8),
     ),
     child: ListTile(
@@ -105,25 +130,40 @@ Widget buildMealPlanMenuItem({
           : const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
       dense: !isExpanded,
       horizontalTitleGap: 8,
-      onTap: () => onItemSelected(index),
+      onTap: () {
+        onItemSelected(index);
+        context.go('/admin/meal-plans');
+      },
       selected: isSelected,
     ),
   );
 }
 
-// Modify your admin_panel_screen.dart to add Meal Plans
-// Add to your _screens list:
-// const MealPlanAdminSection(),
+// Navigation helper methods
+void navigateToMealPlanManagement(BuildContext context) {
+  context.go('/admin/meal-plans/management');
+}
 
-// Add to your _screenTitles list:
-// 'Meal Plans', 
+void navigateToMealPlanItems(BuildContext context) {
+  context.go('/admin/meal-plans/items');
+}
 
-// Update your SidebarMenu widgets to include:
-/*
-_buildMenuItem(
-  context,
-  index: 7, // Use the correct index
-  icon: Icons.restaurant_menu,
-  title: 'Meal Plans',
-),
-*/
+void navigateToMealPlanAnalytics(BuildContext context) {
+  context.go('/admin/meal-plans/analytics');
+}
+
+void navigateToMealPlanQRCode(BuildContext context, String planId) {
+  context.go('/admin/meal-plans/qr/$planId');
+}
+
+void navigateToMealPlanScanner(BuildContext context) {
+  context.go('/admin/meal-plans/scanner');
+}
+
+void navigateToMealPlanPOS(BuildContext context) {
+  context.go('/admin/meal-plans/pos');
+}
+
+void navigateToMealPlanExport(BuildContext context) {
+  context.go('/admin/meal-plans/export');
+}

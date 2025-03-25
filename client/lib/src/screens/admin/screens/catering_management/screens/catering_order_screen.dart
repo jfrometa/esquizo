@@ -3,10 +3,11 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/screens/caterig_order_details_screen.dart';
 
 class CateringOrdersScreen extends ConsumerStatefulWidget {
   const CateringOrdersScreen({super.key});
@@ -714,12 +715,11 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen>
     }
   }
 
+  // Updated to use GoRouter
   void _navigateToOrderDetails(String orderId) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CateringOrderDetailsScreen(orderId: orderId),
-      ),
+    context.goNamed(
+      AppRoute.cateringOrderDetails.name,
+      pathParameters: {'orderId': orderId},
     );
   }
 
@@ -819,6 +819,7 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen>
 
   void _createNewOrder() {
     // Navigate to order creation screen
-    // This would typically show a form to create a new catering order
+    // This would be updated to use GoRouter once implemented
+    // context.goNamed(AppRoute.createCateringOrder.name);
   }
 }

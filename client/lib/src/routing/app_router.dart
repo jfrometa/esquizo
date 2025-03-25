@@ -7,8 +7,16 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/app_config/app_config_services.dart';
-import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_analitics.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_analitics.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/screens/customer_meal_plan_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/screens/meal_plan_analytics_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/screens/meal_plan_items_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/meal_plan_management_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/screens/meal_plan_qr_code.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/widgets/meal_plan_admin_section.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/widgets/meal_plan_export.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/widgets/staff/pos_meal_plan_scanner.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/widgets/staff/pos_meal_plan_widget.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/authenticated_profile_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/screens/catering_menu/catering_menu_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/landing-page-home.dart';
@@ -20,7 +28,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/catering_quote
 import 'package:starter_architecture_flutter_firebase/src/screens/checkout/checkout_creen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/all_dishes_menu_home/all_dishes_menu_home_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/dish_details/dish_details_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_details.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_details.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/categories.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/home/home.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_startup.dart';
@@ -34,9 +42,17 @@ import 'package:starter_architecture_flutter_firebase/src/routing/navigation_pro
 import 'package:starter_architecture_flutter_firebase/src/routing/not_found_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/scaffold_with_nested_navigation.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_panel_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/routing/unauthorized_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/orders/in_progress_orders_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_setup_screen.dart'; // Add import for AdminSetupScreen
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_setup_screen.dart';
+
+// Add catering management imports
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/catering_management_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/screens/catering_dashboard_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/screens/catering_order_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/screens/catering_package_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/screens/catering_item_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/screens/catering_category_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/screens/caterig_order_details_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -49,6 +65,7 @@ final _cartNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'cart');
 final _adminNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'admin');
 final _OrdersNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'local');
 final _localNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'orders');
+
 enum AppRoute {
   authenticatedProfile,
   onboarding,
@@ -67,15 +84,34 @@ enum AppRoute {
   mealPlan,
   catering,
   cateringMenu,
-  caterings, // If both are used
-  cateringMenuE, // Add this route
-  cateringQuote, // Add this route
+  caterings,
+  cateringMenuE,
+  cateringQuote,
   landing,
   local,
   adminPanel,
-  adminSetup, // Add this route for admin setup
+  adminSetup,
   inProgressOrders,
-  manualQuote
+  manualQuote,
+  // Catering management routes
+  cateringManagement,
+  cateringDashboard,
+  cateringOrders,
+  cateringOrderDetails,
+  cateringPackages,
+  cateringItems,
+  cateringCategories,
+  // Meal plan management routes
+  mealPlanManagement,
+  mealPlanAdminSection,
+  mealPlanItems,
+  mealPlanAnalytics,
+  mealPlanExport,
+  mealPlanQrCode,
+  mealPlanScanner,
+  mealPlanPos,
+  customerMealPlan,
+  mealPlanDetails
 }
 
 @riverpod
@@ -90,34 +126,22 @@ GoRouter goRouter(Ref ref) {
     navigatorKey: _rootNavigatorKey,
     debugLogDiagnostics: true,
     redirect: (context, state) async {
+      // Firebase initialization and authentication logic...
       if (!isFirebaseInitialized) {
         try {
           await Firebase.initializeApp(
               options: DefaultFirebaseOptions.currentPlatform);
         } catch (e) {
-          debugPrint("Error initializing Firebase: $e"); // Log the error
-          return '/error'; // Redirect to error page
+          debugPrint("Error initializing Firebase: $e");
+          return '/error';
         }
       }
 
-      // If the app is still initializing, show the /startup route
       if (appStartupState.isLoading || appStartupState.hasError) {
         return '/startup';
       }
 
       final path = state.uri.path;
-
-      // final onboardingRepository =
-      //     ref.read(onboardingRepositoryProvider).requireValue;
-      // final didCompleteOnboarding = onboardingRepository.isOnboardingComplete();
-
-      // if (!didCompleteOnboarding) {
-      //   if (path != '/onboarding') {
-      //     return '/onboarding';
-      //   }
-      //   return null;
-      // }
-
       final isLoggedIn = authRepository.currentUser != null;
 
       if (isLoggedIn) {
@@ -140,30 +164,28 @@ GoRouter goRouter(Ref ref) {
       return null;
     },
     observers: [
-      // Firebase Analytics Observer
+      // Firebase Analytics Observer...
       FirebaseAnalyticsObserver(
         analytics: FirebaseAnalytics.instance,
         nameExtractor: (RouteSettings settings) {
-          // Extract meaningful names from route settings
           final String? name = settings.name;
-          
-          // Log custom screen_view event with additional parameters
+
           if (name != null && name.isNotEmpty) {
             AnalyticsService.instance.logCustomEvent(
               eventName: 'screen_view',
               parameters: {
                 'screen_name': name,
-                'screen_class': settings.arguments?.runtimeType.toString() ?? 'unknown',
+                'screen_class':
+                    settings.arguments?.runtimeType.toString() ?? 'unknown',
               },
             );
           }
-          
+
           return name;
         },
         onError: (Object error) {
-          // Handle any observer errors
           debugPrint('Analytics navigation observer error: $error');
-          return true; // Allow navigation to continue
+          return true;
         },
       ),
     ],
@@ -191,7 +213,7 @@ GoRouter goRouter(Ref ref) {
           child: CustomSignInScreen(),
         ),
       ),
-      // Add a root-level admin setup route that can be accessed from anywhere
+      // Admin setup route
       GoRoute(
         path: '/admin-setup',
         name: AppRoute.adminSetup.name,
@@ -215,7 +237,7 @@ GoRouter goRouter(Ref ref) {
 List<RouteBase> _getNestedRoutes(String path) {
   switch (path) {
     case '/':
-      return [     // ... your existing routes
+      return [
         GoRoute(
           path: '/catering-menu',
           name: AppRoute.cateringMenuE.name,
@@ -223,23 +245,10 @@ List<RouteBase> _getNestedRoutes(String path) {
         ),
         GoRoute(
           path: '/catering-quote',
-          name: AppRoute.cateringQuote.name, 
+          name: AppRoute.cateringQuote.name,
           builder: (context, state) => const QuoteScreen(),
         ),
       ];
-      //     case '/local':
-      // return [     // ... your existing routes
-      //   GoRoute(
-      //     path: '/locales',
-      //     name: AppRoute.local.name,
-      //     builder: (context, state) => const QRCodeScreen(),
-      //   ),
-        // GoRoute(
-        //   path: '/catering-quote',
-        //   name: AppRoute.cateringQuote.name, 
-        //   builder: (context, state) => const QuoteScreen(),
-        // ),
-      // ];
     case '/menu':
       return [
         GoRoute(
@@ -346,7 +355,7 @@ List<RouteBase> _getNestedRoutes(String path) {
           ],
         ),
       ];
-    
+
     case '/carrito':
       return [
         GoRoute(
@@ -364,13 +373,128 @@ List<RouteBase> _getNestedRoutes(String path) {
       ];
     case '/admin':
       return [
-        // Add the setup route to the admin nested routes as well
+        // Admin setup nested route
         GoRoute(
           path: 'setup',
-          name: 'adminSetupNested', // Different name to avoid conflict
+          name: 'adminSetupNested',
           pageBuilder: (context, state) => const NoTransitionPage(
             child: AdminSetupScreen(),
           ),
+        ),
+        // Catering management routes
+        GoRoute(
+          path: 'catering',
+          name: AppRoute.cateringManagement.name,
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: CateringManagementScreen(),
+          ),
+          routes: [
+            // Catering dashboard route (default route)
+            GoRoute(
+              path: 'dashboard',
+              name: AppRoute.cateringDashboard.name,
+              builder: (context, state) => const CateringDashboardScreen(),
+            ),
+            // Catering orders route
+            GoRoute(
+              path: 'orders',
+              name: AppRoute.cateringOrders.name,
+              builder: (context, state) => const CateringOrdersScreen(),
+              routes: [
+                // Order details route
+                GoRoute(
+                  path: ':orderId',
+                  name: AppRoute.cateringOrderDetails.name,
+                  builder: (context, state) {
+                    final orderId = state.pathParameters['orderId']!;
+                    return CateringOrderDetailsScreen(orderId: orderId);
+                  },
+                ),
+              ],
+            ),
+            // Catering packages route
+            GoRoute(
+              path: 'packages',
+              name: AppRoute.cateringPackages.name,
+              builder: (context, state) => const CateringPackageScreen(),
+            ),
+            // Catering items route
+            GoRoute(
+              path: 'items',
+              name: AppRoute.cateringItems.name,
+              builder: (context, state) => const CateringItemScreen(),
+            ),
+            // Catering categories route
+            GoRoute(
+              path: 'categories',
+              name: AppRoute.cateringCategories.name,
+              builder: (context, state) => const CateringCategoryScreen(),
+            ),
+          ],
+        ),
+        // Meal plan management routes
+        GoRoute(
+          path: 'meal-plans',
+          name: AppRoute.mealPlanManagement.name,
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: MealPlanAdminSection(),
+          ),
+          routes: [
+            // Meal plan management dashboard
+            GoRoute(
+              path: 'management',
+              name: AppRoute.mealPlanAdminSection.name,
+              builder: (context, state) => const MealPlanManagementScreen(),
+            ),
+            // Meal plan items route
+            GoRoute(
+              path: 'items',
+              name: AppRoute.mealPlanItems.name,
+              builder: (context, state) => const MealPlanItemsScreen(),
+            ),
+            // Meal plan analytics route
+            GoRoute(
+              path: 'analytics',
+              name: AppRoute.mealPlanAnalytics.name,
+              builder: (context, state) => const MealPlanAnalyticsScreen(),
+            ),
+            // Meal plan export route
+            GoRoute(
+              path: 'export',
+              name: AppRoute.mealPlanExport.name,
+              builder: (context, state) => const MealPlanExportScreen(),
+            ),
+            // Meal plan QR code route
+            GoRoute(
+              path: 'qr/:planId',
+              name: AppRoute.mealPlanQrCode.name,
+              builder: (context, state) {
+                final planId = state.pathParameters['planId']!;
+                return MealPlanQRCode(mealPlanId: planId);
+              },
+            ),
+            // Meal plan scanner route
+            GoRoute(
+              path: 'scanner',
+              name: AppRoute.mealPlanScanner.name,
+              builder: (context, state) {
+                return MealPlanScanner(
+                  onMealPlanScanned: (mealPlan) =>
+                      context.go('/admin/meal-plans'),
+                );
+              },
+            ),
+            // Meal plan POS widget route
+            GoRoute(
+              path: 'pos',
+              name: AppRoute.mealPlanPos.name,
+              builder: (context, state) {
+                return POSMealPlanWidget(
+                  onMealPlanUsed: (item) {},
+                );
+              },
+            ),
+          ],
         ),
       ];
     case '/cuenta':
@@ -383,6 +507,22 @@ List<RouteBase> _getNestedRoutes(String path) {
             return AuthenticatedProfileScreen(user: user!);
           },
         ),
+        // Customer meal plans route in account section
+        GoRoute(
+          path: 'meal-plans',
+          name: AppRoute.customerMealPlan.name,
+          builder: (context, state) => const CustomerMealPlanScreen(),
+          routes: [
+            GoRoute(
+              path: ':planId',
+              name: AppRoute.mealPlanDetails.name,
+              builder: (context, state) {
+                final planId = state.pathParameters['planId']!;
+                return PlanDetailsScreen(planId: planId);
+              },
+            ),
+          ],
+        ),
       ];
     default:
       return [];
@@ -393,8 +533,6 @@ GlobalKey<NavigatorState> _getNavigatorKey(String path) {
   switch (path) {
     case '/':
       return _landingNavigatorKey;
-    // case '/local':
-    //   return _localNavigatorKey;
     case '/menu':
       return _homeNavigatorKey;
     case '/carrito':
@@ -413,7 +551,6 @@ GlobalKey<NavigatorState> _getNavigatorKey(String path) {
 String _getRouteName(String path) {
   final pathToRoute = {
     '/': AppRoute.landing.name,
-    // '/local': AppRoute.local.name,
     '/menu': AppRoute.home.name,
     '/carrito': AppRoute.homecart.name,
     '/cuenta': AppRoute.profile.name,
@@ -427,8 +564,6 @@ Widget _getDestinationScreen(String path) {
   switch (path) {
     case '/':
       return const ResponsiveLandingPage();
-    // case '/local':
-    //   return const MenuHome(); // QRCodeScreen();
     case '/menu':
       return const MenuScreen();
     case '/carrito':
@@ -440,9 +575,8 @@ Widget _getDestinationScreen(String path) {
         builder: (context, ref, _) {
           final isAdmin = ref.watch(isAdminProvider);
           return isAdmin.when(
-            data: (isAdmin) => isAdmin
-                ? const AdminPanelScreen()
-                : const UnauthorizedScreen(),
+            data: (isAdmin) =>
+                isAdmin ? const AdminPanelScreen() : const UnauthorizedScreen(),
             loading: () => const CircularProgressIndicator(),
             error: (_, __) => const UnauthorizedScreen(),
           );
@@ -469,4 +603,30 @@ StatefulShellBranch _buildBranch(NavigationDestinationItem destination) {
       ),
     ],
   );
+}
+
+// Include bare minimum of UnauthorizedScreen to make the code complete
+class UnauthorizedScreen extends StatelessWidget {
+  const UnauthorizedScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.lock, size: 64),
+            const SizedBox(height: 16),
+            const Text('You do not have access to this area'),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => context.go('/'),
+              child: const Text('Go to Home'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

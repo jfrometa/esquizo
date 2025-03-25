@@ -4,29 +4,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
 
 class CateringOrderDetailsScreen extends ConsumerStatefulWidget {
   final String orderId;
-  
+
   const CateringOrderDetailsScreen({
     super.key,
     required this.orderId,
   });
 
   @override
-  ConsumerState<CateringOrderDetailsScreen> createState() => _CateringOrderDetailsScreenState();
+  ConsumerState<CateringOrderDetailsScreen> createState() =>
+      _CateringOrderDetailsScreenState();
 }
 
-class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetailsScreen> {
+class _CateringOrderDetailsScreenState
+    extends ConsumerState<CateringOrderDetailsScreen> {
   bool _isLoading = false;
-  
+
   @override
   Widget build(BuildContext context) {
     final orderAsync = ref.watch(rawCateringOrderStream(widget.orderId));
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Order Details'),
@@ -88,8 +90,9 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
       ),
     );
   }
-  
-  Widget _buildOrderDetails(CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
+
+  Widget _buildOrderDetails(
+      CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(cateringOrderProvider);
@@ -99,49 +102,49 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
         children: [
           // Status Card
           _buildStatusCard(order, theme, colorScheme),
-          
+
           const SizedBox(height: 24),
-          
+
           // Order Info Card
           _buildOrderInfoCard(order, theme, colorScheme),
-          
+
           const SizedBox(height: 24),
-          
+
           // Customer Info Card
           _buildCustomerInfoCard(order, theme, colorScheme),
-          
+
           const SizedBox(height: 24),
-          
+
           // Items Card
           _buildOrderItemsCard(order, theme, colorScheme),
-          
+
           const SizedBox(height: 24),
-          
+
           // Event Details Card
           _buildEventDetailsCard(order, theme, colorScheme),
-          
+
           const SizedBox(height: 24),
-          
+
           // Timing Card
           _buildTimingCard(order, theme, colorScheme),
-          
+
           const SizedBox(height: 24),
-          
+
           // Payment Card
           _buildPaymentCard(order, theme, colorScheme),
-          
+
           const SizedBox(height: 24),
-          
+
           // Assignment Card
           _buildAssignmentCard(order, theme, colorScheme),
-          
+
           const SizedBox(height: 24),
-          
+
           // Status History Card (if available)
           // _buildStatusHistoryCard(order, theme, colorScheme),
-          
+
           const SizedBox(height: 32),
-          
+
           if (!order.status.isTerminal)
             SizedBox(
               width: double.infinity,
@@ -151,16 +154,17 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
                 label: const Text('Update Status'),
               ),
             ),
-          
+
           const SizedBox(height: 16),
         ],
       ),
     );
   }
-  
-  Widget _buildStatusCard(CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
+
+  Widget _buildStatusCard(
+      CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
     final statusColor = order.status.color;
-    
+
     return Card(
       elevation: 2,
       child: Padding(
@@ -238,8 +242,9 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
       ),
     );
   }
-  
-  Widget _buildOrderInfoCard(CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
+
+  Widget _buildOrderInfoCard(
+      CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -310,15 +315,17 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: order.dietaryRestrictions.map((restriction) => 
-                  Chip(
-                    label: Text(restriction),
-                    backgroundColor: colorScheme.primaryContainer,
-                    labelStyle: TextStyle(
-                      color: colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                ).toList(),
+                children: order.dietaryRestrictions
+                    .map(
+                      (restriction) => Chip(
+                        label: Text(restriction),
+                        backgroundColor: colorScheme.primaryContainer,
+                        labelStyle: TextStyle(
+                          color: colorScheme.onPrimaryContainer,
+                        ),
+                      ),
+                    )
+                    .toList(),
               ),
             ],
             if (order.specialInstructions.isNotEmpty) ...[
@@ -345,8 +352,9 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
       ),
     );
   }
-  
-  Widget _buildCustomerInfoCard(CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
+
+  Widget _buildCustomerInfoCard(
+      CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -381,7 +389,9 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
             const SizedBox(height: 8),
             _buildInfoRow(
               'Email:',
-              order.customerEmail.isEmpty ? 'Not provided' : order.customerEmail,
+              order.customerEmail.isEmpty
+                  ? 'Not provided'
+                  : order.customerEmail,
               theme,
               colorScheme,
               customChild: order.customerEmail.isNotEmpty
@@ -407,7 +417,9 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
             const SizedBox(height: 8),
             _buildInfoRow(
               'Phone:',
-              order.customerPhone.isEmpty ? 'Not provided' : order.customerPhone,
+              order.customerPhone.isEmpty
+                  ? 'Not provided'
+                  : order.customerPhone,
               theme,
               colorScheme,
               customChild: order.customerPhone.isNotEmpty
@@ -449,14 +461,13 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
       ),
     );
   }
-  
-  Widget _buildOrderItemsCard(CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
+
+  Widget _buildOrderItemsCard(
+      CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
     final currencyFormat = NumberFormat.currency(symbol: '\$');
-    final subtotal = order.items.fold<double>(
-      0, 
-      (sum, item) => sum + (item.price * item.quantity)
-    );
-    
+    final subtotal = order.items
+        .fold<double>(0, (sum, item) => sum + (item.price * item.quantity));
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -482,8 +493,8 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
               ],
             ),
             const Divider(height: 24),
-            ...order.items.map((item) => 
-              Padding(
+            ...order.items.map(
+              (item) => Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -522,20 +533,24 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
                           if (item.modifications.isNotEmpty)
                             Wrap(
                               spacing: 4,
-                              children: item.modifications.map((mod) => 
-                                Chip(
-                                  label: Text(
-                                    mod,
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: colorScheme.onSurfaceVariant,
+                              children: item.modifications
+                                  .map(
+                                    (mod) => Chip(
+                                      label: Text(
+                                        mod,
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: colorScheme.onSurfaceVariant,
+                                        ),
+                                      ),
+                                      padding: EdgeInsets.zero,
+                                      materialTapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                      backgroundColor:
+                                          colorScheme.surfaceContainerHighest,
                                     ),
-                                  ),
-                                  padding: EdgeInsets.zero,
-                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                  backgroundColor: colorScheme.surfaceContainerHighest,
-                                ),
-                              ).toList(),
+                                  )
+                                  .toList(),
                             ),
                         ],
                       ),
@@ -620,8 +635,9 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
       ),
     );
   }
-  
-  Widget _buildEventDetailsCard(CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
+
+  Widget _buildEventDetailsCard(
+      CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -706,8 +722,9 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
       ),
     );
   }
-  
-  Widget _buildTimingCard(CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
+
+  Widget _buildTimingCard(
+      CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -800,10 +817,11 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
       ),
     );
   }
-  
-  Widget _buildPaymentCard(CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
+
+  Widget _buildPaymentCard(
+      CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
     final currencyFormat = NumberFormat.currency(symbol: '\$');
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -852,13 +870,16 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: _getPaymentStatusColor(order.paymentStatus, colorScheme).withOpacity(0.2),
+                  color:
+                      _getPaymentStatusColor(order.paymentStatus, colorScheme)
+                          .withOpacity(0.2),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
                   _formatPaymentStatus(order.paymentStatus),
                   style: TextStyle(
-                    color: _getPaymentStatusColor(order.paymentStatus, colorScheme),
+                    color: _getPaymentStatusColor(
+                        order.paymentStatus, colorScheme),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -891,10 +912,11 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
       ),
     );
   }
-  
-  Widget _buildAssignmentCard(CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
+
+  Widget _buildAssignmentCard(
+      CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
     final bool isAssigned = order.assignedStaffId != null;
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -1001,7 +1023,7 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
       ),
     );
   }
-  
+
   Widget _buildInfoRow(
     String label,
     String value,
@@ -1023,15 +1045,16 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
           ),
         ),
         Expanded(
-          child: customChild ?? Text(
-            value,
-            style: valueTextStyle ?? theme.textTheme.bodyMedium,
-          ),
+          child: customChild ??
+              Text(
+                value,
+                style: valueTextStyle ?? theme.textTheme.bodyMedium,
+              ),
         ),
       ],
     );
   }
-  
+
   Color _getPaymentStatusColor(String status, ColorScheme colorScheme) {
     switch (status.toLowerCase()) {
       case 'paid':
@@ -1048,7 +1071,7 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
         return colorScheme.onSurfaceVariant;
     }
   }
-  
+
   String _formatPaymentStatus(String status) {
     switch (status.toLowerCase()) {
       case 'paid':
@@ -1065,117 +1088,122 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
         return status.isNotEmpty ? status : 'Not Paid';
     }
   }
-  
+
   void _showUpdateStatusDialog() {
     showDialog(
       context: context,
       builder: (context) => Consumer(
         builder: (context, ref, _) {
           final orderAsync = ref.watch(rawCateringOrderStream(widget.orderId));
-          
+
           return orderAsync.when(
             data: (order) {
               final allowedStatuses = order.status.allowedTransitions;
               CateringOrderStatus? selectedStatus;
-              
-              return StatefulBuilder(
-                builder: (context, setState) {
-                  return AlertDialog(
-                    title: const Text('Update Order Status'),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Current status: ${order.status.displayName}'),
-                        const SizedBox(height: 16),
-                        const Text('Select new status:'),
-                        const SizedBox(height: 8),
-                        if (allowedStatuses.isEmpty)
-                          const Text(
-                            'No further status changes available for this order.',
-                            style: TextStyle(fontStyle: FontStyle.italic),
-                          )
-                        else
-                          SizedBox(
-                            width: double.maxFinite,
-                            child: DropdownButtonFormField<CateringOrderStatus>(
-                              value: selectedStatus,
-                              isExpanded: true,
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                              ),
-                              items: allowedStatuses.map((status) => 
-                                DropdownMenuItem<CateringOrderStatus>(
-                                  value: status,
-                                  child: Row(
-                                    children: [
-                                      Icon(status.icon, color: status.color, size: 18),
-                                      const SizedBox(width: 8),
-                                      Text(status.displayName),
-                                    ],
-                                  ),
-                                ),
-                              ).toList(),
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedStatus = value;
-                                });
-                              },
+
+              return StatefulBuilder(builder: (context, setState) {
+                return AlertDialog(
+                  title: const Text('Update Order Status'),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Current status: ${order.status.displayName}'),
+                      const SizedBox(height: 16),
+                      const Text('Select new status:'),
+                      const SizedBox(height: 8),
+                      if (allowedStatuses.isEmpty)
+                        const Text(
+                          'No further status changes available for this order.',
+                          style: TextStyle(fontStyle: FontStyle.italic),
+                        )
+                      else
+                        SizedBox(
+                          width: double.maxFinite,
+                          child: DropdownButtonFormField<CateringOrderStatus>(
+                            value: selectedStatus,
+                            isExpanded: true,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
                             ),
+                            items: allowedStatuses
+                                .map(
+                                  (status) =>
+                                      DropdownMenuItem<CateringOrderStatus>(
+                                    value: status,
+                                    child: Row(
+                                      children: [
+                                        Icon(status.icon,
+                                            color: status.color, size: 18),
+                                        const SizedBox(width: 8),
+                                        Text(status.displayName),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedStatus = value;
+                              });
+                            },
                           ),
-                      ],
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancel'),
-                      ),
-                      FilledButton(
-                        onPressed: selectedStatus == null
-                            ? null
-                            : () async {
-                                Navigator.pop(context);
-                                
-                                setState(() {
-                                  _isLoading = true;
-                                });
-                                
-                                try {
-                                  await ref.read(cateringOrderProvider.notifier)
-                                      .updateOrderStatus(widget.orderId, selectedStatus!);
-                                      
-                                  if (mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Status updated to ${selectedStatus!.displayName}'),
-                                        behavior: SnackBarBehavior.floating,
-                                      ),
-                                    );
-                                  }
-                                } catch (e) {
-                                  if (mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Error: $e'),
-                                        backgroundColor: Colors.red,
-                                        behavior: SnackBarBehavior.floating,
-                                      ),
-                                    );
-                                  }
-                                } finally {
-                                  if (mounted) {
-                                    setState(() {
-                                      _isLoading = false;
-                                    });
-                                  }
-                                }
-                              },
-                        child: const Text('Update Status'),
-                      ),
+                        ),
                     ],
-                  );
-                }
-              );
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                    FilledButton(
+                      onPressed: selectedStatus == null
+                          ? null
+                          : () async {
+                              Navigator.pop(context);
+
+                              setState(() {
+                                _isLoading = true;
+                              });
+
+                              try {
+                                await ref
+                                    .read(cateringOrderProvider.notifier)
+                                    .updateOrderStatus(
+                                        widget.orderId, selectedStatus!);
+
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          'Status updated to ${selectedStatus!.displayName}'),
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Error: $e'),
+                                      backgroundColor: Colors.red,
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
+                                }
+                              } finally {
+                                if (mounted) {
+                                  setState(() {
+                                    _isLoading = false;
+                                  });
+                                }
+                              }
+                            },
+                      child: const Text('Update Status'),
+                    ),
+                  ],
+                );
+              });
             },
             loading: () => const AlertDialog(
               content: Center(
@@ -1198,115 +1226,125 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
       ),
     );
   }
-  
+
   void _showUpdatePaymentDialog() {
     showDialog(
       context: context,
       builder: (context) => Consumer(
         builder: (context, ref, _) {
           final orderAsync = ref.watch(rawCateringOrderStream(widget.orderId));
-          
+
           return orderAsync.when(
             data: (order) {
               String selectedStatus = order.paymentStatus;
-              final paymentIdController = TextEditingController(text: order.paymentId);
-              
-              return StatefulBuilder(
-                builder: (context, setState) {
-                  return AlertDialog(
-                    title: const Text('Update Payment Status'),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Current status: ${_formatPaymentStatus(order.paymentStatus)}'),
-                        const SizedBox(height: 16),
-                        const Text('Select new status:'),
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          width: double.maxFinite,
-                          child: DropdownButtonFormField<String>(
-                            value: selectedStatus,
-                            isExpanded: true,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                            items: ['pending', 'paid', 'partial', 'refunded', 'failed'].map((status) => 
-                              DropdownMenuItem<String>(
-                                value: status,
-                                child: Text(_formatPaymentStatus(status)),
-                              ),
-                            ).toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                selectedStatus = value!;
-                              });
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: paymentIdController,
+              final paymentIdController =
+                  TextEditingController(text: order.paymentId);
+
+              return StatefulBuilder(builder: (context, setState) {
+                return AlertDialog(
+                  title: const Text('Update Payment Status'),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                          'Current status: ${_formatPaymentStatus(order.paymentStatus)}'),
+                      const SizedBox(height: 16),
+                      const Text('Select new status:'),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.maxFinite,
+                        child: DropdownButtonFormField<String>(
+                          value: selectedStatus,
+                          isExpanded: true,
                           decoration: const InputDecoration(
-                            labelText: 'Payment ID (Optional)',
                             border: OutlineInputBorder(),
                           ),
+                          items: [
+                            'pending',
+                            'paid',
+                            'partial',
+                            'refunded',
+                            'failed'
+                          ]
+                              .map(
+                                (status) => DropdownMenuItem<String>(
+                                  value: status,
+                                  child: Text(_formatPaymentStatus(status)),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedStatus = value!;
+                            });
+                          },
                         ),
-                      ],
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancel'),
                       ),
-                      FilledButton(
-                        onPressed: () async {
-                          Navigator.pop(context);
-                          
-                          setState(() {
-                            _isLoading = true;
-                          });
-                          
-                          try {
-                            await ref.read(cateringOrderProvider.notifier)
-                                .updatePaymentStatus(
-                                  widget.orderId, 
-                                  selectedStatus,
-                                  paymentIdController.text.trim(),
-                                );
-                                
-                            if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Payment status updated to ${_formatPaymentStatus(selectedStatus)}'),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                            }
-                          } catch (e) {
-                            if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Error: $e'),
-                                  backgroundColor: Colors.red,
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                            }
-                          } finally {
-                            if (mounted) {
-                              setState(() {
-                                _isLoading = false;
-                              });
-                            }
-                          }
-                        },
-                        child: const Text('Update Payment'),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: paymentIdController,
+                        decoration: const InputDecoration(
+                          labelText: 'Payment ID (Optional)',
+                          border: OutlineInputBorder(),
+                        ),
                       ),
                     ],
-                  );
-                }
-              );
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                    FilledButton(
+                      onPressed: () async {
+                        Navigator.pop(context);
+
+                        setState(() {
+                          _isLoading = true;
+                        });
+
+                        try {
+                          await ref
+                              .read(cateringOrderProvider.notifier)
+                              .updatePaymentStatus(
+                                widget.orderId,
+                                selectedStatus,
+                                paymentIdController.text.trim(),
+                              );
+
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                    'Payment status updated to ${_formatPaymentStatus(selectedStatus)}'),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Error: $e'),
+                                backgroundColor: Colors.red,
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+                        } finally {
+                          if (mounted) {
+                            setState(() {
+                              _isLoading = false;
+                            });
+                          }
+                        }
+                      },
+                      child: const Text('Update Payment'),
+                    ),
+                  ],
+                );
+              });
             },
             loading: () => const AlertDialog(
               content: Center(
@@ -1329,7 +1367,7 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
       ),
     );
   }
-  
+
   void _showAssignmentDialog() {
     // This would typically fetch a list of staff members from a provider
     // and display them for selection
@@ -1337,7 +1375,8 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Assign Staff'),
-        content: const Text('Staff assignment functionality would be implemented here.'),
+        content: const Text(
+            'Staff assignment functionality would be implemented here.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1347,13 +1386,14 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
       ),
     );
   }
-  
+
   void _showRemoveAssignmentDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Remove Assignment'),
-        content: const Text('Are you sure you want to remove the staff assignment?'),
+        content:
+            const Text('Are you sure you want to remove the staff assignment?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1374,7 +1414,7 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
       ),
     );
   }
-  
+
   void _printOrder() {
     // Print order functionality
     ScaffoldMessenger.of(context).showSnackBar(
@@ -1384,7 +1424,7 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
       ),
     );
   }
-  
+
   void _archiveOrder() {
     // Archive order functionality
     ScaffoldMessenger.of(context).showSnackBar(
@@ -1394,13 +1434,14 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
       ),
     );
   }
-  
+
   void _confirmDeleteOrder() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Order'),
-        content: const Text('Are you sure you want to delete this order? This action cannot be undone.'),
+        content: const Text(
+            'Are you sure you want to delete this order? This action cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1411,7 +1452,7 @@ class _CateringOrderDetailsScreenState extends ConsumerState<CateringOrderDetail
               // Delete order
               Navigator.pop(context);
               Navigator.pop(context); // Go back to previous screen
-              
+
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Order deleted'),
