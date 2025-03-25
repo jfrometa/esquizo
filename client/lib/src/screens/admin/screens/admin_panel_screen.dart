@@ -2,13 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/user/auth_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/admin_panel/admin_stats_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.dart';
 import 'dart:async';
 
 class AdminPanelScreen extends ConsumerStatefulWidget {
-  const AdminPanelScreen({super.key});
+  final Widget child;
+  final int initialIndex;
+
+  const AdminPanelScreen({
+    super.key,
+    required this.child,
+    this.initialIndex = 0,
+  });
 
   @override
   ConsumerState<AdminPanelScreen> createState() => AdminPanelScreenState();
@@ -18,130 +25,127 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Timer? _refreshTimer;
   bool _isLoading = false;
-  int selectedIndex = 0;
+  late int selectedIndex;
 
+  // Use AdminRoutes to define navigation items
   final List<_AdminNavigationItem> _navigationItems = [
     _AdminNavigationItem(
       title: 'Dashboard',
       icon: Icons.dashboard,
-      route: '/admin',
+      route: AdminRoutes.getFullPath(AdminRoutes.dashboard),
     ),
     _AdminNavigationItem(
       title: 'Products & Menu',
       icon: Icons.restaurant_menu,
-      route: '/admin/products',
+      route: AdminRoutes.getFullPath(AdminRoutes.products),
     ),
     _AdminNavigationItem(
       title: 'Orders',
       icon: Icons.receipt_long,
-      route: '/admin/orders',
+      route: AdminRoutes.getFullPath(AdminRoutes.orders),
     ),
     _AdminNavigationItem(
       title: 'Tables',
       icon: Icons.table_bar,
-      route: '/admin/tables',
+      route: AdminRoutes.getFullPath(AdminRoutes.tables),
     ),
     _AdminNavigationItem(
       title: 'Users & Staff',
       icon: Icons.people,
-      route: '/admin/users',
+      route: AdminRoutes.getFullPath(AdminRoutes.users),
     ),
     _AdminNavigationItem(
       title: 'Business Settings',
       icon: Icons.settings,
-      route: '/admin/settings',
+      route: AdminRoutes.getFullPath(AdminRoutes.settings),
     ),
     _AdminNavigationItem(
       title: 'Analytics',
       icon: Icons.bar_chart,
-      route: '/admin/analytics',
+      route: AdminRoutes.getFullPath(AdminRoutes.analytics),
     ),
     _AdminNavigationItem(
-        title: 'Meal Plans',
-        icon: Icons.lunch_dining,
-        route: '/admin/meal-plans',
-        subroutes: [
-          _SubRoute(
-              title: 'Meal Plans Management',
-              route: '/admin/meal-plans/management',
-              icon: Icons.list),
-          _SubRoute(
-              title: 'Meal Plan Items',
-              route: '/admin/meal-plans/items',
-              icon: Icons.restaurant_menu),
-          _SubRoute(
-              title: 'Analytics',
-              route: '/admin/meal-plans/analytics',
-              icon: Icons.bar_chart),
-          _SubRoute(
-              title: 'Export Reports',
-              route: '/admin/meal-plans/export',
-              icon: Icons.download),
-          _SubRoute(
-              title: 'QR Scanner',
-              route: '/admin/meal-plans/scanner',
-              icon: Icons.qr_code_scanner),
-          _SubRoute(
-              title: 'POS Interface',
-              route: '/admin/meal-plans/pos',
-              icon: Icons.point_of_sale),
-        ]),
+      title: 'Meal Plans',
+      icon: Icons.lunch_dining,
+      route: AdminRoutes.getFullPath(AdminRoutes.mealPlans),
+      subroutes: [
+        _SubRoute(
+          title: 'Meal Plans Management',
+          route: AdminRoutes.getFullPath(AdminRoutes.mealPlanManagement),
+          icon: Icons.list,
+        ),
+        _SubRoute(
+          title: 'Meal Plan Items',
+          route: AdminRoutes.getFullPath(AdminRoutes.mealPlanItems),
+          icon: Icons.restaurant_menu,
+        ),
+        _SubRoute(
+          title: 'Analytics',
+          route: AdminRoutes.getFullPath(AdminRoutes.mealPlanAnalytics),
+          icon: Icons.bar_chart,
+        ),
+        _SubRoute(
+          title: 'Export Reports',
+          route: AdminRoutes.getFullPath(AdminRoutes.mealPlanExport),
+          icon: Icons.download,
+        ),
+        _SubRoute(
+          title: 'QR Scanner',
+          route: AdminRoutes.getFullPath(AdminRoutes.mealPlanScanner),
+          icon: Icons.qr_code_scanner,
+        ),
+        _SubRoute(
+          title: 'POS Interface',
+          route: AdminRoutes.getFullPath(AdminRoutes.mealPlanPos),
+          icon: Icons.point_of_sale,
+        ),
+      ],
+    ),
     _AdminNavigationItem(
-        title: 'Catering Management',
-        icon: Icons.inventory_2,
-        route: '/admin/catering',
-        subroutes: [
-          _SubRoute(
-              title: 'Dashboard',
-              route: '/admin/catering/dashboard',
-              icon: Icons.dashboard),
-          _SubRoute(
-              title: 'Orders',
-              route: '/admin/catering/orders',
-              icon: Icons.receipt_long),
-          _SubRoute(
-              title: 'Packages',
-              route: '/admin/catering/packages',
-              icon: Icons.category),
-          _SubRoute(
-              title: 'Items',
-              route: '/admin/catering/items',
-              icon: Icons.food_bank),
-          _SubRoute(
-              title: 'Categories',
-              route: '/admin/catering/categories',
-              icon: Icons.list),
-        ]),
+      title: 'Catering Management',
+      icon: Icons.inventory_2,
+      route: AdminRoutes.getFullPath(AdminRoutes.catering),
+      subroutes: [
+        _SubRoute(
+          title: 'Dashboard',
+          route: AdminRoutes.getFullPath(AdminRoutes.cateringDashboard),
+          icon: Icons.dashboard,
+        ),
+        _SubRoute(
+          title: 'Orders',
+          route: AdminRoutes.getFullPath(AdminRoutes.cateringOrders),
+          icon: Icons.receipt_long,
+        ),
+        _SubRoute(
+          title: 'Packages',
+          route: AdminRoutes.getFullPath(AdminRoutes.cateringPackages),
+          icon: Icons.category,
+        ),
+        _SubRoute(
+          title: 'Items',
+          route: AdminRoutes.getFullPath(AdminRoutes.cateringItems),
+          icon: Icons.food_bank,
+        ),
+        _SubRoute(
+          title: 'Categories',
+          route: AdminRoutes.getFullPath(AdminRoutes.cateringCategories),
+          icon: Icons.list,
+        ),
+      ],
+    ),
   ];
 
   @override
   void initState() {
     super.initState();
 
+    // Set the initial index from the widget parameter
+    selectedIndex = widget.initialIndex;
+
     // Set up refresh timer to periodically update data
     _refreshTimer = Timer.periodic(const Duration(minutes: 5), (_) {
       _refreshData();
     });
-
-    // Set initial selectedIndex based on route
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final location = GoRouterState.of(context).fullPath ?? '';
-      final index = _findIndexForRoute(location);
-      if (index != selectedIndex) {
-        setState(() {
-          selectedIndex = index;
-        });
-      }
-    });
-  }
-
-  int _findIndexForRoute(String route) {
-    for (int i = 0; i < _navigationItems.length; i++) {
-      if (route.startsWith(_navigationItems[i].route)) {
-        return i;
-      }
-    }
-    return 0; // Default to dashboard
   }
 
   @override
@@ -174,27 +178,17 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
   }
 
   void _onItemSelected(int index) {
-    // Don't navigate if already on that screen
-    if (index == selectedIndex) return;
-
+    // Update the selected index
     setState(() {
       selectedIndex = index;
     });
 
-    // Navigate using GoRouter
+    // Navigate using GoRouter with routes from AdminRoutes
     context.go(_navigationItems[index].route);
   }
 
   void _navigateToSubroute(String route) {
     context.go(route);
-  }
-
-  void _navigateToMealPlanSection(String subRoute) {
-    _navigateToSubroute('/admin/meal-plans/$subRoute');
-  }
-
-  void _navigateToCateringSection() {
-    context.goNamed(AppRoute.cateringManagement.name);
   }
 
   @override
@@ -207,7 +201,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
       return const UnauthorizedScreen();
     }
 
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final isDesktop = size.width >= 1100;
     final isTablet = size.width >= 600;
 
@@ -256,8 +250,8 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                 Expanded(
                   child: Stack(
                     children: [
-                      // Main content - this will be populated by the GoRouter
-                      const RouterOutlet(),
+                      // Main content from the router
+                      widget.child,
 
                       // Loading indicator on top
                       if (_isLoading)
@@ -276,9 +270,6 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
       ),
     );
   }
-
-  // The tablet and mobile layouts would follow a similar pattern
-  // with appropriate modifications for screen size
 
   Widget _buildTabletLayout() {
     // Similar to desktop but with collapsed NavigationRail
@@ -324,7 +315,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                 Expanded(
                   child: Stack(
                     children: [
-                      const RouterOutlet(),
+                      widget.child,
                       if (_isLoading)
                         const Positioned.fill(
                           child: Center(
@@ -422,7 +413,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
       ),
       body: Stack(
         children: [
-          const RouterOutlet(),
+          widget.child,
           if (_isLoading)
             const Positioned.fill(
               child: Center(
@@ -564,7 +555,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
     showMenu(
       context: context,
       position: RelativeRect.fromLTRB(
-        MediaQuery.of(context).size.width - 160,
+        MediaQuery.sizeOf(context).width - 160,
         kToolbarHeight + 16,
         16,
         0,
@@ -587,15 +578,6 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
         ),
       ],
     );
-  }
-}
-
-class RouterOutlet extends StatelessWidget {
-  const RouterOutlet({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox.expand();
   }
 }
 

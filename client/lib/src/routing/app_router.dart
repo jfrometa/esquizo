@@ -8,6 +8,8 @@ import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/app_config/app_config_services.dart';
 import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_analitics.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_dashboard_home.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/screens/customer_meal_plan_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/screens/meal_plan_analytics_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/screens/meal_plan_items_screen.dart';
@@ -145,6 +147,14 @@ GoRouter goRouter(Ref ref) {
       final isLoggedIn = authRepository.currentUser != null;
 
       if (isLoggedIn) {
+        // Check admin status for admin routes
+        if (path.startsWith('/admin')) {
+          final isAdmin = ref.read(cachedAdminStatusProvider);
+          if (!isAdmin) {
+            return '/';
+          }
+        }
+
         if (path.startsWith('/startup') ||
             path.startsWith('/onboarding') ||
             path.startsWith('/signIn')) {
@@ -157,7 +167,8 @@ GoRouter goRouter(Ref ref) {
             path.startsWith('/home') ||
             path.startsWith('/chat') ||
             path.startsWith('/entries') ||
-            path.startsWith('/account')) {
+            path.startsWith('/account') ||
+            path.startsWith('/admin')) {
           return '/signIn';
         }
       }
@@ -227,6 +238,8 @@ GoRouter goRouter(Ref ref) {
         ),
         branches: destinations.map((dest) => _buildBranch(dest)).toList(),
       ),
+      // Add all admin routes here for proper URL handling
+      ...getAdminRoutes(),
     ],
     errorPageBuilder: (context, state) => const NoTransitionPage(
       child: NotFoundScreen(),
@@ -371,132 +384,6 @@ List<RouteBase> _getNestedRoutes(String path) {
           },
         ),
       ];
-    case '/admin':
-      return [
-        // Admin setup nested route
-        GoRoute(
-          path: 'setup',
-          name: 'adminSetupNested',
-          pageBuilder: (context, state) => const NoTransitionPage(
-            child: AdminSetupScreen(),
-          ),
-        ),
-        // Catering management routes
-        GoRoute(
-          path: 'catering',
-          name: AppRoute.cateringManagement.name,
-          pageBuilder: (context, state) => const NoTransitionPage(
-            child: CateringManagementScreen(),
-          ),
-          routes: [
-            // Catering dashboard route (default route)
-            GoRoute(
-              path: 'dashboard',
-              name: AppRoute.cateringDashboard.name,
-              builder: (context, state) => const CateringDashboardScreen(),
-            ),
-            // Catering orders route
-            GoRoute(
-              path: 'orders',
-              name: AppRoute.cateringOrders.name,
-              builder: (context, state) => const CateringOrdersScreen(),
-              routes: [
-                // Order details route
-                GoRoute(
-                  path: ':orderId',
-                  name: AppRoute.cateringOrderDetails.name,
-                  builder: (context, state) {
-                    final orderId = state.pathParameters['orderId']!;
-                    return CateringOrderDetailsScreen(orderId: orderId);
-                  },
-                ),
-              ],
-            ),
-            // Catering packages route
-            GoRoute(
-              path: 'packages',
-              name: AppRoute.cateringPackages.name,
-              builder: (context, state) => const CateringPackageScreen(),
-            ),
-            // Catering items route
-            GoRoute(
-              path: 'items',
-              name: AppRoute.cateringItems.name,
-              builder: (context, state) => const CateringItemScreen(),
-            ),
-            // Catering categories route
-            GoRoute(
-              path: 'categories',
-              name: AppRoute.cateringCategories.name,
-              builder: (context, state) => const CateringCategoryScreen(),
-            ),
-          ],
-        ),
-        // Meal plan management routes
-        GoRoute(
-          path: 'meal-plans',
-          name: AppRoute.mealPlanManagement.name,
-          pageBuilder: (context, state) => const NoTransitionPage(
-            child: MealPlanAdminSection(),
-          ),
-          routes: [
-            // Meal plan management dashboard
-            GoRoute(
-              path: 'management',
-              name: AppRoute.mealPlanAdminSection.name,
-              builder: (context, state) => const MealPlanManagementScreen(),
-            ),
-            // Meal plan items route
-            GoRoute(
-              path: 'items',
-              name: AppRoute.mealPlanItems.name,
-              builder: (context, state) => const MealPlanItemsScreen(),
-            ),
-            // Meal plan analytics route
-            GoRoute(
-              path: 'analytics',
-              name: AppRoute.mealPlanAnalytics.name,
-              builder: (context, state) => const MealPlanAnalyticsScreen(),
-            ),
-            // Meal plan export route
-            GoRoute(
-              path: 'export',
-              name: AppRoute.mealPlanExport.name,
-              builder: (context, state) => const MealPlanExportScreen(),
-            ),
-            // Meal plan QR code route
-            GoRoute(
-              path: 'qr/:planId',
-              name: AppRoute.mealPlanQrCode.name,
-              builder: (context, state) {
-                final planId = state.pathParameters['planId']!;
-                return MealPlanQRCode(mealPlanId: planId);
-              },
-            ),
-            // Meal plan scanner route
-            GoRoute(
-              path: 'scanner',
-              name: AppRoute.mealPlanScanner.name,
-              builder: (context, state) {
-                return MealPlanScanner(
-                  onMealPlanScanned: (mealPlan) =>
-                      context.go('/admin/meal-plans'),
-                );
-              },
-            ),
-            // Meal plan POS widget route
-            GoRoute(
-              path: 'pos',
-              name: AppRoute.mealPlanPos.name,
-              builder: (context, state) {
-                return POSMealPlanWidget(
-                  onMealPlanUsed: (item) {},
-                );
-              },
-            ),
-          ],
-        ),
-      ];
     case '/cuenta':
       return [
         GoRoute(
@@ -575,8 +462,12 @@ Widget _getDestinationScreen(String path) {
         builder: (context, ref, _) {
           final isAdmin = ref.watch(isAdminProvider);
           return isAdmin.when(
-            data: (isAdmin) =>
-                isAdmin ? const AdminPanelScreen() : const UnauthorizedScreen(),
+            data: (isAdmin) => isAdmin
+                ? const AdminPanelScreen(
+                    initialIndex: 0, // Dashboard is index 0
+                    child: AdminDashboardHome(),
+                  )
+                : const UnauthorizedScreen(),
             loading: () => const CircularProgressIndicator(),
             error: (_, __) => const UnauthorizedScreen(),
           );

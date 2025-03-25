@@ -3,15 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_category_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/form/catering_category_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_category_model.dart';
- 
+
 class CateringCategoryScreen extends ConsumerStatefulWidget {
   const CateringCategoryScreen({super.key});
 
   @override
-  ConsumerState<CateringCategoryScreen> createState() => _CateringCategoryScreenState();
+  ConsumerState<CateringCategoryScreen> createState() =>
+      _CateringCategoryScreenState();
 }
 
-class _CateringCategoryScreenState extends ConsumerState<CateringCategoryScreen> {
+class _CateringCategoryScreenState
+    extends ConsumerState<CateringCategoryScreen> {
   final bool _isLoading = false;
 
   void _showCategoryForm({CateringCategory? category}) {
@@ -30,8 +32,8 @@ class _CateringCategoryScreenState extends ConsumerState<CateringCategoryScreen>
     final categories = ref.watch(cateringCategoryRepositoryProvider);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final isDesktop = MediaQuery.of(context).size.width >= 1100;
-    
+    final isDesktop = MediaQuery.sizeOf(context).width >= 1100;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Catering Categories'),
@@ -46,7 +48,8 @@ class _CateringCategoryScreenState extends ConsumerState<CateringCategoryScreen>
         ],
       ),
       body: categories.when(
-        data: (categoryList) => _buildCategoryList(categoryList, colorScheme, isDesktop),
+        data: (categoryList) =>
+            _buildCategoryList(categoryList, colorScheme, isDesktop),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text('Error: $error')),
       ),
@@ -58,7 +61,8 @@ class _CateringCategoryScreenState extends ConsumerState<CateringCategoryScreen>
     );
   }
 
-  Widget _buildCategoryList(List<CateringCategory> categories, ColorScheme colorScheme, bool isDesktop) {
+  Widget _buildCategoryList(List<CateringCategory> categories,
+      ColorScheme colorScheme, bool isDesktop) {
     if (categories.isEmpty) {
       return Center(
         child: Column(
@@ -97,7 +101,8 @@ class _CateringCategoryScreenState extends ConsumerState<CateringCategoryScreen>
     }
   }
 
-  Widget _buildDesktopCategoryList(List<CateringCategory> categories, ColorScheme colorScheme) {
+  Widget _buildDesktopCategoryList(
+      List<CateringCategory> categories, ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Card(
@@ -129,62 +134,67 @@ class _CateringCategoryScreenState extends ConsumerState<CateringCategoryScreen>
                     DataColumn(label: Text('Status')),
                     DataColumn(label: Text('Actions')),
                   ],
-                  rows: categories.map((category) => DataRow(
-                    cells: [
-                      DataCell(
-                        Row(
-                          children: [
-                            if (category.iconName != null)
-                              Icon(
-                                _getIconData(category.iconName),
-                                color: colorScheme.primary,
+                  rows: categories
+                      .map((category) => DataRow(
+                            cells: [
+                              DataCell(
+                                Row(
+                                  children: [
+                                    if (category.iconName != null)
+                                      Icon(
+                                        _getIconData(category.iconName),
+                                        color: colorScheme.primary,
+                                      ),
+                                    const SizedBox(width: 8),
+                                    Text(category.name),
+                                  ],
+                                ),
                               ),
-                            const SizedBox(width: 8),
-                            Text(category.name),
-                          ],
-                        ),
-                      ),
-                      DataCell(Text(
-                        category.description,
-                        overflow: TextOverflow.ellipsis,
-                      )),
-                      DataCell(
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: category.isActive
-                                ? colorScheme.primaryContainer
-                                : colorScheme.surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            category.isActive ? 'Active' : 'Inactive',
-                            style: TextStyle(
-                              color: category.isActive
-                                  ? colorScheme.onPrimaryContainer
-                                  : colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                      ),
-                      DataCell(
-                        Row(
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit_outlined),
-                              tooltip: 'Edit',
-                              onPressed: () => _showCategoryForm(category: category),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline),
-                              tooltip: 'Delete',
-                              onPressed: () => _showDeleteConfirmation(category),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  )).toList(),
+                              DataCell(Text(
+                                category.description,
+                                overflow: TextOverflow.ellipsis,
+                              )),
+                              DataCell(
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: category.isActive
+                                        ? colorScheme.primaryContainer
+                                        : colorScheme.surfaceContainerHighest,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    category.isActive ? 'Active' : 'Inactive',
+                                    style: TextStyle(
+                                      color: category.isActive
+                                          ? colorScheme.onPrimaryContainer
+                                          : colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.edit_outlined),
+                                      tooltip: 'Edit',
+                                      onPressed: () =>
+                                          _showCategoryForm(category: category),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete_outline),
+                                      tooltip: 'Delete',
+                                      onPressed: () =>
+                                          _showDeleteConfirmation(category),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ))
+                      .toList(),
                 ),
               ),
             ],
@@ -194,7 +204,8 @@ class _CateringCategoryScreenState extends ConsumerState<CateringCategoryScreen>
     );
   }
 
-  Widget _buildMobileCategoryList(List<CateringCategory> categories, ColorScheme colorScheme) {
+  Widget _buildMobileCategoryList(
+      List<CateringCategory> categories, ColorScheme colorScheme) {
     return ReorderableListView.builder(
       padding: const EdgeInsets.all(16.0),
       itemCount: categories.length,
@@ -206,9 +217,11 @@ class _CateringCategoryScreenState extends ConsumerState<CateringCategoryScreen>
           final item = categories.removeAt(oldIndex);
           categories.insert(newIndex, item);
         });
-        
+
         // Update the order in the database
-        ref.read(cateringCategoryRepositoryProvider.notifier).reorderCategories(categories);
+        ref
+            .read(cateringCategoryRepositoryProvider.notifier)
+            .reorderCategories(categories);
       },
       itemBuilder: (context, index) {
         final category = categories[index];
@@ -248,7 +261,8 @@ class _CateringCategoryScreenState extends ConsumerState<CateringCategoryScreen>
                 ),
                 const SizedBox(height: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
                     color: category.isActive
                         ? colorScheme.primaryContainer
@@ -288,12 +302,12 @@ class _CateringCategoryScreenState extends ConsumerState<CateringCategoryScreen>
       },
     );
   }
-  
+
   // Helper method to safely convert icon name to IconData
   IconData _getIconData(String? iconName) {
     // Default icon if parsing fails
     if (iconName == null) return Icons.category_outlined;
-    
+
     // Map of common icon names to their corresponding IconData constants
     final Map<String, IconData> iconMap = {
       '0xe318': Icons.restaurant, // Example mapping
@@ -308,7 +322,7 @@ class _CateringCategoryScreenState extends ConsumerState<CateringCategoryScreen>
       '0xe3f8': Icons.category_outlined,
       // Add more mappings as needed
     };
-    
+
     // Try to find the icon in our map
     return iconMap[iconName] ?? Icons.category_outlined;
   }
@@ -330,7 +344,9 @@ class _CateringCategoryScreenState extends ConsumerState<CateringCategoryScreen>
               foregroundColor: Theme.of(context).colorScheme.onError,
             ),
             onPressed: () {
-              ref.read(cateringCategoryRepositoryProvider.notifier).deleteCategory(category.id);
+              ref
+                  .read(cateringCategoryRepositoryProvider.notifier)
+                  .deleteCategory(category.id);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('${category.name} has been deleted')),

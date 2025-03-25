@@ -5,18 +5,20 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/screens/catering_item_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/screens/catering_order_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/screens/catering_package_screen.dart';
- 
+
 class CateringManagementScreen extends ConsumerStatefulWidget {
   const CateringManagementScreen({super.key});
 
   @override
-  ConsumerState<CateringManagementScreen> createState() => _CateringManagementScreenState();
+  ConsumerState<CateringManagementScreen> createState() =>
+      _CateringManagementScreenState();
 }
 
-class _CateringManagementScreenState extends ConsumerState<CateringManagementScreen> {
+class _CateringManagementScreenState
+    extends ConsumerState<CateringManagementScreen> {
   int _selectedIndex = 0;
   final PageController _pageController = PageController();
-  
+
   final List<_NavigationItem> _navigationItems = [
     _NavigationItem(
       title: 'Dashboard',
@@ -49,28 +51,28 @@ class _CateringManagementScreenState extends ConsumerState<CateringManagementScr
       screen: const CateringCategoryScreen(),
     ),
   ];
-  
+
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
   }
-  
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
       _pageController.jumpToPage(index);
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final isDesktop = size.width >= 1100;
     final isTablet = size.width >= 600;
-    
+
     if (isDesktop) {
       return _buildDesktopLayout(colorScheme);
     } else if (isTablet) {
@@ -79,7 +81,7 @@ class _CateringManagementScreenState extends ConsumerState<CateringManagementScr
       return _buildMobileLayout(colorScheme);
     }
   }
-  
+
   Widget _buildDesktopLayout(ColorScheme colorScheme) {
     return Scaffold(
       body: Row(
@@ -95,24 +97,28 @@ class _CateringManagementScreenState extends ConsumerState<CateringManagementScr
               color: colorScheme.primary,
               fontWeight: FontWeight.bold,
             ),
-            unselectedIconTheme: IconThemeData(color: colorScheme.onSurfaceVariant),
-            unselectedLabelTextStyle: TextStyle(color: colorScheme.onSurfaceVariant),
-            destinations: _navigationItems.map((item) => 
-              NavigationRailDestination(
-                icon: Icon(item.icon),
-                selectedIcon: Icon(item.selectedIcon),
-                label: Text(item.title),
-              ),
-            ).toList(),
+            unselectedIconTheme:
+                IconThemeData(color: colorScheme.onSurfaceVariant),
+            unselectedLabelTextStyle:
+                TextStyle(color: colorScheme.onSurfaceVariant),
+            destinations: _navigationItems
+                .map(
+                  (item) => NavigationRailDestination(
+                    icon: Icon(item.icon),
+                    selectedIcon: Icon(item.selectedIcon),
+                    label: Text(item.title),
+                  ),
+                )
+                .toList(),
           ),
-          
+
           // Vertical divider
           VerticalDivider(
             width: 1,
             thickness: 1,
             color: colorScheme.outlineVariant,
           ),
-          
+
           // Main content
           Expanded(
             child: PageView(
@@ -125,7 +131,7 @@ class _CateringManagementScreenState extends ConsumerState<CateringManagementScr
       ),
     );
   }
-  
+
   Widget _buildTabletLayout(ColorScheme colorScheme) {
     return Scaffold(
       body: Row(
@@ -141,24 +147,28 @@ class _CateringManagementScreenState extends ConsumerState<CateringManagementScr
               color: colorScheme.primary,
               fontWeight: FontWeight.bold,
             ),
-            unselectedIconTheme: IconThemeData(color: colorScheme.onSurfaceVariant),
-            unselectedLabelTextStyle: TextStyle(color: colorScheme.onSurfaceVariant),
-            destinations: _navigationItems.map((item) => 
-              NavigationRailDestination(
-                icon: Icon(item.icon),
-                selectedIcon: Icon(item.selectedIcon),
-                label: Text(item.title),
-              ),
-            ).toList(),
+            unselectedIconTheme:
+                IconThemeData(color: colorScheme.onSurfaceVariant),
+            unselectedLabelTextStyle:
+                TextStyle(color: colorScheme.onSurfaceVariant),
+            destinations: _navigationItems
+                .map(
+                  (item) => NavigationRailDestination(
+                    icon: Icon(item.icon),
+                    selectedIcon: Icon(item.selectedIcon),
+                    label: Text(item.title),
+                  ),
+                )
+                .toList(),
           ),
-          
+
           // Vertical divider
           VerticalDivider(
             width: 1,
             thickness: 1,
             color: colorScheme.outlineVariant,
           ),
-          
+
           // Main content
           Expanded(
             child: PageView(
@@ -171,7 +181,7 @@ class _CateringManagementScreenState extends ConsumerState<CateringManagementScr
       ),
     );
   }
-  
+
   Widget _buildMobileLayout(ColorScheme colorScheme) {
     return Scaffold(
       body: PageView(
@@ -182,13 +192,15 @@ class _CateringManagementScreenState extends ConsumerState<CateringManagementScr
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: _onItemTapped,
-        destinations: _navigationItems.map((item) => 
-          NavigationDestination(
-            icon: Icon(item.icon),
-            selectedIcon: Icon(item.selectedIcon),
-            label: item.title,
-          ),
-        ).toList(),
+        destinations: _navigationItems
+            .map(
+              (item) => NavigationDestination(
+                icon: Icon(item.icon),
+                selectedIcon: Icon(item.selectedIcon),
+                label: item.title,
+              ),
+            )
+            .toList(),
       ),
     );
   }
@@ -199,7 +211,7 @@ class _NavigationItem {
   final IconData icon;
   final IconData selectedIcon;
   final Widget screen;
-  
+
   const _NavigationItem({
     required this.title,
     required this.icon,

@@ -49,7 +49,7 @@ class CateringDashboardScreen extends ConsumerWidget {
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final isDesktop = size.width >= 1100;
     final isTablet = size.width >= 600;
 
