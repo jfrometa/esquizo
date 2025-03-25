@@ -40,18 +40,18 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
     final isDesktop = size.width >= 1100;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Catering Items'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.help_outline),
-            tooltip: 'Help',
-            onPressed: () {
-              // Show help dialog
-            },
-          ),
-        ],
-      ),
+      // appBar: AppBar(
+      //   title: const Text('Catering Items'),
+      //   actions: [
+      //     IconButton(
+      //       icon: const Icon(Icons.help_outline),
+      //       tooltip: 'Help',
+      //       onPressed: () {
+      //         // Show help dialog
+      //       },
+      //     ),
+      //   ],
+      // ),
       body: Column(
         children: [
           _buildFilterBar(categoriesAsyncValue, colorScheme),
@@ -175,12 +175,16 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                       items: [
                         const DropdownMenuItem<String?>(
                           value: null,
-                          child: Text('All Categories'),
+                          child: Expanded(
+                            child: Text('All Categories'),
+                          ),
                         ),
                         ...categories.map(
                           (category) => DropdownMenuItem<String?>(
                             value: category.id,
-                            child: Text(category.name),
+                            child: Expanded(
+                              child: Text(category.name),
+                            ),
                           ),
                         ),
                       ],

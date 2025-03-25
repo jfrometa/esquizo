@@ -44,38 +44,40 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen>
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Catering Orders'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'All Orders'),
-            Tab(text: 'Upcoming'),
-            Tab(text: 'Today'),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.date_range),
-            tooltip: 'Filter by Date',
-            onPressed: _selectDateFilter,
-          ),
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            tooltip: 'Filter by Status',
-            onPressed: _showStatusFilterDialog,
-          ),
-          IconButton(
-            icon: const Icon(Icons.help_outline),
-            tooltip: 'Help',
-            onPressed: () {
-              // Show help dialog
-            },
-          ),
-        ],
-      ),
       body: Column(
         children: [
+          // Tab bar with filter icons on the right
+          Row(
+            children: [
+              Expanded(
+                child: TabBar(
+                  controller: _tabController,
+                  tabs: const [
+                    Tab(text: 'All Orders'),
+                    Tab(text: 'Upcoming'),
+                    Tab(text: 'Today'),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.date_range),
+                tooltip: 'Filter by Date',
+                onPressed: _selectDateFilter,
+              ),
+              IconButton(
+                icon: const Icon(Icons.filter_list),
+                tooltip: 'Filter by Status',
+                onPressed: _showStatusFilterDialog,
+              ),
+              IconButton(
+                icon: const Icon(Icons.help_outline),
+                tooltip: 'Help',
+                onPressed: () {
+                  // Show help dialog
+                },
+              ),
+            ],
+          ),
           // Search and filter bar
           Padding(
             padding: const EdgeInsets.all(16.0),

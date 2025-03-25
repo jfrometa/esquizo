@@ -35,18 +35,18 @@ class _CateringCategoryScreenState
     final isDesktop = MediaQuery.sizeOf(context).width >= 1100;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Catering Categories'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.help_outline),
-            tooltip: 'Help',
-            onPressed: () {
-              // Show help dialog
-            },
-          ),
-        ],
-      ),
+      // appBar: AppBar(
+      //   title: const Text('Catering Categories'),
+      //   actions: [
+      //     IconButton(
+      //       icon: const Icon(Icons.help_outline),
+      //       tooltip: 'Help',
+      //       onPressed: () {
+      //         // Show help dialog
+      //       },
+      //     ),
+      //   ],
+      // ),
       body: categories.when(
         data: (categoryList) =>
             _buildCategoryList(categoryList, colorScheme, isDesktop),

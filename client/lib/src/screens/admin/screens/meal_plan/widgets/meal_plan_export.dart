@@ -117,13 +117,13 @@ class _MealPlanExportScreenState extends ConsumerState<MealPlanExportScreen> {
     final dateRange = ref.watch(dateRangeProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Export Reports'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/admin/meal-plans'),
-        ),
-      ),
+      // appBar: AppBar(
+      //   title: const Text('Export Reports'),
+      //   leading: IconButton(
+      //     icon: const Icon(Icons.arrow_back),
+      //     onPressed: () => context.go('/admin/meal-plans'),
+      //   ),
+      // ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -133,7 +133,7 @@ class _MealPlanExportScreenState extends ConsumerState<MealPlanExportScreen> {
             Card(
               elevation: 2,
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -333,9 +333,14 @@ class _MealPlanExportScreenState extends ConsumerState<MealPlanExportScreen> {
       loading: () => const Center(
         child: CircularProgressIndicator(),
       ),
-      error: (error, _) => Center(
-        child: Text('Error: $error'),
-      ),
+      error: (error, stack) {
+        // Debug print the error and stack trace for troubleshooting
+        debugPrint('Error loading report data: $error');
+        debugPrint('Stack trace: $stack');
+        return Center(
+          child: Text('Error: $error'),
+        );
+      },
     );
   }
 

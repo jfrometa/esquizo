@@ -54,26 +54,6 @@ class CateringDashboardScreen extends ConsumerWidget {
     final isTablet = size.width >= 600;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Catering Dashboard'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh',
-            onPressed: () {
-              ref.invalidate(cateringDashboardSummaryProvider);
-              ref.invalidate(cateringOrderStatisticsProvider);
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.help_outline),
-            tooltip: 'Help',
-            onPressed: () {
-              // Show help dialog
-            },
-          ),
-        ],
-      ),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(cateringDashboardSummaryProvider);

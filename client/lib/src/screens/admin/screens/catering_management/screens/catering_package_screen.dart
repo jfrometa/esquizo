@@ -40,18 +40,6 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
     final isDesktop = size.width >= 1100;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Catering Packages'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.help_outline),
-            tooltip: 'Help',
-            onPressed: () {
-              // Show help dialog
-            },
-          ),
-        ],
-      ),
       body: Column(
         children: [
           _buildFilterBar(categoriesAsyncValue, colorScheme),

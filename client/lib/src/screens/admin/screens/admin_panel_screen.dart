@@ -206,15 +206,15 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
     final isTablet = size.width >= 600;
 
     if (isDesktop) {
-      return _buildDesktopLayout();
+      return _buildDesktopLayout(context);
     } else if (isTablet) {
-      return _buildTabletLayout();
+      return _buildTabletLayout(context);
     } else {
-      return _buildMobileLayout();
+      return _buildMobileLayout(context);
     }
   }
 
-  Widget _buildDesktopLayout() {
+  Widget _buildDesktopLayout(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       body: Row(
@@ -244,7 +244,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
           Expanded(
             child: Column(
               children: [
-                _buildDesktopHeader(),
+                _buildDesktopHeader(context),
 
                 // Main content with loading indicator
                 Expanded(
@@ -271,8 +271,12 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
     );
   }
 
-  Widget _buildTabletLayout() {
+  Widget _buildTabletLayout(BuildContext context) {
     // Similar to desktop but with collapsed NavigationRail
+    final item = _navigationItems[selectedIndex];
+    final hasSubroutes = item.subroutes != null && item.subroutes!.isNotEmpty;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       key: _scaffoldKey,
       body: Row(
@@ -312,6 +316,29 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                     ),
                   ],
                 ),
+
+                // Add subroute navigation bar for tablet
+                if (hasSubroutes)
+                  Container(
+                    height: 48,
+                    color: colorScheme.surface,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final availableWidth = constraints.maxWidth;
+                        final itemCount = item.subroutes!.length;
+
+                        // Always use ListView for consistent scrolling behavior
+                        // This ensures it works properly when screen resizes
+                        return ListView(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          children: _buildSubrouteItems(
+                              item.subroutes!, colorScheme, context),
+                        );
+                      },
+                    ),
+                  ),
+
                 Expanded(
                   child: Stack(
                     children: [
@@ -333,7 +360,11 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
     );
   }
 
-  Widget _buildMobileLayout() {
+  Widget _buildMobileLayout(BuildContext context) {
+    final item = _navigationItems[selectedIndex];
+    final hasSubroutes = item.subroutes != null && item.subroutes!.isNotEmpty;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -411,15 +442,35 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
           ],
         ),
       ),
-      body: Stack(
+      body: Column(
         children: [
-          widget.child,
-          if (_isLoading)
-            const Positioned.fill(
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
+          // Add subroute navigation for mobile
+          // if (hasSubroutes)
+          //   Container(
+          //     height: 40, // Slightly smaller for mobile
+          //     color: colorScheme.surface,
+          //     child: ListView(
+          //       scrollDirection: Axis.horizontal,
+          //       padding: const EdgeInsets.symmetric(horizontal: 8),
+          //       children:
+          //           _buildSubrouteItems(item.subroutes!, colorScheme, context),
+          //     ),
+          //   ),
+
+          // Main content
+          Expanded(
+            child: Stack(
+              children: [
+                widget.child,
+                if (_isLoading)
+                  const Positioned.fill(
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+              ],
             ),
+          ),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -459,80 +510,226 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
     );
   }
 
-  Widget _buildDesktopHeader() {
+  Widget _buildDesktopHeader(BuildContext context) {
     final item = _navigationItems[selectedIndex];
     final hasSubroutes = item.subroutes != null && item.subroutes!.isNotEmpty;
+    final colorScheme = Theme.of(context).colorScheme;
 
-    return AppBar(
-      title: Text(item.title),
-      actions: [
-        // Show subroute buttons if the current section has them
-        if (hasSubroutes) ...[
-          const SizedBox(width: 16),
-          ...item.subroutes!.map((subroute) => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: TextButton.icon(
-                  icon: Icon(subroute.icon, size: 18),
-                  label: Text(subroute.title),
-                  onPressed: () => _navigateToSubroute(subroute.route),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-              )),
-        ],
-        const SizedBox(width: 16),
-        IconButton(
-          icon: const Icon(Icons.refresh),
-          onPressed: _refreshData,
-          tooltip: 'Refresh Data',
+    return Column(
+      children: [
+        AppBar(
+          title: Text(item.title),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: _refreshData,
+              tooltip: 'Refresh Data',
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.account_circle),
+              onPressed: _showUserMenu,
+            ),
+            const SizedBox(width: 16),
+          ],
         ),
-        const SizedBox(width: 8),
-        IconButton(
-          icon: const Icon(Icons.account_circle),
-          onPressed: _showUserMenu,
-        ),
-        const SizedBox(width: 16),
+
+        // Add subroute navigation for desktop
+        if (hasSubroutes)
+          Container(
+            height: 48,
+            color: colorScheme.surface,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final availableWidth = constraints.maxWidth;
+                final itemCount = item.subroutes!.length;
+
+                // Calculate if we need scrolling or can fit all items
+                final estimatedItemWidth = 150.0; // Slightly wider for desktop
+                final needsScrolling =
+                    estimatedItemWidth * itemCount > availableWidth;
+
+                return needsScrolling
+                    ? ListView(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        children: _buildSubrouteItems(
+                            item.subroutes!, colorScheme, context),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: _buildSubrouteItems(
+                            item.subroutes!, colorScheme, context),
+                      );
+              },
+            ),
+          ),
       ],
     );
   }
 
   void _showMoreOptions() {
+    final theme = Theme.of(context);
+
     showModalBottomSheet(
       context: context,
-      builder: (context) => ListView(
-        shrinkWrap: true,
-        children: [
-          _buildMoreMenuTile(4), // Users & Staff
-          _buildMoreMenuTile(5), // Business Settings
-          _buildMoreMenuTile(6), // Analytics
-          _buildMoreMenuTile(7), // Meal Plans
-          if (_navigationItems[7].subroutes != null) ...[
-            ...(_navigationItems[7].subroutes!.map((subroute) => ListTile(
-                  leading: Icon(subroute.icon, size: 20),
-                  title: Text(subroute.title),
-                  contentPadding: const EdgeInsets.only(left: 48),
-                  dense: true,
-                  onTap: () {
-                    Navigator.pop(context); // Close bottom sheet
-                    _navigateToSubroute(subroute.route);
-                  },
-                ))),
+      isScrollControlled: true, // Allow the sheet to be larger
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height *
+              0.7, // Limit height to 70% of screen
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header with handle and title
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: theme.primaryColor,
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(16)),
+              ),
+              child: Column(
+                children: [
+                  // Drag handle
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Admin Dashboard',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Menu items in a scrollable list
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  // Main menu items
+                  _buildMoreMenuTileWithSelection(4), // Users & Staff
+                  _buildMoreMenuTileWithSelection(5), // Business Settings
+                  _buildMoreMenuTileWithSelection(6), // Analytics
+
+                  // Meal Plans with subroutes
+                  _buildExpandableMoreMenuSection(7),
+
+                  // Catering Management with subroutes
+                  _buildExpandableMoreMenuSection(8),
+                ],
+              ),
+            ),
           ],
-          _buildMoreMenuTile(8), // Catering Management
-          if (_navigationItems[8].subroutes != null) ...[
-            ...(_navigationItems[8].subroutes!.map((subroute) => ListTile(
-                  leading: Icon(subroute.icon, size: 20),
-                  title: Text(subroute.title),
-                  contentPadding: const EdgeInsets.only(left: 48),
-                  dense: true,
-                  onTap: () {
-                    Navigator.pop(context); // Close bottom sheet
-                    _navigateToSubroute(subroute.route);
-                  },
-                ))),
-          ],
-        ],
+        ),
+      ),
+    );
+  }
+
+  // Helper method to build menu tile with selection indicator
+  Widget _buildMoreMenuTileWithSelection(int index) {
+    final item = _navigationItems[index];
+    final isSelected = selectedIndex == index;
+    final theme = Theme.of(context);
+
+    return ListTile(
+      leading: Icon(
+        item.icon,
+        color: isSelected ? theme.colorScheme.primary : null,
+      ),
+      title: Text(
+        item.title,
+        style: TextStyle(
+          color: isSelected ? theme.colorScheme.primary : null,
+          fontWeight: isSelected ? FontWeight.bold : null,
+        ),
+      ),
+      selected: isSelected,
+      selectedTileColor: theme.colorScheme.primaryContainer.withOpacity(0.2),
+      onTap: () {
+        Navigator.pop(context); // Close bottom sheet
+        _onItemSelected(index);
+      },
+    );
+  }
+
+  // Helper method to build expandable sections with subroutes
+  Widget _buildExpandableMoreMenuSection(int index) {
+    final item = _navigationItems[index];
+    final isSelected = selectedIndex == index;
+    final theme = Theme.of(context);
+    final hasSubroutes = item.subroutes != null && item.subroutes!.isNotEmpty;
+
+    if (!hasSubroutes) {
+      return _buildMoreMenuTileWithSelection(index);
+    }
+
+    // Get the current route to check which subroute is selected
+    final currentPath = GoRouterState.of(context).matchedLocation;
+
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        leading: Icon(
+          item.icon,
+          color: isSelected ? theme.colorScheme.primary : null,
+        ),
+        title: Text(
+          item.title,
+          style: TextStyle(
+            color: isSelected ? theme.colorScheme.primary : null,
+            fontWeight: isSelected ? FontWeight.bold : null,
+          ),
+        ),
+        initiallyExpanded: isSelected,
+        backgroundColor: isSelected
+            ? theme.colorScheme.primaryContainer.withOpacity(0.1)
+            : null,
+        children: item.subroutes!.map((subroute) {
+          final isSubrouteSelected = currentPath == subroute.route;
+
+          return ListTile(
+            leading: Icon(
+              subroute.icon,
+              size: 20,
+              color: isSubrouteSelected ? theme.colorScheme.primary : null,
+            ),
+            title: Text(
+              subroute.title,
+              style: TextStyle(
+                fontSize: 14,
+                color: isSubrouteSelected ? theme.colorScheme.primary : null,
+                fontWeight: isSubrouteSelected ? FontWeight.bold : null,
+              ),
+            ),
+            contentPadding: const EdgeInsets.only(left: 48),
+            dense: true,
+            selected: isSubrouteSelected,
+            selectedTileColor:
+                theme.colorScheme.primaryContainer.withOpacity(0.2),
+            onTap: () {
+              Navigator.pop(context); // Close bottom sheet
+              _navigateToSubroute(subroute.route);
+            },
+          );
+        }).toList(),
       ),
     );
   }
@@ -605,6 +802,57 @@ class _SubRoute {
     required this.route,
     required this.icon,
   });
+}
+
+// Helper method to build subroute items consistently
+List<Widget> _buildSubrouteItems(
+    List<_SubRoute> subroutes, ColorScheme colorScheme, BuildContext context) {
+  return subroutes.map((subroute) {
+    // Check if this subroute is the current route
+    final currentPath = GoRouterState.of(context).matchedLocation;
+    final subroutePath = subroute.route;
+    final isSelected = currentPath == subroutePath;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      child: InkWell(
+        onTap: () => context.go(subroute.route),
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            color:
+                isSelected ? colorScheme.primaryContainer : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isSelected ? colorScheme.primary : Colors.transparent,
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                subroute.icon,
+                size: 16,
+                color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                subroute.title,
+                style: TextStyle(
+                  fontSize: 13,
+                  color:
+                      isSelected ? colorScheme.primary : colorScheme.onSurface,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }).toList();
 }
 
 // Include bare minimum of UnauthorizedScreen to make the code complete

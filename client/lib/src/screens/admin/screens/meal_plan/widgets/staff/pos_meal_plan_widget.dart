@@ -61,11 +61,11 @@ class _POSMealPlanWidgetState extends ConsumerState<POSMealPlanWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Meal Plan Payment',
-              style: theme.textTheme.titleLarge,
-            ),
-            const SizedBox(height: 16),
+            // Text(
+            //   'Meal Plan Payment',
+            //   style: theme.textTheme.titleLarge,
+            // ),
+            // const SizedBox(height: 16),
             
             // Customer search fields
             Row(
