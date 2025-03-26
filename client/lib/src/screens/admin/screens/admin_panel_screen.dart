@@ -445,17 +445,52 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
       body: Column(
         children: [
           // Add subroute navigation for mobile
-          // if (hasSubroutes)
-          //   Container(
-          //     height: 40, // Slightly smaller for mobile
-          //     color: colorScheme.surface,
-          //     child: ListView(
-          //       scrollDirection: Axis.horizontal,
-          //       padding: const EdgeInsets.symmetric(horizontal: 8),
-          //       children:
-          //           _buildSubrouteItems(item.subroutes!, colorScheme, context),
-          //     ),
-          //   ),
+          // Show only the current selected subroute for mobile instead of full list
+          if (hasSubroutes)
+            Container(
+              height: 40, // Slightly smaller for mobile
+              color: colorScheme.surface,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Row(
+                children: [
+                  // Show current section name
+                  Text(
+                    item.title,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: colorScheme.onSurface.withOpacity(0.7),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.arrow_right, size: 16),
+                  const SizedBox(width: 8),
+
+                  // Find and show the current subroute
+                  Expanded(
+                    child: Builder(
+                      builder: (context) {
+                        final currentPath =
+                            GoRouterState.of(context).matchedLocation;
+                        final currentSubroute = item.subroutes!.firstWhere(
+                          (route) => route.route == currentPath,
+                          orElse: () => item.subroutes!.first,
+                        );
+
+                        return Text(
+                          currentSubroute.title,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.primary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
           // Main content
           Expanded(
