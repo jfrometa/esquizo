@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+// Existing screen imports...
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_dashboard_home.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_management/admin_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_panel_screen.dart';
@@ -10,7 +11,6 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/product_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/table_management/table_management_scren_new.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/order_details_widget.dart';
-// Import meal plan screens
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/meal_plan_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/screens/meal_plan_items_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/screens/meal_plan_analytics_screen.dart';
@@ -18,7 +18,6 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/screens/meal_plan_qr_code.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/widgets/staff/pos_meal_plan_scanner.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/widgets/staff/pos_meal_plan_widget.dart';
-// Import catering screens
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/catering_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/screens/catering_dashboard_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/screens/catering_order_screen.dart';
@@ -26,27 +25,40 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/screens/catering_item_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/screens/catering_category_screen.dart';
 
-/// This class defines all admin routes based on the 4-section structure
+// --- Import Placeholder Staff Screens ---
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/staff/staff_kitchen_screen.dart'; // Create this file
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/staff/staff_waiter_screen.dart'; // Create this file
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/staff/staff_order_entry_screen.dart'; // Create this file
+// --- End Import ---
+
+/// This class defines all admin routes based on a 5-section structure
 class AdminRoutes {
   // Base admin path
   static const String basePath = '/admin';
 
   // --- Top Level Section Paths (relative) ---
   static const String productDashboard = ''; // Represents /admin
-  static const String settings = '/settings'; // Represents /admin/settings
+  static const String staff = '/staff'; // NEW: Represents /admin/staff
   static const String mealPlans = '/meal-plans'; // Represents /admin/meal-plans
   static const String catering = '/catering'; // Represents /admin/catering
+  static const String settings = '/settings'; // Represents /admin/settings
 
   // --- Product Dashboard Sub-Paths (relative to basePath) ---
-  // Note: These paths are structured differently in the router definition
-  // but we need constants for matching in getIndexFromRoute
-  static const String _pdPrefix =
-      '/product-dashboard'; // Internal prefix used in paths
+  static const String _pdPrefix = '/product-dashboard';
   static const String dashboardProducts = '$_pdPrefix/products';
   static const String dashboardOrders = '$_pdPrefix/orders';
   static const String dashboardTables = '$_pdPrefix/tables';
   static const String dashboardAnalytics = '$_pdPrefix/analytics';
   static const String dashboardOrderDetails = '$_pdPrefix/orders/:orderId';
+
+  // --- Staff Sub-Paths (relative to staff path) ---
+  static const String staffKitchen = 'kitchen'; // -> /admin/staff/kitchen
+  static const String staffKitchenNew = 'kitchen/new';
+  static const String staffKitchenCurrent = 'kitchen/current';
+  static const String staffKitchenUpcoming = 'kitchen/upcoming';
+  static const String staffKitchenTurns = 'kitchen/turns';
+  static const String staffWaiter = 'waiter'; // -> /admin/staff/waiter
+  static const String staffWaiterOrderEntry = 'waiter/table/:tableId/order';
 
   // --- Settings Sub-Paths (relative to settings path) ---
   static const String settingsUsers = 'users'; // -> /admin/settings/users
@@ -67,15 +79,27 @@ class AdminRoutes {
   static const String mealPlanPos = 'pos';
   static const String mealPlanQr = 'qr/:planId';
 
-  // --- Named Routes (Ensure these match GoRoute names) ---
+  // --- Named Routes ---
+  // Product Dashboard
   static const String namePdHome = 'product-dashboard-home';
   static const String namePdProducts = 'product-dashboard-products';
   static const String namePdOrders = 'product-dashboard-orders';
   static const String namePdOrderDetails = 'product-dashboard-order-details';
   static const String namePdTables = 'product-dashboard-tables';
   static const String namePdAnalytics = 'product-dashboard-analytics';
+  // Staff (NEW)
+  static const String nameStaffHome = 'staff-home';
+  static const String nameStaffKitchen = 'staff-kitchen';
+  static const String nameStaffKitchenNew = 'staff-kitchen-new';
+  static const String nameStaffKitchenCurrent = 'staff-kitchen-current';
+  static const String nameStaffKitchenUpcoming = 'staff-kitchen-upcoming';
+  static const String nameStaffKitchenTurns = 'staff-kitchen-turns';
+  static const String nameStaffWaiter = 'staff-waiter';
+  static const String nameStaffWaiterOrderEntry = 'staff-waiter-order-entry';
+  // Settings
   static const String nameSettings = 'settings';
   static const String nameSettingsUsers = 'settings-users';
+  // Meal Plans
   static const String nameMpHome = 'meal-plans-home';
   static const String nameMpManagement = 'meal-plans-management';
   static const String nameMpItems = 'meal-plans-items';
@@ -84,14 +108,15 @@ class AdminRoutes {
   static const String nameMpScanner = 'meal-plans-scanner';
   static const String nameMpPos = 'meal-plans-pos';
   static const String nameMpQr = 'meal-plans-qr';
+  // Catering
   static const String nameCtHome = 'catering-home';
   static const String nameCtDashboard = 'catering-dashboard';
   static const String nameCtOrders = 'catering-orders';
   static const String nameCtPackages = 'catering-packages';
   static const String nameCtItems = 'catering-items';
   static const String nameCtCategories = 'catering-categories';
+  // Others
   static const String nameAdminSetup = 'admin-setup';
-  // Add names for login, profile, help, home if used in _showUserMenu/UnauthorizedScreen
   static const String nameLogin = 'login';
   static const String nameProfile = 'profile';
   static const String nameHelp = 'help';
@@ -102,40 +127,46 @@ class AdminRoutes {
     if (relativePath.isEmpty || relativePath == '/') return basePath;
     final String cleanRelative =
         relativePath.startsWith('/') ? relativePath.substring(1) : relativePath;
-    // Avoid double slash if basePath is just '/'
     if (basePath == '/') return '/$cleanRelative';
     return '$basePath/$cleanRelative';
   }
 
-  // Helper to get the primary named route for a section index (0-3)
+  // Helper to get the primary named route for a section index (0-4) - UPDATED
   static String getPrimaryNamedRouteFromIndex(int index) {
     switch (index) {
       case 0:
         return namePdHome;
       case 1:
-        return nameSettings;
+        return nameStaffHome; // NEW
       case 2:
         return nameMpHome;
       case 3:
         return nameCtHome;
+      case 4:
+        return nameSettings;
       default:
         return namePdHome;
     }
   }
 
-  // Helper to get index (0-3) from ANY valid admin route path - REFINED
+  // Helper to get index (0-4) from ANY valid admin route path - UPDATED
   static int getIndexFromRoute(String route) {
-    // Ensure we are comparing full paths starting from root or /admin
     final String fullRoute = route.startsWith('/') ? route : getFullPath(route);
 
     // Define full base paths for sections
+    final String sfBasePath = getFullPath(staff); // /admin/staff
     final String mpBasePath = getFullPath(mealPlans); // /admin/meal-plans
     final String ctBasePath = getFullPath(catering); // /admin/catering
     final String stBasePath = getFullPath(settings); // /admin/settings
     final String pdSubroutePrefix =
         '$basePath$_pdPrefix/'; // /admin/product-dashboard/
 
-    // Check Meal Plans first (most specific prefix)
+    // Check Staff section first (NEW)
+    if (fullRoute.startsWith(sfBasePath)) {
+      return 1; // Index for Staff
+    }
+
+    // Check Meal Plans
     if (fullRoute.startsWith(mpBasePath)) {
       return 2; // Index for Meal Plans
     }
@@ -147,23 +178,20 @@ class AdminRoutes {
 
     // Check Settings
     if (fullRoute.startsWith(stBasePath)) {
-      return 1; // Index for Settings
+      return 4; // Index for Settings
     }
 
     // Check Product Dashboard and its subroutes LAST
-    // Matches /admin OR /admin/product-dashboard/...
     if (fullRoute == basePath || fullRoute.startsWith(pdSubroutePrefix)) {
       return 0; // Index for Product Dashboard
     }
 
-    // Fallback if none match (e.g., /admin/setup) - default to 0 for ShellRoute context
-    // Log this case if it happens unexpectedly during navigation
-    // print("Warning: Route '$fullRoute' did not match any admin section, defaulting to index 0.");
+    // Fallback
     return 0;
   }
 }
 
-/// Admin router configuration based on the provided structure
+/// Admin router configuration based on the provided structure - UPDATED
 List<RouteBase> getAdminRoutes() {
   return [
     // Wrapper route that shows the admin panel with shell navigation
@@ -171,8 +199,6 @@ List<RouteBase> getAdminRoutes() {
       builder: (context, state, child) {
         final currentRoute = state.matchedLocation;
         final index = AdminRoutes.getIndexFromRoute(currentRoute);
-        // Add logging to see index calculation
-        // print("ShellRoute builder: Route='$currentRoute', Calculated Index=$index");
         return AdminPanelScreen(
           initialIndex: index,
           child: child,
@@ -185,117 +211,132 @@ List<RouteBase> getAdminRoutes() {
           name: AdminRoutes.namePdHome,
           builder: (context, state) => const AdminDashboardHome(),
           routes: [
-            // Products subroute
             GoRoute(
-              // Path relative to parent '/admin', needs full prefix from base
-              path:
-                  'product-dashboard/products', // -> /admin/product-dashboard/products
-              name: AdminRoutes.namePdProducts,
-              builder: (context, state) => const ProductManagementScreen(),
-            ),
-            // Orders subroute
+                path: 'product-dashboard/products',
+                name: AdminRoutes.namePdProducts,
+                builder: (context, state) => const ProductManagementScreen()),
             GoRoute(
-              path:
-                  'product-dashboard/orders', // -> /admin/product-dashboard/orders
+              path: 'product-dashboard/orders',
               name: AdminRoutes.namePdOrders,
               builder: (context, state) => const OrderManagementScreen(),
               routes: [
-                // Order details subroute (relative to orders path)
                 GoRoute(
-                  path:
-                      ':orderId', // -> /admin/product-dashboard/orders/:orderId
-                  name: AdminRoutes.namePdOrderDetails,
-                  builder: (context, state) {
-                    final orderId = state.pathParameters['orderId'] ?? '';
-                    return OrderDetailScreen(orderId: orderId);
-                  },
-                ),
+                    path: ':orderId',
+                    name: AdminRoutes.namePdOrderDetails,
+                    builder: (context, state) => OrderDetailScreen(
+                        orderId: state.pathParameters['orderId'] ?? '')),
               ],
             ),
-            // Tables subroute
             GoRoute(
-              path:
-                  'product-dashboard/tables', // -> /admin/product-dashboard/tables
-              name: AdminRoutes.namePdTables,
-              builder: (context, state) => const TableManagementScreen(),
-            ),
-            // Analytics subroute
+                path: 'product-dashboard/tables',
+                name: AdminRoutes.namePdTables,
+                builder: (context, state) => const TableManagementScreen()),
             GoRoute(
-              path:
-                  'product-dashboard/analytics', // -> /admin/product-dashboard/analytics
-              name: AdminRoutes.namePdAnalytics,
-              builder: (context, state) => const AnalyticsDashboard(),
-            ),
+                path: 'product-dashboard/analytics',
+                name: AdminRoutes.namePdAnalytics,
+                builder: (context, state) => const AnalyticsDashboard()),
           ],
         ),
 
-        // --- Settings Section (Index 1) ---
+        // --- Staff Section (Index 1) --- NEW ---
         GoRoute(
-          path:
-              AdminRoutes.getFullPath(AdminRoutes.settings), // /admin/settings
-          name: AdminRoutes.nameSettings,
-          builder: (context, state) => const BusinessSettingsScreen(),
-          routes: [
-            // Users subroute (relative to settings path)
-            GoRoute(
-              path:
-                  AdminRoutes.settingsUsers, // 'users' -> /admin/settings/users
-              name: AdminRoutes.nameSettingsUsers,
-              builder: (context, state) => const AdminManagementScreen(),
-            ),
-          ],
-        ),
+            path: AdminRoutes.getFullPath(AdminRoutes.staff), // /admin/staff
+            name: AdminRoutes.nameStaffHome,
+            // Redirect parent /staff to a default view, e.g., Kitchen New Orders
+            redirect: (_, __) => AdminRoutes.getFullPath(
+                '${AdminRoutes.staff}/${AdminRoutes.staffKitchenNew}'),
+            routes: [
+              // Kitchen Routes nested under /admin/staff/kitchen
+              GoRoute(
+                  path: AdminRoutes.staffKitchen, // 'kitchen'
+                  name: AdminRoutes.nameStaffKitchen,
+                  // Redirect /staff/kitchen to new orders
+                  redirect: (_, __) => AdminRoutes.getFullPath(
+                      '${AdminRoutes.staff}/${AdminRoutes.staffKitchenNew}'),
+                  // This route needs a builder if it's ever navigated to directly,
+                  // but since it redirects, it might not be strictly necessary.
+                  // builder: (context, state) => const StaffKitchenScreen(initialTab: KitchenTab.newOrders),
+                  routes: [
+                    GoRoute(
+                        path: 'new',
+                        name: AdminRoutes.nameStaffKitchenNew,
+                        builder: (context, state) => const StaffKitchenScreen(
+                            initialTab: KitchenTab.newOrders)),
+                    GoRoute(
+                        path: 'current',
+                        name: AdminRoutes.nameStaffKitchenCurrent,
+                        builder: (context, state) => const StaffKitchenScreen(
+                            initialTab: KitchenTab.current)),
+                    GoRoute(
+                        path: 'upcoming',
+                        name: AdminRoutes.nameStaffKitchenUpcoming,
+                        builder: (context, state) => const StaffKitchenScreen(
+                            initialTab: KitchenTab.upcoming)),
+                    GoRoute(
+                        path: 'turns',
+                        name: AdminRoutes.nameStaffKitchenTurns,
+                        builder: (context, state) => const StaffKitchenScreen(
+                            initialTab: KitchenTab.turns)),
+                  ]),
+              // Waiter Routes nested under /admin/staff/waiter
+              GoRoute(
+                  path: AdminRoutes.staffWaiter, // 'waiter'
+                  name: AdminRoutes.nameStaffWaiter,
+                  builder: (context, state) =>
+                      const StaffWaiterTableSelectScreen(), // Table selection screen
+                  routes: [
+                    GoRoute(
+                        // Path relative to waiter: 'table/:tableId/order'
+                        path: 'table/:tableId/order',
+                        name: AdminRoutes.nameStaffWaiterOrderEntry,
+                        builder: (context, state) {
+                          final tableId =
+                              state.pathParameters['tableId'] ?? 'unknown';
+                          return StaffOrderEntryScreen(
+                              tableId: tableId); // Order entry screen
+                        })
+                  ]),
+            ]),
+        // --- End Staff Section ---
 
         // --- Meal Plans Section (Index 2) ---
         GoRoute(
           path: AdminRoutes.getFullPath(
               AdminRoutes.mealPlans), // /admin/meal-plans
           name: AdminRoutes.nameMpHome,
-          // Builder for the main meal plans screen (parent route)
-          // This assumes /admin/meal-plans shows the management screen
           builder: (context, state) => const MealPlanManagementScreen(),
           routes: [
-            // Subroutes relative to /admin/meal-plans
             GoRoute(
-              path: AdminRoutes.mealPlanManagement, // 'management'
-              name: AdminRoutes.nameMpManagement,
-              builder: (context, state) => const MealPlanManagementScreen(),
-            ),
+                path: AdminRoutes.mealPlanManagement,
+                name: AdminRoutes.nameMpManagement,
+                builder: (context, state) => const MealPlanManagementScreen()),
             GoRoute(
-              path: AdminRoutes.mealPlanItems, // 'items'
-              name: AdminRoutes.nameMpItems,
-              builder: (context, state) => const MealPlanItemsScreen(),
-            ),
+                path: AdminRoutes.mealPlanItems,
+                name: AdminRoutes.nameMpItems,
+                builder: (context, state) => const MealPlanItemsScreen()),
             GoRoute(
-              path: AdminRoutes.mealPlanAnalytics, // 'analytics'
-              name: AdminRoutes.nameMpAnalytics,
-              builder: (context, state) => const MealPlanAnalyticsScreen(),
-            ),
+                path: AdminRoutes.mealPlanAnalytics,
+                name: AdminRoutes.nameMpAnalytics,
+                builder: (context, state) => const MealPlanAnalyticsScreen()),
             GoRoute(
-              path: AdminRoutes.mealPlanExport, // 'export'
-              name: AdminRoutes.nameMpExport,
-              builder: (context, state) => const MealPlanExportScreen(),
-            ),
+                path: AdminRoutes.mealPlanExport,
+                name: AdminRoutes.nameMpExport,
+                builder: (context, state) => const MealPlanExportScreen()),
             GoRoute(
-              path: AdminRoutes.mealPlanScanner, // 'scanner'
-              name: AdminRoutes.nameMpScanner,
-              builder: (context, state) =>
-                  MealPlanScanner(onMealPlanScanned: (_) {}),
-            ),
+                path: AdminRoutes.mealPlanScanner,
+                name: AdminRoutes.nameMpScanner,
+                builder: (context, state) =>
+                    MealPlanScanner(onMealPlanScanned: (_) {})),
             GoRoute(
-              path: AdminRoutes.mealPlanPos, // 'pos'
-              name: AdminRoutes.nameMpPos,
-              builder: (context, state) =>
-                  POSMealPlanWidget(onMealPlanUsed: (_) {}),
-            ),
+                path: AdminRoutes.mealPlanPos,
+                name: AdminRoutes.nameMpPos,
+                builder: (context, state) =>
+                    POSMealPlanWidget(onMealPlanUsed: (_) {})),
             GoRoute(
-              path: AdminRoutes.mealPlanQr, // 'qr/:planId'
-              name: AdminRoutes.nameMpQr,
-              builder: (context, state) {
-                final planId = state.pathParameters['planId'] ?? '';
-                return MealPlanQRCode(mealPlanId: planId);
-              },
-            ),
+                path: AdminRoutes.mealPlanQr,
+                name: AdminRoutes.nameMpQr,
+                builder: (context, state) => MealPlanQRCode(
+                    mealPlanId: state.pathParameters['planId'] ?? '')),
           ],
         ),
 
@@ -304,36 +345,42 @@ List<RouteBase> getAdminRoutes() {
           path:
               AdminRoutes.getFullPath(AdminRoutes.catering), // /admin/catering
           name: AdminRoutes.nameCtHome,
-          // Builder for the main catering screen (parent route)
-          // This assumes /admin/catering shows the management screen
           builder: (context, state) => const CateringManagementScreen(),
           routes: [
-            // Subroutes relative to /admin/catering
             GoRoute(
-              path: AdminRoutes.cateringDashboard, // 'dashboard'
-              name: AdminRoutes.nameCtDashboard,
-              builder: (context, state) => const CateringDashboardScreen(),
-            ),
+                path: AdminRoutes.cateringDashboard,
+                name: AdminRoutes.nameCtDashboard,
+                builder: (context, state) => const CateringDashboardScreen()),
             GoRoute(
-              path: AdminRoutes.cateringOrders, // 'orders'
-              name: AdminRoutes.nameCtOrders,
-              builder: (context, state) => const CateringOrdersScreen(),
-            ),
+                path: AdminRoutes.cateringOrders,
+                name: AdminRoutes.nameCtOrders,
+                builder: (context, state) => const CateringOrdersScreen()),
             GoRoute(
-              path: AdminRoutes.cateringPackages, // 'packages'
-              name: AdminRoutes.nameCtPackages,
-              builder: (context, state) => const CateringPackageScreen(),
-            ),
+                path: AdminRoutes.cateringPackages,
+                name: AdminRoutes.nameCtPackages,
+                builder: (context, state) => const CateringPackageScreen()),
             GoRoute(
-              path: AdminRoutes.cateringItems, // 'items'
-              name: AdminRoutes.nameCtItems,
-              builder: (context, state) => const CateringItemScreen(),
-            ),
+                path: AdminRoutes.cateringItems,
+                name: AdminRoutes.nameCtItems,
+                builder: (context, state) => const CateringItemScreen()),
             GoRoute(
-              path: AdminRoutes.cateringCategories, // 'categories'
-              name: AdminRoutes.nameCtCategories,
-              builder: (context, state) => const CateringCategoryScreen(),
-            ),
+                path: AdminRoutes.cateringCategories,
+                name: AdminRoutes.nameCtCategories,
+                builder: (context, state) => const CateringCategoryScreen()),
+          ],
+        ),
+
+        // --- Settings Section (Index 4) ---
+        GoRoute(
+          path:
+              AdminRoutes.getFullPath(AdminRoutes.settings), // /admin/settings
+          name: AdminRoutes.nameSettings,
+          builder: (context, state) => const BusinessSettingsScreen(),
+          routes: [
+            GoRoute(
+                path: AdminRoutes.settingsUsers,
+                name: AdminRoutes.nameSettingsUsers,
+                builder: (context, state) => const AdminManagementScreen()),
           ],
         ),
       ],
@@ -341,7 +388,7 @@ List<RouteBase> getAdminRoutes() {
 
     // Setup screen outside the shell
     GoRoute(
-      path: '/admin/setup', // Simple path
+      path: '/admin/setup',
       name: AdminRoutes.nameAdminSetup,
       builder: (context, state) => const AdminSetupScreen(),
     ),
@@ -351,4 +398,14 @@ List<RouteBase> getAdminRoutes() {
     // GoRoute(path: '/help', name: AdminRoutes.nameHelp, builder: ...),
     // GoRoute(path: '/', name: AdminRoutes.nameHome, builder: ...),
   ];
+}
+
+// Helper class for order details screen
+class OrderDetailScreen extends StatelessWidget {
+  final String orderId;
+  const OrderDetailScreen({super.key, required this.orderId});
+  @override
+  Widget build(BuildContext context) {
+    return OrderDetailView(orderId: orderId);
+  }
 }
