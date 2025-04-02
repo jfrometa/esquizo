@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/firebase_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/pagination/paginated_list_widget.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/subscription_repository.dart';
 
@@ -59,7 +59,7 @@ class _SubscriptionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       child: Container(
@@ -104,7 +104,7 @@ class _SubscriptionCard extends StatelessWidget {
 
   Widget _buildSubscriptionDetails(BuildContext context, ThemeData theme) {
     final colorScheme = theme.colorScheme;
-    
+
     return Column(
       children: [
         Text(
@@ -160,7 +160,8 @@ class _SubscriptionCard extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30.0),
         ),
-        disabledBackgroundColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        disabledBackgroundColor:
+            colorScheme.surfaceContainerHighest.withOpacity(0.5),
         disabledForegroundColor: colorScheme.onSurfaceVariant.withOpacity(0.5),
       ),
       child: Text(
@@ -180,7 +181,7 @@ class NotificationService {
 
   static void showInAppNotification(BuildContext context, String message) {
     final theme = Theme.of(context);
-    
+
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(
         message,
@@ -315,7 +316,7 @@ class SubscriptionShimmer extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return ListView.builder(
       itemCount: 2,
       shrinkWrap: true,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/user_preference/user_preference_provider.dart';
 
 class LocationsSection extends ConsumerStatefulWidget {
@@ -20,8 +20,9 @@ class _LocationsSectionState extends ConsumerState<LocationsSection> {
 
   @override
   Widget build(BuildContext context) {
-    final userPreferencesAsyncValue = ref.watch(userPreferencesProvider(widget.userId));
-    
+    final userPreferencesAsyncValue =
+        ref.watch(userPreferencesProvider(widget.userId));
+
     return userPreferencesAsyncValue.when(
       data: (preferences) {
         return Card(
@@ -37,8 +38,8 @@ class _LocationsSectionState extends ConsumerState<LocationsSection> {
                     Text(
                       'Mis Ubicaciones',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     IconButton(
                       icon: Icon(
@@ -61,7 +62,6 @@ class _LocationsSectionState extends ConsumerState<LocationsSection> {
                   ],
                 ),
                 const SizedBox(height: 8),
-                
                 if (_isAddingLocation || _locationBeingEdited != null)
                   _buildLocationForm(preferences)
                 else if (preferences.savedLocations.isEmpty)
@@ -119,7 +119,8 @@ class _LocationsSectionState extends ConsumerState<LocationsSection> {
                 context: context,
                 builder: (context) => AlertDialog(
                   title: const Text('Eliminar Ubicación'),
-                  content: Text('¿Estás seguro que deseas eliminar la ubicación "${location.name}"?'),
+                  content: Text(
+                      '¿Estás seguro que deseas eliminar la ubicación "${location.name}"?'),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(false),
@@ -135,12 +136,14 @@ class _LocationsSectionState extends ConsumerState<LocationsSection> {
                   ],
                 ),
               );
-              
+
               if (confirm == true) {
                 try {
-                  final repository = ref.read(userPreferencesRepositoryProvider);
-                  await repository.deleteSavedLocation(widget.userId, location.id);
-                  
+                  final repository =
+                      ref.read(userPreferencesRepositoryProvider);
+                  await repository.deleteSavedLocation(
+                      widget.userId, location.id);
+
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -153,7 +156,8 @@ class _LocationsSectionState extends ConsumerState<LocationsSection> {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Error eliminando la ubicación: ${e.toString()}'),
+                        content: Text(
+                            'Error eliminando la ubicación: ${e.toString()}'),
                         backgroundColor: Colors.red,
                       ),
                     );
@@ -165,11 +169,12 @@ class _LocationsSectionState extends ConsumerState<LocationsSection> {
               try {
                 final repository = ref.read(userPreferencesRepositoryProvider);
                 await repository.setDefaultLocation(widget.userId, location.id);
-                
+
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Ubicación establecida como predeterminada'),
+                      content:
+                          Text('Ubicación establecida como predeterminada'),
                       backgroundColor: Colors.green,
                     ),
                   );
@@ -178,7 +183,8 @@ class _LocationsSectionState extends ConsumerState<LocationsSection> {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Error estableciendo la ubicación: ${e.toString()}'),
+                      content: Text(
+                          'Error estableciendo la ubicación: ${e.toString()}'),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -193,18 +199,25 @@ class _LocationsSectionState extends ConsumerState<LocationsSection> {
   Widget _buildLocationForm(UserPreferences preferences) {
     final isEditing = _locationBeingEdited?.id.isNotEmpty ?? false;
     final formKey = GlobalKey<FormState>();
-    
+
     // Form controllers
-    final nameController = TextEditingController(text: _locationBeingEdited?.name ?? '');
-    final addressController = TextEditingController(text: _locationBeingEdited?.address ?? '');
+    final nameController =
+        TextEditingController(text: _locationBeingEdited?.name ?? '');
+    final addressController =
+        TextEditingController(text: _locationBeingEdited?.address ?? '');
     final latController = TextEditingController(
-      text: _locationBeingEdited?.latitude != 0 ? _locationBeingEdited?.latitude.toString() : '',
+      text: _locationBeingEdited?.latitude != 0
+          ? _locationBeingEdited?.latitude.toString()
+          : '',
     );
     final lngController = TextEditingController(
-      text: _locationBeingEdited?.longitude != 0 ? _locationBeingEdited?.longitude.toString() : '',
+      text: _locationBeingEdited?.longitude != 0
+          ? _locationBeingEdited?.longitude.toString()
+          : '',
     );
-    final notesController = TextEditingController(text: _locationBeingEdited?.notes ?? '');
-    
+    final notesController =
+        TextEditingController(text: _locationBeingEdited?.notes ?? '');
+
     return Form(
       key: formKey,
       child: Column(
@@ -215,7 +228,7 @@ class _LocationsSectionState extends ConsumerState<LocationsSection> {
             style: Theme.of(context).textTheme.titleSmall,
           ),
           const SizedBox(height: 16),
-          
+
           // Name field
           TextFormField(
             controller: nameController,
@@ -232,7 +245,7 @@ class _LocationsSectionState extends ConsumerState<LocationsSection> {
             },
           ),
           const SizedBox(height: 12),
-          
+
           // Address field
           TextFormField(
             controller: addressController,
@@ -249,7 +262,7 @@ class _LocationsSectionState extends ConsumerState<LocationsSection> {
             },
           ),
           const SizedBox(height: 12),
-          
+
           // Coordinates row
           Row(
             children: [
@@ -260,7 +273,8 @@ class _LocationsSectionState extends ConsumerState<LocationsSection> {
                     labelText: 'Latitud',
                     border: OutlineInputBorder(),
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Requerido';
@@ -280,7 +294,8 @@ class _LocationsSectionState extends ConsumerState<LocationsSection> {
                     labelText: 'Longitud',
                     border: OutlineInputBorder(),
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Requerido';
@@ -295,7 +310,7 @@ class _LocationsSectionState extends ConsumerState<LocationsSection> {
             ],
           ),
           const SizedBox(height: 12),
-          
+
           // Notes field
           TextFormField(
             controller: notesController,
@@ -307,7 +322,7 @@ class _LocationsSectionState extends ConsumerState<LocationsSection> {
             maxLines: 2,
           ),
           const SizedBox(height: 16),
-          
+
           // Action buttons
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -323,27 +338,31 @@ class _LocationsSectionState extends ConsumerState<LocationsSection> {
               ),
               const SizedBox(width: 8),
               ElevatedButton(
-               
                 onPressed: () async {
                   if (formKey.currentState!.validate()) {
                     try {
-                      final repository = ref.read(userPreferencesRepositoryProvider);
-                      
+                      final repository =
+                          ref.read(userPreferencesRepositoryProvider);
+
                       final location = SavedLocation(
                         id: _locationBeingEdited?.id ?? '',
                         name: nameController.text,
                         address: addressController.text,
                         latitude: double.parse(latController.text),
                         longitude: double.parse(lngController.text),
-                        notes: notesController.text.isNotEmpty ? notesController.text : null,
+                        notes: notesController.text.isNotEmpty
+                            ? notesController.text
+                            : null,
                       );
-                      
+
                       if (isEditing) {
-                        await repository.updateSavedLocation(widget.userId, location);
+                        await repository.updateSavedLocation(
+                            widget.userId, location);
                       } else {
-                        await repository.addSavedLocation(widget.userId, location);
+                        await repository.addSavedLocation(
+                            widget.userId, location);
                       }
-                      
+
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -355,7 +374,7 @@ class _LocationsSectionState extends ConsumerState<LocationsSection> {
                             backgroundColor: Colors.green,
                           ),
                         );
-                        
+
                         setState(() {
                           _isAddingLocation = false;
                           _locationBeingEdited = null;
@@ -402,7 +421,7 @@ class LocationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       elevation: 1,

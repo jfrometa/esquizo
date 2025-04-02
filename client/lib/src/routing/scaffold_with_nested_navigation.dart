@@ -2,22 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart'; 
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_management_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_cart.dart';
-import 'package:starter_architecture_flutter_firebase/src/routing/navigation_provider.dart'; 
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/navigation_provider.dart';
 
 // Update the provider to include both catering and manual orders
 final cateringItemCountProvider = StateProvider<int>((ref) {
   final cateringOrder = ref.watch(cateringOrderProvider);
   final manualQuote = ref.watch(manualQuoteProvider);
-  
+
   final hasCateringOrder = (cateringOrder?.dishes.length ?? 0) > 0 ? 1 : 0;
   final hasManualQuote = (manualQuote?.dishes.length ?? 0) > 0 ? 1 : 0;
-  
+
   return hasCateringOrder + hasManualQuote;
 });
 
@@ -28,7 +28,8 @@ final totalCartQuantityProvider = Provider<int>((ref) {
   final cartItems = ref.watch(cartProvider);
   final mealItems = ref.watch(mealOrderProvider);
   final cateringCount = ref.watch(cateringItemCountProvider);
-  final cartTotal = cartItems.items.fold(0, (total, item) => total + item.quantity);
+  final cartTotal =
+      cartItems.items.fold(0, (total, item) => total + item.quantity);
   final mealTotal = mealItems.length;
   return cartTotal + mealTotal + cateringCount;
 });
@@ -39,12 +40,12 @@ final totalCartQuantityProvider = Provider<int>((ref) {
 class CartBadge extends ConsumerWidget {
   final IconData icon;
   const CartBadge({super.key, required this.icon});
-  
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final totalQuantity = ref.watch(totalCartQuantityProvider);
     final theme = Theme.of(context);
-    
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -174,11 +175,11 @@ class ScaffoldWithNavigationBarState
   Widget build(BuildContext context) {
     final destinations = ref.watch(navigationDestinationsProvider);
     final totalQuantity = ref.watch(totalCartQuantityProvider);
-    
+
     // Watch both the cached status and the auth state
     final isAdmin = ref.watch(cachedAdminStatusProvider);
     final authState = ref.watch(authStateChangesProvider);
-    
+
     // If user is null (signed out), ensure admin is false
     if (authState.value == null && isAdmin) {
       // Use Future.microtask to avoid build-time state changes
@@ -186,7 +187,7 @@ class ScaffoldWithNavigationBarState
         ref.read(cachedAdminStatusProvider.notifier).state = false;
       });
     }
-    
+
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -222,13 +223,11 @@ class ScaffoldWithNavigationBarState
             labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
             destinations: [
               // Map regular destinations
-              ...destinations.map((dest) => 
-                _buildDestination(dest, totalQuantity, destinations.indexOf(dest))
-              ),
-              
+              ...destinations.map((dest) => _buildDestination(
+                  dest, totalQuantity, destinations.indexOf(dest))),
+
               // Admin destination with animation
-              if (isAdmin && authState.value != null)
-                _buildAdminDestination(),
+              if (isAdmin && authState.value != null) _buildAdminDestination(),
             ],
           ),
         ),
@@ -253,7 +252,7 @@ class ScaffoldWithNavigationBarState
       label: destination.label,
     );
   }
-  
+
   // New method to build the admin destination
   NavigationDestination _buildAdminDestination() {
     return NavigationDestination(
@@ -292,11 +291,11 @@ class ScaffoldWithNavigationRail extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final destinations = ref.watch(navigationDestinationsProvider);
     final totalQuantity = ref.watch(totalCartQuantityProvider);
-    
+
     // Watch both the cached status and the auth state
     final isAdmin = ref.watch(cachedAdminStatusProvider);
     final authState = ref.watch(authStateChangesProvider);
-    
+
     // If user is null (signed out), ensure admin is false
     if (authState.value == null && isAdmin) {
       // Use Future.microtask to avoid build-time state changes
@@ -304,7 +303,7 @@ class ScaffoldWithNavigationRail extends ConsumerWidget {
         ref.read(cachedAdminStatusProvider.notifier).state = false;
       });
     }
-    
+
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -320,7 +319,8 @@ class ScaffoldWithNavigationRail extends ConsumerWidget {
               selectedIndex: currentIndex,
               onDestinationSelected: onDestinationSelected,
               labelType: NavigationRailLabelType.all,
-              selectedIconTheme: IconThemeData(color: theme.colorScheme.onPrimary),
+              selectedIconTheme:
+                  IconThemeData(color: theme.colorScheme.onPrimary),
               selectedLabelTextStyle: TextStyle(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.bold,
@@ -333,10 +333,9 @@ class ScaffoldWithNavigationRail extends ConsumerWidget {
               ),
               destinations: [
                 // Map regular destinations
-                ...destinations.map((dest) => 
-                  _buildRailDestination(dest, totalQuantity, destinations.indexOf(dest))
-                ),
-                
+                ...destinations.map((dest) => _buildRailDestination(
+                    dest, totalQuantity, destinations.indexOf(dest))),
+
                 // Admin destination with animation
                 if (isAdmin && authState.value != null)
                   _buildAdminRailDestination(),
@@ -366,7 +365,7 @@ class ScaffoldWithNavigationRail extends ConsumerWidget {
       label: Text(destination.label),
     );
   }
-  
+
   // New method to build the admin rail destination
   NavigationRailDestination _buildAdminRailDestination() {
     return NavigationRailDestination(

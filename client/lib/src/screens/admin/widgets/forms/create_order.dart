@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/order_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/user/auth_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/restaurant/restaurant_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';
@@ -11,10 +12,10 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/o
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';
 import 'package:uuid/uuid.dart';
-import '../../../../core/providers/catalog/catalog_provider.dart'; 
-import '../../../../core/services/cart_service.dart'; 
+import '../../../../core/providers/catalog/catalog_provider.dart';
+import '../../../../core/services/cart_service.dart';
 import '../../../../core/services/service_factory.dart';
-import '../../../../core/services/resource_service.dart'; 
+import '../../../../core/services/resource_service.dart';
 
 class CreateOrderForm extends ConsumerStatefulWidget {
   final String? preselectedTableId;
@@ -43,44 +44,44 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
   String? _contactPhone;
   String _paymentMethod = 'cash';
   bool _isCreatingOrder = false;
-  
+
   // Filter and search state
   String _searchQuery = '';
   String _selectedCategoryId = '';
   final TextEditingController _searchController = TextEditingController();
-  
+
   // Form key
   final _formKey = GlobalKey<FormState>();
-  
+
   @override
   void initState() {
     super.initState();
     _selectedTableId = widget.preselectedTableId;
-    
+
     // Set up cart
     _initializeCart();
-    
+
     // Set up search
     _searchController.addListener(_onSearchChanged);
   }
-  
+
   @override
   void dispose() {
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
   }
-  
+
   void _initializeCart() {
     _cartService = ref.read(cartServiceProvider);
-    
+
     // Initialize cart with business ID and selected table
     _cartService.clearCart();
     _cartService.updateResourceId(_selectedTableId);
     _cartService.updateDeliveryOption(_isDelivery);
     _cartService.updatePeopleCount(_peopleCount);
   }
-  
+
   void _onSearchChanged() {
     setState(() {
       _searchQuery = _searchController.text.toLowerCase();
@@ -90,7 +91,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width > 1200;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create New Order'),
@@ -125,8 +126,8 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                     Text(
                       '\$${_cartService.cart.total.toStringAsFixed(2)}',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ],
                 ),
@@ -138,7 +139,8 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                     ? null
                     : _createOrder,
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 ),
               ),
             ],
@@ -147,7 +149,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
       ),
     );
   }
-  
+
   Widget _buildDesktopLayout(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,7 +166,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
             ],
           ),
         ),
-        
+
         // Right side - Order Details and Cart
         Expanded(
           flex: 2,
@@ -185,7 +187,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
       ],
     );
   }
-  
+
   Widget _buildMobileLayout(BuildContext context) {
     return DefaultTabController(
       length: 2,
@@ -199,7 +201,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
             ],
             labelColor: Colors.black,
           ),
-          
+
           // Tab content
           Expanded(
             child: TabBarView(
@@ -213,7 +215,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                     ),
                   ],
                 ),
-                
+
                 // Order details tab
                 SingleChildScrollView(
                   padding: const EdgeInsets.all(16.0),
@@ -235,11 +237,11 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
       ),
     );
   }
-  
+
   Widget _buildSearchAndFilterBar() {
     final catalogType = ref.watch(currentCatalogTypeProvider);
     final categoriesAsync = ref.watch(catalogCategoriesProvider(catalogType));
-    
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -262,16 +264,16 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
               contentPadding: const EdgeInsets.symmetric(vertical: 12),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Categories filter
           SizedBox(
             height: 40,
             child: categoriesAsync.when(
               data: (categories) {
                 if (categories.isEmpty) return const SizedBox.shrink();
-                
+
                 return ListView(
                   scrollDirection: Axis.horizontal,
                   children: [
@@ -290,20 +292,19 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                     ...categories
                         .where((category) => category.isActive)
                         .map((category) {
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8.0),
-                            child: FilterChip(
-                              label: Text(category.name),
-                              selected: _selectedCategoryId == category.id,
-                              onSelected: (selected) {
-                                setState(() {
-                                  _selectedCategoryId = selected ? category.id : '';
-                                });
-                              },
-                            ),
-                          );
-                        })
-                        ,
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: FilterChip(
+                          label: Text(category.name),
+                          selected: _selectedCategoryId == category.id,
+                          onSelected: (selected) {
+                            setState(() {
+                              _selectedCategoryId = selected ? category.id : '';
+                            });
+                          },
+                        ),
+                      );
+                    }),
                   ],
                 );
               },
@@ -315,7 +316,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
       ),
     );
   }
-  
+
   Widget _buildMenuItems() {
     final catalogType = ref.watch(currentCatalogTypeProvider);
     final itemsAsync = _selectedCategoryId.isEmpty
@@ -324,28 +325,28 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
             catalogType: catalogType,
             categoryId: _selectedCategoryId,
           )));
-    
+
     return itemsAsync.when(
       data: (items) {
         // Filter items by search query
         final filteredItems = items.where((item) {
           if (_searchQuery.isEmpty) return true;
-          
+
           return item.name.toLowerCase().contains(_searchQuery) ||
-                 item.description.toLowerCase().contains(_searchQuery);
+              item.description.toLowerCase().contains(_searchQuery);
         }).toList();
-        
+
         if (filteredItems.isEmpty) {
           return const Center(
             child: Text('No items found'),
           );
         }
-        
+
         // Display items in a grid or list based on screen size
         return LayoutBuilder(
           builder: (context, constraints) {
             final isWide = constraints.maxWidth > 600;
-            
+
             if (isWide) {
               // Grid for wider screens
               return GridView.builder(
@@ -379,10 +380,10 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
       error: (error, _) => Center(child: Text('Error: $error')),
     );
   }
-  
+
   Widget _buildMenuItemCard(CatalogItem item) {
     final theme = Theme.of(context);
-    
+
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -390,7 +391,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final isNarrow = constraints.maxWidth < 300;
-            
+
             if (isNarrow) {
               // Vertical layout for narrow screens
               return Column(
@@ -411,7 +412,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                         ),
                       ),
                     ),
-                  
+
                   // Item details
                   Padding(
                     padding: const EdgeInsets.all(12.0),
@@ -467,7 +468,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                       ],
                     ),
                   ),
-                  
+
                   // Add button
                   if (item.isAvailable)
                     Padding(
@@ -505,7 +506,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                         ),
                       ),
                     ),
-                  
+
                   // Item details
                   Expanded(
                     child: Padding(
@@ -564,11 +565,13 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                             Align(
                               alignment: Alignment.centerRight,
                               child: ElevatedButton.icon(
-                                icon: const Icon(Icons.add_shopping_cart, size: 16),
+                                icon: const Icon(Icons.add_shopping_cart,
+                                    size: 16),
                                 label: const Text('Add'),
                                 onPressed: () => _addItemToCart(item),
                                 style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12),
                                 ),
                               ),
                             ),
@@ -584,11 +587,11 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
       ),
     );
   }
-  
+
   Widget _buildOrderSettingsCard() {
     final theme = Theme.of(context);
     final resourceServiceAsync = ref.watch(tableResourcesProvider);
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -600,17 +603,19 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
               style: theme.textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
-            
+
             // Delivery/Dine-in toggle
             SwitchListTile(
               title: const Text('Delivery Order'),
-              subtitle: Text(_isDelivery ? 'Delivery to address' : 'Dine-in at restaurant'),
+              subtitle: Text(_isDelivery
+                  ? 'Delivery to address'
+                  : 'Dine-in at restaurant'),
               value: _isDelivery,
               onChanged: (value) {
                 setState(() {
                   _isDelivery = value;
                   _cartService.updateDeliveryOption(value);
-                  
+
                   // Clear table selection if switching to delivery
                   if (value) {
                     _selectedTableId = null;
@@ -619,22 +624,24 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                 });
               },
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Table selection (if dine-in)
             if (!_isDelivery) ...[
               resourceServiceAsync.when(
                 data: (resources) {
                   // Filter to available tables
                   final availableTables = resources
-                      .where((res) => res.status == 'available' || res.id == _selectedTableId)
+                      .where((res) =>
+                          res.status == 'available' ||
+                          res.id == _selectedTableId)
                       .toList();
-                  
+
                   if (availableTables.isEmpty) {
                     return const Text('No tables available');
                   }
-                  
+
                   return DropdownButtonFormField<String>(
                     decoration: const InputDecoration(
                       labelText: 'Select Table',
@@ -666,9 +673,9 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (_, __) => const Text('Error loading tables'),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // People count
               Row(
                 children: [
@@ -694,7 +701,8 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                       initialValue: _peopleCount.toString(),
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                       ),
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -735,9 +743,9 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                   return null;
                 },
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Contact phone
               TextFormField(
                 decoration: const InputDecoration(
@@ -760,9 +768,9 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                 },
               ),
             ],
-            
+
             const SizedBox(height: 16),
-            
+
             // Special instructions
             TextFormField(
               decoration: const InputDecoration(
@@ -783,11 +791,11 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
       ),
     );
   }
-  
+
   Widget _buildCartSection() {
     final theme = Theme.of(context);
     final cart = _cartService.cart;
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -808,7 +816,6 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
               ],
             ),
             const SizedBox(height: 16),
-            
             if (cart.items.isEmpty)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 32.0),
@@ -822,13 +829,13 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: cart.items.length,
                 separatorBuilder: (_, __) => const Divider(),
-                itemBuilder: (_, index) => _buildCartItemTile(index, cart.items[index]),
+                itemBuilder: (_, index) =>
+                    _buildCartItemTile(index, cart.items[index]),
               ),
-            
             if (cart.items.isNotEmpty) ...[
               const Divider(),
               const SizedBox(height: 8),
-              
+
               // Cart summary
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -845,11 +852,11 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                   Text('\$${cart.tax.toStringAsFixed(2)}'),
                 ],
               ),
-              
+
               const SizedBox(height: 8),
               const Divider(),
               const SizedBox(height: 8),
-              
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -872,10 +879,10 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
       ),
     );
   }
-  
+
   Widget _buildCartItemTile(int index, CartItem item) {
     final theme = Theme.of(context);
-    
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -884,7 +891,8 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
           children: [
             IconButton(
               icon: const Icon(Icons.add_circle_outline),
-              onPressed: () => _updateCartItemQuantity(index, item.quantity + 1),
+              onPressed: () =>
+                  _updateCartItemQuantity(index, item.quantity + 1),
               iconSize: 20,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
@@ -895,16 +903,17 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
             ),
             IconButton(
               icon: const Icon(Icons.remove_circle_outline),
-              onPressed: () => _updateCartItemQuantity(index, item.quantity - 1),
+              onPressed: () =>
+                  _updateCartItemQuantity(index, item.quantity - 1),
               iconSize: 20,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),
           ],
         ),
-        
+
         const SizedBox(width: 8),
-        
+
         // Item details
         Expanded(
           child: Column(
@@ -914,7 +923,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                 item.title,
                 style: theme.textTheme.titleSmall,
               ),
-              
+
               // Item options
               if (item.options.isNotEmpty)
                 Padding(
@@ -924,7 +933,8 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                     runSpacing: 4,
                     children: item.options.entries.map((option) {
                       return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
                           color: theme.colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(4),
@@ -940,7 +950,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                     }).toList(),
                   ),
                 ),
-              
+
               // Item notes
               if (item.notes != null && item.notes!.isNotEmpty)
                 Padding(
@@ -957,7 +967,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
             ],
           ),
         ),
-        
+
         // Price and remove button
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -977,10 +987,10 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
       ],
     );
   }
-  
+
   Widget _buildPaymentMethodCard() {
     final theme = Theme.of(context);
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -992,16 +1002,19 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
               style: theme.textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
-            
+
             // Payment method selection
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
                 _buildPaymentMethodChip('cash', 'Cash', Icons.payments),
-                _buildPaymentMethodChip('credit_card', 'Credit Card', Icons.credit_card),
-                _buildPaymentMethodChip('debit_card', 'Debit Card', Icons.credit_card),
-                _buildPaymentMethodChip('mobile_payment', 'Mobile Payment', Icons.phone_android),
+                _buildPaymentMethodChip(
+                    'credit_card', 'Credit Card', Icons.credit_card),
+                _buildPaymentMethodChip(
+                    'debit_card', 'Debit Card', Icons.credit_card),
+                _buildPaymentMethodChip(
+                    'mobile_payment', 'Mobile Payment', Icons.phone_android),
               ],
             ),
           ],
@@ -1009,11 +1022,11 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
       ),
     );
   }
-  
+
   Widget _buildPaymentMethodChip(String value, String label, IconData icon) {
     final theme = Theme.of(context);
     final isSelected = _paymentMethod == value;
-    
+
     return ChoiceChip(
       label: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1039,7 +1052,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
       },
     );
   }
-  
+
   void _showItemOptionsDialog(CatalogItem item) {
     showDialog(
       context: context,
@@ -1049,8 +1062,9 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
       ),
     );
   }
-  
-  void _addItemToCart(CatalogItem item, {Map<String, dynamic>? options, String? notes, int quantity = 1}) {
+
+  void _addItemToCart(CatalogItem item,
+      {Map<String, dynamic>? options, String? notes, int quantity = 1}) {
     if (!item.isAvailable) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -1060,7 +1074,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
       );
       return;
     }
-    
+
     final cartItem = CartItem(
       img: item.imageUrl,
       description: item.description,
@@ -1075,12 +1089,12 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
       options: options ?? {},
       notes: notes,
     );
-    
+
     _cartService.addItem(cartItem);
-    
+
     // Force refresh UI
     setState(() {});
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Added ${item.name} to cart'),
@@ -1089,25 +1103,26 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
       ),
     );
   }
-  
+
   void _updateCartItemQuantity(int index, int quantity) {
     _cartService.updateItemQuantity(index, quantity);
     // Force refresh UI
     setState(() {});
   }
-  
+
   void _removeCartItem(int index) {
     _cartService.removeItem(index);
     // Force refresh UI
     setState(() {});
   }
-  
+
   void _clearCart() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Clear Cart?'),
-        content: const Text('Are you sure you want to remove all items from the cart?'),
+        content: const Text(
+            'Are you sure you want to remove all items from the cart?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1125,12 +1140,12 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
       ),
     );
   }
-  
+
   Future<void> _createOrder() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    
+
     if (_cartService.cart.items.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -1140,23 +1155,23 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
       );
       return;
     }
-    
+
     setState(() {
       _isCreatingOrder = true;
     });
-    
+
     try {
       final cart = _cartService.cart;
       final userAsync = ref.watch(currentUserProvider.future);
       final orderService = ref.read(orderServiceProvider);
       final businessId = ref.read(currentBusinessIdProvider);
-      
+
       // Set resourceId based on table or delivery address
       final resourceId = _isDelivery ? null : _selectedTableId;
-      
+
       // Get current user for order metadata
       final currentUser = await userAsync;
-      
+
       // Create order
       final order = Order(
         id: const Uuid().v4(),
@@ -1165,14 +1180,16 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
         userName: currentUser?.displayName ?? 'Guest',
         userEmail: currentUser?.email,
         userPhone: _contactPhone,
-        items: cart.items.map((item) => OrderItem(
-          id: item.id,
-          name: item.title,
-          price: item.numericPrice.toDouble(),
-          quantity: item.quantity, 
-          notes: item.notes,
-          productId: item.id, 
-        )).toList(),
+        items: cart.items
+            .map((item) => OrderItem(
+                  id: item.id,
+                  name: item.title,
+                  price: item.numericPrice.toDouble(),
+                  quantity: item.quantity,
+                  notes: item.notes,
+                  productId: item.id,
+                ))
+            .toList(),
         subtotal: cart.subtotal,
         tax: cart.tax,
         total: cart.total,
@@ -1187,32 +1204,31 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
         peopleCount: _peopleCount,
         paymentMethod: _paymentMethod,
       );
-      
+
       // Save order to database
       final orderId = await orderService.createOrder(order);
-      
+
       // Update table status if using a table
       if (!_isDelivery && _selectedTableId != null) {
-        final resourceService = ref.read(
-          serviceFactoryProvider.select((factory) => 
-            factory.createResourceService('table')
-          )
-        );
-        
-        await resourceService.updateResourceStatus(_selectedTableId!, 'occupied');
+        final resourceService = ref.read(serviceFactoryProvider
+            .select((factory) => factory.createResourceService('table')));
+
+        await resourceService.updateResourceStatus(
+            _selectedTableId!, 'occupied');
       }
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Order created successfully: #${orderId.substring(0, 6)}'),
+            content:
+                Text('Order created successfully: #${orderId.substring(0, 6)}'),
             behavior: SnackBarBehavior.floating,
           ),
         );
-        
+
         // Clear cart
         _cartService.clearCart();
-        
+
         // Call success callback with the created order
         widget.onSuccess(order);
       }
@@ -1235,19 +1251,17 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
 
 // Provider for table resources
 final tableResourcesProvider = StreamProvider<List<Resource>>((ref) {
-  final resourceService = ref.watch(
-    serviceFactoryProvider.select((factory) => 
-      factory.createResourceService('table')
-    )
-  );
-  
+  final resourceService = ref.watch(serviceFactoryProvider
+      .select((factory) => factory.createResourceService('table')));
+
   return resourceService.getResourcesStream();
 });
 
 // Item options dialog
 class ItemOptionsDialog extends StatefulWidget {
   final CatalogItem item;
-  final Function(CatalogItem, {Map<String, dynamic>? options, String? notes, int quantity}) onAddToCart;
+  final Function(CatalogItem,
+      {Map<String, dynamic>? options, String? notes, int quantity}) onAddToCart;
 
   const ItemOptionsDialog({
     super.key,
@@ -1263,7 +1277,7 @@ class _ItemOptionsDialogState extends State<ItemOptionsDialog> {
   int _quantity = 1;
   String? _notes;
   final Map<String, dynamic> _selectedOptions = {};
-  
+
   // Example item options - in a real app, these would come from the item metadata
   final Map<String, List<String>> _availableOptions = {
     'Size': ['Regular', 'Large', 'Extra Large'],
@@ -1274,7 +1288,7 @@ class _ItemOptionsDialogState extends State<ItemOptionsDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Dialog(
       child: SingleChildScrollView(
         child: Padding(
@@ -1331,9 +1345,9 @@ class _ItemOptionsDialogState extends State<ItemOptionsDialog> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Quantity selector
               Row(
                 children: [
@@ -1368,23 +1382,24 @@ class _ItemOptionsDialogState extends State<ItemOptionsDialog> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Options
-              if (widget.item.metadata.containsKey('options') || _availableOptions.isNotEmpty) ...[
+              if (widget.item.metadata.containsKey('options') ||
+                  _availableOptions.isNotEmpty) ...[
                 const Text(
                   'Options',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                
+
                 // In a real app, options would come from item metadata
                 // Using example options for now
                 ..._availableOptions.entries.map((entry) {
                   final optionName = entry.key;
                   final values = entry.value;
-                  
+
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1394,8 +1409,9 @@ class _ItemOptionsDialogState extends State<ItemOptionsDialog> {
                         spacing: 8,
                         runSpacing: 8,
                         children: values.map((value) {
-                          final isSelected = _selectedOptions[optionName] == value;
-                          
+                          final isSelected =
+                              _selectedOptions[optionName] == value;
+
                           return ChoiceChip(
                             label: Text(value),
                             selected: isSelected,
@@ -1416,9 +1432,9 @@ class _ItemOptionsDialogState extends State<ItemOptionsDialog> {
                   );
                 }),
               ],
-              
+
               const SizedBox(height: 16),
-              
+
               // Special instructions
               TextField(
                 decoration: const InputDecoration(
@@ -1433,9 +1449,9 @@ class _ItemOptionsDialogState extends State<ItemOptionsDialog> {
                   });
                 },
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Action buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -1455,7 +1471,8 @@ class _ItemOptionsDialogState extends State<ItemOptionsDialog> {
                         quantity: _quantity,
                       );
                     },
-                    child: Text('Add to Cart (\$${(widget.item.price * _quantity).toStringAsFixed(2)})'),
+                    child: Text(
+                        'Add to Cart (\$${(widget.item.price * _quantity).toStringAsFixed(2)})'),
                   ),
                 ],
               ),
@@ -1467,24 +1484,13 @@ class _ItemOptionsDialogState extends State<ItemOptionsDialog> {
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
 /// Data model for restaurant stats dashboard
 class DashboardStats {
   final OrderStats orderStats;
   final SalesStats salesStats;
   final TableStats tableStats;
   final ProductStats productStats;
-  
+
   DashboardStats({
     required this.orderStats,
     required this.salesStats,
@@ -1492,15 +1498,14 @@ class DashboardStats {
     required this.productStats,
   });
 }
- class SalesStats {
+
+class SalesStats {
   final double totalSales;
   final double todaySales;
   final int orderCount;
   final Map<String, double>? salesByDay;
   final double averageOrderValue;
 
-  
-  
   const SalesStats({
     required this.totalSales,
     required this.todaySales,
@@ -1508,11 +1513,9 @@ class DashboardStats {
     this.salesByDay,
     this.averageOrderValue = 0,
   });
-  
+
   // Calculate average order value
-  double get avgOrderValue => orderCount > 0 
-      ? totalSales / orderCount 
-      : 0;
+  double get avgOrderValue => orderCount > 0 ? totalSales / orderCount : 0;
 }
 
 /// Table statistics
@@ -1523,7 +1526,7 @@ class TableStats {
   final int availableTables;
   final double occupancyRate;
   final double turnoverRate; // average times a table is used per day
- 
+
   final int cleaningTables;
 
   const TableStats({
@@ -1535,14 +1538,13 @@ class TableStats {
     this.occupancyRate = 0,
     this.turnoverRate = 0,
   });
-  
+
   // Calculate available tables
   int get available => totalTables - occupiedTables - reservedTables;
-  
+
   // Calculate occupancy rate
-  double get occupancy => totalTables > 0 
-      ? (occupiedTables + reservedTables) / totalTables 
-      : 0;
+  double get occupancy =>
+      totalTables > 0 ? (occupiedTables + reservedTables) / totalTables : 0;
 }
 
 /// Product statistics
@@ -1551,21 +1553,20 @@ class ProductStats {
   final int categories;
   final int outOfStock;
   final List<TopSellingProduct>? topProducts;
-  
+
   const ProductStats({
     required this.totalProducts,
     required this.categories,
     required this.outOfStock,
     this.topProducts,
   });
-  
+
   // Calculate in-stock products
   int get inStock => totalProducts - outOfStock;
-  
+
   // Calculate in-stock percentage
-  double get inStockPercentage => totalProducts > 0 
-      ? (totalProducts - outOfStock) / totalProducts 
-      : 0;
+  double get inStockPercentage =>
+      totalProducts > 0 ? (totalProducts - outOfStock) / totalProducts : 0;
 }
 
 /// Top selling product data
@@ -1575,7 +1576,7 @@ class TopSellingProduct {
   final int quantity;
   final double revenue;
   final String category;
-  
+
   const TopSellingProduct({
     required this.id,
     required this.name,
@@ -1590,7 +1591,7 @@ class SalesDataPoint {
   final DateTime date;
   final double sales;
   final int orders;
-  
+
   const SalesDataPoint({
     required this.date,
     required this.sales,
@@ -1604,7 +1605,7 @@ class CategoryDataPoint {
   final double sales;
   final int orders;
   final Color color;
-  
+
   const CategoryDataPoint({
     required this.category,
     required this.sales,
@@ -1617,13 +1618,12 @@ class CategoryDataPoint {
 class HourlyDataPoint {
   final int hour;
   final int orders;
-  
+
   const HourlyDataPoint({
     required this.hour,
     required this.orders,
   });
 }
-
 
 /// Customer statistics
 class CustomerStats {
@@ -1632,7 +1632,7 @@ class CustomerStats {
   final int returningCustomers;
   final double returnRate;
   final List<CustomerFrequency>? frequencyDistribution;
-  
+
   const CustomerStats({
     required this.totalCustomers,
     required this.newCustomers,
@@ -1640,11 +1640,10 @@ class CustomerStats {
     this.returnRate = 0,
     this.frequencyDistribution,
   });
-  
+
   // Calculate return rate
-  double get customerReturnRate => totalCustomers > 0 
-      ? returningCustomers / totalCustomers 
-      : 0;
+  double get customerReturnRate =>
+      totalCustomers > 0 ? returningCustomers / totalCustomers : 0;
 }
 
 /// Customer visit frequency
@@ -1652,7 +1651,7 @@ class CustomerFrequency {
   final String label; // e.g., "1 visit", "2-5 visits", etc.
   final int count;
   final double percentage;
-  
+
   const CustomerFrequency({
     required this.label,
     required this.count,

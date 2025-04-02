@@ -13,9 +13,9 @@ class OnboardingController extends _$OnboardingController {
   }
 
   Future<void> completeOnboarding() async {
-    final onboardingRepository =
-        ref.watch(onboardingRepositoryProvider).requireValue;
+    final onboardingRepository = ref.read(onboardingRepositoryProvider).value;
     state = const AsyncLoading();
-    state = await AsyncValue.guard(onboardingRepository.setOnboardingComplete);
+    state = await AsyncValue.guard(
+        () => onboardingRepository?.setOnboardingComplete() ?? Future.value());
   }
 }

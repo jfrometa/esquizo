@@ -1,5 +1,6 @@
  
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/order_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/restaurant/table_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/create_order.dart';
@@ -98,27 +99,7 @@ final cashiersProvider = FutureProvider<List<StaffMember>>((ref) {
   final staffService = ref.watch(staffServiceProvider);
   return staffService.getStaffByRole(StaffRole.cashier);
 });
-
-class OrderStats {
-  final int pendingOrders;
-  final int preparingOrders;
-  final int readyOrders;
-  final double dailySales;
-  final int averageServiceTime;
-  final int totalOrders;
-  final int completedOrders;
-
-  OrderStats({
-    required this.pendingOrders,
-    required this.preparingOrders,
-    required this.readyOrders,
-    required this.dailySales,
-    required this.averageServiceTime,
-    required this.totalOrders,
-    required this.completedOrders,
-  });
-}
-
+ 
 class RestaurantStats {
   final int totalTables;
   final int occupiedTables;

@@ -3,7 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/firebase_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
 
 /// A dialog to collect contact information or use existing authenticated user data.
 /// Supports four modes:
@@ -18,12 +19,15 @@ class ContactInfoDialog {
     return await showDialog<Map<String, String>>(
       context: context,
       barrierDismissible: true,
-      builder: (dialogContext) => _ContactInfoDialogContent(dialogContext: dialogContext),
+      builder: (dialogContext) =>
+          _ContactInfoDialogContent(dialogContext: dialogContext),
     );
   }
 }
-  // UI state
-  enum FormMode { contact, register, login }
+
+// UI state
+enum FormMode { contact, register, login }
+
 /// The internal widget for the contact info dialog content
 class _ContactInfoDialogContent extends ConsumerStatefulWidget {
   final BuildContext dialogContext;
@@ -31,20 +35,24 @@ class _ContactInfoDialogContent extends ConsumerStatefulWidget {
   const _ContactInfoDialogContent({required this.dialogContext});
 
   @override
-  _ContactInfoDialogContentState createState() => _ContactInfoDialogContentState();
+  _ContactInfoDialogContentState createState() =>
+      _ContactInfoDialogContentState();
 }
 
-class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogContent> {
+class _ContactInfoDialogContentState
+    extends ConsumerState<_ContactInfoDialogContent> {
   // Form controllers
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
-  
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+
   // Login form controllers
   final TextEditingController _loginEmailController = TextEditingController();
-  final TextEditingController _loginPasswordController = TextEditingController();
+  final TextEditingController _loginPasswordController =
+      TextEditingController();
 
   // Form validation state
   bool _isNameValid = true;
@@ -54,7 +62,6 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
   bool _isConfirmPasswordValid = true;
   bool _isLoginEmailValid = true;
   bool _isLoginPasswordValid = true;
-  
 
   FormMode _formMode = FormMode.contact;
   bool _isEditingInfo = false;
@@ -73,7 +80,7 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
   /// Initialize form data based on current authentication state
   Future<void> _initializeUserData() async {
     final currentUser = ref.read(firebaseAuthProvider).currentUser;
-    
+
     // If no user or anonymous user, nothing to pre-fill
     if (currentUser == null || currentUser.isAnonymous) {
       return;
@@ -82,14 +89,14 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
     // Pre-fill with auth data
     _nameController.text = currentUser.displayName ?? '';
     _emailController.text = currentUser.email ?? '';
-    
+
     // Try to get additional user data from Firestore
     try {
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(currentUser.uid)
           .get();
-      
+
       if (userDoc.exists) {
         setState(() {
           _userData = userDoc.data();
@@ -119,11 +126,11 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
     // Access current user through Riverpod
     final user = ref.watch(authStateChangesProvider).value;
     final bool isUserLoggedIn = user != null && !user.isAnonymous;
-    
+
     // Theme data
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     // Responsive width calculation
     final double screenWidth = MediaQuery.sizeOf(context).width;
     final double dialogWidth = screenWidth > 600 ? 500 : screenWidth * 0.85;
@@ -147,21 +154,20 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
             children: [
               // Header section
               _buildHeader(isUserLoggedIn, colorScheme),
-              
+
               const SizedBox(height: 16),
-              
+
               // User info banner for logged-in users
               if (isUserLoggedIn && !_isEditingInfo)
                 _buildLoggedInBanner(user, colorScheme),
-              
+
               // Toggle between form modes (only for guests)
               if (!isUserLoggedIn && !_isEditingInfo)
                 _buildFormToggle(colorScheme),
-              
+
               // Error message
-              if (_errorMessage != null)
-                _buildErrorMessage(colorScheme),
-              
+              if (_errorMessage != null) _buildErrorMessage(colorScheme),
+
               // Form content
               Flexible(
                 child: SingleChildScrollView(
@@ -171,9 +177,9 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Action buttons
               _buildActionButtons(isUserLoggedIn, user, colorScheme),
             ],
@@ -187,7 +193,7 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
   Widget _buildHeader(bool isUserLoggedIn, ColorScheme colorScheme) {
     IconData headerIcon;
     String headerTitle;
-    
+
     if (isUserLoggedIn && !_isEditingInfo) {
       headerIcon = Icons.person;
       headerTitle = 'Confirmar Información';
@@ -210,7 +216,7 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
           break;
       }
     }
-    
+
     return Row(
       children: [
         Icon(
@@ -257,7 +263,7 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
       child: Row(
         children: [
           Icon(
-            Icons.check_circle_outline, 
+            Icons.check_circle_outline,
             color: colorScheme.primary,
             size: 20,
           ),
@@ -324,7 +330,7 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
                   decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
-                        color: _formMode == FormMode.contact 
+                        color: _formMode == FormMode.contact
                             ? colorScheme.primary
                             : colorScheme.outlineVariant,
                         width: _formMode == FormMode.contact ? 2 : 1,
@@ -335,18 +341,18 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
                     'Contacto',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: _formMode == FormMode.contact 
+                      color: _formMode == FormMode.contact
                           ? colorScheme.primary
                           : colorScheme.onSurfaceVariant,
-                      fontWeight: _formMode == FormMode.contact 
-                          ? FontWeight.bold 
+                      fontWeight: _formMode == FormMode.contact
+                          ? FontWeight.bold
                           : FontWeight.normal,
                     ),
                   ),
                 ),
               ),
             ),
-            
+
             // Login Tab
             Expanded(
               child: InkWell(
@@ -361,7 +367,7 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
                   decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
-                        color: _formMode == FormMode.login 
+                        color: _formMode == FormMode.login
                             ? colorScheme.primary
                             : colorScheme.outlineVariant,
                         width: _formMode == FormMode.login ? 2 : 1,
@@ -372,18 +378,18 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
                     'Iniciar Sesión',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: _formMode == FormMode.login 
+                      color: _formMode == FormMode.login
                           ? colorScheme.primary
                           : colorScheme.onSurfaceVariant,
-                      fontWeight: _formMode == FormMode.login 
-                          ? FontWeight.bold 
+                      fontWeight: _formMode == FormMode.login
+                          ? FontWeight.bold
                           : FontWeight.normal,
                     ),
                   ),
                 ),
               ),
             ),
-            
+
             // Register Tab
             Expanded(
               child: InkWell(
@@ -398,7 +404,7 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
                   decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
-                        color: _formMode == FormMode.register 
+                        color: _formMode == FormMode.register
                             ? colorScheme.primary
                             : colorScheme.outlineVariant,
                         width: _formMode == FormMode.register ? 2 : 1,
@@ -409,11 +415,11 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
                     'Registrarse',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: _formMode == FormMode.register 
+                      color: _formMode == FormMode.register
                           ? colorScheme.primary
                           : colorScheme.onSurfaceVariant,
-                      fontWeight: _formMode == FormMode.register 
-                          ? FontWeight.bold 
+                      fontWeight: _formMode == FormMode.register
+                          ? FontWeight.bold
                           : FontWeight.normal,
                     ),
                   ),
@@ -422,7 +428,7 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
             ),
           ],
         ),
-        
+
         // Subtitle for the selected mode
         Padding(
           padding: const EdgeInsets.only(top: 8.0),
@@ -587,7 +593,9 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: isEmpty ? FontWeight.normal : FontWeight.w500,
-                  color: isEmpty ? colorScheme.onSurfaceVariant : colorScheme.onSurface,
+                  color: isEmpty
+                      ? colorScheme.onSurfaceVariant
+                      : colorScheme.onSurface,
                   fontStyle: isEmpty ? FontStyle.italic : FontStyle.normal,
                 ),
               ),
@@ -822,7 +830,8 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
           obscureText: obscureText,
           readOnly: readOnly,
           style: TextStyle(
-            color: readOnly ? colorScheme.onSurfaceVariant : colorScheme.onSurface,
+            color:
+                readOnly ? colorScheme.onSurfaceVariant : colorScheme.onSurface,
             fontStyle: readOnly ? FontStyle.italic : FontStyle.normal,
           ),
           decoration: InputDecoration(
@@ -833,9 +842,7 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
             ),
             prefixIcon: Icon(
               icon,
-              color: isValid 
-                  ? colorScheme.onSurfaceVariant
-                  : colorScheme.error,
+              color: isValid ? colorScheme.onSurfaceVariant : colorScheme.error,
               size: 20,
             ),
             contentPadding: const EdgeInsets.symmetric(
@@ -859,9 +866,7 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(
-                color: isValid
-                    ? colorScheme.primary
-                    : colorScheme.error,
+                color: isValid ? colorScheme.primary : colorScheme.error,
                 width: 1.5,
               ),
             ),
@@ -882,7 +887,7 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
   /// Builds action buttons (Continue, Cancel, etc.)
   Widget _buildActionButtons(
     bool isUserLoggedIn,
-    User? user, 
+    User? user,
     ColorScheme colorScheme,
   ) {
     return Row(
@@ -907,7 +912,7 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
             ),
             child: const Text('Cancelar Edición'),
           ),
-        
+
         // Regular cancel button
         if (!isUserLoggedIn || !_isEditingInfo)
           TextButton(
@@ -919,9 +924,9 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
             ),
             child: const Text('Cancelar'),
           ),
-        
+
         const SizedBox(width: 8),
-        
+
         // Main action button (Continue, Register, Save Changes)
         ElevatedButton(
           onPressed: _isProcessing
@@ -978,12 +983,12 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
     final TextEditingController emailController = TextEditingController();
     bool isProcessing = false;
     String? errorMessage;
-    
+
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         final colorScheme = Theme.of(context).colorScheme;
-        
+
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
@@ -1006,7 +1011,8 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
                       labelText: 'Correo electrónico',
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.email_outlined),
-                      labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+                      labelStyle:
+                          TextStyle(color: colorScheme.onSurfaceVariant),
                     ),
                     keyboardType: TextInputType.emailAddress,
                     style: TextStyle(color: colorScheme.onSurface),
@@ -1038,26 +1044,28 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
                       : () async {
                           if (emailController.text.isEmpty) {
                             setState(() {
-                              errorMessage = 'Por favor ingrese su correo electrónico';
+                              errorMessage =
+                                  'Por favor ingrese su correo electrónico';
                             });
                             return;
                           }
-                          
+
                           setState(() {
                             isProcessing = true;
                             errorMessage = null;
                           });
-                          
+
                           try {
                             await FirebaseAuth.instance.sendPasswordResetEmail(
                               email: emailController.text,
                             );
                             Navigator.of(context).pop();
-                            
+
                             // Show success message
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Hemos enviado un enlace para restablecer su contraseña'),
+                                content: Text(
+                                    'Hemos enviado un enlace para restablecer su contraseña'),
                                 backgroundColor: colorScheme.primary,
                               ),
                             );
@@ -1103,12 +1111,12 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
       });
       return;
     }
-    
+
     setState(() {
       _isProcessing = true;
       _errorMessage = null;
     });
-    
+
     try {
       // Handle based on current state/mode
       if (isUserLoggedIn && _isEditingInfo) {
@@ -1121,7 +1129,7 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
               setState(() => _isProcessing = false);
               return;
             }
-            
+
             // Just using contact info without registration
             Navigator.of(widget.dialogContext).pop({
               'name': _nameController.text,
@@ -1129,24 +1137,24 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
               'email': _emailController.text,
             });
             break;
-            
+
           case FormMode.register:
             // Validate registration form
             if (!_validateRegistrationForm()) {
               setState(() => _isProcessing = false);
               return;
             }
-            
+
             await _registerNewUser();
             break;
-            
+
           case FormMode.login:
             // Validate login form
             if (!_validateLoginForm()) {
               setState(() => _isProcessing = false);
               return;
             }
-            
+
             await _loginUser();
             break;
         }
@@ -1166,7 +1174,7 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
       _isPhoneValid = _validatePhone(_phoneController.text);
       _isEmailValid = _validateEmail(_emailController.text);
     });
-    
+
     return _isNameValid && _isPhoneValid && _isEmailValid;
   }
 
@@ -1177,21 +1185,25 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
       _isPhoneValid = _validatePhone(_phoneController.text);
       _isEmailValid = _validateEmail(_emailController.text);
       _isPasswordValid = _passwordController.text.length >= 6;
-      _isConfirmPasswordValid = _passwordController.text == _confirmPasswordController.text;
+      _isConfirmPasswordValid =
+          _passwordController.text == _confirmPasswordController.text;
     });
-    
-    return _isNameValid && _isPhoneValid && _isEmailValid && 
-           _isPasswordValid && _isConfirmPasswordValid;
+
+    return _isNameValid &&
+        _isPhoneValid &&
+        _isEmailValid &&
+        _isPasswordValid &&
+        _isConfirmPasswordValid;
   }
 
   /// Validate the login form
   bool _validateLoginForm() {
     setState(() {
-      _isLoginEmailValid = _loginEmailController.text.trim().isNotEmpty && 
-                           _validateEmail(_loginEmailController.text);
+      _isLoginEmailValid = _loginEmailController.text.trim().isNotEmpty &&
+          _validateEmail(_loginEmailController.text);
       _isLoginPasswordValid = _loginPasswordController.text.trim().isNotEmpty;
     });
-    
+
     return _isLoginEmailValid && _isLoginPasswordValid;
   }
 
@@ -1200,17 +1212,17 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
     try {
       // Get Firebase Auth instance from provider
       final auth = ref.read(firebaseAuthProvider);
-      
+
       // Sign in user
       final credentials = await auth.signInWithEmailAndPassword(
         email: _loginEmailController.text,
         password: _loginPasswordController.text,
       );
-      
+
       // Initialize user data for the view
       _nameController.text = credentials.user?.displayName ?? '';
       _emailController.text = credentials.user?.email ?? '';
-      
+
       // Try to get additional user info from Firestore
       if (credentials.user != null) {
         try {
@@ -1218,7 +1230,7 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
               .collection('users')
               .doc(credentials.user!.uid)
               .get();
-          
+
           if (userDoc.exists) {
             _userData = userDoc.data();
             _phoneController.text = _userData?['phone'] ?? '';
@@ -1228,20 +1240,20 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
                 .collection('users')
                 .doc(credentials.user!.uid)
                 .set({
-                  'name': credentials.user?.displayName ?? '',
-                  'email': credentials.user?.email ?? '',
-                  'createdAt': FieldValue.serverTimestamp(),
-                });
+              'name': credentials.user?.displayName ?? '',
+              'email': credentials.user?.email ?? '',
+              'createdAt': FieldValue.serverTimestamp(),
+            });
           }
         } catch (e) {
           debugPrint('Error fetching/creating user data: $e');
         }
       }
-      
+
       // Make sure auth state is refreshed
       final authRepo = ref.read(authRepositoryProvider);
       await authRepo.forceRefreshAuthState();
-      
+
       // Return user data
       if (mounted) {
         Navigator.of(widget.dialogContext).pop({
@@ -1269,21 +1281,18 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
     try {
       // Update user profile in Firebase Auth using our provider
       await user.updateDisplayName(_nameController.text);
-      
+
       // Update phone in Firestore
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .set({
-            'phone': _phoneController.text,
-            'name': _nameController.text,
-            'updatedAt': FieldValue.serverTimestamp(),
-          }, SetOptions(merge: true));
-      
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'phone': _phoneController.text,
+        'name': _nameController.text,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
       // Make sure auth state is refreshed
       final authRepo = ref.read(authRepositoryProvider);
       await authRepo.forceRefreshAuthState();
-      
+
       // Return updated info
       if (mounted) {
         Navigator.of(widget.dialogContext).pop({
@@ -1306,33 +1315,33 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
     try {
       // Get Firebase Auth instance from provider
       final auth = ref.read(firebaseAuthProvider);
-      
+
       // Create new user
       final credentials = await auth.createUserWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
-      
+
       // Update user profile
       await credentials.user?.updateDisplayName(_nameController.text);
-      
+
       // Save additional user info to Firestore
       if (credentials.user != null) {
         await FirebaseFirestore.instance
             .collection('users')
             .doc(credentials.user!.uid)
             .set({
-              'name': _nameController.text,
-              'email': _emailController.text,
-              'phone': _phoneController.text,
-              'createdAt': FieldValue.serverTimestamp(),
-            });
+          'name': _nameController.text,
+          'email': _emailController.text,
+          'phone': _phoneController.text,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
       }
-      
+
       // Make sure auth state is refreshed
       final authRepo = ref.read(authRepositoryProvider);
       await authRepo.forceRefreshAuthState();
-      
+
       // Return user data
       if (mounted) {
         Navigator.of(widget.dialogContext).pop({
@@ -1362,7 +1371,7 @@ class _ContactInfoDialogContentState extends ConsumerState<_ContactInfoDialogCon
     );
     return emailRegex.hasMatch(email);
   }
-  
+
   /// Get human-readable error message for Firebase errors
   static String _getFirebaseErrorMessage(dynamic error) {
     if (error is FirebaseAuthException) {
@@ -1409,14 +1418,15 @@ class PhoneNumberFormatter extends TextInputFormatter {
 
   String _formatPhoneNumber(String digits) {
     if (digits.isEmpty) return '';
-    
+
     // Handle different lengths
     if (digits.length < 4) {
       return '(${digits.padRight(3, ' ').trim()}';
     } else if (digits.length < 7) {
       return '(${digits.substring(0, 3)}) ${digits.substring(3).padRight(3, ' ').trim()}';
     } else {
-      final formattedNumber = '(${digits.substring(0, 3)}) ${digits.substring(3, 6)}-${digits.substring(6, min(10, digits.length))}';
+      final formattedNumber =
+          '(${digits.substring(0, 3)}) ${digits.substring(3, 6)}-${digits.substring(6, min(10, digits.length))}';
       return formattedNumber;
     }
   }

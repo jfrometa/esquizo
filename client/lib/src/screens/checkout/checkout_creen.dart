@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
+
 import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
@@ -19,7 +20,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/checkout/widge
 import 'package:starter_architecture_flutter_firebase/src/screens/checkout/widgets/quote_checkout.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/location/location_capture.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_cart.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/prompt_dialogs/contact_info_dialog.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/screens/prompt_dialogs/contact_info_dialog.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/manual_quote_provider.dart';
 import 'package:uuid/uuid.dart';
@@ -35,13 +36,18 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 
 class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   // Controllers
-  final TextEditingController _cateringLocationController = TextEditingController();
-  final TextEditingController _regularDishesLocationController = TextEditingController();
-  final TextEditingController _mealSubscriptionLocationController = TextEditingController();
+  final TextEditingController _cateringLocationController =
+      TextEditingController();
+  final TextEditingController _regularDishesLocationController =
+      TextEditingController();
+  final TextEditingController _mealSubscriptionLocationController =
+      TextEditingController();
   final TextEditingController _cateringDateController = TextEditingController();
-  final TextEditingController _mealSubscriptionDateController = TextEditingController();
+  final TextEditingController _mealSubscriptionDateController =
+      TextEditingController();
   final TextEditingController _cateringTimeController = TextEditingController();
-  final TextEditingController _mealSubscriptionTimeController = TextEditingController();
+  final TextEditingController _mealSubscriptionTimeController =
+      TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
   // Constants
@@ -68,7 +74,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   String? _mealSubscriptionLongitude;
   String? _regularDishesLatitude;
   String? _regularDishesLongitude;
- 
+
   // User data
   String? name, phone, email;
   bool showSignInScreen = false;
@@ -76,7 +82,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   // Process state
   bool _isProcessingOrder = false;
-  
+
   // Animation
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
 
@@ -114,7 +120,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     switch (widget.displayType) {
       case 'platos':
         itemsToDisplay = cartItems
-            .where((item) => !item.isMealSubscription && item.foodType != 'Catering')
+            .where((item) =>
+                !item.isMealSubscription && item.foodType != 'Catering')
             .toList();
         totalPrice = _calculateTotalPrice(itemsToDisplay);
         break;
@@ -146,14 +153,14 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     // Get theme data
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     // Responsive layout sizing
     final screenSize = MediaQuery.sizeOf(context);
     final isDesktop = screenSize.width > 1200;
     final isTablet = screenSize.width > 600 && screenSize.width <= 1200;
-    
+
     // Fetch items based on displayType
-    final List<CartItem> cartItems = ref.watch(cartProvider).items ;
+    final List<CartItem> cartItems = ref.watch(cartProvider).items;
     final CateringOrderItem? cateringOrder = ref.watch(cateringOrderProvider);
     final CateringOrderItem? cateringQuote = ref.watch(manualQuoteProvider);
     final List<CartItem> mealItems = ref.watch(mealOrderProvider) ?? [];
@@ -164,7 +171,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       cateringOrder,
       cateringQuote,
     );
-    
+
     // Calculate number of steps based on order type
     final int totalSteps = widget.displayType == 'quote' ? 2 : 3;
 
@@ -186,10 +193,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 const SizedBox(height: 16),
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
-                  child: _buildCurrentStepContent(
-                    totalSteps, 
-                    colorScheme
-                  ),
+                  child: _buildCurrentStepContent(totalSteps, colorScheme),
                 ),
               ],
             ),
@@ -209,13 +213,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     orderType: widget.displayType,
                   ),
                 const SizedBox(height: 16),
-                _buildActionButtons(
-                  itemsToDisplay, 
-                  cateringOrder, 
-                  cateringQuote, 
-                  totalSteps, 
-                  colorScheme
-                ),
+                _buildActionButtons(itemsToDisplay, cateringOrder,
+                    cateringQuote, totalSteps, colorScheme),
               ],
             ),
           ),
@@ -239,10 +238,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     const SizedBox(height: 16),
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 300),
-                      child: _buildCurrentStepContent(
-                        totalSteps, 
-                        colorScheme
-                      ),
+                      child: _buildCurrentStepContent(totalSteps, colorScheme),
                     ),
                     const SizedBox(height: 24),
                   ],
@@ -250,14 +246,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               ),
             ),
           ),
-          _buildBottomActions(
-            itemsToDisplay, 
-            cateringOrder, 
-            cateringQuote, 
-            totalPrice, 
-            totalSteps, 
-            colorScheme
-          ),
+          _buildBottomActions(itemsToDisplay, cateringOrder, cateringQuote,
+              totalPrice, totalSteps, colorScheme),
         ],
       );
     }
@@ -319,8 +309,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         title = 'Detalles de Entrega';
         break;
       case 1:
-        title = widget.displayType == 'quote' 
-            ? 'Resumen de Cotización' 
+        title = widget.displayType == 'quote'
+            ? 'Resumen de Cotización'
             : 'Método de Pago';
         break;
       case 2:
@@ -340,10 +330,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     );
   }
 
-  Widget _buildCurrentStepContent(
-    int totalSteps, 
-    ColorScheme colorScheme
-  ) {
+  Widget _buildCurrentStepContent(int totalSteps, ColorScheme colorScheme) {
     switch (_currentStep) {
       case 0:
         return _buildDeliveryStep(colorScheme);
@@ -407,7 +394,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   Widget _buildPaymentOption(int index, ColorScheme colorScheme) {
     final bool isSelected = _selectedPaymentMethod == index;
-    
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -420,12 +407,11 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected 
-                ? colorScheme.primary 
-                : colorScheme.outlineVariant,
+            color:
+                isSelected ? colorScheme.primary : colorScheme.outlineVariant,
             width: isSelected ? 2 : 1,
           ),
-          color: isSelected 
+          color: isSelected
               ? colorScheme.primaryContainer.withOpacity(0.3)
               : colorScheme.surface,
         ),
@@ -437,9 +423,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected 
-                      ? colorScheme.primary 
-                      : colorScheme.outline,
+                  color: isSelected ? colorScheme.primary : colorScheme.outline,
                   width: 2,
                 ),
               ),
@@ -465,8 +449,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     _paymentMethods[index],
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: isSelected 
-                          ? colorScheme.primary 
+                      color: isSelected
+                          ? colorScheme.primary
                           : colorScheme.onSurface,
                     ),
                   ),
@@ -543,13 +527,13 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   Widget _buildOrderDetails(ColorScheme colorScheme) {
     Widget? content;
-    
+
     switch (widget.displayType) {
       case 'platos':
         content = _buildDetailRow(
-          'Ubicación', 
-          _regularDishesLocationController.text.isNotEmpty 
-              ? _regularDishesLocationController.text 
+          'Ubicación',
+          _regularDishesLocationController.text.isNotEmpty
+              ? _regularDishesLocationController.text
               : 'No especificada',
           Icons.location_on,
           colorScheme,
@@ -559,18 +543,18 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         content = Column(
           children: [
             _buildDetailRow(
-              'Ubicación', 
-              _cateringLocationController.text.isNotEmpty 
-                  ? _cateringLocationController.text 
+              'Ubicación',
+              _cateringLocationController.text.isNotEmpty
+                  ? _cateringLocationController.text
                   : 'No especificada',
               Icons.location_on,
               colorScheme,
             ),
             const SizedBox(height: 8),
             _buildDetailRow(
-              'Fecha y Hora', 
-              _cateringDateController.text.isNotEmpty 
-                  ? '${_cateringDateController.text} - ${_cateringTimeController.text}' 
+              'Fecha y Hora',
+              _cateringDateController.text.isNotEmpty
+                  ? '${_cateringDateController.text} - ${_cateringTimeController.text}'
                   : 'No especificada',
               Icons.calendar_today,
               colorScheme,
@@ -582,18 +566,18 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         content = Column(
           children: [
             _buildDetailRow(
-              'Ubicación', 
-              _mealSubscriptionLocationController.text.isNotEmpty 
-                  ? _mealSubscriptionLocationController.text 
+              'Ubicación',
+              _mealSubscriptionLocationController.text.isNotEmpty
+                  ? _mealSubscriptionLocationController.text
                   : 'No especificada',
               Icons.location_on,
               colorScheme,
             ),
             const SizedBox(height: 8),
             _buildDetailRow(
-              'Fecha y Hora', 
-              _mealSubscriptionDateController.text.isNotEmpty 
-                  ? '${_mealSubscriptionDateController.text} - ${_mealSubscriptionTimeController.text}' 
+              'Fecha y Hora',
+              _mealSubscriptionDateController.text.isNotEmpty
+                  ? '${_mealSubscriptionDateController.text} - ${_mealSubscriptionTimeController.text}'
                   : 'No especificada',
               Icons.calendar_today,
               colorScheme,
@@ -603,37 +587,35 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         break;
       case 'quote':
         final CateringOrderItem? quote = ref.watch(manualQuoteProvider);
-        content = quote != null 
+        content = quote != null
             ? Column(
                 children: [
                   _buildDetailRow(
-                    'Tipo', 
+                    'Tipo',
                     'Cotización de catering',
                     Icons.assignment,
                     colorScheme,
                   ),
-                  if (_cateringLocationController.text.isNotEmpty)
-                  ...[
+                  if (_cateringLocationController.text.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     _buildDetailRow(
-                      'Ubicación', 
+                      'Ubicación',
                       _cateringLocationController.text,
                       Icons.location_on,
                       colorScheme,
                     ),
                   ],
-                  if (_cateringDateController.text.isNotEmpty)
-                  ...[
+                  if (_cateringDateController.text.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     _buildDetailRow(
-                      'Fecha y Hora', 
+                      'Fecha y Hora',
                       '${_cateringDateController.text} - ${_cateringTimeController.text}',
                       Icons.calendar_today,
                       colorScheme,
                     ),
                   ],
                 ],
-              ) 
+              )
             : Center(
                 child: Text(
                   'No hay cotización disponible',
@@ -642,13 +624,13 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               );
         break;
     }
-    
+
     return content ?? const SizedBox.shrink();
   }
 
   Widget _buildDetailRow(
-    String label, 
-    String value, 
+    String label,
+    String value,
     IconData icon,
     ColorScheme colorScheme,
   ) {
@@ -695,9 +677,9 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   Widget _buildBottomActions(
-    List<CartItem> itemsToDisplay, 
-    CateringOrderItem? cateringOrder, 
-    CateringOrderItem? cateringQuote, 
+    List<CartItem> itemsToDisplay,
+    CateringOrderItem? cateringOrder,
+    CateringOrderItem? cateringQuote,
     double totalPrice,
     int totalSteps,
     ColorScheme colorScheme,
@@ -754,7 +736,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         if (_currentStep == 0 && !_validateDeliveryStep()) {
                           return;
                         }
-                        
+
                         setState(() {
                           _currentStep++;
                         });
@@ -811,9 +793,9 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   Widget _buildActionButtons(
-    List<CartItem> itemsToDisplay, 
-    CateringOrderItem? cateringOrder, 
-    CateringOrderItem? cateringQuote, 
+    List<CartItem> itemsToDisplay,
+    CateringOrderItem? cateringOrder,
+    CateringOrderItem? cateringQuote,
     int totalSteps,
     ColorScheme colorScheme,
   ) {
@@ -852,33 +834,33 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             const SizedBox(height: 12),
             ElevatedButton(
               onPressed: _isProcessingOrder
-                ? null
-                : () async {
-                    if (_currentStep < totalSteps - 1) {
-                      // Validate current step
-                      if (_currentStep == 0 && !_validateDeliveryStep()) {
-                        return;
+                  ? null
+                  : () async {
+                      if (_currentStep < totalSteps - 1) {
+                        // Validate current step
+                        if (_currentStep == 0 && !_validateDeliveryStep()) {
+                          return;
+                        }
+
+                        setState(() {
+                          _currentStep++;
+                        });
+                      } else {
+                        // Final step - process order
+                        setState(() {
+                          _isProcessingOrder = true;
+                        });
+                        await _processOrder(
+                          context,
+                          itemsToDisplay,
+                          cateringOrder,
+                          cateringQuote,
+                        );
+                        setState(() {
+                          _isProcessingOrder = false;
+                        });
                       }
-                      
-                      setState(() {
-                        _currentStep++;
-                      });
-                    } else {
-                      // Final step - process order
-                      setState(() {
-                        _isProcessingOrder = true;
-                      });
-                      await _processOrder(
-                        context,
-                        itemsToDisplay,
-                        cateringOrder,
-                        cateringQuote,
-                      );
-                      setState(() {
-                        _isProcessingOrder = false;
-                      });
-                    }
-                  },
+                    },
               style: ElevatedButton.styleFrom(
                 backgroundColor: colorScheme.primary,
                 foregroundColor: colorScheme.onPrimary,
@@ -889,25 +871,25 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 ),
               ),
               child: _isProcessingOrder
-                ? SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      color: colorScheme.onPrimary,
-                      strokeWidth: 2,
+                  ? SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: colorScheme.onPrimary,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Text(
+                      _currentStep < totalSteps - 1
+                          ? 'Continuar'
+                          : widget.displayType == 'quote'
+                              ? 'Enviar Cotización'
+                              : 'Completar Orden',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  )
-                : Text(
-                    _currentStep < totalSteps - 1
-                        ? 'Continuar'
-                        : widget.displayType == 'quote'
-                            ? 'Enviar Cotización'
-                            : 'Completar Orden',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
             ),
           ],
         ),
@@ -917,7 +899,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   Widget _buildCheckoutContent() {
     // Fetch items based on displayType
-    final List<CartItem> cartItems = ref.watch(cartProvider).items  ;
+    final List<CartItem> cartItems = ref.watch(cartProvider).items;
     final CateringOrderItem? cateringOrder = ref.watch(cateringOrderProvider);
     final CateringOrderItem? cateringQuote = ref.watch(manualQuoteProvider);
     final List<CartItem> mealItems = ref.watch(mealOrderProvider) ?? [];
@@ -929,7 +911,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           items: cartItems,
           locationController: _regularDishesLocationController,
           onLocationTap: _showLocationBottomSheet,
-          paymentMethodDropdown: const SizedBox.shrink(), // We handle payment in separate step
+          paymentMethodDropdown:
+              const SizedBox.shrink(), // We handle payment in separate step
         );
       case 'catering':
         if (cateringOrder == null) {
@@ -949,7 +932,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           timeController: _cateringTimeController,
           onLocationTap: _showLocationBottomSheet,
           onDateTimeTap: _selectDateTime,
-          paymentMethodDropdown: const SizedBox.shrink(), // We handle payment in separate step
+          paymentMethodDropdown:
+              const SizedBox.shrink(), // We handle payment in separate step
         );
       case 'quote':
         if (cateringQuote == null) {
@@ -969,7 +953,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           timeController: _cateringTimeController,
           onLocationTap: _showLocationBottomSheet,
           onDateTimeTap: _selectDateTime,
-          paymentMethodDropdown: const SizedBox.shrink(), // We handle payment in separate step
+          paymentMethodDropdown:
+              const SizedBox.shrink(), // We handle payment in separate step
         );
       case 'subscriptions':
         return MealPlanCheckout(
@@ -979,7 +964,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           timeController: _mealSubscriptionTimeController,
           onLocationTap: _showLocationBottomSheet,
           onDateTimeTap: _selectDateTime,
-          paymentMethodDropdown: const SizedBox.shrink(), // We handle payment in separate step
+          paymentMethodDropdown:
+              const SizedBox.shrink(), // We handle payment in separate step
         );
       default:
         return const SizedBox.shrink();
@@ -1007,12 +993,11 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     );
   }
 
-Future<void> _processOrder(
-    BuildContext context, 
-    List<CartItem> items,
-    CateringOrderItem? cateringOrder, 
-    CateringOrderItem? cateringQuote
-  ) async {
+  Future<void> _processOrder(
+      BuildContext context,
+      List<CartItem> items,
+      CateringOrderItem? cateringOrder,
+      CateringOrderItem? cateringQuote) async {
     // Store context related objects before async operations
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
@@ -1029,21 +1014,23 @@ Future<void> _processOrder(
       // Save order to database
       try {
         final orderService = ref.read(orderServiceProvider);
-   Order order;
+        Order order;
         // Create OrderItems from CartItems
-        List<OrderItem> orderItems = items.map((item) => OrderItem(
-          id: item.id,
-          productId: item.id,
-          name: item.title,
-          price: double.tryParse(item.pricing) ?? 0.0,
-          quantity: item.quantity,
-          notes: item.notes,
-          imageUrl: item.img,
-        )).toList();
-        
+        List<OrderItem> orderItems = items
+            .map((item) => OrderItem(
+                  id: item.id,
+                  productId: item.id,
+                  name: item.title,
+                  price: double.tryParse(item.pricing) ?? 0.0,
+                  quantity: item.quantity,
+                  notes: item.notes,
+                  imageUrl: item.img,
+                ))
+            .toList();
+
         // Generate a unique order ID
         final orderId = const Uuid().v4();
-        
+
         // Prepare order data based on order type
         if (widget.displayType == 'platos') {
           order = Order(
@@ -1153,15 +1140,14 @@ Future<void> _processOrder(
           throw Exception('Invalid order type or missing data');
         }
 
-         // Save order to database
-        final newOrder = await orderService.createOrder(order);  
-          scaffoldMessenger.showSnackBar(SnackBar(
+        // Save order to database
+        final newOrder = await orderService.createOrder(order);
+        scaffoldMessenger.showSnackBar(SnackBar(
           content: Text('Order: $newOrder'),
           backgroundColor: colorScheme.error,
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 4),
         ));
-        
       } catch (error) {
         if (!mounted) return;
         scaffoldMessenger.showSnackBar(SnackBar(
@@ -1194,7 +1180,7 @@ Future<void> _processOrder(
 
         // Show success screen
         if (!mounted) return;
-        
+
         await navigator.push(
           MaterialPageRoute(
             builder: (context) => OrderSuccessScreen(
@@ -1222,7 +1208,6 @@ Future<void> _processOrder(
 
   String _generateOrderDetails(
       List<CartItem> items, Map<String, String>? contactInfo) {
-    
     final generator = OrderDetailsGenerator(
       taxRate: _taxRate,
       deliveryFee: _deliveryFee,
@@ -1372,13 +1357,13 @@ Future<void> _processOrder(
           _showValidationError('catering');
         }
         break;
-      
+
       case 'quote':
         // For quotes, no validation needed in first step
         isValid = true;
         break;
     }
-    
+
     return isValid;
   }
 
@@ -1494,7 +1479,7 @@ Future<void> _processOrder(
           _showValidationError('catering');
         }
         break;
-      
+
       case 'quote':
         // For quotes, minimal validation
         isValid = true;
@@ -1560,9 +1545,9 @@ Future<void> _processOrder(
   void _showLocationBottomSheet(BuildContext context,
       TextEditingController controller, String orderType) {
     if (!mounted) return;
-    
+
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1581,7 +1566,7 @@ Future<void> _processOrder(
             child: LocationCaptureBottomSheet(
               onLocationCaptured: (latitude, longitude, address) {
                 if (!mounted) return;
-                
+
                 setState(() {
                   controller.text = address;
                   switch (orderType.toLowerCase()) {
@@ -1618,7 +1603,7 @@ Future<void> _processOrder(
       },
     );
   }
-  
+
   Future<void> _selectDateTime(
     BuildContext context,
     TextEditingController dateController,
