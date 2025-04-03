@@ -75,16 +75,7 @@ class AppStartupResult {
 final appStartupResultProvider =
     StateProvider<AppStartupResult?>((ref) => null);
 
-// Separate provider to check if setup screen should be shown - after initialization
-final checkSetupScreenProvider = Provider<void>((ref) {
-  final startupResult = ref.watch(appStartupResultProvider);
-
-  // Only update if we have a result and it indicates we should show setup
-  if (startupResult != null && startupResult.showSetupScreen) {
-    // Now it's safe to modify this state as we're not in initialization
-    ref.read(showSetupScreenProvider.notifier).state = true;
-  }
-});
+// Remove the problematic checkSetupScreenProvider and handle setup screen state differently
 
 // Main app startup provider - refactored to avoid modifying providers during init
 @Riverpod(keepAlive: true)
@@ -120,9 +111,8 @@ Future<void> appStartup(AppStartupRef ref) async {
     // Wait for all initialization code to be complete before returning
     await ref.read(onboardingRepositoryProvider.future);
 
-    // Now read the checkSetupScreenProvider to trigger the setup screen check
-    // This happens after initialization is complete
-    ref.read(checkSetupScreenProvider);
+    // Don't try to modify other providers during initialization
+    // We'll handle the setup screen state in the UI layer
   } catch (e) {
     debugPrint('Error during app startup: $e');
     rethrow;
@@ -133,4 +123,10 @@ Future<void> appStartup(AppStartupRef ref) async {
 final isSetupCompleteProvider = Provider<bool>((ref) {
   final result = ref.watch(appStartupResultProvider);
   return result != null && result.businessConfig != null;
+});
+
+// Add a new provider that can be used in the UI to determine if setup screen should be shown
+final shouldShowSetupScreenProvider = Provider<bool>((ref) {
+  final result = ref.watch(appStartupResultProvider);
+  return result != null && result.showSetupScreen;
 });

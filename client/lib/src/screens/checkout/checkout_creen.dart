@@ -1551,6 +1551,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      enableDrag: false, // disables drag-to-dismiss gesture
+      isDismissible: false, // prevents tapping outside to dismiss
       backgroundColor: Colors.transparent,
       builder: (BuildContext bottomSheetContext) {
         return FractionallySizedBox(

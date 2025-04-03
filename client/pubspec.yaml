@@ -14,6 +14,7 @@ dependencies:
   rxdart: ^0.28.0
   shared_preferences: ^2.2.3
   google_maps_flutter: ^2.9.0
+  flutter_inappwebview: ^6.1.5
   #no wasm
   # speech_to_text: ^6.6.2 
   equatable: ^2.0.5

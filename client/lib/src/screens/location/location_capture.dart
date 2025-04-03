@@ -939,39 +939,47 @@ window.getCurrentLocation = function() {
     final isDesktop = size.width > 1024;
     final isTablet = size.width > 600 && size.width <= 1024;
 
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: size.height * 0.85,
-        maxWidth: isDesktop ? 800 : double.infinity,
-      ),
-      padding: EdgeInsets.symmetric(
-        horizontal: isDesktop ? 32 : 16,
-        vertical: 24,
-      ),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildHeader(colorScheme, theme),
-          const SizedBox(height: 24),
-          Expanded(
-            child: _isMapView
-                ? _buildMapView(colorScheme, theme)
-                : _buildAddressFormView(colorScheme, theme),
-          ),
-          const SizedBox(height: 24),
-          _buildActionButtons(colorScheme, theme),
-        ],
+    // Wrapping in WillPopScope to prevent dismissal by back button.
+    // Also note: when showing this bottom sheet, set isDismissible: false and
+    // enableDrag: false in showModalBottomSheet().
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Container(
+        // Occupy the full screen height
+        height: size.height,
+        constraints: BoxConstraints(
+          maxHeight: size.height,
+          maxWidth: isDesktop ? 800 : double.infinity,
+        ),
+        padding: EdgeInsets.symmetric(
+          horizontal: isDesktop ? 32 : 16,
+          vertical: 24,
+        ),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildHeader(colorScheme, theme),
+            const SizedBox(height: 24),
+            Expanded(
+              child: _isMapView
+                  ? _buildMapView(colorScheme, theme)
+                  : _buildAddressFormView(colorScheme, theme),
+            ),
+            const SizedBox(height: 24),
+            _buildActionButtons(colorScheme, theme),
+          ],
+        ),
       ),
     );
   }
