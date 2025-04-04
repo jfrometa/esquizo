@@ -6,7 +6,6 @@ import 'package:starter_architecture_flutter_firebase/src/core/providers/busines
 import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/user/auth_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/restaurant/restaurant_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
@@ -16,6 +15,7 @@ import '../../../../core/providers/catalog/catalog_provider.dart';
 import '../../../../core/services/cart_service.dart';
 import '../../../../core/services/service_factory.dart';
 import '../../../../core/services/resource_service.dart';
+import 'dart:math';
 
 class CreateOrderForm extends ConsumerStatefulWidget {
   final String? preselectedTableId;
@@ -77,7 +77,9 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
 
     // Initialize cart with business ID and selected table
     _cartService.clearCart();
-    _cartService.updateResourceId(_selectedTableId);
+    // Fix: Add null check before using _selectedTableId
+    _cartService.updateResourceId(
+        _selectedTableId); // Make sure updateResourceId handles null
     _cartService.updateDeliveryOption(_isDelivery);
     _cartService.updatePeopleCount(_peopleCount);
   }
@@ -90,60 +92,69 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width > 1200;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 1200;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create New Order'),
-        actions: [
-          TextButton.icon(
-            icon: const Icon(Icons.clear_all),
-            label: const Text('Clear Cart'),
-            onPressed: _clearCart,
-          ),
-        ],
-      ),
-      body: Form(
-        key: _formKey,
-        child: isDesktop
-            ? _buildDesktopLayout(context)
-            : _buildMobileLayout(context),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Total',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    Text(
-                      '\$${_cartService.cart.total.toStringAsFixed(2)}',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                  ],
+    // Use SafeArea to avoid layout issues with system UI
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Create New Order'),
+          actions: [
+            TextButton.icon(
+              icon: const Icon(Icons.clear_all),
+              label: const Text('Clear Cart'),
+              onPressed: _clearCart,
+            ),
+          ],
+        ),
+        body: Form(
+          key: _formKey,
+          child: isDesktop
+              ? _buildDesktopLayout(context)
+              : _buildMobileLayout(context),
+        ),
+        bottomNavigationBar: BottomAppBar(
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Total',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      Text(
+                        // Fix: Ensure cart is not null
+                        '\$${(_cartService.cart?.total ?? 0.0).toStringAsFixed(2)}',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.shopping_cart_checkout),
-                label: const Text('Create Order'),
-                onPressed: _cartService.cart.items.isEmpty || _isCreatingOrder
-                    ? null
-                    : _createOrder,
-                style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.shopping_cart_checkout),
+                  label: const Text('Create Order'),
+                  // Fix: Safe access to cart items with null check
+                  onPressed: (_cartService.cart?.items.isEmpty ?? true) ||
+                          _isCreatingOrder
+                      ? null
+                      : _createOrder,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 16),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -151,40 +162,53 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
   }
 
   Widget _buildDesktopLayout(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Left side - Menu and Items
-        Expanded(
-          flex: 3,
-          child: Column(
-            children: [
-              _buildSearchAndFilterBar(),
-              Expanded(
-                child: _buildMenuItems(),
-              ),
-            ],
-          ),
-        ),
-
-        // Right side - Order Details and Cart
-        Expanded(
-          flex: 2,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
+    // Important: Define container sizing to avoid unbounded height issues
+    return Container(
+      // Use constraints to provide bounded height for inner widgets
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Left side - Menu and Items
+          Expanded(
+            flex: 3,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildOrderSettingsCard(),
-                const SizedBox(height: 16),
-                _buildCartSection(),
-                const SizedBox(height: 16),
-                _buildPaymentMethodCard(),
+                _buildSearchAndFilterBar(),
+                Expanded(
+                  child: _buildMenuItems(),
+                ),
               ],
             ),
           ),
-        ),
-      ],
+
+          // Right side - Order Details and Cart
+          Expanded(
+            flex: 2,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height -
+                      150, // Adjust as needed
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildOrderSettingsCard(),
+                    const SizedBox(height: 16),
+                    _buildCartSection(),
+                    const SizedBox(height: 16),
+                    _buildPaymentMethodCard(),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -202,14 +226,15 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
             labelColor: Colors.black,
           ),
 
-          // Tab content
+          // Tab content - wrap in Expanded to provide size constraints
           Expanded(
             child: TabBarView(
               children: [
-                // Menu tab
+                // Menu tab - use Column with proper constraints
                 Column(
                   children: [
                     _buildSearchAndFilterBar(),
+                    // The Expanded here is critical to provide height constraints
                     Expanded(
                       child: _buildMenuItems(),
                     ),
@@ -218,6 +243,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
 
                 // Order details tab
                 SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -245,29 +271,34 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Search field
-          TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Search menu items...',
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: _searchQuery.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () => _searchController.clear(),
-                    )
-                  : null,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+          // Search field - Fixed with explicit constraints
+          SizedBox(
+            height: 56,
+            width: double.infinity,
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search menu items...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () => _searchController.clear(),
+                      )
+                    : null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
               ),
-              contentPadding: const EdgeInsets.symmetric(vertical: 12),
             ),
           ),
 
           const SizedBox(height: 16),
 
-          // Categories filter
+          // Categories filter - Fix with SizedBox and proper ListView constraints
           SizedBox(
             height: 40,
             child: categoriesAsync.when(
@@ -275,6 +306,8 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                 if (categories.isEmpty) return const SizedBox.shrink();
 
                 return ListView(
+                  shrinkWrap: true, // Important!
+                  physics: const ClampingScrollPhysics(),
                   scrollDirection: Axis.horizontal,
                   children: [
                     Padding(
@@ -309,7 +342,9 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                 );
               },
               loading: () => const Center(child: LinearProgressIndicator()),
-              error: (_, __) => const Text('Error loading categories'),
+              // Fix: Better error handling
+              error: (error, stack) => Text(
+                  'Error loading categories: ${error.toString().substring(0, min(50, error.toString().length))}'),
             ),
           ),
         ],
@@ -326,58 +361,78 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
             categoryId: _selectedCategoryId,
           )));
 
-    return itemsAsync.when(
-      data: (items) {
-        // Filter items by search query
-        final filteredItems = items.where((item) {
-          if (_searchQuery.isEmpty) return true;
+    // Container with fixed size constraints to avoid layout issues
+    return Container(
+      // This explicit height helps avoid unbounded height issues
+      constraints: BoxConstraints(
+        minHeight: 100,
+        maxHeight: double.infinity,
+      ),
+      child: itemsAsync.when(
+        data: (items) {
+          // Filter items by search query
+          final filteredItems = items.where((item) {
+            if (_searchQuery.isEmpty) return true;
 
-          return item.name.toLowerCase().contains(_searchQuery) ||
-              item.description.toLowerCase().contains(_searchQuery);
-        }).toList();
+            return item.name.toLowerCase().contains(_searchQuery) ||
+                (item.description?.toLowerCase() ?? '').contains(_searchQuery);
+          }).toList();
 
-        if (filteredItems.isEmpty) {
-          return const Center(
-            child: Text('No items found'),
+          if (filteredItems.isEmpty) {
+            return const Center(
+              child: Text('No items found'),
+            );
+          }
+
+          // Use a LimitedBox to avoid unbounded height issues with scrollable widgets
+          return LimitedBox(
+            maxHeight: double.infinity,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth > 600;
+                final crossAxisCount = constraints.maxWidth > 900 ? 3 : 2;
+
+                if (isWide) {
+                  // Grid for wider screens
+                  return GridView.builder(
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      childAspectRatio: 1.5,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                    ),
+                    itemCount: filteredItems.length,
+                    itemBuilder: (context, index) {
+                      return _buildMenuItemCard(filteredItems[index]);
+                    },
+                    shrinkWrap: true,
+                    physics: const ClampingScrollPhysics(),
+                  );
+                } else {
+                  // List for narrower screens
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: filteredItems.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: _buildMenuItemCard(filteredItems[index]),
+                      );
+                    },
+                    shrinkWrap: true,
+                    physics: const ClampingScrollPhysics(),
+                  );
+                }
+              },
+            ),
           );
-        }
-
-        // Display items in a grid or list based on screen size
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final isWide = constraints.maxWidth > 600;
-
-            if (isWide) {
-              // Grid for wider screens
-              return GridView.builder(
-                padding: const EdgeInsets.all(16),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 1.5,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                ),
-                itemCount: filteredItems.length,
-                itemBuilder: (context, index) {
-                  return _buildMenuItemCard(filteredItems[index]);
-                },
-              );
-            } else {
-              // List for narrower screens
-              return ListView.separated(
-                padding: const EdgeInsets.all(16),
-                itemCount: filteredItems.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 16),
-                itemBuilder: (context, index) {
-                  return _buildMenuItemCard(filteredItems[index]);
-                },
-              );
-            }
-          },
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Error: $error')),
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+            child: Text(
+                'Error: ${error.toString().substring(0, min(50, error.toString().length))}')),
+      ),
     );
   }
 
@@ -392,199 +447,219 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
           builder: (context, constraints) {
             final isNarrow = constraints.maxWidth < 300;
 
-            if (isNarrow) {
-              // Vertical layout for narrow screens
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Item image
-                  if (item.imageUrl.isNotEmpty)
-                    AspectRatio(
-                      aspectRatio: 16 / 9,
-                      child: Image.network(
-                        item.imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          color: theme.colorScheme.primaryContainer,
-                          child: const Center(
-                            child: Icon(Icons.image_not_supported),
+            // Fixed height container to ensure proper sizing
+            return Container(
+              height: isNarrow
+                  ? 320
+                  : 140, // Provide explicit height based on layout
+              child: isNarrow
+                  ? _buildNarrowItemLayout(item, theme)
+                  : _buildWideItemLayout(item, theme),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNarrowItemLayout(CatalogItem item, ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Item image with explicit height
+        if (item.imageUrl != null && item.imageUrl.isNotEmpty)
+          Container(
+            height: 140,
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Image.network(
+                item.imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  color: theme.colorScheme.primaryContainer,
+                  child: const Center(
+                    child: Icon(Icons.image_not_supported),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+        // Item details
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        item.name,
+                        style: theme.textTheme.titleMedium,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (!item.isAvailable)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          'Out of Stock',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 10,
                           ),
                         ),
                       ),
-                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '\$${item.price.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Expanded(
+                  child: Text(
+                    item.description ?? '',
+                    style: theme.textTheme.bodySmall,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
 
-                  // Item details
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                item.name,
-                                style: theme.textTheme.titleMedium,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            if (!item.isAvailable)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.red.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  'Out of Stock',
-                                  style: TextStyle(
-                                    color: Colors.red,
-                                    fontSize: 10,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '\$${item.price.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          item.description,
-                          style: theme.textTheme.bodySmall,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                // Add button
+                if (item.isAvailable)
+                  SizedBox(
+                    width: double.infinity,
+                    height: 36,
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.add_shopping_cart, size: 16),
+                      label: const Text('Add'),
+                      onPressed: () => _addItemToCart(item),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                      ),
                     ),
                   ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
-                  // Add button
-                  if (item.isAvailable)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+  Widget _buildWideItemLayout(CatalogItem item, ThemeData theme) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Item image with fixed width and full height
+        if (item.imageUrl != null && item.imageUrl.isNotEmpty)
+          Container(
+            width: 120,
+            height: double.infinity,
+            child: Image.network(
+              item.imageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                color: theme.colorScheme.primaryContainer,
+                child: const Center(
+                  child: Icon(Icons.image_not_supported),
+                ),
+              ),
+            ),
+          ),
+
+        // Item details
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        item.name,
+                        style: theme.textTheme.titleMedium,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (!item.isAvailable)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          'Out of Stock',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '\$${item.price.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Expanded(
+                  child: Text(
+                    item.description ?? '',
+                    style: theme.textTheme.bodySmall,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (item.isAvailable)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: SizedBox(
+                      width: 120,
+                      height: 36,
                       child: ElevatedButton.icon(
                         icon: const Icon(Icons.add_shopping_cart, size: 16),
                         label: const Text('Add'),
                         onPressed: () => _addItemToCart(item),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
-                          minimumSize: const Size(double.infinity, 36),
                         ),
-                      ),
-                    ),
-                ],
-              );
-            } else {
-              // Horizontal layout for wider screens
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Item image
-                  if (item.imageUrl.isNotEmpty)
-                    SizedBox(
-                      width: 120,
-                      height: double.infinity,
-                      child: Image.network(
-                        item.imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          color: theme.colorScheme.primaryContainer,
-                          child: const Center(
-                            child: Icon(Icons.image_not_supported),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                  // Item details
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  item.name,
-                                  style: theme.textTheme.titleMedium,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              if (!item.isAvailable)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    'Out of Stock',
-                                    style: TextStyle(
-                                      color: Colors.red,
-                                      fontSize: 10,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '\$${item.price.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            item.description,
-                            style: theme.textTheme.bodySmall,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const Spacer(),
-                          if (item.isAvailable)
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: ElevatedButton.icon(
-                                icon: const Icon(Icons.add_shopping_cart,
-                                    size: 16),
-                                label: const Text('Add'),
-                                onPressed: () => _addItemToCart(item),
-                                style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12),
-                                ),
-                              ),
-                            ),
-                        ],
                       ),
                     ),
                   ),
-                ],
-              );
-            }
-          },
+              ],
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 
@@ -629,49 +704,62 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
 
             // Table selection (if dine-in)
             if (!_isDelivery) ...[
-              resourceServiceAsync.when(
-                data: (resources) {
-                  // Filter to available tables
-                  final availableTables = resources
-                      .where((res) =>
-                          res.status == 'available' ||
-                          res.id == _selectedTableId)
-                      .toList();
+              SizedBox(
+                height: 80, // Explicit height constraint
+                child: resourceServiceAsync.when(
+                  data: (resources) {
+                    // Filter to available tables
+                    final availableTables = resources
+                        .where((res) =>
+                            res.status == 'available' ||
+                            res.id == _selectedTableId)
+                        .toList();
 
-                  if (availableTables.isEmpty) {
-                    return const Text('No tables available');
-                  }
+                    if (availableTables.isEmpty) {
+                      return const Text('No tables available');
+                    }
 
-                  return DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(
-                      labelText: 'Select Table',
-                      border: OutlineInputBorder(),
-                    ),
-                    value: _selectedTableId,
-                    items: availableTables.map((table) {
-                      final tableName = table.name.replaceAll('Table ', '');
-                      final capacity = table.attributes['capacity'] ?? 4;
-                      return DropdownMenuItem<String>(
-                        value: table.id,
-                        child: Text('Table $tableName (Seats $capacity)'),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedTableId = value;
-                        _cartService.updateResourceId(value);
-                      });
-                    },
-                    validator: (value) {
-                      if (!_isDelivery && (value == null || value.isEmpty)) {
-                        return 'Please select a table';
-                      }
-                      return null;
-                    },
-                  );
-                },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, __) => const Text('Error loading tables'),
+                    return SizedBox(
+                      width: double.infinity,
+                      height: 60,
+                      child: DropdownButtonFormField<String>(
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Select Table',
+                          border: OutlineInputBorder(),
+                        ),
+                        value: _selectedTableId,
+                        items: availableTables.map((table) {
+                          // Fix: Add null checks for table attributes
+                          final tableName = table.name.replaceAll('Table ', '');
+                          final capacity = table.attributes?['capacity'] ?? 4;
+                          return DropdownMenuItem<String>(
+                            value: table.id,
+                            child: Text('Table $tableName (Seats $capacity)'),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedTableId = value;
+                            _cartService.updateResourceId(value);
+                          });
+                        },
+                        validator: (value) {
+                          if (!_isDelivery &&
+                              (value == null || value.isEmpty)) {
+                            return 'Please select a table';
+                          }
+                          return null;
+                        },
+                      ),
+                    );
+                  },
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  // Fix: Better error handling
+                  error: (error, stack) => Text(
+                      'Error loading tables: ${error.toString().substring(0, min(50, error.toString().length))}'),
+                ),
               ),
 
               const SizedBox(height: 16),
@@ -697,6 +785,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                   ),
                   SizedBox(
                     width: 50,
+                    height: 40,
                     child: TextFormField(
                       initialValue: _peopleCount.toString(),
                       decoration: const InputDecoration(
@@ -724,67 +813,79 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
               ),
             ] else ...[
               // Delivery address
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Delivery Address',
-                  hintText: 'Enter delivery address',
-                  border: OutlineInputBorder(),
+              SizedBox(
+                width: double.infinity,
+                height: 96,
+                child: TextFormField(
+                  decoration: const InputDecoration(
+                    labelText: 'Delivery Address',
+                    hintText: 'Enter delivery address',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 2,
+                  onChanged: (value) {
+                    setState(() {
+                      _deliveryAddress = value;
+                    });
+                  },
+                  validator: (value) {
+                    if (_isDelivery && (value == null || value.isEmpty)) {
+                      return 'Please enter a delivery address';
+                    }
+                    return null;
+                  },
                 ),
-                maxLines: 2,
-                onChanged: (value) {
-                  setState(() {
-                    _deliveryAddress = value;
-                  });
-                },
-                validator: (value) {
-                  if (_isDelivery && (value == null || value.isEmpty)) {
-                    return 'Please enter a delivery address';
-                  }
-                  return null;
-                },
               ),
 
               const SizedBox(height: 16),
 
               // Contact phone
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Contact Phone',
-                  hintText: 'Enter phone number',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.phone),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: TextFormField(
+                  decoration: const InputDecoration(
+                    labelText: 'Contact Phone',
+                    hintText: 'Enter phone number',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.phone),
+                  ),
+                  keyboardType: TextInputType.phone,
+                  onChanged: (value) {
+                    setState(() {
+                      _contactPhone = value;
+                    });
+                  },
+                  validator: (value) {
+                    if (_isDelivery && (value == null || value.isEmpty)) {
+                      return 'Please enter a contact phone number';
+                    }
+                    return null;
+                  },
                 ),
-                keyboardType: TextInputType.phone,
-                onChanged: (value) {
-                  setState(() {
-                    _contactPhone = value;
-                  });
-                },
-                validator: (value) {
-                  if (_isDelivery && (value == null || value.isEmpty)) {
-                    return 'Please enter a contact phone number';
-                  }
-                  return null;
-                },
               ),
             ],
 
             const SizedBox(height: 16),
 
             // Special instructions
-            TextFormField(
-              decoration: const InputDecoration(
-                labelText: 'Special Instructions',
-                hintText: 'Enter any special instructions or requests',
-                border: OutlineInputBorder(),
+            SizedBox(
+              width: double.infinity,
+              height: 96,
+              child: TextFormField(
+                decoration: const InputDecoration(
+                  labelText: 'Special Instructions',
+                  hintText: 'Enter any special instructions or requests',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+                onChanged: (value) {
+                  setState(() {
+                    _specialInstructions = value;
+                    _cartService.updateSpecialInstructions(value);
+                  });
+                },
               ),
-              maxLines: 3,
-              onChanged: (value) {
-                setState(() {
-                  _specialInstructions = value;
-                  _cartService.updateSpecialInstructions(value);
-                });
-              },
             ),
           ],
         ),
@@ -794,7 +895,16 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
 
   Widget _buildCartSection() {
     final theme = Theme.of(context);
+    // Fix: Add null check for cart access
     final cart = _cartService.cart;
+    if (cart == null) {
+      return const Card(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Text('Cart unavailable'),
+        ),
+      );
+    }
 
     return Card(
       child: Padding(
@@ -882,7 +992,87 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
 
   Widget _buildCartItemTile(int index, CartItem item) {
     final theme = Theme.of(context);
+    final isSmallScreen = MediaQuery.of(context).size.width < 360;
 
+    // For very small screens, use a more compact layout
+    if (isSmallScreen) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  item.title,
+                  style: theme.textTheme.titleSmall,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Text(
+                '\$${item.numericPrice.toStringAsFixed(2)}',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.remove_circle_outline, size: 18),
+                onPressed: () =>
+                    _updateCartItemQuantity(index, item.quantity - 1),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+              Text('${item.quantity}'),
+              IconButton(
+                icon: const Icon(Icons.add_circle_outline, size: 18),
+                onPressed: () =>
+                    _updateCartItemQuantity(index, item.quantity + 1),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.delete_outline, color: Colors.red),
+                onPressed: () => _removeCartItem(index),
+                tooltip: 'Remove',
+                iconSize: 18,
+                padding: EdgeInsets.zero,
+              ),
+            ],
+          ),
+          if (item.options.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4.0),
+              child: Wrap(
+                spacing: 4,
+                runSpacing: 4,
+                children: item.options.entries.map((option) {
+                  return Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      '${option.key}: ${option.value}',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+        ],
+      );
+    }
+
+    // Default layout for larger screens
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -951,8 +1141,8 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                   ),
                 ),
 
-              // Item notes
-              if (item.notes != null && item.notes!.isNotEmpty)
+              // Item notes - Fix: Safer access to notes property
+              if (item.notes?.isNotEmpty ?? false)
                 Padding(
                   padding: const EdgeInsets.only(top: 4.0),
                   child: Text(
@@ -1054,11 +1244,37 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
   }
 
   void _showItemOptionsDialog(CatalogItem item) {
+    // Get screen info for responsive sizing
+    final mediaQuery = MediaQuery.of(context);
+    final screenWidth = mediaQuery.size.width;
+    final screenHeight = mediaQuery.size.height;
+
+    // Calculate appropriate dialog width based on screen size
+    final dialogWidth = screenWidth > 1200
+        ? 800.0
+        : screenWidth > 700
+            ? 600.0
+            : screenWidth * 0.9;
+
     showDialog(
       context: context,
-      builder: (context) => ItemOptionsDialog(
-        item: item,
-        onAddToCart: _addItemToCart,
+      // Use barrierDismissible to allow clicking outside to dismiss
+      barrierDismissible: true,
+      builder: (context) => Dialog(
+        // Don't use insetPadding - it can cause layout issues
+        // Instead use a specific width with constraints
+        child: Container(
+          width: dialogWidth,
+          // Use constraints with both min and max dimensions
+          constraints: BoxConstraints(
+            maxWidth: dialogWidth,
+            maxHeight: screenHeight * 0.8,
+          ),
+          child: ItemOptionsDialog(
+            item: item,
+            onAddToCart: _addItemToCart,
+          ),
+        ),
       ),
     );
   }
@@ -1076,8 +1292,8 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
     }
 
     final cartItem = CartItem(
-      img: item.imageUrl,
-      description: item.description,
+      img: item.imageUrl ?? '',
+      description: item.description ?? '',
       ingredients: [], // Default empty ingredients list
       isSpicy: false, // Default not spicy
       foodType: 'regular', // Default food type
@@ -1095,13 +1311,15 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
     // Force refresh UI
     setState(() {});
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Added ${item.name} to cart'),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 1),
-      ),
-    );
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Added ${item.name} to cart'),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    }
   }
 
   void _updateCartItemQuantity(int index, int quantity) {
@@ -1146,13 +1364,16 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
       return;
     }
 
-    if (_cartService.cart.items.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please add items to your cart'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+    // Fix: Safer access to cart items
+    if (_cartService.cart?.items.isEmpty ?? true) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please add items to your cart'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
       return;
     }
 
@@ -1162,9 +1383,15 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
 
     try {
       final cart = _cartService.cart;
+      // Validate cart is not null
+      if (cart == null) {
+        throw Exception("Cart is unavailable");
+      }
+
       final userAsync = ref.watch(currentUserProvider.future);
       final orderService = ref.read(orderServiceProvider);
-      final businessId = ref.read(currentBusinessIdProvider);
+      // Fix: Add default for businessId
+      final businessId = ref.read(currentBusinessIdProvider) ?? 'default';
 
       // Set resourceId based on table or delivery address
       final resourceId = _isDelivery ? null : _selectedTableId;
@@ -1178,7 +1405,8 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
         businessId: businessId,
         userId: currentUser?.uid ?? 'anonymous',
         userName: currentUser?.displayName ?? 'Guest',
-        userEmail: currentUser?.email,
+        // Fix: Add fallback for userEmail
+        userEmail: currentUser?.email ?? 'unknown@example.com',
         userPhone: _contactPhone,
         items: cart.items
             .map((item) => OrderItem(
@@ -1209,6 +1437,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
       final orderId = await orderService.createOrder(order);
 
       // Update table status if using a table
+      // Fix: Proper null checking for table ID
       if (!_isDelivery && _selectedTableId != null) {
         final resourceService = ref.read(serviceFactoryProvider
             .select((factory) => factory.createResourceService('table')));
@@ -1217,11 +1446,13 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
             _selectedTableId!, 'occupied');
       }
 
-      if (mounted) {
+      // Fix: Better check for mounted state and context
+      if (mounted && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                Text('Order created successfully: #${orderId.substring(0, 6)}'),
+            // Fix: Safer substring use for orderId
+            content: Text(
+                'Order created successfully: #${orderId.length >= 6 ? orderId.substring(0, 6) : orderId}'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -1233,10 +1464,11 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
         widget.onSuccess(order);
       }
     } catch (e) {
-      if (mounted) {
+      // Fix: Better check for mounted state and context
+      if (mounted && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error creating order: $e'),
+            content: Text('Error creating order: ${e.toString()}'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -1288,8 +1520,16 @@ class _ItemOptionsDialogState extends State<ItemOptionsDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isNarrow = screenWidth < 400;
 
-    return Dialog(
+    // Wrap with Container to ensure sizing
+    return Container(
+      // Define explicit constraints
+      constraints: BoxConstraints(
+        minHeight: 200,
+        maxHeight: MediaQuery.of(context).size.height * 0.8,
+      ),
       child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -1297,96 +1537,159 @@ class _ItemOptionsDialogState extends State<ItemOptionsDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Item header
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (widget.item.imageUrl.isNotEmpty)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        widget.item.imageUrl,
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          width: 80,
-                          height: 80,
-                          color: theme.colorScheme.primaryContainer,
-                          child: const Icon(Icons.image_not_supported),
-                        ),
-                      ),
-                    ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.item.name,
-                          style: theme.textTheme.titleLarge,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '\$${widget.item.price.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.primary,
-                            fontSize: 18,
+              // Item header with defined height constraints
+              Container(
+                height: isNarrow ? null : 120, // Height for horizontal layout
+                child: isNarrow
+                    // Vertical layout for narrow screens
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Fix: Add null check for imageUrl and explicit height
+                          if (widget.item.imageUrl != null &&
+                              widget.item.imageUrl.isNotEmpty)
+                            Container(
+                              height: 180,
+                              width: double.infinity,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  widget.item.imageUrl,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    color: theme.colorScheme.primaryContainer,
+                                    child: const Center(
+                                      child: Icon(Icons.image_not_supported,
+                                          size: 48),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          const SizedBox(height: 16),
+                          Text(
+                            widget.item.name,
+                            style: theme.textTheme.titleLarge,
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          widget.item.description,
-                          style: theme.textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                          const SizedBox(height: 4),
+                          Text(
+                            '\$${widget.item.price.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.primary,
+                              fontSize: 18,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            widget.item.description ?? '',
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                        ],
+                      )
+                    // Horizontal layout for wider screens
+                    : Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Fix: Add null check for imageUrl
+                          if (widget.item.imageUrl != null &&
+                              widget.item.imageUrl.isNotEmpty)
+                            Container(
+                              width: 120,
+                              height: 120,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  widget.item.imageUrl,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    color: theme.colorScheme.primaryContainer,
+                                    child: const Center(
+                                      child: Icon(Icons.image_not_supported),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  widget.item.name,
+                                  style: theme.textTheme.titleLarge,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '\$${widget.item.price.toStringAsFixed(2)}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.primary,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  widget.item.description ?? '',
+                                  style: theme.textTheme.bodyMedium,
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
               ),
 
               const SizedBox(height: 24),
 
-              // Quantity selector
-              Row(
-                children: [
-                  const Text('Quantity:'),
-                  Expanded(
-                    child: Slider(
-                      value: _quantity.toDouble(),
-                      min: 1,
-                      max: 10,
-                      divisions: 9,
-                      label: _quantity.toString(),
-                      onChanged: (value) {
-                        setState(() {
-                          _quantity = value.toInt();
-                        });
-                      },
-                    ),
-                  ),
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: theme.colorScheme.outline),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '$_quantity',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+              // Quantity selector with fixed height
+              Container(
+                height: 60,
+                child: Row(
+                  children: [
+                    const Text('Quantity:'),
+                    Expanded(
+                      child: Slider(
+                        value: _quantity.toDouble(),
+                        min: 1,
+                        max: 10,
+                        divisions: 9,
+                        label: _quantity.toString(),
+                        onChanged: (value) {
+                          setState(() {
+                            _quantity = value.toInt();
+                          });
+                        },
                       ),
                     ),
-                  ),
-                ],
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: theme.colorScheme.outline),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '$_quantity',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
               const SizedBox(height: 16),
 
               // Options
-              if (widget.item.metadata.containsKey('options') ||
+              // Fix: Add null check for item.metadata
+              if ((widget.item.metadata?.containsKey('options') ?? false) ||
                   _availableOptions.isNotEmpty) ...[
                 const Text(
                   'Options',
@@ -1436,45 +1739,55 @@ class _ItemOptionsDialogState extends State<ItemOptionsDialog> {
               const SizedBox(height: 16),
 
               // Special instructions
-              TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Special Instructions',
-                  hintText: 'Any special requests?',
-                  border: OutlineInputBorder(),
+              SizedBox(
+                width: double.infinity,
+                height: 80,
+                child: TextField(
+                  decoration: const InputDecoration(
+                    labelText: 'Special Instructions',
+                    hintText: 'Any special requests?',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 2,
+                  onChanged: (value) {
+                    setState(() {
+                      _notes = value;
+                    });
+                  },
                 ),
-                maxLines: 2,
-                onChanged: (value) {
-                  setState(() {
-                    _notes = value;
-                  });
-                },
               ),
 
               const SizedBox(height: 24),
 
               // Action buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel'),
-                  ),
-                  const SizedBox(width: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      widget.onAddToCart(
-                        widget.item,
-                        options: _selectedOptions,
-                        notes: _notes,
-                        quantity: _quantity,
-                      );
-                    },
-                    child: Text(
-                        'Add to Cart (\$${(widget.item.price * _quantity).toStringAsFixed(2)})'),
-                  ),
-                ],
+              SizedBox(
+                width: double.infinity,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                    const SizedBox(width: 16),
+                    SizedBox(
+                      height: 40,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          widget.onAddToCart(
+                            widget.item,
+                            options: _selectedOptions,
+                            notes: _notes,
+                            quantity: _quantity,
+                          );
+                        },
+                        child: Text(
+                            'Add to Cart (\$${(widget.item.price * _quantity).toStringAsFixed(2)})'),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

@@ -4,13 +4,13 @@ import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
- 
+
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 
 class OrderDetailView extends ConsumerStatefulWidget {
   final String orderId;
   final VoidCallback? onClose;
-  
+
   const OrderDetailView({
     super.key,
     required this.orderId,
@@ -24,11 +24,11 @@ class OrderDetailView extends ConsumerStatefulWidget {
 class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
   bool _isUpdatingStatus = false;
   bool _isPrinting = false;
-  
+
   @override
   Widget build(BuildContext context) {
     final orderAsync = ref.watch(orderByIdProvider(widget.orderId));
-    
+
     return orderAsync.when(
       data: (order) {
         if (order == null) {
@@ -48,7 +48,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
             ),
           );
         }
-        
+
         return _buildOrderDetails(order);
       },
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -69,10 +69,10 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
       ),
     );
   }
-  
+
   Widget _buildOrderDetails(Order order) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Order #${order.id.substring(0, 6)}'),
@@ -93,7 +93,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
             // Status card with action buttons
             _buildStatusCard(order),
             const SizedBox(height: 24),
-            
+
             // Order info and customer details in a row on desktop, or stacked on mobile
             LayoutBuilder(
               builder: (context, constraints) {
@@ -126,15 +126,15 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
               },
             ),
             const SizedBox(height: 24),
-            
+
             // Order items card
             _buildOrderItemsCard(order),
             const SizedBox(height: 24),
-            
+
             // Order totals card
             _buildOrderTotalsCard(order),
             const SizedBox(height: 32),
-            
+
             // Additional actions buttons at the bottom
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -150,7 +150,8 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
                   label: const Text('Email Receipt'),
                   onPressed: () => _emailReceipt(order),
                 ),
-                if (order.status != 'cancelled' && order.status != 'completed') ...[
+                if (order.status != 'cancelled' &&
+                    order.status != 'completed') ...[
                   const SizedBox(width: 16),
                   OutlinedButton.icon(
                     icon: const Icon(Icons.cancel),
@@ -168,14 +169,14 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
       ),
     );
   }
-  
+
   Widget _buildStatusCard(Order order) {
     final theme = Theme.of(context);
     final statusColor = _getStatusColor(order.status.name);
-    
+
     // Available next statuses based on current status
     final nextStatuses = _getNextPossibleStatuses(order.status);
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -187,12 +188,13 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
               style: theme.textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
-            
+
             // Current status with colored badge
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: statusColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(16),
@@ -228,12 +230,12 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
                 ),
               ],
             ),
-            
+
             if (nextStatuses.isNotEmpty) ...[
               const SizedBox(height: 16),
               const Divider(),
               const SizedBox(height: 8),
-              
+
               // Update status actions
               Row(
                 children: [
@@ -247,7 +249,8 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
                             runSpacing: 8,
                             children: nextStatuses.map((status) {
                               return OutlinedButton(
-                                onPressed: () => _updateOrderStatus(order, status),
+                                onPressed: () =>
+                                    _updateOrderStatus(order, status),
                                 child: Text(_getStatusActionText(status)),
                               );
                             }).toList(),
@@ -261,10 +264,10 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
       ),
     );
   }
-  
+
   Widget _buildOrderInfoCard(Order order) {
     final theme = Theme.of(context);
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -276,48 +279,48 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 16),
-            
+
             // Order ID
             _buildInfoRow(
               label: 'Order ID',
               value: '#${order.id.substring(0, 8)}',
             ),
             const SizedBox(height: 8),
-            
+
             // Order date
             _buildInfoRow(
               label: 'Date',
               value: DateFormat.yMMMd().format(order.createdAt),
             ),
             const SizedBox(height: 8),
-            
+
             // Order time
             _buildInfoRow(
               label: 'Time',
               value: DateFormat.jm().format(order.createdAt),
             ),
             const SizedBox(height: 8),
-            
+
             // Resource (table/delivery)
             _buildInfoRow(
               label: order.isDelivery ? 'Delivery to' : 'Table',
-              value: order.isDelivery 
+              value: order.isDelivery
                   ? 'Address: ${order.address ?? 'N/A'}'
                   : order.id ?? 'N/A',
             ),
             const SizedBox(height: 8),
-            
+
             // Person count
             _buildInfoRow(
               label: 'People',
               value: '${order.customerCount}',
             ),
-            
+
             // if (order.specialInstructions != null && order.specialInstructions!.isNotEmpty) ...[
             //   const SizedBox(height: 16),
             //   const Divider(),
             //   const SizedBox(height: 8),
-              
+
             //   Text(
             //     'Special Instructions',
             //     style: theme.textTheme.titleSmall,
@@ -332,16 +335,15 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
             //     child: Text(order.specialInstructions!),
             //   ),
             // ],
-          
           ],
         ),
       ),
     );
   }
-  
+
   Widget _buildCustomerCard(Order order) {
     final theme = Theme.of(context);
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -353,7 +355,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 16),
-            
+
             // Customer name
             _buildInfoRow(
               label: 'Name',
@@ -361,26 +363,26 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
               icon: Icons.person,
             ),
             const SizedBox(height: 8),
-            
+
             // Customer phone
             _buildInfoRow(
               label: 'Phone',
-              value:   'N/A',
+              value: 'N/A',
               icon: Icons.phone,
             ),
             const SizedBox(height: 8),
-            
+
             // Customer email
             _buildInfoRow(
               label: 'Email',
               value: order.email ?? 'N/A',
               icon: Icons.email,
             ),
-            
+
             const SizedBox(height: 16),
             const Divider(),
             const SizedBox(height: 8),
-            
+
             // Customer ID
             _buildInfoRow(
               label: 'Customer ID',
@@ -388,9 +390,9 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
               icon: Icons.badge,
             ),
             const SizedBox(height: 8),
-            
+
             // Loyalty points or other customer metadata could go here
-            
+
             // View customer details button
             const SizedBox(height: 8),
             SizedBox(
@@ -406,10 +408,10 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
       ),
     );
   }
-  
+
   Widget _buildOrderItemsCard(Order order) {
     final theme = Theme.of(context);
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -430,7 +432,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // Items list
             ListView.separated(
               shrinkWrap: true,
@@ -447,10 +449,10 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
       ),
     );
   }
-  
+
   Widget _buildOrderTotalsCard(Order order) {
     final theme = Theme.of(context);
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -462,21 +464,21 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
               style: theme.textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
-            
+
             // Subtotal
             _buildSummaryRow(
               label: 'Subtotal',
               value: '\$${order.subtotal?.toStringAsFixed(2)}',
             ),
             const SizedBox(height: 8),
-            
+
             // Tax
             _buildSummaryRow(
               label: 'Tax',
               value: '\$${order.taxAmount?.toStringAsFixed(2)}',
             ),
             const SizedBox(height: 8),
-            
+
             // Discount (if applicable)
             if (0 > 0) ...[
               _buildSummaryRow(
@@ -486,7 +488,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
               ),
               const SizedBox(height: 8),
             ],
-            
+
             // Delivery fee (if applicable)
             if (order.isDelivery && 200 > 0) ...[
               _buildSummaryRow(
@@ -495,11 +497,11 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
               ),
               const SizedBox(height: 8),
             ],
-            
+
             // Divider before total
             const Divider(),
             const SizedBox(height: 8),
-            
+
             // Total
             _buildSummaryRow(
               label: 'Total',
@@ -512,29 +514,29 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
                 color: theme.colorScheme.primary,
               ),
             ),
-            
+
             // Payment method (if available)
             ...[
-            const SizedBox(height: 16),
-            _buildInfoRow(
-              label: 'Payment Method',
-              value: _capitalizeFirst(order.paymentMethod),
-              icon: Icons.payment,
-            ),
-          ],
+              const SizedBox(height: 16),
+              _buildInfoRow(
+                label: 'Payment Method',
+                value: _capitalizeFirst(order.paymentMethod),
+                icon: Icons.payment,
+              ),
+            ],
           ],
         ),
       ),
     );
   }
-  
+
   Widget _buildInfoRow({
     required String label,
     required String value,
     IconData? icon,
   }) {
     final theme = Theme.of(context);
-    
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -566,10 +568,10 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
       ],
     );
   }
-  
+
   Widget _buildOrderItemRow(OrderItem item) {
     final theme = Theme.of(context);
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -594,7 +596,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
             ),
           ),
           const SizedBox(width: 12),
-          
+
           // Item details
           Expanded(
             child: Column(
@@ -604,7 +606,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
                   item.name,
                   style: theme.textTheme.titleSmall,
                 ),
-                
+
                 // Item options
                 // if (item.options.isNotEmpty)
                 //   Padding(
@@ -629,7 +631,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
                 //       }).toList(),
                 //     ),
                 //   ),
-                
+
                 // Item notes
                 if (item.notes != null && item.notes!.isNotEmpty)
                   Padding(
@@ -646,7 +648,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
               ],
             ),
           ),
-          
+
           // Item price
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -669,7 +671,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
       ),
     );
   }
-  
+
   Widget _buildSummaryRow({
     required String label,
     required String value,
@@ -678,7 +680,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
     TextStyle? valueStyle,
   }) {
     final theme = Theme.of(context);
-    
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -688,28 +690,30 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
         ),
         Text(
           value,
-          style: valueStyle ?? theme.textTheme.bodyMedium?.copyWith(
-            color: valueColor,
-            fontWeight: FontWeight.bold,
-          ),
+          style: valueStyle ??
+              theme.textTheme.bodyMedium?.copyWith(
+                color: valueColor,
+                fontWeight: FontWeight.bold,
+              ),
         ),
       ],
     );
   }
-  
+
   Future<void> _updateOrderStatus(Order order, OrderStatus newStatus) async {
     setState(() {
       _isUpdatingStatus = true;
     });
-    
+
     try {
       final orderService = ref.read(orderServiceProvider);
       await orderService.updateOrderStatus(order.id, newStatus);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Order status updated to ${_capitalizeFirst(newStatus.name)}'),
+            content: Text(
+                'Order status updated to ${_capitalizeFirst(newStatus.name)}'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -729,7 +733,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
       });
     }
   }
-  
+
   Future<void> _confirmCancelOrder(Order order) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -753,21 +757,21 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
         ],
       ),
     );
-    
+
     if (confirmed == true) {
       await _updateOrderStatus(order, OrderStatus.cancelled);
     }
   }
-  
+
   Future<void> _printReceipt(Order order) async {
     setState(() {
       _isPrinting = true;
     });
-    
+
     try {
       // In a real app, implement printing logic here
       await Future.delayed(const Duration(seconds: 2)); // Simulate printing
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -791,22 +795,23 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
       });
     }
   }
-  
+
   void _emailReceipt(Order order) {
     // In a real app, implement email sending logic here
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Receipt sent to ${order.customerName ?? 'customer email'}'),
+        content:
+            Text('Receipt sent to ${order.customerName ?? 'customer email'}'),
         behavior: SnackBarBehavior.floating,
       ),
     );
   }
-  
+
   void _viewCustomerDetails(String userId) {
     // Navigate to customer details screen
     Navigator.of(context).pushNamed('/admin/customers/$userId');
   }
-  
+
   List<OrderStatus> _getNextPossibleStatuses(OrderStatus currentStatus) {
     switch (currentStatus) {
       case OrderStatus.pending:
@@ -825,7 +830,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
         return [];
     }
   }
-  
+
   String _getStatusActionText(OrderStatus status) {
     switch (status) {
       case OrderStatus.preparing:
@@ -840,7 +845,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
         return _capitalizeFirst(status.name);
     }
   }
-  
+
   Color _getStatusColor(String status) {
     switch (status) {
       case 'pending':
@@ -859,7 +864,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
         return Colors.grey;
     }
   }
-  
+
   String _capitalizeFirst(String text) {
     if (text.isEmpty) return text;
     return text[0].toUpperCase() + text.substring(1);

@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/restaurant/table_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/restaurant/table_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/florr_plan_editor.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/create_order.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/table_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/responsive_layout.dart';
- 
+
 // Provider for table service
 final tableServiceProvider = Provider<TableService>((ref) {
   final restaurantId = ref.watch(restaurantIdProvider);
@@ -21,7 +23,7 @@ final tablesStreamProvider = StreamProvider<List<RestaurantTable>>((ref) {
 });
 
 // Extension for string conversion
-extension TableStatusExtension on TableStatusEnum  {
+extension TableStatusExtension on TableStatusEnum {
   String get name {
     switch (this) {
       case TableStatusEnum.available:
@@ -36,7 +38,7 @@ extension TableStatusExtension on TableStatusEnum  {
         return 'cleaning';
     }
   }
-  
+
   static TableStatusEnum fromString(String status) {
     switch (status) {
       case 'available':
@@ -57,19 +59,21 @@ class TableManagementScreen extends ConsumerStatefulWidget {
   const TableManagementScreen({super.key});
 
   @override
-  ConsumerState<TableManagementScreen> createState() => _TableManagementScreenState();
+  ConsumerState<TableManagementScreen> createState() =>
+      _TableManagementScreenState();
 }
 
-class _TableManagementScreenState extends ConsumerState<TableManagementScreen> with SingleTickerProviderStateMixin {
+class _TableManagementScreenState extends ConsumerState<TableManagementScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String _filterStatus = '';
-  
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
   }
-  
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -94,17 +98,16 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
                     ],
                     indicatorSize: TabBarIndicatorSize.label,
                     labelColor: Theme.of(context).colorScheme.primary,
-                    unselectedLabelColor: Theme.of(context).colorScheme.onSurface,
+                    unselectedLabelColor:
+                        Theme.of(context).colorScheme.onSurface,
                     isScrollable: true,
                   ),
                 ),
                 const SizedBox(width: 16),
-                if (_tabController.index == 0)
-                  _buildStatusFilter(),
+                if (_tabController.index == 0) _buildStatusFilter(),
               ],
             ),
           ),
-          
           Expanded(
             child: TabBarView(
               controller: _tabController,
@@ -123,7 +126,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
       ),
     );
   }
-  
+
   Widget _buildStatusFilter() {
     return DropdownButton<String>(
       value: _filterStatus.isEmpty ? 'all' : _filterStatus,
@@ -142,55 +145,57 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
       hint: const Text('Filter by Status'),
     );
   }
-  
+
   Widget _buildTableList() {
     return ref.watch(tablesStreamProvider).when(
-      data: (tables) {
-        // Apply status filter if set
-        final filteredTables = _filterStatus.isEmpty
-            ? tables
-            : tables.where((table) => table.status.name == _filterStatus).toList();
-        
-        // Sort by table number
-        filteredTables.sort((a, b) => a.number.compareTo(b.number));
-        
-        if (filteredTables.isEmpty) {
-          return const Center(
-            child: Text('No tables found'),
-          );
-        }
-        
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: ResponsiveGridView(
-            children: filteredTables.map((table) => 
-              _buildTableCard(table)
-            ).toList(),
-          ),
+          data: (tables) {
+            // Apply status filter if set
+            final filteredTables = _filterStatus.isEmpty
+                ? tables
+                : tables
+                    .where((table) => table.status.name == _filterStatus)
+                    .toList();
+
+            // Sort by table number
+            filteredTables.sort((a, b) => a.number.compareTo(b.number));
+
+            if (filteredTables.isEmpty) {
+              return const Center(
+                child: Text('No tables found'),
+              );
+            }
+
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ResponsiveGridView(
+                children: filteredTables
+                    .map((table) => _buildTableCard(table))
+                    .toList(),
+              ),
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stackTrace) => Center(child: Text('Error: $error')),
         );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stackTrace) => Center(child: Text('Error: $error')),
-    );
   }
-  
+
   Widget _buildFloorPlan() {
     return ref.watch(tablesStreamProvider).when(
-      data: (tables) {
-        return FloorPlanEditor(
-          tables: tables,
-          onTableMoved: _updateTablePosition,
-          onTableTapped: _showTableDetails,
+          data: (tables) {
+            return FloorPlanEditor(
+              tables: tables,
+              onTableMoved: _updateTablePosition,
+              onTableTapped: _showTableDetails,
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stackTrace) => Center(child: Text('Error: $error')),
         );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stackTrace) => Center(child: Text('Error: $error')),
-    );
   }
-  
+
   Widget _buildTableCard(RestaurantTable table) {
     final theme = Theme.of(context);
-    
+
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -206,7 +211,8 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
                           color: theme.colorScheme.primaryContainer,
                           borderRadius: BorderRadius.circular(4),
@@ -238,9 +244,9 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Table icon
                   Center(
                     child: Icon(
@@ -249,9 +255,9 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
                       color: _getStatusColor(table.status).withOpacity(0.5),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Capacity
                   Row(
                     children: [
@@ -260,9 +266,9 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
                       Text('Capacity: ${table.capacity}'),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Current order if any
                   if (table.currentOrderId != null) ...[
                     Row(
@@ -277,10 +283,9 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
                         ),
                       ],
                     ),
-                    
                     const SizedBox(height: 8),
                   ],
-                  
+
                   // Action buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -303,7 +308,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
                 ],
               ),
             ),
-            
+
             // Status color bar
             Positioned(
               top: 0,
@@ -319,7 +324,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
       ),
     );
   }
-  
+
   void _showAddTableDialog() {
     showDialog(
       context: context,
@@ -337,7 +342,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
       ),
     );
   }
-  
+
   void _showEditTableDialog(RestaurantTable table) {
     showDialog(
       context: context,
@@ -356,10 +361,10 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
       ),
     );
   }
-  
+
   void _showTableDetails(RestaurantTable table) {
     final theme = Theme.of(context);
-    
+
     showModalBottomSheet(
       context: context,
       builder: (context) => Container(
@@ -376,7 +381,8 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
                     color: _getStatusColor(table.status).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -391,9 +397,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
                 ),
               ],
             ),
-            
             const SizedBox(height: 16),
-            
             Row(
               children: [
                 _buildDetailItem(
@@ -405,22 +409,19 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
                 _buildDetailItem(
                   icon: Icons.place,
                   label: 'Position',
-                  value: 'x: ${table.position['x']?.toStringAsFixed(1)}, y: ${table.position['y']?.toStringAsFixed(1)}',
+                  value:
+                      'x: ${table.position['x']?.toStringAsFixed(1)}, y: ${table.position['y']?.toStringAsFixed(1)}',
                 ),
               ],
             ),
-            
             const SizedBox(height: 16),
-            
             if (table.currentOrderId != null) ...[
               _buildDetailItem(
                 icon: Icons.receipt_long,
                 label: 'Current Order',
                 value: '#${table.currentOrderId!.substring(0, 6)}',
               ),
-              
               const SizedBox(height: 16),
-              
               OutlinedButton.icon(
                 icon: const Icon(Icons.visibility),
                 label: const Text('View Order'),
@@ -433,10 +434,9 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
                 ),
               ),
             ],
-            
             const SizedBox(height: 16),
-            
-            if (table.status == TableStatusEnum.available || table.status == TableStatusEnum.reserved) ...[
+            if (table.status == TableStatusEnum.available ||
+                table.status == TableStatusEnum.reserved) ...[
               ElevatedButton.icon(
                 icon: const Icon(Icons.add_shopping_cart),
                 label: const Text('Create New Order'),
@@ -448,10 +448,8 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
                   minimumSize: const Size(double.infinity, 36),
                 ),
               ),
-              
               const SizedBox(height: 8),
             ],
-            
             Row(
               children: [
                 Expanded(
@@ -475,7 +473,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
       ),
     );
   }
-  
+
   Widget _buildDetailItem({
     required IconData icon,
     required String label,
@@ -501,7 +499,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
       ],
     );
   }
-  
+
   Widget _buildStatusUpdateButton(RestaurantTable table) {
     // If occupied, show different options
     if (table.status == TableStatusEnum.occupied) {
@@ -517,7 +515,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
         ),
       );
     }
-    
+
     // For other statuses, show dropdown for status change
     return OutlinedButton.icon(
       icon: const Icon(Icons.update),
@@ -528,7 +526,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
       },
     );
   }
-  
+
   void _confirmTableAvailable(RestaurantTable table) {
     if (table.currentOrderId != null) {
       showDialog(
@@ -557,7 +555,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
       );
       return;
     }
-    
+
     // If no active order, confirm making available
     showDialog(
       context: context,
@@ -582,7 +580,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
       ),
     );
   }
-  
+
   void _showChangeStatusDialog(RestaurantTable table) {
     showDialog(
       context: context,
@@ -630,7 +628,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
       ),
     );
   }
-  
+
   void _confirmDeleteTable(RestaurantTable table) {
     showDialog(
       context: context,
@@ -656,13 +654,13 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
       ),
     );
   }
-  
+
   // CRUD operations with TableService
   void _addTable(RestaurantTable table) async {
     try {
       final tableService = ref.read(tableServiceProvider);
       await tableService.addTable(table);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Table added successfully')),
@@ -676,12 +674,12 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
       }
     }
   }
-  
+
   void _updateTable(RestaurantTable table) async {
     try {
       final tableService = ref.read(tableServiceProvider);
       await tableService.updateTable(table);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Table updated successfully')),
@@ -695,12 +693,12 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
       }
     }
   }
-  
+
   void _deleteTable(RestaurantTable table) async {
     try {
       final tableService = ref.read(tableServiceProvider);
       await tableService.deleteTable(table.id);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Table deleted successfully')),
@@ -714,17 +712,18 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
       }
     }
   }
-  
-  void _updateTableStatus(RestaurantTable table, TableStatusEnum newStatus) async {
+
+  void _updateTableStatus(
+      RestaurantTable table, TableStatusEnum newStatus) async {
     try {
       final tableService = ref.read(tableServiceProvider);
       await tableService.updateTableStatus(table.id, newStatus);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(
-            'Table ${table.number} status updated to ${_capitalizeFirst(newStatus.name)}'
-          )),
+          SnackBar(
+              content: Text(
+                  'Table ${table.number} status updated to ${_capitalizeFirst(newStatus.name)}')),
         );
       }
     } catch (e) {
@@ -735,14 +734,15 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
       }
     }
   }
-  
-  void _updateTablePosition(RestaurantTable table, Map<String, double> newPosition) async {
+
+  void _updateTablePosition(
+      RestaurantTable table, Map<String, double> newPosition) async {
     try {
       final tableService = ref.read(tableServiceProvider);
-      
+
       // Create updated table with new position
       final updatedTable = table.copyWith(position: newPosition);
-      
+
       // Update the table
       await tableService.updateTable(updatedTable);
     } catch (e) {
@@ -753,12 +753,27 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
       }
     }
   }
-  
+
   void _createOrderForTable(RestaurantTable table) {
-    // Navigate to create order screen with table pre-selected
-    context.push('/admin/orders/create?tableId=${table.id}');
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog.fullscreen(
+        child: CreateOrderForm(
+          preselectedTableId: table.id,
+          onSuccess: (order) {
+            Navigator.pop(context);
+            context.pushNamed(
+              AdminRoutes.namePdOrderDetails,
+              pathParameters: {'orderId': order.id},
+            );
+          },
+          onCancel: () => Navigator.pop(context),
+        ),
+      ),
+    );
   }
-  
+
   Color _getStatusColor(TableStatusEnum status) {
     switch (status) {
       case TableStatusEnum.available:
@@ -773,7 +788,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> w
         return Colors.purple;
     }
   }
-  
+
   String _capitalizeFirst(String text) {
     if (text.isEmpty) return text;
     return text[0].toUpperCase() + text.substring(1);

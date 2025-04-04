@@ -207,6 +207,15 @@ Stream<List<CateringOrder>> cateringPackages(CateringPackagesRef ref) {
       .map((snapshot) => snapshot.docs.map((doc) {
             final data = doc.data();
             data['id'] = doc.id;
+            
+            // Add default values for missing icon fields
+            if (!data.containsKey('iconCodePoint')) {
+              data['iconCodePoint'] = 0xe491; // Default icon code (e.g., restaurant icon)
+            }
+            if (!data.containsKey('iconFontFamily')) {
+              data['iconFontFamily'] = 'MaterialIcons';
+            }
+            
             // Convert the map to a CateringOrder object
             return CateringOrder.fromJson(data);
           }).toList());

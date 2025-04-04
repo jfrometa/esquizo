@@ -14,12 +14,13 @@ enum CateringOrderStatus {
   completed,
   cancelled,
   refunded;
-  
+
   /// Helper property to check if status is in a terminal state
-  bool get isTerminal => this == CateringOrderStatus.completed || 
-                        this == CateringOrderStatus.cancelled || 
-                        this == CateringOrderStatus.refunded;
-                        
+  bool get isTerminal =>
+      this == CateringOrderStatus.completed ||
+      this == CateringOrderStatus.cancelled ||
+      this == CateringOrderStatus.refunded;
+
   String get displayName {
     switch (this) {
       case CateringOrderStatus.pending:
@@ -42,7 +43,7 @@ enum CateringOrderStatus {
         return 'Refunded';
     }
   }
-  
+
   String get description {
     switch (this) {
       case CateringOrderStatus.pending:
@@ -65,7 +66,7 @@ enum CateringOrderStatus {
         return 'Order has been refunded';
     }
   }
-  
+
   Color get color {
     switch (this) {
       case CateringOrderStatus.pending:
@@ -88,7 +89,7 @@ enum CateringOrderStatus {
         return Colors.redAccent;
     }
   }
-  
+
   IconData get icon {
     switch (this) {
       case CateringOrderStatus.pending:
@@ -111,7 +112,7 @@ enum CateringOrderStatus {
         return Icons.money_off;
     }
   }
-  
+
   List<CateringOrderStatus> get allowedTransitions {
     switch (this) {
       case CateringOrderStatus.pending:
@@ -166,7 +167,7 @@ class CateringDish {
   final double pricePerPerson;
   final double? pricePerUnit;
   final List<String> ingredients;
-  final double pricing; 
+  final double pricing;
   final int quantity;
   final String img;
   final bool hasUnitSelection;
@@ -219,16 +220,16 @@ class CateringDish {
 
   /// Converts dish to JSON format
   Map<String, dynamic> toJson() => {
-    'title': title,
-    'peopleCount': peopleCount,
-    'pricePerPerson': pricePerPerson,
-    'ingredients': ingredients,
-    'pricing': pricing,
-    'pricePerUnit': pricePerUnit,
-    'quantity': quantity,
-    'img': img,
-    'hasUnitSelection': hasUnitSelection,
-  };
+        'title': title,
+        'peopleCount': peopleCount,
+        'pricePerPerson': pricePerPerson,
+        'ingredients': ingredients,
+        'pricing': pricing,
+        'pricePerUnit': pricePerUnit,
+        'quantity': quantity,
+        'img': img,
+        'hasUnitSelection': hasUnitSelection,
+      };
 
   /// Creates a dish from JSON format
   factory CateringDish.fromJson(Map<String, dynamic> json) {
@@ -236,8 +237,8 @@ class CateringDish {
       title: json['title'],
       peopleCount: json['peopleCount'] ?? 0,
       pricePerPerson: (json['pricePerPerson'] ?? 0.0).toDouble(),
-      ingredients: json['ingredients'] != null 
-          ? List<String>.from(json['ingredients']) 
+      ingredients: json['ingredients'] != null
+          ? List<String>.from(json['ingredients'])
           : [],
       pricing: (json['pricing'] ?? 0.0).toDouble(),
       pricePerUnit: json['pricePerUnit']?.toDouble(),
@@ -246,12 +247,12 @@ class CateringDish {
       img: json['img'] ?? 'assets/food5.jpeg',
     );
   }
-  
+
   /// Equality operator
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    
+
     return other is CateringDish &&
         other.title == title &&
         other.peopleCount == peopleCount &&
@@ -277,7 +278,7 @@ class CateringDish {
         img.hashCode ^
         hasUnitSelection.hashCode;
   }
-  
+
   /// String representation
   @override
   String toString() {
@@ -293,11 +294,11 @@ class CateringOrderItem {
   final String name;
   final double price;
   final int quantity;
-  
+
   // Additional fields
   final String notes;
   final List<String> modifications;
-  
+
   // Optional reference to the original dish
   final CateringDish? dish;
 
@@ -320,13 +321,13 @@ class CateringOrderItem {
     required this.itemId,
     required this.name,
     required this.price,
-    
+
     // Optional fields with defaults
     this.quantity = 1,
     this.notes = '',
     this.modifications = const [],
     this.dish,
-    
+
     // Legacy fields with defaults
     this.title = '',
     this.img = '',
@@ -342,20 +343,21 @@ class CateringOrderItem {
   });
 
   /// Create an item from a dish
-  factory CateringOrderItem.fromDish(CateringDish dish, {String? id, String? itemId, String? notes}) {
+  factory CateringOrderItem.fromDish(CateringDish dish,
+      {String? id, String? itemId, String? notes}) {
     return CateringOrderItem(
       id: id ?? '', // Added id parameter
       itemId: itemId ?? UniqueKey().toString(),
       name: dish.title,
-      price: dish.hasUnitSelection && dish.pricePerUnit != null 
-          ? dish.pricePerUnit! 
+      price: dish.hasUnitSelection && dish.pricePerUnit != null
+          ? dish.pricePerUnit!
           : dish.pricePerPerson,
       quantity: dish.quantity,
       notes: notes ?? '',
       dish: dish,
     );
   }
-  
+
   /// Create a legacy order item
   factory CateringOrderItem.legacy({
     String? id, // Added id parameter
@@ -392,7 +394,7 @@ class CateringOrderItem {
 
   /// Total price for this item
   double get totalPrice => price * quantity;
-  
+
   /// Calculates the total price for all dishes (legacy mode)
   double get legacyTotalPrice {
     if (isQuote) return 0.0;
@@ -416,7 +418,7 @@ class CateringOrderItem {
     String? notes,
     List<String>? modifications,
     CateringDish? dish,
-    
+
     // Legacy fields
     String? title,
     String? img,
@@ -440,7 +442,7 @@ class CateringOrderItem {
       notes: notes ?? this.notes,
       modifications: modifications ?? this.modifications,
       dish: dish ?? this.dish,
-      
+
       // Legacy fields
       title: title ?? this.title,
       img: img ?? this.img,
@@ -467,7 +469,7 @@ class CateringOrderItem {
       'quantity': quantity,
       'notes': notes,
       'modifications': modifications,
-      
+
       // Legacy fields
       'title': title,
       'img': img,
@@ -479,7 +481,7 @@ class CateringOrderItem {
       'adicionales': adicionales,
       'isQuote': isQuote,
     };
-    
+
     // Add optional fields
     if (dish != null) {
       json['dish'] = dish!.toJson();
@@ -490,7 +492,7 @@ class CateringOrderItem {
     if (hasChef != null) {
       json['hasChef'] = hasChef ?? false;
     }
-    
+
     return json;
   }
 
@@ -501,46 +503,50 @@ class CateringOrderItem {
       return CateringOrderItem(
         // Modern fields (with fallbacks)
         id: json['id'] as String? ?? '', // Added id field
-        itemId: json['itemId'] ?? UniqueKey().toString(),
-        name: json['name'] ?? json['title'] ?? '',
+        itemId: json['itemId'] as String? ?? UniqueKey().toString(),
+        name: json['name'] as String? ??
+            json['title'] as String? ??
+            'Unnamed Item',
         price: json['price'] != null ? (json['price'] as num).toDouble() : 0.0,
         quantity: json['quantity'] as int? ?? 1,
         notes: json['notes'] as String? ?? '',
         modifications: (json['modifications'] as List<dynamic>?)
-            ?.map((e) => e as String)
-            .toList() ?? [],
+                ?.map((e) => e as String? ?? '')
+                .toList() ??
+            [],
         dish: json['dish'] != null ? CateringDish.fromJson(json['dish']) : null,
-        
+
         // Legacy fields
-        title: json['title'] as String? ?? '',
+        title: json['title'] as String? ?? 'Unnamed Item',
         img: json['img'] as String? ?? '',
         description: json['description'] as String? ?? '',
-        dishes: json['dishes'] != null 
+        dishes: json['dishes'] != null
             ? (json['dishes'] as List)
                 .map((dish) => CateringDish.fromJson(dish))
                 .toList()
             : const [],
         alergias: json['alergias'] as String? ?? '',
-        eventType: json['eventType'] as String? ?? '',
+        eventType: json['eventType'] as String? ?? 'Not specified',
         preferencia: json['preferencia'] as String? ?? '',
         adicionales: json['adicionales'] as String? ?? '',
-        peopleCount: json['peopleCount'] ?? json['cantidadPersonas'],
-        hasChef: json['hasChef'] as bool?,
+        peopleCount: json['peopleCount'] ?? json['cantidadPersonas'] ?? 0,
+        hasChef: json['hasChef'] as bool? ?? false,
         isQuote: json['isQuote'] as bool? ?? false,
       );
     }
-    
+
     // Standard format (modern)
     return CateringOrderItem(
       id: json['id'] as String? ?? '', // Added id field
-      itemId: json['itemId'] as String,
-      name: json['name'] as String,
-      price: (json['price'] as num).toDouble(),
+      itemId: json['itemId'] as String? ?? UniqueKey().toString(),
+      name: json['name'] as String? ?? 'Unnamed Item',
+      price: json['price'] != null ? (json['price'] as num).toDouble() : 0.0,
       quantity: json['quantity'] as int? ?? 1,
       notes: json['notes'] as String? ?? '',
       modifications: (json['modifications'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ?? [],
+              ?.map((e) => e as String? ?? '')
+              .toList() ??
+          [],
       dish: json['dish'] != null ? CateringDish.fromJson(json['dish']) : null,
     );
   }
@@ -549,7 +555,7 @@ class CateringOrderItem {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    
+
     return other is CateringOrderItem &&
         other.id == id && // Added id comparison
         other.itemId == itemId &&
@@ -606,7 +612,7 @@ class CateringOrderItem {
     }
     return 'CateringOrderItem(itemId: $itemId, name: $name, price: $price, quantity: $quantity)';
   }
-  
+
   /// Check if this is primarily a legacy item
   bool get isLegacyItem => dishes.isNotEmpty;
 }
@@ -619,23 +625,23 @@ class CateringOrder {
   final DateTime orderDate;
   final DateTime eventDate;
   final CateringOrderStatus status;
-  
+
   // Content related fields
   final List<CateringOrderItem> items;
   final double total;
-  
+
   // Customer details
   final String customerName;
   final String customerEmail;
   final String customerPhone;
-  
+
   // Event details
   final String eventAddress;
   final String eventType;
   final int guestCount;
   final String? packageId;
   final String? packageName;
-  
+
   // Service details
   final bool hasChef;
   final String specialInstructions;
@@ -643,11 +649,11 @@ class CateringOrder {
   final String alergias; // Legacy field for allergies
   final String preferencia; // Legacy field for preferences
   final String adicionales; // Legacy field for additional notes
-  
+
   // Scheduling details
   final DateTime? deliveryTime;
   final DateTime? setupTime;
-  
+
   // Metadata
   final DateTime? lastStatusUpdate;
   final String? assignedStaffId;
@@ -655,7 +661,7 @@ class CateringOrder {
   final String? paymentId;
   final String paymentStatus;
   final String? cancellationReason;
-  
+
   // Legacy flags
   final bool isQuote;
   final String img;
@@ -697,48 +703,50 @@ class CateringOrder {
   });
 
   // Add this to your CateringOrder class
-factory CateringOrder.fromStatistics(Map<String, dynamic> stats) {
-  final String statsId = 'stats-${DateTime.now().millisecondsSinceEpoch}';
-  
-  // Create a statistics item that will be included in the order
-  final statisticsItem = CateringOrderItem(
-    itemId: statsId,
-    name: 'Statistics Summary',
-    price: stats['totalRevenue'] ?? 0.0,
-    quantity: 1,
-    notes: 'Generated statistics report',
-    adicionales: json.encode(stats), // Store the full stats as JSON
-  );
-  
-  return CateringOrder(
-    id: statsId,
-    customerId: 'admin',
-    orderDate: DateTime.now(),
-    eventDate: DateTime.now(),
-    status: CateringOrderStatus.completed,
-    items: [statisticsItem], // Include the statistics item
-    total: stats['totalRevenue'] ?? 0.0,
-    customerName: 'Statistics',
-    eventType: 'Statistics Report',
-    guestCount: stats['totalOrders'] ?? 0,
-    paymentStatus: 'completed',
-    specialInstructions: 'This is an automatically generated statistics report',
-  );
-}
+  factory CateringOrder.fromStatistics(Map<String, dynamic> stats) {
+    final String statsId = 'stats-${DateTime.now().millisecondsSinceEpoch}';
+
+    // Create a statistics item that will be included in the order
+    final statisticsItem = CateringOrderItem(
+      itemId: statsId,
+      name: 'Statistics Summary',
+      price: stats['totalRevenue'] ?? 0.0,
+      quantity: 1,
+      notes: 'Generated statistics report',
+      adicionales: json.encode(stats), // Store the full stats as JSON
+    );
+
+    return CateringOrder(
+      id: statsId,
+      customerId: 'admin',
+      orderDate: DateTime.now(),
+      eventDate: DateTime.now(),
+      status: CateringOrderStatus.completed,
+      items: [statisticsItem], // Include the statistics item
+      total: stats['totalRevenue'] ?? 0.0,
+      customerName: 'Statistics',
+      eventType: 'Statistics Report',
+      guestCount: stats['totalOrders'] ?? 0,
+      paymentStatus: 'completed',
+      specialInstructions:
+          'This is an automatically generated statistics report',
+    );
+  }
 
   // Empty constructor
   factory CateringOrder.empty() => CateringOrder(
-    id: '',
-    customerId: '',
-    orderDate: DateTime.now(),
-    eventDate: DateTime.now().add(const Duration(days: 7)),
-    status: CateringOrderStatus.pending,
-    items: const [],
-    total: 0,
-  );
-  
+        id: '',
+        customerId: '',
+        orderDate: DateTime.now(),
+        eventDate: DateTime.now().add(const Duration(days: 7)),
+        status: CateringOrderStatus.pending,
+        items: const [],
+        total: 0,
+      );
+
   /// Create an order from a legacy CateringOrderItem
-  factory CateringOrder.fromLegacyItem(CateringOrderItem legacyItem, {
+  factory CateringOrder.fromLegacyItem(
+    CateringOrderItem legacyItem, {
     String? id,
     required String customerId,
     String? customerName,
@@ -753,9 +761,9 @@ factory CateringOrder.fromStatistics(Map<String, dynamic> stats) {
       orderDate: DateTime.now(),
       eventDate: eventDate,
       status: status,
-      items: legacyItem.dishes.map((dish) => 
-        CateringOrderItem.fromDish(dish)
-      ).toList(),
+      items: legacyItem.dishes
+          .map((dish) => CateringOrderItem.fromDish(dish))
+          .toList(),
       total: legacyItem.isQuote ? 0.0 : legacyItem.legacyTotalPrice,
       hasChef: legacyItem.hasChef ?? false,
       alergias: legacyItem.alergias,
@@ -852,11 +860,18 @@ factory CateringOrder.fromStatistics(Map<String, dynamic> stats) {
       alergias: alergias ?? this.alergias,
       preferencia: preferencia ?? this.preferencia,
       adicionales: adicionales ?? this.adicionales,
-      deliveryTime: clearDeliveryTime ? null : (deliveryTime ?? this.deliveryTime),
+      deliveryTime:
+          clearDeliveryTime ? null : (deliveryTime ?? this.deliveryTime),
       setupTime: clearSetupTime ? null : (setupTime ?? this.setupTime),
-      lastStatusUpdate: clearLastStatusUpdate ? null : (lastStatusUpdate ?? this.lastStatusUpdate),
-      assignedStaffId: clearAssignedStaffId ? null : (assignedStaffId ?? this.assignedStaffId),
-      assignedStaffName: clearAssignedStaffName ? null : (assignedStaffName ?? this.assignedStaffName),
+      lastStatusUpdate: clearLastStatusUpdate
+          ? null
+          : (lastStatusUpdate ?? this.lastStatusUpdate),
+      assignedStaffId: clearAssignedStaffId
+          ? null
+          : (assignedStaffId ?? this.assignedStaffId),
+      assignedStaffName: clearAssignedStaffName
+          ? null
+          : (assignedStaffName ?? this.assignedStaffName),
       paymentId: clearPaymentId ? null : (paymentId ?? this.paymentId),
       paymentStatus: paymentStatus ?? this.paymentStatus,
       cancellationReason: cancellationReason ?? this.cancellationReason,
@@ -869,7 +884,7 @@ factory CateringOrder.fromStatistics(Map<String, dynamic> stats) {
   /// Helper method to parse order status from string or int
   static CateringOrderStatus _parseOrderStatus(dynamic status) {
     if (status == null) return CateringOrderStatus.pending;
-    
+
     if (status is String) {
       return CateringOrderStatus.values.firstWhere(
         (e) => e.toString().split('.').last == status,
@@ -878,7 +893,7 @@ factory CateringOrder.fromStatistics(Map<String, dynamic> stats) {
     } else if (status is int) {
       return CateringOrderStatus.values[status];
     }
-    
+
     return CateringOrderStatus.pending;
   }
 
@@ -913,13 +928,17 @@ factory CateringOrder.fromStatistics(Map<String, dynamic> stats) {
     // Add optional fields if they exist
     if (packageId != null) json['packageId'] = packageId;
     if (packageName != null) json['packageName'] = packageName;
-    if (deliveryTime != null) json['deliveryTime'] = deliveryTime!.toIso8601String();
+    if (deliveryTime != null)
+      json['deliveryTime'] = deliveryTime!.toIso8601String();
     if (setupTime != null) json['setupTime'] = setupTime!.toIso8601String();
-    if (lastStatusUpdate != null) json['lastStatusUpdate'] = lastStatusUpdate!.toIso8601String();
+    if (lastStatusUpdate != null)
+      json['lastStatusUpdate'] = lastStatusUpdate!.toIso8601String();
     if (assignedStaffId != null) json['assignedStaffId'] = assignedStaffId;
-    if (assignedStaffName != null) json['assignedStaffName'] = assignedStaffName;
+    if (assignedStaffName != null)
+      json['assignedStaffName'] = assignedStaffName;
     if (paymentId != null) json['paymentId'] = paymentId;
-    if (cancellationReason != null) json['cancellationReason'] = cancellationReason;
+    if (cancellationReason != null)
+      json['cancellationReason'] = cancellationReason;
 
     return json;
   }
@@ -928,32 +947,37 @@ factory CateringOrder.fromStatistics(Map<String, dynamic> stats) {
   factory CateringOrder.fromJson(Map<String, dynamic> json) {
     return CateringOrder(
       id: json['id'] as String? ?? '',
-      customerId: json['customerId'] as String? ?? json['userId'] as String? ?? '',
-      orderDate: json['orderDate'] != null 
-          ? DateTime.parse(json['orderDate'] as String) 
+      customerId:
+          json['customerId'] as String? ?? json['userId'] as String? ?? '',
+      orderDate: json['orderDate'] != null
+          ? DateTime.parse(json['orderDate'] as String)
           : DateTime.now(),
-      eventDate: json['eventDate'] != null 
-          ? DateTime.parse(json['eventDate'] as String) 
+      eventDate: json['eventDate'] != null
+          ? DateTime.parse(json['eventDate'] as String)
           : DateTime.now().add(const Duration(days: 7)),
       status: _parseOrderStatus(json['status']),
-      items: json['items'] != null 
+      items: json['items'] != null
           ? (json['items'] as List)
               .map((e) => CateringOrderItem.fromJson(e))
-              .toList() 
+              .toList()
           : [],
       total: json['total'] != null ? (json['total'] as num).toDouble() : 0.0,
-      customerName: json['customerName'] as String? ?? json['userName'] as String? ?? '',
+      customerName:
+          json['customerName'] as String? ?? json['userName'] as String? ?? '',
       customerEmail: json['customerEmail'] as String? ?? '',
       customerPhone: json['customerPhone'] as String? ?? '',
       eventAddress: json['eventAddress'] as String? ?? '',
       eventType: json['eventType'] as String? ?? '',
-      guestCount: json['guestCount'] as int? ?? json['peopleCount'] as int? ?? 0,
+      guestCount:
+          json['guestCount'] as int? ?? json['peopleCount'] as int? ?? 0,
       packageId: json['packageId'] as String?,
       packageName: json['packageName'] as String?,
       hasChef: json['hasChef'] as bool? ?? false,
       specialInstructions: json['specialInstructions'] as String? ?? '',
-      dietaryRestrictions: json['dietaryRestrictions'] != null 
-          ? (json['dietaryRestrictions'] as List).map((e) => e as String).toList() 
+      dietaryRestrictions: json['dietaryRestrictions'] != null
+          ? (json['dietaryRestrictions'] as List)
+              .map((e) => e as String)
+              .toList()
           : const [],
       alergias: json['alergias'] as String? ?? '',
       preferencia: json['preferencia'] as String? ?? 'salado',
@@ -983,21 +1007,23 @@ factory CateringOrder.fromStatistics(Map<String, dynamic> stats) {
   String toString() {
     return 'CateringOrder(id: $id, status: $status, eventDate: $eventDate, total: $total)';
   }
-  
+
   /// Convert to legacy CateringOrderItem
   CateringOrderItem toLegacyItem() {
     // Convert items to dishes if possible
-    final dishes = items.map((item) => 
-      item.dish ?? CateringDish(
-        title: item.name,
-        peopleCount: guestCount,
-        pricePerPerson: item.price,
-        ingredients: [],
-        pricing: item.price,
-        quantity: item.quantity,
-      )
-    ).toList();
-    
+    final dishes = items
+        .map((item) =>
+            item.dish ??
+            CateringDish(
+              title: item.name,
+              peopleCount: guestCount,
+              pricePerPerson: item.price,
+              ingredients: [],
+              pricing: item.price,
+              quantity: item.quantity,
+            ))
+        .toList();
+
     return CateringOrderItem.legacy(
       title: description.isNotEmpty ? description : customerName,
       img: img,
