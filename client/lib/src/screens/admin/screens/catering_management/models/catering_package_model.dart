@@ -174,6 +174,7 @@ class PackageItem {
   final double price;
   final String? description;
   final int quantity;
+  final bool? isRequired;
 
   const PackageItem({
     required this.id,
@@ -182,6 +183,7 @@ class PackageItem {
     required this.price,
     this.description,
     this.quantity = 1,
+    this.isRequired,
   });
 
   factory PackageItem.fromJson(Map<String, dynamic> json) {
@@ -192,6 +194,7 @@ class PackageItem {
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
       description: json['description'] as String?,
       quantity: json['quantity'] as int? ?? 1,
+      isRequired: json['isRequired'] as bool?,
     );
   }
 
@@ -203,6 +206,7 @@ class PackageItem {
       'price': price,
       if (description != null) 'description': description,
       'quantity': quantity,
+      if (isRequired != null) 'isRequired': isRequired,
     };
   }
 
@@ -215,6 +219,8 @@ class PackageItem {
     String? description,
     bool clearDescription = false,
     int? quantity,
+    bool? isRequired,
+    bool clearIsRequired = false,
   }) {
     return PackageItem(
       id: id ?? this.id,
@@ -223,6 +229,7 @@ class PackageItem {
       price: price ?? this.price,
       description: clearDescription ? null : (description ?? this.description),
       quantity: quantity ?? this.quantity,
+      isRequired: clearIsRequired ? null : (isRequired ?? this.isRequired),
     );
   }
 
@@ -237,7 +244,8 @@ class PackageItem {
         other.category == category &&
         other.price == price &&
         other.description == description &&
-        other.quantity == quantity;
+        other.quantity == quantity &&
+        other.isRequired == isRequired;
   }
 
   @override
@@ -247,11 +255,12 @@ class PackageItem {
         category.hashCode ^
         price.hashCode ^
         description.hashCode ^
-        quantity.hashCode;
+        quantity.hashCode ^
+        isRequired.hashCode;
   }
 
   @override
   String toString() {
-    return 'PackageItem(id: $id, name: $name, category: $category, price: $price, quantity: $quantity)';
+    return 'PackageItem(id: $id, name: $name, category: $category, price: $price, quantity: $quantity, isRequired: $isRequired)';
   }
 }

@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/firebase_providers.dart';
+
 import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart';
- 
+import 'package:starter_architecture_flutter_firebase/src/core/providers/order/unified_order_service.dart';
+
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/order_history_screen.dart';
- 
+
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/catering_card.dart';
 // Remove ColorsPaletteRedonda import
- 
+
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart'
     as auth_models;
- 
-import '../admin/models/order_status_enum.dart';
 
+import '../admin/models/order_status_enum.dart';
 
 class InProgressOrdersScreen extends ConsumerStatefulWidget {
   const InProgressOrdersScreen({super.key});
@@ -41,7 +42,7 @@ class _InProgressOrdersScreenState extends ConsumerState<InProgressOrdersScreen>
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Scaffold(
       appBar: AppBar(
         forceMaterialTransparency: true,
@@ -83,7 +84,9 @@ class _OrdersList extends ConsumerWidget {
     if (user == null) return const SizedBox.shrink();
 
     final ordersAsync = ref.watch(
-      isCompleted ? completedOrdersProvider(user.uid) : activeOrdersProvider(user.uid),
+      isCompleted
+          ? completedOrdersProvider(user.uid)
+          : activeOrdersProvider(user.uid),
     );
 
     return ordersAsync.when(
@@ -93,7 +96,8 @@ class _OrdersList extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.inbox_outlined, color: colorScheme.onSurfaceVariant, size: 60),
+                Icon(Icons.inbox_outlined,
+                    color: colorScheme.onSurfaceVariant, size: 60),
                 const SizedBox(height: 16),
                 Text(
                   isCompleted
@@ -114,7 +118,8 @@ class _OrdersList extends ConsumerWidget {
           },
         );
       },
-      loading: () => Center(child: CircularProgressIndicator(color: colorScheme.primary)),
+      loading: () =>
+          Center(child: CircularProgressIndicator(color: colorScheme.primary)),
       error: (error, stack) => Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -136,14 +141,14 @@ class OrderCard extends StatelessWidget {
   final auth_models.Order order;
 
   const OrderCard({required this.order, super.key});
-  
+
   // Update the status color method to use theme colors
   Color _getStatusColor(String status, ColorScheme colorScheme) {
     final orderStatus = OrderStatus.values.firstWhere(
       (e) => e.name == status,
       orElse: () => OrderStatus.pending,
     );
-    
+
     switch (orderStatus) {
       case OrderStatus.pending:
         return colorScheme.tertiary;
@@ -167,14 +172,14 @@ class OrderCard extends StatelessWidget {
         return colorScheme.primary;
       case OrderStatus.confirmed:
         // TODO: Handle this case.
-       return colorScheme.secondary;
+        return colorScheme.secondary;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Card(
       margin: const EdgeInsets.symmetric(
         horizontal: 16,
@@ -212,21 +217,21 @@ class OrderCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 ...[
-                Divider(color: colorScheme.outlineVariant),
-                Text(
-                  'Artículos:',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurface,
+                  Divider(color: colorScheme.outlineVariant),
+                  Text(
+                    'Artículos:',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                ...order.items.map((item) => ListTile(
-                      dense: true,
-                      title: Text(item.name),
-                      trailing: Text('x${item.quantity}'),
-                    )),
-              ],
+                  const SizedBox(height: 8),
+                  ...order.items.map((item) => ListTile(
+                        dense: true,
+                        title: Text(item.name),
+                        trailing: Text('x${item.quantity}'),
+                      )),
+                ],
               ],
             ),
           ),

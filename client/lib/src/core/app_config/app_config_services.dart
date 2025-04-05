@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/onboarding/onboarding_repository.dart';
@@ -8,7 +9,6 @@ import 'package:starter_architecture_flutter_firebase/src/core/providers/busines
 import 'package:starter_architecture_flutter_firebase/src/core/providers/setup/setup_screen_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/business_config_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/local_storage_service.dart';
- 
 
 part 'app_config_services.g.dart';
 
@@ -32,7 +32,7 @@ final isFirebaseInitializedProvider = StateProvider<bool>((ref) => false);
 final localStorageInitProvider = FutureProvider<void>((ref) async {
   final localStorageService = ref.read(localStorageServiceProvider);
   await localStorageService.init();
-  
+
   // Load business ID from local storage if available
   final storedBusinessId = await localStorageService.getString('businessId');
   if (storedBusinessId != null && storedBusinessId.isNotEmpty) {
@@ -44,21 +44,40 @@ final localStorageInitProvider = FutureProvider<void>((ref) async {
 final businessConfigInitProvider = FutureProvider<BusinessConfig?>((ref) async {
   // Wait for Firebase to be initialized first
   await ref.watch(firebaseInitializationProvider.future);
-  
+
   // Wait for local storage to be initialized
   await ref.watch(localStorageInitProvider.future);
-  
+
   // Get the business ID
   final businessId = ref.read(currentBusinessIdProvider);
-  
+
   // Get the business configuration
   final configService = ref.read(businessConfigServiceProvider);
   final config = await configService.getBusinessConfig(businessId);
-  
+
   return config;
 });
 
-// https://codewithandrea.com/articles/robust-app-initialization-riverpod/
+// Result class to handle setup check outcome
+class AppStartupResult {
+  final bool isAdmin;
+  final bool showSetupScreen;
+  final BusinessConfig? businessConfig;
+
+  AppStartupResult({
+    required this.isAdmin,
+    required this.showSetupScreen,
+    this.businessConfig,
+  });
+}
+
+// This provider will hold the startup result without modifying other providers
+final appStartupResultProvider =
+    StateProvider<AppStartupResult?>((ref) => null);
+
+// Remove the problematic checkSetupScreenProvider and handle setup screen state differently
+
+// Main app startup provider - refactored to avoid modifying providers during init
 @Riverpod(keepAlive: true)
 Future<void> appStartup(AppStartupRef ref) async {
   ref.onDispose(() {
@@ -68,22 +87,46 @@ Future<void> appStartup(AppStartupRef ref) async {
     ref.invalidate(localStorageInitProvider);
   });
 
-  // Initialize Firebase
-  await ref.read(firebaseInitializationProvider.future);
-  
-  // Initialize local storage
-  await ref.read(localStorageInitProvider.future);
+  try {
+    // Initialize Firebase
+    await ref.read(firebaseInitializationProvider.future);
 
-  // Initialize business configuration
-  final businessConfig = await ref.read(businessConfigInitProvider.future);
-  
-  // Check if admin and if example data should be initialized
-  final isAdmin = await ref.read(isAdminProvider.future);
-  if (isAdmin && businessConfig == null) {
-    // This is an admin with no business config - show setup screen
-    ref.read(showSetupScreenProvider.notifier).state = true;
+    // Initialize local storage
+    await ref.read(localStorageInitProvider.future);
+
+    // Initialize business configuration
+    final businessConfig = await ref.read(businessConfigInitProvider.future);
+
+    // Check if admin, but don't directly modify providers
+    final isAdmin = await ref.read(isAdminProvider.future);
+    final shouldShowSetup = isAdmin && businessConfig == null;
+
+    // Store the result so other providers can react to it
+    ref.read(appStartupResultProvider.notifier).state = AppStartupResult(
+      isAdmin: isAdmin,
+      showSetupScreen: shouldShowSetup,
+      businessConfig: businessConfig,
+    );
+
+    // Wait for all initialization code to be complete before returning
+    await ref.read(onboardingRepositoryProvider.future);
+
+    // Don't try to modify other providers during initialization
+    // We'll handle the setup screen state in the UI layer
+  } catch (e) {
+    debugPrint('Error during app startup: $e');
+    rethrow;
   }
-
-  // Wait for all initialization code to be complete before returning
-  await ref.read(onboardingRepositoryProvider.future);
 }
+
+// Convenience method to check if setup is complete
+final isSetupCompleteProvider = Provider<bool>((ref) {
+  final result = ref.watch(appStartupResultProvider);
+  return result != null && result.businessConfig != null;
+});
+
+// Add a new provider that can be used in the UI to determine if setup screen should be shown
+final shouldShowSetupScreenProvider = Provider<bool>((ref) {
+  final result = ref.watch(appStartupResultProvider);
+  return result != null && result.showSetupScreen;
+});

@@ -3,17 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/order/unified_order_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/create_order.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/order_details_widget.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import '../../../core/providers/order/order_provider.dart';
-import '../widgets/responsive_layout.dart'; 
+import '../widgets/responsive_layout.dart';
 
 class OrderManagementScreen extends ConsumerStatefulWidget {
   const OrderManagementScreen({super.key});
 
   @override
-  ConsumerState<OrderManagementScreen> createState() => _OrderManagementScreenState();
+  ConsumerState<OrderManagementScreen> createState() =>
+      _OrderManagementScreenState();
 }
 
 class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
@@ -21,7 +24,7 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
   String _searchQuery = '';
   DateTime? _selectedDate;
   bool _showFilters = false;
-  
+
   final TextEditingController _searchController = TextEditingController();
   final List<String> _statusFilters = [
     'all',
@@ -32,7 +35,7 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
     'completed',
     'cancelled',
   ];
-  
+
   @override
   void initState() {
     super.initState();
@@ -42,7 +45,7 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
       });
     });
   }
-  
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -53,12 +56,11 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveLayout.isDesktop(context);
     final selectedOrderId = ref.watch(activeOrderIdProvider);
-    
+
     return Scaffold(
       body: Column(
         children: [
           _buildFiltersSection(),
-          
           Expanded(
             child: isDesktop && selectedOrderId != null
                 ? Row(
@@ -72,7 +74,9 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
                         flex: 3,
                         child: OrderDetailView(
                           orderId: selectedOrderId,
-                          onClose: () => ref.read(activeOrderIdProvider.notifier).state = null,
+                          onClose: () => ref
+                              .read(activeOrderIdProvider.notifier)
+                              .state = null,
                         ),
                       ),
                     ],
@@ -88,7 +92,7 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
       ),
     );
   }
-  
+
   Widget _buildFiltersSection() {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -132,7 +136,8 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
               ),
               const SizedBox(width: 16),
               IconButton(
-                icon: Icon(_showFilters ? Icons.expand_less : Icons.expand_more),
+                icon:
+                    Icon(_showFilters ? Icons.expand_less : Icons.expand_more),
                 onPressed: () {
                   setState(() {
                     _showFilters = !_showFilters;
@@ -142,10 +147,8 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
               ),
             ],
           ),
-          
           if (_showFilters) ...[
             const SizedBox(height: 16),
-            
             Text(
               'Filter by Status:',
               style: Theme.of(context).textTheme.titleSmall,
@@ -179,9 +182,7 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
                 }).toList(),
               ),
             ),
-            
             const SizedBox(height: 8),
-            
             Row(
               children: [
                 Text(
@@ -215,35 +216,35 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
       ),
     );
   }
-  
+
   Widget _buildOrdersList() {
     final ordersStream = _selectedStatus == 'all'
         ? ref.watch(ordersByDateProvider(_selectedDate))
         : ref.watch(ordersByStatusStringProvider(_selectedStatus));
-    
+
     return ordersStream.when(
       data: (orders) {
         // Apply search filter
         final filteredOrders = orders.where((order) {
           if (_searchQuery.isEmpty) return true;
-          
+
           // Search by order ID
           if (order.id.toLowerCase().contains(_searchQuery)) return true;
-          
+
           // Search by table number or customer name
           final resourceId = order.id.toLowerCase();
           final userName = order.customerName?.toLowerCase() ?? '';
-          
-          return resourceId.contains(_searchQuery) || 
-                 userName.contains(_searchQuery);
+
+          return resourceId.contains(_searchQuery) ||
+              userName.contains(_searchQuery);
         }).toList();
-        
+
         if (filteredOrders.isEmpty) {
           return const Center(
             child: Text('No orders found'),
           );
         }
-        
+
         return ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: filteredOrders.length,
@@ -257,13 +258,13 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
       error: (error, stackTrace) => Center(child: Text('Error: $error')),
     );
   }
-  
+
   Widget _buildOrderCard(Order order) {
     final theme = Theme.of(context);
     final isDesktop = ResponsiveLayout.isDesktop(context);
     final activeOrderId = ref.watch(activeOrderIdProvider);
     final isSelected = order.id == activeOrderId;
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
@@ -278,8 +279,11 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
             // For desktop, set active order for side view
             ref.read(activeOrderIdProvider.notifier).state = order.id;
           } else {
-            // For mobile, navigate to detail page
-            context.push('/admin/orders/${order.id}');
+            // For mobile, navigate to detail page using named route
+            context.goNamed(
+              AdminRoutes.namePdOrderDetails,
+              pathParameters: {'orderId': order.id},
+            );
           }
         },
         borderRadius: BorderRadius.circular(8),
@@ -299,12 +303,14 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  
+
                   // Order status
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: _getStatusColor(order.status.name).withOpacity(0.1),
+                      color:
+                          _getStatusColor(order.status.name).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -315,9 +321,9 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
                       ),
                     ),
                   ),
-                  
+
                   const Spacer(),
-                  
+
                   // Order date/time
                   Text(
                     DateFormat.yMMMd().add_jm().format(order.createdAt),
@@ -325,9 +331,9 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Order details
               Row(
                 children: [
@@ -336,7 +342,9 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
                     child: Row(
                       children: [
                         Icon(
-                          order.isDelivery ? Icons.delivery_dining : Icons.table_restaurant,
+                          order.isDelivery
+                              ? Icons.delivery_dining
+                              : Icons.table_restaurant,
                           size: 16,
                           color: theme.colorScheme.onSurface.withOpacity(0.7),
                         ),
@@ -349,7 +357,7 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
                       ],
                     ),
                   ),
-                  
+
                   // Items count
                   Expanded(
                     child: Row(
@@ -363,7 +371,7 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
                       ],
                     ),
                   ),
-                  
+
                   // Total amount
                   Expanded(
                     child: Row(
@@ -382,9 +390,9 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Action buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -395,27 +403,31 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
                     label: const Text('View'),
                     onPressed: () {
                       if (isDesktop) {
-                        ref.read(activeOrderIdProvider.notifier).state = order.id;
+                        ref.read(activeOrderIdProvider.notifier).state =
+                            order.id;
                       } else {
                         context.push('/admin/orders/${order.id}');
                       }
                     },
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                       visualDensity: VisualDensity.compact,
                     ),
                   ),
-                  
+
                   const SizedBox(width: 8),
-                  
+
                   // Status update button
-                  if (order.status != 'completed' && order.status != 'cancelled')
+                  if (order.status != 'completed' &&
+                      order.status != 'cancelled')
                     ElevatedButton.icon(
                       icon: const Icon(Icons.update, size: 16),
                       label: Text(_getNextStatusLabel(order.status.name)),
                       onPressed: () => _updateOrderStatus(order),
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
                         visualDensity: VisualDensity.compact,
                       ),
                     ),
@@ -427,7 +439,7 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
       ),
     );
   }
-  
+
   void _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -435,14 +447,14 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
       firstDate: DateTime(2020),
       lastDate: DateTime.now().add(const Duration(days: 1)),
     );
-    
+
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
       });
     }
   }
-  
+
   void _showCreateOrderDialog() {
     showDialog(
       context: context,
@@ -452,7 +464,10 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
           child: CreateOrderForm(
             onSuccess: (order) {
               Navigator.pop(context);
-              context.push('/admin/orders/${order.id}');
+              context.goNamed(
+                AdminRoutes.namePdOrderDetails,
+                pathParameters: {'orderId': order.id},
+              );
             },
             onCancel: () => Navigator.pop(context),
           ),
@@ -460,16 +475,17 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
       ),
     );
   }
-  
+
   Future<void> _updateOrderStatus(Order order) async {
-    
     try {
       final orderService = ref.read(orderServiceProvider);
       await orderService.updateOrderStatus(order.id, order.status);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Order status updated to ${_capitalizeFirst(order.status.name)}')),
+          SnackBar(
+              content: Text(
+                  'Order status updated to ${_capitalizeFirst(order.status.name)}')),
         );
       }
     } catch (e) {
@@ -480,8 +496,7 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
       }
     }
   }
- 
-  
+
   String _getNextStatusLabel(String currentStatus) {
     switch (currentStatus) {
       case 'pending':
@@ -496,7 +511,7 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
         return 'Update Status';
     }
   }
-  
+
   Color _getStatusColor(String status) {
     switch (status) {
       case 'pending':
@@ -517,20 +532,10 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
         return Colors.grey;
     }
   }
-  
+
   String _capitalizeFirst(String text) {
     if (text.isEmpty) return text;
     return text[0].toUpperCase() + text.substring(1);
   }
 }
 
-// Provider for filtered orders by date
-final ordersByDateProvider = StreamProvider.family<List<Order>, DateTime?>((ref, date) {
-  final orderService = ref.watch(orderServiceProvider);
-  
-  if (date == null) {
-    return orderService.getAllOrdersStream();
-  }
-  
-  return orderService.getOrdersByDateStream(date);
-});

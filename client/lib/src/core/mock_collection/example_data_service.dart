@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/firebase_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/setup/initialize_example_data_provider.dart';
 
 /// First-time setup screen for admins
@@ -18,53 +18,48 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
   String _businessType = 'restaurant';
   bool _isInitializing = false;
   String? _errorMessage;
-  
-  final _businessTypes = [
-    'restaurant',
-    'hotel',
-    'retail',
-    'service',
-    'other'
-  ];
+
+  final _businessTypes = ['restaurant', 'hotel', 'retail', 'service', 'other'];
 
   Future<void> _initializeBusinessData() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    
+
     _formKey.currentState!.save();
-    
+
     setState(() {
       _isInitializing = true;
       _errorMessage = null;
     });
-    
+
     try {
       // Generate a business ID based on the name
       final businessId = _businessName.toLowerCase().replaceAll(' ', '_');
-      
+
       // Set the business ID in the provider
       ref.read(currentBusinessIdProvider.notifier).state = businessId;
-      
+
       // Get current user's email
       final userEmail = ref.read(firebaseAuthProvider).currentUser?.email;
       if (userEmail == null) {
         throw Exception('User not logged in or has no email');
       }
-      
+
       // Initialize example data
       await ref.read(initializeExampleDataProvider(
         businessId: businessId,
         businessType: _businessType,
         adminEmail: userEmail,
       ).future);
-      
+
       // Show success
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Business setup completed successfully!')),
+          const SnackBar(
+              content: Text('Business setup completed successfully!')),
         );
-        
+
         // Navigate to home screen or admin panel
         // Navigator.of(context).pushReplacementNamed('/admin');
       }
@@ -85,7 +80,7 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
   Widget build(BuildContext context) {
     // Check if business exists
     final businessAsyncValue = ref.watch(businessConfigProvider);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Business Setup'),
@@ -103,7 +98,8 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 16),
-                  Text('Your business "${businessConfig.name}" is already set up.'),
+                  Text(
+                      'Your business "${businessConfig.name}" is already set up.'),
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () {
@@ -115,7 +111,7 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
                 ],
               );
             }
-            
+
             // Business not set up yet, show the form
             return SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
@@ -160,7 +156,8 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
                       items: _businessTypes.map((type) {
                         return DropdownMenuItem<String>(
                           value: type,
-                          child: Text(type.substring(0, 1).toUpperCase() + type.substring(1)),
+                          child: Text(type.substring(0, 1).toUpperCase() +
+                              type.substring(1)),
                         );
                       }).toList(),
                       onChanged: (value) {
@@ -181,12 +178,14 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
                         padding: const EdgeInsets.only(bottom: 16),
                         child: Text(
                           _errorMessage!,
-                          style: TextStyle(color: Theme.of(context).colorScheme.error),
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.error),
                           textAlign: TextAlign.center,
                         ),
                       ),
                     ElevatedButton(
-                      onPressed: _isInitializing ? null : _initializeBusinessData,
+                      onPressed:
+                          _isInitializing ? null : _initializeBusinessData,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
@@ -206,4 +205,3 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
     );
   }
 }
-

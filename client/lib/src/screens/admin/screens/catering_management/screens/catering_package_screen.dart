@@ -46,7 +46,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
           Expanded(
             child: packageAsyncValue.when(
               data: (packages) {
-                // Ensure we're working with CateringPackage objects
+                // // Ensure we're working with CateringPackage objects
                 final List<CateringPackage> validPackages =
                     packages.whereType<CateringPackage>().toList();
 
@@ -123,7 +123,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                     ...categories.map(
                       (category) => DropdownMenuItem<String?>(
                         value: category.id,
-                        child: Text(category.name),
+                        child: Text(category.name ?? 'Unnamed Category'),
                       ),
                     ),
                   ],
@@ -251,7 +251,8 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                                     padding: const EdgeInsets.only(right: 8.0),
                                     child: Icon(
                                       IconMapper.getIconData(
-                                          package.iconCodePoint.toString()),
+                                          package.iconCodePoint?.toString() ??
+                                              ''),
                                       color: colorScheme.primary,
                                     ),
                                   ),
@@ -260,13 +261,13 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      package.name,
+                                      package.name ?? 'Unnamed Package',
                                       style: const TextStyle(
                                           fontWeight: FontWeight.bold),
                                     ),
-                                    if (package.description.isNotEmpty)
+                                    if ((package.description ?? '').isNotEmpty)
                                       Text(
-                                        package.description,
+                                        package.description ?? '',
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodySmall,
@@ -292,7 +293,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                               children: categories.map((category) {
                                 return Chip(
                                   label: Text(
-                                    category.name,
+                                    category.name ?? 'Unnamed Category',
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: colorScheme.onPrimaryContainer,
@@ -314,7 +315,8 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                                     .read(
                                         unifiedCateringPackageRepositoryProvider
                                             .notifier)
-                                    .togglePackageStatus(package.id, value);
+                                    .togglePackageStatus(
+                                        package.id ?? '', value);
                               },
                             ),
                           ),
@@ -326,7 +328,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                                     .read(
                                         unifiedCateringPackageRepositoryProvider
                                             .notifier)
-                                    .togglePromoted(package.id, value);
+                                    .togglePromoted(package.id ?? '', value);
                               },
                             ),
                           ),
@@ -402,7 +404,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                         ),
                       Expanded(
                         child: Text(
-                          package.name,
+                          package.name ?? 'Unnamed Package',
                           style:
                               Theme.of(context).textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
@@ -415,7 +417,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                           ref
                               .read(unifiedCateringPackageRepositoryProvider
                                   .notifier)
-                              .togglePackageStatus(package.id, value);
+                              .togglePackageStatus(package.id ?? '', value);
                         },
                       ),
                     ],
@@ -440,7 +442,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                                 ),
                                 child: Icon(
                                   IconMapper.getIconData(
-                                      package.iconCodePoint.toString()),
+                                      package.iconCodePoint?.toString() ?? ''),
                                   color: colorScheme.onPrimaryContainer,
                                   size: 28,
                                 ),
@@ -466,7 +468,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          package.description,
+                          package.description ?? '',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.bodySmall,
@@ -478,7 +480,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                           children: categories.map((category) {
                             return Chip(
                               label: Text(
-                                category.name,
+                                category.name ?? 'Unnamed Category',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: colorScheme.onPrimaryContainer,
@@ -576,19 +578,9 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                             color: colorScheme.primaryContainer,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          // child: Icon(
-                          //   IconData(
-                          //     package.iconCodePoint!,
-                          //     fontFamily: package.iconFontFamily,
-                          //   ),
-                          //   color: colorScheme.onPrimaryContainer,
-                          //   size: 28,
-                          // ),
-
-                          // Replace with:
                           child: Icon(
                             IconMapper.getIconData(
-                                package.iconCodePoint.toString()),
+                                package.iconCodePoint?.toString() ?? ''),
                             color: colorScheme.onPrimaryContainer,
                             size: 28,
                           ),
@@ -603,7 +595,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    package.name,
+                                    package.name ?? 'Unnamed Package',
                                     style: Theme.of(context)
                                         .textTheme
                                         .titleMedium
@@ -624,7 +616,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              package.description,
+                              package.description ?? '',
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: Theme.of(context).textTheme.bodyMedium,
@@ -664,7 +656,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
-                                    category.name,
+                                    category.name ?? 'Unnamed Category',
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: colorScheme.onPrimaryContainer,
@@ -699,7 +691,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                               ref
                                   .read(unifiedCateringPackageRepositoryProvider
                                       .notifier)
-                                  .togglePackageStatus(package.id, value);
+                                  .togglePackageStatus(package.id ?? '', value);
                             },
                           ),
                           Text(
@@ -738,7 +730,8 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Package'),
-        content: Text('Are you sure you want to delete "${package.name}"?'),
+        content: Text(
+            'Are you sure you want to delete "${package.name ?? 'Unnamed Package'}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -752,10 +745,12 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
             onPressed: () {
               ref
                   .read(unifiedCateringPackageRepositoryProvider.notifier)
-                  .deletePackage(package.id);
+                  .deletePackage(package.id ?? '');
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('${package.name} has been deleted')),
+                SnackBar(
+                    content: Text(
+                        '${package.name ?? 'Unnamed Package'} has been deleted')),
               );
             },
             child: const Text('Delete'),

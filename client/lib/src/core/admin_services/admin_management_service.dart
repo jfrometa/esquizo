@@ -2,32 +2,51 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/firebase_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/admin_user.dart';
 
-class AdminManagementService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+/// Unified admin service that handles all admin-related operations.
+/// Consolidates functionality from both AdminManagementService and AdminService.
+class UnifiedAdminService {
+  final FirebaseFirestore _firestore;
+  final FirebaseAuth _auth;
 
-  // Check if current user is admin with caching
+  // Private constructor for dependency injection
+  UnifiedAdminService({FirebaseFirestore? firestore, FirebaseAuth? auth})
+      : _firestore = firestore ?? FirebaseFirestore.instance,
+        _auth = auth ?? FirebaseAuth.instance;
+
+  // Check if current user is admin with optimized caching
   Future<bool> isCurrentUserAdmin() async {
     try {
       final user = _auth.currentUser;
       if (user == null) return false;
 
-      // Use get() with source option for better caching
-      final adminDoc = await _firestore
-          .collection('admins')
-          .doc(user.uid)
-          .get(const GetOptions(source: Source.serverAndCache));
+      // Cache option for better performance
+      const cacheOption = GetOptions(source: Source.serverAndCache);
 
-      return adminDoc.exists;
+      // Check admin document in Firestore
+      final adminDoc =
+          await _firestore.collection('admins').doc(user.uid).get(cacheOption);
+
+      // Check admin claims in user's token as fallback
+      bool isAdminClaim = false;
+      try {
+        final idTokenResult = await user.getIdTokenResult(true);
+        isAdminClaim = idTokenResult.claims?['admin'] == true;
+      } catch (tokenError) {
+        debugPrint('Error getting token claims: $tokenError');
+      }
+
+      return adminDoc.exists || isAdminClaim;
     } catch (e) {
       debugPrint('Error checking admin status: $e');
       return false;
     }
   }
 
-  // Add new admin
+  // Add new admin with transaction and validation
   Future<String> addAdmin(String email) async {
     try {
       // Verify current user is admin
@@ -40,28 +59,23 @@ class AdminManagementService {
         throw Exception('Invalid email format');
       }
 
-      String? uid;
-      // Get user by email directly
+      // Find user by email
       final users = await _firestore
           .collection('users')
           .where('email', isEqualTo: email)
           .limit(1) // Limit for performance
           .get();
-          
-      if (users.docs.isNotEmpty) {
-        uid = users.docs.first.id;
-      }
 
-      if (uid == null) {
+      if (users.docs.isEmpty) {
         throw Exception('Usuario no encontrado. Debe registrarse primero.');
       }
 
+      final uid = users.docs.first.id;
+
       // Check if already admin
-      final existingAdmin = await _firestore
-          .collection('admins')
-          .doc(uid)
-          .get();
-          
+      final existingAdmin =
+          await _firestore.collection('admins').doc(uid).get();
+
       if (existingAdmin.exists) {
         return '$email ya es administrador';
       }
@@ -78,11 +92,12 @@ class AdminManagementService {
 
       return 'Se agregó $email como administrador exitosamente';
     } catch (e) {
+      debugPrint('Error al agregar administrador: $e');
       throw Exception('Error al agregar administrador: $e');
     }
   }
 
-  // Remove admin
+  // Remove admin with transaction and validation
   Future<String> removeAdmin(String email) async {
     try {
       // Verify current user is admin
@@ -92,7 +107,8 @@ class AdminManagementService {
 
       // Prevent removing yourself
       if (_auth.currentUser?.email == email) {
-        throw Exception('No puedes eliminar tus propios privilegios de administrador');
+        throw Exception(
+            'No puedes eliminar tus propios privilegios de administrador');
       }
 
       // Find admin document by email
@@ -109,40 +125,37 @@ class AdminManagementService {
       // Remove admin document with transaction
       await _firestore.runTransaction((transaction) async {
         transaction.delete(
-          _firestore.collection('admins').doc(querySnapshot.docs.first.id)
-        );
+            _firestore.collection('admins').doc(querySnapshot.docs.first.id));
       });
 
       return 'Se eliminaron los privilegios de administrador de $email';
     } catch (e) {
+      debugPrint('Error al eliminar administrador: $e');
       throw Exception('Error al eliminar administrador: $e');
     }
   }
 
   // Get all admins with error handling
   Stream<List<AdminUser>> getAdmins() {
-    return _firestore
-        .collection('admins')
-        .snapshots()
-        .map((snapshot) {
-          try {
-            return snapshot.docs
-                .map((doc) {
-                  try {
-                    return AdminUser.fromMap(doc.id, doc.data());
-                  } catch (e) {
-                   debugPrint('Error parsing admin document: $e');
-                    return null;
-                  }
-                })
-                .where((admin) => admin != null)
-                .cast<AdminUser>()
-                .toList();
-          } catch (e) {
-           debugPrint('Error processing admin snapshot: $e');
-            return <AdminUser>[];
-          }
-        });
+    return _firestore.collection('admins').snapshots().map((snapshot) {
+      try {
+        return snapshot.docs
+            .map((doc) {
+              try {
+                return AdminUser.fromMap(doc.id, doc.data());
+              } catch (e) {
+                debugPrint('Error parsing admin document: $e');
+                return null;
+              }
+            })
+            .where((admin) => admin != null)
+            .cast<AdminUser>()
+            .toList();
+      } catch (e) {
+        debugPrint('Error processing admin snapshot: $e');
+        return <AdminUser>[];
+      }
+    });
   }
 
   // Get specific admin
@@ -152,46 +165,67 @@ class AdminManagementService {
           .collection('admins')
           .doc(uid)
           .get(const GetOptions(source: Source.serverAndCache));
-          
+
       if (doc.exists && doc.data() != null) {
         return AdminUser.fromMap(doc.id, doc.data()!);
       }
       return null;
     } catch (e) {
-     debugPrint('Error getting admin: $e');
+      debugPrint('Error getting admin: $e');
       return null;
     }
   }
+
+  // Clear admin cache on logout
+  void clearAdminStatus() {
+    // Method to be called on logout to clear caches
+  }
 }
 
-// Providers with caching
-final adminManagementServiceProvider = Provider<AdminManagementService>(
-  (ref) => AdminManagementService(),
-);
+// Optimized providers with proper caching and dependency management
+final unifiedAdminServiceProvider = Provider<UnifiedAdminService>((ref) {
+  // Get Firestore instance from central Firebase provider
+  final firestore = ref.watch(firebaseFirestoreProvider);
+  return UnifiedAdminService(firestore: firestore);
+});
 
 // Stream provider with error handling
 final adminsStreamProvider = StreamProvider<List<AdminUser>>((ref) {
-  final adminService = ref.watch(adminManagementServiceProvider);
+  final adminService = ref.watch(unifiedAdminServiceProvider);
   return adminService.getAdmins();
 });
 
-// Admin status provider with caching
+// Admin status provider with proper caching
 final isAdminProvider = FutureProvider<bool>((ref) async {
-  // Check cached value first
+  // Listen to auth state changes for cache invalidation
+  ref.listen(authStateChangesProvider, (_, next) {
+    if (next == null) {
+      // User signed out, reset cached admin status
+      ref.invalidateSelf();
+      ref.read(cachedAdminStatusProvider.notifier).state = false;
+    }
+  });
+
+  // Check cached value first for performance
   final cachedStatus = ref.read(cachedAdminStatusProvider);
   if (cachedStatus) return true;
-  
+
   // If not cached, check from service
-  final adminService = ref.watch(adminManagementServiceProvider);
+  final adminService = ref.watch(unifiedAdminServiceProvider);
   final isAdmin = await adminService.isCurrentUserAdmin();
-  
+
   // Update cache if admin
   if (isAdmin) {
     ref.read(cachedAdminStatusProvider.notifier).state = true;
   }
-  
+
   return isAdmin;
 });
 
-// Cache provider
+// Auth state changes provider
+// final authStateChangesProvider = StreamProvider<User?>((ref) {
+//   return FirebaseAuth.instance.authStateChanges();
+// });
+
+// Single, centralized cache provider
 final cachedAdminStatusProvider = StateProvider<bool>((ref) => false);

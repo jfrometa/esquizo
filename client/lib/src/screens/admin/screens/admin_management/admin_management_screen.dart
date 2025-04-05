@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/user/auth_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/admin_user.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_management_service.dart'; 
- 
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_management_service.dart';
 
 class AdminManagementScreen extends ConsumerStatefulWidget {
   const AdminManagementScreen({super.key});
@@ -18,10 +17,9 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isSubmitting = false;
   String? _errorMessage;
-  
+
   @override
   Widget build(BuildContext context) {
-    final adminService = ref.watch(adminManagementServiceProvider);
     final admins = ref.watch(adminsStreamProvider);
     final theme = Theme.of(context);
 
@@ -82,13 +80,14 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
                             if (value == null || value.isEmpty) {
                               return 'Por favor ingresa un email';
                             }
-                            
+
                             // Simple email validation
-                            final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                            final emailRegex =
+                                RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
                             if (!emailRegex.hasMatch(value)) {
                               return 'Por favor ingresa un email válido';
                             }
-                            
+
                             return null;
                           },
                         ),
@@ -96,11 +95,12 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
                       const SizedBox(width: 16),
                       ElevatedButton.icon(
                         onPressed: _isSubmitting ? null : _addAdmin,
-                        icon: _isSubmitting 
+                        icon: _isSubmitting
                             ? const SizedBox(
                                 width: 20,
                                 height: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
                               )
                             : const Icon(Icons.person_add),
                         label: const Text('Agregar'),
@@ -121,7 +121,7 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
               ),
             ),
           ),
-          
+
           // List of admins section
           Expanded(
             child: Container(
@@ -151,7 +151,7 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Admin list
                   Expanded(
                     child: admins.when(
@@ -164,40 +164,43 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
                                 Icon(
                                   Icons.people_outline,
                                   size: 64,
-                                  color: theme.colorScheme.onSurface.withAlpha(77), // 0.3 * 255 ≈ 77
+                                  color: theme.colorScheme.onSurface
+                                      .withAlpha(77), // 0.3 * 255 ≈ 77
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
                                   'No hay administradores aún',
                                   style: theme.textTheme.titleMedium?.copyWith(
-                                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                                    color: theme.colorScheme.onSurface
+                                        .withOpacity(0.7),
                                   ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
                                   'Agrega administradores usando el formulario superior',
                                   style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                                    color: theme.colorScheme.onSurface
+                                        .withOpacity(0.5),
                                   ),
                                 ),
                               ],
                             ),
                           );
                         }
-                        
 
-                        
                         return ListView.separated(
                           itemCount: adminList.length,
                           separatorBuilder: (context, index) => const Divider(),
                           itemBuilder: (context, index) {
                             final admin = adminList[index];
                             // Watch the AsyncValue instead of the future directly
-                            final isCurrentUserAsync = ref.watch(isCurrentUserProvider(admin.email));
-                            
+                            final isCurrentUserAsync =
+                                ref.watch(isCurrentUserProvider(admin.email));
+
                             return ListTile(
                               leading: CircleAvatar(
-                                backgroundColor: theme.colorScheme.primaryContainer,
+                                backgroundColor:
+                                    theme.colorScheme.primaryContainer,
                                 child: Icon(
                                   Icons.admin_panel_settings,
                                   color: theme.colorScheme.onPrimaryContainer,
@@ -211,20 +214,25 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
                                     data: (isCurrentUser) {
                                       if (isCurrentUser) {
                                         return Padding(
-                                          padding: const EdgeInsets.only(left: 8.0),
+                                          padding:
+                                              const EdgeInsets.only(left: 8.0),
                                           child: Container(
                                             padding: const EdgeInsets.symmetric(
                                               horizontal: 8,
                                               vertical: 2,
                                             ),
                                             decoration: BoxDecoration(
-                                              color: theme.colorScheme.secondaryContainer,
-                                              borderRadius: BorderRadius.circular(12),
+                                              color: theme.colorScheme
+                                                  .secondaryContainer,
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
                                             ),
                                             child: Text(
                                               'Tú',
-                                              style: theme.textTheme.bodySmall?.copyWith(
-                                                color: theme.colorScheme.onSecondaryContainer,
+                                              style: theme.textTheme.bodySmall
+                                                  ?.copyWith(
+                                                color: theme.colorScheme
+                                                    .onSecondaryContainer,
                                               ),
                                             ),
                                           ),
@@ -238,7 +246,8 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
                                 ],
                               ),
                               subtitle: admin.createdAt != null
-                                  ? Text('Administrador desde: ${_formatDate(admin.createdAt!)}')
+                                  ? Text(
+                                      'Administrador desde: ${_formatDate(admin.createdAt!)}')
                                   : const Text('Fecha no disponible'),
                               trailing: isCurrentUserAsync.when(
                                 data: (isCurrentUser) => isCurrentUser
@@ -249,14 +258,17 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
                                           color: Colors.red,
                                         ),
                                         tooltip: 'Eliminar administrador',
-                                        onPressed: () => _confirmDeleteAdmin(admin),
+                                        onPressed: () =>
+                                            _confirmDeleteAdmin(admin),
                                       ),
                                 loading: () => const SizedBox(
                                   width: 24,
                                   height: 24,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2),
                                 ),
-                                error: (_, __) => const Icon(Icons.error, color: Colors.red),
+                                error: (_, __) =>
+                                    const Icon(Icons.error, color: Colors.red),
                               ),
                             );
                           },
@@ -287,7 +299,8 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
                             ),
                             const SizedBox(height: 16),
                             ElevatedButton.icon(
-                              onPressed: () => ref.refresh(adminsStreamProvider),
+                              onPressed: () =>
+                                  ref.refresh(adminsStreamProvider),
                               icon: const Icon(Icons.refresh),
                               label: const Text('Reintentar'),
                             ),
@@ -309,18 +322,18 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    
+
     setState(() {
       _isSubmitting = true;
       _errorMessage = null;
     });
-    
+
     try {
-      final adminService = ref.read(adminManagementServiceProvider);
+      final adminService = ref.read(unifiedAdminServiceProvider);
       final email = _emailController.text.trim();
-      
+
       final result = await adminService.addAdmin(email);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -329,14 +342,14 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
-        
+
         _emailController.clear();
       }
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -360,7 +373,8 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Eliminar Administrador'),
-        content: Text('¿Estás seguro de que deseas eliminar a ${admin.email} como administrador? Esta acción no se puede deshacer.'),
+        content: Text(
+            '¿Estás seguro de que deseas eliminar a ${admin.email} como administrador? Esta acción no se puede deshacer.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -383,9 +397,9 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
 
   void _removeAdmin(AdminUser admin) async {
     try {
-      final adminService = ref.read(adminManagementServiceProvider);
+      final adminService = ref.read(unifiedAdminServiceProvider);
       final result = await adminService.removeAdmin(admin.email);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -423,7 +437,8 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
               Text('• Ver la lista de administradores actuales'),
               Text('• Eliminar administradores (excepto a ti mismo)'),
               SizedBox(height: 16),
-              Text('Los administradores tienen acceso completo al panel administrativo y pueden gestionar todos los aspectos del restaurante.'),
+              Text(
+                  'Los administradores tienen acceso completo al panel administrativo y pueden gestionar todos los aspectos del restaurante.'),
             ],
           ),
         ),
@@ -447,4 +462,3 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
     super.dispose();
   }
 }
-

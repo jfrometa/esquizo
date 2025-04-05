@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/app_config/app_config_services.dart';
 import '../constants/app_sizes.dart';
 
-
 /// Widget class to manage asynchronous app initialization
 class AppStartupWidget extends ConsumerWidget {
   const AppStartupWidget({super.key, required this.onLoaded});
@@ -50,7 +49,9 @@ class AppStartupErrorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(forceMaterialTransparency: true,),
+      appBar: AppBar(
+        forceMaterialTransparency: true,
+      ),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,

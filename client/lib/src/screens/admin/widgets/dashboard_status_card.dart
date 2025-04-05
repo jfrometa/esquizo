@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/restaurant/restaurant_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/order/unified_order_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/create_order.dart';
 
 class DashboardStatsCard extends StatelessWidget {
@@ -23,7 +23,7 @@ class DashboardStatsCard extends StatelessWidget {
     this.isLoading = false,
     this.hasError = false,
   });
-  
+
   // Constructor for loading state
   const DashboardStatsCard.loading({
     Key? key,
@@ -31,13 +31,13 @@ class DashboardStatsCard extends StatelessWidget {
     required IconData icon,
     required Color color,
   }) : this(
-    key: key,
-    title: title,
-    icon: icon,
-    color: color,
-    isLoading: true,
-  );
-  
+          key: key,
+          title: title,
+          icon: icon,
+          color: color,
+          isLoading: true,
+        );
+
   // Constructor for error state
   const DashboardStatsCard.error({
     Key? key,
@@ -45,17 +45,17 @@ class DashboardStatsCard extends StatelessWidget {
     required IconData icon,
     required Color color,
   }) : this(
-    key: key,
-    title: title,
-    icon: icon,
-    color: color,
-    hasError: true,
-  );
+          key: key,
+          title: title,
+          icon: icon,
+          color: color,
+          hasError: true,
+        );
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Card(
       elevation: 0,
       color: theme.colorScheme.surface,
@@ -97,9 +97,9 @@ class DashboardStatsCard extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Main stat
               if (isLoading) ...[
                 const LinearProgressIndicator(),
@@ -137,7 +137,6 @@ class DashboardStatsCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                
                 if (secondaryStat != null) ...[
                   const SizedBox(height: 4),
                   Text(
@@ -148,9 +147,9 @@ class DashboardStatsCard extends StatelessWidget {
                   ),
                 ],
               ],
-              
+
               const Spacer(),
-              
+
               // View details link
               if (onTap != null && !isLoading && !hasError)
                 Row(
@@ -183,7 +182,7 @@ class DashboardStats {
   final SalesStats salesStats;
   final TableStats tableStats;
   final ProductStats productStats;
-  
+
   DashboardStats({
     required this.orderStats,
     required this.salesStats,
@@ -191,4 +190,3 @@ class DashboardStats {
     required this.productStats,
   });
 }
-

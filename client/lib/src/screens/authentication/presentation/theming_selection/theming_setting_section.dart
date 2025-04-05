@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/firebase_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/user_preference/user_preference_provider.dart';
 
 class ThemeSettingsSection extends ConsumerWidget {
@@ -30,12 +30,12 @@ class ThemeSettingsSection extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Theme mode selector
             _buildThemeModeSelector(context, ref, currentThemeMode),
-            
+
             const SizedBox(height: 24),
-            
+
             // Theme mode details
             _buildThemeModeDetails(context, currentThemeMode),
           ],
@@ -96,30 +96,33 @@ class ThemeSettingsSection extends ConsumerWidget {
 
   Widget _buildThemeModeDetails(BuildContext context, ThemeMode themeMode) {
     final theme = Theme.of(context);
-    
+
     IconData icon;
     String title;
     String description;
-    
+
     switch (themeMode) {
       case ThemeMode.light:
         icon = Icons.light_mode;
         title = 'Tema Claro';
-        description = 'Utiliza el tema claro independientemente de la configuración del sistema.';
+        description =
+            'Utiliza el tema claro independientemente de la configuración del sistema.';
         break;
       case ThemeMode.dark:
         icon = Icons.dark_mode;
         title = 'Tema Oscuro';
-        description = 'Utiliza el tema oscuro independientemente de la configuración del sistema.';
+        description =
+            'Utiliza el tema oscuro independientemente de la configuración del sistema.';
         break;
       case ThemeMode.system:
       default:
         icon = Icons.smartphone;
         title = 'Tema del Sistema';
-        description = 'Cambia entre tema claro y oscuro automáticamente según la configuración de tu dispositivo.';
+        description =
+            'Cambia entre tema claro y oscuro automáticamente según la configuración de tu dispositivo.';
         break;
     }
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -161,7 +164,7 @@ class ThemeSettingsSection extends ConsumerWidget {
   void _updateThemeMode(WidgetRef ref, ThemeMode themeMode) async {
     final user = ref.read(firebaseAuthProvider).currentUser;
     if (user == null) return;
-    
+
     try {
       final themeNotifier = ref.read(themeProvider.notifier);
       await themeNotifier.setThemeMode(themeMode);

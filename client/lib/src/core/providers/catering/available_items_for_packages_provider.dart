@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart'; 
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart'; // Update this import path to your merged models
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart'; // Update this import path to your merged models
 
 part 'available_items_for_packages_provider.g.dart';
 
@@ -13,7 +14,7 @@ class AvailableItemsRepository extends _$AvailableItemsRepository {
   Future<List<CateringDish>> build() async {
     // Fetch all available dishes from Firestore
     final snapshot = await _firestore.collection('cateringDishes').get();
-    
+
     return snapshot.docs.map((doc) {
       final data = doc.data();
       data['id'] = doc.id; // Add the document ID to the data
@@ -27,7 +28,7 @@ class AvailableItemsRepository extends _$AvailableItemsRepository {
         .collection('cateringDishes')
         .where('category', isEqualTo: category)
         .get();
-    
+
     return snapshot.docs.map((doc) {
       final data = doc.data();
       data['id'] = doc.id;
@@ -37,51 +38,52 @@ class AvailableItemsRepository extends _$AvailableItemsRepository {
 
   /// Get dishes for a specific package
   Future<List<CateringDish>> getDishesForPackage(String packageId) async {
-    final packageDoc = await _firestore.collection('cateringPackages').doc(packageId).get();
-    
+    final packageDoc =
+        await _firestore.collection('cateringPackages').doc(packageId).get();
+
     if (!packageDoc.exists) {
       return [];
     }
-    
+
     final packageData = packageDoc.data()!;
     final dishIds = List<String>.from(packageData['dishIds'] ?? []);
-    
+
     if (dishIds.isEmpty) {
       return [];
     }
-    
+
     // Chunks of 10 for Firestore 'in' query limitation
     List<CateringDish> result = [];
-    
+
     for (int i = 0; i < dishIds.length; i += 10) {
       final chunkEnd = (i + 10 < dishIds.length) ? i + 10 : dishIds.length;
       final chunk = dishIds.sublist(i, chunkEnd);
-      
+
       final snapshot = await _firestore
           .collection('cateringDishes')
           .where(FieldPath.documentId, whereIn: chunk)
           .get();
-      
+
       result.addAll(snapshot.docs.map((doc) {
         final data = doc.data();
         data['id'] = doc.id;
         return CateringDish.fromJson(data);
       }));
     }
-    
+
     return result;
   }
 
   /// Search for dishes by name
   Future<List<CateringDish>> searchDishes(String query) async {
-    // This is a simplified search - consider implementing more advanced 
+    // This is a simplified search - consider implementing more advanced
     // search with Algolia or Cloud Functions if needed
     final snapshot = await _firestore
         .collection('cateringDishes')
         .where('title', isGreaterThanOrEqualTo: query)
         .where('title', isLessThanOrEqualTo: '$query\uf8ff')
         .get();
-    
+
     return snapshot.docs.map((doc) {
       final data = doc.data();
       data['id'] = doc.id;
@@ -90,27 +92,28 @@ class AvailableItemsRepository extends _$AvailableItemsRepository {
   }
 
   /// Filter dishes by dietary restrictions
-  Future<List<CateringDish>> getDishesByDietaryRestrictions(List<String> restrictions) async {
+  Future<List<CateringDish>> getDishesByDietaryRestrictions(
+      List<String> restrictions) async {
     // This implementation assumes dishes have a 'dietaryRestrictions' array field
     // that contains strings like 'vegetarian', 'vegan', 'gluten-free', etc.
-    
+
     // For each restriction, we need to perform a separate query and then
     // combine the results, since Firestore doesn't support OR queries on array-contains
     Set<CateringDish> result = {};
-    
+
     for (final restriction in restrictions) {
       final snapshot = await _firestore
           .collection('cateringDishes')
           .where('dietaryRestrictions', arrayContains: restriction)
           .get();
-      
+
       result.addAll(snapshot.docs.map((doc) {
         final data = doc.data();
         data['id'] = doc.id;
         return CateringDish.fromJson(data);
       }));
     }
-    
+
     return result.toList();
   }
 }
@@ -200,15 +203,25 @@ Future<List<CateringDish>> popularItems(PopularItemsRef ref) async {
 
 /// Provider for getting all catering packages
 @riverpod
-Stream<List<CateringOrder>> cateringPackages(CateringPackagesRef ref) {
+Stream<List<CateringPackage>> cateringPackages(CateringPackagesRef ref) {
   return FirebaseFirestore.instance
       .collection('cateringPackages')
       .snapshots()
       .map((snapshot) => snapshot.docs.map((doc) {
             final data = doc.data();
             data['id'] = doc.id;
+
+            // Add default values for missing icon fields
+            if (!data.containsKey('iconCodePoint')) {
+              data['iconCodePoint'] =
+                  0xe491; // Default icon code (e.g., restaurant icon)
+            }
+            if (!data.containsKey('iconFontFamily')) {
+              data['iconFontFamily'] = 'MaterialIcons';
+            }
+
             // Convert the map to a CateringOrder object
-            return CateringOrder.fromJson(data);
+            return CateringPackage.fromJson(data);
           }).toList());
 }
 
@@ -222,18 +235,17 @@ Future<Map<String, dynamic>> packageWithItems(
       .collection('cateringPackages')
       .doc(packageId)
       .get();
-  
+
   if (!packageDoc.exists) {
     throw Exception('Package not found');
   }
-  
+
   final packageData = packageDoc.data()!;
   packageData['id'] = packageDoc.id;
-  
-  final dishes = await ref.watch(
-    availableItemsForPackageProvider(packageId).future
-  );
-  
+
+  final dishes =
+      await ref.watch(availableItemsForPackageProvider(packageId).future);
+
   return {
     'package': packageData,
     'dishes': dishes,

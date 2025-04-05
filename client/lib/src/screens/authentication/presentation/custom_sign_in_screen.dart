@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_management_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/auth_services/firebase_auth_repository.dart'; 
+
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
 import 'package:go_router/go_router.dart';
- import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
 class CustomSignInScreen extends ConsumerStatefulWidget {
   const CustomSignInScreen({super.key});
@@ -32,19 +32,18 @@ class _CustomSignInScreenState extends ConsumerState<CustomSignInScreen> {
         actions: [
           AuthStateChangeAction((context, state) async {
             // Handle sign out case to reset admin status
-            if (state.toString().contains('SignedOut') || 
+            if (state.toString().contains('SignedOut') ||
                 FirebaseAuth.instance.currentUser == null) {
-                          
               // Force refresh the admin provider
               ref.invalidate(isAdminProvider);
-              
+
               // Navigate to home with animation
               if (context.mounted) {
                 context.goNamed(AppRoute.home.name);
               }
               return;
             }
-            
+
             final user = switch (state) {
               SignedIn(user: final user) => user,
               CredentialLinked(user: final user) => user,
@@ -56,11 +55,11 @@ class _CustomSignInScreenState extends ConsumerState<CustomSignInScreen> {
               // Force refresh auth state to update providers
               final authRepo = ref.read(authRepositoryProvider);
               authRepo.forceRefreshAuthState();
-              
+
               // Check admin status and refresh the provider
               await ref.refresh(isAdminProvider.future);
               final isAdmin = await ref.read(isAdminProvider.future);
-              
+
               if (isAdmin) {
                 // Navigate to admin panel and rebuild the navigation
                 await Future.delayed(const Duration(milliseconds: 300));
@@ -75,9 +74,11 @@ class _CustomSignInScreenState extends ConsumerState<CustomSignInScreen> {
               }
 
               // Handle non-admin user navigation
-              final RouteMatch lastMatch = GoRouter.of(context).routerDelegate.currentConfiguration.last;
-              final RouteMatchList matchList = lastMatch is ImperativeRouteMatch ? 
-                lastMatch.matches : GoRouter.of(context).routerDelegate.currentConfiguration;
+              final RouteMatch lastMatch =
+                  GoRouter.of(context).routerDelegate.currentConfiguration.last;
+              final RouteMatchList matchList = lastMatch is ImperativeRouteMatch
+                  ? lastMatch.matches
+                  : GoRouter.of(context).routerDelegate.currentConfiguration;
               final String location = matchList.uri.toString();
 
               switch (user) {
