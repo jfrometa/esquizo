@@ -11,11 +11,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/app.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/api_services/auth_services/auth_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_analitics.dart';
 import 'package:starter_architecture_flutter_firebase/src/localization/string_hardcoded.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/user_preference/user_preference_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/api_services/user_preference/user_preference_provider.dart';
 
 // Using dynamic type to handle different device info types across platforms
 late final dynamic deviceInfo;

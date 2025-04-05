@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_management_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/api_services/admin_panel/admin_management_service.dart';
 
 
 class NavigationDestinationItem {

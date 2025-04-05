@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/api_services/cart/cart_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart'; 
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/manual_quote_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/providers/order_storage_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/api_services/catering/catering_order_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/api_services/catering/manual_quote_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/api_services/providers/order_storage_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:url_launcher/url_launcher.dart';

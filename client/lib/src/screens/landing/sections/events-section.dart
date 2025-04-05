@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/api_services/catalog/catalog_service.dart';
 
 class EventsSection extends ConsumerWidget {
   final bool isMobile;

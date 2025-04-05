@@ -1,8 +1,7 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/api_services/cart/cart_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_analitics.dart';
 
 class DishCard extends ConsumerStatefulWidget {

@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/resource_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/api_services/resource/resource_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/table_management/table_management_scren_new.dart';
 
 // Table status enum

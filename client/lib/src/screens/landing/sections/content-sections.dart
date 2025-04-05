@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/api_services/catalog/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/catering-section.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/events-section.dart';

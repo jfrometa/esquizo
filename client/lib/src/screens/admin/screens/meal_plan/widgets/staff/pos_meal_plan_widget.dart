@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/meal_plan_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/api_services/subscriptions/meal_plan_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/plans/plans.dart';
  
 // Provider for customer search

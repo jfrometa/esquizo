@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/services/auth_service.dart';
+import '../../../../core/api_services/auth_services/auth_service.dart';
 
 class UserForm extends ConsumerStatefulWidget {
   final AppUser? user;

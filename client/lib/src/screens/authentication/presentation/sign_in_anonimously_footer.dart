@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/firebase_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/api_services/firebase/firebase_providers.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 

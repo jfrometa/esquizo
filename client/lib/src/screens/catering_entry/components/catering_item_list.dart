@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
  
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/manual_quote_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/api_services/catering/catering_order_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/api_services/catering/manual_quote_provider.dart';
 
 class ItemsList extends ConsumerWidget {
   final List<CateringDish> items;

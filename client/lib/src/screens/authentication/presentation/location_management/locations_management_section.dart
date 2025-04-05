@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/user_preference/user_preference_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/api_services/user_preference/user_preference_provider.dart';
 
 class LocationsSection extends ConsumerStatefulWidget {
   final String userId;

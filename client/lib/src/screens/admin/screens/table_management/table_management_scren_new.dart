@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/table_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/restaurant/table_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/restaurant/table_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/api_services/restaurant/table_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/florr_plan_editor.dart';
