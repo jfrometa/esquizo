@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/cards/dish_card_small.dart';
 
 // SEARCH RESULTS VIEW

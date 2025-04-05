@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_packages_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/featured_dishes_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/providers/catalog/catalog_provider.dart';
-import '../../../../core/services/catalog_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_service.dart';
+
 import 'package:uuid/uuid.dart';
 
 class ProductForm extends ConsumerStatefulWidget {
@@ -120,67 +120,69 @@ class _ProductFormState extends ConsumerState<ProductForm> {
               const SizedBox(height: 16),
 
               // Category dropdown
-             categoriesAsync.when(
-  data: (categories) {
-    if (categories.isEmpty) {
-      return const Text('No categories available. Please create a category first.');
-    }
+              categoriesAsync.when(
+                data: (categories) {
+                  if (categories.isEmpty) {
+                    return const Text(
+                        'No categories available. Please create a category first.');
+                  }
 
-    // Check if the selected category exists in the list
-    final selectedCategoryExists = categories
-        .any((category) => category.id == _selectedCategoryId);
-    
-    // Reset selected category if it doesn't exist or if none is selected
-    if (!selectedCategoryExists && categories.isNotEmpty) {
-      // Use Future.microtask to avoid setState during build
-      Future.microtask(() {
-        setState(() {
-          _selectedCategoryId = categories.first.id;
-        });
-      });
-    }
+                  // Check if the selected category exists in the list
+                  final selectedCategoryExists = categories
+                      .any((category) => category.id == _selectedCategoryId);
 
-    // Include ALL categories in dropdown (including inactive ones) 
-    // when the category is already selected
-    final dropdownItems = categories
-        .where((category) => 
-          category.isActive || category.id == _selectedCategoryId)
-        .map((category) => DropdownMenuItem(
-              value: category.id,
-              child: Text(category.name + 
-                  (category.isActive ? '' : ' (Inactive)')),
-            ))
-        .toList();
-    
-    // Only set value if it exists in items
-    final dropdownValue = dropdownItems
-        .any((item) => item.value == _selectedCategoryId)
-        ? _selectedCategoryId
-        : null;
+                  // Reset selected category if it doesn't exist or if none is selected
+                  if (!selectedCategoryExists && categories.isNotEmpty) {
+                    // Use Future.microtask to avoid setState during build
+                    Future.microtask(() {
+                      setState(() {
+                        _selectedCategoryId = categories.first.id;
+                      });
+                    });
+                  }
 
-    return DropdownButtonFormField<String>(
-      value: dropdownValue,
-      decoration: const InputDecoration(
-        labelText: 'Category',
-        border: OutlineInputBorder(),
-      ),
-      items: dropdownItems,
-      onChanged: (value) {
-        setState(() {
-          _selectedCategoryId = value!;
-        });
-      },
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please select a category';
-        }
-        return null;
-      },
-    );
-  },
-  loading: () => const Center(child: CircularProgressIndicator()),
-  error: (_, __) => const Text('Error loading categories'),
-),
+                  // Include ALL categories in dropdown (including inactive ones)
+                  // when the category is already selected
+                  final dropdownItems = categories
+                      .where((category) =>
+                          category.isActive ||
+                          category.id == _selectedCategoryId)
+                      .map((category) => DropdownMenuItem(
+                            value: category.id,
+                            child: Text(category.name +
+                                (category.isActive ? '' : ' (Inactive)')),
+                          ))
+                      .toList();
+
+                  // Only set value if it exists in items
+                  final dropdownValue = dropdownItems
+                          .any((item) => item.value == _selectedCategoryId)
+                      ? _selectedCategoryId
+                      : null;
+
+                  return DropdownButtonFormField<String>(
+                    value: dropdownValue,
+                    decoration: const InputDecoration(
+                      labelText: 'Category',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: dropdownItems,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedCategoryId = value!;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please select a category';
+                      }
+                      return null;
+                    },
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => const Text('Error loading categories'),
+              ),
               const SizedBox(height: 16),
 
               // Price field
@@ -192,7 +194,8 @@ class _ProductFormState extends ConsumerState<ProductForm> {
                   border: OutlineInputBorder(),
                   prefixText: '\$ ',
                 ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],

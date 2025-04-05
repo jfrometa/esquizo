@@ -1,14 +1,14 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';
-
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_service.dart';
+ 
 part 'featured_dishes_provider.g.dart';
 
 @riverpod
 Future<List<CatalogItem>> featuredDishes(FeaturedDishesRef ref) async {
   final catalogType = 'menu';
   final catalogService = ref.watch(catalogServiceProvider(catalogType));
-  final itemsStream = catalogService.getItems();
+  final itemsStream = catalogService.getItems(catalogType);
 
   // Get all menu items
   final items = await itemsStream.first;
