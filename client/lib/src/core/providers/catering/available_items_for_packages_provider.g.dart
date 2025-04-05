@@ -685,14 +685,14 @@ final popularItemsProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef PopularItemsRef = AutoDisposeFutureProviderRef<List<CateringDish>>;
-String _$cateringPackagesHash() => r'4fa17f888fd246709594f4ca381dc89cf12602ef';
+String _$cateringPackagesHash() => r'1cb207aaaae14a4a7965f6d3097b6522cece919b';
 
 /// Provider for getting all catering packages
 ///
 /// Copied from [cateringPackages].
 @ProviderFor(cateringPackages)
 final cateringPackagesProvider =
-    AutoDisposeStreamProvider<List<CateringOrder>>.internal(
+    AutoDisposeStreamProvider<List<CateringPackage>>.internal(
   cateringPackages,
   name: r'cateringPackagesProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -704,7 +704,8 @@ final cateringPackagesProvider =
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef CateringPackagesRef = AutoDisposeStreamProviderRef<List<CateringOrder>>;
+typedef CateringPackagesRef
+    = AutoDisposeStreamProviderRef<List<CateringPackage>>;
 String _$packageWithItemsHash() => r'f5caaf477829482867c4d9ebd537ac01ee325ca1';
 
 /// Provider for getting the details of a specific package with its dishes

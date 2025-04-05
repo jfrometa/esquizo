@@ -51,7 +51,8 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                     packages.whereType<CateringPackage>().toList();
 
                 // Apply filters
-                var filteredPackages = List<CateringPackage>.from(packages);
+                var filteredPackages =
+                    List<CateringPackage>.from(validPackages);
                 if (_selectedCategoryId != null) {
                   filteredPackages = filteredPackages
                       .where((package) =>
