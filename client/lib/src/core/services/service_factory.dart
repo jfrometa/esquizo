@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/table_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/order/unified_order_service.dart';
 import 'resource_service.dart';
 import 'catalog_service.dart';

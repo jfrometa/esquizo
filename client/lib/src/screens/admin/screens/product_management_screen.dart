@@ -1,32 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/category_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/product_form.dart';
-import '../../../core/providers/catalog/catalog_provider.dart';
-import '../../../core/services/catalog_service.dart';
-import '../widgets/responsive_layout.dart';
 
+import '../widgets/responsive_layout.dart';
 
 class ProductManagementScreen extends ConsumerStatefulWidget {
   const ProductManagementScreen({super.key});
 
   @override
-  ConsumerState<ProductManagementScreen> createState() => _ProductManagementScreenState();
+  ConsumerState<ProductManagementScreen> createState() =>
+      _ProductManagementScreenState();
 }
 
-class _ProductManagementScreenState extends ConsumerState<ProductManagementScreen> with SingleTickerProviderStateMixin {
+class _ProductManagementScreenState
+    extends ConsumerState<ProductManagementScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _selectedCategoryId = '';
-  
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _searchController.addListener(_onSearchChanged);
   }
-  
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -34,7 +36,7 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
     _searchController.dispose();
     super.dispose();
   }
-  
+
   void _onSearchChanged() {
     setState(() {
       _searchQuery = _searchController.text.toLowerCase();
@@ -44,7 +46,7 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
   @override
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveLayout.isDesktop(context);
-    
+
     return Scaffold(
       body: Column(
         children: [
@@ -62,7 +64,8 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
                     ],
                     indicatorSize: TabBarIndicatorSize.label,
                     labelColor: Theme.of(context).colorScheme.primary,
-                    unselectedLabelColor: Theme.of(context).colorScheme.onSurface,
+                    unselectedLabelColor:
+                        Theme.of(context).colorScheme.onSurface,
                     isScrollable: true,
                   ),
                 ),
@@ -102,7 +105,7 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
                 ),
               ),
             ),
-          
+
           // Tab content
           Expanded(
             child: TabBarView(
@@ -128,12 +131,12 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
       ),
     );
   }
-  
+
   Widget _buildProductsTab() {
     final catalogType = ref.watch(currentCatalogTypeProvider);
     final productsAsync = ref.watch(catalogItemsProvider(catalogType));
     final categoriesAsync = ref.watch(catalogCategoriesProvider(catalogType));
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -181,35 +184,35 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, stackTrace) => Center(child: Text('Error: $error')),
         ),
-        
+
         // Products list
         Expanded(
           child: productsAsync.when(
             data: (products) {
               // Filter products based on search and category
               final filteredProducts = products.where((product) {
-                final matchesSearch = _searchQuery.isEmpty || 
-                  product.name.toLowerCase().contains(_searchQuery) ||
-                  product.description.toLowerCase().contains(_searchQuery);
-                  
-                final matchesCategory = _selectedCategoryId.isEmpty || 
-                  product.categoryId == _selectedCategoryId;
-                  
+                final matchesSearch = _searchQuery.isEmpty ||
+                    product.name.toLowerCase().contains(_searchQuery) ||
+                    product.description.toLowerCase().contains(_searchQuery);
+
+                final matchesCategory = _selectedCategoryId.isEmpty ||
+                    product.categoryId == _selectedCategoryId;
+
                 return matchesSearch && matchesCategory;
               }).toList();
-              
+
               if (filteredProducts.isEmpty) {
                 return const Center(
                   child: Text('No products found'),
                 );
               }
-              
+
               return Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: ResponsiveGridView(
-                  children: filteredProducts.map((product) => 
-                    _buildProductCard(product)
-                  ).toList(),
+                  children: filteredProducts
+                      .map((product) => _buildProductCard(product))
+                      .toList(),
                 ),
               );
             },
@@ -220,31 +223,31 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
       ],
     );
   }
-  
+
   Widget _buildCategoriesTab() {
     final catalogType = ref.watch(currentCatalogTypeProvider);
     final categoriesAsync = ref.watch(catalogCategoriesProvider(catalogType));
-    
+
     return categoriesAsync.when(
       data: (categories) {
         // Filter categories based on search
         final filteredCategories = categories.where((category) {
-          return _searchQuery.isEmpty || 
-            category.name.toLowerCase().contains(_searchQuery);
+          return _searchQuery.isEmpty ||
+              category.name.toLowerCase().contains(_searchQuery);
         }).toList();
-        
+
         if (filteredCategories.isEmpty) {
           return const Center(
             child: Text('No categories found'),
           );
         }
-        
+
         return Padding(
           padding: const EdgeInsets.all(16.0),
           child: ResponsiveGridView(
-            children: filteredCategories.map((category) => 
-              _buildCategoryCard(category)
-            ).toList(),
+            children: filteredCategories
+                .map((category) => _buildCategoryCard(category))
+                .toList(),
           ),
         );
       },
@@ -252,10 +255,10 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
       error: (error, stackTrace) => Center(child: Text('Error: $error')),
     );
   }
-  
+
   Widget _buildProductCard(CatalogItem product) {
     final theme = Theme.of(context);
-    
+
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -287,7 +290,7 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
                       ),
                     ),
             ),
-            
+
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: Column(
@@ -309,14 +312,15 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
                         height: 10,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: product.isAvailable ? Colors.green : Colors.red,
+                          color:
+                              product.isAvailable ? Colors.green : Colors.red,
                         ),
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 4),
-                  
+
                   // Product price
                   Text(
                     '\$${product.price.toStringAsFixed(2)}',
@@ -325,9 +329,9 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Product description
                   Text(
                     product.description,
@@ -335,9 +339,9 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Action buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -350,11 +354,15 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
                       ),
                       IconButton(
                         icon: Icon(
-                          product.isAvailable ? Icons.visibility_off : Icons.visibility,
+                          product.isAvailable
+                              ? Icons.visibility_off
+                              : Icons.visibility,
                           size: 20,
                         ),
                         onPressed: () => _toggleProductAvailability(product),
-                        tooltip: product.isAvailable ? 'Mark as unavailable' : 'Mark as available',
+                        tooltip: product.isAvailable
+                            ? 'Mark as unavailable'
+                            : 'Mark as available',
                         visualDensity: VisualDensity.compact,
                       ),
                       IconButton(
@@ -373,44 +381,44 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
       ),
     );
   }
-  
+
   Widget _buildCategoryCard(CatalogCategory category) {
-  final theme = Theme.of(context);
-  
-  return Card(
-    // Remove any fixed height constraints here
-    child: InkWell(
-      onTap: () => _showEditCategoryDialog(category),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        // Add mainAxisSize.min to minimize height while still showing all content
-        child: Column(
-          mainAxisSize: MainAxisSize.min, // Add this line
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Category image with fixed height is fine
-            if (category.imageUrl.isNotEmpty)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  category.imageUrl,
-                  height: 80,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+    final theme = Theme.of(context);
+
+    return Card(
+      // Remove any fixed height constraints here
+      child: InkWell(
+        onTap: () => _showEditCategoryDialog(category),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          // Add mainAxisSize.min to minimize height while still showing all content
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // Add this line
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Category image with fixed height is fine
+              if (category.imageUrl.isNotEmpty)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    category.imageUrl,
                     height: 80,
                     width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      Icons.category,
-                      color: theme.colorScheme.onPrimaryContainer,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      height: 80,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.category,
+                        color: theme.colorScheme.onPrimaryContainer,
+                      ),
                     ),
                   ),
-                ),
-              )
+                )
               else
                 Container(
                   height: 80,
@@ -424,9 +432,9 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
                     color: theme.colorScheme.onPrimaryContainer,
                   ),
                 ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Category name and status
               Row(
                 children: [
@@ -448,9 +456,9 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Action buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -463,7 +471,9 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
                   ),
                   IconButton(
                     icon: Icon(
-                      category.isActive ? Icons.visibility_off : Icons.visibility,
+                      category.isActive
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                       size: 20,
                     ),
                     onPressed: () => _toggleCategoryActive(category),
@@ -484,7 +494,7 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
       ),
     );
   }
-  
+
   void _showAddProductDialog() {
     showDialog(
       context: context,
@@ -502,7 +512,7 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
       ),
     );
   }
-  
+
   void _showEditProductDialog(CatalogItem product) {
     showDialog(
       context: context,
@@ -521,7 +531,7 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
       ),
     );
   }
-  
+
   void _showAddCategoryDialog() {
     showDialog(
       context: context,
@@ -539,7 +549,7 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
       ),
     );
   }
-  
+
   void _showEditCategoryDialog(CatalogCategory category) {
     showDialog(
       context: context,
@@ -558,7 +568,7 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
       ),
     );
   }
-  
+
   void _confirmDeleteProduct(CatalogItem product) {
     showDialog(
       context: context,
@@ -584,14 +594,13 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
       ),
     );
   }
-  
+
   void _confirmDeleteCategory(CatalogCategory category) {
     // Check if there are products in this category first
     final catalogType = ref.read(currentCatalogTypeProvider);
     final productsAsync = ref.read(catalogItemsByCategoryProvider(
-      (catalogType: catalogType, categoryId: category.id)
-    ).future);
-    
+        (catalogType: catalogType, categoryId: category.id)).future);
+
     productsAsync.then((products) {
       if (products.isNotEmpty) {
         showDialog(
@@ -611,7 +620,7 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
         );
         return;
       }
-      
+
       // If there are no products, confirm deletion
       showDialog(
         context: context,
@@ -638,15 +647,15 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
       );
     });
   }
-  
+
   // CRUD operations
   Future<void> _addProduct(CatalogItem product) async {
     try {
       final catalogType = ref.read(currentCatalogTypeProvider);
       final catalogService = ref.read(catalogServiceProvider(catalogType));
-      
-      await catalogService.addItem(product);
-      
+
+      await catalogService.addItem(catalogType, product);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Product added successfully')),
@@ -660,14 +669,14 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
       }
     }
   }
-  
+
   Future<void> _updateProduct(CatalogItem product) async {
     try {
       final catalogType = ref.read(currentCatalogTypeProvider);
       final catalogService = ref.read(catalogServiceProvider(catalogType));
-      
-      await catalogService.updateItem(product);
-      
+
+      await catalogService.updateItem(catalogType, product);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Product updated successfully')),
@@ -681,14 +690,14 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
       }
     }
   }
-  
+
   Future<void> _deleteProduct(CatalogItem product) async {
     try {
       final catalogType = ref.read(currentCatalogTypeProvider);
       final catalogService = ref.read(catalogServiceProvider(catalogType));
-      
-      await catalogService.deleteItem(product.id);
-      
+
+      await catalogService.deleteItem(catalogType, product.id);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Product deleted successfully')),
@@ -702,12 +711,12 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
       }
     }
   }
-  
+
   Future<void> _toggleProductAvailability(CatalogItem product) async {
     try {
       final catalogType = ref.read(currentCatalogTypeProvider);
       final catalogService = ref.read(catalogServiceProvider(catalogType));
-      
+
       final updatedProduct = CatalogItem(
         id: product.id,
         name: product.name,
@@ -718,16 +727,15 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
         isAvailable: !product.isAvailable,
         metadata: product.metadata,
       );
-      
-      await catalogService.updateItem(updatedProduct);
-      
+
+      await catalogService.updateItem(catalogType, updatedProduct);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(
-            product.isAvailable 
-              ? 'Product marked as unavailable' 
-              : 'Product marked as available'
-          )),
+          SnackBar(
+              content: Text(product.isAvailable
+                  ? 'Product marked as unavailable'
+                  : 'Product marked as available')),
         );
       }
     } catch (e) {
@@ -738,14 +746,14 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
       }
     }
   }
-  
+
   Future<void> _addCategory(CatalogCategory category) async {
     try {
       final catalogType = ref.read(currentCatalogTypeProvider);
       final catalogService = ref.read(catalogServiceProvider(catalogType));
-      
-      await catalogService.addCategory(category);
-      
+
+      await catalogService.createCategory(catalogType, category);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Category added successfully')),
@@ -759,14 +767,14 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
       }
     }
   }
-  
+
   Future<void> _updateCategory(CatalogCategory category) async {
     try {
       final catalogType = ref.read(currentCatalogTypeProvider);
       final catalogService = ref.read(catalogServiceProvider(catalogType));
-      
-      await catalogService.updateCategory(category);
-      
+
+      await catalogService.updateCategory(catalogType, category);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Category updated successfully')),
@@ -780,14 +788,14 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
       }
     }
   }
-  
+
   Future<void> _deleteCategory(CatalogCategory category) async {
     try {
       final catalogType = ref.read(currentCatalogTypeProvider);
       final catalogService = ref.read(catalogServiceProvider(catalogType));
-      
-      await catalogService.deleteCategory(category.id);
-      
+
+      await catalogService.deleteCategory(catalogType, category.id);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Category deleted successfully')),
@@ -801,12 +809,12 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
       }
     }
   }
-  
+
   Future<void> _toggleCategoryActive(CatalogCategory category) async {
     try {
       final catalogType = ref.read(currentCatalogTypeProvider);
       final catalogService = ref.read(catalogServiceProvider(catalogType));
-      
+
       final updatedCategory = CatalogCategory(
         id: category.id,
         name: category.name,
@@ -814,16 +822,15 @@ class _ProductManagementScreenState extends ConsumerState<ProductManagementScree
         sortOrder: category.sortOrder,
         isActive: !category.isActive,
       );
-      
-      await catalogService.updateCategory(updatedCategory);
-      
+
+      await catalogService.updateCategory(catalogType, updatedCategory);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(
-            category.isActive 
-              ? 'Category deactivated' 
-              : 'Category activated'
-          )),
+          SnackBar(
+              content: Text(category.isActive
+                  ? 'Category deactivated'
+                  : 'Category activated')),
         );
       }
     } catch (e) {

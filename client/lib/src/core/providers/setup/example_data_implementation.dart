@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart' as CloudFireStore;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_service.dart';
  import 'package:starter_architecture_flutter_firebase/src/core/services/business_config_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/resource_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';

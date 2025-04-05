@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/services/catalog_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_service.dart';
+
 import 'package:uuid/uuid.dart';
 
 class CategoryForm extends ConsumerStatefulWidget {
@@ -156,7 +157,8 @@ class _CategoryFormState extends ConsumerState<CategoryForm> {
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : Text(_isEditMode ? 'Update Category' : 'Add Category'),
+                        : Text(
+                            _isEditMode ? 'Update Category' : 'Add Category'),
                   ),
                 ],
               ),
