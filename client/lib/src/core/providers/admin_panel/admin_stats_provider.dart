@@ -1,104 +1,14 @@
 // Providers for dashboard stats - FIXED
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/firebase_providers.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/order_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/order/unified_order_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/restaurant/restaurant_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/service_factory.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/create_order.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart' as cloud_firestore;
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
-
-/// Optimized admin dashboard statistics providers with efficient data fetching,
-/// caching, and computation strategies.
-
-// // Common stats models
-// class OrderStats {
-//   final int totalOrders;
-//   final int pendingOrders;
-//   final int preparingOrders;
-//   final int readyOrders;
-//   final int completedOrders;
-//   final double dailySales;
-//   final int averageServiceTime;
-
-//   const OrderStats({
-//     required this.totalOrders,
-//     required this.pendingOrders,
-//     required this.preparingOrders,
-//     required this.readyOrders,
-//     required this.completedOrders,
-//     required this.dailySales,
-//     required this.averageServiceTime,
-//   });
-
-//   // Create a copy with updated values
-//   OrderStats copyWith({
-//     int? totalOrders,
-//     int? pendingOrders,
-//     int? preparingOrders,
-//     int? readyOrders,
-//     int? completedOrders,
-//     double? dailySales,
-//     int? averageServiceTime,
-//   }) {
-//     return OrderStats(
-//       totalOrders: totalOrders ?? this.totalOrders,
-//       pendingOrders: pendingOrders ?? this.pendingOrders,
-//       preparingOrders: preparingOrders ?? this.preparingOrders,
-//       readyOrders: readyOrders ?? this.readyOrders,
-//       completedOrders: completedOrders ?? this.completedOrders,
-//       dailySales: dailySales ?? this.dailySales,
-//       averageServiceTime: averageServiceTime ?? this.averageServiceTime,
-//     );
-//   }
-// }
-
-// class SalesStats {
-//   final double totalSales;
-//   final double todaySales;
-//   final int orderCount;
-
-//   const SalesStats({
-//     required this.totalSales,
-//     required this.todaySales,
-//     required this.orderCount,
-//   });
-// }
-
-// class TableStats {
-//   final int totalTables;
-//   final int occupiedTables;
-//   final int reservedTables;
-//   final int cleaningTables;
-
-//   const TableStats({
-//     required this.totalTables,
-//     required this.occupiedTables,
-//     required this.reservedTables,
-//     required this.cleaningTables,
-//   });
-// }
-
-// class ProductStats {
-//   final int totalProducts;
-//   final int categories;
-//   final int outOfStock;
-
-//   const ProductStats({
-//     required this.totalProducts,
-//     required this.categories,
-//     required this.outOfStock,
-//   });
-// }
 
 // Optimized admin statistics service
 class AdminStatsService {

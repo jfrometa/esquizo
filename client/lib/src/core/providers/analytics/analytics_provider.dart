@@ -2,15 +2,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/order/unified_order_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/analytics_screen.dart';
 
 // Provider for analytics data based on date range
 final analyticsDataProvider =
     FutureProvider.family<AnalyticsData, AnalyticsDateRange>(
         (ref, dateRange) async {
-  final orderService = ref.watch(orderServiceProvider);
-
   // This would typically call a method on the order service to get analytics data,
   // but for this example, we'll mock the data
   await Future.delayed(const Duration(seconds: 1)); // Simulate API call

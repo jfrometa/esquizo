@@ -1,71 +1,71 @@
- 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/order_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/table_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/order/unified_order_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/restaurant/table_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/create_order.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/product_model.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart';
 
 import 'dart:async';
 
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/product_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/staff_service.dart';
 
+// final orderByIdProvider = FutureProvider.family<Order?, String>((ref, orderId) {
+//   final orderService = ref.watch(orderServiceProvider);
+//   return orderService.getOrderById(orderId) as FutureOr<Order?>;
+// });
 
-final orderByIdProvider = FutureProvider.family<Order?, String>((ref, orderId) {
-  final orderService = ref.watch(orderServiceProvider);
-  return orderService.getOrderById(orderId) as FutureOr<Order?>;
-});
+// final ordersByTableProvider =
+//     StreamProvider.family<List<Order>, String>((ref, tableId) {
+//   final orderService = ref.watch(orderServiceProvider);
+//   return orderService.getOrdersByTableStream(tableId);
+// });
 
-final ordersByTableProvider = StreamProvider.family<List<Order>, String>((ref, tableId) {
-  final orderService = ref.watch(orderServiceProvider);
-  return orderService.getOrdersByTableStream(tableId);
-});
+// final pendingOrdersProvider = StreamProvider<List<Order>>((ref) {
+//   final orderService = ref.watch(orderServiceProvider);
+//   return orderService.getOrdersByStatusStream(OrderStatus.pending);
+// });
 
-final pendingOrdersProvider = StreamProvider<List<Order>>((ref) {
-  final orderService = ref.watch(orderServiceProvider);
-  return orderService.getOrdersByStatusStream(OrderStatus.pending);
-});
+// final preparingOrdersProvider = StreamProvider<List<Order>>((ref) {
+//   final orderService = ref.watch(orderServiceProvider);
+//   return orderService.getOrdersByStatusStream(OrderStatus.preparing);
+// });
 
+// final readyOrdersProvider = StreamProvider<List<Order>>((ref) {
+//   final orderService = ref.watch(orderServiceProvider);
+//   return orderService.getOrdersByStatusStream(OrderStatus.readyForDelivery);
+// });
 
-final preparingOrdersProvider = StreamProvider<List<Order>>((ref) {
-  final orderService = ref.watch(orderServiceProvider);
-  return orderService.getOrdersByStatusStream(OrderStatus.preparing) ;
-});
-
-final readyOrdersProvider = StreamProvider<List<Order>>((ref) {
-  final orderService = ref.watch(orderServiceProvider);
-  return orderService.getOrdersByStatusStream(OrderStatus.readyForDelivery)  ;
-});
-
-
-final productsByCategoryProvider = FutureProvider.family<List<MenuItem>, String>((ref, categoryId) {
-  final productService = ref.watch(productServiceProvider);
-  return productService.getProductsByCategory(categoryId) as FutureOr<List<MenuItem>>;
-});
+// final productsByCategoryProvider =
+//     FutureProvider.family<List<MenuItem>, String>((ref, categoryId) {
+//   final productService = ref.watch(productServiceProvider);
+//   return productService.getProductsByCategory(categoryId)
+//       as FutureOr<List<MenuItem>>;
+// });
 
 // Restaurant stats provider
 final restaurantStatsProvider = FutureProvider<RestaurantStats>((ref) {
   final tableService = ref.watch(tableServiceProvider);
   final orderService = ref.watch(orderServiceProvider);
-  
+
   return Future.wait([
     tableService.getTableStats(),
     orderService.getOrderStats(),
   ]).then((results) {
     final tableStats = results[0] as TableStats;
     final orderStats = results[1] as OrderStats;
-    
+
     // Calculate derived stats
-    final availableTables = tableStats.totalTables - tableStats.occupiedTables - tableStats.cleaningTables - tableStats.reservedTables;
-    final occupancyRate = tableStats.totalTables > 0 ? tableStats.occupiedTables / tableStats.totalTables * 100 : 0.0;
-    final turnoverRate = orderStats.totalOrders > 0 && tableStats.totalTables > 0 ? 
-        orderStats.completedOrders / tableStats.totalTables : 0.0;
-    
+    final availableTables = tableStats.totalTables -
+        tableStats.occupiedTables -
+        tableStats.cleaningTables -
+        tableStats.reservedTables;
+    final occupancyRate = tableStats.totalTables > 0
+        ? tableStats.occupiedTables / tableStats.totalTables * 100
+        : 0.0;
+    final turnoverRate =
+        orderStats.totalOrders > 0 && tableStats.totalTables > 0
+            ? orderStats.completedOrders / tableStats.totalTables
+            : 0.0;
+
     return RestaurantStats(
       totalTables: tableStats.totalTables,
       occupiedTables: tableStats.occupiedTables,
@@ -100,7 +100,7 @@ final cashiersProvider = FutureProvider<List<StaffMember>>((ref) {
   final staffService = ref.watch(staffServiceProvider);
   return staffService.getStaffByRole(StaffRole.cashier);
 });
- 
+
 class RestaurantStats {
   final int totalTables;
   final int occupiedTables;
@@ -116,7 +116,7 @@ class RestaurantStats {
   final int availableTables;
   final double occupancyRate;
   final double turnoverRate;
-  
+
   RestaurantStats({
     required this.totalTables,
     required this.occupiedTables,

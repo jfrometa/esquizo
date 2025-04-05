@@ -1,27 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';  
+import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/widgets_mesa_redonda/dish_item.dart';
 
 class AllDishesMenuHomeScreen extends ConsumerStatefulWidget {
   const AllDishesMenuHomeScreen({super.key});
 
   @override
-  ConsumerState<AllDishesMenuHomeScreen> createState() => _AllDishesMenuHomeScreenState();
+  ConsumerState<AllDishesMenuHomeScreen> createState() =>
+      _AllDishesMenuHomeScreenState();
 }
- 
-class _AllDishesMenuHomeScreenState extends ConsumerState<AllDishesMenuHomeScreen> {
+
+class _AllDishesMenuHomeScreenState
+    extends ConsumerState<AllDishesMenuHomeScreen> {
   String selectedFoodType = 'All'; // Default filter to show all dishes
 
   @override
   Widget build(BuildContext context) {
     final dishesAsync = ref.watch(catalogItemsProvider('menu'));
     final cart = ref.watch(cartProvider);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Platos'),
@@ -75,9 +78,11 @@ class _AllDishesMenuHomeScreenState extends ConsumerState<AllDishesMenuHomeScree
             // Apply filter when we have the data
             final filteredDishes = selectedFoodType == 'All'
                 ? dishes
-                : dishes.where((dish) => 
-                    dish.metadata['foodType'] == selectedFoodType).toList();
-            
+                : dishes
+                    .where(
+                        (dish) => dish.metadata['foodType'] == selectedFoodType)
+                    .toList();
+
             if (filteredDishes.isEmpty) {
               return Center(
                 child: Text(
@@ -86,19 +91,19 @@ class _AllDishesMenuHomeScreenState extends ConsumerState<AllDishesMenuHomeScree
                 ),
               );
             }
-            
+
             return Column(
               children: [
                 // Filter chips for food types (only show if we have dishes)
                 if (dishes.isNotEmpty) _buildFoodTypeFilters(dishes),
-                
+
                 // Dishes list
                 Expanded(
                   child: ListView.builder(
                     itemCount: filteredDishes.length,
                     itemBuilder: (context, index) {
                       final dish = filteredDishes[index];
-                      
+
                       // Convert CatalogItem to the format DishItem expects
                       final dishData = {
                         'id': dish.id,
@@ -106,11 +111,12 @@ class _AllDishesMenuHomeScreenState extends ConsumerState<AllDishesMenuHomeScree
                         'description': dish.description,
                         'pricing': 'S/ ${dish.price.toStringAsFixed(2)}',
                         'img': dish.imageUrl,
-                        'ingredients': dish.metadata['ingredients'] ?? <String>[],
+                        'ingredients':
+                            dish.metadata['ingredients'] ?? <String>[],
                         'isSpicy': dish.metadata['spicy'] ?? false,
                         'foodType': dish.metadata['foodType'] ?? 'Other',
                       };
-                      
+
                       // Use DishItem with the converted data
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 16.0),
@@ -119,7 +125,8 @@ class _AllDishesMenuHomeScreenState extends ConsumerState<AllDishesMenuHomeScree
                           title: dishData['title'],
                           description: dishData['description'],
                           pricing: dishData['pricing'],
-                          ingredients: List<String>.from(dishData['ingredients']),
+                          ingredients:
+                              List<String>.from(dishData['ingredients']),
                           isSpicy: dishData['isSpicy'],
                           foodType: dishData['foodType'],
                           index: index,
@@ -165,7 +172,7 @@ class _AllDishesMenuHomeScreenState extends ConsumerState<AllDishesMenuHomeScree
       ),
     );
   }
-  
+
   // Build filter chips for food types
   Widget _buildFoodTypeFilters(List<CatalogItem> dishes) {
     // Extract unique food types from dishes
@@ -176,7 +183,7 @@ class _AllDishesMenuHomeScreenState extends ConsumerState<AllDishesMenuHomeScree
         foodTypes.add(foodType);
       }
     }
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: SingleChildScrollView(
@@ -195,7 +202,8 @@ class _AllDishesMenuHomeScreenState extends ConsumerState<AllDishesMenuHomeScree
                     });
                   }
                 },
-                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                backgroundColor:
+                    Theme.of(context).colorScheme.surfaceContainerHighest,
                 selectedColor: Theme.of(context).colorScheme.primaryContainer,
                 checkmarkColor: Theme.of(context).colorScheme.primary,
               ),
@@ -206,4 +214,3 @@ class _AllDishesMenuHomeScreenState extends ConsumerState<AllDishesMenuHomeScree
     );
   }
 }
-

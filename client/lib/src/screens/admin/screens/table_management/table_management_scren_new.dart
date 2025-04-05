@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/table_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/restaurant/table_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/restaurant/table_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.dart';
@@ -9,18 +10,6 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/create_order.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/table_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/responsive_layout.dart';
-
-// Provider for table service
-final tableServiceProvider = Provider<TableService>((ref) {
-  final restaurantId = ref.watch(restaurantIdProvider);
-  return TableService(restaurantId: restaurantId);
-});
-
-// Provider for streaming all tables
-final tablesStreamProvider = StreamProvider<List<RestaurantTable>>((ref) {
-  final tableService = ref.watch(tableServiceProvider);
-  return tableService.getTablesStream();
-});
 
 // Extension for string conversion
 extension TableStatusExtension on TableStatusEnum {

@@ -30,12 +30,6 @@ final firebaseStorageProvider = Provider<FirebaseStorage>((ref) {
   return FirebaseStorage.instance;
 });
 
-// Auth state changes provider
-// final authStateChangesProvider = StreamProvider<User?>((ref) {
-//   final auth = ref.watch(firebaseAuthProvider);
-//   return auth.authStateChanges();
-// });
-
 // Current user provider with caching
 final currentUserProvider = FutureProvider<User?>((ref) {
   final auth = ref.watch(firebaseAuthProvider);

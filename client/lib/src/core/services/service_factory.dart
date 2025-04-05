@@ -1,10 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_services/table_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/order/unified_order_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/restaurant/table_service.dart';
 import 'resource_service.dart';
 import 'catalog_service.dart';
-import 'order_service.dart';
 import '../providers/business/business_config_provider.dart';
 
 /// Factory for creating business-type specific services
@@ -92,7 +91,7 @@ class ServiceFactory {
   TableService createTableService() {
     // Use the base resource service with 'table' as the resource type
     final resourceService = createResourceService('table');
-    return TableService(restaurantId: '');
+    return TableService(restaurantId: businessId, businessId: businessId);
   }
 }
 
@@ -108,7 +107,7 @@ final serviceFactoryProvider = Provider<ServiceFactory>((ref) {
 });
 
 // Provider for table service
-final tableServiceProvider = Provider<TableService>((ref) {
-  final factory = ref.watch(serviceFactoryProvider);
-  return factory.createTableService();
-});
+// final tableServiceProvider = Provider<TableService>((ref) {
+//   final factory = ref.watch(serviceFactoryProvider);
+//   return factory.createTableService();
+// });
