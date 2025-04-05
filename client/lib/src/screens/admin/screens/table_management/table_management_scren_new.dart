@@ -757,18 +757,20 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen>
   void _createOrderForTable(RestaurantTable table) {
     showDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (context) => Dialog.fullscreen(
-        child: CreateOrderForm(
-          preselectedTableId: table.id,
-          onSuccess: (order) {
-            Navigator.pop(context);
-            context.pushNamed(
-              AdminRoutes.namePdOrderDetails,
-              pathParameters: {'orderId': order.id},
-            );
-          },
-          onCancel: () => Navigator.pop(context),
+      builder: (context) => Dialog(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 600, maxHeight: 800),
+          child: CreateOrderForm(
+            preselectedTableId: table.id,
+            onSuccess: (order) {
+              Navigator.pop(context);
+              context.pushNamed(
+                AdminRoutes.namePdOrderDetails,
+                pathParameters: {'orderId': order.id},
+              );
+            },
+            onCancel: () => Navigator.pop(context),
+          ),
         ),
       ),
     );

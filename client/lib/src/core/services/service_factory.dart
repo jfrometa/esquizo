@@ -1,9 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/order/unified_order_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/restaurant/table_service.dart';
 import 'resource_service.dart';
 import 'catalog_service.dart';
-import 'order_service.dart'; 
+import 'order_service.dart';
 import '../providers/business/business_config_provider.dart';
 
 /// Factory for creating business-type specific services
@@ -11,13 +12,13 @@ class ServiceFactory {
   final String businessId;
   final String businessType;
   final FirebaseFirestore firestore;
-  
+
   ServiceFactory({
     required this.businessId,
     required this.businessType,
     FirebaseFirestore? firestore,
   }) : firestore = firestore ?? FirebaseFirestore.instance;
-  
+
   // Create a resource service appropriate for the business type
   ResourceService createResourceService(String resourceType) {
     switch (businessType) {
@@ -41,7 +42,7 @@ class ServiceFactory {
         );
     }
   }
-  
+
   // Create a catalog service appropriate for the business type
   CatalogService createCatalogService(String catalogType) {
     switch (businessType) {
@@ -65,33 +66,33 @@ class ServiceFactory {
         );
     }
   }
-  
+
   // Create an order service appropriate for the business type
   OrderService createOrderService() {
     switch (businessType) {
       case 'restaurant':
         return OrderService(
-           firestore,
-            businessId,
+          businessId: businessId,
+          firestore: firestore,
         );
       case 'retail':
         return OrderService(
-           firestore,
-            businessId,
+          businessId: businessId,
+          firestore: firestore,
         );
       default:
         return OrderService(
-           firestore,
-            businessId,
+          businessId: businessId,
+          firestore: firestore,
         );
     }
   }
-  
+
   // Create a table service for restaurant table management
   TableService createTableService() {
     // Use the base resource service with 'table' as the resource type
     final resourceService = createResourceService('table');
-    return TableService( restaurantId: '');
+    return TableService(restaurantId: '');
   }
 }
 
@@ -99,7 +100,7 @@ class ServiceFactory {
 final serviceFactoryProvider = Provider<ServiceFactory>((ref) {
   final businessId = ref.watch(currentBusinessIdProvider);
   final businessType = ref.watch(businessTypeProvider);
-  
+
   return ServiceFactory(
     businessId: businessId,
     businessType: businessType,

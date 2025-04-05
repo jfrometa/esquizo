@@ -13,7 +13,7 @@ import 'dart:js_util' as js_util;
 import 'dart:html' as html;
 import 'package:flutter/services.dart';
 // Import platformViewRegistry from the correct location
-import 'dart:ui' as ui;
+import 'dart:ui_web' as ui;
 
 // Use this ID for consistent view registration
 const String MAP_ELEMENT_ID = 'google-map-view';

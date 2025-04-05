@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/firebase_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_services/order_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/order/unified_order_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/restaurant/restaurant_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/services/service_factory.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';

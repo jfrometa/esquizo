@@ -5,6 +5,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/auth_services/aut
 
 import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/order/unified_order_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';

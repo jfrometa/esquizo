@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/order/unified_order_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/create_order.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/order_details_widget.dart';
@@ -538,14 +539,3 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
   }
 }
 
-// Provider for filtered orders by date
-final ordersByDateProvider =
-    StreamProvider.family<List<Order>, DateTime?>((ref, date) {
-  final orderService = ref.watch(orderServiceProvider);
-
-  if (date == null) {
-    return orderService.getAllOrdersStream();
-  }
-
-  return orderService.getOrdersByDateStream(date);
-});
