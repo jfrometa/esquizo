@@ -9,13 +9,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_web_plugins/url_strategy.dart'; // Import for usePathUrlStrategy
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/app.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/auth_services/auth_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/user_preference/user_preference_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_analitics.dart';
 import 'package:starter_architecture_flutter_firebase/src/localization/string_hardcoded.dart';
-import 'package:flutter_web_plugins/url_strategy.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/user_preference/user_preference_provider.dart';
+ 
+import 'package:starter_architecture_flutter_firebase/src/utils/web/web_utils.dart';
 
 // Using dynamic type to handle different device info types across platforms
 late final dynamic deviceInfo;
@@ -26,59 +28,121 @@ Future<void> main() async {
   // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Use path URL strategy for web (cleaner URLs without hashes)
-  usePathUrlStrategy();
+  // *** SIMPLIFIED URL STRATEGY INITIALIZATION ***
+  // Configure URL strategy for web (use path URLs instead of hash fragments)
+  if (kIsWeb) {
+    // This is the FIRST thing we do to ensure it's applied before any routing happens
+    usePathUrlStrategy();
+    debugPrint('🌐 Path URL strategy initialized');
+  }
 
   // Set system UI overlay style for better visual integration
   await _configureSystemUI();
 
-  // Initialize Firebase
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  // Initialize Analytics (should be done early to track other initialization events)
-  await _initializeAnalytics();
-
-  // Initialize Crashlytics
-  await _initializeCrashlytics();
-
-  // For development only - completely bypass AppCheck if needed
-  // Set this to true if you need to completely skip AppCheck during development
-  bool bypassAppCheck = kDebugMode; // Set to true to bypass in debug mode
-
-  if (!bypassAppCheck) {
-    // Try to initialize AppCheck with fallback
-    await _initializeAppCheckWithFallback();
-  } else {
-    debugPrint('⚠️ Firebase AppCheck is BYPASSED in development mode');
-  }
-
   // Create a provider container for dependency injection
+  // We need this before initializing Firebase to access providers
   final container = ProviderContainer();
 
-  // Initialize auth first (critical for app functionality)
-  await _initializeAuth(container);
+  try {
+    // Initialize Firebase first - needed for most services
+    await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform);
+    debugPrint('🔥 Firebase core initialized successfully');
 
-  // Initialize device info (can happen after auth)
-  if (!kIsWeb) {
-    // Only initialize device info and camera on non-web platforms
-    await _initializeDeviceInfo();
-  } else {
-    // Set deviceInfo to a simple flag for web
-    deviceInfo = {'isWeb': true};
-    camera = null;
+    // Initialize Analytics (should be done early to track initialization)
+    await _initializeAnalytics();
+
+    // Initialize Crashlytics
+    await _initializeCrashlytics();
+
+    // For development only - completely bypass AppCheck if needed
+    bool bypassAppCheck = kDebugMode;
+
+    if (!bypassAppCheck) {
+      // Try to initialize AppCheck with fallback
+      await _initializeAppCheckWithFallback();
+    } else {
+      debugPrint('⚠️ Firebase AppCheck is BYPASSED in development mode');
+    }
+
+    // Initialize auth (critical for app functionality)
+    await _initializeAuth(container);
+
+    // Initialize device info (can happen after auth)
+    if (!kIsWeb) {
+      // Only initialize device info and camera on non-web platforms
+      await _initializeDeviceInfo();
+    } else {
+      // Set deviceInfo to a simple flag for web
+      deviceInfo = {'isWeb': true};
+      camera = null;
+    }
+
+    // Run the application
+    runApp(
+      UncontrolledProviderScope(
+        container: container,
+        child: const KakoApp(),
+      ),
+    );
+  } catch (e, stackTrace) {
+    // Log critical startup errors
+    debugPrint('🚨 Critical error during app initialization: $e');
+
+    if (!kIsWeb) {
+      // Report to Crashlytics if available
+      FirebaseCrashlytics.instance.recordError(
+        e,
+        stackTrace,
+        reason: 'Error during app initialization',
+        fatal: true,
+      );
+    }
+
+    // Run a minimal error app to show the user something went wrong
+    runApp(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red, size: 64),
+                const SizedBox(height: 16),
+                Text(
+                  'Failed to start the application'.hardcoded,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Please try again later or contact support'.hardcoded,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    // Try to restart the app
+                    if (kIsWeb) {
+                      // For web, reload the page
+                      WebUtils.reloadPage();
+                    } else {
+                      // For mobile, exit and restart
+                      SystemNavigator.pop();
+                    }
+                  },
+                  child: Text('Restart'.hardcoded),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
   }
-
-  // Register global error handlers - Now handled by Crashlytics
-
-  // Run the application
-  runApp(
-    UncontrolledProviderScope(
-      container: container,
-      child: const KakoApp(),
-    ),
-  );
 }
-
 // Initialize Firebase Analytics
 Future<void> _initializeAnalytics() async {
   try {
@@ -432,6 +496,21 @@ class CustomErrorWidget extends StatelessWidget {
                         : 'Please try again later'.hardcoded,
                   ),
                 ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  // Try to navigate to home page or restart the app
+                  try {
+                    Navigator.of(context)
+                        .pushNamedAndRemoveUntil('/', (route) => false);
+                  } catch (_) {
+                    if (kIsWeb) {
+                      WebUtils.goToHomePage();
+                    }
+                  }
+                },
+                child: Text('Go to Home'.hardcoded),
               ),
             ],
           ),

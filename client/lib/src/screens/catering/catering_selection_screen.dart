@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/catering/catering_item_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_item_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_item_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/widgets/catering_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/widgets/catering_selection/category_items_list.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/catering/catering_order_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_order_provider.dart';
 
 final localCateringItemCountProvider = StateProvider<int>((ref) {
   final cateringOrder = ref.watch(cateringOrderProvider);

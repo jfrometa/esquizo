@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/admin_panel/admin_stats_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/business/business_config_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/business/business_config_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_stats_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/dashboard_status_card.dart';
 

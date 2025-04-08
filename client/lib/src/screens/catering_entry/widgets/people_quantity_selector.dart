@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/api_services/catering/catering_order_provider.dart';
+import '../../../core/catering/catering_order_provider.dart';
 
 class PeopleQuantitySelector extends ConsumerStatefulWidget {
   final List<int> quantities;

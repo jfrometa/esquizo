@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/business/business_config_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 
 /// Helper class for navigating to the admin setup screen
 class AdminSetupNavigation {

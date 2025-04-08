@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/menu/menu_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/menu/menu_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/search/material_search_bar.dart';
 
 // Extract placeholder to a separate const widget for better performance

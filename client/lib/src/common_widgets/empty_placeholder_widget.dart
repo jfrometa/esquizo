@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/common_widgets/primary_button.dart';
 import 'package:starter_architecture_flutter_firebase/src/constants/app_sizes.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/auth_services/auth_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 

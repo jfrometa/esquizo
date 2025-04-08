@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/catalog/catalog_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/catalog/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/helpers/scroll_bahaviour.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/home/provider/recent_search_notifier.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';

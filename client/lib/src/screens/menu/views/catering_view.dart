@@ -9,7 +9,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/menu/views/cat
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/views/catering/_show_catering_quote_dialog.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/views/catering/catering_orders_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/views/catering/custom_quote_view.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/catering/manual_quote_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/catering/manual_quote_provider.dart';
 
 class CateringView extends ConsumerStatefulWidget {
   final ScrollController scrollController;

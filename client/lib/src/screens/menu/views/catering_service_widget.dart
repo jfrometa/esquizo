@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/widgets/catering_form.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/catering/catering_order_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/catering/manual_quote_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_order_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/catering/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
 /// A modular widget that provides catering service functionality

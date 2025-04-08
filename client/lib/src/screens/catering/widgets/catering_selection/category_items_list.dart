@@ -4,7 +4,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/catering_selection_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/widgets/catering_selection/catering_enhanced_item.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/catering/catering_order_provider.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_order_provider.dart'; 
 
 class CategoryItemsList extends ConsumerWidget {
   const CategoryItemsList({

@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/firebase/firebase_providers.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/auth_services/auth_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
 
 /// A dialog to collect contact information or use existing authenticated user data.
 /// Supports four modes:

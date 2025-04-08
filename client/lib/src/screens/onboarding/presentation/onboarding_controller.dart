@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/onboarding/onboarding_repository.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/onboarding/onboarding_repository.dart';
 
 part 'onboarding_controller.g.dart';
 

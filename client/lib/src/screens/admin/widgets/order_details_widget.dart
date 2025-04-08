@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/order/unified_order_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/order/unified_order_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';

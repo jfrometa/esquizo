@@ -6,7 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/api_services/providers/delivery_location_provider.dart';
+import '../../core/providers/delivery_location_provider.dart';
 
 // For web platform only
 import 'dart:js_util' as js_util;

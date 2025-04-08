@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/firebase/firebase_providers.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/user_preference/user_preference_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/user_preference/user_preference_provider.dart';
 
 class ThemeSettingsSection extends ConsumerWidget {
   const ThemeSettingsSection({super.key});

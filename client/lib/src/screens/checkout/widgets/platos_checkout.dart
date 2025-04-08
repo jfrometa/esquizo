@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/cart/cart_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/cart/cart_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/cart_item_view.dart';
 

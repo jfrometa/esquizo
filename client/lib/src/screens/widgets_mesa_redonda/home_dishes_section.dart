@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/cart/cart_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/catalog/catalog_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/cart/cart_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/catalog/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/helpers/scroll_bahaviour.dart';
 // Replace ordering_providers import with catalog provider
 import 'package:starter_architecture_flutter_firebase/src/screens/widgets_mesa_redonda/list_items/slide_home_menu_horizontal_item.dart';

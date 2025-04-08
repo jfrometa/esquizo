@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/catering/manual_quote_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/catering/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/catering_order_details.dart';

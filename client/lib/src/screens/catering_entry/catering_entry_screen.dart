@@ -6,8 +6,8 @@ import 'package:starter_architecture_flutter_firebase/src/screens/cart/widgets/c
 import 'package:starter_architecture_flutter_firebase/src/screens/catering_entry/components/catering_order/catering_order_form_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering_entry/components/catering_quote/quote_order_form_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/prompt_dialogs/new_item_dialog.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/catering/catering_order_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/catering/manual_quote_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_order_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/catering/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
 /// The complete entry screen with two tabs: one for Catering and one for Cotización.

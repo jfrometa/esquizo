@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/business/business_config_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/catalog/catalog_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/order/unified_order_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/api_services/user/auth_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/catalog/catalog_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/order/unified_order_service.dart';
+
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';
 import 'package:uuid/uuid.dart';
-import '../../../../core/api_services/cart/cart_service.dart';
-import '../../../../core/api_services/service_factory/service_factory.dart';
-import '../../../../core/api_services/resource/resource_service.dart';
+import '../../../../core/cart/cart_service.dart';
+import '../../../../core/service_factory/service_factory.dart';
+import '../../../../core/resource/resource_service.dart';
 import 'dart:math';
 
 class CreateOrderForm extends ConsumerStatefulWidget {
