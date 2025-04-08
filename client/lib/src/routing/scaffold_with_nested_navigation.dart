@@ -8,6 +8,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/cart/cart_service
 import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catering/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/setup/app_config_services.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/navigation_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/utils/web/web_utils.dart';
@@ -92,101 +93,156 @@ class ScaffoldWithNestedNavigation extends ConsumerStatefulWidget {
 
 class _ScaffoldWithNestedNavigationState
     extends ConsumerState<ScaffoldWithNestedNavigation> {
-  bool _navigatedToAdmin = false;
+  bool _isDisposed = false;
+  String? _originalPath;
 
   @override
   void initState() {
     super.initState();
+
+    // Capture the initial path - important for route preservation
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // First, trigger the app startup provider to ensure admin status is checked
-      ref.read(appStartupProvider);
+      if (_isDisposed) return;
 
-      // Check if we're in the admin route and handle accordingly
-      _checkCurrentPath();
+      try {
+        // Store initial path to preserve it during admin status changes
+        final router = GoRouter.of(context);
+        _originalPath = router.state.matchedLocation;
+        debugPrint('📝 Original path stored: $_originalPath');
 
-      // Then update the selectedTabIndex provider for non-admin routes
-      ref
-          .read(selectedTabIndexProvider.notifier)
-          .setIndex(widget.navigationShell.currentIndex);
+        // Trigger the app startup provider to ensure admin status is checked
+        ref.read(appStartupProvider);
+
+        // Check for admin status without changing routes
+        _checkAdminStatus(preserveRoute: true);
+
+        // Update the selectedTabIndex provider for the current tab
+        if (!_isDisposed) {
+          ref
+              .read(selectedTabIndexProvider.notifier)
+              .setIndex(widget.navigationShell.currentIndex);
+        }
+      } catch (e) {
+        debugPrint('❌ Error in initState: $e');
+      }
     });
   }
 
-  void _checkCurrentPath() async {
-    // Check if we're in an admin route
-    String currentPath = '';
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
+  }
 
-    if (kIsWeb) {
-      // For web, directly get the path from the browser URL
-      currentPath = WebUtils.getCurrentPath();
-    } else {
-      // For mobile, get the current location from GoRouter
-      try {
-        final router = GoRouter.of(context);
-        currentPath = router.state.matchedLocation;
-      } catch (e) {
-        debugPrint('❌ Error getting current path: $e');
-      }
-    }
+  void _checkAdminStatus({bool preserveRoute = false}) async {
+    if (_isDisposed) return;
 
-    debugPrint('🛣️ Current path check: $currentPath');
+    try {
+      // Check admin status eagerly, regardless of path
+      final isAdmin = await ref.read(eagerAdminStatusProvider.future);
+      if (_isDisposed) return;
 
-    // Check admin status eagerly, regardless of path
-    final isAdmin = await ref.read(eagerAdminStatusProvider.future);
-
-    // If we're in admin route, handle it appropriately
-    if (currentPath.startsWith('/admin')) {
-      debugPrint('🔐 Detected admin path on startup/reload: $currentPath');
-
-      // Set admin status to true if we're in admin path
-      if (!ref.read(cachedAdminStatusProvider)) {
-        debugPrint('🔄 Setting admin status to true based on path');
-        ref.read(cachedAdminStatusProvider.notifier).state = true;
-      }
-
-      if (!_navigatedToAdmin) {
-        _navigatedToAdmin = true;
-
-        // Find admin destination index
-        final destinations = ref.read(navigationDestinationsProvider);
-        final adminIndex = destinations.indexWhere((d) => d.path == '/admin');
-
-        if (adminIndex >= 0) {
-          // Navigate directly to admin tab
-          debugPrint('🧭 Setting admin tab (index: $adminIndex)');
-
-          // Use microtask to avoid rebuild issues
-          Future.microtask(() {
-            _goBranch(adminIndex);
-          });
+      // Get current path
+      String currentPath = '';
+      if (kIsWeb) {
+        currentPath = WebUtils.getCurrentPath();
+      } else {
+        try {
+          final router = GoRouter.of(context);
+          currentPath = router.state.matchedLocation;
+        } catch (e) {
+          debugPrint('❌ Error getting current path: $e');
         }
       }
-    } else if (isAdmin) {
-      // We're not on an admin path, but user is admin - make sure the option is visible
-      debugPrint('👤 User is admin but not on admin path');
-      ref.read(cachedAdminStatusProvider.notifier).state = true;
+
+      debugPrint('🛣️ Current path check: $currentPath');
+
+      // Update admin status based on path or status check
+      bool shouldUpdateUI = false;
+
+      if (currentPath.startsWith('/admin')) {
+        debugPrint('🔐 Detected admin path: $currentPath');
+
+        // Set admin status to true if we're in admin path
+        if (!ref.read(cachedAdminStatusProvider)) {
+          debugPrint('🔄 Setting admin status to true based on path');
+          ref.read(cachedAdminStatusProvider.notifier).state = true;
+          shouldUpdateUI = true;
+        }
+
+        // Store the path, but don't navigate if preserveRoute is true
+        ref.read(pendingAdminPathProvider.notifier).state = currentPath;
+      } else if (isAdmin) {
+        // We're not on an admin path, but user is admin
+        debugPrint('👤 User is admin but not on admin path');
+
+        if (!ref.read(cachedAdminStatusProvider)) {
+          ref.read(cachedAdminStatusProvider.notifier).state = true;
+          shouldUpdateUI = true;
+        }
+
+        // If we should preserve the route, don't navigate
+        if (preserveRoute && _originalPath != null) {
+          debugPrint('🔒 Preserving original route: $_originalPath');
+        }
+      }
+
+      // Request UI update if needed (only if status changed)
+      if (shouldUpdateUI) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!_isDisposed) {
+            setState(() {
+              // Trigger rebuild to show admin tab without changing route
+            });
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('❌ Error in _checkAdminStatus: $e');
     }
   }
 
   void _goBranch(int index) {
-    // Get the list of destinations
-    final destinations = ref.read(navigationDestinationsProvider);
+    if (_isDisposed) return;
 
-    // Handle direct navigation for admin routes
-    if (index < destinations.length && destinations[index].path == '/admin') {
-      debugPrint('🔐 Directly navigating to admin panel');
-      context.go('/admin');
-      return;
+    try {
+      // Get the list of destinations
+      final destinations = ref.read(navigationDestinationsProvider);
+
+      // Ensure index is valid
+      if (index < 0 || index >= destinations.length) {
+        debugPrint('⚠️ Invalid destination index: $index');
+        return;
+      }
+
+      // Handle direct navigation for admin routes
+      if (destinations[index].path == '/admin') {
+        // Check if we have a pending admin path to navigate to
+        final pendingAdminPath = ref.read(pendingAdminPathProvider);
+        if (pendingAdminPath != null && pendingAdminPath.startsWith('/admin')) {
+          debugPrint('🔐 Navigating to saved admin path: $pendingAdminPath');
+          context.go(pendingAdminPath);
+          return;
+        }
+
+        // Default to root admin path
+        debugPrint('🔐 Navigating to admin panel');
+        context.go('/admin');
+        return;
+      }
+
+      // Update the provider state
+      ref.read(selectedTabIndexProvider.notifier).setIndex(index);
+
+      // Use the navigationShell to navigate
+      widget.navigationShell.goBranch(
+        index,
+        // Navigate to initial location if selecting the same tab
+        initialLocation: index == widget.navigationShell.currentIndex,
+      );
+    } catch (e) {
+      debugPrint('❌ Error in _goBranch: $e');
     }
-
-    // Update the provider state
-    ref.read(selectedTabIndexProvider.notifier).setIndex(index);
-
-    // Use the navigationShell to navigate
-    widget.navigationShell.goBranch(
-      index,
-      // Navigate to initial location if selecting the same tab
-      initialLocation: index == widget.navigationShell.currentIndex,
-    );
   }
 
   @override
@@ -234,7 +290,10 @@ class ScaffoldWithNavigationBarState
   bool _isVisible = true;
   final ScrollController _scrollController = ScrollController();
   late AnimationController _adminIconController;
-  bool _isFirstBuild = true;
+  bool _isDisposed = false;
+
+  // Flag to track if we've already checked for admin status
+  bool _hasCheckedAdminStatus = false;
 
   @override
   void initState() {
@@ -248,6 +307,8 @@ class ScaffoldWithNavigationBarState
 
     // Listen to scroll events to hide/show the navigation bar (except for the "Cuenta" tab).
     _scrollController.addListener(() {
+      if (_isDisposed) return;
+
       if (widget.currentIndex != 3) {
         if (_scrollController.position.userScrollDirection ==
             ScrollDirection.reverse) {
@@ -269,43 +330,50 @@ class ScaffoldWithNavigationBarState
 
     // Check admin status on first render
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkAdminStatusAndRoute();
+      if (!_isDisposed) {
+        _checkAdminStatus();
+      }
     });
   }
 
-  void _checkAdminStatusAndRoute() async {
-    // Eagerly check admin status
-    final isAdmin = await ref.read(eagerAdminStatusProvider.future);
+  // Check admin status without affecting navigation
+  void _checkAdminStatus() async {
+    if (_isDisposed) return;
 
-    // Start animation if admin
-    if (isAdmin &&
-        !_adminIconController.isAnimating &&
-        _adminIconController.status != AnimationStatus.completed) {
-      _adminIconController.forward();
-    }
+    try {
+      // Mark that we've checked for admin status
+      _hasCheckedAdminStatus = true;
 
-    // Check if we should navigate to admin
-    final currentPath = GoRouterState.of(context).uri.path;
-    final isAdminRoute = currentPath.startsWith('/admin');
+      final isAdmin = await ref.read(eagerAdminStatusProvider.future);
 
-    // If we're supposed to be in admin route but UI doesn't reflect it yet
-    if (isAdmin && isAdminRoute && widget.currentIndex != -1) {
-      // Find admin index in destinations
-      final destinations = ref.read(navigationDestinationsProvider);
-      final adminIndex = destinations.indexWhere((d) => d.path == '/admin');
+      if (_isDisposed) return;
 
-      if (adminIndex >= 0 && widget.currentIndex != adminIndex) {
-        // Navigate to admin without rebuilding whole screen
-        debugPrint('🔄 Detected admin route, navigating smoothly to admin tab');
-        Future.microtask(() {
-          widget.onDestinationSelected(adminIndex);
-        });
+      // Update the cached admin status if needed
+      if (isAdmin && !ref.read(cachedAdminStatusProvider)) {
+        ref.read(cachedAdminStatusProvider.notifier).state = true;
       }
+
+      // Start animation if admin, without navigating
+      if (isAdmin &&
+          !_adminIconController.isAnimating &&
+          _adminIconController.status != AnimationStatus.completed) {
+        _adminIconController.forward();
+      }
+
+      // Store the current path if we're on an admin path
+      final currentPath = GoRouterState.of(context).uri.path;
+      if (isAdmin && currentPath.startsWith('/admin')) {
+        // Store the path for future reference, but don't navigate yet
+        ref.read(pendingAdminPathProvider.notifier).state = currentPath;
+      }
+    } catch (e) {
+      debugPrint('Error checking admin status: $e');
     }
   }
 
   @override
   void dispose() {
+    _isDisposed = true;
     _scrollController.dispose();
     _adminIconController.dispose();
     super.dispose();
@@ -319,12 +387,29 @@ class ScaffoldWithNavigationBarState
     final isAdmin = ref.watch(cachedAdminStatusProvider);
     final authState = ref.watch(authStateChangesProvider);
 
+    // If we haven't checked admin status yet and the user is authenticated, do it now
+    if (!_hasCheckedAdminStatus && authState.value != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_isDisposed) {
+          _checkAdminStatus();
+        }
+      });
+    }
+
     // If user is signed out, ensure admin is false and reset animation
     if (authState.value == null && isAdmin) {
-      // Use Future.microtask to avoid build-time state changes
-      Future.microtask(() {
-        ref.read(cachedAdminStatusProvider.notifier).state = false;
-        _adminIconController.reset();
+      if (_adminIconController.status != AnimationStatus.dismissed) {
+        try {
+          _adminIconController.reset();
+        } catch (e) {
+          debugPrint('Error resetting animation: $e');
+        }
+      }
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_isDisposed) {
+          ref.read(cachedAdminStatusProvider.notifier).state = false;
+        }
       });
     }
 
@@ -332,14 +417,22 @@ class ScaffoldWithNavigationBarState
     final currentPath = GoRouterState.of(context).uri.path;
     final isAdminRoute = currentPath.startsWith('/admin');
 
-    // If we're on an admin route but admin status is false, update it
+    // If we're on an admin route but admin status is false, update it without navigating
     if (isAdminRoute && !isAdmin && authState.value != null) {
       debugPrint('🔄 On admin route but admin status is false, updating...');
-      Future.microtask(() {
-        ref.read(cachedAdminStatusProvider.notifier).state = true;
-        if (!_adminIconController.isAnimating &&
-            _adminIconController.status != AnimationStatus.completed) {
-          _adminIconController.forward();
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_isDisposed) {
+          ref.read(cachedAdminStatusProvider.notifier).state = true;
+
+          if (!_adminIconController.isAnimating &&
+              _adminIconController.status != AnimationStatus.completed) {
+            try {
+              _adminIconController.forward();
+            } catch (e) {
+              debugPrint('Error starting animation: $e');
+            }
+          }
         }
       });
     }
@@ -348,7 +441,15 @@ class ScaffoldWithNavigationBarState
     if (isAdmin && authState.value != null) {
       if (_adminIconController.status != AnimationStatus.completed &&
           !_adminIconController.isAnimating) {
-        Future.microtask(() => _adminIconController.forward());
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!_isDisposed) {
+            try {
+              _adminIconController.forward();
+            } catch (e) {
+              debugPrint('Error starting animation: $e');
+            }
+          }
+        });
       }
     }
 
@@ -363,19 +464,6 @@ class ScaffoldWithNavigationBarState
     }
 
     final theme = Theme.of(context);
-
-    // If this is the first build and we're on an admin route, navigate immediately
-    if (_isFirstBuild && isAdminRoute && isAdmin) {
-      _isFirstBuild = false;
-      // Find the admin tab index
-      final adminIndex = destinations.indexWhere((d) => d.path == '/admin');
-      if (adminIndex >= 0) {
-        // Queue navigation after build
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          widget.onDestinationSelected(adminIndex);
-        });
-      }
-    }
 
     return Scaffold(
       body: widget.navigationShell,
@@ -406,7 +494,6 @@ class ScaffoldWithNavigationBarState
                     : IconThemeData(color: theme.colorScheme.onSurface);
               }),
             ),
-            // Use AnimatedSize to smoothly resize the navigation bar when items are added/removed
             child: AnimatedSize(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
@@ -437,46 +524,12 @@ class ScaffoldWithNavigationBarState
                       label: dest.label,
                     );
                   }),
-
-                  // Admin destination with smooth animation
-                  if (isAdmin && authState.value != null)
-                    _buildAdminDestination(isAdminRoute, theme),
                 ],
               ),
             ),
           ),
         ),
       ),
-    );
-  }
-
-  // Build the admin destination with enhanced animation
-  NavigationDestination _buildAdminDestination(
-      bool isAdminRoute, ThemeData theme) {
-    return NavigationDestination(
-      icon: FadeTransition(
-        opacity: _adminIconController,
-        child: ScaleTransition(
-          scale: CurvedAnimation(
-            parent: _adminIconController,
-            curve: Curves.easeOutBack,
-          ),
-          child: Icon(Icons.admin_panel_settings_outlined,
-              color: isAdminRoute ? theme.colorScheme.primary : null),
-        ),
-      ),
-      selectedIcon: FadeTransition(
-        opacity: _adminIconController,
-        child: ScaleTransition(
-          scale: CurvedAnimation(
-            parent: _adminIconController,
-            curve: Curves.easeOutBack,
-          ),
-          child: Icon(Icons.admin_panel_settings,
-              color: isAdminRoute ? theme.colorScheme.primary : null),
-        ),
-      ),
-      label: 'Admin',
     );
   }
 }
@@ -505,7 +558,7 @@ class _ScaffoldWithNavigationRailState
     extends ConsumerState<ScaffoldWithNavigationRail>
     with SingleTickerProviderStateMixin {
   late AnimationController _adminIconController;
-  bool _isFirstBuild = true;
+  bool _isDisposed = false;
 
   @override
   void initState() {
@@ -519,44 +572,36 @@ class _ScaffoldWithNavigationRailState
 
     // Eagerly check admin status for the navigation rail
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkAdminStatusAndRoute();
+      if (!_isDisposed) {
+        _checkAdminStatus();
+      }
     });
   }
 
   @override
   void dispose() {
+    _isDisposed = true;
     _adminIconController.dispose();
     super.dispose();
   }
 
-  void _checkAdminStatusAndRoute() async {
-    // Eagerly check admin status
-    final isAdmin = await ref.read(eagerAdminStatusProvider.future);
+  void _checkAdminStatus() async {
+    if (_isDisposed) return;
 
-    // Start animation if admin
-    if (isAdmin &&
-        !_adminIconController.isAnimating &&
-        _adminIconController.status != AnimationStatus.completed) {
-      _adminIconController.forward();
-    }
+    try {
+      // Eagerly check admin status
+      final isAdmin = await ref.read(eagerAdminStatusProvider.future);
 
-    // Check if we should navigate to admin
-    final currentPath = GoRouterState.of(context).uri.path;
-    final isAdminRoute = currentPath.startsWith('/admin');
-
-    // If we're supposed to be in admin route but UI doesn't reflect it yet
-    if (isAdmin && isAdminRoute && widget.currentIndex != -1) {
-      // Find admin index in destinations
-      final destinations = ref.read(navigationDestinationsProvider);
-      final adminIndex = destinations.indexWhere((d) => d.path == '/admin');
-
-      if (adminIndex >= 0 && widget.currentIndex != adminIndex) {
-        // Navigate to admin without rebuilding whole screen
-        debugPrint('🔄 Detected admin route, navigating smoothly to admin tab');
-        Future.microtask(() {
-          widget.onDestinationSelected(adminIndex);
-        });
+      // Start animation if admin
+      if (!_isDisposed &&
+          isAdmin &&
+          !_adminIconController.isAnimating &&
+          _adminIconController.status != AnimationStatus.completed) {
+        _adminIconController.forward();
       }
+    } catch (e) {
+      // Safely handle any exceptions during admin status check
+      debugPrint('Error checking admin status: $e');
     }
   }
 
@@ -570,10 +615,20 @@ class _ScaffoldWithNavigationRailState
 
     // If user is signed out, ensure admin is false and reset animation
     if (authState.value == null && isAdmin) {
-      // Use Future.microtask to avoid build-time state changes
-      Future.microtask(() {
-        ref.read(cachedAdminStatusProvider.notifier).state = false;
-        _adminIconController.reset();
+      // Use safer approach instead of Future.microtask
+      if (_adminIconController.status != AnimationStatus.dismissed) {
+        try {
+          _adminIconController.reset();
+        } catch (e) {
+          debugPrint('Error resetting animation: $e');
+        }
+      }
+
+      // Update the admin status on next frame
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_isDisposed) {
+          ref.read(cachedAdminStatusProvider.notifier).state = false;
+        }
       });
     }
 
@@ -584,11 +639,19 @@ class _ScaffoldWithNavigationRailState
     // If we're on an admin route but admin status is false, update it
     if (isAdminRoute && !isAdmin && authState.value != null) {
       debugPrint('🔄 On admin route but admin status is false, updating...');
-      Future.microtask(() {
-        ref.read(cachedAdminStatusProvider.notifier).state = true;
-        if (!_adminIconController.isAnimating &&
-            _adminIconController.status != AnimationStatus.completed) {
-          _adminIconController.forward();
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_isDisposed) {
+          ref.read(cachedAdminStatusProvider.notifier).state = true;
+
+          if (!_adminIconController.isAnimating &&
+              _adminIconController.status != AnimationStatus.completed) {
+            try {
+              _adminIconController.forward();
+            } catch (e) {
+              debugPrint('Error starting animation: $e');
+            }
+          }
         }
       });
     }
@@ -597,7 +660,15 @@ class _ScaffoldWithNavigationRailState
     if (isAdmin && authState.value != null) {
       if (_adminIconController.status != AnimationStatus.completed &&
           !_adminIconController.isAnimating) {
-        Future.microtask(() => _adminIconController.forward());
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!_isDisposed) {
+            try {
+              _adminIconController.forward();
+            } catch (e) {
+              debugPrint('Error starting animation: $e');
+            }
+          }
+        });
       }
     }
 
@@ -608,19 +679,6 @@ class _ScaffoldWithNavigationRailState
       final adminIndex = destinations.indexWhere((d) => d.path == '/admin');
       if (adminIndex >= 0) {
         selectedIndex = adminIndex;
-      }
-    }
-
-    // If this is the first build and we're on an admin route, navigate immediately
-    if (_isFirstBuild && isAdminRoute && isAdmin) {
-      _isFirstBuild = false;
-      // Find the admin tab index
-      final adminIndex = destinations.indexWhere((d) => d.path == '/admin');
-      if (adminIndex >= 0) {
-        // Queue navigation after build
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          widget.onDestinationSelected(adminIndex);
-        });
       }
     }
 
@@ -672,52 +730,12 @@ class _ScaffoldWithNavigationRailState
                     label: Text(dest.label),
                   );
                 }),
-
-                // Admin destination with enhanced animation
-                if (isAdmin && authState.value != null)
-                  _buildAdminRailDestination(isAdminRoute, theme),
               ],
             ),
           ),
           VerticalDivider(thickness: 1, width: 1, color: theme.dividerColor),
           Expanded(child: widget.navigationShell),
         ],
-      ),
-    );
-  }
-
-  // Enhanced admin rail destination with smoother animations
-  NavigationRailDestination _buildAdminRailDestination(
-      bool isAdminRoute, ThemeData theme) {
-    return NavigationRailDestination(
-      icon: FadeTransition(
-        opacity: _adminIconController,
-        child: ScaleTransition(
-          scale: CurvedAnimation(
-            parent: _adminIconController,
-            curve: Curves.easeOutBack,
-          ),
-          child: Icon(Icons.admin_panel_settings_outlined,
-              color: isAdminRoute ? theme.colorScheme.primary : null),
-        ),
-      ),
-      selectedIcon: FadeTransition(
-        opacity: _adminIconController,
-        child: ScaleTransition(
-          scale: CurvedAnimation(
-            parent: _adminIconController,
-            curve: Curves.easeOutBack,
-          ),
-          child: Icon(Icons.admin_panel_settings,
-              color: isAdminRoute ? theme.colorScheme.primary : null),
-        ),
-      ),
-      label: FadeTransition(
-        opacity: _adminIconController,
-        child: Text('Admin',
-            style: isAdminRoute
-                ? TextStyle(color: theme.colorScheme.primary)
-                : null),
       ),
     );
   }

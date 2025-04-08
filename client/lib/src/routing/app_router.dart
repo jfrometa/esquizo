@@ -55,8 +55,8 @@ final _OrdersNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'local');
 final _localNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'orders');
 
 // Store paths that were attempted before authentication
-final _pendingPathProvider = StateProvider<String?>((ref) => null);
-
+// final _pendingPathProvider = StateProvider<String?>((ref) => null);
+final pendingAdminPathProvider = StateProvider<String?>((ref) => null);
 // Error state for router
 final routerErrorNotifierProvider = StateProvider<String?>((ref) => null);
 
@@ -115,11 +115,20 @@ GoRouter goRouter(Ref ref) {
   final isFirebaseInitialized = ref.watch(isFirebaseInitializedProvider);
   final isAdmin = ref.watch(cachedAdminStatusProvider);
 
+  // Watch for pending admin path
+  final pendingAdminPath = ref.watch(pendingAdminPathProvider);
+
   // *** DIRECTLY USE WEB UTILS TO GET THE INITIAL LOCATION FROM BROWSER URL ***
   String initialLocation = '/';
   if (kIsWeb) {
     initialLocation = WebUtils.getCurrentPath();
     debugPrint('📍 Direct initial location: $initialLocation');
+
+    // Store admin path if detected
+    if (initialLocation.startsWith('/admin') && initialLocation != '/admin') {
+      debugPrint('📍 Storing admin path: $initialLocation');
+      ref.read(pendingAdminPathProvider.notifier).state = initialLocation;
+    }
   }
 
   return GoRouter(
@@ -170,7 +179,7 @@ GoRouter goRouter(Ref ref) {
           if (path != '/signin') {
             // Use Future.microtask to avoid setState during build
             Future.microtask(() {
-              ref.read(_pendingPathProvider.notifier).state = path;
+              ref.read(pendingAdminPathProvider.notifier).state = path;
             });
 
             return '/signin?from=$path';
@@ -181,7 +190,7 @@ GoRouter goRouter(Ref ref) {
         // User is logged in
         if (isLoggedIn) {
           // Check for any pending path that was saved before authentication
-          final pendingPath = ref.read(_pendingPathProvider);
+          final pendingPath = ref.read(pendingAdminPathProvider);
 
           // Handle admin routes - check permissions
           if (path.startsWith('/admin')) {
@@ -197,7 +206,7 @@ GoRouter goRouter(Ref ref) {
                 pendingPath != '/') {
               // Clear the pending path
               Future.microtask(() {
-                ref.read(_pendingPathProvider.notifier).state = null;
+                ref.read(pendingAdminPathProvider.notifier).state = null;
               });
               return pendingPath;
             }

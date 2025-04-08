@@ -11,12 +11,14 @@ class NavigationDestinationItem {
   final String path;
   final IconData icon;
   final IconData selectedIcon;
+  final bool isVisible; // Add visibility control
 
   const NavigationDestinationItem({
     required this.label,
     required this.path,
     required this.icon,
     required this.selectedIcon,
+    this.isVisible = true, // Default to visible
   });
 
   // Factory to create NavigationDestination widgets
@@ -28,17 +30,25 @@ class NavigationDestinationItem {
       tooltip: label,
     );
   }
+
+  // Create a copy with modified visibility
+  NavigationDestinationItem copyWith({bool? isVisible}) {
+    return NavigationDestinationItem(
+      label: label,
+      path: path,
+      icon: icon,
+      selectedIcon: selectedIcon,
+      isVisible: isVisible ?? this.isVisible,
+    );
+  }
 }
 
-/// Provider for navigation destinations - customize this based on your app's requirements
+/// Provider for all possible navigation destinations (including admin)
 @riverpod
-List<NavigationDestinationItem> navigationDestinations(
-    NavigationDestinationsRef ref) {
-  final isAdmin = ref.watch(cachedAdminStatusProvider);
-  final authState = ref.watch(authStateChangesProvider);
-  final isAuthenticated = authState.value != null;
-
-  final baseDestinations = [
+List<NavigationDestinationItem> allNavigationDestinations(
+    AllNavigationDestinationsRef ref) {
+  // Define all possible destinations including admin
+  return [
     const NavigationDestinationItem(
       label: 'Home',
       path: '/',
@@ -63,28 +73,44 @@ List<NavigationDestinationItem> navigationDestinations(
       icon: Icons.person_outline,
       selectedIcon: Icons.person,
     ),
+    // Admin tab is always in the list but visibility is controlled
+    const NavigationDestinationItem(
+      label: 'Admin',
+      path: '/admin',
+      icon: Icons.admin_panel_settings_outlined,
+      selectedIcon: Icons.admin_panel_settings,
+      isVisible: false, // Hidden by default
+    ),
   ];
+}
 
-  // Add admin destination if the user is an admin
-  if (isAdmin && isAuthenticated) {
-    return [
-      ...baseDestinations,
-      const NavigationDestinationItem(
-        label: 'Admin',
-        path: '/admin',
-        icon: Icons.admin_panel_settings_outlined,
-        selectedIcon: Icons.admin_panel_settings,
-      ),
-    ];
-  }
+/// Provider for visible navigation destinations
+@riverpod
+List<NavigationDestinationItem> navigationDestinations(
+    NavigationDestinationsRef ref) {
+  final isAdmin = ref.watch(cachedAdminStatusProvider);
+  final authState = ref.watch(authStateChangesProvider);
+  final isAuthenticated = authState.value != null;
+  final allDestinations = ref.watch(allNavigationDestinationsProvider);
 
-  return baseDestinations;
+  // Update admin tab visibility without changing the structure
+  final updatedDestinations = allDestinations.map((destination) {
+    // Only modify the admin tab's visibility
+    if (destination.path == '/admin') {
+      return destination.copyWith(isVisible: isAdmin && isAuthenticated);
+    }
+    return destination;
+  }).toList();
+
+  // Return only visible destinations
+  return updatedDestinations.where((item) => item.isVisible).toList();
 }
 
 /// Provider to determine the current tab index based on a path
 @riverpod
 int findTabIndexFromPath(FindTabIndexFromPathRef ref, String path) {
-  final destinations = ref.watch(navigationDestinationsProvider);
+  final destinations = ref.watch(allNavigationDestinationsProvider);
+  // final allDestinations = ref.watch(allNavigationDestinationsProvider);
 
   // Find the index of the destination whose path is a prefix of the given path
   for (int i = 0; i < destinations.length; i++) {
@@ -101,17 +127,20 @@ int findTabIndexFromPath(FindTabIndexFromPathRef ref, String path) {
     }
   }
 
-  // Special handling for admin and other paths
+  // Special handling for admin path
   if (path.startsWith('/admin')) {
-    // Find admin tab index if it exists
+    // Check if admin tab is visible in current destinations
     final adminIndex = destinations.indexWhere((d) => d.path == '/admin');
     if (adminIndex >= 0) {
       return adminIndex;
     }
+
+    // If admin tab isn't visible but user is on admin path, default to home
+    return 0;
   }
 
+  // Special handling for orders path
   if (path.startsWith('/ordenes')) {
-    // Find orders tab index if it exists
     final ordersIndex = destinations.indexWhere((d) => d.path == '/ordenes');
     if (ordersIndex >= 0) {
       return ordersIndex;

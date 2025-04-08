@@ -6,10 +6,32 @@ part of 'navigation_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$navigationDestinationsHash() =>
-    r'15936606c0b89df58ee0053f617d2090cdd4b423';
+String _$allNavigationDestinationsHash() =>
+    r'91fe991dd79577ed6905d32fb37381f26bba9c61';
 
-/// Provider for navigation destinations - customize this based on your app's requirements
+/// Provider for all possible navigation destinations (including admin)
+///
+/// Copied from [allNavigationDestinations].
+@ProviderFor(allNavigationDestinations)
+final allNavigationDestinationsProvider =
+    AutoDisposeProvider<List<NavigationDestinationItem>>.internal(
+  allNavigationDestinations,
+  name: r'allNavigationDestinationsProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$allNavigationDestinationsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef AllNavigationDestinationsRef
+    = AutoDisposeProviderRef<List<NavigationDestinationItem>>;
+String _$navigationDestinationsHash() =>
+    r'5360a811483875bc39541a14361dd3b5f137c594';
+
+/// Provider for visible navigation destinations
 ///
 /// Copied from [navigationDestinations].
 @ProviderFor(navigationDestinations)
@@ -29,7 +51,7 @@ final navigationDestinationsProvider =
 typedef NavigationDestinationsRef
     = AutoDisposeProviderRef<List<NavigationDestinationItem>>;
 String _$findTabIndexFromPathHash() =>
-    r'1691b737244aa9a80861fdfd03bcaf03b9cd0b78';
+    r'75ecc7288c5d14e60b99711dba2d3eb30fbd1aaa';
 
 /// Copied from Dart SDK
 class _SystemHash {

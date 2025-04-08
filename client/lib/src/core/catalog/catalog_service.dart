@@ -246,7 +246,6 @@ class CatalogService {
   final Map<String, String> _collectionPaths = {};
   final String _catalogType;
 
-
   /// Constructor with dependency injection for testing
   CatalogService({
     required cloud_firestore.FirebaseFirestore firestore,
@@ -874,22 +873,61 @@ class CatalogService {
   // ============= CACHING METHODS =============
 
   /// Update categories cache
+  /// Update categories cache
   Future<void> _updateCategoriesCache(
       String catalogType, List<CatalogCategory> categories) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final cacheKey = 'catalog_categories_$_businessId$catalogType';
 
+      // Create a serializable version of each category
+      final serializableCategories = categories.map((cat) {
+        // Create a copy of the category data without FieldValue objects
+        final catData = Map<String, dynamic>.from(cat.toFirestore());
+        // Remove the updatedAt field which contains FieldValue.serverTimestamp()
+        catData.remove('updatedAt');
+        // Add the ID field for later retrieval
+        catData['id'] = cat.id;
+        return catData;
+      }).toList();
+
       final cacheData = CatalogCache(
         timestamp: DateTime.now(),
-        data: categories
-            .map((cat) => cat.toFirestore()..addAll({'id': cat.id}))
-            .toList(),
+        data: serializableCategories,
       );
 
       await prefs.setString(cacheKey, jsonEncode(cacheData.toJson()));
     } catch (e) {
       debugPrint('Error caching categories: $e');
+    }
+  }
+
+  /// Cache featured items
+  Future<void> _cacheFeaturedItems(
+      String catalogType, List<CatalogItem> items) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheKey = 'catalog_featured_$_businessId$catalogType';
+
+      // Create a serializable version of each item
+      final serializableItems = items.map((item) {
+        // Create a copy of the item data without FieldValue objects
+        final itemData = Map<String, dynamic>.from(item.toFirestore());
+        // Remove the updatedAt field which contains FieldValue.serverTimestamp()
+        itemData.remove('updatedAt');
+        // Add the ID field for later retrieval
+        itemData['id'] = item.id;
+        return itemData;
+      }).toList();
+
+      final cacheData = CatalogCache(
+        timestamp: DateTime.now(),
+        data: serializableItems,
+      );
+
+      await prefs.setString(cacheKey, jsonEncode(cacheData.toJson()));
+    } catch (e) {
+      debugPrint('Error caching featured items: $e');
     }
   }
 
@@ -931,11 +969,20 @@ class CatalogService {
       final prefs = await SharedPreferences.getInstance();
       final cacheKey = 'catalog_items_$_businessId$catalogType';
 
+      // Create a serializable version of each item
+      final serializableItems = items.map((item) {
+        // Create a copy of the item data without FieldValue objects
+        final itemData = Map<String, dynamic>.from(item.toFirestore());
+        // Remove the updatedAt field which contains FieldValue.serverTimestamp()
+        itemData.remove('updatedAt');
+        // Add the ID field for later retrieval
+        itemData['id'] = item.id;
+        return itemData;
+      }).toList();
+
       final cacheData = CatalogCache(
         timestamp: DateTime.now(),
-        data: items
-            .map((item) => item.toFirestore()..addAll({'id': item.id}))
-            .toList(),
+        data: serializableItems,
       );
 
       await prefs.setString(cacheKey, jsonEncode(cacheData.toJson()));
@@ -972,26 +1019,6 @@ class CatalogService {
     } catch (e) {
       debugPrint('Error loading items cache: $e');
       return null;
-    }
-  }
-
-  /// Cache featured items
-  Future<void> _cacheFeaturedItems(
-      String catalogType, List<CatalogItem> items) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final cacheKey = 'catalog_featured_$_businessId$catalogType';
-
-      final cacheData = CatalogCache(
-        timestamp: DateTime.now(),
-        data: items
-            .map((item) => item.toFirestore()..addAll({'id': item.id}))
-            .toList(),
-      );
-
-      await prefs.setString(cacheKey, jsonEncode(cacheData.toJson()));
-    } catch (e) {
-      debugPrint('Error caching featured items: $e');
     }
   }
 
@@ -1156,8 +1183,9 @@ final popularItemsProvider =
 });
 
 /// Provider for seasonal menus
-final seasonalMenusProvider = FutureProvider.family<List<Map<String, dynamic>>, String>((ref, catalogType) {
+final seasonalMenusProvider =
+    FutureProvider.family<List<Map<String, dynamic>>, String>(
+        (ref, catalogType) {
   final catalogService = ref.watch(catalogServiceProvider(catalogType));
   return catalogService.getActiveSeasonalMenus();
 });
- 
