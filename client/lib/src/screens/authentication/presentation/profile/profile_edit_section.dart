@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/user_preference/user_preference_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/user_preference/user_preference_provider.dart';
 
 class ProfileEditSection extends ConsumerStatefulWidget {
   final User user;

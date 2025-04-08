@@ -3,12 +3,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_management_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/onboarding/onboarding_repository.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/setup/setup_screen_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/business_config_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/local_storage_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/setup/setup_screen_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/local_storange/local_storage_service.dart';
 
 part 'app_config_services.g.dart';
 

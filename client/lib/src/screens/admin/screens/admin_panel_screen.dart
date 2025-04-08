@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/user/auth_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_management_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/admin_panel/admin_stats_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
+
+import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_stats_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.dart'; // Use updated router
 import 'dart:async';
 

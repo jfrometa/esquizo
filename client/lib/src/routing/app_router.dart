@@ -1,43 +1,46 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_management_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/app_config/app_config_services.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_analitics.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_dashboard_home.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/screens/customer_meal_plan_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/authenticated_profile_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/catering/screens/catering_menu/catering_menu_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/landing/landing-page-home.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/menu/menu_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/cart/cart_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/catering_entry/catering_entry_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/catering/catering_selection_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/catering_quote/manual_quote_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/checkout/checkout_creen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/all_dishes_menu_home/all_dishes_menu_home_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/dishes/dish_details/dish_details_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_details.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/categories.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/home/home.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_startup.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/custom_profile_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/custom_sign_in_screen.dart';
-import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/onboarding/presentation/onboarding_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/go_router_refresh_stream.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/navigation_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/not_found_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/scaffold_with_nested_navigation.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_dashboard_home.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_panel_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/orders/in_progress_orders_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_setup_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/screens/customer_meal_plan_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/all_dishes_menu_home/all_dishes_menu_home_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/authenticated_profile_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/custom_profile_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/custom_sign_in_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/cart/cart_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/catering/catering_selection_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/catering/screens/catering_menu/catering_menu_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/catering_entry/catering_entry_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/catering_quote/manual_quote_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/checkout/checkout_creen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/dishes/dish_details/dish_details_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/landing/landing-page-home.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_details.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/menu/menu_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/onboarding/presentation/onboarding_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/orders/in_progress_orders_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/categories.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/home/home.dart';
+import 'package:starter_architecture_flutter_firebase/src/utils/web/web_utils.dart';
+import 'package:go_router/go_router.dart';
 
 part 'app_router.g.dart';
 
@@ -50,6 +53,12 @@ final _cartNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'cart');
 final _adminNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'admin');
 final _OrdersNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'local');
 final _localNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'orders');
+
+// Store paths that were attempted before authentication
+// final _pendingPathProvider = StateProvider<String?>((ref) => null);
+final pendingAdminPathProvider = StateProvider<String?>((ref) => null);
+// Error state for router
+final routerErrorNotifierProvider = StateProvider<String?>((ref) => null);
 
 enum AppRoute {
   authenticatedProfile,
@@ -101,69 +110,122 @@ enum AppRoute {
 
 @riverpod
 GoRouter goRouter(Ref ref) {
-  final appStartupState = ref.watch(appStartupProvider);
   final authRepository = ref.watch(authRepositoryProvider);
   final destinations = ref.watch(navigationDestinationsProvider);
   final isFirebaseInitialized = ref.watch(isFirebaseInitializedProvider);
+  final isAdmin = ref.watch(cachedAdminStatusProvider);
+
+  // Watch for pending admin path
+  final pendingAdminPath = ref.watch(pendingAdminPathProvider);
+
+  // *** DIRECTLY USE WEB UTILS TO GET THE INITIAL LOCATION FROM BROWSER URL ***
+  String initialLocation = '/';
+  if (kIsWeb) {
+    initialLocation = WebUtils.getCurrentPath();
+    debugPrint('📍 Direct initial location: $initialLocation');
+
+    // Store admin path if detected
+    if (initialLocation.startsWith('/admin') && initialLocation != '/admin') {
+      debugPrint('📍 Storing admin path: $initialLocation');
+      ref.read(pendingAdminPathProvider.notifier).state = initialLocation;
+    }
+  }
 
   return GoRouter(
-    initialLocation: '/signIn',
+    initialLocation: initialLocation,
     navigatorKey: _rootNavigatorKey,
-    debugLogDiagnostics: true,
+    debugLogDiagnostics: kDebugMode,
+    refreshListenable: GoRouterRefreshStream(authRepository.authStateChanges()),
     redirect: (context, state) async {
-      // Firebase initialization and authentication logic...
-      if (!isFirebaseInitialized) {
-        try {
-          await Firebase.initializeApp(
-              options: DefaultFirebaseOptions.currentPlatform);
-        } catch (e) {
-          debugPrint("Error initializing Firebase: $e");
-          return '/error';
+      try {
+        final path = state.uri.path;
+
+        // Log router state for debugging
+        debugPrint(
+            '🧭 Router redirect, path: "$path", location: "${state.uri}"');
+
+        // Skip redirect logic entirely if we're already at error
+        if (path.startsWith('/error')) {
+          return null;
         }
-      }
 
-      if (appStartupState.isLoading || appStartupState.hasError) {
-        return '/startup';
-      }
-
-      final path = state.uri.path;
-      final isLoggedIn = authRepository.currentUser != null;
-
-      if (isLoggedIn) {
-        // Check admin status for admin routes
-        if (path.startsWith('/admin')) {
-          final isAdmin = ref.read(cachedAdminStatusProvider);
-          if (!isAdmin) {
-            return '/';
+        // Initialize Firebase if needed
+        if (!isFirebaseInitialized) {
+          try {
+            await Firebase.initializeApp(
+                options: DefaultFirebaseOptions.currentPlatform);
+            debugPrint("📱 Firebase initialized successfully");
+          } catch (e) {
+            debugPrint("🔥 Error initializing Firebase: $e");
+            return '/error?message=${Uri.encodeComponent(e.toString())}';
           }
         }
 
-        if (path.startsWith('/startup') ||
-            path.startsWith('/onboarding') ||
-            path.startsWith('/signIn')) {
-          return '/';
+        // Check authentication status
+        final isLoggedIn = authRepository.currentUser != null;
+        final isLoggingIn = state.uri.path == '/signin';
+        final isOnboarding = state.uri.path == '/onboarding';
+        final isAtError = state.uri.path == '/error';
+        final isAtStartup = state.uri.path == '/startup';
+
+        // Handle authentication redirects
+        if (!isLoggedIn) {
+          // Allow access to public routes and error routes
+          if (isLoggingIn || isOnboarding || isAtError || isAtStartup) {
+            return null;
+          }
+
+          // Store the attempted path to redirect after login if not already at signin
+          if (path != '/signin') {
+            // Use Future.microtask to avoid setState during build
+            Future.microtask(() {
+              ref.read(pendingAdminPathProvider.notifier).state = path;
+            });
+
+            return '/signin?from=$path';
+          }
+          return null;
         }
-      } else {
-        if (path.startsWith('/startup') ||
-            path.startsWith('/onboarding') ||
-            path.startsWith('/jobs') ||
-            path.startsWith('/home') ||
-            path.startsWith('/chat') ||
-            path.startsWith('/entries') ||
-            path.startsWith('/account') ||
-            path.startsWith('/admin')) {
-          return '/signIn';
+
+        // User is logged in
+        if (isLoggedIn) {
+          // Check for any pending path that was saved before authentication
+          final pendingPath = ref.read(pendingAdminPathProvider);
+
+          // Handle admin routes - check permissions
+          if (path.startsWith('/admin')) {
+            if (!isAdmin) {
+              return '/'; // Redirect non-admins to home
+            }
+          }
+
+          // If we're at startup, signin, or onboarding, go to saved path or home
+          if (isAtStartup || isLoggingIn || isOnboarding) {
+            if (pendingPath != null &&
+                pendingPath.isNotEmpty &&
+                pendingPath != '/') {
+              // Clear the pending path
+              Future.microtask(() {
+                ref.read(pendingAdminPathProvider.notifier).state = null;
+              });
+              return pendingPath;
+            }
+            return '/'; // Default to home if no pending path
+          }
         }
+
+        return null; // No redirect needed
+      } catch (e) {
+        debugPrint("🔥 Router error: $e");
+        return '/error?message=${Uri.encodeComponent(e.toString())}';
       }
-      return null;
     },
     observers: [
-      // Firebase Analytics Observer...
+      // Firebase Analytics Observer
       FirebaseAnalyticsObserver(
         analytics: FirebaseAnalytics.instance,
         nameExtractor: (RouteSettings settings) {
           final String? name = settings.name;
-
           if (name != null && name.isNotEmpty) {
             AnalyticsService.instance.logCustomEvent(
               eventName: 'screen_view',
@@ -174,7 +236,6 @@ GoRouter goRouter(Ref ref) {
               },
             );
           }
-
           return name;
         },
         onError: (Object error) {
@@ -183,7 +244,12 @@ GoRouter goRouter(Ref ref) {
         },
       ),
     ],
-    refreshListenable: GoRouterRefreshStream(authRepository.authStateChanges()),
+    // Use only errorBuilder, not errorPageBuilder or onException
+    errorBuilder: (context, state) {
+      final errorMsg = state.error?.toString() ?? 'Unknown error';
+      debugPrint("🔥 Router error: $errorMsg");
+      return UnauthorizedScreen();
+    },
     routes: [
       GoRoute(
         path: '/startup',
@@ -194,6 +260,16 @@ GoRouter goRouter(Ref ref) {
         ),
       ),
       GoRoute(
+        path: '/error',
+        pageBuilder: (context, state) {
+          final message =
+              state.uri.queryParameters['message'] ?? 'An error occurred';
+          return NoTransitionPage(
+            child: UnauthorizedScreen(),
+          );
+        },
+      ),
+      GoRoute(
         path: '/onboarding',
         name: AppRoute.onboarding.name,
         pageBuilder: (context, state) => const NoTransitionPage(
@@ -201,7 +277,7 @@ GoRouter goRouter(Ref ref) {
         ),
       ),
       GoRoute(
-        path: '/signIn',
+        path: '/signin',
         name: AppRoute.signIn.name,
         pageBuilder: (context, state) => const NoTransitionPage(
           child: CustomSignInScreen(),
@@ -224,12 +300,10 @@ GoRouter goRouter(Ref ref) {
       // Add all admin routes here for proper URL handling
       ...getAdminRoutes(),
     ],
-    errorPageBuilder: (context, state) => const NoTransitionPage(
-      child: NotFoundScreen(),
-    ),
   );
 }
 
+// Rest of your file with helper functions and route definitions...
 List<RouteBase> _getNestedRoutes(String path) {
   switch (path) {
     case '/':

@@ -3,10 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
 
-import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/cart/cart_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/order/unified_order_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/cart/cart_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/order/unified_order_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';
@@ -23,8 +21,8 @@ import 'package:starter_architecture_flutter_firebase/src/screens/checkout/widge
 import 'package:starter_architecture_flutter_firebase/src/screens/location/location_capture.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/prompt_dialogs/contact_info_dialog.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/manual_quote_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_order_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/catering/manual_quote_provider.dart';
 import 'package:uuid/uuid.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {

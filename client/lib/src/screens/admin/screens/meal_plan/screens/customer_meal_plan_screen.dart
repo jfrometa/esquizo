@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/user/auth_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/meal_plan_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/subscriptions/meal_plan_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/responsive_layout.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/plans/plans.dart';
- 
- 
 
 // Provider for customer's meal plans - change to StreamProvider
 final customerMealPlansProvider = StreamProvider<List<MealPlan>>((ref) {
@@ -19,22 +17,24 @@ class CustomerMealPlanScreen extends ConsumerStatefulWidget {
   const CustomerMealPlanScreen({super.key});
 
   @override
-  ConsumerState<CustomerMealPlanScreen> createState() => _CustomerMealPlanScreenState();
+  ConsumerState<CustomerMealPlanScreen> createState() =>
+      _CustomerMealPlanScreenState();
 }
 
-class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen> {
+class _CustomerMealPlanScreenState
+    extends ConsumerState<CustomerMealPlanScreen> {
   String? _selectedMealPlanId;
 
   @override
   Widget build(BuildContext context) {
     final customerPlansAsync = ref.watch(customerMealPlansProvider);
     // Use a StreamProvider for the selected meal plan instead of a FutureProvider
-    final  selectedPlanAsync = _selectedMealPlanId != null
+    final selectedPlanAsync = _selectedMealPlanId != null
         ? ref.watch(mealPlanProvider(_selectedMealPlanId!))
         : const AsyncValue.loading();
-    
+
     final isDesktop = ResponsiveLayout.isDesktop(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Meal Plans'),
@@ -53,7 +53,7 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
               child: Text('You don\'t have any active meal plans'),
             );
           }
-          
+
           if (_selectedMealPlanId == null && plans.isNotEmpty) {
             // Auto-select the first meal plan
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -62,7 +62,7 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
               });
             });
           }
-          
+
           return isDesktop
               ? Row(
                   children: [
@@ -73,7 +73,8 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
                     const VerticalDivider(width: 1),
                     Expanded(
                       child: _selectedMealPlanId != null
-                          ? _buildMealPlanDetails(selectedPlanAsync as AsyncValue<MealPlan>)
+                          ? _buildMealPlanDetails(
+                              selectedPlanAsync as AsyncValue<MealPlan>)
                           : Center(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -81,14 +82,23 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
                                   Icon(
                                     Icons.restaurant_menu,
                                     size: 48,
-                                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withOpacity(0.5),
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
                                     'Select a meal plan to view details',
-                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                              .withOpacity(0.5),
+                                        ),
                                   ),
                                 ],
                               ),
@@ -98,17 +108,18 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
                 )
               : _selectedMealPlanId == null
                   ? _buildMealPlansList(plans)
-                  : _buildMealPlanDetails(selectedPlanAsync as AsyncValue<MealPlan>);
+                  : _buildMealPlanDetails(
+                      selectedPlanAsync as AsyncValue<MealPlan>);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: SelectableText('Error: $error')),
       ),
     );
   }
-  
+
   Widget _buildMealPlansList(List<MealPlan> plans) {
     final theme = Theme.of(context);
-    
+
     return Column(
       children: [
         // Header
@@ -131,7 +142,7 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
             ],
           ),
         ),
-        
+
         // Plans list
         Expanded(
           child: ListView.builder(
@@ -140,7 +151,7 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
             itemBuilder: (context, index) {
               final plan = plans[index];
               final isSelected = plan.id == _selectedMealPlanId;
-              
+
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 elevation: isSelected ? 2 : 0,
@@ -155,7 +166,7 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
                     setState(() {
                       _selectedMealPlanId = plan.id;
                     });
-                    
+
                     // If on mobile, navigate to detail view
                     if (!ResponsiveLayout.isDesktop(context)) {
                       // Use a mobile-specific navigation approach
@@ -175,7 +186,9 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
                                 plan.title,
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: isSelected ? theme.colorScheme.primary : null,
+                                  color: isSelected
+                                      ? theme.colorScheme.primary
+                                      : null,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -189,7 +202,8 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
                               decoration: BoxDecoration(
                                 color: _getStatusColor(plan).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: _getStatusColor(plan)),
+                                border:
+                                    Border.all(color: _getStatusColor(plan)),
                               ),
                               child: Text(
                                 _getStatusText(plan),
@@ -200,17 +214,18 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
                             ),
                           ],
                         ),
-                        
+
                         const SizedBox(height: 8),
-                        
+
                         // Progress indicator
                         LinearProgressIndicator(
                           value: plan.usagePercentage / 100,
-                          backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                          backgroundColor:
+                              theme.colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         const SizedBox(height: 4),
-                        
+
                         // Usage stats
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -225,7 +240,7 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
                             ),
                           ],
                         ),
-                        
+
                         if (plan.expiryDate != null) ...[
                           const SizedBox(height: 8),
                           Row(
@@ -262,10 +277,10 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
       ],
     );
   }
-  
+
   Widget _buildMealPlanDetails(AsyncValue<MealPlan> planAsync) {
     final isDesktop = ResponsiveLayout.isDesktop(context);
-    
+
     return planAsync.when(
       data: (plan) {
         return Stack(
@@ -284,7 +299,7 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
                         });
                       },
                     ),
-                  
+
                   // Image and header
                   if (plan.img.isNotEmpty)
                     ClipRRect(
@@ -296,7 +311,9 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(
                           height: 200,
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
                           child: const Icon(
                             Icons.image_not_supported,
                             size: 48,
@@ -304,16 +321,16 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
                         ),
                       ),
                     ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   Text(
                     plan.title,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Usage summary card
                   Card(
                     elevation: 0,
@@ -328,9 +345,12 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
                             children: [
                               Text(
                                 'Usage Summary',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
                               ),
                               Text(
                                 '${plan.mealsRemaining} of ${plan.totalMeals} remaining',
@@ -338,17 +358,15 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
                               ),
                             ],
                           ),
-                          
                           const SizedBox(height: 16),
-                          
                           LinearProgressIndicator(
                             value: plan.usagePercentage / 100,
-                            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                            backgroundColor: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          
                           const SizedBox(height: 8),
-                          
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -369,11 +387,16 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
                                     const SizedBox(width: 4),
                                     Text(
                                       'Expires: ${DateFormat.yMMMd().format(plan.expiryDate!)}',
-                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: plan.isExpired
-                                            ? Theme.of(context).colorScheme.error
-                                            : null,
-                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: plan.isExpired
+                                                ? Theme.of(context)
+                                                    .colorScheme
+                                                    .error
+                                                : null,
+                                          ),
                                     ),
                                   ],
                                 ),
@@ -383,70 +406,71 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // About this plan
                   Text(
                     'About This Plan',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   Text(plan.longDescription),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // How it works
                   Text(
                     'How It Works',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   Text(plan.howItWorks),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Features
                   Text(
                     'Features',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 8),
-                  
-                  ...plan.features.map((feature) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.check_circle,
-                          color: Theme.of(context).colorScheme.primary,
-                          size: 18,
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(child: Text(feature)),
-                      ],
-                    ),
-                  )),
-                  
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  ...plan.features.map((feature) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.check_circle,
+                              color: Theme.of(context).colorScheme.primary,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(child: Text(feature)),
+                          ],
+                        ),
+                      )),
+
                   const SizedBox(height: 24),
-                  
+
                   // Recent consumption
                   Consumer(
                     builder: (context, ref, _) {
-                      final consumedItemsAsync = ref.watch(consumedItemsProvider(plan.id));
-                      
+                      final consumedItemsAsync =
+                          ref.watch(consumedItemsProvider(plan.id));
+
                       return consumedItemsAsync.when(
                         data: (items) {
                           if (items.isEmpty) {
@@ -457,18 +481,21 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
                               ),
                             );
                           }
-                          
+
                           // Show only the 5 most recent consumed items
                           final recentItems = items.take(5).toList();
-                          
+
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 'Recent Usage',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
                               ),
                               const SizedBox(height: 8),
                               Card(
@@ -477,20 +504,28 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
                                   itemCount: recentItems.length,
-                                  separatorBuilder: (context, index) => const Divider(),
+                                  separatorBuilder: (context, index) =>
+                                      const Divider(),
                                   itemBuilder: (context, index) {
                                     final item = recentItems[index];
                                     return ListTile(
                                       leading: CircleAvatar(
-                                        backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                                        backgroundColor: Theme.of(context)
+                                            .colorScheme
+                                            .primary
+                                            .withOpacity(0.1),
                                         child: Icon(
                                           Icons.restaurant,
-                                          color: Theme.of(context).colorScheme.primary,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
                                         ),
                                       ),
                                       title: Text(item.itemName),
                                       subtitle: Text(
-                                        DateFormat.yMMMd().add_jm().format(item.consumedAt),
+                                        DateFormat.yMMMd()
+                                            .add_jm()
+                                            .format(item.consumedAt),
                                       ),
                                     );
                                   },
@@ -499,18 +534,20 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
                             ],
                           );
                         },
-                        loading: () => const Center(child: CircularProgressIndicator()),
-                        error: (_, __) => const Text('Error loading consumption history'),
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
+                        error: (_, __) =>
+                            const Text('Error loading consumption history'),
                       );
                     },
                   ),
-                  
+
                   // Add space at bottom for floating button
                   const SizedBox(height: 80),
                 ],
               ),
             ),
-            
+
             // Use meal button
             if (plan.isActive)
               Positioned(
@@ -533,7 +570,7 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
       error: (error, _) => Center(child: Text('Error: $error')),
     );
   }
-  
+
   void _showUseItemDialog(MealPlan plan) {
     if (plan.mealsRemaining <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -541,32 +578,34 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
       );
       return;
     }
-    
+
     if (plan.isExpired) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('This meal plan has expired')),
       );
       return;
     }
-    
+
     final itemsAsync = ref.read(mealPlanItemsProvider.future);
-    
+
     itemsAsync.then((items) {
       // Filter to only allowed items that are available
-      final allowedItems = items.where(
-        (item) => plan.allowedItemIds.contains(item.id) && item.isAvailable
-      ).toList();
-      
+      final allowedItems = items
+          .where((item) =>
+              plan.allowedItemIds.contains(item.id) && item.isAvailable)
+          .toList();
+
       if (allowedItems.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No available items for this meal plan')),
+          const SnackBar(
+              content: Text('No available items for this meal plan')),
         );
         return;
       }
-      
+
       MealPlanItem? selectedItem = allowedItems.first;
       final notesController = TextEditingController();
-      
+
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -580,37 +619,33 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
                 Text(
                   'Meals Remaining: ${plan.mealsRemaining}',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                
-                StatefulBuilder(
-                  builder: (context, setState) {
-                    return DropdownButtonFormField<MealPlanItem>(
-                      value: selectedItem,
-                      decoration: const InputDecoration(
-                        labelText: 'Select Item',
-                        border: OutlineInputBorder(),
+                        fontWeight: FontWeight.bold,
                       ),
-                      items: allowedItems.map((item) {
-                        return DropdownMenuItem<MealPlanItem>(
-                          value: item,
-                          child: Text(item.name),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            selectedItem = value;
-                          });
-                        }
-                      },
-                    );
-                  }
                 ),
                 const SizedBox(height: 16),
-                
+                StatefulBuilder(builder: (context, setState) {
+                  return DropdownButtonFormField<MealPlanItem>(
+                    value: selectedItem,
+                    decoration: const InputDecoration(
+                      labelText: 'Select Item',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: allowedItems.map((item) {
+                      return DropdownMenuItem<MealPlanItem>(
+                        value: item,
+                        child: Text(item.name),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          selectedItem = value;
+                        });
+                      }
+                    },
+                  );
+                }),
+                const SizedBox(height: 16),
                 TextField(
                   controller: notesController,
                   decoration: const InputDecoration(
@@ -630,18 +665,19 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
             ElevatedButton(
               onPressed: () {
                 if (selectedItem != null) {
-                  final customerId = ref.watch(currentUserIdProvider) ?? 'no ide';
-                  
+                  final customerId =
+                      ref.watch(currentUserIdProvider) ?? 'no ide';
+
                   final consumedItem = ConsumedItem(
                     id: '',
                     mealPlanId: plan.id,
                     itemId: selectedItem!.id,
                     itemName: selectedItem!.name,
                     consumedAt: DateTime.now(),
-                    consumedBy: customerId, 
+                    consumedBy: customerId,
                     notes: notesController.text.trim(),
                   );
-                  
+
                   Navigator.pop(context);
                   _consumeItem(consumedItem);
                 }
@@ -653,7 +689,7 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
       );
     });
   }
-  
+
   void _showHelpDialog() {
     showDialog(
       context: context,
@@ -709,44 +745,44 @@ class _CustomerMealPlanScreenState extends ConsumerState<CustomerMealPlanScreen>
       ),
     );
   }
-  
+
   Color _getStatusColor(MealPlan plan) {
     if (plan.isExpired) {
       return Colors.red;
     }
-    
+
     if (!plan.isAvailable) {
       return Colors.grey;
     }
-    
+
     if (plan.mealsRemaining <= 0) {
       return Colors.orange;
     }
-    
+
     return Colors.green;
   }
-  
+
   String _getStatusText(MealPlan plan) {
     if (plan.isExpired) {
       return 'Expired';
     }
-    
+
     if (!plan.isAvailable) {
       return 'Unavailable';
     }
-    
+
     if (plan.mealsRemaining <= 0) {
       return 'Depleted';
     }
-    
+
     return 'Active';
   }
-  
+
   Future<void> _consumeItem(ConsumedItem item) async {
     try {
       final service = ref.read(mealPlanServiceProvider);
       await service.addConsumedItem(item);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Successfully used ${item.itemName}')),
       );

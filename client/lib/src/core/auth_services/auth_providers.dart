@@ -3,7 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart' as firebase_ui;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/firebase_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
 
 /// Unified Authentication Repository that consolidates all auth-related functionality.
 /// This combines the features from AuthRepository and also integrates with Firebase UI Auth.
@@ -113,20 +114,92 @@ final authStateChangesProvider = StreamProvider<User?>((ref) {
   return authRepository.authStateChanges();
 });
 
-// Current user provider - cached with proper invalidation
-final currentUserProvider = FutureProvider<User?>((ref) {
-  final authRepository = ref.watch(authRepositoryProvider);
-
-  // Listen to auth state changes to invalidate cache when needed
-  ref.listen(authStateChangesProvider, (_, __) {
-    ref.invalidateSelf();
-  });
-
-  return Future.value(authRepository.currentUser);
-});
-
 // Is anonymous provider with caching
 final isAnonymousProvider = Provider<bool>((ref) {
-  final user = ref.watch(currentUserProvider).valueOrNull;
+  final user = ref.watch(firebaseAuthProvider).currentUser;
   return user?.isAnonymous ?? true;
 });
+
+// Provider for auth service
+final authServiceProvider = Provider<UnifiedAuthService>((ref) {
+  return UnifiedAuthService();
+});
+
+// Provider for current Firebase user
+final firebaseUserProvider = StreamProvider<User?>((ref) {
+  final authService = ref.watch(authServiceProvider);
+  return authService.authStateChanges;
+});
+
+// Provider for current user ID
+final currentUserIdProvider = Provider<String?>((ref) {
+  return ref.watch(firebaseUserProvider).value?.uid;
+});
+
+final isCurrentUserProvider =
+    FutureProvider.family<bool, String>((ref, email) async {
+  final currentUser = await ref.watch(currentUserProvider.future);
+  return currentUser?.email == email;
+});
+
+// Provider for current app user data
+final currentUserProvider = StreamProvider<AppUser?>((ref) {
+  final authService = ref.watch(authServiceProvider);
+  final userId = ref.watch(currentUserIdProvider);
+
+  if (userId == null) {
+    return Stream.value(null);
+  }
+
+  return authService.streamUserData(userId);
+});
+
+// // Provider for current app user data
+// final currentUserProvider = StreamProvider<AppUser?>((ref) {
+//   final authService = ref.watch(authServiceProvider);
+//   final userId = ref.watch(currentUserIdProvider);
+
+//   if (userId == null) {
+//     return Stream.value(null);
+//   }
+
+//   return authService.streamUserData(userId);
+// });
+
+// Provider to check if user has a specific role
+final hasRoleProvider = Provider.family<bool, String>((ref, role) {
+  final userAsync = ref.watch(currentUserProvider);
+  return userAsync.when(
+    data: (user) => user?.hasRole(role) ?? false,
+    loading: () => false,
+    error: (_, __) => false,
+  );
+});
+
+// Provider for authentication state
+final authStateProvider = Provider<AuthState>((ref) {
+  final userAsync = ref.watch(currentUserProvider);
+
+  return userAsync.when(
+    data: (user) {
+      if (user == null) {
+        return AuthState.unauthenticated;
+      }
+      if (!user.isActive) {
+        return AuthState.disabled;
+      }
+      return AuthState.authenticated;
+    },
+    loading: () => AuthState.loading,
+    error: (_, __) => AuthState.error,
+  );
+});
+
+// Authentication state enum
+enum AuthState {
+  loading,
+  authenticated,
+  unauthenticated,
+  disabled,
+  error,
+}

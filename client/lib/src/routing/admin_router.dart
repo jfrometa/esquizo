@@ -152,6 +152,7 @@ class AdminRoutes {
   // Helper to get index (0-4) from ANY valid admin route path - UPDATED
   static int getIndexFromRoute(String route) {
     final String fullRoute = route.startsWith('/') ? route : getFullPath(route);
+    debugPrint('🔍 Getting admin index for route: "$fullRoute"');
 
     // Define full base paths for sections
     final String sfBasePath = getFullPath(staff); // /admin/staff
@@ -163,41 +164,68 @@ class AdminRoutes {
 
     // Check Staff section first (NEW)
     if (fullRoute.startsWith(sfBasePath)) {
+      debugPrint('✅ Route matches staff section, index: 1');
       return 1; // Index for Staff
     }
 
     // Check Meal Plans
     if (fullRoute.startsWith(mpBasePath)) {
+      debugPrint('✅ Route matches meal plans section, index: 2');
       return 2; // Index for Meal Plans
     }
 
     // Check Catering
     if (fullRoute.startsWith(ctBasePath)) {
+      debugPrint('✅ Route matches catering section, index: 3');
       return 3; // Index for Catering
     }
 
     // Check Settings
     if (fullRoute.startsWith(stBasePath)) {
+      debugPrint('✅ Route matches settings section, index: 4');
       return 4; // Index for Settings
     }
 
     // Check Product Dashboard and its subroutes LAST
     if (fullRoute == basePath || fullRoute.startsWith(pdSubroutePrefix)) {
+      debugPrint('✅ Route matches product dashboard section, index: 0');
       return 0; // Index for Product Dashboard
     }
 
     // Fallback
+    debugPrint('⚠️ No section match found for route, using default index: 0');
     return 0;
+  }
+
+  // Helper to get the path for a given section index
+  static String getPathFromIndex(int index) {
+    switch (index) {
+      case 0:
+        return basePath; // Product dashboard
+      case 1:
+        return getFullPath(staff); // Staff
+      case 2:
+        return getFullPath(mealPlans); // Meal plans
+      case 3:
+        return getFullPath(catering); // Catering
+      case 4:
+        return getFullPath(settings); // Settings
+      default:
+        return basePath;
+    }
   }
 }
 
 /// Admin router configuration based on the provided structure - UPDATED
 List<RouteBase> getAdminRoutes() {
+  debugPrint('🏗️ Building admin routes');
+
   return [
     // Wrapper route that shows the admin panel with shell navigation
     ShellRoute(
       builder: (context, state, child) {
         final currentRoute = state.matchedLocation;
+        debugPrint('🔄 AdminShellRoute: Current route: "$currentRoute"');
         final index = AdminRoutes.getIndexFromRoute(currentRoute);
         return AdminPanelScreen(
           initialIndex: index,
@@ -253,9 +281,6 @@ List<RouteBase> getAdminRoutes() {
                   // Redirect /staff/kitchen to new orders
                   redirect: (_, __) => AdminRoutes.getFullPath(
                       '${AdminRoutes.staff}/${AdminRoutes.staffKitchenNew}'),
-                  // This route needs a builder if it's ever navigated to directly,
-                  // but since it redirects, it might not be strictly necessary.
-                  // builder: (context, state) => const StaffKitchenScreen(initialTab: KitchenTab.newOrders),
                   routes: [
                     GoRoute(
                         path: 'new',
@@ -400,12 +425,54 @@ List<RouteBase> getAdminRoutes() {
   ];
 }
 
-// // Helper class for order details screen
+// This is just a stub for the placeholder screen mentioned in the imports
+// In a real implementation, these would be real screen widgets
+enum KitchenTab { newOrders, current, upcoming, turns }
+
+class StaffKitchenScreen extends StatelessWidget {
+  final KitchenTab initialTab;
+  const StaffKitchenScreen({Key? key, required this.initialTab})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(child: Text('Kitchen Screen - ${initialTab.toString()}')),
+    );
+  }
+}
+
+class StaffWaiterTableSelectScreen extends StatelessWidget {
+  const StaffWaiterTableSelectScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(child: Text('Waiter Table Selection')),
+    );
+  }
+}
+
+class StaffOrderEntryScreen extends StatelessWidget {
+  final String tableId;
+  const StaffOrderEntryScreen({Key? key, required this.tableId})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(child: Text('Order Entry for Table $tableId')),
+    );
+  }
+}
+
 // class OrderDetailScreen extends StatelessWidget {
 //   final String orderId;
 //   const OrderDetailScreen({super.key, required this.orderId});
 //   @override
 //   Widget build(BuildContext context) {
-//     return OrderDetailView(orderId: orderId);
+//     return Scaffold(
+//       body: Center(child: Text('Order Details for $orderId')),
+//     );
 //   }
 // }

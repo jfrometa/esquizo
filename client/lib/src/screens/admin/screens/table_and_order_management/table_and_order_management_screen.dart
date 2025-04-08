@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/table_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/order/order_admin_providers.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/order/unified_order_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/restaurant/table_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/restaurant/table_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/order/unified_order_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/product_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/print_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/product_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/print/print_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/catalog/product_service.dart';
 
 // Create or view order screen with table context
 class TableOrderScreen extends ConsumerStatefulWidget {

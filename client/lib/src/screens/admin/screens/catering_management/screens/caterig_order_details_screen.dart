@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_order_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
 
 class CateringOrderDetailsScreen extends ConsumerStatefulWidget {

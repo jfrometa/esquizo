@@ -5,12 +5,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/constants/app_sizes.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/firebase_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/location_management/locations_management_section.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/profile/profile_edit_section.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/theming_selection/theming_setting_section.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/admin_management_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
 
 class AuthenticatedProfileScreen extends ConsumerStatefulWidget {
   final User user;

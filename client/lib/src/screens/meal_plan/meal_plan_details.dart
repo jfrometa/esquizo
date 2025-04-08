@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/meal_plan_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/subscriptions/meal_plan_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_cart.dart';
 import '../plans/plans.dart';
 

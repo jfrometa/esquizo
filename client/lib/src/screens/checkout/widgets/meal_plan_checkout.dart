@@ -5,7 +5,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/car
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/meal_subscription_item_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/models/scheduled_meal.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/providers/meal_schedule_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/providers/meal_schedule_provider.dart';
  
 
 class MealPlanCheckout extends ConsumerWidget {

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; 
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catalog/catalog_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/services/catalog_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/catalog/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/cards/dish_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/dish_details/dish_details_screen.dart';
 import '../../QR/models/qr_code_data.dart';

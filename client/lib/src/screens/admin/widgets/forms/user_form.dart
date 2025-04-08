@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/services/auth_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_service.dart';
 
 class UserForm extends ConsumerStatefulWidget {
   final AppUser? user;
@@ -20,26 +20,26 @@ class UserForm extends ConsumerStatefulWidget {
 
 class _UserFormState extends ConsumerState<UserForm> {
   final _formKey = GlobalKey<FormState>();
-  
+
   // Form controllers
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _displayNameController = TextEditingController();
   final _photoURLController = TextEditingController();
-  
+
   // Form state
   List<String> _selectedRoles = ['customer'];
   bool _isActive = true;
   final Map<String, dynamic> _metadata = {};
   bool _isEditMode = false;
   bool _showPassword = false;
-  
+
   @override
   void initState() {
     super.initState();
     _isEditMode = widget.user != null;
-    
+
     if (_isEditMode) {
       // Populate form with existing user data
       _emailController.text = widget.user!.email;
@@ -50,7 +50,7 @@ class _UserFormState extends ConsumerState<UserForm> {
       _metadata.addAll(widget.user!.metadata);
     }
   }
-  
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -77,11 +77,11 @@ class _UserFormState extends ConsumerState<UserForm> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
-              
+
               // User avatar preview
               _buildAvatarPreview(),
               const SizedBox(height: 16),
-              
+
               // Photo URL
               TextFormField(
                 controller: _photoURLController,
@@ -99,7 +99,7 @@ class _UserFormState extends ConsumerState<UserForm> {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Email field
               TextFormField(
                 controller: _emailController,
@@ -114,7 +114,8 @@ class _UserFormState extends ConsumerState<UserForm> {
                   if (value == null || value.isEmpty) {
                     return 'Please enter an email';
                   }
-                  final emailRegExp = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                  final emailRegExp =
+                      RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
                   if (!emailRegExp.hasMatch(value)) {
                     return 'Please enter a valid email';
                   }
@@ -122,7 +123,7 @@ class _UserFormState extends ConsumerState<UserForm> {
                 },
               ),
               const SizedBox(height: 16),
-              
+
               // Display name field
               TextFormField(
                 controller: _displayNameController,
@@ -133,7 +134,7 @@ class _UserFormState extends ConsumerState<UserForm> {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Password fields (only shown when creating new user)
               if (!_isEditMode) ...[
                 TextFormField(
@@ -151,7 +152,8 @@ class _UserFormState extends ConsumerState<UserForm> {
                           _showPassword = !_showPassword;
                         });
                       },
-                      tooltip: _showPassword ? 'Hide password' : 'Show password',
+                      tooltip:
+                          _showPassword ? 'Hide password' : 'Show password',
                     ),
                   ),
                   obscureText: !_showPassword,
@@ -181,7 +183,8 @@ class _UserFormState extends ConsumerState<UserForm> {
                           _showPassword = !_showPassword;
                         });
                       },
-                      tooltip: _showPassword ? 'Hide password' : 'Show password',
+                      tooltip:
+                          _showPassword ? 'Hide password' : 'Show password',
                     ),
                   ),
                   obscureText: !_showPassword,
@@ -194,7 +197,7 @@ class _UserFormState extends ConsumerState<UserForm> {
                 ),
                 const SizedBox(height: 16),
               ],
-              
+
               // User roles
               const Text(
                 'User Roles',
@@ -210,7 +213,7 @@ class _UserFormState extends ConsumerState<UserForm> {
                 children: _buildRoleChips(),
               ),
               const SizedBox(height: 16),
-              
+
               // Is active toggle
               SwitchListTile(
                 title: const Text('Active'),
@@ -223,7 +226,7 @@ class _UserFormState extends ConsumerState<UserForm> {
                 },
               ),
               const SizedBox(height: 16),
-              
+
               // Custom metadata section - expandable
               ExpansionTile(
                 title: const Text('Additional Metadata'),
@@ -237,7 +240,7 @@ class _UserFormState extends ConsumerState<UserForm> {
                 ],
               ),
               const SizedBox(height: 24),
-              
+
               // Form actions
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -259,7 +262,7 @@ class _UserFormState extends ConsumerState<UserForm> {
       ),
     );
   }
-  
+
   Widget _buildAvatarPreview() {
     return Center(
       child: Column(
@@ -299,7 +302,7 @@ class _UserFormState extends ConsumerState<UserForm> {
       ),
     );
   }
-  
+
   List<Widget> _buildRoleChips() {
     const availableRoles = [
       'admin',
@@ -307,7 +310,7 @@ class _UserFormState extends ConsumerState<UserForm> {
       'staff',
       'customer',
     ];
-    
+
     return availableRoles.map((role) {
       final isSelected = _selectedRoles.contains(role);
       return FilterChip(
@@ -323,7 +326,8 @@ class _UserFormState extends ConsumerState<UserForm> {
                 _selectedRoles.remove(role);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('User must have at least one role')),
+                  const SnackBar(
+                      content: Text('User must have at least one role')),
                 );
               }
             }
@@ -332,7 +336,7 @@ class _UserFormState extends ConsumerState<UserForm> {
       );
     }).toList();
   }
-  
+
   Widget _buildMetadataFields() {
     return Column(
       children: _metadata.entries.map((entry) {
@@ -383,29 +387,33 @@ class _UserFormState extends ConsumerState<UserForm> {
       }).toList(),
     );
   }
-  
+
   void _addMetadataField() {
     setState(() {
       _metadata['field${_metadata.length + 1}'] = '';
     });
   }
-  
+
   void _handleSubmit() {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    
+
     // Create AppUser object
     final user = AppUser(
-      uid: _isEditMode ? widget.user!.uid : '', // UID will be set after creation
+      uid:
+          _isEditMode ? widget.user!.uid : '', // UID will be set after creation
       email: _emailController.text,
-      displayName: _displayNameController.text.isEmpty ? null : _displayNameController.text,
-      photoURL: _photoURLController.text.isEmpty ? null : _photoURLController.text,
+      displayName: _displayNameController.text.isEmpty
+          ? null
+          : _displayNameController.text,
+      photoURL:
+          _photoURLController.text.isEmpty ? null : _photoURLController.text,
       metadata: _metadata,
       roles: _selectedRoles,
       isActive: _isActive,
     );
-    
+
     // Pass to parent handler with password (only used for new users)
     widget.onSave(user, _passwordController.text);
   }

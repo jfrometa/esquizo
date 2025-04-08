@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/analytics/analytics_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/analytics/analytics_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/charts/active_hours_chart.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/charts/category_breakdown_chart.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/charts/stats_summary_chart.dart';

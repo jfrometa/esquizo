@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/catering_category_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/catering/unified_catering_package_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_category_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/catering/unified_catering_package_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_item_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/utils/icon_mapper.dart';

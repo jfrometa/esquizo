@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_services/firebase_providers.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/business/business_config_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/providers/setup/initialize_example_data_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/setup/initialize_example_data_provider.dart';
 
 /// First-time setup screen for admins
 class AdminSetupScreen extends ConsumerStatefulWidget {
