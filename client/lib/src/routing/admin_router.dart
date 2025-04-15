@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 // Existing screen imports...
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/payment/order_payment_details_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_dashboard_home.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_management/admin_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_panel_screen.dart';
@@ -85,6 +86,7 @@ class AdminRoutes {
   static const String namePdProducts = 'product-dashboard-products';
   static const String namePdOrders = 'product-dashboard-orders';
   static const String namePdOrderDetails = 'product-dashboard-order-details';
+  static const String namePdOrderPaymentDetails = 'product-dashboard-order-payment-details';
   static const String namePdTables = 'product-dashboard-tables';
   static const String namePdAnalytics = 'product-dashboard-analytics';
   // Staff (NEW)
@@ -263,6 +265,14 @@ List<RouteBase> getAdminRoutes() {
                 path: 'product-dashboard/analytics',
                 name: AdminRoutes.namePdAnalytics,
                 builder: (context, state) => const AnalyticsDashboard()),
+            GoRoute(
+                path: ':orderId/payment',
+                name: AdminRoutes.namePdOrderPaymentDetails, //'product-dashboard-order-payment-details',
+                builder: (context, state) => OrderPaymentDetailsScreen(
+                    orderId: state.pathParameters['orderId'] ?? '',
+                ),
+              ),
+
           ],
         ),
 
@@ -474,3 +484,4 @@ class StaffOrderEntryScreen extends StatelessWidget {
 //     );
 //   }
 // }
+

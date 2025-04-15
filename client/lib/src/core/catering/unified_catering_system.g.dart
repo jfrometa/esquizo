@@ -1042,7 +1042,7 @@ final cateringPackageRepositoryProvider = AutoDisposeStreamNotifierProvider<
 typedef _$CateringPackageRepository
     = AutoDisposeStreamNotifier<List<CateringPackage>>;
 String _$cateringOrderRepositoryHash() =>
-    r'f4942a2a02f446c7ea00c872053bd770e71700e2';
+    r'a1abbf3a92ad9481cd0e18687fe1c1c4ba45ea56';
 
 /// Unified Catering Order Repository
 ///

@@ -58,9 +58,16 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
             detailRouteName: AdminRoutes.namePdOrderDetails,
             route: AdminRoutes.getFullPath(AdminRoutes.dashboardOrders)),
         _SubRoute(
+            title: 'Payment Details',
+            routeName: AdminRoutes.namePdOrderPaymentDetails,
+            icon: Icons.payment,
+            isDetailRoute: true,
+            route: AdminRoutes.getFullPath(':orderId/payment')),
+        _SubRoute(
             title: 'Tables',
             routeName: AdminRoutes.namePdTables,
             icon: Icons.table_bar,
+            detailRouteName: AdminRoutes.namePdTables,
             route: AdminRoutes.getFullPath(AdminRoutes.dashboardTables)),
         _SubRoute(
             title: 'Analytics',
