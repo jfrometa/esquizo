@@ -566,11 +566,9 @@ class CartService {
   Future<void> loadCart() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      String? serializedCart = prefs.getString('cart');
-      if (serializedCart != null) {
-        _cart = Cart.deserialize(serializedCart);
-      }
-    } catch (e) {
+      String? serializedCart = prefs.getString('cart') ?? "no estring";
+      _cart = Cart.deserialize(serializedCart);
+        } catch (e) {
       debugPrint('Error loading cart: $e');
       // If loading fails, keep the existing cart
     }

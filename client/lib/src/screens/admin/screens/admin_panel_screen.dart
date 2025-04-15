@@ -875,8 +875,9 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
   Widget _buildDesktopHeader(BuildContext context, int currentSelectedIndex,
       String? currentRouteName) {
     if (currentSelectedIndex < 0 ||
-        currentSelectedIndex >= _navigationItems.length)
+        currentSelectedIndex >= _navigationItems.length) {
       return AppBar(title: const Text("Admin Panel"));
+    }
     final item = _navigationItems[currentSelectedIndex];
     final visibleSubroutes =
         item.subroutes?.where((sr) => !sr.isDetailRoute).toList() ?? [];
@@ -968,7 +969,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                   ...visibleSubroutes
                       .map((subroute) => _buildSubrouteMoreMenuTile(
                           _productDashboardIndex, subroute, currentRouteName))
-                      .toList(),
+                      ,
                 ],
               ),
             ),
@@ -1019,7 +1020,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                   ...visibleSubroutes
                       .map((subroute) => _buildSubrouteMoreMenuTile(
                           globalIndex, subroute, currentRouteName))
-                      .toList(),
+                      ,
                 ],
               ),
             ),
@@ -1071,7 +1072,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                       .map((subroute) => _buildSubrouteMoreMenuTile(
                           _staffIndex, subroute, currentRouteName,
                           indent: true))
-                      .toList(),
+                      ,
 
                   const Divider(),
 
@@ -1091,7 +1092,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                       .map((subroute) => _buildSubrouteMoreMenuTile(
                           _settingsIndex, subroute, currentRouteName,
                           indent: true))
-                      .toList(),
+                      ,
                 ],
               ),
             ),
@@ -1223,8 +1224,7 @@ class _SubRoute {
   final String title;
   final String route; // Full Path
   final String routeName; // Named route
-  final IconData icon;
-  final String? detailRoutePattern; // Not used in this revision's logic
+  final IconData icon;  // Not used in this revision's logic
   final String?
       detailRouteName; // Name of the detail route for highlighting parent
   final bool isDetailRoute; // Flag to hide from navigation lists
@@ -1234,8 +1234,7 @@ class _SubRoute {
     required this.route,
     required this.routeName,
     required this.icon,
-    this.detailRoutePattern,
-    this.detailRouteName,
+    this.detailRouteName, 
     this.isDetailRoute = false,
   });
 }

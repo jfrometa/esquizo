@@ -258,8 +258,8 @@ class CateringPackageCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: isMore
-            ? colorScheme.surfaceVariant.withOpacity(0.7)
-            : colorScheme.surfaceVariant,
+            ? colorScheme.surfaceContainerHighest.withOpacity(0.7)
+            : colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
@@ -492,7 +492,7 @@ class CateringPackageDetailScreen extends StatelessWidget {
                           const SizedBox(height: 8),
                         ],
                       );
-                    }).toList(),
+                    }),
 
                     const SizedBox(height: 24),
                   ],
@@ -590,7 +590,7 @@ class CateringPackageDetailScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceVariant,
+        color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Text(

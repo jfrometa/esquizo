@@ -1,9 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/app_config/app_config_services.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/onboarding/onboarding_repository.dart';
 import 'setup_screen_provider.dart';

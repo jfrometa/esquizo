@@ -276,7 +276,7 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // TabBar - fixed height
-                        Container(
+                        SizedBox(
                           height: 48,
                           child: const TabBar(
                             tabs: [
@@ -1306,7 +1306,7 @@ class _ItemSelectionDialogState extends State<_ItemSelectionDialog> {
                                     : null,
                               ),
                               subtitle: Text(
-                                '\$${item.price.toStringAsFixed(2)}${item.description != null && item.description.isNotEmpty ? ' • ${item.description}' : ''}',
+                                '\$${item.price.toStringAsFixed(2)}${item.description.isNotEmpty ? ' • ${item.description}' : ''}',
                               ),
                               selected: isSelected,
                               onTap: () {
@@ -1328,7 +1328,7 @@ class _ItemSelectionDialogState extends State<_ItemSelectionDialog> {
                   const SizedBox(height: 16),
 
                   // Selected item header
-                  Container(
+                  SizedBox(
                     height: 70, // Fixed height for this section
                     child: Row(
                       children: [
@@ -1366,7 +1366,7 @@ class _ItemSelectionDialogState extends State<_ItemSelectionDialog> {
                   const SizedBox(height: 16),
 
                   // Quantity selector with fixed height
-                  Container(
+                  SizedBox(
                     height: 50,
                     child: Row(
                       children: [
@@ -1405,7 +1405,7 @@ class _ItemSelectionDialogState extends State<_ItemSelectionDialog> {
                   ),
 
                   // Required switch with fixed height
-                  Container(
+                  SizedBox(
                     height: 60,
                     child: SwitchListTile(
                       title: const Text('Required Item'),

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart' as cloud_firestore;
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -369,14 +368,10 @@ class CateringCategoryRepository extends _$CateringCategoryRepository {
 class _CateringCategoryRepositoryImpl
     extends BaseCateringRepository<CateringCategory> {
   _CateringCategoryRepositoryImpl({
-    required cloud_firestore.FirebaseFirestore firestore,
-    required String collectionPath,
-    required String cacheKey,
-  }) : super(
-          firestore: firestore,
-          collectionPath: collectionPath,
-          cacheKey: cacheKey,
-        );
+    required super.firestore,
+    required super.collectionPath,
+    required super.cacheKey,
+  });
 
   @override
   CateringCategory fromJson(Map<String, dynamic> json) {
@@ -545,14 +540,10 @@ class CateringItemRepository extends _$CateringItemRepository {
 // Implementation of BaseCateringRepository for items
 class _CateringItemRepositoryImpl extends BaseCateringRepository<CateringItem> {
   _CateringItemRepositoryImpl({
-    required cloud_firestore.FirebaseFirestore firestore,
-    required String collectionPath,
-    required String cacheKey,
-  }) : super(
-          firestore: firestore,
-          collectionPath: collectionPath,
-          cacheKey: cacheKey,
-        );
+    required super.firestore,
+    required super.collectionPath,
+    required super.cacheKey,
+  });
 
   @override
   CateringItem fromJson(Map<String, dynamic> json) {
@@ -765,14 +756,10 @@ class CateringPackageRepository extends _$CateringPackageRepository {
 class _CateringPackageRepositoryImpl
     extends BaseCateringRepository<CateringPackage> {
   _CateringPackageRepositoryImpl({
-    required cloud_firestore.FirebaseFirestore firestore,
-    required String collectionPath,
-    required String cacheKey,
-  }) : super(
-          firestore: firestore,
-          collectionPath: collectionPath,
-          cacheKey: cacheKey,
-        );
+    required super.firestore,
+    required super.collectionPath,
+    required super.cacheKey,
+  });
 
   @override
   CateringPackage fromJson(Map<String, dynamic> json) {
@@ -802,16 +789,14 @@ class CateringOrderRepository extends _$CateringOrderRepository {
   // Load catering order from SharedPreferences
   Future<CateringOrderItem?> _loadCateringOrder() async {
     final prefs = await SharedPreferences.getInstance();
-    String? serializedOrder = prefs.getString(CateringCacheKeys.cateringOrder);
-    if (serializedOrder != null) {
-      try {
-        return CateringOrderItem.fromJson(jsonDecode(serializedOrder));
-      } catch (e) {
-        debugPrint('Error loading catering order: $e');
-        return null;
-      }
+    String? serializedOrder = prefs.getString(CateringCacheKeys.cateringOrder) ?? "";
+    try {
+      return CateringOrderItem.fromJson(jsonDecode(serializedOrder));
+    } catch (e) {
+      debugPrint('Error loading catering order: $e');
+      return null;
     }
-    return null;
+      return null;
   }
 
   // Save catering order to SharedPreferences
@@ -1099,16 +1084,14 @@ class CateringOrderRepository extends _$CateringOrderRepository {
   // Load manual quote from SharedPreferences
   Future<CateringOrderItem?> loadManualQuote() async {
     final prefs = await SharedPreferences.getInstance();
-    String? serializedQuote = prefs.getString(CateringCacheKeys.manualQuote);
-    if (serializedQuote != null) {
-      try {
-        return CateringOrderItem.fromJson(jsonDecode(serializedQuote));
-      } catch (e) {
-        debugPrint('Error loading manual quote: $e');
-        return null;
-      }
+    String? serializedQuote = prefs.getString(CateringCacheKeys.manualQuote) ?? "";
+    try {
+      return CateringOrderItem.fromJson(jsonDecode(serializedQuote));
+    } catch (e) {
+      debugPrint('Error loading manual quote: $e');
+      return null;
     }
-    return null;
+      return null;
   }
 
   // Save manual quote to SharedPreferences

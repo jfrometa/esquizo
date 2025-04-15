@@ -21,11 +21,9 @@ class CateringOrderProvider extends StateNotifier<CateringOrderItem?> {
   // Load catering order from SharedPreferences
   Future<void> _loadCateringOrder() async {
     final prefs = await SharedPreferences.getInstance();
-    String? serializedOrder = prefs.getString('cateringOrder');
-    if (serializedOrder != null) {
-      state = CateringOrderItem.fromJson(jsonDecode(serializedOrder));
+    String? serializedOrder = prefs.getString('cateringOrder') ?? "";
+    state = CateringOrderItem.fromJson(jsonDecode(serializedOrder));
     }
-  }
 
   // Save catering order to SharedPreferences
   Future<void> _saveCateringOrder() async {

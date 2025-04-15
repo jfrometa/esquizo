@@ -43,7 +43,6 @@ class _KakoAppState extends ConsumerState<KakoApp> with WidgetsBindingObserver {
 
     try {
       final router = ref.read(goRouterProvider);
-      if (router == null) return;
 
       final currentRouterPath = router.state.matchedLocation;
       final browserPath = WebUtils.getCurrentPath();

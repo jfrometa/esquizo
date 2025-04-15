@@ -199,11 +199,7 @@ final adminsStreamProvider = StreamProvider<List<AdminUser>>((ref) {
 final isAdminProvider = FutureProvider<bool>((ref) async {
   // Listen to auth state changes for cache invalidation
   ref.listen(authStateChangesProvider, (_, next) {
-    if (next == null) {
-      // User signed out, reset cached admin status
-      ref.invalidateSelf();
-      ref.read(cachedAdminStatusProvider.notifier).state = false;
-    }
+    
   });
 
   // Check cached value first for performance

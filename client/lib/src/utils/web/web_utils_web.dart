@@ -1,5 +1,5 @@
 // Library directive must come first
-library web_utils_web;
+library;
 
 import 'dart:html' as html;
 import 'package:flutter/foundation.dart';

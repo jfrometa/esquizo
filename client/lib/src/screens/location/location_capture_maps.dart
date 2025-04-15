@@ -1,8 +1,6 @@
 // lib/src/screens/location/location_capture.dart
 
-import 'package:flutter/foundation.dart'
-    show
-        kIsWeb; // Used for checks if needed, though conditional import handles the primary case
+// Used for checks if needed, though conditional import handles the primary case
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';

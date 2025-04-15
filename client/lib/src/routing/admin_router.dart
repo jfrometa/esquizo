@@ -26,9 +26,9 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/screens/catering_category_screen.dart';
 
 // --- Import Placeholder Staff Screens ---
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/staff/staff_kitchen_screen.dart'; // Create this file
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/staff/staff_waiter_screen.dart'; // Create this file
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/staff/staff_order_entry_screen.dart'; // Create this file
+// Create this file
+// Create this file
+// Create this file
 // --- End Import ---
 
 /// This class defines all admin routes based on a 5-section structure
@@ -431,8 +431,7 @@ enum KitchenTab { newOrders, current, upcoming, turns }
 
 class StaffKitchenScreen extends StatelessWidget {
   final KitchenTab initialTab;
-  const StaffKitchenScreen({Key? key, required this.initialTab})
-      : super(key: key);
+  const StaffKitchenScreen({super.key, required this.initialTab});
 
   @override
   Widget build(BuildContext context) {
@@ -443,7 +442,7 @@ class StaffKitchenScreen extends StatelessWidget {
 }
 
 class StaffWaiterTableSelectScreen extends StatelessWidget {
-  const StaffWaiterTableSelectScreen({Key? key}) : super(key: key);
+  const StaffWaiterTableSelectScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -455,8 +454,7 @@ class StaffWaiterTableSelectScreen extends StatelessWidget {
 
 class StaffOrderEntryScreen extends StatelessWidget {
   final String tableId;
-  const StaffOrderEntryScreen({Key? key, required this.tableId})
-      : super(key: key);
+  const StaffOrderEntryScreen({super.key, required this.tableId});
 
   @override
   Widget build(BuildContext context) {

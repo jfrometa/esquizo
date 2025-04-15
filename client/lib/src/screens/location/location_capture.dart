@@ -11,7 +11,6 @@ import '../../core/providers/delivery_location_provider.dart';
 // For web platform only
 import 'dart:js_util' as js_util;
 import 'dart:html' as html;
-import 'package:flutter/services.dart';
 // Import platformViewRegistry from the correct location
 import 'dart:ui_web' as ui;
 
@@ -916,11 +915,9 @@ window.getCurrentLocation = function() {
         if (positionData != null) {
           final lat = js_util.getProperty(positionData, 'latitude').toString();
           final lng = js_util.getProperty(positionData, 'longitude').toString();
-          if (lat != null && lng != null) {
-            _latitude = lat;
-            _longitude = lng;
-          }
-        }
+          _latitude = lat;
+          _longitude = lng;
+                }
       } catch (e) {
         print('Error getting marker position: $e');
       }
@@ -1307,7 +1304,7 @@ window.getCurrentLocation = function() {
         labelText: required ? '$label *' : label,
         prefixIcon: Icon(icon, color: colorScheme.primary),
         filled: true,
-        fillColor: colorScheme.surfaceVariant.withOpacity(0.3),
+        fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,

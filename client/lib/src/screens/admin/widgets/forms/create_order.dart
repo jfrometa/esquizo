@@ -130,7 +130,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                       ),
                       Text(
                         // Fix: Ensure cart is not null
-                        '\$${(_cartService.cart?.total ?? 0.0).toStringAsFixed(2)}',
+                        '\$${(_cartService.cart.total ?? 0.0).toStringAsFixed(2)}',
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
@@ -143,7 +143,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                   icon: const Icon(Icons.shopping_cart_checkout),
                   label: const Text('Create Order'),
                   // Fix: Safe access to cart items with null check
-                  onPressed: (_cartService.cart?.items.isEmpty ?? true) ||
+                  onPressed: (_cartService.cart.items.isEmpty ?? true) ||
                           _isCreatingOrder
                       ? null
                       : _createOrder,
@@ -374,7 +374,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
             if (_searchQuery.isEmpty) return true;
 
             return item.name.toLowerCase().contains(_searchQuery) ||
-                (item.description?.toLowerCase() ?? '').contains(_searchQuery);
+                (item.description.toLowerCase() ?? '').contains(_searchQuery);
           }).toList();
 
           if (filteredItems.isEmpty) {
@@ -447,7 +447,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
             final isNarrow = constraints.maxWidth < 300;
 
             // Fixed height container to ensure proper sizing
-            return Container(
+            return SizedBox(
               height: isNarrow
                   ? 320
                   : 140, // Provide explicit height based on layout
@@ -466,8 +466,8 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Item image with explicit height
-        if (item.imageUrl != null && item.imageUrl.isNotEmpty)
-          Container(
+        if (item.imageUrl.isNotEmpty)
+          SizedBox(
             height: 140,
             child: AspectRatio(
               aspectRatio: 16 / 9,
@@ -567,8 +567,8 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Item image with fixed width and full height
-        if (item.imageUrl != null && item.imageUrl.isNotEmpty)
-          Container(
+        if (item.imageUrl.isNotEmpty)
+          SizedBox(
             width: 120,
             height: double.infinity,
             child: Image.network(
@@ -731,7 +731,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                         items: availableTables.map((table) {
                           // Fix: Add null checks for table attributes
                           final tableName = table.name.replaceAll('Table ', '');
-                          final capacity = table.attributes?['capacity'] ?? 4;
+                          final capacity = table.attributes['capacity'] ?? 4;
                           return DropdownMenuItem<String>(
                             value: table.id,
                             child: Text('Table $tableName (Seats $capacity)'),
@@ -896,14 +896,6 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
     final theme = Theme.of(context);
     // Fix: Add null check for cart access
     final cart = _cartService.cart;
-    if (cart == null) {
-      return const Card(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Text('Cart unavailable'),
-        ),
-      );
-    }
 
     return Card(
       child: Padding(
@@ -1364,7 +1356,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
     }
 
     // Fix: Safer access to cart items
-    if (_cartService.cart?.items.isEmpty ?? true) {
+    if (_cartService.cart.items.isEmpty ?? true) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -1382,10 +1374,6 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
 
     try {
       final cart = _cartService.cart;
-      // Validate cart is not null
-      if (cart == null) {
-        throw Exception("Cart is unavailable");
-      }
 
       final userAsync = ref.watch(currentUserProvider.future);
       final orderService = ref.read(orderServiceProvider);
@@ -1537,7 +1525,7 @@ class _ItemOptionsDialogState extends State<ItemOptionsDialog> {
             mainAxisSize: MainAxisSize.min,
             children: [
               // Item header with defined height constraints
-              Container(
+              SizedBox(
                 height: isNarrow ? null : 120, // Height for horizontal layout
                 child: isNarrow
                     // Vertical layout for narrow screens
@@ -1546,9 +1534,8 @@ class _ItemOptionsDialogState extends State<ItemOptionsDialog> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           // Fix: Add null check for imageUrl and explicit height
-                          if (widget.item.imageUrl != null &&
-                              widget.item.imageUrl.isNotEmpty)
-                            Container(
+                          if (widget.item.imageUrl.isNotEmpty)
+                            SizedBox(
                               height: 180,
                               width: double.infinity,
                               child: ClipRRect(
@@ -1592,9 +1579,8 @@ class _ItemOptionsDialogState extends State<ItemOptionsDialog> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Fix: Add null check for imageUrl
-                          if (widget.item.imageUrl != null &&
-                              widget.item.imageUrl.isNotEmpty)
-                            Container(
+                          if (widget.item.imageUrl.isNotEmpty)
+                            SizedBox(
                               width: 120,
                               height: 120,
                               child: ClipRRect(
@@ -1647,7 +1633,7 @@ class _ItemOptionsDialogState extends State<ItemOptionsDialog> {
               const SizedBox(height: 24),
 
               // Quantity selector with fixed height
-              Container(
+              SizedBox(
                 height: 60,
                 child: Row(
                   children: [
@@ -1688,7 +1674,7 @@ class _ItemOptionsDialogState extends State<ItemOptionsDialog> {
 
               // Options
               // Fix: Add null check for item.metadata
-              if ((widget.item.metadata?.containsKey('options') ?? false) ||
+              if ((widget.item.metadata.containsKey('options') ?? false) ||
                   _availableOptions.isNotEmpty) ...[
                 const Text(
                   'Options',

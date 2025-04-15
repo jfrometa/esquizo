@@ -56,11 +56,9 @@ class DeliveryLocationNotifier extends StateNotifier<DeliveryLocation?> {
 
   Future<void> _loadLocation() async {
     final prefs = await SharedPreferences.getInstance();
-    String? serializedLocation = prefs.getString(_key);
-    if (serializedLocation != null) {
-      state = _deserializeLocation(serializedLocation);
+    String? serializedLocation = prefs.getString(_key) ?? "";
+    state = _deserializeLocation(serializedLocation);
     }
-  }
 
   Future<void> _saveLocation() async {
     final prefs = await SharedPreferences.getInstance();

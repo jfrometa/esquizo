@@ -26,11 +26,9 @@ class ManualQuoteNotifier extends StateNotifier<CateringOrderItem?> {
   /// Load the quote from SharedPreferences (using the key 'manualQuote')
   Future<void> _loadManualQuote() async {
     final prefs = await SharedPreferences.getInstance();
-    String? serializedQuote = prefs.getString('manualQuote');
-    if (serializedQuote != null) {
-      state = CateringOrderItem.fromJson(jsonDecode(serializedQuote));
+    String? serializedQuote = prefs.getString('manualQuote') ?? "";
+    state = CateringOrderItem.fromJson(jsonDecode(serializedQuote));
     }
-  }
 
   /// Create a new empty quote with default values
   void createEmptyQuote() {

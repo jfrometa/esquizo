@@ -928,17 +928,21 @@ class CateringOrder {
     // Add optional fields if they exist
     if (packageId != null) json['packageId'] = packageId;
     if (packageName != null) json['packageName'] = packageName;
-    if (deliveryTime != null)
+    if (deliveryTime != null) {
       json['deliveryTime'] = deliveryTime!.toIso8601String();
+    }
     if (setupTime != null) json['setupTime'] = setupTime!.toIso8601String();
-    if (lastStatusUpdate != null)
+    if (lastStatusUpdate != null) {
       json['lastStatusUpdate'] = lastStatusUpdate!.toIso8601String();
+    }
     if (assignedStaffId != null) json['assignedStaffId'] = assignedStaffId;
-    if (assignedStaffName != null)
+    if (assignedStaffName != null) {
       json['assignedStaffName'] = assignedStaffName;
+    }
     if (paymentId != null) json['paymentId'] = paymentId;
-    if (cancellationReason != null)
+    if (cancellationReason != null) {
       json['cancellationReason'] = cancellationReason;
+    }
 
     return json;
   }

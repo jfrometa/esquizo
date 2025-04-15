@@ -6,7 +6,6 @@ import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/onboarding/onboarding_repository.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/setup/setup_screen_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/local_storange/local_storage_service.dart';
 
