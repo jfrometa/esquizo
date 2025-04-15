@@ -317,9 +317,7 @@ final mealPlanServiceProvider = Provider<MealPlanService>((ref) {
   return MealPlanService(firestore, businessId);
 });
 
-// Current business ID provider (this would normally come from your auth system)
-// final currentBusinessIdProvider = StateProvider<String>((ref) => 'default_business');
-
+ 
 // Providers for accessing meal plans
 final mealPlansProvider = StreamProvider<List<MealPlan>>((ref) {
   final mealPlanService = ref.watch(mealPlanServiceProvider);

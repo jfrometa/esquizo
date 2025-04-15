@@ -9,6 +9,8 @@ import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/app_config/app_config_services.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
+
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_setup_manager.dart';
 import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_analitics.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_startup.dart';
@@ -18,6 +20,8 @@ import 'package:starter_architecture_flutter_firebase/src/routing/scaffold_with_
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_dashboard_home.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_panel_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_setup_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_set_comple_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_setup_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/screens/customer_meal_plan_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/all_dishes_menu_home/all_dishes_menu_home_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/authenticated_profile_screen.dart';
@@ -37,6 +41,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/onboarding/pre
 import 'package:starter_architecture_flutter_firebase/src/screens/orders/in_progress_orders_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/categories.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/home/home.dart';
+
 import 'package:starter_architecture_flutter_firebase/src/utils/web/web_utils.dart';
 import 'package:go_router/go_router.dart';
 
@@ -85,6 +90,9 @@ enum AppRoute {
   adminSetup,
   inProgressOrders,
   manualQuote,
+  // Business setup routes
+  businessSetup,
+  businessSetupComplete,
   // Catering management routes
   cateringManagement,
   cateringDashboard,
@@ -115,6 +123,9 @@ GoRouter goRouter(Ref ref) {
 
   // Watch for pending admin path
   final pendingAdminPath = ref.watch(pendingAdminPathProvider);
+  
+  // Watch for business setup status
+  final isBusinessSetup = ref.watch(isBusinessSetupProvider);
 
   // *** DIRECTLY USE WEB UTILS TO GET THE INITIAL LOCATION FROM BROWSER URL ***
   String initialLocation = '/';
@@ -165,6 +176,11 @@ GoRouter goRouter(Ref ref) {
         final isOnboarding = state.uri.path == '/onboarding';
         final isAtError = state.uri.path == '/error';
         final isAtStartup = state.uri.path == '/startup';
+        
+        // Allow access to business setup related paths
+        if (path.startsWith('/business-setup')) {
+          return null;
+        }
 
         // Handle authentication redirects
         if (!isLoggedIn) {
@@ -249,6 +265,21 @@ GoRouter goRouter(Ref ref) {
       return UnauthorizedScreen();
     },
     routes: [
+      // Business Setup Routes
+      GoRoute(
+        path: '/business-setup',
+        name: AppRoute.businessSetup.name,
+        builder: (context, state) => const BusinessSetupScreen(),
+      ),
+      GoRoute(
+        path: '/business-setup/complete/:businessId',
+        name: AppRoute.businessSetupComplete.name,
+        builder: (context, state) {
+          final businessId = state.pathParameters['businessId'] ?? '';
+          return BusinessSetupCompleteScreen(businessId: businessId);
+        },
+      ),
+    
       GoRoute(
         path: '/startup',
         pageBuilder: (context, state) => NoTransitionPage(

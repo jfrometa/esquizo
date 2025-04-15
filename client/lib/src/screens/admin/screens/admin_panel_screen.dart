@@ -61,7 +61,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
             title: 'Payment Details',
             routeName: AdminRoutes.namePdOrderPaymentDetails,
             icon: Icons.payment,
-            isDetailRoute: true,
+            isDetailRoute: false,
             route: AdminRoutes.getFullPath(':orderId/payment')),
         _SubRoute(
             title: 'Tables',

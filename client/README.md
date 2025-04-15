@@ -98,6 +98,27 @@ If you don't want to use FlutterFire CLI, follow these steps instead:
 - On iOS, use `com.example.starterArchitectureFlutterFirebase` as the bundle ID.
 - then, [download and copy](https://firebase.google.com/docs/flutter/setup#configure_an_ios_app) `GoogleService-Info.plist` into `iOS/Runner`, and add it to the Runner target in Xcode.
 
-That's it. Have fun!
+businesses/{businessId}
+  - name: string
+  - type: string
+  - logoUrl: string
+  - coverImageUrl: string
+  - description: string
+  - contactInfo: map
+  - address: map
+  - hours: map
+  - settings: map
+    - primaryColor: string (hex)
+    - secondaryColor: string (hex)
+    - tertiaryColor: string (hex)
+    - accentColor: string (hex)
+    - darkMode: boolean
+    - useSystemTheme: boolean
+    - logoDarkUrl: string
+    - [other settings]
+  - features: array
+  - isActive: boolean
+  - createdAt: timestamp
+  - updatedAt: timestamp
 
 ## [License: MIT](LICENSE.md)

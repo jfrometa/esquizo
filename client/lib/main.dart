@@ -13,10 +13,13 @@ import 'package:flutter_web_plugins/url_strategy.dart'; // Import for usePathUrl
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/app.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
+
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_setup_manager.dart';
+
 import 'package:starter_architecture_flutter_firebase/src/core/user_preference/user_preference_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_analitics.dart';
 import 'package:starter_architecture_flutter_firebase/src/localization/string_hardcoded.dart';
- 
+
 import 'package:starter_architecture_flutter_firebase/src/utils/web/web_utils.dart';
 
 // Using dynamic type to handle different device info types across platforms
@@ -77,6 +80,9 @@ Future<void> main() async {
       deviceInfo = {'isWeb': true};
       camera = null;
     }
+
+    // Initialize business configuration
+    await _initializeBusinessConfig(container);
 
     // Run the application
     runApp(
@@ -143,6 +149,7 @@ Future<void> main() async {
     ));
   }
 }
+
 // Initialize Firebase Analytics
 Future<void> _initializeAnalytics() async {
   try {
@@ -363,6 +370,24 @@ Future<void> _initializeAuth(ProviderContainer container) async {
   } catch (e) {
     debugPrint('❌ Error during authentication initialization: $e');
     // Continue anyway - anonymous auth might fail but app should still work
+  }
+}
+
+// Initialize business configuration
+Future<void> _initializeBusinessConfig(ProviderContainer container) async {
+  try {
+    // Check if business configuration exists
+    final businessSetupManager = container.read(businessSetupManagerProvider);
+    final isBusinessSetup = await businessSetupManager.isBusinessSetup();
+    
+    debugPrint('🏢 Business configuration check: isSetup = $isBusinessSetup');
+    
+    // Initialize the business setup detector state
+    container.read(isBusinessSetupProvider);
+    
+  } catch (e) {
+    debugPrint('❌ Error checking business setup: $e');
+    // Continue anyway - business setup might not be critical for initial launch
   }
 }
 
