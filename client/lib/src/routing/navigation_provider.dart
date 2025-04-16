@@ -43,7 +43,7 @@ class NavigationDestinationItem {
   }
 }
 
-/// Provider for all possible navigation destinations (including admin)
+/// Provider for all possible navigation destinations (including admin))
 @riverpod
 List<NavigationDestinationItem> allNavigationDestinations(
     AllNavigationDestinationsRef ref) {

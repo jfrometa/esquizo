@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -70,10 +71,10 @@ class _KakoAppState extends ConsumerState<KakoApp> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     // Get GoRouter configuration
     final goRouter = ref.watch(goRouterProvider);
-    
+
     // Get theme mode - combine user preferences with business theme
     final userThemeMode = ref.watch(themeProvider);
-    
+
     // Watch for router errors
     ref.listen<String?>(routerErrorNotifierProvider, (previous, current) {
       if (current != null && mounted && previous != current) {
@@ -96,76 +97,87 @@ class _KakoAppState extends ConsumerState<KakoApp> with WidgetsBindingObserver {
         });
       }
     });
-    
+
     // Get theme data from business config
     final lightTheme = ref.watch(lightThemeProvider);
     final darkTheme = ref.watch(darkThemeProvider);
 
-    return BusinessSetupDetector(
-      // The main app content when business is set up
-      child: MaterialApp.router(
-        routerConfig: goRouter,
-        theme: lightTheme,
-        darkTheme: darkTheme,
-        themeMode: userThemeMode,
-        debugShowCheckedModeBanner: false,
-        title: 'KakoApp',
-        restorationScopeId: 'app',
-        // Error widget for Flutter framework errors
-        builder: (context, child) {
-          // Add your global error handling widgets here
-          ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
-            // In debug mode, use Flutter's default error widget
-            if (kDebugMode) {
-              return ErrorWidget(errorDetails.exception);
-            }
-            // In release mode, use a custom error widget
-            return Material(
-              color: Colors.white,
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.error_outline,
-                          color: Colors.red, size: 64),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Something went wrong',
-                        style: Theme.of(context).textTheme.titleLarge,
-                        textAlign: TextAlign.center,
+    return Directionality(
+        textDirection: TextDirection.ltr,
+        child: BusinessSetupDetector(
+          // The main app content when business is set up
+          setupScreen: const BusinessSetupScreen(),
+          // The main app content when business is set up
+          child: MaterialApp.router(
+            localizationsDelegates: const [
+              // Add built-in localization delegates
+              DefaultMaterialLocalizations.delegate,
+              DefaultWidgetsLocalizations.delegate,
+              DefaultCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [
+              Locale('en', 'US'), // English
+            ],
+            routerConfig: goRouter,
+            theme: lightTheme,
+            darkTheme: darkTheme,
+            themeMode: userThemeMode,
+            debugShowCheckedModeBanner: false,
+            title: 'KakoApp',
+            restorationScopeId: 'app',
+            // Error widget for Flutter framework errors
+            builder: (context, child) {
+              // Add your global error handling widgets here
+              ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
+                // In debug mode, use Flutter's default error widget
+                if (kDebugMode) {
+                  return ErrorWidget(errorDetails.exception);
+                }
+                // In release mode, use a custom error widget
+                return Material(
+                  color: Colors.white,
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.error_outline,
+                              color: Colors.red, size: 64),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Something went wrong',
+                            style: Theme.of(context).textTheme.titleLarge,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Please try again',
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () {
+                              // Try to restart the app or navigate home
+                              if (kIsWeb) {
+                                WebUtils.reloadPage();
+                              } else {
+                                goRouter.go('/');
+                              }
+                            },
+                            child: const Text('Restart'),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Please try again',
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Try to restart the app or navigate home
-                          if (kIsWeb) {
-                            WebUtils.reloadPage();
-                          } else {
-                            goRouter.go('/');
-                          }
-                        },
-                        child: const Text('Restart'),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            );
-          };
+                );
+              };
 
-          // Return the child with any additional wrappers
-          return child ?? const SizedBox.shrink();
-        },
-      ),
-      // The setup screen to show when no business config is found
-      setupScreen: const BusinessSetupScreen(),
-    );
+              // Return the child with any additional wrappers
+              return child ?? const SizedBox.shrink();
+            },
+          ),
+        ));
   }
 }
