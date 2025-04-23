@@ -544,16 +544,6 @@ class OrderStats {
 /// Provider for the unified order service
 final orderServiceProvider = Provider<OrderService>((ref) {
   final businessId = ref.watch(currentBusinessIdProvider);
-  // Handle the case where businessId might be null initially
-  if (businessId == null) {
-    // You might want to throw an error or return a dummy service
-    // depending on your application's logic.
-    // For now, let's throw an error indicating the dependency isn't ready.
-     throw Exception("Business ID is not available yet.");
-     // If you have a way to handle a null businessId (e.g., guest mode),
-     // you could return a default/dummy OrderService here.
-     // Example: return OrderService(businessId: 'default_or_guest_id');
-  }
   return OrderService(businessId: businessId);
 });
 
