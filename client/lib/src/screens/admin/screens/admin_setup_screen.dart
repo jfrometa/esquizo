@@ -1,11 +1,7 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/setup/initialize_example_data_provider.dart';
 
@@ -66,7 +62,12 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
         );
 
         // Navigate to admin panel using GoRouter
-        context.go('/admin');
+        if (GoRouter.of(context).canPop()) {
+          context.go('/admin');
+        } else {
+          // If no GoRouter context, use pushReplacement fallback
+          Navigator.of(context).pushReplacementNamed('/admin');
+        }
       }
     } catch (e) {
       setState(() {
@@ -109,7 +110,12 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
                   ElevatedButton(
                     onPressed: () {
                       // Navigate to admin panel using GoRouter
-                      context.go('/admin');
+                      try {
+                        context.go('/admin');
+                      } catch (e) {
+                        // Fallback navigation if GoRouter context not available
+                        Navigator.of(context).pushReplacementNamed('/admin');
+                      }
                     },
                     child: const Text('Go to Admin Panel'),
                   ),
@@ -205,101 +211,6 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
           },
           loading: () => const CircularProgressIndicator(),
           error: (error, stackTrace) => Text('Error: $error'),
-        ),
-      ),
-    );
-  }
-}
-
-/// Main function that drives the application startup
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
-  // Create a ProviderContainer for initialization
-  final container = ProviderContainer();
-
-  // Initialize auth repository
-  final authRepository = container.read(authRepositoryProvider);
-  await authRepository.initialize();
-
-  // Run the app
-  runApp(
-    ProviderScope(
-      parent: container,
-      child: const MyApp(),
-    ),
-  );
-}
-
-/// Main app widget
-class MyApp extends ConsumerWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Listen to auth state changes
-    final authState = ref.watch(authStateChangesProvider);
-
-    return MaterialApp(
-      title: 'Business Management App',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: authState.when(
-        data: (user) {
-          if (user == null) {
-            // User not logged in, show auth screen
-            return const Scaffold(
-              body: Center(
-                child: Text('Please log in'),
-              ),
-            );
-          }
-
-          // Check if user is admin
-          final isAdmin = ref.watch(isAdminProvider);
-
-          return isAdmin.when(
-            data: (isAdmin) {
-              if (isAdmin) {
-                // User is admin, show setup screen or admin panel
-                return const AdminSetupScreen();
-              } else {
-                // User is not admin, show user home
-                return const Scaffold(
-                  body: Center(
-                    child: Text('User Dashboard - Not an admin'),
-                  ),
-                );
-              }
-            },
-            loading: () => const Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
-            error: (error, stackTrace) => Scaffold(
-              body: Center(
-                child: Text('Error: $error'),
-              ),
-            ),
-          );
-        },
-        loading: () => const Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(),
-          ),
-        ),
-        error: (error, stackTrace) => Scaffold(
-          body: Center(
-            child: Text('Error: $error'),
-          ),
         ),
       ),
     );

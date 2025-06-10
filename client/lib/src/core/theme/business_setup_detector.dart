@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/business/business_setup_manager.dart';
 import '../business/business_config_provider.dart';
 import '../local_storange/local_storage_service.dart';
  
@@ -24,62 +23,46 @@ class BusinessSetupDetector extends ConsumerStatefulWidget {
 }
 
 class _BusinessSetupDetectorState extends ConsumerState<BusinessSetupDetector> {
-  bool _isChecking = true;
-  bool _needsSetup = false;
+  bool _isInitializing = true;
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _checkBusinessSetup();
+    _initializeBusinessConfig();
   }
 
-  Future<void> _checkBusinessSetup() async {
+  Future<void> _initializeBusinessConfig() async {
     setState(() {
-      _isChecking = true;
+      _isInitializing = true;
       _errorMessage = null;
     });
 
     try {
-      // Check if business is set up
-      final setupManager = ref.read(businessSetupManagerProvider);
-      final isSetup = await setupManager.isBusinessSetup();
+      // Initialize business configuration for the app
+      final localStorage = ref.read(localStorageServiceProvider);
+      final businessId = await localStorage.getString('businessId');
 
-      if (!isSetup) {
-        // No business ID or not found in Firestore
-        setState(() {
-          _needsSetup = true;
-        });
-      } else {
-        // Business exists, make sure it's loaded
-        final localStorage = ref.read(localStorageServiceProvider);
-        final businessId = await localStorage.getString('businessId');
-
-        // Set the business ID in the provider
-        if (businessId != null && businessId.isNotEmpty) {
-          ref.read(currentBusinessIdProvider.notifier).state = businessId;
-        }
-
-        setState(() {
-          _needsSetup = false;
-        });
+      // Set the business ID in the provider if it exists
+      if (businessId != null && businessId.isNotEmpty) {
+        ref.read(currentBusinessIdProvider.notifier).state = businessId;
       }
+
+      setState(() {
+        _isInitializing = false;
+      });
     } catch (e) {
       setState(() {
-        _errorMessage = 'Error checking business setup: $e';
-        _needsSetup = true; // Show setup screen on error to allow recovery
-      });
-    } finally {
-      setState(() {
-        _isChecking = false;
+        _errorMessage = 'Error initializing business configuration: $e';
+        _isInitializing = false;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // If still checking, show loading indicator
-    if (_isChecking) {
+    // If still initializing, show loading indicator
+    if (_isInitializing) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Material(
@@ -91,7 +74,7 @@ class _BusinessSetupDetectorState extends ConsumerState<BusinessSetupDetector> {
                 CircularProgressIndicator(),
                 SizedBox(height: 16),
                 Text(
-                  'Checking business configuration...',
+                  'Initializing application...',
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.black87,
@@ -121,7 +104,7 @@ class _BusinessSetupDetectorState extends ConsumerState<BusinessSetupDetector> {
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  'Error',
+                  'Initialization Error',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -142,25 +125,12 @@ class _BusinessSetupDetectorState extends ConsumerState<BusinessSetupDetector> {
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: _checkBusinessSetup,
+                  onPressed: _initializeBusinessConfig,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
                   ),
                   child: const Text('Retry'),
-                ),
-                const SizedBox(height: 8),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _needsSetup = true;
-                      _errorMessage = null;
-                    });
-                  },
-                  child: const Text(
-                    'Go to Setup',
-                    style: TextStyle(color: Colors.blue),
-                  ),
                 ),
               ],
             ),
@@ -169,10 +139,8 @@ class _BusinessSetupDetectorState extends ConsumerState<BusinessSetupDetector> {
       );
     }
 
-    // Show setup screen or main app based on setup status
-    return _needsSetup 
-        ? widget.setupScreen
-        : widget.child;
+    // Always show the main app - the router will handle redirects
+    return widget.child;
   }
 }
 

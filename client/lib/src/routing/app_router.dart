@@ -54,8 +54,7 @@ final _accountNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'account');
 final _landingNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'landing');
 final _cartNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'cart');
 final _adminNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'admin');
-final _OrdersNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'local');
-final _localNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'orders');
+final _ordersNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'local');
 
 // Store paths that were attempted before authentication
 // final _pendingPathProvider = StateProvider<String?>((ref) => null);
@@ -120,9 +119,6 @@ GoRouter goRouter(Ref ref) {
   final destinations = ref.watch(navigationDestinationsProvider);
   final isFirebaseInitialized = ref.watch(isFirebaseInitializedProvider);
   final isAdmin = ref.watch(cachedAdminStatusProvider);
-
-  // Watch for pending admin path
-  final pendingAdminPath = ref.watch(pendingAdminPathProvider);
   
   // Watch for business setup status
   final isBusinessSetup = ref.watch(isBusinessSetupProvider);
@@ -178,7 +174,7 @@ GoRouter goRouter(Ref ref) {
         final isAtStartup = state.uri.path == '/startup';
         
         // Allow access to business setup related paths
-        if (path.startsWith('/business-setup')) {
+        if (path.startsWith('/business-setup') || path.startsWith('/admin-setup')) {
           return null;
         }
 
@@ -210,6 +206,14 @@ GoRouter goRouter(Ref ref) {
           if (path.startsWith('/admin')) {
             if (!isAdmin) {
               return '/'; // Redirect non-admins to home
+            }
+            
+            // If admin is trying to access admin routes but business isn't set up,
+            // redirect to admin setup
+            if (isBusinessSetup.hasValue && !isBusinessSetup.value!) {
+              if (path != '/admin-setup') {
+                return '/admin-setup';
+              }
             }
           }
 
@@ -290,13 +294,9 @@ GoRouter goRouter(Ref ref) {
       ),
       GoRoute(
         path: '/error',
-        pageBuilder: (context, state) {
-          final message =
-              state.uri.queryParameters['message'] ?? 'An error occurred';
-          return NoTransitionPage(
-            child: UnauthorizedScreen(),
-          );
-        },
+        pageBuilder: (context, state) => NoTransitionPage(
+          child: UnauthorizedScreen(),
+        ),
       ),
       GoRoute(
         path: '/onboarding',
@@ -515,7 +515,7 @@ GlobalKey<NavigatorState> _getNavigatorKey(String path) {
     case '/admin':
       return _adminNavigatorKey;
     case '/ordenes':
-      return _OrdersNavigatorKey;
+      return _ordersNavigatorKey;
     default:
       return _rootNavigatorKey;
   }

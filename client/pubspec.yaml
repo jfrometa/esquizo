@@ -43,6 +43,8 @@ dependencies:
   googleapis: ^13.1.0
   flutter:
     sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
 
   flutter_riverpod: ^2.6.0
   riverpod_annotation: ^2.6.0
