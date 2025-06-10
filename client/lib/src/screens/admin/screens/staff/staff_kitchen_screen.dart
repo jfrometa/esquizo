@@ -63,7 +63,6 @@ class _StaffKitchenScreenState extends ConsumerState<StaffKitchenScreen>
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Kitchen Orders'),
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
