@@ -12,9 +12,18 @@ class MealOrderNotifier extends StateNotifier<List<CartItem>> {
   // Load meals from SharedPreferences
   Future<void> _loadMeals() async {
     final prefs = await SharedPreferences.getInstance();
-    String? serializedMeals = prefs.getString('mealOrders') ?? 'no order';
-    state = deserializeCart(serializedMeals);
+    String? serializedMeals = prefs.getString('mealOrders');
+    if (serializedMeals != null && serializedMeals.isNotEmpty) {
+      try {
+        state = deserializeCart(serializedMeals);
+      } catch (e) {
+        debugPrint('Error deserializing meals: $e');
+        state = [];
+      }
+    } else {
+      state = [];
     }
+  }
 
   // Save meals to SharedPreferences
   Future<void> _saveMeals() async {

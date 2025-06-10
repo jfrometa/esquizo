@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
@@ -21,9 +22,18 @@ class CateringOrderProvider extends StateNotifier<CateringOrderItem?> {
   // Load catering order from SharedPreferences
   Future<void> _loadCateringOrder() async {
     final prefs = await SharedPreferences.getInstance();
-    String? serializedOrder = prefs.getString('cateringOrder') ?? "";
-    state = CateringOrderItem.fromJson(jsonDecode(serializedOrder));
+    String? serializedOrder = prefs.getString('cateringOrder');
+    if (serializedOrder != null && serializedOrder.isNotEmpty) {
+      try {
+        state = CateringOrderItem.fromJson(jsonDecode(serializedOrder));
+      } catch (e) {
+        debugPrint('Error deserializing catering order: $e');
+        state = null;
+      }
+    } else {
+      state = null;
     }
+  }
 
   // Save catering order to SharedPreferences
   Future<void> _saveCateringOrder() async {

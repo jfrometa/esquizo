@@ -67,10 +67,13 @@ class ContentSections extends StatelessWidget {
                   child: SizedBox.expand(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min, // Prevent overflow
                       children: [
-                        Icon(Icons.restaurant_menu),
-                        SizedBox(height: 4),
-                        Text('Menú'),
+                        Icon(Icons.restaurant_menu, size: 20), // Slightly smaller icon
+                        SizedBox(height: 2), // Reduced spacing
+                        Flexible(
+                          child: Text('Menú', style: TextStyle(fontSize: 12)), // Smaller text
+                        ),
                       ],
                     ),
                   ),
@@ -79,10 +82,13 @@ class ContentSections extends StatelessWidget {
                   child: SizedBox.expand(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min, // Prevent overflow
                       children: [
-                        Icon(Icons.food_bank),
-                        SizedBox(height: 4),
-                        Text('Planes'),
+                        Icon(Icons.food_bank, size: 20),
+                        SizedBox(height: 2),
+                        Flexible(
+                          child: Text('Planes', style: TextStyle(fontSize: 12)),
+                        ),
                       ],
                     ),
                   ),
@@ -91,10 +97,13 @@ class ContentSections extends StatelessWidget {
                   child: SizedBox.expand(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min, // Prevent overflow
                       children: [
-                        Icon(Icons.celebration),
-                        SizedBox(height: 4),
-                        Text('Catering'),
+                        Icon(Icons.celebration, size: 20),
+                        SizedBox(height: 2),
+                        Flexible(
+                          child: Text('Catering', style: TextStyle(fontSize: 12)),
+                        ),
                       ],
                     ),
                   ),
@@ -103,10 +112,13 @@ class ContentSections extends StatelessWidget {
                   child: SizedBox.expand(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min, // Prevent overflow
                       children: [
-                        Icon(Icons.event_available),
-                        SizedBox(height: 4),
-                        Text('Eventos'),
+                        Icon(Icons.event_available, size: 20),
+                        SizedBox(height: 2),
+                        Flexible(
+                          child: Text('Eventos', style: TextStyle(fontSize: 12)),
+                        ),
                       ],
                     ),
                   ),
@@ -118,12 +130,25 @@ class ContentSections extends StatelessWidget {
           const SizedBox(height: 40),
 
           // Tab content
-          SizedBox(
-            // Fixed height makes the layout more stable
-            height: isMobile ? 600 : 700,
-            child: TabBarView(
-              controller: tabController,
-              children: [
+          LayoutBuilder(
+            builder: (context, constraints) {
+              // Calculate dynamic height based on screen size with better responsiveness
+              final availableHeight = MediaQuery.of(context).size.height;
+              double tabViewHeight;
+              
+              if (isMobile) {
+                tabViewHeight = (availableHeight * 0.8).clamp(620.0, 800.0);
+              } else if (isTablet) {
+                tabViewHeight = (availableHeight * 0.75).clamp(680.0, 850.0);
+              } else {
+                tabViewHeight = (availableHeight * 0.7).clamp(720.0, 900.0);
+              }
+              
+              return SizedBox(
+                height: tabViewHeight,
+                child: TabBarView(
+                  controller: tabController,
+                  children: [
                 // Menu tab
                 MenuSection(
                   randomDishes: randomDishes,
@@ -155,7 +180,9 @@ class ContentSections extends StatelessWidget {
                   isDesktop: isDesktop,
                 ),
               ],
-            ),
+                ),
+              );
+            },
           ),
         ],
       ),

@@ -566,11 +566,20 @@ class CartService {
   Future<void> loadCart() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      String? serializedCart = prefs.getString('cart') ?? "no estring";
-      _cart = Cart.deserialize(serializedCart);
+      String? serializedCart = prefs.getString('cart');
+      if (serializedCart != null && serializedCart.isNotEmpty) {
+        try {
+          _cart = Cart.deserialize(serializedCart);
         } catch (e) {
+          debugPrint('Error deserializing cart: $e');
+          _cart = Cart(); // Initialize empty cart on deserialization error
+        }
+      } else {
+        _cart = Cart(); // Initialize empty cart if no data
+      }
+    } catch (e) {
       debugPrint('Error loading cart: $e');
-      // If loading fails, keep the existing cart
+      _cart = Cart(); // Initialize empty cart on any error
     }
   }
 
