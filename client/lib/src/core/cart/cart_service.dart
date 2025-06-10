@@ -572,14 +572,14 @@ class CartService {
           _cart = Cart.deserialize(serializedCart);
         } catch (e) {
           debugPrint('Error deserializing cart: $e');
-          _cart = Cart(); // Initialize empty cart on deserialization error
+          _cart = Cart(businessId: _cart.businessId, userId: _cart.userId); // Initialize empty cart on deserialization error
         }
       } else {
-        _cart = Cart(); // Initialize empty cart if no data
+        _cart = Cart(businessId: _cart.businessId, userId: _cart.userId); // Initialize empty cart if no data
       }
     } catch (e) {
       debugPrint('Error loading cart: $e');
-      _cart = Cart(); // Initialize empty cart on any error
+      _cart = Cart(businessId: _cart.businessId, userId: _cart.userId); // Initialize empty cart on any error
     }
   }
 

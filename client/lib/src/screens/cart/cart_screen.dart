@@ -32,8 +32,8 @@ class _CartScreenState extends ConsumerState<CartScreen>
   @override
   void initState() {
     super.initState();
-    // Initialize tabs and controller in initState
-    _availableTabs = _getAvailableTabs();
+    // Initialize tabs and controller in initState with default tab
+    _availableTabs = ['Platos']; // Default tab
     _initializeTabController();
   }
 
@@ -48,7 +48,10 @@ class _CartScreenState extends ConsumerState<CartScreen>
       _availableTabs = ['Platos']; // Default tab if nothing is available
     }
 
-    // If there are available tabs, create the controller
+    // Dispose of old controller if it exists
+    _tabController?.dispose();
+
+    // Create new controller with current tab count
     _tabController = TabController(length: _availableTabs.length, vsync: this);
 
     // Add listener only if controller is initialized
@@ -60,12 +63,13 @@ class _CartScreenState extends ConsumerState<CartScreen>
     });
   }
 
-  List<String> _getAvailableTabs() {
+  List<String> _getAvailableTabs({
+    required Cart cartItems,
+    required CateringOrderItem? cateringOrder,
+    required CateringOrderItem? manualQuote,
+    required List<CartItem> mealItems,
+  }) {
     final List<String> tabs = [];
-    final cartItems = ref.read(cartProvider);
-    final cateringOrder = ref.read(cateringOrderProvider);
-    final manualQuote = ref.read(manualQuoteProvider);
-    final mealItems = ref.read(mealOrderProvider);
 
     // Add tabs in order of priority
     if (mealItems.isNotEmpty) tabs.add('Subscripciones');
@@ -104,24 +108,41 @@ class _CartScreenState extends ConsumerState<CartScreen>
 
     final List<CartItem> mealSubscriptions = mealItems;
 
-    // Update available tabs
-    _availableTabs = _getAvailableTabs();
+    // Update available tabs using the watched values
+    final newAvailableTabs = _getAvailableTabs(
+      cartItems: cartItems,
+      cateringOrder: cateringOrder,
+      manualQuote: manualQuote,
+      mealItems: mealItems,
+    );
+
+    // Check if we need to reinitialize the tab controller due to tab count change
+    bool shouldReinitialize = false;
+    if (_availableTabs.length != newAvailableTabs.length ||
+        !_availableTabs.every((element) => newAvailableTabs.contains(element))) {
+      shouldReinitialize = true;
+      _availableTabs = newAvailableTabs;
+    }
 
     // If we have no items at all, show empty state
     if (_availableTabs.isEmpty ||
-        (_availableTabs.length == 1 && dishes.isEmpty)) {
+        (_availableTabs.length == 1 && dishes.isEmpty && cateringItems.isEmpty && quoteItems.isEmpty && mealSubscriptions.isEmpty)) {
       return _buildEmptyCartScreen(context);
     }
 
-    // Check if we need to reinitialize the tab controller due to tab count change
-    if (_tabController == null ||
-        _tabController?.length != _availableTabs.length) {
-      // Reinitialize the controller
+    // Reinitialize tab controller if needed
+    if (shouldReinitialize) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        setState(() {
-          _initializeTabController();
-        });
+        if (mounted) {
+          setState(() {
+            _initializeTabController();
+          });
+        }
       });
+    }
+    
+    // Show loading screen only if controller is actually null
+    if (_tabController == null) {
       return _buildLoadingScreen();
     }
 
@@ -286,13 +307,13 @@ class _CartScreenState extends ConsumerState<CartScreen>
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.shopping_cart_outlined,
                 size: 64,
-                color: colorScheme.primary.withOpacity(0.7),
+                color: colorScheme.primary.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 24),
@@ -431,7 +452,7 @@ class _CartScreenState extends ConsumerState<CartScreen>
           color: colorScheme.surface,
           boxShadow: [
             BoxShadow(
-              color: colorScheme.shadow.withOpacity(0.08),
+              color: colorScheme.shadow.withValues(alpha: 0.08),
               blurRadius: 8,
               offset: const Offset(0, -4),
             ),
@@ -463,8 +484,10 @@ class _CartScreenState extends ConsumerState<CartScreen>
 
       // Add a small delay to show animation
       Future.delayed(const Duration(milliseconds: 300), () {
-        setState(() => _isLoading = false);
-        GoRouter.of(context).goNamed(AppRoute.checkout.name, extra: type);
+        if (mounted) {
+          setState(() => _isLoading = false);
+          GoRouter.of(context).goNamed(AppRoute.checkout.name, extra: type);
+        }
       });
     } catch (e) {
       // Handle navigation errors
@@ -488,10 +511,9 @@ class _CartScreenState extends ConsumerState<CartScreen>
     final colorScheme = theme.colorScheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
-        border: Border(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          border: Border(
           top: BorderSide(
             color: colorScheme.outlineVariant,
             width: 1,
@@ -778,7 +800,7 @@ class _CartScreenState extends ConsumerState<CartScreen>
 
       return Card(
         elevation: 0,
-        color: colorScheme.secondaryContainer.withOpacity(0.5),
+        color: colorScheme.secondaryContainer.withValues(alpha: 0.5),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -809,7 +831,7 @@ class _CartScreenState extends ConsumerState<CartScreen>
                       description,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color:
-                            colorScheme.onSecondaryContainer.withOpacity(0.8),
+                            colorScheme.onSecondaryContainer.withValues(alpha: 0.8),
                       ),
                     ),
                   ],
@@ -864,7 +886,7 @@ class _CartScreenState extends ConsumerState<CartScreen>
                     label: const Text('Agregar'),
                     style: FilledButton.styleFrom(
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      backgroundColor: accentColor.withOpacity(0.1),
+                      backgroundColor: accentColor.withValues(alpha: 0.1),
                       foregroundColor: accentColor,
                       minimumSize: const Size(40, 40),
                       padding: const EdgeInsets.symmetric(
@@ -916,7 +938,7 @@ class _CartScreenState extends ConsumerState<CartScreen>
                       elevation: 0,
                       margin: const EdgeInsets.only(bottom: 8),
                       color:
-                          colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                          colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -926,7 +948,7 @@ class _CartScreenState extends ConsumerState<CartScreen>
                           vertical: 8.0,
                         ),
                         leading: CircleAvatar(
-                          backgroundColor: accentColor.withOpacity(0.2),
+                          backgroundColor: accentColor.withValues(alpha: 0.2),
                           foregroundColor: accentColor,
                           child: Text(
                             '${dish.quantity}',
@@ -1037,7 +1059,7 @@ class _CartScreenState extends ConsumerState<CartScreen>
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                  color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(

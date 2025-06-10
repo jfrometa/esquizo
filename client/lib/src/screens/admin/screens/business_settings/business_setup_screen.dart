@@ -3,6 +3,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_setup_manager.dart';
@@ -176,8 +177,8 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       await localStorage.setString('businessId', businessId);
       
       if (mounted) {
-        // Navigate to dashboard/home screen
-        Navigator.of(context).pushReplacementNamed('/admin');
+        // Navigate to admin panel using GoRouter
+        context.go('/admin');
       }
     } catch (e) {
       setState(() {

@@ -288,53 +288,92 @@ class CateringCartItemView extends ConsumerWidget {
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
+        useSafeArea: true,
+        enableDrag: true,
+        showDragHandle: true,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
         ),
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
+          minHeight: MediaQuery.of(context).size.height * 0.6,
+        ),
         builder: (context) {
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.viewInsetsOf(context).bottom,
-              left: 20.0,
-              right: 20.0,
-              top: 20.0,
-            ),
-            child: CateringForm(
-              initialData: order,
-              onSubmit: (formData) {
-                try {
-                  ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(
-                        title: order.title,
-                        img: order.img,
-                        description: order.description,
-                        hasChef: formData.hasChef,
-                        alergias: formData.allergies.join(','),
-                        eventType: formData.eventType,
-                        preferencia: order.preferencia,
-                        adicionales: formData.additionalNotes,
-                        cantidadPersonas: formData.peopleCount,
-                      );
+          return DraggableScrollableSheet(
+            initialChildSize: 0.7,
+            minChildSize: 0.6,
+            maxChildSize: 0.9,
+            expand: false,
+            builder: (context, scrollController) {
+              return Container(
+                width: double.infinity,
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+                  left: 20.0,
+                  right: 20.0,
+                  top: 8.0,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Header
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Text(
+                        'Detalles del Catering',
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    // Form content
+                    Expanded(
+                      child: SingleChildScrollView(
+                        controller: scrollController,
+                        child: CateringForm(
+                          initialData: order,
+                          onSubmit: (formData) {
+                            try {
+                              ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(
+                                    title: order.title,
+                                    img: order.img,
+                                    description: order.description,
+                                    hasChef: formData.hasChef,
+                                    alergias: formData.allergies.join(','),
+                                    eventType: formData.eventType,
+                                    preferencia: order.preferencia,
+                                    adicionales: formData.additionalNotes,
+                                    cantidadPersonas: formData.peopleCount,
+                                  );
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text('Se actualizó el Catering'),
-                      backgroundColor: Theme.of(context).colorScheme.tertiary,
-                      behavior: SnackBarBehavior.floating,
-                      duration: const Duration(seconds: 2),
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text('Se actualizó el Catering'),
+                                  backgroundColor: Theme.of(context).colorScheme.tertiary,
+                                  behavior: SnackBarBehavior.floating,
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                              Navigator.pop(context);
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text('Error al actualizar el catering'),
+                                  backgroundColor: Theme.of(context).colorScheme.error,
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ),
                     ),
-                  );
-                  Navigator.pop(context);
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text('Error al actualizar el catering'),
-                      backgroundColor: Theme.of(context).colorScheme.error,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                }
-              },
-            ),
+                  ],
+                ),
+              );
+            },
           );
         },
       );

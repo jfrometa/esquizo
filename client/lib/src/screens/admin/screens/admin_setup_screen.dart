@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
@@ -64,8 +65,8 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
               content: Text('Business setup completed successfully!')),
         );
 
-        // Navigate to home screen or admin panel
-        // Navigator.of(context).pushReplacementNamed('/admin');
+        // Navigate to admin panel using GoRouter
+        context.go('/admin');
       }
     } catch (e) {
       setState(() {
@@ -107,8 +108,8 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () {
-                      // Navigate to admin panel
-                      // Navigator.of(context).pushReplacementNamed('/admin');
+                      // Navigate to admin panel using GoRouter
+                      context.go('/admin');
                     },
                     child: const Text('Go to Admin Panel'),
                   ),
