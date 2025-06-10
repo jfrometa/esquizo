@@ -1,5 +1,6 @@
 // File: lib/src/screens/setup/business_setup_screen.dart
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,6 +8,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/business/business
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_setup_manager.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/local_storange/local_storage_service.dart';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/setup/color_picker_widget.dart';
  
@@ -25,10 +27,15 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
   final _businessNameController = TextEditingController();
   String _businessType = 'restaurant';
   
-  // Logo and cover image files
+  // Logo and cover image files - platform compatible
   File? _logoLightFile;
   File? _logoDarkFile;
   File? _coverImageFile;
+  
+  // For web platform, store image bytes
+  Uint8List? _logoLightBytes;
+  Uint8List? _logoDarkBytes;
+  Uint8List? _coverImageBytes;
   
   // Page index
   int _currentPage = 0;
@@ -66,19 +73,38 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       );
       
       if (pickedFile != null) {
-        setState(() {
-          switch (type) {
-            case 'logo_light':
-              _logoLightFile = File(pickedFile.path);
-              break;
-            case 'logo_dark':
-              _logoDarkFile = File(pickedFile.path);
-              break;
-            case 'cover':
-              _coverImageFile = File(pickedFile.path);
-              break;
-          }
-        });
+        if (kIsWeb) {
+          // For web platform, load image bytes
+          final bytes = await pickedFile.readAsBytes();
+          setState(() {
+            switch (type) {
+              case 'logo_light':
+                _logoLightBytes = bytes;
+                break;
+              case 'logo_dark':
+                _logoDarkBytes = bytes;
+                break;
+              case 'cover':
+                _coverImageBytes = bytes;
+                break;
+            }
+          });
+        } else {
+          // For mobile platforms, use File objects
+          setState(() {
+            switch (type) {
+              case 'logo_light':
+                _logoLightFile = File(pickedFile.path);
+                break;
+              case 'logo_dark':
+                _logoDarkFile = File(pickedFile.path);
+                break;
+              case 'cover':
+                _coverImageFile = File(pickedFile.path);
+                break;
+            }
+          });
+        }
       }
     } catch (e) {
       _showErrorDialog('Failed to pick image: $e');
@@ -186,6 +212,20 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
         curve: Curves.easeInOut,
       );
     }
+  }
+  
+  String _getBrandingStatus() {
+    final hasLightLogo = kIsWeb ? _logoLightBytes != null : _logoLightFile != null;
+    final hasDarkLogo = kIsWeb ? _logoDarkBytes != null : _logoDarkFile != null;
+    final hasCoverImage = kIsWeb ? _coverImageBytes != null : _coverImageFile != null;
+    
+    final List<String> status = [];
+    if (hasLightLogo) status.add("Light Logo ✓");
+    if (hasDarkLogo) status.add("Dark Logo ✓");
+    if (hasCoverImage) status.add("Cover Image ✓");
+    
+    if (status.isEmpty) return "No images uploaded";
+    return status.join(", ");
   }
   
   void _showErrorDialog(String message) {
@@ -385,6 +425,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
             subtitle: 'This logo will be used in light theme mode',
             icon: Icons.light_mode,
             file: _logoLightFile,
+            bytes: _logoLightBytes,
             onUpload: () => _pickImage(ImageSource.gallery, 'logo_light'),
           ),
           const SizedBox(height: 16),
@@ -394,6 +435,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
             subtitle: 'This logo will be used in dark theme mode',
             icon: Icons.dark_mode,
             file: _logoDarkFile,
+            bytes: _logoDarkBytes,
             onUpload: () => _pickImage(ImageSource.gallery, 'logo_dark'),
           ),
           const SizedBox(height: 16),
@@ -403,6 +445,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
             subtitle: 'This image will be displayed at the top of your restaurant app',
             icon: Icons.image,
             file: _coverImageFile,
+            bytes: _coverImageBytes,
             onUpload: () => _pickImage(ImageSource.gallery, 'cover'),
           ),
           const SizedBox(height: 24),
@@ -423,8 +466,38 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
     required String subtitle,
     required IconData icon,
     required File? file,
+    required Uint8List? bytes,
     required VoidCallback onUpload,
   }) {
+    // Build image widget based on platform
+    Widget? imageWidget;
+    
+    if (kIsWeb) {
+      if (bytes != null) {
+        imageWidget = ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.memory(
+            bytes,
+            width: 60,
+            height: 60,
+            fit: BoxFit.cover,
+          ),
+        );
+      }
+    } else {
+      if (file != null) {
+        imageWidget = ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.file(
+            file,
+            width: 60,
+            height: 60,
+            fit: BoxFit.cover,
+          ),
+        );
+      }
+    }
+    
     return InkWell(
       onTap: onUpload,
       borderRadius: BorderRadius.circular(12),
@@ -438,17 +511,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
         ),
         child: Row(
           children: [
-            if (file != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.file(
-                  file,
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.cover,
-                ),
-              )
-            else
+            imageWidget ??
               Container(
                 width: 60,
                 height: 60,
@@ -745,9 +808,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
           _buildReviewItem(
             theme,
             title: 'Branding',
-            value: '${_logoLightFile != null ? "Light Logo ✓" : "Light Logo ✗"}, '
-                '${_logoDarkFile != null ? "Dark Logo ✓" : "Dark Logo ✗"}, '
-                '${_coverImageFile != null ? "Cover Image ✓" : "Cover Image ✗"}',
+            value: _getBrandingStatus(),
             icon: Icons.image,
           ),
           const SizedBox(height: 16),
@@ -805,6 +866,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                 Text(
                   value,
                   style: theme.textTheme.bodyMedium,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
@@ -820,23 +882,36 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         if (_currentPage > 0)
-          OutlinedButton.icon(
+          OutlinedButton(
             onPressed: _isLoading ? null : _previousPage,
-            icon: const Icon(Icons.arrow_back),
-            label: const Text('Back'),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.arrow_back),
+                SizedBox(width: 8),
+                Text('Back'),
+              ],
+            ),
           )
         else
           const SizedBox.shrink(),
-        ElevatedButton.icon(
+        ElevatedButton(
           onPressed: _isLoading ? null : _nextPage,
-          icon: _isLoading 
-              ? const SizedBox(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (_isLoading)
+                const SizedBox(
                   width: 16,
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : Icon(_currentPage < 3 ? Icons.arrow_forward : Icons.check),
-          label: Text(_currentPage < 3 ? 'Next' : 'Finish'),
+              else
+                Icon(_currentPage < 3 ? Icons.arrow_forward : Icons.check),
+              const SizedBox(width: 8),
+              Text(_currentPage < 3 ? 'Next' : 'Finish'),
+            ],
+          ),
         ),
       ],
     );

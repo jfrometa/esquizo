@@ -103,6 +103,15 @@ class _KakoAppState extends ConsumerState<KakoApp> with WidgetsBindingObserver {
 
     return BusinessSetupDetector(
       // The main app content when business is set up
+      setupScreen: MaterialApp(
+        theme: lightTheme,
+        darkTheme: darkTheme,
+        themeMode: userThemeMode,
+        debugShowCheckedModeBanner: false,
+        title: 'Business Setup',
+        home: const BusinessSetupScreen(),
+      ),
+      // The main app content when business is set up
       child: MaterialApp.router(
         routerConfig: goRouter,
         theme: lightTheme,
@@ -164,8 +173,6 @@ class _KakoAppState extends ConsumerState<KakoApp> with WidgetsBindingObserver {
           return child ?? const SizedBox.shrink();
         },
       ),
-      // The setup screen to show when no business config is found
-      setupScreen: const BusinessSetupScreen(),
     );
   }
 }

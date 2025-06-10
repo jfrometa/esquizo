@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_setup_manager.dart';
 import '../business/business_config_provider.dart';
-import '../firebase/firebase_providers.dart';
 import '../local_storange/local_storage_service.dart';
  
 
@@ -81,15 +80,25 @@ class _BusinessSetupDetectorState extends ConsumerState<BusinessSetupDetector> {
   Widget build(BuildContext context) {
     // If still checking, show loading indicator
     if (_isChecking) {
-      return const Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Checking business configuration...'),
-            ],
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          color: Colors.white,
+          child: const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text(
+                  'Checking business configuration...',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -97,52 +106,73 @@ class _BusinessSetupDetectorState extends ConsumerState<BusinessSetupDetector> {
 
     // If there's an error, show it
     if (_errorMessage != null) {
-      return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                color: Colors.red,
-                size: 48,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Error',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Text(
-                  _errorMessage!,
-                  textAlign: TextAlign.center,
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          color: Colors.white,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  color: Colors.red,
+                  size: 48,
                 ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _checkBusinessSetup,
-                child: const Text('Retry'),
-              ),
-              const SizedBox(height: 8),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    _needsSetup = true;
-                    _errorMessage = null;
-                  });
-                },
-                child: const Text('Go to Setup'),
-              ),
-            ],
+                const SizedBox(height: 16),
+                const Text(
+                  'Error',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Text(
+                    _errorMessage!,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: _checkBusinessSetup,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Retry'),
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _needsSetup = true;
+                      _errorMessage = null;
+                    });
+                  },
+                  child: const Text(
+                    'Go to Setup',
+                    style: TextStyle(color: Colors.blue),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
     }
 
     // Show setup screen or main app based on setup status
-    return _needsSetup ? widget.setupScreen : widget.child;
+    return _needsSetup 
+        ? widget.setupScreen
+        : widget.child;
   }
 }
 
