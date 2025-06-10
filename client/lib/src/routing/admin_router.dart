@@ -52,6 +52,8 @@ class AdminRoutes {
   static const String dashboardOrderDetails = '$_pdPrefix/orders/:orderId';
 
   // --- Staff Sub-Paths (relative to staff path) ---
+  static const String staffKitchen = 'kitchen';
+  static const String staffWaiter = 'waiter';
   static const String staffWaiterOrderEntry = 'table/:tableId/order';
 
   // --- Settings Sub-Paths (relative to settings path) ---
@@ -85,6 +87,8 @@ class AdminRoutes {
   static const String namePdAnalytics = 'product-dashboard-analytics';
   // Staff (NEW)
   static const String nameStaffHome = 'staff-home';
+  static const String nameStaffKitchen = 'staff-kitchen';
+  static const String nameStaffWaiter = 'staff-waiter';
   static const String nameStaffWaiterOrderEntry = 'staff-waiter-order-entry';
   // Settings
   static const String nameSettings = 'settings';
@@ -270,6 +274,20 @@ List<RouteBase> getAdminRoutes() {
           name: AdminRoutes.nameStaffHome,
           builder: (context, state) => const StaffManagementScreen(),
           routes: [
+            // Kitchen management route
+            GoRoute(
+              path: 'kitchen',
+              name: AdminRoutes.nameStaffKitchen,
+              builder: (context, state) =>
+                  const StaffManagementScreen(initialIndex: 0),
+            ),
+            // Waiter management route
+            GoRoute(
+              path: 'waiter',
+              name: AdminRoutes.nameStaffWaiter,
+              builder: (context, state) =>
+                  const StaffManagementScreen(initialIndex: 1),
+            ),
             // Order entry route for waiter flow
             GoRoute(
               path: 'table/:tableId/order',

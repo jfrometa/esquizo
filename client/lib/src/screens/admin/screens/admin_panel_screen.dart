@@ -83,6 +83,20 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
       route: AdminRoutes.getFullPath(AdminRoutes.staff),
       routeName: AdminRoutes.nameStaffHome, // Navigates to /admin/staff
       subroutes: [
+        // Kitchen management route
+        _SubRoute(
+            title: 'Kitchen',
+            routeName: AdminRoutes.nameStaffKitchen,
+            icon: Icons.kitchen,
+            route: AdminRoutes.getFullPath(
+                '${AdminRoutes.staff}/${AdminRoutes.staffKitchen}')),
+        // Waiter management route
+        _SubRoute(
+            title: 'Waiter',
+            routeName: AdminRoutes.nameStaffWaiter,
+            icon: Icons.room_service,
+            route: AdminRoutes.getFullPath(
+                '${AdminRoutes.staff}/${AdminRoutes.staffWaiter}')),
         // Order entry route for waiter flow
         _SubRoute(
             title: 'Order Entry',

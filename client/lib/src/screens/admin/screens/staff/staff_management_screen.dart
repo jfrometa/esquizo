@@ -4,7 +4,9 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/staff/staff_waiter_screen.dart';
 
 class StaffManagementScreen extends ConsumerStatefulWidget {
-  const StaffManagementScreen({super.key});
+  final int initialIndex;
+
+  const StaffManagementScreen({super.key, this.initialIndex = 0});
 
   @override
   ConsumerState<StaffManagementScreen> createState() =>
@@ -29,6 +31,17 @@ class _StaffManagementScreenState extends ConsumerState<StaffManagementScreen> {
       screen: const StaffWaiterTableSelectScreen(),
     ),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_pageController.hasClients) {
+        _pageController.jumpToPage(widget.initialIndex);
+      }
+    });
+  }
 
   @override
   void dispose() {
