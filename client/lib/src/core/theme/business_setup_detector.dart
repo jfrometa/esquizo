@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../business/business_config_provider.dart';
 import '../local_storange/local_storage_service.dart';
- 
 
 /// A widget that detects if business setup is needed and shows
 /// appropriate UI based on that condition
@@ -19,7 +18,8 @@ class BusinessSetupDetector extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<BusinessSetupDetector> createState() => _BusinessSetupDetectorState();
+  ConsumerState<BusinessSetupDetector> createState() =>
+      _BusinessSetupDetectorState();
 }
 
 class _BusinessSetupDetectorState extends ConsumerState<BusinessSetupDetector> {
@@ -139,8 +139,89 @@ class _BusinessSetupDetectorState extends ConsumerState<BusinessSetupDetector> {
       );
     }
 
-    // Always show the main app - the router will handle redirects
-    return widget.child;
+    // Check if business config exists and is complete
+    final businessConfigAsync = ref.watch(businessConfigProvider);
+
+    return businessConfigAsync.when(
+      data: (businessConfig) {
+        // If business is already configured, show the main app
+        if (businessConfig != null && businessConfig.isActive) {
+          return widget.child;
+        }
+        // If no business config or inactive, show setup screen
+        return widget.setupScreen;
+      },
+      loading: () => Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          color: Colors.white,
+          child: const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text(
+                  'Loading business configuration...',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      error: (error, stackTrace) => Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          color: Colors.white,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  color: Colors.red,
+                  size: 48,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Configuration Error',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Text(
+                    'Error loading business configuration: $error',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: _initializeBusinessConfig,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

@@ -10,7 +10,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin
 import 'package:starter_architecture_flutter_firebase/src/core/app_config/app_config_services.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
 
-import 'package:starter_architecture_flutter_firebase/src/core/business/business_setup_manager.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_analitics.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_startup.dart';
@@ -119,9 +119,9 @@ GoRouter goRouter(Ref ref) {
   final destinations = ref.watch(navigationDestinationsProvider);
   final isFirebaseInitialized = ref.watch(isFirebaseInitializedProvider);
   final isAdmin = ref.watch(cachedAdminStatusProvider);
-  
-  // Watch for business setup status
-  final isBusinessSetup = ref.watch(isBusinessSetupProvider);
+
+  // Watch for business config status (same as AdminSetupScreen)
+  final businessConfigAsync = ref.watch(businessConfigProvider);
 
   // *** DIRECTLY USE WEB UTILS TO GET THE INITIAL LOCATION FROM BROWSER URL ***
   String initialLocation = '/';
@@ -172,9 +172,10 @@ GoRouter goRouter(Ref ref) {
         final isOnboarding = state.uri.path == '/onboarding';
         final isAtError = state.uri.path == '/error';
         final isAtStartup = state.uri.path == '/startup';
-        
+
         // Allow access to business setup related paths
-        if (path.startsWith('/business-setup') || path.startsWith('/admin-setup')) {
+        if (path.startsWith('/business-setup') ||
+            path.startsWith('/admin-setup')) {
           return null;
         }
 
@@ -207,13 +208,25 @@ GoRouter goRouter(Ref ref) {
             if (!isAdmin) {
               return '/'; // Redirect non-admins to home
             }
-            
-            // If admin is trying to access admin routes but business isn't set up,
-            // redirect to admin setup
-            if (isBusinessSetup.hasValue && !isBusinessSetup.value!) {
-              if (path != '/admin-setup') {
-                return '/admin-setup';
-              }
+
+            // Check business configuration status (same logic as AdminSetupScreen)
+            final businessConfig = businessConfigAsync.value;
+            final isBusinessConfigured =
+                businessConfig != null && businessConfig.isActive;
+
+            // Only redirect to admin setup if business is definitely not set up
+            // and we're not already at the admin setup page
+            if (businessConfigAsync.hasValue &&
+                !isBusinessConfigured &&
+                path != '/admin-setup') {
+              return '/admin-setup';
+            }
+
+            // If business is set up and user is at admin-setup, redirect to admin panel
+            if (businessConfigAsync.hasValue &&
+                isBusinessConfigured &&
+                path == '/admin-setup') {
+              return '/admin';
             }
           }
 
@@ -283,7 +296,7 @@ GoRouter goRouter(Ref ref) {
           return BusinessSetupCompleteScreen(businessId: businessId);
         },
       ),
-    
+
       GoRoute(
         path: '/startup',
         pageBuilder: (context, state) => NoTransitionPage(

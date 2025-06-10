@@ -70,10 +70,10 @@ class _KakoAppState extends ConsumerState<KakoApp> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     // Get GoRouter configuration
     final goRouter = ref.watch(goRouterProvider);
-    
+
     // Get theme mode - combine user preferences with business theme
     final userThemeMode = ref.watch(themeProvider);
-    
+
     // Watch for router errors
     ref.listen<String?>(routerErrorNotifierProvider, (previous, current) {
       if (current != null && mounted && previous != current) {
@@ -96,13 +96,13 @@ class _KakoAppState extends ConsumerState<KakoApp> with WidgetsBindingObserver {
         });
       }
     });
-    
+
     // Get theme data from business config
     final lightTheme = ref.watch(lightThemeProvider);
     final darkTheme = ref.watch(darkThemeProvider);
 
     return BusinessSetupDetector(
-      // The main app content when business is set up
+      // The setup screen when business is NOT set up
       setupScreen: MaterialApp(
         theme: lightTheme,
         darkTheme: darkTheme,
@@ -111,7 +111,7 @@ class _KakoAppState extends ConsumerState<KakoApp> with WidgetsBindingObserver {
         title: 'Business Setup',
         home: const BusinessSetupScreen(),
       ),
-      // The main app content when business is set up
+      // The main app content when business IS set up
       child: MaterialApp.router(
         routerConfig: goRouter,
         theme: lightTheme,

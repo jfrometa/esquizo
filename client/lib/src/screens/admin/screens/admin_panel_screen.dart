@@ -79,45 +79,11 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
     // Index 1 - Staff (NEW)
     _AdminNavigationItem(
       title: 'Staff',
-      icon: Icons.people_alt_rounded, // Example Icon
+      icon: Icons.people_alt_rounded,
       route: AdminRoutes.getFullPath(AdminRoutes.staff),
-      routeName: AdminRoutes
-          .nameStaffHome, // Navigates to /admin/staff (redirects to kitchen/new)
+      routeName: AdminRoutes.nameStaffHome, // Navigates to /admin/staff
       subroutes: [
-        _SubRoute(
-            title: 'Kitchen View',
-            routeName: AdminRoutes.nameStaffKitchenNew,
-            icon: Icons.kitchen,
-            route: AdminRoutes.getFullPath(
-                '${AdminRoutes.staff}/${AdminRoutes.staffKitchenNew}')), // Target specific kitchen view
-        _SubRoute(
-            title: 'Waiter View',
-            routeName: AdminRoutes.nameStaffWaiter,
-            icon: Icons.room_service,
-            route: AdminRoutes.getFullPath(
-                '${AdminRoutes.staff}/${AdminRoutes.staffWaiter}')), // Link to waiter table select
-        // Add detail routes if needed for highlighting logic
-        _SubRoute(
-            title: 'Kitchen Current',
-            routeName: AdminRoutes.nameStaffKitchenCurrent,
-            icon: Icons.kitchen,
-            isDetailRoute: true,
-            route: AdminRoutes.getFullPath(
-                '${AdminRoutes.staff}/${AdminRoutes.staffKitchenCurrent}')),
-        _SubRoute(
-            title: 'Kitchen Upcoming',
-            routeName: AdminRoutes.nameStaffKitchenUpcoming,
-            icon: Icons.update,
-            isDetailRoute: true,
-            route: AdminRoutes.getFullPath(
-                '${AdminRoutes.staff}/${AdminRoutes.staffKitchenUpcoming}')),
-        _SubRoute(
-            title: 'Kitchen Turns',
-            routeName: AdminRoutes.nameStaffKitchenTurns,
-            icon: Icons.format_list_numbered,
-            isDetailRoute: true,
-            route: AdminRoutes.getFullPath(
-                '${AdminRoutes.staff}/${AdminRoutes.staffKitchenTurns}')),
+        // Order entry route for waiter flow
         _SubRoute(
             title: 'Order Entry',
             routeName: AdminRoutes.nameStaffWaiterOrderEntry,
@@ -125,7 +91,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
             isDetailRoute: true,
             detailRouteName: AdminRoutes.nameStaffWaiterOrderEntry,
             route: AdminRoutes.getFullPath(
-                '${AdminRoutes.staff}/${AdminRoutes.staffWaiterOrderEntry}')), // Base pattern
+                '${AdminRoutes.staff}/${AdminRoutes.staffWaiterOrderEntry}')),
       ],
     ),
     // Index 2 - Meal Plans (Shifted)
@@ -973,10 +939,9 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                       }),
                   const Divider(),
                   // Subroutes
-                  ...visibleSubroutes
-                      .map((subroute) => _buildSubrouteMoreMenuTile(
-                          _productDashboardIndex, subroute, currentRouteName))
-                      ,
+                  ...visibleSubroutes.map((subroute) =>
+                      _buildSubrouteMoreMenuTile(
+                          _productDashboardIndex, subroute, currentRouteName)),
                 ],
               ),
             ),
@@ -1024,10 +989,9 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                         _onItemSelected(globalIndex);
                       }),
                   const Divider(),
-                  ...visibleSubroutes
-                      .map((subroute) => _buildSubrouteMoreMenuTile(
-                          globalIndex, subroute, currentRouteName))
-                      ,
+                  ...visibleSubroutes.map((subroute) =>
+                      _buildSubrouteMoreMenuTile(
+                          globalIndex, subroute, currentRouteName)),
                 ],
               ),
             ),
@@ -1075,11 +1039,10 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                     },
                   ),
                   // Indented Staff Subroutes
-                  ...staffSubroutes
-                      .map((subroute) => _buildSubrouteMoreMenuTile(
+                  ...staffSubroutes.map((subroute) =>
+                      _buildSubrouteMoreMenuTile(
                           _staffIndex, subroute, currentRouteName,
-                          indent: true))
-                      ,
+                          indent: true)),
 
                   const Divider(),
 
@@ -1095,11 +1058,10 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                     },
                   ),
                   // Indented Settings Subroutes (Users)
-                  ...settingsSubroutes
-                      .map((subroute) => _buildSubrouteMoreMenuTile(
+                  ...settingsSubroutes.map((subroute) =>
+                      _buildSubrouteMoreMenuTile(
                           _settingsIndex, subroute, currentRouteName,
-                          indent: true))
-                      ,
+                          indent: true)),
                 ],
               ),
             ),
@@ -1231,7 +1193,7 @@ class _SubRoute {
   final String title;
   final String route; // Full Path
   final String routeName; // Named route
-  final IconData icon;  // Not used in this revision's logic
+  final IconData icon; // Not used in this revision's logic
   final String?
       detailRouteName; // Name of the detail route for highlighting parent
   final bool isDetailRoute; // Flag to hide from navigation lists
@@ -1241,7 +1203,7 @@ class _SubRoute {
     required this.route,
     required this.routeName,
     required this.icon,
-    this.detailRouteName, 
+    this.detailRouteName,
     this.isDetailRoute = false,
   });
 }

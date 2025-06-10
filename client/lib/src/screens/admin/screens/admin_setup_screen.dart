@@ -96,30 +96,43 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
           data: (businessConfig) {
             if (businessConfig != null) {
               // Business already set up
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Business Already Configured',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                      'Your business "${businessConfig.name}" is already set up.'),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Navigate to admin panel using GoRouter
-                      try {
-                        context.go('/admin');
-                      } catch (e) {
-                        // Fallback navigation if GoRouter context not available
-                        Navigator.of(context).pushReplacementNamed('/admin');
-                      }
-                    },
-                    child: const Text('Go to Admin Panel'),
-                  ),
-                ],
+              return Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Business Already Configured',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Your business "${businessConfig.name}" is already set up.',
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Navigate to admin panel using GoRouter
+                          try {
+                            context.go('/admin');
+                          } catch (e) {
+                            // Fallback navigation if GoRouter context not available
+                            Navigator.of(context)
+                                .pushReplacementNamed('/admin');
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: const Text('Go to Admin Panel'),
+                      ),
+                    ),
+                  ],
+                ),
               );
             }
 
