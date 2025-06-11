@@ -1,23 +1,27 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../screens/admin/models/product_model.dart';
+import '../business/business_config_provider.dart';
 
 class ProductService {
   final FirebaseFirestore _firestore;
+  final String businessId;
 
-  ProductService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+  ProductService({
+    FirebaseFirestore? firestore,
+    required this.businessId,
+  }) : _firestore = firestore ?? FirebaseFirestore.instance;
 
   // Collection references
   CollectionReference get _categoriesCollection => _firestore
-      .collection('restaurants')
-      .doc('default')
-      .collection('categories');
+      .collection('businesses')
+      .doc(businessId)
+      .collection('menu_categories');
 
   CollectionReference get _productsCollection => _firestore
-      .collection('restaurants')
-      .doc('default')
-      .collection('products');
+      .collection('businesses')
+      .doc(businessId)
+      .collection('menu_items');
 
   // Get all categories
   Stream<List<MenuCategory>> getCategories() {
@@ -131,7 +135,8 @@ class ProductService {
 
 // Provider for product service
 final productServiceProvider = Provider<ProductService>((ref) {
-  return ProductService();
+  final businessId = ref.watch(currentBusinessIdProvider);
+  return ProductService(businessId: businessId);
 });
 
 // Provider for categories stream

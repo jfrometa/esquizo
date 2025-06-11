@@ -1,6 +1,6 @@
-
 class CateringCategory {
   final String id;
+  final String businessId;
   final String name;
   final String description;
   final bool isActive;
@@ -11,6 +11,7 @@ class CateringCategory {
 
   const CateringCategory({
     required this.id,
+    required this.businessId,
     required this.name,
     required this.description,
     this.isActive = false,
@@ -22,20 +23,24 @@ class CateringCategory {
 
   // Empty constructor
   factory CateringCategory.empty() => const CateringCategory(
-    id: '',
-    name: '',
-    description: '',
-  );
+        id: '',
+        businessId: '',
+        name: '',
+        description: '',
+      );
 
   // From JSON constructor
   factory CateringCategory.fromJson(Map<String, dynamic> json) {
     return CateringCategory(
       id: json['id'] as String,
+      businessId: json['businessId'] as String? ?? '',
       name: json['name'] as String,
       description: json['description'] as String,
       isActive: json['isActive'] as bool? ?? false,
       imageUrl: json['imageUrl'] as String? ?? '',
-      tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+      tags:
+          (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+              [],
       displayOrder: json['displayOrder'] as int? ?? 0,
       iconName: json['iconName'] as String?,
     );
@@ -45,6 +50,7 @@ class CateringCategory {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'businessId': businessId,
       'name': name,
       'description': description,
       'isActive': isActive,
@@ -58,6 +64,7 @@ class CateringCategory {
   // Copy with method
   CateringCategory copyWith({
     String? id,
+    String? businessId,
     String? name,
     String? description,
     bool? isActive,
@@ -69,6 +76,7 @@ class CateringCategory {
   }) {
     return CateringCategory(
       id: id ?? this.id,
+      businessId: businessId ?? this.businessId,
       name: name ?? this.name,
       description: description ?? this.description,
       isActive: isActive ?? this.isActive,
@@ -83,29 +91,31 @@ class CateringCategory {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    
+
     return other is CateringCategory &&
-      other.id == id &&
-      other.name == name &&
-      other.description == description &&
-      other.isActive == isActive &&
-      other.imageUrl == imageUrl &&
-      _listEquals(other.tags, tags) &&
-      other.displayOrder == displayOrder &&
-      other.iconName == iconName;
+        other.id == id &&
+        other.businessId == businessId &&
+        other.name == name &&
+        other.description == description &&
+        other.isActive == isActive &&
+        other.imageUrl == imageUrl &&
+        _listEquals(other.tags, tags) &&
+        other.displayOrder == displayOrder &&
+        other.iconName == iconName;
   }
 
   // Hash code
   @override
   int get hashCode {
     return id.hashCode ^
-      name.hashCode ^
-      description.hashCode ^
-      isActive.hashCode ^
-      imageUrl.hashCode ^
-      tags.hashCode ^
-      displayOrder.hashCode ^
-      iconName.hashCode;
+        businessId.hashCode ^
+        name.hashCode ^
+        description.hashCode ^
+        isActive.hashCode ^
+        imageUrl.hashCode ^
+        tags.hashCode ^
+        displayOrder.hashCode ^
+        iconName.hashCode;
   }
 
   // Helper for list equality
@@ -121,6 +131,6 @@ class CateringCategory {
   // String representation
   @override
   String toString() {
-    return 'CateringCategory(id: $id, name: $name, description: $description, isActive: $isActive, displayOrder: $displayOrder)';
+    return 'CateringCategory(id: $id, businessId: $businessId, name: $name, description: $description, isActive: $isActive, displayOrder: $displayOrder)';
   }
 }

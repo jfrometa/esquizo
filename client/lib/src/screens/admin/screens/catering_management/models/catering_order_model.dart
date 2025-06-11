@@ -621,6 +621,7 @@ class CateringOrderItem {
 class CateringOrder {
   // Core identification
   final String id;
+  final String businessId; // Add business ID field
   final String customerId;
   final DateTime orderDate;
   final DateTime eventDate;
@@ -669,6 +670,7 @@ class CateringOrder {
 
   const CateringOrder({
     required this.id,
+    required this.businessId, // Add to constructor
     required this.customerId,
     required this.orderDate,
     required this.eventDate,
@@ -951,6 +953,7 @@ class CateringOrder {
   factory CateringOrder.fromJson(Map<String, dynamic> json) {
     return CateringOrder(
       id: json['id'] as String? ?? '',
+      businessId: json['businessId'] as String? ?? '', // Parse business ID
       customerId:
           json['customerId'] as String? ?? json['userId'] as String? ?? '',
       orderDate: json['orderDate'] != null

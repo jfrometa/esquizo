@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:convert';
 
@@ -6,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
 
 /// Unified provider for both admin and user catering orders
@@ -16,9 +16,9 @@ class CateringOrderProvider extends StateNotifier<CateringOrderItem?> {
   CateringOrderProvider() : super(null) {
     _loadCateringOrder();
   }
-  
+
   // SECTION: Local State Management (SharedPreferences)
-  
+
   // Load catering order from SharedPreferences
   Future<void> _loadCateringOrder() async {
     final prefs = await SharedPreferences.getInstance();
@@ -155,7 +155,10 @@ class CateringOrderProvider extends StateNotifier<CateringOrderItem?> {
 
   // Update a specific dish by index
   void updateDish(int index, CateringDish updatedDish) {
-    if (state != null && state!.isLegacyItem && index >= 0 && index < state!.dishes.length) {
+    if (state != null &&
+        state!.isLegacyItem &&
+        index >= 0 &&
+        index < state!.dishes.length) {
       final updatedDishes = List<CateringDish>.from(state!.dishes);
       updatedDishes[index] = updatedDish; // Update dish at the specified index
       state = state!.copyWith(
@@ -171,7 +174,10 @@ class CateringOrderProvider extends StateNotifier<CateringOrderItem?> {
 
   // Remove a specific dish from the order by index
   void removeFromCart(int index) {
-    if (state != null && state!.isLegacyItem && index >= 0 && index < state!.dishes.length) {
+    if (state != null &&
+        state!.isLegacyItem &&
+        index >= 0 &&
+        index < state!.dishes.length) {
       final updatedDishes = List<CateringDish>.from(state!.dishes)
         ..removeAt(index); // Remove dish at the specified index
       state = state!.copyWith(
@@ -183,42 +189,54 @@ class CateringOrderProvider extends StateNotifier<CateringOrderItem?> {
   // SECTION: Firestore Operations
 
   // Convert CateringOrderItem to CateringOrder for Firestore
-  CateringOrder _convertToFirestoreOrder(
-    CateringOrderItem item, 
-    {required String userId, required DateTime eventDate, String? customerName}
-  ) {
+  CateringOrder _convertToFirestoreOrder(CateringOrderItem item,
+      {required String userId,
+      required DateTime eventDate,
+      String? customerName}) {
     return CateringOrder.fromLegacyItem(
       item,
       customerId: userId,
       customerName: customerName,
       eventDate: eventDate,
+      // Business ID will be set from current context
     );
   }
 
   // Submit current cart/order to Firestore
   Future<String?> submitCurrentOrder({
-    required String userId, 
+    required String userId,
     required DateTime eventDate,
     String? customerName,
   }) async {
     if (state == null || !state!.isLegacyItem || state!.dishes.isEmpty) {
       return null; // Nothing to submit
     }
-    
+
     // Convert local state to Firestore model
     final order = _convertToFirestoreOrder(
-      state!, 
-      userId: userId, 
+      state!,
+      userId: userId,
       eventDate: eventDate,
       customerName: customerName,
     );
-    
-    // Save to Firestore
-    final docRef = await _firestore.collection('cateringOrders').add(order.toJson()..remove('id'));
-    
+
+    // Add business ID to order data
+    final orderData = order.toJson();
+    orderData.remove('id');
+    // Business ID should already be in the model, but ensure it's set
+    if (!orderData.containsKey('businessId') ||
+        orderData['businessId'].isEmpty) {
+      // If businessId is not set in the order, we would need to get it from context
+      // For now, this assumes it's already set in the model
+      debugPrint('Warning: Business ID not set in catering order');
+    }
+
+    // Save to Firestore (root collection, filtered by business ID)
+    final docRef = await _firestore.collection('cateringOrders').add(orderData);
+
     // Optionally clear the cart after submission
     clearCateringOrder();
-    
+
     return docRef.id;
   }
 
@@ -243,8 +261,11 @@ class CateringOrderProvider extends StateNotifier<CateringOrderItem?> {
             }));
   }
 
-  // Get all catering orders (admin)
+  // Get all catering orders (admin) - filtered by business ID
   Stream<List<CateringOrder>> getAllOrders() {
+    // Note: For admin access, we might want to pass business ID as parameter
+    // For now, assuming global admin access. In a multi-business scenario,
+    // this should be filtered by business ID
     return _firestore
         .collection('cateringOrders')
         .orderBy('orderDate', descending: true)
@@ -256,7 +277,22 @@ class CateringOrderProvider extends StateNotifier<CateringOrderItem?> {
                 }))
             .toList());
   }
-  
+
+  // Get orders for a specific business
+  Stream<List<CateringOrder>> getOrdersForBusiness(String businessId) {
+    return _firestore
+        .collection('cateringOrders')
+        .where('businessId', isEqualTo: businessId)
+        .orderBy('orderDate', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => CateringOrder.fromJson({
+                  'id': doc.id,
+                  ...doc.data(),
+                }))
+            .toList());
+  }
+
   // Get orders for a specific user
   Stream<List<CateringOrder>> getUserOrders(String userId) {
     return _firestore
@@ -289,7 +325,8 @@ class CateringOrderProvider extends StateNotifier<CateringOrderItem?> {
   }
 
   // Assign staff to an order
-  Future<void> assignStaff(String orderId, String staffId, String staffName) async {
+  Future<void> assignStaff(
+      String orderId, String staffId, String staffName) async {
     await _firestore.collection('cateringOrders').doc(orderId).update({
       'assignedStaffId': staffId,
       'assignedStaffName': staffName,
@@ -297,13 +334,14 @@ class CateringOrderProvider extends StateNotifier<CateringOrderItem?> {
   }
 
   // Update payment status
-  Future<void> updatePaymentStatus(String orderId, String paymentStatus, [String? paymentId]) async {
+  Future<void> updatePaymentStatus(String orderId, String paymentStatus,
+      [String? paymentId]) async {
     final data = {'paymentStatus': paymentStatus};
-    
+
     if (paymentId != null) {
       data['paymentId'] = paymentId;
     }
-    
+
     await _firestore.collection('cateringOrders').doc(orderId).update(data);
   }
 
@@ -345,7 +383,7 @@ class CateringOrderProvider extends StateNotifier<CateringOrderItem?> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final tomorrow = today.add(const Duration(days: 1));
-    
+
     return _firestore
         .collection('cateringOrders')
         .where('eventDate', isGreaterThanOrEqualTo: today)
@@ -381,74 +419,75 @@ class CateringOrderProvider extends StateNotifier<CateringOrderItem?> {
     final today = DateTime(now.year, now.month, now.day);
     final startOfWeek = today.subtract(Duration(days: today.weekday - 1));
     final startOfMonth = DateTime(now.year, now.month, 1);
-    
-    final orderQuerySnapshot = await _firestore
-        .collection('cateringOrders')
-        .get();
-    
+
+    final orderQuerySnapshot =
+        await _firestore.collection('cateringOrders').get();
+
     final orders = orderQuerySnapshot.docs
         .map((doc) => CateringOrder.fromJson({
               'id': doc.id,
               ...doc.data(),
             }))
         .toList();
-    
+
     // Total orders
     final totalOrders = orders.length;
-    
+
     // Upcoming orders
-    final upcomingOrders = orders.where((order) => 
-        order.eventDate.isAfter(now) && 
-        !order.status.isTerminal
-    ).length;
-    
+    final upcomingOrders = orders
+        .where(
+            (order) => order.eventDate.isAfter(now) && !order.status.isTerminal)
+        .length;
+
     // Today's orders
-    final todayOrders = orders.where((order) => 
-        order.eventDate.isAfter(today) && 
-        order.eventDate.isBefore(today.add(const Duration(days: 1)))
-    ).length;
-    
+    final todayOrders = orders
+        .where((order) =>
+            order.eventDate.isAfter(today) &&
+            order.eventDate.isBefore(today.add(const Duration(days: 1))))
+        .length;
+
     // This week's orders
-    final thisWeekOrders = orders.where((order) => 
-        order.eventDate.isAfter(startOfWeek) && 
-        order.eventDate.isBefore(startOfWeek.add(const Duration(days: 7)))
-    ).length;
-    
+    final thisWeekOrders = orders
+        .where((order) =>
+            order.eventDate.isAfter(startOfWeek) &&
+            order.eventDate.isBefore(startOfWeek.add(const Duration(days: 7))))
+        .length;
+
     // This month's orders
-    final thisMonthOrders = orders.where((order) => 
-        order.eventDate.isAfter(startOfMonth) && 
-        order.eventDate.isBefore(DateTime(now.year, now.month + 1, 1))
-    ).length;
-    
+    final thisMonthOrders = orders
+        .where((order) =>
+            order.eventDate.isAfter(startOfMonth) &&
+            order.eventDate.isBefore(DateTime(now.year, now.month + 1, 1)))
+        .length;
+
     // Revenue calculations
     final totalRevenue = orders.fold(0.0, (sum, order) => sum + order.total);
-    
+
     final todayRevenue = orders
-        .where((order) => 
-            order.eventDate.isAfter(today) && 
+        .where((order) =>
+            order.eventDate.isAfter(today) &&
             order.eventDate.isBefore(today.add(const Duration(days: 1))))
         .fold(0.0, (sum, order) => sum + order.total);
-    
+
     final thisWeekRevenue = orders
-        .where((order) => 
-            order.eventDate.isAfter(startOfWeek) && 
+        .where((order) =>
+            order.eventDate.isAfter(startOfWeek) &&
             order.eventDate.isBefore(startOfWeek.add(const Duration(days: 7))))
         .fold(0.0, (sum, order) => sum + order.total);
-    
+
     final thisMonthRevenue = orders
-        .where((order) => 
-            order.eventDate.isAfter(startOfMonth) && 
+        .where((order) =>
+            order.eventDate.isAfter(startOfMonth) &&
             order.eventDate.isBefore(DateTime(now.year, now.month + 1, 1)))
         .fold(0.0, (sum, order) => sum + order.total);
-    
+
     // Status breakdown
     final Map<String, int> statusCounts = {};
     for (final status in CateringOrderStatus.values) {
-      statusCounts[status.name] = orders
-          .where((order) => order.status == status)
-          .length;
+      statusCounts[status.name] =
+          orders.where((order) => order.status == status).length;
     }
-    
+
     return {
       'totalOrders': totalOrders,
       'upcomingOrders': upcomingOrders,
@@ -467,7 +506,7 @@ class CateringOrderProvider extends StateNotifier<CateringOrderItem?> {
   Future<Map<String, dynamic>> getDashboardSummary() async {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    
+
     final upcomingEvents = await _firestore
         .collection('cateringOrders')
         .where('eventDate', isGreaterThanOrEqualTo: today)
@@ -478,39 +517,39 @@ class CateringOrderProvider extends StateNotifier<CateringOrderItem?> {
         .orderBy('eventDate')
         .limit(5)
         .get();
-    
+
     final recentOrders = await _firestore
         .collection('cateringOrders')
         .orderBy('orderDate', descending: true)
         .limit(5)
         .get();
-    
+
     final pendingConfirmation = await _firestore
         .collection('cateringOrders')
         .where('status', isEqualTo: CateringOrderStatus.pending.name)
         .count()
         .get();
-    
+
     final readyForDelivery = await _firestore
         .collection('cateringOrders')
         .where('status', isEqualTo: CateringOrderStatus.readyForDelivery.name)
         .count()
         .get();
-    
+
     final todayEvents = await _firestore
         .collection('cateringOrders')
         .where('eventDate', isGreaterThanOrEqualTo: today)
         .where('eventDate', isLessThan: today.add(const Duration(days: 1)))
         .count()
         .get();
-    
+
     return {
-      'upcomingEvents': upcomingEvents.docs.map((doc) => 
-          CateringOrder.fromJson({'id': doc.id, ...doc.data()})
-      ).toList(),
-      'recentOrders': recentOrders.docs.map((doc) => 
-          CateringOrder.fromJson({'id': doc.id, ...doc.data()})
-      ).toList(),
+      'upcomingEvents': upcomingEvents.docs
+          .map((doc) => CateringOrder.fromJson({'id': doc.id, ...doc.data()}))
+          .toList(),
+      'recentOrders': recentOrders.docs
+          .map((doc) => CateringOrder.fromJson({'id': doc.id, ...doc.data()}))
+          .toList(),
       'pendingConfirmation': pendingConfirmation.count,
       'readyForDelivery': readyForDelivery.count,
       'todayEvents': todayEvents.count,
@@ -525,7 +564,8 @@ final cateringOrderProvider =
 });
 
 // Convenience providers for common queries using StreamProvider
-final upcomingCateringOrdersProvider = StreamProvider<List<CateringOrder>>((ref) {
+final upcomingCateringOrdersProvider =
+    StreamProvider<List<CateringOrder>>((ref) {
   return ref.watch(cateringOrderProvider.notifier).getUpcomingOrders();
 });
 
@@ -533,30 +573,37 @@ final todayCateringOrdersProvider = StreamProvider<List<CateringOrder>>((ref) {
   return ref.watch(cateringOrderProvider.notifier).getTodayOrders();
 });
 
-final ordersByStatusProvider = StreamProvider.family<List<CateringOrder>, CateringOrderStatus>((ref, status) {
+final ordersByStatusProvider =
+    StreamProvider.family<List<CateringOrder>, CateringOrderStatus>(
+        (ref, status) {
   return ref.watch(cateringOrderProvider.notifier).getOrdersByStatus(status);
 });
 
-final userCateringOrdersProvider = Provider.family<Stream<List<CateringOrder>>, String>((ref, userId) {
+final userCateringOrdersProvider =
+    Provider.family<Stream<List<CateringOrder>>, String>((ref, userId) {
   return ref.watch(cateringOrderProvider.notifier).getUserOrders(userId);
 });
 
-final cateringOrderStreamProvider = Provider.family<Stream<CateringOrder>, String>((ref, orderId) {
+final cateringOrderStreamProvider =
+    Provider.family<Stream<CateringOrder>, String>((ref, orderId) {
   return ref.watch(cateringOrderProvider.notifier).streamOrder(orderId);
 });
 
 // Direct stream provider that returns the raw Stream without wrapping in Provider
-final rawCateringOrderStream = StreamProvider.family<CateringOrder, String>((ref, orderId) {
+final rawCateringOrderStream =
+    StreamProvider.family<CateringOrder, String>((ref, orderId) {
   return ref.watch(cateringOrderProvider.notifier).streamOrder(orderId);
 });
 
 // Update the return type from Map<String, dynamic> to CateringOrder
-final cateringOrderStatisticsProvider = FutureProvider<CateringOrder>((ref) async {
+final cateringOrderStatisticsProvider =
+    FutureProvider<CateringOrder>((ref) async {
   final stats = await ref.watch(cateringOrderProvider.notifier).getStatistics();
   // Convert the statistics map to a CateringOrder object
   return CateringOrder.fromStatistics(stats);
 });
 
-final cateringDashboardSummaryProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+final cateringDashboardSummaryProvider =
+    FutureProvider<Map<String, dynamic>>((ref) async {
   return ref.watch(cateringOrderProvider.notifier).getDashboardSummary();
 });

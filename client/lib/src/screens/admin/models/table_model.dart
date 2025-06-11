@@ -122,7 +122,9 @@ class RestaurantTable extends Resource {
       'isActive': isActive,
       'shape': shape?.toString().split('.').last,
       'updatedAt': FieldValue.serverTimestamp(),
-      'createdAt': createdAt != null ? Timestamp.fromDate(createdAt!) : FieldValue.serverTimestamp(),
+      'createdAt': createdAt != null
+          ? Timestamp.fromDate(createdAt!)
+          : FieldValue.serverTimestamp(),
       'name': name,
       'isAvailable': isAvailable,
       'position': position,
@@ -188,7 +190,9 @@ enum StaffRole {
   admin, // Full access to all areas
   manager, // Management access
   waiter, // Waitstaff
+  cook
   cashier, // Cashier
+  supervisor,
   kitchen, // Kitchen staff
   delivery, // Delivery personnel
   host // Host/hostess
@@ -249,7 +253,9 @@ class StaffMember {
       'lastLogin': lastLogin != null ? Timestamp.fromDate(lastLogin!) : null,
       'profileImageUrl': profileImageUrl,
       'updatedAt': FieldValue.serverTimestamp(),
-      'createdAt': createdAt != null ? Timestamp.fromDate(createdAt!) : FieldValue.serverTimestamp(),
+      'createdAt': createdAt != null
+          ? Timestamp.fromDate(createdAt!)
+          : FieldValue.serverTimestamp(),
     };
   }
 }

@@ -5,22 +5,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'business_config_service.dart';
 import '../local_storange/local_storage_service.dart';
 import '../firebase/firebase_providers.dart';
+import '../../routing/business_routing_provider.dart';
 
-// Provider for business ID
-final currentBusinessIdProvider = StateProvider<String>((ref) {
-  // Initialize with default value
-  return 'default';
+// Provider for business ID - now URL-aware
+final currentBusinessIdProvider = Provider<String>((ref) {
+  // Watch the URL-aware business ID provider
+  final urlAwareBusinessIdAsync = ref.watch(urlAwareBusinessIdProvider);
+  
+  return urlAwareBusinessIdAsync.when(
+    data: (businessId) => businessId,
+    loading: () => 'default', // Fallback while loading
+    error: (_, __) => 'default', // Fallback on error
+  );
 });
 
-// Provider to initialize business ID from storage
+// Provider to initialize business ID from storage (now used by URL-aware provider)
 final initBusinessIdProvider = FutureProvider<String>((ref) async {
   final localStorage = ref.watch(localStorageServiceProvider);
   final businessId = await localStorage.getString('businessId');
-  
-  // Update the state provider with the retrieved value
-  if (businessId != null) {
-    ref.read(currentBusinessIdProvider.notifier).state = businessId;
-  }
   
   // Return the business ID or default
   return businessId ?? 'default';

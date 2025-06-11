@@ -119,14 +119,19 @@ class _CartScreenState extends ConsumerState<CartScreen>
     // Check if we need to reinitialize the tab controller due to tab count change
     bool shouldReinitialize = false;
     if (_availableTabs.length != newAvailableTabs.length ||
-        !_availableTabs.every((element) => newAvailableTabs.contains(element))) {
+        !_availableTabs
+            .every((element) => newAvailableTabs.contains(element))) {
       shouldReinitialize = true;
       _availableTabs = newAvailableTabs;
     }
 
     // If we have no items at all, show empty state
     if (_availableTabs.isEmpty ||
-        (_availableTabs.length == 1 && dishes.isEmpty && cateringItems.isEmpty && quoteItems.isEmpty && mealSubscriptions.isEmpty)) {
+        (_availableTabs.length == 1 &&
+            dishes.isEmpty &&
+            cateringItems.isEmpty &&
+            quoteItems.isEmpty &&
+            mealSubscriptions.isEmpty)) {
       return _buildEmptyCartScreen(context);
     }
 
@@ -140,7 +145,7 @@ class _CartScreenState extends ConsumerState<CartScreen>
         }
       });
     }
-    
+
     // Show loading screen only if controller is actually null
     if (_tabController == null) {
       return _buildLoadingScreen();
@@ -148,43 +153,66 @@ class _CartScreenState extends ConsumerState<CartScreen>
 
     final List<Widget> tabContent = [];
 
-    if (mealSubscriptions.isNotEmpty) {
-      tabContent.add(_buildTabWithCheckoutButton(
-        context,
-        ref,
-        'subscriptions',
-        mealSubscriptions,
-        _buildSubscripcionesTab(ref, mealSubscriptions),
-      ));
+    // Build tab content in the same order as _availableTabs to ensure consistency
+    for (final tabTitle in _availableTabs) {
+      switch (tabTitle) {
+        case 'Subscripciones':
+          tabContent.add(_buildTabWithCheckoutButton(
+            context,
+            ref,
+            'subscriptions',
+            mealSubscriptions,
+            _buildSubscripcionesTab(ref, mealSubscriptions),
+          ));
+          break;
+        case 'Cotizar Catering':
+          if (manualQuote != null) {
+            tabContent.add(_buildTabWithCheckoutButton(
+              context,
+              ref,
+              'quote',
+              quoteItems,
+              _buildManualQuoteTab(ref, manualQuote),
+            ));
+          }
+          break;
+        case 'Catering':
+          if (cateringOrder != null) {
+            tabContent.add(_buildTabWithCheckoutButton(
+              context,
+              ref,
+              'catering',
+              cateringItems,
+              _buildCateringTab(ref, cateringOrder),
+            ));
+          }
+          break;
+        case 'Platos':
+          tabContent.add(_buildTabWithCheckoutButton(
+            context,
+            ref,
+            'platos',
+            dishes,
+            _buildPlatosTab(ref, dishes),
+          ));
+          break;
+      }
     }
 
-    if (quoteItems.isNotEmpty) {
-      tabContent.add(_buildTabWithCheckoutButton(
-        context,
-        ref,
-        'quote',
-        quoteItems,
-        _buildManualQuoteTab(ref, manualQuote!),
-      ));
+    // Validate that tabContent length matches _availableTabs length
+    if (tabContent.length != _availableTabs.length) {
+      debugPrint(
+          'ERROR: TabContent length (${tabContent.length}) does not match availableTabs length (${_availableTabs.length})');
+      // Force reinitialize to fix the mismatch
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _initializeTabController();
+          });
+        }
+      });
+      return _buildLoadingScreen();
     }
-
-    if (cateringItems.isNotEmpty) {
-      tabContent.add(_buildTabWithCheckoutButton(
-        context,
-        ref,
-        'catering',
-        cateringItems,
-        _buildCateringTab(ref, cateringOrder),
-      ));
-    }
-
-    tabContent.add(_buildTabWithCheckoutButton(
-      context,
-      ref,
-      'platos',
-      dishes,
-      _buildPlatosTab(ref, dishes),
-    ));
 
     return Scaffold(
       appBar: AppBar(
@@ -199,7 +227,7 @@ class _CartScreenState extends ConsumerState<CartScreen>
             tooltip: 'Opciones de carrito',
           ),
         ],
-        bottom: _tabController == null
+        bottom: _tabController == null || _availableTabs.isEmpty
             ? null
             : TabBar(
                 controller: _tabController,
@@ -237,7 +265,7 @@ class _CartScreenState extends ConsumerState<CartScreen>
       ),
       body: _errorMessage != null
           ? _buildErrorState(_errorMessage!)
-          : _isLoading || _tabController == null
+          : _isLoading || _tabController == null || tabContent.isEmpty
               ? _buildLoadingState()
               : TabBarView(
                   controller: _tabController,
@@ -307,7 +335,8 @@ class _CartScreenState extends ConsumerState<CartScreen>
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                color:
+                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -511,9 +540,10 @@ class _CartScreenState extends ConsumerState<CartScreen>
     final colorScheme = theme.colorScheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-          border: Border(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        border: Border(
           top: BorderSide(
             color: colorScheme.outlineVariant,
             width: 1,
@@ -830,8 +860,8 @@ class _CartScreenState extends ConsumerState<CartScreen>
                     Text(
                       description,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color:
-                            colorScheme.onSecondaryContainer.withValues(alpha: 0.8),
+                        color: colorScheme.onSecondaryContainer
+                            .withValues(alpha: 0.8),
                       ),
                     ),
                   ],
@@ -937,8 +967,8 @@ class _CartScreenState extends ConsumerState<CartScreen>
                     return Card(
                       elevation: 0,
                       margin: const EdgeInsets.only(bottom: 8),
-                      color:
-                          colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                      color: colorScheme.surfaceContainerHighest
+                          .withValues(alpha: 0.3),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -1059,7 +1089,8 @@ class _CartScreenState extends ConsumerState<CartScreen>
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                  color: colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.5),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(

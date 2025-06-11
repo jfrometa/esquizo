@@ -17,6 +17,7 @@ import 'package:starter_architecture_flutter_firebase/src/routing/app_startup.da
 import 'package:starter_architecture_flutter_firebase/src/routing/go_router_refresh_stream.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/navigation_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/scaffold_with_nested_navigation.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/business_routing_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_dashboard_home.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_panel_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_setup_screen.dart';
