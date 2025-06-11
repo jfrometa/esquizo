@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/app_config/app_config_services.dart';
@@ -9,7 +10,7 @@ import 'setup_screen_provider.dart';
 part 'app_config_services.g.dart';
 
 @Riverpod(keepAlive: true)
-Future<void> appStartup(AppStartupRef ref) async {
+Future<void> appStartup(Ref ref) async {
   debugPrint('🚀 Starting app initialization...');
 
   ref.onDispose(() {
@@ -68,7 +69,7 @@ Future<void> appStartup(AppStartupRef ref) async {
 
 /// Provider for checking admin status eagerly (helping with UI updates)
 @riverpod
-Future<bool> eagerAdminStatus(EagerAdminStatusRef ref) async {
+Future<bool> eagerAdminStatus(Ref ref) async {
   // First check the cached status for immediate response
   final cachedStatus = ref.read(cachedAdminStatusProvider);
   if (cachedStatus) return true;

@@ -57,8 +57,7 @@ final _adminNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'admin');
 final _ordersNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'local');
 
 // Store paths that were attempted before authentication
-// final _pendingPathProvider = StateProvider<String?>((ref) => null);
-final pendingAdminPathProvider = StateProvider<String?>((ref) => null);
+final _pendingAdminPathProvider = StateProvider<String?>((ref) => null);
 // Error state for router
 final routerErrorNotifierProvider = StateProvider<String?>((ref) => null);
 
@@ -132,7 +131,7 @@ GoRouter goRouter(Ref ref) {
     // Store admin path if detected
     if (initialLocation.startsWith('/admin') && initialLocation != '/admin') {
       debugPrint('📍 Storing admin path: $initialLocation');
-      ref.read(pendingAdminPathProvider.notifier).state = initialLocation;
+      ref.read(_pendingAdminPathProvider.notifier).state = initialLocation;
     }
   }
 
@@ -190,7 +189,7 @@ GoRouter goRouter(Ref ref) {
           if (path != '/signin') {
             // Use Future.microtask to avoid setState during build
             Future.microtask(() {
-              ref.read(pendingAdminPathProvider.notifier).state = path;
+              ref.read(_pendingAdminPathProvider.notifier).state = path;
             });
 
             return '/signin?from=$path';
@@ -201,7 +200,7 @@ GoRouter goRouter(Ref ref) {
         // User is logged in
         if (isLoggedIn) {
           // Check for any pending path that was saved before authentication
-          final pendingPath = ref.read(pendingAdminPathProvider);
+          final pendingPath = ref.read(_pendingAdminPathProvider);
 
           // Handle admin routes - check permissions
           if (path.startsWith('/admin')) {
@@ -237,7 +236,7 @@ GoRouter goRouter(Ref ref) {
                 pendingPath != '/') {
               // Clear the pending path
               Future.microtask(() {
-                ref.read(pendingAdminPathProvider.notifier).state = null;
+                ref.read(_pendingAdminPathProvider.notifier).state = null;
               });
               return pendingPath;
             }
