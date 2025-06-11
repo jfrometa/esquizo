@@ -426,14 +426,15 @@ GoRouter goRouter(Ref ref) {
         redirect: (context, state) {
           final businessSlug = state.pathParameters['businessSlug'];
           debugPrint('🔍 Checking business slug: $businessSlug');
-          
+
           if (businessSlug != null && _isValidBusinessSlug(businessSlug)) {
             // Valid business slug - allow business routing
             debugPrint('🏢 Valid business slug detected: $businessSlug');
             return null;
           }
           // Invalid business slug - redirect to home
-          debugPrint('❌ Invalid business slug: $businessSlug, redirecting to home');
+          debugPrint(
+              '❌ Invalid business slug: $businessSlug, redirecting to home');
           return '/';
         },
         pageBuilder: (context, state) {
@@ -906,10 +907,10 @@ bool _isValidBusinessSlug(String slug) {
     'js',
     'javascript',
     'fonts',
-    'menu',        // Default route
-    'carrito',     // Default route  
-    'cuenta',      // Default route
-    'ordenes',     // Default route
+    'menu', // Default route
+    'carrito', // Default route
+    'cuenta', // Default route
+    'ordenes', // Default route
     'startup',
     'error',
     'onboarding',
