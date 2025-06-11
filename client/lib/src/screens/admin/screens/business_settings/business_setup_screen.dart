@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_setup_manager.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/local_storange/local_storage_service.dart';
 import 'dart:io';
 import 'dart:typed_data';
@@ -160,7 +161,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       final businessSetupManager = ref.read(businessSetupManagerProvider);
       final selectedColors = ref.read(selectedBusinessColorsProvider);
 
-      final businessId = await businessSetupManager.createBusinessConfig(
+      final result = await businessSetupManager.createBusinessConfig(
         businessName: _businessNameController.text,
         businessType: _businessType,
         primaryColor: selectedColors['primary']!,
@@ -174,11 +175,42 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
 
       // Save to local storage for future reference
       final localStorage = ref.read(localStorageServiceProvider);
-      await localStorage.setString('businessId', businessId);
+      await localStorage.setString('businessId', result.businessId);
 
       if (mounted) {
-        // Navigate to admin panel using GoRouter
-        context.go('/admin');
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Business setup completed successfully!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+
+        // Refresh the business config provider to trigger app state change
+        ref.invalidate(businessConfigProvider);
+
+        // Navigate directly to the business-specific URL using the slug
+        if (mounted && context.mounted) {
+          try {
+            // Get the business slug from the creation result
+            final businessSlug = result.businessSlug;
+            if (businessSlug.isNotEmpty) {
+              // Navigate directly to business-specific route (e.g., /g2)
+              debugPrint('🎯 Redirecting to business URL: /$businessSlug');
+              GoRouter.of(context).go('/$businessSlug');
+            } else {
+              // Fallback: navigate to completion screen then let it handle redirect
+              GoRouter.of(context)
+                  .go('/business-setup/complete/${result.businessId}');
+            }
+          } catch (routerError) {
+            // Fallback: navigate to admin if there's any routing issue
+            debugPrint('Router navigation failed: $routerError');
+            if (context.mounted) {
+              GoRouter.of(context).go('/admin');
+            }
+          }
+        }
       }
     } catch (e) {
       setState(() {

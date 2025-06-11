@@ -1,30 +1,31 @@
 // Business routing provider for URL-based business access
-// Handles extracting business ID from URL paths like /restaurantBusinessLaBonita
+// Handles extracting business slug from URL paths like /panesitos
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_slug_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/utils/web/web_utils.dart';
 
 part 'business_routing_provider.g.dart';
 
-/// Provider that extracts business ID from the current URL path
+/// Provider that extracts business slug from the current URL path
 @riverpod
-String? businessIdFromUrl(BusinessIdFromUrlRef ref) {
+String? businessSlugFromUrl(BusinessSlugFromUrlRef ref) {
   if (!kIsWeb) return null;
 
   final currentPath = WebUtils.getCurrentPath();
-  return extractBusinessIdFromPath(currentPath);
+  return extractBusinessSlugFromPath(currentPath);
 }
 
-/// Extract business ID from URL path
+/// Extract business slug from URL path
 /// Supports formats like:
-/// - /restaurantBusinessLaBonita -> restaurantBusinessLaBonita
-/// - /restaurantBusinessLaBonita/menu -> restaurantBusinessLaBonita
+/// - /panesitos -> panesitos
+/// - /panesitos/menu -> panesitos
 /// - /admin -> null (admin doesn't use business routing)
 /// - /signin -> null (auth pages don't use business routing)
-String? extractBusinessIdFromPath(String path) {
+String? extractBusinessSlugFromPath(String path) {
   // Remove leading slash
   if (path.startsWith('/')) {
     path = path.substring(1);
@@ -37,7 +38,7 @@ String? extractBusinessIdFromPath(String path) {
   final segments = path.split('/');
   final firstSegment = segments.first;
 
-  // Skip system/auth routes that don't represent business IDs
+  // Skip system/auth routes that don't represent business slugs
   final systemRoutes = {
     'admin',
     'signin',
@@ -57,44 +58,60 @@ String? extractBusinessIdFromPath(String path) {
     return null;
   }
 
-  // If the first segment looks like a business ID, return it
-  // Business IDs should be non-empty and not contain special chars
-  if (firstSegment.isNotEmpty && _isValidBusinessId(firstSegment)) {
+  // If the first segment looks like a business slug, return it
+  // Business slugs should be non-empty and not contain special chars
+  if (firstSegment.isNotEmpty && _isValidBusinessSlug(firstSegment)) {
     return firstSegment;
   }
 
   return null;
 }
 
-/// Check if a string is a valid business ID format
-bool _isValidBusinessId(String id) {
-  // Business IDs should:
-  // - Be at least 3 characters long
+/// Check if a string is a valid business slug format
+bool _isValidBusinessSlug(String slug) {
+  // Business slugs should:
+  // - Be at least 2 characters long
   // - Not contain spaces or special routing characters
-  // - Not be numeric only (to avoid confusion with other IDs)
-  if (id.length < 3) return false;
-  if (id.contains(' ') || id.contains('?') || id.contains('#')) return false;
-  if (RegExp(r'^\d+$').hasMatch(id)) return false; // Not purely numeric
+  // - Only contain lowercase letters, numbers, and hyphens
+  // - Not start or end with hyphens
+  if (slug.length < 2 || slug.length > 50) return false;
+  if (slug.contains(' ') || slug.contains('?') || slug.contains('#'))
+    return false;
+  if (slug.startsWith('-') || slug.endsWith('-')) return false;
+  if (slug.contains('--')) return false; // No consecutive hyphens
+
+  // Check valid pattern: lowercase letters, numbers, and hyphens only
+  final validPattern = RegExp(r'^[a-z0-9-]+$');
+  if (!validPattern.hasMatch(slug)) return false;
 
   return true;
 }
 
 /// Provider for URL-aware business ID
-/// This provider combines URL-based business ID with fallback to local storage
+/// This provider combines URL-based business slug with fallback to local storage
 @riverpod
 class UrlAwareBusinessId extends _$UrlAwareBusinessId {
   @override
   Future<String> build() async {
-    // First, try to get business ID from URL
-    final urlBusinessId = ref.watch(businessIdFromUrlProvider);
+    // First, try to get business slug from URL
+    final urlBusinessSlug = ref.watch(businessSlugFromUrlProvider);
 
-    if (urlBusinessId != null && urlBusinessId.isNotEmpty) {
-      debugPrint('🌐 Using business ID from URL: $urlBusinessId');
+    if (urlBusinessSlug != null && urlBusinessSlug.isNotEmpty) {
+      debugPrint('🌐 Found business slug in URL: $urlBusinessSlug');
 
-      // Log root access if this is not the default business
-      _logBusinessAccess(urlBusinessId);
+      // Resolve slug to business ID using the slug service
+      final slugService = ref.watch(businessSlugServiceProvider);
+      final businessId =
+          await slugService.getBusinessIdFromSlug(urlBusinessSlug);
 
-      return urlBusinessId;
+      if (businessId != null) {
+        debugPrint('🌐 Using business ID from URL slug: $businessId');
+        _logBusinessAccess(urlBusinessSlug, businessId);
+        return businessId;
+      } else {
+        debugPrint(
+            '⚠️ Slug "$urlBusinessSlug" not found, falling back to storage');
+      }
     }
 
     // Fallback to local storage business ID
@@ -116,11 +133,12 @@ class UrlAwareBusinessId extends _$UrlAwareBusinessId {
 }
 
 /// Log business access for analytics/monitoring
-void _logBusinessAccess(String businessId) {
-  debugPrint('📊 Business Access Log: $businessId accessed via URL routing');
+void _logBusinessAccess(String businessSlug, String businessId) {
+  debugPrint(
+      '📊 Business Access Log: $businessSlug ($businessId) accessed via URL routing');
 
   // TODO: Add analytics tracking here
-  // AnalyticsService.logBusinessAccess(businessId);
+  // AnalyticsService.logBusinessAccess(businessSlug, businessId);
 }
 
 /// Log root/default access for analytics/monitoring
@@ -135,16 +153,23 @@ void _logRootAccess() {
 /// Provider to check if current access is via business-specific URL
 @riverpod
 bool isBusinessUrlAccess(IsBusinessUrlAccessRef ref) {
-  final urlBusinessId = ref.watch(businessIdFromUrlProvider);
-  return urlBusinessId != null && urlBusinessId.isNotEmpty;
+  final urlBusinessSlug = ref.watch(businessSlugFromUrlProvider);
+  return urlBusinessSlug != null && urlBusinessSlug.isNotEmpty;
 }
 
-/// Provider to get the current business route prefix
-/// Returns the business ID if accessing via business URL, null otherwise
+/// Provider to get the current business route prefix (slug)
+/// Returns the business slug if accessing via business URL, null otherwise
 @riverpod
 String? businessRoutePrefix(BusinessRoutePrefixRef ref) {
   final isBusinessUrl = ref.watch(isBusinessUrlAccessProvider);
   if (!isBusinessUrl) return null;
 
-  return ref.watch(businessIdFromUrlProvider);
+  return ref.watch(businessSlugFromUrlProvider);
+}
+
+/// Provider to get the current business slug from URL
+/// This is an alias for businessSlugFromUrlProvider for clearer usage
+@riverpod
+String? currentBusinessSlug(CurrentBusinessSlugRef ref) {
+  return ref.watch(businessSlugFromUrlProvider);
 }

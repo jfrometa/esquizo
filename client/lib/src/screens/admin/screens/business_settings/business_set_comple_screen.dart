@@ -4,20 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
- 
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_slug_service.dart';
+
 class BusinessSetupCompleteScreen extends ConsumerWidget {
   final String businessId;
-  
+
   const BusinessSetupCompleteScreen({
     super.key,
     required this.businessId,
   });
-  
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final businessConfig = ref.watch(businessConfigProvider).valueOrNull;
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -41,7 +42,7 @@ class BusinessSetupCompleteScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Success message
                 Text(
                   'Setup Complete!',
@@ -51,7 +52,7 @@ class BusinessSetupCompleteScreen extends ConsumerWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
-                
+
                 Text(
                   businessConfig != null
                       ? '${businessConfig.name} has been set up successfully.'
@@ -60,7 +61,7 @@ class BusinessSetupCompleteScreen extends ConsumerWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
-                
+
                 // Summary
                 Card(
                   child: Padding(
@@ -73,7 +74,6 @@ class BusinessSetupCompleteScreen extends ConsumerWidget {
                           style: theme.textTheme.titleLarge,
                         ),
                         const SizedBox(height: 16),
-                        
                         _buildSummaryItem(
                           theme,
                           icon: Icons.business,
@@ -81,7 +81,6 @@ class BusinessSetupCompleteScreen extends ConsumerWidget {
                           value: businessId,
                         ),
                         const SizedBox(height: 12),
-                        
                         _buildSummaryItem(
                           theme,
                           icon: Icons.restaurant,
@@ -89,7 +88,6 @@ class BusinessSetupCompleteScreen extends ConsumerWidget {
                           value: businessConfig?.name ?? 'Your Restaurant',
                         ),
                         const SizedBox(height: 12),
-                        
                         _buildSummaryItem(
                           theme,
                           icon: Icons.category,
@@ -101,7 +99,7 @@ class BusinessSetupCompleteScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 32),
-                
+
                 // Next steps
                 Text(
                   'Next Steps',
@@ -109,37 +107,53 @@ class BusinessSetupCompleteScreen extends ConsumerWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
-                
+
                 _buildNextStepItem(
                   theme,
                   number: 1,
                   title: 'Explore the Dashboard',
-                  description: 'Get familiar with your restaurant management dashboard',
+                  description:
+                      'Get familiar with your restaurant management dashboard',
                 ),
                 const SizedBox(height: 12),
-                
+
                 _buildNextStepItem(
                   theme,
                   number: 2,
                   title: 'Add Menu Items',
-                  description: 'Create your restaurant menu with categories and items',
+                  description:
+                      'Create your restaurant menu with categories and items',
                 ),
                 const SizedBox(height: 12),
-                
+
                 _buildNextStepItem(
                   theme,
                   number: 3,
                   title: 'Configure Settings',
-                  description: 'Customize your restaurant settings and preferences',
+                  description:
+                      'Customize your restaurant settings and preferences',
                 ),
                 const SizedBox(height: 32),
-                
+
                 // Continue button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                      context.go('/admin');
+                    onPressed: () async {
+                      // Get the business slug for navigation
+                      final slugService = ref.read(businessSlugServiceProvider);
+                      final businessSlug =
+                          await slugService.getSlugFromBusinessId(businessId);
+
+                      if (context.mounted) {
+                        if (businessSlug != null && businessSlug.isNotEmpty) {
+                          // Navigate to business-specific route
+                          context.go('/$businessSlug');
+                        } else {
+                          // Fallback to admin if slug is not available
+                          context.go('/admin');
+                        }
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -154,7 +168,7 @@ class BusinessSetupCompleteScreen extends ConsumerWidget {
       ),
     );
   }
-  
+
   Widget _buildSummaryItem(
     ThemeData theme, {
     required IconData icon,
@@ -196,7 +210,7 @@ class BusinessSetupCompleteScreen extends ConsumerWidget {
       ],
     );
   }
-  
+
   Widget _buildNextStepItem(
     ThemeData theme, {
     required int number,

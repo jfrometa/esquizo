@@ -13,6 +13,7 @@ import 'package:flutter_web_plugins/url_strategy.dart'; // Import for usePathUrl
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/app.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/app_config/app_config_services.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_setup_manager.dart';
 
@@ -51,6 +52,9 @@ Future<void> main() async {
     await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform);
     debugPrint('🔥 Firebase core initialized successfully');
+
+    // Update the Firebase initialization state in the provider container
+    container.read(isFirebaseInitializedProvider.notifier).state = true;
 
     // Initialize Analytics (should be done early to track initialization)
     await _initializeAnalytics();

@@ -1,11 +1,9 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/app_config/app_config_services.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
@@ -116,9 +114,16 @@ enum AppRoute {
 @riverpod
 GoRouter goRouter(Ref ref) {
   final authRepository = ref.watch(authRepositoryProvider);
-  final destinations = ref.watch(navigationDestinationsProvider);
+  // Use allNavigationDestinations for consistent shell branches
+  final allDestinations = ref.watch(allNavigationDestinationsProvider);
   final isFirebaseInitialized = ref.watch(isFirebaseInitializedProvider);
-  final isAdmin = ref.watch(cachedAdminStatusProvider);
+  final isAdminAsync = ref.watch(isAdminProvider);
+  final isAdmin = isAdminAsync.valueOrNull ?? false;
+
+  // Force admin status check if user is logged in but admin status hasn't been determined
+  if (authRepository.currentUser != null && isAdminAsync.hasValue == false) {
+    ref.invalidate(isAdminProvider);
+  }
 
   // Watch for business config status (same as AdminSetupScreen)
   final businessConfigAsync = ref.watch(businessConfigProvider);
@@ -154,16 +159,11 @@ GoRouter goRouter(Ref ref) {
           return null;
         }
 
-        // Initialize Firebase if needed
+        // Firebase should already be initialized in main.dart - don't initialize here
+        // This check should only verify, not initialize
         if (!isFirebaseInitialized) {
-          try {
-            await Firebase.initializeApp(
-                options: DefaultFirebaseOptions.currentPlatform);
-            debugPrint("📱 Firebase initialized successfully");
-          } catch (e) {
-            debugPrint("🔥 Error initializing Firebase: $e");
-            return '/error?message=${Uri.encodeComponent(e.toString())}';
-          }
+          debugPrint("⚠️ Firebase not initialized, redirecting to startup");
+          return '/startup';
         }
 
         // Check authentication status
@@ -188,11 +188,6 @@ GoRouter goRouter(Ref ref) {
 
           // Store the attempted path to redirect after login if not already at signin
           if (path != '/signin') {
-            // Use Future.microtask to avoid setState during build
-            Future.microtask(() {
-              ref.read(_pendingAdminPathProvider.notifier).state = path;
-            });
-
             return '/signin?from=$path';
           }
           return null;
@@ -202,12 +197,21 @@ GoRouter goRouter(Ref ref) {
         if (isLoggedIn) {
           // Check for any pending path that was saved before authentication
           final pendingPath = ref.read(_pendingAdminPathProvider);
-
-          // Handle admin routes - check permissions
           if (path.startsWith('/admin')) {
+            // Don't redirect if admin status is still loading
+            if (isAdminAsync.isLoading) {
+              return null; // Allow navigation while loading
+            }
+
+            // Log debug info for admin status
+            debugPrint('🔐 Admin status check: isAdmin=$isAdmin, path=$path');
+
             if (!isAdmin) {
+              debugPrint('🚫 Redirecting non-admin from $path to /');
               return '/'; // Redirect non-admins to home
             }
+
+            debugPrint('✅ Admin access granted for $path');
 
             // Check business configuration status (same logic as AdminSetupScreen)
             final businessConfig = businessConfigAsync.value;
@@ -228,24 +232,32 @@ GoRouter goRouter(Ref ref) {
                 path == '/admin-setup') {
               return '/admin';
             }
-          }
-
-          // Handle business-specific URL routing
-          final businessIdFromUrl = extractBusinessIdFromPath(path);
-          if (businessIdFromUrl != null &&
-              _isValidBusinessId(businessIdFromUrl)) {
+          } // Handle business-specific URL routing (slug-based)
+          final businessSlugFromUrl = extractBusinessSlugFromPath(path);
+          if (businessSlugFromUrl != null &&
+              _isValidBusinessSlug(businessSlugFromUrl)) {
             // Valid business-specific URL detected
             debugPrint(
-                '🏢 Business-specific access detected: $businessIdFromUrl');
-
-            // Update the current business ID in the provider for this session
-            // This ensures all business-scoped services use the correct business context
-            Future.microtask(() {
-              // Note: We need to update the URL-aware provider to refresh
-              ref.invalidate(urlAwareBusinessIdProvider);
-            });
-
+                '🏢 Business-specific access detected: $businessSlugFromUrl');
             return null; // Allow the business-specific route to proceed
+          }
+
+          // Root path routing logic
+          if (path == '/') {
+            // Check if there's a default business setup
+            final businessConfig = businessConfigAsync.value;
+            if (businessConfig?.id == 'default' || businessConfig == null) {
+              // No specific business configured or using default
+              // Allow access to root with default business context
+              debugPrint('🏠 Root access with default business context');
+              return null;
+            } else {
+              // There's a configured business but user is accessing root
+              // Still allow access to root (don't force redirect to business slug)
+              debugPrint(
+                  '🏠 Root access allowed with business context: ${businessConfig.id}');
+              return null;
+            }
           }
 
           // If we're at startup, signin, or onboarding, go to saved path or home
@@ -253,10 +265,6 @@ GoRouter goRouter(Ref ref) {
             if (pendingPath != null &&
                 pendingPath.isNotEmpty &&
                 pendingPath != '/') {
-              // Clear the pending path
-              Future.microtask(() {
-                ref.read(_pendingAdminPathProvider.notifier).state = null;
-              });
               return pendingPath;
             }
             return '/'; // Default to home if no pending path
@@ -300,52 +308,6 @@ GoRouter goRouter(Ref ref) {
       return UnauthorizedScreen();
     },
     routes: [
-      // Business-specific routing (e.g., /restaurantBusinessLaBonita)
-      // This should come first to catch business-specific URLs
-      GoRoute(
-        path: '/:businessId',
-        redirect: (context, state) {
-          final businessId = state.pathParameters['businessId'];
-          if (businessId != null && _isValidBusinessId(businessId)) {
-            // Valid business ID - allow business routing
-            debugPrint('🏢 Business-specific route detected: $businessId');
-            return null;
-          }
-          // Invalid business ID - redirect to home
-          return '/';
-        },
-        routes: [
-          // Business menu route (e.g., /restaurantBusinessLaBonita/menu)
-          GoRoute(
-            path: '/menu',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: MenuScreen(),
-            ),
-          ),
-          // Business cart route (e.g., /restaurantBusinessLaBonita/carrito)
-          GoRoute(
-            path: '/carrito',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: CartScreen(isAuthenticated: true),
-            ),
-          ),
-          // Business account route (e.g., /restaurantBusinessLaBonita/cuenta)
-          GoRoute(
-            path: '/cuenta',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: CustomProfileScreen(),
-            ),
-          ),
-          // Business orders route (e.g., /restaurantBusinessLaBonita/ordenes)
-          GoRoute(
-            path: '/ordenes',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: InProgressOrdersScreen(),
-            ),
-          ),
-        ],
-      ),
-
       // Business Setup Routes
       GoRoute(
         path: '/business-setup',
@@ -397,12 +359,91 @@ GoRouter goRouter(Ref ref) {
           child: AdminSetupScreen(),
         ),
       ),
+
+      // Business-specific routing (e.g., /panesitos, /restaurant-name)
+      // This must come BEFORE StatefulShellRoute to properly catch business slugs
+      GoRoute(
+        path: '/:businessSlug',
+        redirect: (context, state) {
+          final businessSlug = state.pathParameters['businessSlug'];
+          if (businessSlug != null && _isValidBusinessSlug(businessSlug)) {
+            // Valid business slug - allow business routing
+            debugPrint('🏢 Business-specific route detected: $businessSlug');
+            return null;
+          }
+          // Invalid business slug - redirect to home
+          debugPrint(
+              '❌ Invalid business slug: $businessSlug, redirecting to home');
+          return '/';
+        },
+        pageBuilder: (context, state) {
+          final businessSlug = state.pathParameters['businessSlug']!;
+          debugPrint('🏢 Loading business home for: $businessSlug');
+          // Business home page - show the home screen for this business
+          return NoTransitionPage(
+            child: HomeScreenContentWrapper(businessSlug: businessSlug),
+          );
+        },
+        routes: [
+          // Business menu route (e.g., /panesitos/menu)
+          GoRoute(
+            path: '/menu',
+            pageBuilder: (context, state) {
+              final businessSlug = state.pathParameters['businessSlug']!;
+              debugPrint('🏢 Loading business menu for: $businessSlug');
+              return NoTransitionPage(
+                child: MenuScreenWrapper(businessSlug: businessSlug),
+              );
+            },
+          ),
+          // Business cart route (e.g., /panesitos/carrito)
+          GoRoute(
+            path: '/carrito',
+            pageBuilder: (context, state) {
+              final businessSlug = state.pathParameters['businessSlug']!;
+              debugPrint('🏢 Loading business cart for: $businessSlug');
+              return NoTransitionPage(
+                child: CartScreenWrapper(businessSlug: businessSlug),
+              );
+            },
+          ),
+          // Business account route (e.g., /panesitos/cuenta)
+          GoRoute(
+            path: '/cuenta',
+            pageBuilder: (context, state) {
+              final businessSlug = state.pathParameters['businessSlug']!;
+              debugPrint('🏢 Loading business account for: $businessSlug');
+              return NoTransitionPage(
+                child: ProfileScreenWrapper(businessSlug: businessSlug),
+              );
+            },
+          ),
+          // Business orders route (e.g., /panesitos/ordenes)
+          GoRoute(
+            path: '/ordenes',
+            pageBuilder: (context, state) {
+              final businessSlug = state.pathParameters['businessSlug']!;
+              debugPrint('🏢 Loading business orders for: $businessSlug');
+              return NoTransitionPage(
+                child: OrdersScreenWrapper(businessSlug: businessSlug),
+              );
+            },
+          ),
+        ],
+      ),
+
+      // StatefulShellRoute for default business navigation (no slug prefix)
       StatefulShellRoute.indexedStack(
         pageBuilder: (context, state, navigationShell) => NoTransitionPage(
           child: ScaffoldWithNestedNavigation(navigationShell: navigationShell),
         ),
-        branches: destinations.map((dest) => _buildBranch(dest)).toList(),
+        branches: allDestinations
+            .where((dest) =>
+                dest.path != '/admin') // Exclude admin from shell branches
+            .map((dest) => _buildBranch(dest))
+            .toList(),
       ),
+
       // Add all admin routes here for proper URL handling
       ...getAdminRoutes(),
     ],
@@ -685,33 +726,149 @@ class UnauthorizedScreen extends StatelessWidget {
   }
 }
 
-// Helper function to validate business IDs in routing
-bool _isValidBusinessId(String id) {
-  // Business IDs should:
-  // - Be at least 3 characters long
-  // - Not contain spaces or special routing characters
-  // - Not be numeric only (to avoid confusion with other IDs)
-  // - Not be system route names
+// --------------------------------------------------------------------------
+// Business Screen Wrappers with Navigation
+// --------------------------------------------------------------------------
 
-  final systemRoutes = {
+/// Wrapper for business home screen with navigation
+class HomeScreenContentWrapper extends StatelessWidget {
+  const HomeScreenContentWrapper({super.key, required this.businessSlug});
+  final String businessSlug;
+
+  @override
+  Widget build(BuildContext context) {
+    return BusinessScaffoldWithNavigation(
+      businessSlug: businessSlug,
+      child: const ResponsiveLandingPage(),
+    );
+  }
+}
+
+/// Wrapper for business menu screen with navigation
+class MenuScreenWrapper extends StatelessWidget {
+  const MenuScreenWrapper({super.key, required this.businessSlug});
+  final String businessSlug;
+
+  @override
+  Widget build(BuildContext context) {
+    return BusinessScaffoldWithNavigation(
+      businessSlug: businessSlug,
+      child: const MenuScreen(),
+    );
+  }
+}
+
+/// Wrapper for business cart screen with navigation
+class CartScreenWrapper extends StatelessWidget {
+  const CartScreenWrapper({super.key, required this.businessSlug});
+  final String businessSlug;
+
+  @override
+  Widget build(BuildContext context) {
+    return BusinessScaffoldWithNavigation(
+      businessSlug: businessSlug,
+      child: const CartScreen(isAuthenticated: true),
+    );
+  }
+}
+
+/// Wrapper for business profile screen with navigation
+class ProfileScreenWrapper extends StatelessWidget {
+  const ProfileScreenWrapper({super.key, required this.businessSlug});
+  final String businessSlug;
+
+  @override
+  Widget build(BuildContext context) {
+    return BusinessScaffoldWithNavigation(
+      businessSlug: businessSlug,
+      child: const CustomProfileScreen(),
+    );
+  }
+}
+
+/// Wrapper for business orders screen with navigation
+class OrdersScreenWrapper extends StatelessWidget {
+  const OrdersScreenWrapper({super.key, required this.businessSlug});
+  final String businessSlug;
+
+  @override
+  Widget build(BuildContext context) {
+    return BusinessScaffoldWithNavigation(
+      businessSlug: businessSlug,
+      child: const InProgressOrdersScreen(),
+    );
+  }
+}
+
+// Helper function to validate business slugs in routing
+bool _isValidBusinessSlug(String slug) {
+  // Business slugs should:
+  // - Be at least 2 characters long
+  // - Not contain spaces or special routing characters
+  // - Only contain lowercase letters, numbers, and hyphens
+  // - Not start or end with hyphens
+  if (slug.length < 2 || slug.length > 50) return false;
+  if (slug.contains(' ') || slug.contains('?') || slug.contains('#'))
+    return false;
+  if (slug.startsWith('-') || slug.endsWith('-')) return false;
+  if (slug.contains('--')) return false; // No consecutive hyphens
+
+  // Check valid pattern: lowercase letters, numbers, and hyphens only
+  final validPattern = RegExp(r'^[a-z0-9-]+$');
+  if (!validPattern.hasMatch(slug)) return false;
+
+  // Check against reserved words
+  final reservedSlugs = {
     'admin',
+    'api',
+    'www',
+    'app',
+    'help',
+    'support',
+    'about',
+    'contact',
     'signin',
     'signup',
-    'onboarding',
-    'error',
+    'login',
+    'logout',
+    'register',
+    'dashboard',
+    'settings',
+    'profile',
+    'account',
+    'billing',
+    'pricing',
+    'terms',
+    'privacy',
+    'legal',
+    'security',
+    'status',
+    'blog',
+    'news',
+    'docs',
+    'documentation',
+    'guide',
+    'tutorial',
+    'faq',
+    'mail',
+    'email',
+    'static',
+    'assets',
+    'images',
+    'css',
+    'js',
+    'javascript',
+    'fonts',
+    'menu',
+    'carrito',
+    'cuenta',
+    'ordenes',
     'startup',
+    'error',
+    'onboarding',
     'business-setup',
-    'admin-setup',
-    'menu', // For default/root access
-    'carrito', // For default/root access
-    'cuenta', // For default/root access
-    'ordenes', // For default/root access
+    'admin-setup'
   };
 
-  if (systemRoutes.contains(id)) return false;
-  if (id.length < 3) return false;
-  if (id.contains(' ') || id.contains('?') || id.contains('#')) return false;
-  if (RegExp(r'^\d+$').hasMatch(id)) return false; // Not purely numeric
-
-  return true;
+  return !reservedSlugs.contains(slug);
 }

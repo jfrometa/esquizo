@@ -60,16 +60,17 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Business setup completed successfully!')),
+            content: Text('Business setup completed successfully!'),
+            duration: Duration(seconds: 2),
+          ),
         );
 
-        // Navigate to admin panel using GoRouter
-        if (GoRouter.of(context).canPop()) {
-          context.go('/admin');
-        } else {
-          // If no GoRouter context, use pushReplacement fallback
-          Navigator.of(context).pushReplacementNamed('/admin');
-        }
+        // Refresh the business config provider to trigger app state change
+        // This will cause BusinessSetupDetector to switch to the main app
+        ref.invalidate(businessConfigProvider);
+
+        // The BusinessSetupDetector will automatically switch to the main app
+        // which has GoRouter context and will navigate to admin panel
       }
     } catch (e) {
       setState(() {
@@ -118,13 +119,18 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-                          // Navigate to admin panel using GoRouter
+                          // Navigate to admin panel
                           try {
-                            context.go('/admin');
+                            // Try GoRouter first
+                            if (GoRouter.maybeOf(context) != null) {
+                              context.go('/admin');
+                            } else {
+                              // Fallback: refresh business config to trigger app state change
+                              ref.invalidate(businessConfigProvider);
+                            }
                           } catch (e) {
-                            // Fallback navigation if GoRouter context not available
-                            Navigator.of(context)
-                                .pushReplacementNamed('/admin');
+                            // Last resort: refresh business config
+                            ref.invalidate(businessConfigProvider);
                           }
                         },
                         style: ElevatedButton.styleFrom(

@@ -39,7 +39,26 @@ class UnifiedAdminService {
         debugPrint('Error getting token claims: $tokenError');
       }
 
-      return adminDoc.exists || isAdminClaim;
+      // Check if user is a business owner
+      bool isBusinessOwner = false;
+      try {
+        final ownershipQuery = await _firestore
+            .collection('business_relationships')
+            .where('userId', isEqualTo: user.uid)
+            .where('role', isEqualTo: 'owner')
+            .limit(1)
+            .get(cacheOption);
+
+        isBusinessOwner = ownershipQuery.docs.isNotEmpty;
+
+        if (isBusinessOwner) {
+          debugPrint('🔐 User ${user.uid} has business owner privileges');
+        }
+      } catch (businessError) {
+        debugPrint('Error checking business ownership: $businessError');
+      }
+
+      return adminDoc.exists || isAdminClaim || isBusinessOwner;
     } catch (e) {
       debugPrint('Error checking admin status: $e');
       return false;

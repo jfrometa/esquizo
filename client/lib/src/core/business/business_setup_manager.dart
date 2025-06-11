@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
 import 'dart:async';
 
@@ -14,14 +15,17 @@ import '../local_storange/local_storage_service.dart';
 class BusinessSetupManager {
   final FirebaseFirestore _firestore;
   final FirebaseStorage _storage;
+  final FirebaseAuth _auth;
   final LocalStorageService _localStorageService;
 
   BusinessSetupManager({
     required FirebaseFirestore firestore,
     required FirebaseStorage storage,
+    required FirebaseAuth auth,
     required LocalStorageService localStorageService,
   })  : _firestore = firestore,
         _storage = storage,
+        _auth = auth,
         _localStorageService = localStorageService;
 
   // Check if a business is set up
@@ -52,7 +56,7 @@ class BusinessSetupManager {
   }
 
   // Create a new business configuration
-  Future<String> createBusinessConfig({
+  Future<BusinessCreationResult> createBusinessConfig({
     required String businessName,
     required String businessType,
     required Color primaryColor,
@@ -68,6 +72,9 @@ class BusinessSetupManager {
     try {
       // Generate a business ID from name
       final businessId = _generateBusinessId(businessName);
+
+      // Generate a business slug from name (for URL routing)
+      final businessSlug = await _generateUniqueSlug(businessName);
 
       // Upload logos if provided
       String logoLightUrl = '';
@@ -91,6 +98,7 @@ class BusinessSetupManager {
       final businessData = {
         'name': businessName,
         'type': businessType,
+        'slug': businessSlug,
         'logoUrl': logoLightUrl,
         'logoDarkUrl': logoDarkUrl,
         'coverImageUrl': coverImageUrl,
@@ -123,10 +131,28 @@ class BusinessSetupManager {
           .doc(businessId)
           .set(businessData);
 
+      // Create business relationship to establish ownership
+      final currentUser = _auth.currentUser;
+      if (currentUser != null) {
+        await _firestore.collection('business_relationships').add({
+          'businessId': businessId,
+          'userId': currentUser.uid,
+          'role': 'owner',
+          'email': currentUser.email ?? '',
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        debugPrint(
+            '✅ Business relationship created: ${currentUser.uid} -> $businessId');
+      } else {
+        debugPrint(
+            '⚠️ No authenticated user found, skipping business relationship creation');
+      }
+
       // Save business ID to local storage
       await _localStorageService.setString('businessId', businessId);
 
-      return businessId;
+      return BusinessCreationResult(
+          businessId: businessId, businessSlug: businessSlug);
     } catch (e) {
       debugPrint('Error creating business config: $e');
       throw Exception('Failed to create business configuration: $e');
@@ -283,17 +309,72 @@ class BusinessSetupManager {
   String _colorToHex(Color color) {
     return '#${color.value.toRadixString(16).padLeft(8, '0').substring(2)}';
   }
+
+  // Generate a unique slug for the business
+  Future<String> _generateUniqueSlug(String businessName) async {
+    String baseSlug = businessName
+        .toLowerCase()
+        .trim()
+        .replaceAll(RegExp(r'[^a-z0-9\s]'), '') // Remove special characters
+        .replaceAll(RegExp(r'\s+'), '-') // Replace spaces with hyphens
+        .replaceAll(RegExp(r'-+'), '-') // Replace multiple hyphens with single
+        .replaceAll(RegExp(r'^-|-$'), ''); // Remove leading/trailing hyphens
+
+    if (baseSlug.isEmpty) {
+      baseSlug = 'business';
+    }
+
+    // Check if the slug already exists
+    String finalSlug = baseSlug;
+    int counter = 1;
+
+    while (await _slugExists(finalSlug)) {
+      finalSlug = '$baseSlug-$counter';
+      counter++;
+    }
+
+    return finalSlug;
+  }
+
+  // Check if a slug already exists in Firestore
+  Future<bool> _slugExists(String slug) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('businesses')
+          .where('slug', isEqualTo: slug)
+          .limit(1)
+          .get();
+
+      return querySnapshot.docs.isNotEmpty;
+    } catch (e) {
+      debugPrint('Error checking slug existence: $e');
+      return false; // Assume it doesn't exist if there's an error
+    }
+  }
+}
+
+// Result class for business creation
+class BusinessCreationResult {
+  final String businessId;
+  final String businessSlug;
+
+  const BusinessCreationResult({
+    required this.businessId,
+    required this.businessSlug,
+  });
 }
 
 // Provider for BusinessSetupManager
 final businessSetupManagerProvider = Provider<BusinessSetupManager>((ref) {
   final firestore = ref.watch(firebaseFirestoreProvider);
   final storage = ref.watch(firebaseStorageProvider);
+  final auth = ref.watch(firebaseAuthProvider);
   final localStorage = ref.watch(localStorageServiceProvider);
 
   return BusinessSetupManager(
     firestore: firestore,
     storage: storage,
+    auth: auth,
     localStorageService: localStorage,
   );
 });
