@@ -15,7 +15,6 @@ import 'package:starter_architecture_flutter_firebase/src/routing/app_startup.da
 import 'package:starter_architecture_flutter_firebase/src/routing/go_router_refresh_stream.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/navigation_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/scaffold_with_nested_navigation.dart';
-import 'package:starter_architecture_flutter_firebase/src/routing/business_routing_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_dashboard_home.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_panel_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_setup_screen.dart';
@@ -59,6 +58,28 @@ final _ordersNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'local');
 final _pendingAdminPathProvider = StateProvider<String?>((ref) => null);
 // Error state for router
 final routerErrorNotifierProvider = StateProvider<String?>((ref) => null);
+
+// Debug navigator observer
+class _DebugNavigatorObserver extends NavigatorObserver {
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    debugPrint('🚢 Navigation: PUSH to ${route.settings.name}');
+    super.didPush(route, previousRoute);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    debugPrint('🚢 Navigation: POP from ${route.settings.name}');
+    super.didPop(route, previousRoute);
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    debugPrint(
+        '🚢 Navigation: REPLACE ${oldRoute?.settings.name} → ${newRoute?.settings.name}');
+    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+  }
+}
 
 enum AppRoute {
   authenticatedProfile,
@@ -150,9 +171,12 @@ GoRouter goRouter(Ref ref) {
       try {
         final path = state.uri.path;
 
-        // Log router state for debugging
-        debugPrint(
-            '🧭 Router redirect, path: "$path", location: "${state.uri}"');
+        // Enhanced logging for debugging navigation issues
+        debugPrint('🧭 Router redirect triggered!');
+        debugPrint('🧭   Path: "$path"');
+        debugPrint('🧭   Full URI: "${state.uri}"');
+        debugPrint('🧭   Query params: "${state.uri.queryParameters}"');
+        debugPrint('🧭   Route name: "${state.name}"');
 
         // Skip redirect logic entirely if we're already at error
         if (path.startsWith('/error')) {
@@ -197,68 +221,82 @@ GoRouter goRouter(Ref ref) {
         if (isLoggedIn) {
           // Check for any pending path that was saved before authentication
           final pendingPath = ref.read(_pendingAdminPathProvider);
+
+          // Handle ONLY admin routes that start with /admin
           if (path.startsWith('/admin')) {
             // Don't redirect if admin status is still loading
             if (isAdminAsync.isLoading) {
+              debugPrint('⏳ Admin status loading, allowing navigation: $path');
               return null; // Allow navigation while loading
             }
 
             // Log debug info for admin status
-            debugPrint('🔐 Admin status check: isAdmin=$isAdmin, path=$path');
+            debugPrint(
+                '🔐 Admin route access attempt: isAdmin=$isAdmin, path=$path');
 
-            if (!isAdmin) {
-              debugPrint('🚫 Redirecting non-admin from $path to /');
+            // Only block access to admin routes for confirmed non-admin users
+            if (isAdminAsync.hasValue && !isAdmin) {
+              debugPrint(
+                  '🚫 Non-admin user blocked from admin area: $path → redirecting to /');
               return '/'; // Redirect non-admins to home
             }
 
-            debugPrint('✅ Admin access granted for $path');
+            // If admin status is confirmed, allow access and check business setup
+            if (isAdmin) {
+              debugPrint('✅ Admin access granted for: $path');
 
-            // Check business configuration status (same logic as AdminSetupScreen)
-            final businessConfig = businessConfigAsync.value;
-            final isBusinessConfigured =
-                businessConfig != null && businessConfig.isActive;
+              // Check business configuration status ONLY for admin users accessing admin routes
+              final businessConfig = businessConfigAsync.value;
+              final isBusinessConfigured =
+                  businessConfig != null && businessConfig.isActive;
 
-            // Only redirect to admin setup if business is definitely not set up
-            // and we're not already at the admin setup page
-            if (businessConfigAsync.hasValue &&
-                !isBusinessConfigured &&
-                path != '/admin-setup') {
-              return '/admin-setup';
+              // Only redirect to admin setup if business is definitely not set up
+              // and we're not already at the admin setup page
+              if (businessConfigAsync.hasValue &&
+                  !isBusinessConfigured &&
+                  path != '/admin-setup') {
+                debugPrint(
+                    '🔧 Admin needs business setup, redirecting to /admin-setup');
+                return '/admin-setup';
+              }
+
+              // If business is set up and user is at admin-setup, redirect to admin panel
+              if (businessConfigAsync.hasValue &&
+                  isBusinessConfigured &&
+                  path == '/admin-setup') {
+                debugPrint(
+                    '🔧 Business already configured, redirecting to /admin');
+                return '/admin';
+              }
             }
 
-            // If business is set up and user is at admin-setup, redirect to admin panel
-            if (businessConfigAsync.hasValue &&
-                isBusinessConfigured &&
-                path == '/admin-setup') {
-              return '/admin';
-            }
-          } // Handle business-specific URL routing (slug-based)
-          final businessSlugFromUrl = extractBusinessSlugFromPath(path);
-          if (businessSlugFromUrl != null &&
-              _isValidBusinessSlug(businessSlugFromUrl)) {
-            // Valid business-specific URL detected
-            debugPrint(
-                '🏢 Business-specific access detected: $businessSlugFromUrl');
-            return null; // Allow the business-specific route to proceed
+            // Allow admin route access (admin confirmed or status still loading)
+            debugPrint('✅ Admin route allowed: $path');
+            return null;
           }
 
-          // Root path routing logic
-          if (path == '/') {
-            // Check if there's a default business setup
-            final businessConfig = businessConfigAsync.value;
-            if (businessConfig?.id == 'default' || businessConfig == null) {
-              // No specific business configured or using default
-              // Allow access to root with default business context
-              debugPrint('🏠 Root access with default business context');
-              return null;
-            } else {
-              // There's a configured business but user is accessing root
-              // Still allow access to root (don't force redirect to business slug)
-              debugPrint(
-                  '🏠 Root access allowed with business context: ${businessConfig.id}');
-              return null;
-            }
+          // Define system routes that should never be treated as business routes
+          final systemRoutes = {
+            '/admin',
+            '/signin',
+            '/signup',
+            '/onboarding',
+            '/error',
+            '/startup',
+            '/business-setup',
+            '/admin-setup',
+          };
+
+          // Check if this is a system route - allow immediately
+          if (systemRoutes.any((route) => path.startsWith(route))) {
+            debugPrint('🔧 System route access: $path');
+            return null;
           }
+
+          // All other routes (default and business) are handled by route matching
+          // Let GoRouter handle the route matching - don't interfere
+          debugPrint('🌐 Route will be handled by GoRouter matching: $path');
+          return null;
 
           // If we're at startup, signin, or onboarding, go to saved path or home
           if (isAtStartup || isLoggingIn || isOnboarding) {
@@ -269,6 +307,11 @@ GoRouter goRouter(Ref ref) {
             }
             return '/'; // Default to home if no pending path
           }
+
+          // Allow all other routes to proceed - don't redirect unknown paths
+          // The GoRouter will handle route matching and show 404 if needed
+          debugPrint('🌐 Allowing route to proceed: $path');
+          return null;
         }
 
         return null; // No redirect needed
@@ -278,11 +321,14 @@ GoRouter goRouter(Ref ref) {
       }
     },
     observers: [
+      // Custom navigation observer for debugging
+      _DebugNavigatorObserver(),
       // Firebase Analytics Observer
       FirebaseAnalyticsObserver(
         analytics: FirebaseAnalytics.instance,
         nameExtractor: (RouteSettings settings) {
           final String? name = settings.name;
+          debugPrint('📊 Analytics Observer: Route changed to: $name');
           if (name != null && name.isNotEmpty) {
             AnalyticsService.instance.logCustomEvent(
               eventName: 'screen_view',
@@ -360,32 +406,45 @@ GoRouter goRouter(Ref ref) {
         ),
       ),
 
-      // Business-specific routing (e.g., /panesitos, /restaurant-name)
-      // This must come BEFORE StatefulShellRoute to properly catch business slugs
+      // StatefulShellRoute for default business navigation (no slug prefix)
+      // This MUST come BEFORE business-specific routing to catch default routes first
+      StatefulShellRoute.indexedStack(
+        pageBuilder: (context, state, navigationShell) => NoTransitionPage(
+          child: ScaffoldWithNestedNavigation(navigationShell: navigationShell),
+        ),
+        branches: allDestinations
+            .where((dest) =>
+                dest.path != '/admin') // Exclude admin from shell branches
+            .map((dest) => _buildBranch(dest))
+            .toList(),
+      ),
+
+      // Business-specific routing (e.g., /g3, /restaurant-name)
+      // This comes AFTER StatefulShellRoute so default routes are handled first
       GoRoute(
         path: '/:businessSlug',
         redirect: (context, state) {
           final businessSlug = state.pathParameters['businessSlug'];
+          debugPrint('🔍 Checking business slug: $businessSlug');
+          
           if (businessSlug != null && _isValidBusinessSlug(businessSlug)) {
             // Valid business slug - allow business routing
-            debugPrint('🏢 Business-specific route detected: $businessSlug');
+            debugPrint('🏢 Valid business slug detected: $businessSlug');
             return null;
           }
           // Invalid business slug - redirect to home
-          debugPrint(
-              '❌ Invalid business slug: $businessSlug, redirecting to home');
+          debugPrint('❌ Invalid business slug: $businessSlug, redirecting to home');
           return '/';
         },
         pageBuilder: (context, state) {
           final businessSlug = state.pathParameters['businessSlug']!;
           debugPrint('🏢 Loading business home for: $businessSlug');
-          // Business home page - show the home screen for this business
           return NoTransitionPage(
             child: HomeScreenContentWrapper(businessSlug: businessSlug),
           );
         },
         routes: [
-          // Business menu route (e.g., /panesitos/menu)
+          // Business menu route (e.g., /g3/menu)
           GoRoute(
             path: '/menu',
             pageBuilder: (context, state) {
@@ -396,7 +455,7 @@ GoRouter goRouter(Ref ref) {
               );
             },
           ),
-          // Business cart route (e.g., /panesitos/carrito)
+          // Business cart route (e.g., /g3/carrito)
           GoRoute(
             path: '/carrito',
             pageBuilder: (context, state) {
@@ -407,7 +466,7 @@ GoRouter goRouter(Ref ref) {
               );
             },
           ),
-          // Business account route (e.g., /panesitos/cuenta)
+          // Business account route (e.g., /g3/cuenta)
           GoRoute(
             path: '/cuenta',
             pageBuilder: (context, state) {
@@ -418,7 +477,7 @@ GoRouter goRouter(Ref ref) {
               );
             },
           ),
-          // Business orders route (e.g., /panesitos/ordenes)
+          // Business orders route (e.g., /g3/ordenes)
           GoRoute(
             path: '/ordenes',
             pageBuilder: (context, state) {
@@ -430,18 +489,6 @@ GoRouter goRouter(Ref ref) {
             },
           ),
         ],
-      ),
-
-      // StatefulShellRoute for default business navigation (no slug prefix)
-      StatefulShellRoute.indexedStack(
-        pageBuilder: (context, state, navigationShell) => NoTransitionPage(
-          child: ScaffoldWithNestedNavigation(navigationShell: navigationShell),
-        ),
-        branches: allDestinations
-            .where((dest) =>
-                dest.path != '/admin') // Exclude admin from shell branches
-            .map((dest) => _buildBranch(dest))
-            .toList(),
       ),
 
       // Add all admin routes here for proper URL handling
@@ -817,7 +864,7 @@ bool _isValidBusinessSlug(String slug) {
   final validPattern = RegExp(r'^[a-z0-9-]+$');
   if (!validPattern.hasMatch(slug)) return false;
 
-  // Check against reserved words
+  // Check against reserved words (including default routes)
   final reservedSlugs = {
     'admin',
     'api',
@@ -859,10 +906,10 @@ bool _isValidBusinessSlug(String slug) {
     'js',
     'javascript',
     'fonts',
-    'menu',
-    'carrito',
-    'cuenta',
-    'ordenes',
+    'menu',        // Default route
+    'carrito',     // Default route  
+    'cuenta',      // Default route
+    'ordenes',     // Default route
     'startup',
     'error',
     'onboarding',
