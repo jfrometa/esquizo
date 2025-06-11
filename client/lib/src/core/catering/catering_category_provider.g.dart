@@ -6,7 +6,7 @@ part of 'catering_category_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$activeCategoriesHash() => r'1eed7e852c0d10ab87caf2df77f6269426729fc2';
+String _$activeCategoriesHash() => r'50220f31252c16a94a4ad46bf891d0892920b480';
 
 /// Provider for active categories only
 ///
@@ -27,7 +27,7 @@ final activeCategoriesProvider =
 // ignore: unused_element
 typedef ActiveCategoriesRef
     = AutoDisposeStreamProviderRef<List<CateringCategory>>;
-String _$searchCategoriesHash() => r'102ca24518f71f3a6b40a054d5c4ad3d15907b79';
+String _$searchCategoriesHash() => r'22f0889ccada18ed424ea041063e086c172b8918';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -196,7 +196,7 @@ class _SearchCategoriesProviderElement
 }
 
 String _$cateringCategoryRepositoryHash() =>
-    r'63d3b8959ddbade0c2f853585978b0f1345b8f16';
+    r'996d63749346685de81b6a79af307e7e4a72d9be';
 
 /// Provider for the catering category repository
 ///

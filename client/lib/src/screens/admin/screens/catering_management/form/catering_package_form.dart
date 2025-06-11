@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_category_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catering/unified_catering_package_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_item_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/utils/icon_mapper.dart';
@@ -108,6 +109,7 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
 
       final package = CateringPackage(
         id: widget.package?.id ?? '',
+        businessId: ref.read(currentBusinessIdProvider),
         name: name,
         description: description.isEmpty ? '' : description,
         basePrice: price,
@@ -123,12 +125,12 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
             .map((item) =>
                 // Ensure all item fields are non-null
                 item.copyWith(
-                  description: item.description ?? '',
                   category: item.category.isEmpty ? '' : item.category,
                 ))
             .toList(),
       );
-      final repository = ref.read(cateringPackageRepositoryProvider);
+      final repository =
+          ref.read(unifiedCateringPackageRepositoryProvider.notifier);
 
       if (package.id.isEmpty) {
         await repository.addPackage(package);
@@ -150,13 +152,15 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $e'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -172,8 +176,6 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final mediaQuery = MediaQuery.sizeOf(context);
-    final viewInsets = MediaQuery.viewInsetsOf(context);
-    final isDesktop = mediaQuery.width >= 1100;
 
     return Scaffold(
       appBar: AppBar(
@@ -540,7 +542,7 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                     Icon(
                       Icons.category_outlined,
                       size: 48,
-                      color: colorScheme.primary.withOpacity(0.5),
+                      color: colorScheme.primary.withValues(alpha: 0.5),
                     ),
                     const SizedBox(height: 16),
                     const Text('No categories available'),
@@ -665,7 +667,7 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                   Icon(
                     Icons.shopping_bag_outlined,
                     size: 48,
-                    color: colorScheme.primary.withOpacity(0.5),
+                    color: colorScheme.primary.withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: 16),
                   const Text('No items added to this package'),
@@ -768,8 +770,6 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
 
   // Improved icon selector with better sizing
   void _showIconSelector() {
-    final screenSize = MediaQuery.of(context).size;
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -794,7 +794,7 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                     color: Theme.of(context)
                         .colorScheme
                         .onSurfaceVariant
-                        .withOpacity(0.4),
+                        .withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -849,7 +849,7 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
                                 : Theme.of(context)
                                     .colorScheme
                                     .surfaceContainerHighest
-                                    .withOpacity(0.3),
+                                    .withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(12),
                             border: isSelected
                                 ? Border.all(
@@ -1119,8 +1119,8 @@ class _CateringPackageFormState extends ConsumerState<CateringPackageForm> {
       id: cateringItem.id,
       name: cateringItem.name,
       quantity: quantity,
-      // Ensure description is never null
-      description: cateringItem.description ?? '',
+      // Ensure category is never null
+      description: cateringItem.description,
       // Ensure category is never null
       category: cateringItem.categoryIds.isNotEmpty
           ? cateringItem.categoryIds.first

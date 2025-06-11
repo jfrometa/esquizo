@@ -11,7 +11,7 @@ import '../../routing/business_routing_provider.dart';
 final currentBusinessIdProvider = Provider<String>((ref) {
   // Watch the URL-aware business ID provider
   final urlAwareBusinessIdAsync = ref.watch(urlAwareBusinessIdProvider);
-  
+
   return urlAwareBusinessIdAsync.when(
     data: (businessId) => businessId,
     loading: () => 'default', // Fallback while loading
@@ -23,7 +23,7 @@ final currentBusinessIdProvider = Provider<String>((ref) {
 final initBusinessIdProvider = FutureProvider<String>((ref) async {
   final localStorage = ref.watch(localStorageServiceProvider);
   final businessId = await localStorage.getString('businessId');
-  
+
   // Return the business ID or default
   return businessId ?? 'default';
 });
@@ -95,7 +95,9 @@ final businessSettingsProvider = Provider<Map<String, dynamic>>((ref) {
 });
 
 // Provider for a specific business setting with default value
-final businessSettingProvider = Provider.family<dynamic, ({String key, dynamic defaultValue})>((ref, params) {
+final businessSettingProvider =
+    Provider.family<dynamic, ({String key, dynamic defaultValue})>(
+        (ref, params) {
   final settings = ref.watch(businessSettingsProvider);
   return settings[params.key] ?? params.defaultValue;
 });
@@ -182,7 +184,8 @@ final businessLogoUrlProvider = Provider<String>((ref) {
 final businessDarkLogoUrlProvider = Provider<String>((ref) {
   final configAsync = ref.watch(businessConfigProvider);
   return configAsync.when(
-    data: (config) => config?.settings['logoDarkUrl'] as String? ?? config?.logoUrl ?? '',
+    data: (config) =>
+        config?.settings['logoDarkUrl'] as String? ?? config?.logoUrl ?? '',
     loading: () => '',
     error: (_, __) => '',
   );
@@ -264,7 +267,7 @@ final businessThemeColorsProvider = Provider<Map<String, Color>>((ref) {
   final secondaryColor = ref.watch(secondaryColorProvider);
   final tertiaryColor = ref.watch(tertiaryColorProvider);
   final accentColor = ref.watch(accentColorProvider);
-  
+
   return {
     'primary': primaryColor,
     'secondary': secondaryColor,

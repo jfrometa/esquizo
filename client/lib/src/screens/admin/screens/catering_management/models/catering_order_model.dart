@@ -720,6 +720,7 @@ class CateringOrder {
 
     return CateringOrder(
       id: statsId,
+      businessId: 'statistics', // Add required businessId
       customerId: 'admin',
       orderDate: DateTime.now(),
       eventDate: DateTime.now(),
@@ -738,6 +739,7 @@ class CateringOrder {
   // Empty constructor
   factory CateringOrder.empty() => CateringOrder(
         id: '',
+        businessId: '', // Add required businessId
         customerId: '',
         orderDate: DateTime.now(),
         eventDate: DateTime.now().add(const Duration(days: 7)),
@@ -758,6 +760,7 @@ class CateringOrder {
   }) {
     return CateringOrder(
       id: id ?? '',
+      businessId: '', // Add required businessId - should be set by caller
       customerId: customerId,
       customerName: customerName ?? '',
       orderDate: DateTime.now(),
@@ -800,6 +803,7 @@ class CateringOrder {
   /// Creates a copy with optional updated fields
   CateringOrder copyWith({
     String? id,
+    String? businessId,
     String? customerId,
     DateTime? orderDate,
     DateTime? eventDate,
@@ -842,6 +846,8 @@ class CateringOrder {
   }) {
     return CateringOrder(
       id: id ?? this.id,
+      businessId:
+          businessId ?? this.businessId, // Include businessId in copyWith
       customerId: customerId ?? this.customerId,
       orderDate: orderDate ?? this.orderDate,
       eventDate: eventDate ?? this.eventDate,

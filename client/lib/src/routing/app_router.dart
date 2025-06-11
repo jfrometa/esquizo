@@ -230,6 +230,24 @@ GoRouter goRouter(Ref ref) {
             }
           }
 
+          // Handle business-specific URL routing
+          final businessIdFromUrl = extractBusinessIdFromPath(path);
+          if (businessIdFromUrl != null &&
+              _isValidBusinessId(businessIdFromUrl)) {
+            // Valid business-specific URL detected
+            debugPrint(
+                '🏢 Business-specific access detected: $businessIdFromUrl');
+
+            // Update the current business ID in the provider for this session
+            // This ensures all business-scoped services use the correct business context
+            Future.microtask(() {
+              // Note: We need to update the URL-aware provider to refresh
+              ref.invalidate(urlAwareBusinessIdProvider);
+            });
+
+            return null; // Allow the business-specific route to proceed
+          }
+
           // If we're at startup, signin, or onboarding, go to saved path or home
           if (isAtStartup || isLoggingIn || isOnboarding) {
             if (pendingPath != null &&
@@ -282,6 +300,52 @@ GoRouter goRouter(Ref ref) {
       return UnauthorizedScreen();
     },
     routes: [
+      // Business-specific routing (e.g., /restaurantBusinessLaBonita)
+      // This should come first to catch business-specific URLs
+      GoRoute(
+        path: '/:businessId',
+        redirect: (context, state) {
+          final businessId = state.pathParameters['businessId'];
+          if (businessId != null && _isValidBusinessId(businessId)) {
+            // Valid business ID - allow business routing
+            debugPrint('🏢 Business-specific route detected: $businessId');
+            return null;
+          }
+          // Invalid business ID - redirect to home
+          return '/';
+        },
+        routes: [
+          // Business menu route (e.g., /restaurantBusinessLaBonita/menu)
+          GoRoute(
+            path: '/menu',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: MenuScreen(),
+            ),
+          ),
+          // Business cart route (e.g., /restaurantBusinessLaBonita/carrito)
+          GoRoute(
+            path: '/carrito',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: CartScreen(isAuthenticated: true),
+            ),
+          ),
+          // Business account route (e.g., /restaurantBusinessLaBonita/cuenta)
+          GoRoute(
+            path: '/cuenta',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: CustomProfileScreen(),
+            ),
+          ),
+          // Business orders route (e.g., /restaurantBusinessLaBonita/ordenes)
+          GoRoute(
+            path: '/ordenes',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: InProgressOrdersScreen(),
+            ),
+          ),
+        ],
+      ),
+
       // Business Setup Routes
       GoRoute(
         path: '/business-setup',
@@ -619,4 +683,35 @@ class UnauthorizedScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+// Helper function to validate business IDs in routing
+bool _isValidBusinessId(String id) {
+  // Business IDs should:
+  // - Be at least 3 characters long
+  // - Not contain spaces or special routing characters
+  // - Not be numeric only (to avoid confusion with other IDs)
+  // - Not be system route names
+
+  final systemRoutes = {
+    'admin',
+    'signin',
+    'signup',
+    'onboarding',
+    'error',
+    'startup',
+    'business-setup',
+    'admin-setup',
+    'menu', // For default/root access
+    'carrito', // For default/root access
+    'cuenta', // For default/root access
+    'ordenes', // For default/root access
+  };
+
+  if (systemRoutes.contains(id)) return false;
+  if (id.length < 3) return false;
+  if (id.contains(' ') || id.contains('?') || id.contains('#')) return false;
+  if (RegExp(r'^\d+$').hasMatch(id)) return false; // Not purely numeric
+
+  return true;
 }

@@ -22,7 +22,7 @@ final selectedItemProvider = AutoDisposeProvider<CateringItem>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SelectedItemRef = AutoDisposeProviderRef<CateringItem>;
-String _$itemsByCategoryHash() => r'cd12c7dd140831290084691aa587cdbb46731d36';
+String _$itemsByCategoryHash() => r'420b13da66bc3cf6456c03f98885943b1cf43f48';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -175,7 +175,7 @@ class _ItemsByCategoryProviderElement
   String get categoryId => (origin as ItemsByCategoryProvider).categoryId;
 }
 
-String _$highlightedItemsHash() => r'8e39f3c1701f3eec3467247a6b3587b6f829dec4';
+String _$highlightedItemsHash() => r'0bcaca16408738df8055b23941cd86ac17643315';
 
 /// See also [highlightedItems].
 @ProviderFor(highlightedItems)
@@ -326,7 +326,7 @@ class _ItemCategoriesProviderElement
 }
 
 String _$cateringItemRepositoryHash() =>
-    r'55b841ebb4349f0d92c838ed0eae7c7abf463bbf';
+    r'52f0018e677fdbd6db82381f025f3cdb6ea106b7';
 
 /// See also [CateringItemRepository].
 @ProviderFor(CateringItemRepository)

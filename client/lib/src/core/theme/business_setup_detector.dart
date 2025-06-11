@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../business/business_config_provider.dart';
-import '../local_storange/local_storage_service.dart';
 
 /// A widget that detects if business setup is needed and shows
 /// appropriate UI based on that condition
@@ -39,14 +38,8 @@ class _BusinessSetupDetectorState extends ConsumerState<BusinessSetupDetector> {
     });
 
     try {
-      // Initialize business configuration for the app
-      final localStorage = ref.read(localStorageServiceProvider);
-      final businessId = await localStorage.getString('businessId');
-
-      // Set the business ID in the provider if it exists
-      if (businessId != null && businessId.isNotEmpty) {
-        ref.read(currentBusinessIdProvider.notifier).state = businessId;
-      }
+      // Note: Business ID is now handled by URL-aware routing system
+      // No need to manually initialize it here
 
       setState(() {
         _isInitializing = false;

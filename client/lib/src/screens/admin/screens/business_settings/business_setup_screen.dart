@@ -5,46 +5,46 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_setup_manager.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/local_storange/local_storage_service.dart';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/setup/color_picker_widget.dart';
- 
+
 class BusinessSetupScreen extends ConsumerStatefulWidget {
   const BusinessSetupScreen({super.key});
 
   @override
-  ConsumerState<BusinessSetupScreen> createState() => _BusinessSetupScreenState();
+  ConsumerState<BusinessSetupScreen> createState() =>
+      _BusinessSetupScreenState();
 }
 
 class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
   final _formKey = GlobalKey<FormState>();
   final _pageController = PageController();
-  
+
   // Form data
   final _businessNameController = TextEditingController();
   String _businessType = 'restaurant';
-  
+
   // Logo and cover image files - platform compatible
   File? _logoLightFile;
   File? _logoDarkFile;
   File? _coverImageFile;
-  
+
   // For web platform, store image bytes
   Uint8List? _logoLightBytes;
   Uint8List? _logoDarkBytes;
   Uint8List? _coverImageBytes;
-  
+
   // Page index
   int _currentPage = 0;
-  
+
   // Loading state
   bool _isLoading = false;
   String? _errorMessage;
-  
+
   // Business types for dropdown
   final List<String> _businessTypes = [
     'restaurant',
@@ -55,14 +55,14 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
     'service',
     'other',
   ];
-  
+
   @override
   void dispose() {
     _businessNameController.dispose();
     _pageController.dispose();
     super.dispose();
   }
-  
+
   Future<void> _pickImage(ImageSource source, String type) async {
     try {
       final imagePicker = ImagePicker();
@@ -72,7 +72,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
         maxHeight: 1024,
         imageQuality: 85,
       );
-      
+
       if (pickedFile != null) {
         if (kIsWeb) {
           // For web platform, load image bytes
@@ -111,20 +111,23 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       _showErrorDialog('Failed to pick image: $e');
     }
   }
-  
+
   void _showColorPicker(String colorType) {
     final currentColors = ref.read(selectedBusinessColorsProvider);
     final current = currentColors[colorType] ?? Colors.blue;
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Select ${colorType.substring(0, 1).toUpperCase()}${colorType.substring(1)} Color'),
+        title: Text(
+            'Select ${colorType.substring(0, 1).toUpperCase()}${colorType.substring(1)} Color'),
         content: SingleChildScrollView(
           child: ColorPicker(
             color: current,
             onColorChanged: (color) {
-              ref.read(selectedBusinessColorsProvider.notifier).updateColor(colorType, color);
+              ref
+                  .read(selectedBusinessColorsProvider.notifier)
+                  .updateColor(colorType, color);
             },
             pickerType: PickerType.materialDesign,
           ),
@@ -142,7 +145,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       ),
     );
   }
-  
+
   Future<void> _createBusiness() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -156,7 +159,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
     try {
       final businessSetupManager = ref.read(businessSetupManagerProvider);
       final selectedColors = ref.read(selectedBusinessColorsProvider);
-      
+
       final businessId = await businessSetupManager.createBusinessConfig(
         businessName: _businessNameController.text,
         businessType: _businessType,
@@ -168,14 +171,11 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
         logoDark: _logoDarkFile,
         coverImage: _coverImageFile,
       );
-      
-      // Save business ID to provider
-      ref.read(currentBusinessIdProvider.notifier).state = businessId;
-      
-      // Save to local storage
+
+      // Save to local storage for future reference
       final localStorage = ref.read(localStorageServiceProvider);
       await localStorage.setString('businessId', businessId);
-      
+
       if (mounted) {
         // Navigate to admin panel using GoRouter
         context.go('/admin');
@@ -192,7 +192,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       }
     }
   }
-  
+
   void _nextPage() {
     if (_currentPage < 3) {
       _pageController.animateToPage(
@@ -204,7 +204,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       _createBusiness();
     }
   }
-  
+
   void _previousPage() {
     if (_currentPage > 0) {
       _pageController.animateToPage(
@@ -214,21 +214,23 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       );
     }
   }
-  
+
   String _getBrandingStatus() {
-    final hasLightLogo = kIsWeb ? _logoLightBytes != null : _logoLightFile != null;
+    final hasLightLogo =
+        kIsWeb ? _logoLightBytes != null : _logoLightFile != null;
     final hasDarkLogo = kIsWeb ? _logoDarkBytes != null : _logoDarkFile != null;
-    final hasCoverImage = kIsWeb ? _coverImageBytes != null : _coverImageFile != null;
-    
+    final hasCoverImage =
+        kIsWeb ? _coverImageBytes != null : _coverImageFile != null;
+
     final List<String> status = [];
     if (hasLightLogo) status.add("Light Logo ✓");
     if (hasDarkLogo) status.add("Dark Logo ✓");
     if (hasCoverImage) status.add("Cover Image ✓");
-    
+
     if (status.isEmpty) return "No images uploaded";
     return status.join(", ");
   }
-  
+
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
@@ -244,12 +246,12 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       ),
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final selectedColors = ref.watch(selectedBusinessColorsProvider);
-    
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -297,7 +299,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       ),
     );
   }
-  
+
   Widget _buildHeader(ThemeData theme) {
     return Column(
       children: [
@@ -326,7 +328,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       ],
     );
   }
-  
+
   Widget _buildProgressIndicator(ThemeData theme) {
     return Row(
       children: List.generate(4, (index) {
@@ -336,8 +338,8 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
             height: 4,
             margin: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
-              color: isActive 
-                  ? theme.colorScheme.primary 
+              color: isActive
+                  ? theme.colorScheme.primary
                   : theme.colorScheme.outlineVariant,
               borderRadius: BorderRadius.circular(2),
             ),
@@ -346,7 +348,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       }),
     );
   }
-  
+
   Widget _buildBasicInfoPage(ThemeData theme) {
     return SingleChildScrollView(
       child: Column(
@@ -381,7 +383,8 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
             items: _businessTypes.map((type) {
               return DropdownMenuItem<String>(
                 value: type,
-                child: Text(type.substring(0, 1).toUpperCase() + type.substring(1)),
+                child: Text(
+                    type.substring(0, 1).toUpperCase() + type.substring(1)),
               );
             }).toList(),
             onChanged: (value) {
@@ -409,7 +412,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       ),
     );
   }
-  
+
   Widget _buildBrandingPage(ThemeData theme) {
     return SingleChildScrollView(
       child: Column(
@@ -443,7 +446,8 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
           _buildImageUploader(
             theme,
             title: 'Cover Image',
-            subtitle: 'This image will be displayed at the top of your restaurant app',
+            subtitle:
+                'This image will be displayed at the top of your restaurant app',
             icon: Icons.image,
             file: _coverImageFile,
             bytes: _coverImageBytes,
@@ -460,7 +464,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       ),
     );
   }
-  
+
   Widget _buildImageUploader(
     ThemeData theme, {
     required String title,
@@ -472,7 +476,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
   }) {
     // Build image widget based on platform
     Widget? imageWidget;
-    
+
     if (kIsWeb) {
       if (bytes != null) {
         imageWidget = ClipRRect(
@@ -498,7 +502,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
         );
       }
     }
-    
+
     return InkWell(
       onTap: onUpload,
       borderRadius: BorderRadius.circular(12),
@@ -513,19 +517,19 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
         child: Row(
           children: [
             imageWidget ??
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(8),
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: theme.colorScheme.onPrimaryContainer,
+                    size: 28,
+                  ),
                 ),
-                child: Icon(
-                  icon,
-                  color: theme.colorScheme.onPrimaryContainer,
-                  size: 28,
-                ),
-              ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -554,7 +558,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       ),
     );
   }
-  
+
   Widget _buildColorsPage(ThemeData theme, Map<String, Color> selectedColors) {
     return SingleChildScrollView(
       child: Column(
@@ -609,7 +613,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       ),
     );
   }
-  
+
   Widget _buildColorSelector(
     ThemeData theme, {
     required String title,
@@ -666,7 +670,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       ),
     );
   }
-  
+
   Widget _buildColorPreview(ThemeData theme, Map<String, Color> colors) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -754,7 +758,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       ),
     );
   }
-  
+
   Widget _buildPreviewButton(Color color, Color textColor, String label) {
     return Column(
       children: [
@@ -781,7 +785,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       ],
     );
   }
-  
+
   Widget _buildReviewPage(ThemeData theme, Map<String, Color> selectedColors) {
     return SingleChildScrollView(
       child: Column(
@@ -802,7 +806,8 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
           _buildReviewItem(
             theme,
             title: 'Restaurant Type',
-            value: _businessType.substring(0, 1).toUpperCase() + _businessType.substring(1),
+            value: _businessType.substring(0, 1).toUpperCase() +
+                _businessType.substring(1),
             icon: Icons.category,
           ),
           const SizedBox(height: 16),
@@ -825,7 +830,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       ),
     );
   }
-  
+
   Widget _buildReviewItem(
     ThemeData theme, {
     required String title,
@@ -877,7 +882,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       ),
     );
   }
-  
+
   Widget _buildNavButtons(ThemeData theme) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

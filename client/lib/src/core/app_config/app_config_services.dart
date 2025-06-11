@@ -32,11 +32,8 @@ final localStorageInitProvider = FutureProvider<void>((ref) async {
   final localStorageService = ref.read(localStorageServiceProvider);
   await localStorageService.init();
 
-  // Load business ID from local storage if available
-  final storedBusinessId = await localStorageService.getString('businessId');
-  if (storedBusinessId != null && storedBusinessId.isNotEmpty) {
-    ref.read(currentBusinessIdProvider.notifier).state = storedBusinessId;
-  }
+  // Note: Business ID is now handled by URL-aware routing system
+  // The stored business ID is read by initBusinessIdProvider when needed
 });
 
 // Business configuration initialization provider

@@ -6,7 +6,7 @@ part of 'unified_catering_system.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$activeCategoriesHash() => r'3a8ae8b8696890c193353cfe17b2091db64afe61';
+String _$activeCategoriesHash() => r'6a9366a4d162932f4ebf2988dfd704f723dc73c8';
 
 /// Provider for active categories
 ///
@@ -27,7 +27,7 @@ final activeCategoriesProvider =
 // ignore: unused_element
 typedef ActiveCategoriesRef
     = AutoDisposeStreamProviderRef<List<CateringCategory>>;
-String _$searchCategoriesHash() => r'57a3667c97b8e6b0da55101bab0960fe40d6d279';
+String _$searchCategoriesHash() => r'62847004dea85f3a107a94bc48755e00eeffd8b2';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -195,7 +195,7 @@ class _SearchCategoriesProviderElement
   String get searchTerm => (origin as SearchCategoriesProvider).searchTerm;
 }
 
-String _$activePackagesHash() => r'0a2ec3181637fe01f4110c96f30f489c19ea3063';
+String _$activePackagesHash() => r'30b916218b147a547fcc1cf3f395b1c2d2de2260';
 
 /// Provider for active packages
 ///
@@ -215,7 +215,7 @@ final activePackagesProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ActivePackagesRef = AutoDisposeStreamProviderRef<List<CateringPackage>>;
-String _$promotedPackagesHash() => r'f178594880b6747890d9a5f90a88ce7d9a367f93';
+String _$promotedPackagesHash() => r'5630152b86faf4e1a489e75f1e8462ef331bdd15';
 
 /// Provider for promoted packages
 ///
@@ -237,7 +237,7 @@ final promotedPackagesProvider =
 typedef PromotedPackagesRef
     = AutoDisposeStreamProviderRef<List<CateringPackage>>;
 String _$packagesByCategoryHash() =>
-    r'02a723c62b57df89c6b85fcad20aa8fdff0ca423';
+    r'b43ffd00e5e7c6920b8840481b56313331456584';
 
 /// Provider for packages by category
 ///
@@ -385,7 +385,7 @@ class _PackagesByCategoryProviderElement
   String get categoryId => (origin as PackagesByCategoryProvider).categoryId;
 }
 
-String _$searchPackagesHash() => r'd77ca9617e3092dddd8c946c8e81e6bfa990b0db';
+String _$searchPackagesHash() => r'2eadbad18a72cdf988f5de3da30dc1ebef6511d6';
 
 /// Provider for searching packages
 ///
@@ -529,7 +529,7 @@ class _SearchPackagesProviderElement
   String get searchTerm => (origin as SearchPackagesProvider).searchTerm;
 }
 
-String _$itemsByCategoryHash() => r'ff5398a64e8ec6fca268a7c42f11939b88af1b57';
+String _$itemsByCategoryHash() => r'87d82049649c62486a7000dc6a9063b4c3939c6f';
 
 /// Provider for items by category
 ///
@@ -673,7 +673,7 @@ class _ItemsByCategoryProviderElement
   String get categoryId => (origin as ItemsByCategoryProvider).categoryId;
 }
 
-String _$highlightedItemsHash() => r'd8d1c4dcefe33c90c07687b99249c0e8c854282c';
+String _$highlightedItemsHash() => r'c5b1e020e8a7a3948cdd087f594989639edc461f';
 
 /// Provider for highlighted items
 ///
@@ -693,7 +693,7 @@ final highlightedItemsProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef HighlightedItemsRef = AutoDisposeStreamProviderRef<List<CateringItem>>;
-String _$itemCategoriesHash() => r'bcc68897e1d0cee156cd03846b66cf98ce14bf81';
+String _$itemCategoriesHash() => r'8a234eb9dae61246b1f298722ddbbe2f680b346e';
 
 /// Provider for item categories
 ///
@@ -837,7 +837,7 @@ class _ItemCategoriesProviderElement
   CateringItem get item => (origin as ItemCategoriesProvider).item;
 }
 
-String _$packageCategoriesHash() => r'f9a75f9c0464606a73b60a4e48defb05b8845dcf';
+String _$packageCategoriesHash() => r'985d3d30d0d42ecf3aea67260cd9dcc1e5f820a0';
 
 /// Provider for package categories
 ///
@@ -982,7 +982,7 @@ class _PackageCategoriesProviderElement
 }
 
 String _$cateringCategoryRepositoryHash() =>
-    r'e1ad727e81111f1ccdb5f04f7614adc6a8822491';
+    r'852a5a8a63de9c335438dc44f3f00dc9560d6f41';
 
 /// Unified Catering Category Repository
 ///
@@ -1002,7 +1002,7 @@ final cateringCategoryRepositoryProvider = AutoDisposeStreamNotifierProvider<
 typedef _$CateringCategoryRepository
     = AutoDisposeStreamNotifier<List<CateringCategory>>;
 String _$cateringItemRepositoryHash() =>
-    r'83a6a9ef4e2af8a9e1a607ebd33e429547f2bc11';
+    r'3a7e40e8ee51bf6c7e0f31373eee4e4f021541f1';
 
 /// Unified Catering Item Repository
 ///
@@ -1022,7 +1022,7 @@ final cateringItemRepositoryProvider = AutoDisposeStreamNotifierProvider<
 typedef _$CateringItemRepository
     = AutoDisposeStreamNotifier<List<CateringItem>>;
 String _$cateringPackageRepositoryHash() =>
-    r'9d4a3ea4c01dbd2b8ab5991c1320127b9b82e7bc';
+    r'ba507d00aff7477f188b33a484bd0037c65f5fae';
 
 /// Unified Catering Package Repository
 ///
@@ -1042,7 +1042,7 @@ final cateringPackageRepositoryProvider = AutoDisposeStreamNotifierProvider<
 typedef _$CateringPackageRepository
     = AutoDisposeStreamNotifier<List<CateringPackage>>;
 String _$cateringOrderRepositoryHash() =>
-    r'a1abbf3a92ad9481cd0e18687fe1c1c4ba45ea56';
+    r'f08e2364fb80f5f85ce6bb0f1b363be0177d0895';
 
 /// Unified Catering Order Repository
 ///
