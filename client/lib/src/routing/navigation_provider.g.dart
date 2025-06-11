@@ -29,7 +29,7 @@ final allNavigationDestinationsProvider =
 typedef AllNavigationDestinationsRef
     = AutoDisposeProviderRef<List<NavigationDestinationItem>>;
 String _$navigationDestinationsHash() =>
-    r'5360a811483875bc39541a14361dd3b5f137c594';
+    r'3397f48ee0c8557ea293663504dc007358adb1c8';
 
 /// Provider for visible navigation destinations
 ///

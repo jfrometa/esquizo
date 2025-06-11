@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart'; 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../admin/models/order_status_enum.dart';
@@ -60,7 +60,6 @@ class Subscription {
       };
 }
 
-
 class Order {
   final String orderNumber;
   final String id;
@@ -80,30 +79,30 @@ class Order {
   final List<OrderItem> items;
   final OrderStatus status;
   final String? customerName;
-  final String? userName;  // Added to match create_order.dart
-  final String? userEmail;  // Added to match create_order.dart
-  final String? userPhone;  // Added to match create_order.dart
+  final String? userName; // Added to match create_order.dart
+  final String? userEmail; // Added to match create_order.dart
+  final String? userPhone; // Added to match create_order.dart
   final int? customerCount;
-  final int? peopleCount;  // Added to match create_order.dart
+  final int? peopleCount; // Added to match create_order.dart
   final String? waiterNotes;
-  final String? specialInstructions;  // Added to match create_order.dart
+  final String? specialInstructions; // Added to match create_order.dart
   final String? waiterId;
   final String? waiterName;
   final String paymentMethod;
   final double? subtotal;
   final double? taxAmount;
-  final double? tax;  // Added to match create_order.dart
+  final double? tax; // Added to match create_order.dart
   final double? tipAmount;
-  final double? total;  // Added to match create_order.dart
-  final double? deliveryFee;  // Added to match create_order.dart
-  final double? discount;  // Added to match create_order.dart
+  final double? total; // Added to match create_order.dart
+  final double? deliveryFee; // Added to match create_order.dart
+  final double? discount; // Added to match create_order.dart
   final String? cashierId;
   final String? cashierName;
   final bool isPaid;
   final DateTime? paidAt;
   final String? receiptNumber;
   final bool isDelivery;
-  final String? deliveryAddress;  // Added to match create_order.dart
+  final String? deliveryAddress; // Added to match create_order.dart
   final DateTime orderDate;
   final Map<String, dynamic> location;
   final String? deliveryDate;
@@ -112,7 +111,7 @@ class Order {
   final String? assignedToId;
   final String? assignedToName;
   final String? businessId;
-  final String? resourceId;  // Added to match create_order.dart
+  final String? resourceId; // Added to match create_order.dart
   final String? adminNotes;
   final DateTime? adminReviewedAt;
   final String? adminId;
@@ -133,7 +132,7 @@ class Order {
     required this.paymentMethod,
     this.paymentStatus = 'pending',
     this.totalAmount = 0.0,
-      // Initialize timestamp properly
+    // Initialize timestamp properly
     this.tableNumber,
     this.tableId,
     required this.createdAt,
@@ -163,7 +162,7 @@ class Order {
     this.receiptNumber,
     this.isDelivery = false,
     this.deliveryAddress,
-    DateTime? orderDate,  // Keep as parameter
+    DateTime? orderDate, // Keep as parameter
     Map<String, dynamic>? location,
     this.deliveryDate,
     this.deliveryTime,
@@ -178,19 +177,20 @@ class Order {
     this.adminName,
     this.isArchived = false,
     this.adminMetadata,
-  }) : 
-    // Initialize orderDate and location with default values if not provided
-    timestamp =  Timestamp.now(),
-    orderDate = orderDate ?? DateTime.now(),
-    location = location ?? {
-      'address': address,
-      'latitude': latitude,
-      'longitude': longitude,
-    };
+  })  :
+        // Initialize orderDate and location with default values if not provided
+        timestamp = Timestamp.now(),
+        orderDate = orderDate ?? DateTime.now(),
+        location = location ??
+            {
+              'address': address,
+              'latitude': latitude,
+              'longitude': longitude,
+            };
 
   factory Order.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    
+
     // Parse items
     List<OrderItem> orderItems = [];
     if (data['items'] != null) {
@@ -211,7 +211,7 @@ class Order {
         }).toList();
       }
     }
-    
+
     // Parse location data
     Map<String, dynamic> locationData = {};
     if (data['location'] != null && data['location'] is Map) {
@@ -223,7 +223,7 @@ class Order {
         'longitude': data['longitude'] ?? '0.0',
       };
     }
-    
+
     return Order(
       orderNumber: data['orderNumber'] ?? '',
       id: doc.id,
@@ -268,7 +268,7 @@ class Order {
   }
 
   Map<String, dynamic> toFirestore() {
-    return {
+    final map = <String, dynamic>{
       'orderNumber': orderNumber,
       'email': email,
       'userId': userId,
@@ -277,39 +277,45 @@ class Order {
       'latitude': latitude,
       'longitude': longitude,
       'location': location,
-      'tableNumber': tableNumber,
-      'tableId': tableId,
       'createdAt': Timestamp.fromDate(createdAt),
       'orderDate': Timestamp.fromDate(orderDate),
-      'lastUpdated': lastUpdated != null ? Timestamp.fromDate(lastUpdated!) : FieldValue.serverTimestamp(),
+      'lastUpdated': lastUpdated != null
+          ? Timestamp.fromDate(lastUpdated!)
+          : FieldValue.serverTimestamp(),
       'items': items.map((item) => item.toMap()).toList(),
       'status': status.toString().split('.').last,
       'paymentMethod': paymentMethod,
       'paymentStatus': paymentStatus,
       'totalAmount': totalAmount,
-      'subtotal': subtotal,
-      'taxAmount': taxAmount,
-      'tipAmount': tipAmount,
-      'customerName': customerName,
-      'customerCount': customerCount,
-      'waiterNotes': waiterNotes,
-      'waiterId': waiterId,
-      'waiterName': waiterName,
-      'cashierId': cashierId,
-      'cashierName': cashierName,
       'isPaid': isPaid,
-      'paidAt': paidAt != null ? Timestamp.fromDate(paidAt!) : null,
-      'receiptNumber': receiptNumber,
       'isDelivery': isDelivery,
-      'deliveryDate': deliveryDate,
-      'deliveryTime': deliveryTime,
       'isReviewed': isReviewed,
-      'assignedToId': assignedToId,
-      'assignedToName': assignedToName,
       'timestamp': timestamp,
     };
+
+    // Only include optional fields if they are not null
+    if (tableNumber != null) map['tableNumber'] = tableNumber;
+    if (tableId != null) map['tableId'] = tableId;
+    if (subtotal != null) map['subtotal'] = subtotal;
+    if (taxAmount != null) map['taxAmount'] = taxAmount;
+    if (tipAmount != null) map['tipAmount'] = tipAmount;
+    if (customerName != null) map['customerName'] = customerName;
+    if (customerCount != null) map['customerCount'] = customerCount;
+    if (waiterNotes != null) map['waiterNotes'] = waiterNotes;
+    if (waiterId != null) map['waiterId'] = waiterId;
+    if (waiterName != null) map['waiterName'] = waiterName;
+    if (cashierId != null) map['cashierId'] = cashierId;
+    if (cashierName != null) map['cashierName'] = cashierName;
+    if (paidAt != null) map['paidAt'] = Timestamp.fromDate(paidAt!);
+    if (receiptNumber != null) map['receiptNumber'] = receiptNumber;
+    if (deliveryDate != null) map['deliveryDate'] = deliveryDate;
+    if (deliveryTime != null) map['deliveryTime'] = deliveryTime;
+    if (assignedToId != null) map['assignedToId'] = assignedToId;
+    if (assignedToName != null) map['assignedToName'] = assignedToName;
+
+    return map;
   }
-  
+
   Map<String, dynamic> toJson() {
     return {
       'orderNumber': orderNumber,
@@ -329,7 +335,8 @@ class Order {
       'tableId': tableId,
       'createdAt': Timestamp.fromDate(createdAt),
       'orderDate': Timestamp.fromDate(orderDate),
-      'lastUpdated': lastUpdated != null ? Timestamp.fromDate(lastUpdated!) : null,
+      'lastUpdated':
+          lastUpdated != null ? Timestamp.fromDate(lastUpdated!) : null,
       'status': status.toString().split('.').last,
       'customerName': customerName,
       'customerCount': customerCount,
@@ -352,14 +359,14 @@ class Order {
       'assignedToName': assignedToName,
     };
   }
-  
+
   // Helper method to parse order status from string
   static OrderStatus _parseOrderStatus(dynamic status) {
     if (status == null) return OrderStatus.pending;
     if (status is OrderStatus) return status;
-    
+
     final statusStr = status.toString();
-    
+
     switch (statusStr) {
       case 'inProgress':
       case 'preparing':
@@ -381,7 +388,7 @@ class Order {
         return OrderStatus.pending;
     }
   }
-  
+
   // Create an empty order with default values
   factory Order.empty() {
     return Order(
@@ -410,7 +417,7 @@ class Order {
       },
     );
   }
-  
+
   // Create a copy with updated fields
   Order copyWith({
     String? orderNumber,
@@ -499,7 +506,7 @@ class Order {
 
 // Order item model
 class OrderItem {
-  final String? id;  // Added optional id field
+  final String? id; // Added optional id field
   final String productId;
   final String name;
   final double price;
@@ -508,11 +515,12 @@ class OrderItem {
   final String? categoryId;
   final String? categoryName;
   final String? imageUrl;
-  final bool isPriority;    // Items that should be prepared first
-  final bool isModifiable;  // Whether the item can be modified after order is placed
+  final bool isPriority; // Items that should be prepared first
+  final bool
+      isModifiable; // Whether the item can be modified after order is placed
 
   OrderItem({
-    this.id,  // Optional id parameter
+    this.id, // Optional id parameter
     required this.productId,
     required this.name,
     required this.price,
@@ -528,7 +536,7 @@ class OrderItem {
   // Create from map
   factory OrderItem.fromMap(Map<String, dynamic> map) {
     return OrderItem(
-      id: map['id'],  // Get id from map
+      id: map['id'], // Get id from map
       productId: map['productId'] ?? '',
       name: map['name'] ?? '',
       price: (map['price'] ?? 0).toDouble(),
@@ -544,8 +552,7 @@ class OrderItem {
 
   // Convert to map
   Map<String, dynamic> toMap() {
-    return {
-      'id': id,  // Include id in map
+    final map = <String, dynamic>{
       'productId': productId,
       'name': name,
       'price': price,
@@ -557,11 +564,18 @@ class OrderItem {
       'isPriority': isPriority,
       'isModifiable': isModifiable,
     };
+
+    // Only include id if it's not null to avoid Firestore issues
+    if (id != null) {
+      map['id'] = id;
+    }
+
+    return map;
   }
 
   // Create a copy with updated fields
   OrderItem copyWith({
-    String? id,  // Add id to copyWith
+    String? id, // Add id to copyWith
     String? productId,
     String? name,
     double? price,
@@ -574,7 +588,7 @@ class OrderItem {
     bool? isModifiable,
   }) {
     return OrderItem(
-      id: id ?? this.id,  // Use provided id or current id
+      id: id ?? this.id, // Use provided id or current id
       productId: productId ?? this.productId,
       name: name ?? this.name,
       price: price ?? this.price,

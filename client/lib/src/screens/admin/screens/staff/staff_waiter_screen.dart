@@ -157,8 +157,6 @@ class _StaffWaiterTableSelectScreenState
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Waiter Dashboard'),
@@ -354,7 +352,7 @@ class _StaffWaiterTableSelectScreenState
                 Icon(
                   status == 'pending' ? Icons.pending : Icons.restaurant,
                   size: 64,
-                  color: theme.colorScheme.onSurface.withOpacity(0.3),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -362,7 +360,7 @@ class _StaffWaiterTableSelectScreenState
                       ? 'No pending orders'
                       : 'No orders in progress',
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -414,7 +412,7 @@ class _StaffWaiterTableSelectScreenState
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: _getStatusColor(order.status).withOpacity(0.2),
+                color: _getStatusColor(order.status).withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -436,7 +434,7 @@ class _StaffWaiterTableSelectScreenState
                 Icon(
                   Icons.restaurant_menu,
                   size: 16,
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
                 const SizedBox(width: 4),
                 Text('${order.items.length} items'),
@@ -444,7 +442,7 @@ class _StaffWaiterTableSelectScreenState
                 Icon(
                   Icons.people,
                   size: 16,
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
                 const SizedBox(width: 4),
                 Text('${order.customerCount ?? 1} guests'),
@@ -456,7 +454,7 @@ class _StaffWaiterTableSelectScreenState
                 Icon(
                   Icons.access_time,
                   size: 16,
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
                 const SizedBox(width: 4),
                 Text(
@@ -648,20 +646,20 @@ class _StaffWaiterTableSelectScreenState
                 Icon(
                   Icons.notifications_outlined,
                   size: 64,
-                  color: theme.colorScheme.onSurface.withOpacity(0.3),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   'No notifications',
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'You\'ll be notified when kitchen marks items as ready',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -734,10 +732,10 @@ class _StaffWaiterTableSelectScreenState
       elevation: notification.isRead ? 1 : 3,
       color: notification.isRead
           ? null
-          : theme.colorScheme.primaryContainer.withOpacity(0.1),
+          : theme.colorScheme.primaryContainer.withValues(alpha: 0.1),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: typeColor.withOpacity(0.2),
+          backgroundColor: typeColor.withValues(alpha: 0.2),
           child: Icon(typeIcon, color: typeColor),
         ),
         title: Row(
@@ -772,26 +770,26 @@ class _StaffWaiterTableSelectScreenState
                 Icon(
                   Icons.table_restaurant,
                   size: 16,
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
                 const SizedBox(width: 4),
                 Text(
                   'Table ${notification.tableNumber}',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
                 const SizedBox(width: 16),
                 Icon(
                   Icons.access_time,
                   size: 16,
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
                 const SizedBox(width: 4),
                 Text(
                   DateFormat.jm().format(notification.timestamp),
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -829,13 +827,13 @@ class _StaffWaiterTableSelectScreenState
           Icon(
             Icons.table_restaurant,
             size: 64,
-            color: theme.colorScheme.onSurface.withOpacity(0.3),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
           ),
           const SizedBox(height: 16),
           Text(
             'No tables found',
             style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.7),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
           const SizedBox(height: 8),
@@ -844,7 +842,7 @@ class _StaffWaiterTableSelectScreenState
                 ? 'No tables have been set up yet'
                 : 'No tables with status "$_filterStatus"',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.5),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
             ),
           ),
         ],
@@ -890,7 +888,7 @@ class _StaffWaiterTableSelectScreenState
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: statusColor.withOpacity(0.3),
+          color: statusColor.withValues(alpha: 0.3),
           width: 2,
         ),
       ),
@@ -919,7 +917,7 @@ class _StaffWaiterTableSelectScreenState
                   Icon(
                     Icons.chair,
                     size: 16,
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                   const SizedBox(width: 4),
                   Text(
@@ -938,10 +936,10 @@ class _StaffWaiterTableSelectScreenState
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
+                  color: statusColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: statusColor.withOpacity(0.3),
+                    color: statusColor.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
@@ -971,7 +969,8 @@ class _StaffWaiterTableSelectScreenState
                 Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+                    color: theme.colorScheme.primaryContainer
+                        .withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Row(
@@ -1334,8 +1333,8 @@ class _StaffWaiterTableSelectScreenState
                           leading: CircleAvatar(
                             backgroundColor:
                                 table.status == TableStatusEnum.available
-                                    ? Colors.green.withOpacity(0.2)
-                                    : Colors.orange.withOpacity(0.2),
+                                    ? Colors.green.withValues(alpha: 0.2)
+                                    : Colors.orange.withValues(alpha: 0.2),
                             child: Text(
                               'T${table.number}',
                               style: TextStyle(
@@ -1519,7 +1518,8 @@ class _StaffWaiterTableSelectScreenState
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: _getItemStatusColor(item).withOpacity(0.2),
+                          color:
+                              _getItemStatusColor(item).withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(

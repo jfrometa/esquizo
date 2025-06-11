@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/theme/business_setup_detector.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/theme/business_theme_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/user_preference/user_preference_provider.dart';
@@ -68,6 +69,10 @@ class _KakoAppState extends ConsumerState<KakoApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    // Initialize the auto-check admin status provider
+    // This ensures admin status is checked whenever auth state changes
+    ref.watch(autoCheckAdminStatusProvider);
+
     // Get GoRouter configuration
     final goRouter = ref.watch(goRouterProvider);
 

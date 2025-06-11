@@ -113,7 +113,6 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    # - assets/fonts/
     - assets/
     - assets/appIcon.png
     - assets/kako-logo.png
@@ -149,3 +148,9 @@ flutter:
     - assets/dishes/pollo_arroz_ensalada_box.jpg
     - assets/dishes/pollo_camaron_arroz_box.jpg
     - assets/dishes/pollo_papas_ensalada_box.jpg
+
+  # Configure fonts to include SocialIcons from firebase_ui_auth
+  fonts:
+    - family: SocialIcons
+      fonts:
+        - asset: packages/firebase_ui_auth/fonts/SocialIcons.ttf
