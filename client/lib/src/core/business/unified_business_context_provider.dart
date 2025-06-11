@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_slug_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/catering/unified_catering_system.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/local_storange/local_storage_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/business_routing_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catalog/catalog_service.dart';
@@ -169,8 +170,8 @@ class UnifiedBusinessContext extends _$UnifiedBusinessContext {
       ref.invalidate(menuCategoriesProvider);
 
       // Catering providers
-      // ref.invalidate(cateringItemRepositoryProvider);
-      // ref.invalidate(cateringCategoryRepositoryProvider);
+      ref.invalidate(cateringItemRepositoryProvider);
+      ref.invalidate(cateringCategoryRepositoryProvider);
       // ref.invalidate(allCateringItemsProvider);
       // ref.invalidate(allCateringCategoriesProvider);
 
@@ -332,7 +333,7 @@ class ExplicitBusinessContext extends _$ExplicitBusinessContext {
 
 /// Provider for current business ID (simplified access)
 @riverpod
-String currentBusinessIdFromContext(CurrentBusinessIdFromContextRef ref) {
+String currentBusinessIdFromContext(Ref ref) {
   final contextAsync = ref.watch(unifiedBusinessContextProvider);
   return contextAsync.when(
     data: (context) => context.businessId,
@@ -343,7 +344,7 @@ String currentBusinessIdFromContext(CurrentBusinessIdFromContextRef ref) {
 
 /// Provider for current business slug (simplified access)
 @riverpod
-String? currentBusinessSlugFromContext(CurrentBusinessSlugFromContextRef ref) {
+String? currentBusinessSlugFromContext(Ref ref) {
   final contextAsync = ref.watch(unifiedBusinessContextProvider);
   return contextAsync.when(
     data: (context) => context.businessSlug,
@@ -354,7 +355,7 @@ String? currentBusinessSlugFromContext(CurrentBusinessSlugFromContextRef ref) {
 
 /// Provider to check if currently using default business
 @riverpod
-bool isDefaultBusinessContext(IsDefaultBusinessContextRef ref) {
+bool isDefaultBusinessContext(Ref ref) {
   final contextAsync = ref.watch(unifiedBusinessContextProvider);
   return contextAsync.when(
     data: (context) => context.isDefault,
@@ -365,7 +366,7 @@ bool isDefaultBusinessContext(IsDefaultBusinessContextRef ref) {
 
 /// Provider to check if currently using business-specific context
 @riverpod
-bool isBusinessSpecificContext(IsBusinessSpecificContextRef ref) {
+bool isBusinessSpecificContext(Ref ref) {
   final contextAsync = ref.watch(unifiedBusinessContextProvider);
   return contextAsync.when(
     data: (context) => !context.isDefault,
@@ -378,20 +379,20 @@ bool isBusinessSpecificContext(IsBusinessSpecificContextRef ref) {
 /// - If on business-specific route (e.g., /g3), returns the business ID for that slug
 /// - If on default route (e.g., /menu), returns the default business ID
 @riverpod
-Future<String> currentRoutingBusinessId(CurrentRoutingBusinessIdRef ref) async {
+Future<String> currentRoutingBusinessId(Ref ref) async {
   final unifiedContext = await ref.watch(unifiedBusinessContextProvider.future);
   return unifiedContext.businessId;
 }
 
 /// Provider that checks if we're currently in business-specific routing mode
 @riverpod
-bool isBusinessSpecificRouting(IsBusinessSpecificRoutingRef ref) {
+bool isBusinessSpecificRouting(Ref ref) {
   final urlBusinessSlug = ref.watch(businessSlugFromUrlProvider);
   return urlBusinessSlug != null && urlBusinessSlug.isNotEmpty;
 }
 
 /// Provider that returns the current business slug (null for default routing)
 @riverpod
-String? currentBusinessSlug(CurrentBusinessSlugRef ref) {
+String? currentBusinessSlug(Ref ref) {
   return ref.watch(businessSlugFromUrlProvider);
 }

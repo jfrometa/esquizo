@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_slug_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_service.dart';
@@ -8,21 +7,22 @@ import 'package:starter_architecture_flutter_firebase/src/core/business/business
 /// This resolves the issue where the slug is detected in URL routing
 /// but the business doesn't exist in the database
 void main() async {
-  print('🚀 Creating "kako" business in Firestore database...');
-  
+  debugPrint('🚀 Creating "kako" business in Firestore database...');
+
   try {
     final firestore = FirebaseFirestore.instance;
     final slugService = BusinessSlugService(firestore: firestore);
-    
+
     // Check if "kako" business already exists
     final existingBusinessId = await slugService.getBusinessIdFromSlug('kako');
     if (existingBusinessId != null) {
-      print('✅ Business "kako" already exists with ID: $existingBusinessId');
+      debugPrint(
+          '✅ Business "kako" already exists with ID: $existingBusinessId');
       return;
     }
-    
-    print('📝 Business "kako" not found, creating...');
-    
+
+    debugPrint('📝 Business "kako" not found, creating...');
+
     // Create the "kako" business
     const businessId = 'kako-business-001';
     final businessData = {
@@ -67,7 +67,7 @@ void main() async {
         'menu',
         'tables',
         'reservations',
-        'takeout', 
+        'takeout',
         'delivery',
         'staff_management',
         'inventory'
@@ -76,64 +76,66 @@ void main() async {
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     };
-    
+
     // Create business document
     await firestore.collection('businesses').doc(businessId).set(businessData);
-    print('✅ Created business document with ID: $businessId');
-    
+    debugPrint('✅ Created business document with ID: $businessId');
+
     // Verify the creation
     final verifyBusinessId = await slugService.getBusinessIdFromSlug('kako');
     if (verifyBusinessId == businessId) {
-      print('✅ Verification successful: slug "kako" resolves to business ID "$businessId"');
+      debugPrint(
+          '✅ Verification successful: slug "kako" resolves to business ID "$businessId"');
     } else {
-      print('❌ Verification failed: slug resolution returned $verifyBusinessId');
+      debugPrint(
+          '❌ Verification failed: slug resolution returned $verifyBusinessId');
     }
-    
+
     // Verify reverse lookup
     final verifySlug = await slugService.getSlugFromBusinessId(businessId);
     if (verifySlug == 'kako') {
-      print('✅ Reverse lookup successful: business ID "$businessId" resolves to slug "kako"');
+      debugPrint(
+          '✅ Reverse lookup successful: business ID "$businessId" resolves to slug "kako"');
     } else {
-      print('❌ Reverse lookup failed: returned slug "$verifySlug"');
+      debugPrint('❌ Reverse lookup failed: returned slug "$verifySlug"');
     }
-    
-    print('');
-    print('🎉 "kako" business creation completed successfully!');
-    print('');
-    print('📋 Summary:');
-    print('   Business ID: $businessId');
-    print('   Business Slug: kako');
-    print('   Business Name: Kako Restaurant');
-    print('   Status: Active');
-    print('');
-    print('🔗 URL Navigation:');
-    print('   /kako -> Should now resolve to business context');
-    print('   /kako/menu -> Should show Kako Restaurant menu');
-    print('   /kako/cart -> Should show Kako Restaurant cart');
-    print('');
-    print('🧪 Next Steps:');
-    print('1. Test navigation to /kako URL');
-    print('2. Verify business context is maintained');
-    print('3. Check that business-specific data loads correctly');
-    
+
+    debugPrint('');
+    debugPrint('🎉 "kako" business creation completed successfully!');
+    debugPrint('');
+    debugPrint('📋 Summary:');
+    debugPrint('   Business ID: $businessId');
+    debugPrint('   Business Slug: kako');
+    debugPrint('   Business Name: Kako Restaurant');
+    debugPrint('   Status: Active');
+    debugPrint('');
+    debugPrint('🔗 URL Navigation:');
+    debugPrint('   /kako -> Should now resolve to business context');
+    debugPrint('   /kako/menu -> Should show Kako Restaurant menu');
+    debugPrint('   /kako/cart -> Should show Kako Restaurant cart');
+    debugPrint('');
+    debugPrint('🧪 Next Steps:');
+    debugPrint('1. Test navigation to /kako URL');
+    debugPrint('2. Verify business context is maintained');
+    debugPrint('3. Check that business-specific data loads correctly');
   } catch (e, stackTrace) {
-    print('❌ Error creating "kako" business: $e');
-    print('Stack trace: $stackTrace');
+    debugPrint('❌ Error creating "kako" business: $e');
+    debugPrint('Stack trace: $stackTrace');
   }
 }
 
 /// Alternative function to create business using BusinessConfig
 Future<void> createKakoBusinessWithConfig() async {
-  print('🚀 Creating "kako" business using BusinessConfig...');
-  
+  debugPrint('🚀 Creating "kako" business using BusinessConfig...');
+
   try {
     final firestore = FirebaseFirestore.instance;
-    
+
     // Create BusinessConfig object
     final businessConfig = BusinessConfig(
       id: 'kako-business-001',
       name: 'Kako Restaurant',
-      type: 'restaurant', 
+      type: 'restaurant',
       slug: 'kako',
       logoUrl: '',
       coverImageUrl: '',
@@ -171,7 +173,7 @@ Future<void> createKakoBusinessWithConfig() async {
       },
       features: [
         'menu',
-        'tables', 
+        'tables',
         'reservations',
         'takeout',
         'delivery',
@@ -180,20 +182,16 @@ Future<void> createKakoBusinessWithConfig() async {
       ],
       isActive: true,
     );
-    
+
     // Save using BusinessConfig toFirestore method
-    await firestore
-        .collection('businesses')
-        .doc(businessConfig.id)
-        .set({
+    await firestore.collection('businesses').doc(businessConfig.id).set({
       ...businessConfig.toFirestore(),
       'createdAt': FieldValue.serverTimestamp(),
     });
-    
-    print('✅ Successfully created "kako" business using BusinessConfig');
-    
+
+    debugPrint('✅ Successfully created "kako" business using BusinessConfig');
   } catch (e, stackTrace) {
-    print('❌ Error creating "kako" business with BusinessConfig: $e');
-    print('Stack trace: $stackTrace');
+    debugPrint('❌ Error creating "kako" business with BusinessConfig: $e');
+    debugPrint('Stack trace: $stackTrace');
   }
 }

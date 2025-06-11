@@ -14,7 +14,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/business/business
 import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_analitics.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_startup.dart';
-import 'package:starter_architecture_flutter_firebase/src/routing/business_screen_wrappers.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/optimized_business_wrappers.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/go_router_refresh_stream.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/navigation_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/scaffold_with_nested_navigation.dart';
@@ -23,6 +23,9 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_setup_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_set_comple_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_setup_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_settings_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/product_management_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/order_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/screens/customer_meal_plan_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/all_dishes_menu_home/all_dishes_menu_home_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/authenticated_profile_screen.dart';
@@ -406,6 +409,10 @@ GoRouter goRouter(Ref ref) {
         ),
       ),
 
+      // Add all admin routes here BEFORE business routing to prevent conflicts
+      // This ensures /admin is matched before /:businessSlug pattern
+      ...getAdminRoutes(),
+
       // StatefulShellRoute for default business navigation (no slug prefix)
       // This MUST come BEFORE business-specific routing to handle default routes first
       StatefulShellRoute.indexedStack(
@@ -419,8 +426,8 @@ GoRouter goRouter(Ref ref) {
             .toList(),
       ),
 
-      // Business-specific routing (e.g., /g3, /restaurant-name)
-      // This comes AFTER StatefulShellRoute so default routes are handled first
+      // Optimized Business-specific routing with seamless navigation
+      // This comes AFTER admin routes and StatefulShellRoute so they are handled first
       GoRoute(
         path: '/:businessSlug',
         redirect: (context, state) {
@@ -439,72 +446,85 @@ GoRouter goRouter(Ref ref) {
         },
         pageBuilder: (context, state) {
           final businessSlug = state.pathParameters['businessSlug']!;
-          debugPrint('🏢 Loading business home for: $businessSlug');
+          debugPrint('🏢 Optimized business home for: $businessSlug');
           return NoTransitionPage(
-            child: HomeScreenContentWrapper(businessSlug: businessSlug),
+            child: OptimizedHomeScreenWrapper(businessSlug: businessSlug),
           );
         },
         routes: [
-          // Business menu route (e.g., /g3/menu)
+          // Business menu route (e.g., /kako/menu) - Optimized
           GoRoute(
             path: '/menu',
             pageBuilder: (context, state) {
               final businessSlug = state.pathParameters['businessSlug']!;
-              debugPrint('🏢 Loading business menu for: $businessSlug');
+              debugPrint('🏢 Optimized business menu for: $businessSlug');
               return NoTransitionPage(
-                child: MenuScreenWrapper(businessSlug: businessSlug),
+                child: OptimizedMenuScreenWrapper(businessSlug: businessSlug),
               );
             },
           ),
-          // Business cart route (e.g., /g3/carrito or /g3/cart)
+          // Business cart route (e.g., /kako/carrito) - Optimized
           GoRoute(
             path: '/carrito',
             pageBuilder: (context, state) {
               final businessSlug = state.pathParameters['businessSlug']!;
-              debugPrint('🏢 Loading business cart for: $businessSlug');
+              debugPrint('🏢 Optimized business cart for: $businessSlug');
               return NoTransitionPage(
-                child: CartScreenWrapper(businessSlug: businessSlug),
+                child: OptimizedCartScreenWrapper(businessSlug: businessSlug),
               );
             },
           ),
-          // Alias for cart with English route
+          // Alias for cart with English route - Optimized
           GoRoute(
             path: '/cart',
             pageBuilder: (context, state) {
               final businessSlug = state.pathParameters['businessSlug']!;
-              debugPrint('🏢 Loading business cart (EN) for: $businessSlug');
+              debugPrint('🏢 Optimized business cart (EN) for: $businessSlug');
               return NoTransitionPage(
-                child: CartScreenWrapper(businessSlug: businessSlug),
+                child: OptimizedCartScreenWrapper(businessSlug: businessSlug),
               );
             },
           ),
-          // Business account route (e.g., /g3/cuenta)
+          // Business account route (e.g., /kako/cuenta) - Optimized
           GoRoute(
             path: '/cuenta',
             pageBuilder: (context, state) {
               final businessSlug = state.pathParameters['businessSlug']!;
-              debugPrint('🏢 Loading business account for: $businessSlug');
+              debugPrint('🏢 Optimized business account for: $businessSlug');
               return NoTransitionPage(
-                child: ProfileScreenWrapper(businessSlug: businessSlug),
+                child:
+                    OptimizedProfileScreenWrapper(businessSlug: businessSlug),
               );
             },
           ),
-          // Business orders route (e.g., /g3/ordenes)
+          // Business orders route (e.g., /kako/ordenes) - Optimized
           GoRoute(
             path: '/ordenes',
             pageBuilder: (context, state) {
               final businessSlug = state.pathParameters['businessSlug']!;
-              debugPrint('🏢 Loading business orders for: $businessSlug');
+              debugPrint('🏢 Optimized business orders for: $businessSlug');
               return NoTransitionPage(
-                child: OrdersScreenWrapper(businessSlug: businessSlug),
+                child: OptimizedOrdersScreenWrapper(businessSlug: businessSlug),
               );
             },
           ),
+          // Business admin route (e.g., /kako/admin) - Optimized
+          GoRoute(
+            path: '/admin',
+            pageBuilder: (context, state) {
+              final businessSlug = state.pathParameters['businessSlug']!;
+              debugPrint('🏢 Optimized business admin for: $businessSlug');
+              return NoTransitionPage(
+                child: OptimizedAdminScreenWrapper(businessSlug: businessSlug),
+              );
+            },
+            routes: [
+              // Add nested admin routes for business-specific admin access
+              ...getBusinessAdminRoutes(),
+            ],
+          ),
         ],
       ),
-
-      // Add all admin routes here for proper URL handling
-      ...getAdminRoutes(),
     ],
   );
 }
@@ -900,4 +920,28 @@ bool _isValidBusinessSlug(String slug) {
   };
 
   return !reservedSlugs.contains(slug);
+}
+
+/// Helper function to get business-specific admin routes
+/// These are simplified admin routes that work within business context
+List<RouteBase> getBusinessAdminRoutes() {
+  return [
+    // Basic business admin sub-routes - simplified for business context
+    GoRoute(
+      path: '/dashboard',
+      builder: (context, state) => const AdminDashboardHome(),
+    ),
+    GoRoute(
+      path: '/products',
+      builder: (context, state) => const ProductManagementScreen(),
+    ),
+    GoRoute(
+      path: '/orders',
+      builder: (context, state) => const OrderManagementScreen(),
+    ),
+    GoRoute(
+      path: '/settings',
+      builder: (context, state) => const BusinessSettingsScreen(),
+    ),
+  ];
 }
