@@ -76,17 +76,18 @@ class HomeDishesSection extends ConsumerWidget {
                         'id': dish.id,
                         'title': dish.name,
                         'description': dish.description,
-                        'pricing': dish.price,
+                        'pricing': 'S/ ${dish.price.toStringAsFixed(2)}',
                         'img': dish.imageUrl ??
                             'assets/images/placeholder_food.png',
-                        'offertPricing': dish.metadata['offertPricing'],
+                        'offertPricing':
+                            dish.metadata['offertPricing']?.toString(),
                         'ingredients': dish.metadata['ingredients'] ??
                             ['Ingredient 1', 'Ingredient 2'],
                         'isSpicy': dish.metadata['isSpicy'] ?? false,
                         'foodType': dish.metadata['foodType'] ?? 'Main Course',
                         'isMealPlan': dish.metadata['isMealPlan'] ?? false,
                         'bestSeller': dish.metadata['bestSeller'] ?? false,
-                        'rating': dish.metadata['rating'] ?? 4.5,
+                        'rating': (dish.metadata['rating'] as double?) ?? 4.5,
                       };
 
                       return MenuDishCardHorizontal(
@@ -136,16 +137,17 @@ class HomeDishesSection extends ConsumerWidget {
                         'id': dish.id,
                         'title': dish.name,
                         'description': dish.description,
-                        'pricing': dish.price,
+                        'pricing': 'S/ ${dish.price.toStringAsFixed(2)}',
                         'img': dish.imageUrl ?? 'assets/appIcon.png',
-                        'offertPricing': dish.metadata['offertPricing'],
+                        'offertPricing':
+                            dish.metadata['offertPricing']?.toString(),
                         'ingredients': dish.metadata['ingredients'] ??
                             ['Ingredient 1', 'Ingredient 2'],
                         'isSpicy': dish.metadata['isSpicy'] ?? false,
                         'foodType': dish.metadata['foodType'] ?? 'Main Course',
                         'isMealPlan': dish.metadata['isMealPlan'] ?? false,
                         'bestSeller': dish.metadata['bestSeller'] ?? false,
-                        'rating': dish.metadata['rating'] ?? 4.5,
+                        'rating': (dish.metadata['rating'] as double?) ?? 4.5,
                       };
 
                       return MenuDishCardHorizontal(

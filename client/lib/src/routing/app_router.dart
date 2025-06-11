@@ -1,5 +1,6 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,11 +8,13 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/app_config/app_config_services.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_analitics.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_startup.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/business_screen_wrappers.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/go_router_refresh_stream.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/navigation_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/scaffold_with_nested_navigation.dart';
@@ -139,7 +142,6 @@ GoRouter goRouter(Ref ref) {
   final allDestinations = ref.watch(allNavigationDestinationsProvider);
   final isFirebaseInitialized = ref.watch(isFirebaseInitializedProvider);
   final isAdminAsync = ref.watch(isAdminProvider);
-  final isAdmin = isAdminAsync.valueOrNull ?? false;
 
   // Force admin status check if user is logged in but admin status hasn't been determined
   if (authRepository.currentUser != null && isAdminAsync.hasValue == false) {
@@ -222,56 +224,56 @@ GoRouter goRouter(Ref ref) {
           // Check for any pending path that was saved before authentication
           final pendingPath = ref.read(_pendingAdminPathProvider);
 
-          // Handle ONLY admin routes that start with /admin
+          // Handle platform admin routes (/admin) - Only for PLATFORM admins
           if (path.startsWith('/admin')) {
             // Don't redirect if admin status is still loading
             if (isAdminAsync.isLoading) {
-              debugPrint('⏳ Admin status loading, allowing navigation: $path');
+              debugPrint(
+                  '⏳ Platform admin status loading, allowing navigation: $path');
               return null; // Allow navigation while loading
             }
 
-            // Log debug info for admin status
+            // Check if user is a PLATFORM admin (not just a business owner)
+            final isPlatformAdmin = await _isPlatformAdmin(ref);
+
             debugPrint(
-                '🔐 Admin route access attempt: isAdmin=$isAdmin, path=$path');
+                '🔐 Platform admin route access attempt: isPlatformAdmin=$isPlatformAdmin, path=$path');
 
-            // Only block access to admin routes for confirmed non-admin users
-            if (isAdminAsync.hasValue && !isAdmin) {
+            // Only platform admins can access /admin routes
+            if (!isPlatformAdmin) {
               debugPrint(
-                  '🚫 Non-admin user blocked from admin area: $path → redirecting to /');
-              return '/'; // Redirect non-admins to home
+                  '🚫 Non-platform-admin blocked from platform admin area: $path → redirecting to /');
+              return '/'; // Redirect non-platform-admins to home
             }
 
-            // If admin status is confirmed, allow access and check business setup
-            if (isAdmin) {
-              debugPrint('✅ Admin access granted for: $path');
+            debugPrint('✅ Platform admin access granted for: $path');
 
-              // Check business configuration status ONLY for admin users accessing admin routes
-              final businessConfig = businessConfigAsync.value;
-              final isBusinessConfigured =
-                  businessConfig != null && businessConfig.isActive;
+            // Check business configuration status ONLY for platform admin users
+            final businessConfig = businessConfigAsync.value;
+            final isBusinessConfigured =
+                businessConfig != null && businessConfig.isActive;
 
-              // Only redirect to admin setup if business is definitely not set up
-              // and we're not already at the admin setup page
-              if (businessConfigAsync.hasValue &&
-                  !isBusinessConfigured &&
-                  path != '/admin-setup') {
-                debugPrint(
-                    '🔧 Admin needs business setup, redirecting to /admin-setup');
-                return '/admin-setup';
-              }
-
-              // If business is set up and user is at admin-setup, redirect to admin panel
-              if (businessConfigAsync.hasValue &&
-                  isBusinessConfigured &&
-                  path == '/admin-setup') {
-                debugPrint(
-                    '🔧 Business already configured, redirecting to /admin');
-                return '/admin';
-              }
+            // Only redirect to admin setup if business is definitely not set up
+            // and we're not already at the admin setup page
+            if (businessConfigAsync.hasValue &&
+                !isBusinessConfigured &&
+                path != '/admin-setup') {
+              debugPrint(
+                  '🔧 Platform admin needs business setup, redirecting to /admin-setup');
+              return '/admin-setup';
             }
 
-            // Allow admin route access (admin confirmed or status still loading)
-            debugPrint('✅ Admin route allowed: $path');
+            // If business is set up and user is at admin-setup, redirect to admin panel
+            if (businessConfigAsync.hasValue &&
+                isBusinessConfigured &&
+                path == '/admin-setup') {
+              debugPrint(
+                  '🔧 Business already configured, redirecting to /admin');
+              return '/admin';
+            }
+
+            // Allow platform admin route access
+            debugPrint('✅ Platform admin route allowed: $path');
             return null;
           }
 
@@ -406,21 +408,26 @@ GoRouter goRouter(Ref ref) {
         ),
       ),
 
-      // StatefulShellRoute for default business navigation (no slug prefix)
-      // This MUST come BEFORE business-specific routing to catch default routes first
-      StatefulShellRoute.indexedStack(
-        pageBuilder: (context, state, navigationShell) => NoTransitionPage(
-          child: ScaffoldWithNestedNavigation(navigationShell: navigationShell),
-        ),
-        branches: allDestinations
-            .where((dest) =>
-                dest.path != '/admin') // Exclude admin from shell branches
-            .map((dest) => _buildBranch(dest))
-            .toList(),
-      ),
-
       // Business-specific routing (e.g., /g3, /restaurant-name)
-      // This comes AFTER StatefulShellRoute so default routes are handled first
+      // This MUST come BEFORE StatefulShellRoute to catch business routes first
+      GoRoute(
+        path: '/:businessSlug',
+        redirect: (context, state) {
+          final businessSlug = state.pathParameters['businessSlug'];
+          debugPrint('🔍 Checking business slug: $businessSlug');
+
+          if (businessSlug != null && _isValidBusinessSlug(businessSlug)) {
+            // Valid business slug - allow business routing
+            debugPrint('🏢 Valid business slug detected: $businessSlug');
+            return null;
+          }
+          // Invalid business slug - redirect to home
+          debugPrint(
+              '❌ Invalid business slug: $businessSlug, redirecting to home');
+          return '/';
+        },
+      // Business-specific routing (e.g., /g3, /restaurant-name)
+      // This MUST come BEFORE StatefulShellRoute to catch business routes first
       GoRoute(
         path: '/:businessSlug',
         redirect: (context, state) {
@@ -490,6 +497,19 @@ GoRouter goRouter(Ref ref) {
             },
           ),
         ],
+      ),
+
+      // StatefulShellRoute for default business navigation (no slug prefix)
+      // This comes AFTER business-specific routing so business routes are handled first
+      StatefulShellRoute.indexedStack(
+        pageBuilder: (context, state, navigationShell) => NoTransitionPage(
+          child: ScaffoldWithNestedNavigation(navigationShell: navigationShell),
+        ),
+        branches: allDestinations
+            .where((dest) =>
+                dest.path != '/admin') // Exclude admin from shell branches
+            .map((dest) => _buildBranch(dest))
+            .toList(),
       ),
 
       // Add all admin routes here for proper URL handling
@@ -774,77 +794,47 @@ class UnauthorizedScreen extends StatelessWidget {
   }
 }
 
-// --------------------------------------------------------------------------
-// Business Screen Wrappers with Navigation
-// --------------------------------------------------------------------------
+/// Distinguishes platform admins from business owners
+/// Platform admins: Users in 'admins' collection or with 'admin' Firebase Auth claims
+/// Business owners: Users with 'owner' role in business_relationships collection
+Future<bool> _isPlatformAdmin(Ref ref) async {
+  try {
+    final user = ref.read(firebaseAuthProvider).currentUser;
+    if (user == null) return false;
 
-/// Wrapper for business home screen with navigation
-class HomeScreenContentWrapper extends StatelessWidget {
-  const HomeScreenContentWrapper({super.key, required this.businessSlug});
-  final String businessSlug;
+    const cacheOption = GetOptions(source: Source.serverAndCache);
+    final firestore = ref.read(firebaseFirestoreProvider);
 
-  @override
-  Widget build(BuildContext context) {
-    return BusinessScaffoldWithNavigation(
-      businessSlug: businessSlug,
-      child: const ResponsiveLandingPage(),
-    );
-  }
-}
+    // Check admin document in Firestore - PLATFORM ADMIN
+    final adminDoc =
+        await firestore.collection('admins').doc(user.uid).get(cacheOption);
+    if (adminDoc.exists) {
+      debugPrint('🔐 User ${user.uid} is a PLATFORM admin (admins collection)');
+      return true;
+    }
 
-/// Wrapper for business menu screen with navigation
-class MenuScreenWrapper extends StatelessWidget {
-  const MenuScreenWrapper({super.key, required this.businessSlug});
-  final String businessSlug;
+    // Check admin claims in user's token - PLATFORM ADMIN
+    try {
+      final idTokenResult = await user.getIdTokenResult(true);
+      final isAdminClaim = idTokenResult.claims?['admin'] == true;
+      if (isAdminClaim) {
+        debugPrint(
+            '🔐 User ${user.uid} is a PLATFORM admin (Firebase Auth claims)');
+        return true;
+      }
+    } catch (tokenError) {
+      debugPrint('Error getting token claims: $tokenError');
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    return BusinessScaffoldWithNavigation(
-      businessSlug: businessSlug,
-      child: const MenuScreen(),
-    );
-  }
-}
+    // Note: We DON'T check business_relationships here because that would make
+    // business owners count as platform admins, which is not what we want.
+    // Business owners should only access /businessSlug/admin, not /admin
 
-/// Wrapper for business cart screen with navigation
-class CartScreenWrapper extends StatelessWidget {
-  const CartScreenWrapper({super.key, required this.businessSlug});
-  final String businessSlug;
-
-  @override
-  Widget build(BuildContext context) {
-    return BusinessScaffoldWithNavigation(
-      businessSlug: businessSlug,
-      child: const CartScreen(isAuthenticated: true),
-    );
-  }
-}
-
-/// Wrapper for business profile screen with navigation
-class ProfileScreenWrapper extends StatelessWidget {
-  const ProfileScreenWrapper({super.key, required this.businessSlug});
-  final String businessSlug;
-
-  @override
-  Widget build(BuildContext context) {
-    return BusinessScaffoldWithNavigation(
-      businessSlug: businessSlug,
-      child: const CustomProfileScreen(),
-    );
-  }
-}
-
-/// Wrapper for business orders screen with navigation
-class OrdersScreenWrapper extends StatelessWidget {
-  const OrdersScreenWrapper({super.key, required this.businessSlug});
-  final String businessSlug;
-
-  @override
-  Widget build(BuildContext context) {
-    return BusinessScaffoldWithNavigation(
-      businessSlug: businessSlug,
-      child: const InProgressOrdersScreen(),
-    );
+    debugPrint('🔐 User ${user.uid} is NOT a platform admin');
+    return false;
+  } catch (e) {
+    debugPrint('Error checking platform admin status: $e');
+    return false;
   }
 }
 
