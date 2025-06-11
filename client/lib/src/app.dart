@@ -49,6 +49,7 @@ class _KakoAppState extends ConsumerState<KakoApp> with WidgetsBindingObserver {
     try {
       final router = ref.read(goRouterProvider);
 
+      // Use the router's location instead of matchedLocation for full path
       final currentRouterPath = router.state.matchedLocation;
       final browserPath = WebUtils.getCurrentPath();
 
@@ -56,11 +57,17 @@ class _KakoAppState extends ConsumerState<KakoApp> with WidgetsBindingObserver {
       debugPrint('  - router.location: "$currentRouterPath"');
       debugPrint('  - WebUtils.getCurrentPath(): "$browserPath"');
 
-      // If URL changed while app was inactive, navigate to new path
-      if (browserPath != currentRouterPath && browserPath.isNotEmpty) {
+      // Only update if there's a significant difference and browser path is not just root
+      if (browserPath != currentRouterPath &&
+          browserPath.isNotEmpty &&
+          browserPath != '/' &&
+          currentRouterPath != '/') {
         debugPrint(
             '📌 URL changed from "$currentRouterPath" to "$browserPath", updating');
         router.go(browserPath);
+      } else if (browserPath == '/' && currentRouterPath != '/') {
+        debugPrint(
+            '⚠️ Browser URL reset to root but router shows "$currentRouterPath" - ignoring browser change');
       }
     } catch (e) {
       debugPrint('🔥 Error checking URL changes: $e');

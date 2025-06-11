@@ -383,12 +383,11 @@ Future<void> _initializeBusinessConfig(ProviderContainer container) async {
     // Check if business configuration exists
     final businessSetupManager = container.read(businessSetupManagerProvider);
     final isBusinessSetup = await businessSetupManager.isBusinessSetup();
-    
+
     debugPrint('🏢 Business configuration check: isSetup = $isBusinessSetup');
-    
+
     // Initialize the business setup detector state
     container.read(isBusinessSetupProvider);
-    
   } catch (e) {
     debugPrint('❌ Error checking business setup: $e');
     // Continue anyway - business setup might not be critical for initial launch

@@ -177,16 +177,14 @@ GoRouter goRouter(Ref ref) {
         debugPrint('🧭 Router redirect triggered!');
         debugPrint('🧭   Path: "$path"');
         debugPrint('🧭   Full URI: "${state.uri}"');
-        debugPrint('🧭   Query params: "${state.uri.queryParameters}"');
-        debugPrint('🧭   Route name: "${state.name}"');
+        debugPrint('🧭   Firebase initialized: $isFirebaseInitialized');
 
         // Skip redirect logic entirely if we're already at error
         if (path.startsWith('/error')) {
           return null;
         }
 
-        // Firebase should already be initialized in main.dart - don't initialize here
-        // This check should only verify, not initialize
+        // If Firebase is not initialized, redirect to startup (don't initialize here)
         if (!isFirebaseInitialized) {
           debugPrint("⚠️ Firebase not initialized, redirecting to startup");
           return '/startup';
@@ -408,26 +406,21 @@ GoRouter goRouter(Ref ref) {
         ),
       ),
 
-      // Business-specific routing (e.g., /g3, /restaurant-name)
-      // This MUST come BEFORE StatefulShellRoute to catch business routes first
-      GoRoute(
-        path: '/:businessSlug',
-        redirect: (context, state) {
-          final businessSlug = state.pathParameters['businessSlug'];
-          debugPrint('🔍 Checking business slug: $businessSlug');
+      // StatefulShellRoute for default business navigation (no slug prefix)
+      // This MUST come BEFORE business-specific routing to handle default routes first
+      StatefulShellRoute.indexedStack(
+        pageBuilder: (context, state, navigationShell) => NoTransitionPage(
+          child: ScaffoldWithNestedNavigation(navigationShell: navigationShell),
+        ),
+        branches: allDestinations
+            .where((dest) =>
+                dest.path != '/admin') // Exclude admin from shell branches
+            .map((dest) => _buildBranch(dest))
+            .toList(),
+      ),
 
-          if (businessSlug != null && _isValidBusinessSlug(businessSlug)) {
-            // Valid business slug - allow business routing
-            debugPrint('🏢 Valid business slug detected: $businessSlug');
-            return null;
-          }
-          // Invalid business slug - redirect to home
-          debugPrint(
-              '❌ Invalid business slug: $businessSlug, redirecting to home');
-          return '/';
-        },
       // Business-specific routing (e.g., /g3, /restaurant-name)
-      // This MUST come BEFORE StatefulShellRoute to catch business routes first
+      // This comes AFTER StatefulShellRoute so default routes are handled first
       GoRoute(
         path: '/:businessSlug',
         redirect: (context, state) {
@@ -463,12 +456,23 @@ GoRouter goRouter(Ref ref) {
               );
             },
           ),
-          // Business cart route (e.g., /g3/carrito)
+          // Business cart route (e.g., /g3/carrito or /g3/cart)
           GoRoute(
             path: '/carrito',
             pageBuilder: (context, state) {
               final businessSlug = state.pathParameters['businessSlug']!;
               debugPrint('🏢 Loading business cart for: $businessSlug');
+              return NoTransitionPage(
+                child: CartScreenWrapper(businessSlug: businessSlug),
+              );
+            },
+          ),
+          // Alias for cart with English route
+          GoRoute(
+            path: '/cart',
+            pageBuilder: (context, state) {
+              final businessSlug = state.pathParameters['businessSlug']!;
+              debugPrint('🏢 Loading business cart (EN) for: $businessSlug');
               return NoTransitionPage(
                 child: CartScreenWrapper(businessSlug: businessSlug),
               );
@@ -499,26 +503,13 @@ GoRouter goRouter(Ref ref) {
         ],
       ),
 
-      // StatefulShellRoute for default business navigation (no slug prefix)
-      // This comes AFTER business-specific routing so business routes are handled first
-      StatefulShellRoute.indexedStack(
-        pageBuilder: (context, state, navigationShell) => NoTransitionPage(
-          child: ScaffoldWithNestedNavigation(navigationShell: navigationShell),
-        ),
-        branches: allDestinations
-            .where((dest) =>
-                dest.path != '/admin') // Exclude admin from shell branches
-            .map((dest) => _buildBranch(dest))
-            .toList(),
-      ),
-
       // Add all admin routes here for proper URL handling
       ...getAdminRoutes(),
     ],
   );
 }
 
-// Rest of your file with helper functions and route definitions...
+/// Helper function to get nested routes for a specific path
 List<RouteBase> _getNestedRoutes(String path) {
   switch (path) {
     case '/':

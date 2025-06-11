@@ -171,15 +171,9 @@ class ScaffoldWithNavigationBarState
               final router = GoRouter.of(context);
               router.go('/admin');
             } else {
-              // Find the corresponding branch index in the shell destinations list (excluding admin)
-              final shellDestinations = allDestinations
-                  .where((dest) => dest.path != '/admin')
-                  .toList();
-              final branchIndex =
-                  shellDestinations.indexWhere((d) => d.path == dest.path);
-              if (branchIndex >= 0) {
-                widget.navigationShell.goBranch(branchIndex);
-              }
+              // For default navigation, always use default routes (no business slug)
+              debugPrint('🏠 Default navigation to: ${dest.path}');
+              context.go(dest.path);
             }
           }
         },
@@ -312,15 +306,9 @@ class _ScaffoldWithNavigationRailState
                   final router = GoRouter.of(context);
                   router.go('/admin');
                 } else {
-                  // Find the corresponding branch index in the shell destinations list (excluding admin)
-                  final shellDestinations = allDestinations
-                      .where((dest) => dest.path != '/admin')
-                      .toList();
-                  final branchIndex =
-                      shellDestinations.indexWhere((d) => d.path == dest.path);
-                  if (branchIndex >= 0) {
-                    widget.navigationShell.goBranch(branchIndex);
-                  }
+                  // For default navigation, always use default routes (no business slug)
+                  debugPrint('🏠 Default navigation to: ${dest.path}');
+                  context.go(dest.path);
                 }
               }
             },
@@ -436,7 +424,15 @@ class BusinessScaffoldWithNavigationBar extends ConsumerWidget {
         }).toList(),
         onDestinationSelected: (index) {
           final dest = businessDestinations[index];
-          final businessPath = '/$businessSlug${dest.path}';
+          // Always navigate within business context, preserving the business slug
+          String businessPath;
+          if (dest.path == '/') {
+            businessPath = '/$businessSlug';
+          } else {
+            businessPath = '/$businessSlug${dest.path}';
+          }
+          debugPrint(
+              '🏢 Business navigation from /$businessSlug to: $businessPath');
           context.go(businessPath);
         },
       ),
@@ -475,7 +471,15 @@ class BusinessScaffoldWithNavigationRail extends ConsumerWidget {
             selectedIndex: selectedIndex,
             onDestinationSelected: (index) {
               final dest = businessDestinations[index];
-              final businessPath = '/$businessSlug${dest.path}';
+              // Always navigate within business context, preserving the business slug
+              String businessPath;
+              if (dest.path == '/') {
+                businessPath = '/$businessSlug';
+              } else {
+                businessPath = '/$businessSlug${dest.path}';
+              }
+              debugPrint(
+                  '🏢 Business navigation from /$businessSlug to: $businessPath');
               context.go(businessPath);
             },
             labelType: NavigationRailLabelType.all,

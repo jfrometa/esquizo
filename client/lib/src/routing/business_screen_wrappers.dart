@@ -3,10 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/business/business_slug_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/local_storange/local_storage_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/routing/business_routing_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/unified_business_context_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/scaffold_with_nested_navigation.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/home/home.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/menu_screen.dart';
@@ -14,8 +11,8 @@ import 'package:starter_architecture_flutter_firebase/src/screens/cart/cart_scre
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/custom_profile_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/orders/in_progress_orders_screen.dart';
 
-/// Base wrapper that sets business context for business-specific routes
-class BusinessContextWrapper extends ConsumerStatefulWidget {
+/// Simplified business context wrapper using unified business context provider
+class BusinessContextWrapper extends ConsumerWidget {
   const BusinessContextWrapper({
     super.key,
     required this.businessSlug,
@@ -26,97 +23,51 @@ class BusinessContextWrapper extends ConsumerStatefulWidget {
   final Widget child;
 
   @override
-  ConsumerState<BusinessContextWrapper> createState() =>
-      _BusinessContextWrapperState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Use explicit business context provider to avoid race conditions with URL detection
+    final businessContextAsync =
+        ref.watch(explicitBusinessContextProvider(businessSlug));
 
-class _BusinessContextWrapperState
-    extends ConsumerState<BusinessContextWrapper> {
-  bool _isContextSet = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _setBusinessContext();
-  }
-
-  @override
-  void didUpdateWidget(BusinessContextWrapper oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // If the business slug has changed, update the business context
-    if (widget.businessSlug != oldWidget.businessSlug) {
-      debugPrint(
-          '🔄 Business slug changed from ${oldWidget.businessSlug} to ${widget.businessSlug}');
-      _isContextSet = false;
-      _setBusinessContext();
-    }
-  }
-
-  Future<void> _setBusinessContext() async {
-    try {
-      debugPrint(
-          '🏢 Setting business context for slug: ${widget.businessSlug}');
-
-      // Get business ID from slug
-      final slugService = ref.read(businessSlugServiceProvider);
-      final businessId =
-          await slugService.getBusinessIdFromSlug(widget.businessSlug);
-
-      if (businessId != null) {
+    return businessContextAsync.when(
+      data: (businessContext) {
         debugPrint(
-            '🏢 Resolved business ID: $businessId for slug: ${widget.businessSlug}');
+            '✅ Explicit business context loaded: ${businessContext.businessId} for slug: $businessSlug');
 
-        // Update local storage to set this as the current business
-        final localStorage = ref.read(localStorageServiceProvider);
-        await localStorage.setString('businessId', businessId);
-
-        // Force refresh the URL-aware business ID provider
-        ref.invalidate(urlAwareBusinessIdProvider);
-
-        // Only invalidate currentBusinessIdProvider which is safe
-        ref.invalidate(currentBusinessIdProvider);
-
-        debugPrint('🔄 Essential business context providers refreshed');
-
-        debugPrint(
-            '🏢 Business context updated successfully for: ${widget.businessSlug}');
-
-        if (mounted) {
-          setState(() {
-            _isContextSet = true;
-          });
-        }
-      } else {
-        debugPrint('⚠️ Business slug not found: ${widget.businessSlug}');
-        if (mounted) {
-          setState(() {
-            _isContextSet = true;
-          });
-        }
-      }
-    } catch (e) {
-      debugPrint('❌ Error setting business context: $e');
-      if (mounted) {
-        setState(() {
-          _isContextSet = true;
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!_isContextSet) {
-      return const Scaffold(
+        return BusinessScaffoldWithNavigation(
+          businessSlug: businessSlug,
+          child: child,
+        );
+      },
+      loading: () => const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
         ),
-      );
-    }
-
-    return BusinessScaffoldWithNavigation(
-      businessSlug: widget.businessSlug,
-      child: widget.child,
+      ),
+      error: (error, stack) {
+        debugPrint('❌ Error loading business context: $error');
+        return Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error, size: 64, color: Colors.red),
+                const SizedBox(height: 16),
+                Text('Error loading business: $businessSlug'),
+                const SizedBox(height: 8),
+                Text('$error'),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    ref.invalidate(
+                        explicitBusinessContextProvider(businessSlug));
+                  },
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
