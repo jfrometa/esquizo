@@ -255,7 +255,7 @@ class TableService {
           capacity: 0,
           status: TableStatusEnum.available,
           isActive: false,
-          businessId: ((doc.data() as Map<String, dynamic>)?['businessId'] ??
+          businessId: ((doc.data() as Map<String, dynamic>)['businessId'] ??
               '') as String,
         );
       }

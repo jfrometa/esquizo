@@ -1,12 +1,10 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
+import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/setup/initialize_example_data_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/local_storange/local_storage_service.dart';
 
 /// First-time setup screen for admins
 class AdminSetupScreen extends ConsumerStatefulWidget {
@@ -41,8 +39,9 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
       // Generate a business ID based on the name
       final businessId = _businessName.toLowerCase().replaceAll(' ', '_');
 
-      // Set the business ID in the provider
-      ref.read(currentBusinessIdProvider.notifier).state = businessId;
+      // Store business ID in local storage for future reference
+      final localStorage = ref.read(localStorageServiceProvider);
+      await localStorage.setString('businessId', businessId);
 
       // Get current user's email
       final userEmail = ref.read(firebaseAuthProvider).currentUser?.email;
@@ -61,11 +60,17 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Business setup completed successfully!')),
+            content: Text('Business setup completed successfully!'),
+            duration: Duration(seconds: 2),
+          ),
         );
 
-        // Navigate to home screen or admin panel
-        // Navigator.of(context).pushReplacementNamed('/admin');
+        // Refresh the business config provider to trigger app state change
+        // This will cause BusinessSetupDetector to switch to the main app
+        ref.invalidate(businessConfigProvider);
+
+        // The BusinessSetupDetector will automatically switch to the main app
+        // which has GoRouter context and will navigate to admin panel
       }
     } catch (e) {
       setState(() {
@@ -94,25 +99,48 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
           data: (businessConfig) {
             if (businessConfig != null) {
               // Business already set up
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Business Already Configured',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                      'Your business "${businessConfig.name}" is already set up.'),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Navigate to admin panel
-                      // Navigator.of(context).pushReplacementNamed('/admin');
-                    },
-                    child: const Text('Go to Admin Panel'),
-                  ),
-                ],
+              return Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Business Already Configured',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Your business "${businessConfig.name}" is already set up.',
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Navigate to admin panel
+                          try {
+                            // Try GoRouter first
+                            if (GoRouter.maybeOf(context) != null) {
+                              context.go('/admin');
+                            } else {
+                              // Fallback: refresh business config to trigger app state change
+                              ref.invalidate(businessConfigProvider);
+                            }
+                          } catch (e) {
+                            // Last resort: refresh business config
+                            ref.invalidate(businessConfigProvider);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: const Text('Go to Admin Panel'),
+                      ),
+                    ),
+                  ],
+                ),
               );
             }
 
@@ -204,101 +232,6 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
           },
           loading: () => const CircularProgressIndicator(),
           error: (error, stackTrace) => Text('Error: $error'),
-        ),
-      ),
-    );
-  }
-}
-
-/// Main function that drives the application startup
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
-  // Create a ProviderContainer for initialization
-  final container = ProviderContainer();
-
-  // Initialize auth repository
-  final authRepository = container.read(authRepositoryProvider);
-  await authRepository.initialize();
-
-  // Run the app
-  runApp(
-    ProviderScope(
-      parent: container,
-      child: const MyApp(),
-    ),
-  );
-}
-
-/// Main app widget
-class MyApp extends ConsumerWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Listen to auth state changes
-    final authState = ref.watch(authStateChangesProvider);
-
-    return MaterialApp(
-      title: 'Business Management App',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: authState.when(
-        data: (user) {
-          if (user == null) {
-            // User not logged in, show auth screen
-            return const Scaffold(
-              body: Center(
-                child: Text('Please log in'),
-              ),
-            );
-          }
-
-          // Check if user is admin
-          final isAdmin = ref.watch(isAdminProvider);
-
-          return isAdmin.when(
-            data: (isAdmin) {
-              if (isAdmin) {
-                // User is admin, show setup screen or admin panel
-                return const AdminSetupScreen();
-              } else {
-                // User is not admin, show user home
-                return const Scaffold(
-                  body: Center(
-                    child: Text('User Dashboard - Not an admin'),
-                  ),
-                );
-              }
-            },
-            loading: () => const Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
-            error: (error, stackTrace) => Scaffold(
-              body: Center(
-                child: Text('Error: $error'),
-              ),
-            ),
-          );
-        },
-        loading: () => const Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(),
-          ),
-        ),
-        error: (error, stackTrace) => Scaffold(
-          body: Center(
-            child: Text('Error: $error'),
-          ),
         ),
       ),
     );

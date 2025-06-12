@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 class CateringPackage {
   final String id;
+  final String businessId;
   final String name;
   final String description;
   final double basePrice;
@@ -17,6 +18,7 @@ class CateringPackage {
 
   const CateringPackage({
     required this.id,
+    required this.businessId,
     required this.name,
     required this.description,
     required this.basePrice,
@@ -34,6 +36,7 @@ class CateringPackage {
   // Empty constructor
   factory CateringPackage.empty() => const CateringPackage(
         id: '',
+        businessId: '',
         name: '',
         description: '',
         basePrice: 0,
@@ -43,6 +46,7 @@ class CateringPackage {
   factory CateringPackage.fromJson(Map<String, dynamic> json) {
     return CateringPackage(
       id: json['id'] as String,
+      businessId: json['businessId'] as String? ?? '',
       name: json['name'] as String,
       description: json['description'] as String,
       basePrice: (json['basePrice'] as num).toDouble(),
@@ -68,6 +72,7 @@ class CateringPackage {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'businessId': businessId,
       'name': name,
       'description': description,
       'basePrice': basePrice,
@@ -86,6 +91,7 @@ class CateringPackage {
   // Copy with method
   CateringPackage copyWith({
     String? id,
+    String? businessId,
     String? name,
     String? description,
     double? basePrice,
@@ -103,6 +109,7 @@ class CateringPackage {
   }) {
     return CateringPackage(
       id: id ?? this.id,
+      businessId: businessId ?? this.businessId,
       name: name ?? this.name,
       description: description ?? this.description,
       basePrice: basePrice ?? this.basePrice,
@@ -127,6 +134,7 @@ class CateringPackage {
 
     return other is CateringPackage &&
         other.id == id &&
+        other.businessId == businessId &&
         other.name == name &&
         other.description == description &&
         other.basePrice == basePrice &&
@@ -145,6 +153,7 @@ class CateringPackage {
   @override
   int get hashCode {
     return id.hashCode ^
+        businessId.hashCode ^
         name.hashCode ^
         description.hashCode ^
         basePrice.hashCode ^
@@ -162,7 +171,7 @@ class CateringPackage {
   // String representation
   @override
   String toString() {
-    return 'CateringPackage(id: $id, name: $name, basePrice: $basePrice, items: ${items.length})';
+    return 'CateringPackage(id: $id, businessId: $businessId, name: $name, basePrice: $basePrice, items: ${items.length})';
   }
 }
 

@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/setup/initialize_example_data_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/local_storange/local_storage_service.dart';
 
 /// First-time setup screen for admins
 class AdminSetupScreen extends ConsumerStatefulWidget {
@@ -38,8 +40,10 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
       // Generate a business ID based on the name
       final businessId = _businessName.toLowerCase().replaceAll(' ', '_');
 
-      // Set the business ID in the provider
-      ref.read(currentBusinessIdProvider.notifier).state = businessId;
+      // Note: Business ID is now handled by URL-aware routing system
+      // Store it in local storage for future reference
+      final localStorage = ref.read(localStorageServiceProvider);
+      await localStorage.setString('businessId', businessId);
 
       // Get current user's email
       final userEmail = ref.read(firebaseAuthProvider).currentUser?.email;
@@ -61,8 +65,8 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
               content: Text('Business setup completed successfully!')),
         );
 
-        // Navigate to home screen or admin panel
-        // Navigator.of(context).pushReplacementNamed('/admin');
+        // Navigate to admin panel using GoRouter
+        context.go('/admin');
       }
     } catch (e) {
       setState(() {
@@ -104,8 +108,8 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () {
-                      // Navigate to admin panel
-                      // Navigator.of(context).pushReplacementNamed('/admin');
+                      // Navigate to admin panel using GoRouter
+                      context.go('/admin');
                     },
                     child: const Text('Go to Admin Panel'),
                   ),

@@ -5,6 +5,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/order/unified_ord
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/create_order.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart' as cloud_firestore;
 import 'package:flutter/foundation.dart';
@@ -13,9 +14,13 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/t
 // Optimized admin statistics service
 class AdminStatsService {
   final cloud_firestore.FirebaseFirestore _firestore;
+  final String _businessId;
 
-  AdminStatsService({cloud_firestore.FirebaseFirestore? firestore})
-      : _firestore = firestore ?? cloud_firestore.FirebaseFirestore.instance;
+  AdminStatsService({
+    cloud_firestore.FirebaseFirestore? firestore,
+    required String businessId,
+  }) : _firestore = firestore ?? cloud_firestore.FirebaseFirestore.instance,
+       _businessId = businessId;
 
   // Get all stats in a single batch operation
   Future<Map<String, dynamic>> getAllStats() async {
@@ -59,8 +64,10 @@ class AdminStatsService {
       // Use aggregate queries for better performance
       final batch = _firestore.batch();
 
-      // Query for orders for all stats
+      // Query for orders for all stats - filtered by business ID
       final ordersQuery = await _firestore
+          .collection('businesses')
+          .doc(_businessId)
           .collection('orders')
           .where('createdAt',
               isGreaterThanOrEqualTo:
@@ -126,11 +133,16 @@ class AdminStatsService {
     }
   }
 
-  // Get table statistics
+  // Get table statistics - filtered by business ID
   Future<TableStats> _getTableStats() async {
     try {
-      // Get all tables in a single query
-      final tablesQuery = await _firestore.collection('tables').get();
+      // Get all tables in a single query - business-scoped
+      final tablesQuery = await _firestore
+          .collection('businesses')
+          .doc(_businessId)
+          .collection('resources')
+          .where('type', isEqualTo: 'table')
+          .get();
 
       final tables = tablesQuery.docs
           .map((doc) => RestaurantTable.fromFirestore(doc))
@@ -161,20 +173,20 @@ class AdminStatsService {
     }
   }
 
-  // Get product statistics
+  // Get product statistics - filtered by business ID
   Future<ProductStats> _getProductStats() async {
     try {
-      // Run batch queries for categories and products
+      // Run batch queries for categories and products - business-scoped
       final futures = await Future.wait([
         _firestore
-            .collection('restaurants')
-            .doc('default')
-            .collection('categories')
+            .collection('businesses')
+            .doc(_businessId)
+            .collection('menu_categories')
             .get(),
         _firestore
-            .collection('restaurants')
-            .doc('default')
-            .collection('products')
+            .collection('businesses')
+            .doc(_businessId)
+            .collection('menu_items')
             .get(),
       ]);
 
@@ -209,9 +221,11 @@ class AdminStatsService {
     }
   }
 
-  // Get recent orders with limit
+  // Get recent orders with limit - filtered by business ID
   Stream<List<Order>> getRecentOrdersStream({int limit = 5}) {
     return _firestore
+        .collection('businesses')
+        .doc(_businessId)
         .collection('orders')
         .orderBy('createdAt', descending: true)
         .limit(limit)
@@ -230,7 +244,8 @@ class AdminStatsService {
 // Providers
 final adminStatsServiceProvider = Provider<AdminStatsService>((ref) {
   final firestore = ref.watch(firebaseFirestoreProvider);
-  return AdminStatsService(firestore: firestore);
+  final businessId = ref.watch(currentBusinessIdProvider);
+  return AdminStatsService(firestore: firestore, businessId: businessId);
 });
 
 // Combined admin stats provider with cache invalidation

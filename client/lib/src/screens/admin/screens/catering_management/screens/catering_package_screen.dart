@@ -328,7 +328,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                                     .read(
                                         unifiedCateringPackageRepositoryProvider
                                             .notifier)
-                                    .togglePromoted(package.id ?? '', value);
+                                    .togglePromotedStatus(package.id, value);
                               },
                             ),
                           ),

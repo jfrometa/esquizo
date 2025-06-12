@@ -206,7 +206,7 @@ final availableItemsForPackageProvider =
 typedef AvailableItemsForPackageRef
     = AutoDisposeProviderRef<List<CateringItem>>;
 String _$unifiedCateringPackageRepositoryHash() =>
-    r'66e7878999fbfd0ee054722fa41303542dca13e8';
+    r'a428727d7d80a7c1d1b6007e6b7de2764552cbb3';
 
 /// Unified repository for all catering package operations
 /// Combines functionality from multiple providers

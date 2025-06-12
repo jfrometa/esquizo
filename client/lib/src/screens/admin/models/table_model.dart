@@ -122,7 +122,9 @@ class RestaurantTable extends Resource {
       'isActive': isActive,
       'shape': shape?.toString().split('.').last,
       'updatedAt': FieldValue.serverTimestamp(),
-      'createdAt': createdAt != null ? Timestamp.fromDate(createdAt!) : FieldValue.serverTimestamp(),
+      'createdAt': createdAt != null
+          ? Timestamp.fromDate(createdAt!)
+          : FieldValue.serverTimestamp(),
       'name': name,
       'isAvailable': isAvailable,
       'position': position,
@@ -188,10 +190,12 @@ enum StaffRole {
   admin, // Full access to all areas
   manager, // Management access
   waiter, // Waitstaff
+  cook,
   cashier, // Cashier
+  supervisor,
   kitchen, // Kitchen staff
   delivery, // Delivery personnel
-  host // Host/hostess
+  host, // Host/hostess
 }
 
 // Staff member model
@@ -206,6 +210,7 @@ class StaffMember {
   final String? profileImageUrl;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final Map<String, dynamic>? metadata;
 
   StaffMember({
     required this.id,
@@ -218,6 +223,7 @@ class StaffMember {
     this.profileImageUrl,
     this.createdAt,
     this.updatedAt,
+    this.metadata,
   });
 
   // Create from Firestore document
@@ -235,6 +241,7 @@ class StaffMember {
       profileImageUrl: data['profileImageUrl'],
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
+      metadata: data['metadata'] as Map<String, dynamic>?,
     );
   }
 
@@ -249,7 +256,9 @@ class StaffMember {
       'lastLogin': lastLogin != null ? Timestamp.fromDate(lastLogin!) : null,
       'profileImageUrl': profileImageUrl,
       'updatedAt': FieldValue.serverTimestamp(),
-      'createdAt': createdAt != null ? Timestamp.fromDate(createdAt!) : FieldValue.serverTimestamp(),
+      'createdAt': createdAt != null
+          ? Timestamp.fromDate(createdAt!)
+          : FieldValue.serverTimestamp(),
     };
   }
 }

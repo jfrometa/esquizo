@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/subscriptions/meal_plan_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/responsive_layout.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/plans/plans.dart';
-import 'package:go_router/go_router.dart';
 
 // Date range provider
 final dateRangeProvider = StateProvider<DateTimeRange>((ref) {
@@ -355,8 +353,7 @@ class _MealPlanExportScreenState extends ConsumerState<MealPlanExportScreen> {
           return ListTile(
             title: Text(plan.title),
             subtitle: Text(
-                'Owner: ${plan.ownerName.isNotEmpty ? plan.ownerName : "N/A"} • ' +
-                    'Meals: ${plan.mealsRemaining}/${plan.totalMeals}'),
+                'Owner: ${plan.ownerName.isNotEmpty ? plan.ownerName : "N/A"} • ' 'Meals: ${plan.mealsRemaining}/${plan.totalMeals}'),
             trailing: Text('\$${plan.price}'),
           );
         },
@@ -375,8 +372,7 @@ class _MealPlanExportScreenState extends ConsumerState<MealPlanExportScreen> {
           return ListTile(
             title: Text(item.itemName),
             subtitle: Text(
-                'Date: ${DateFormat.yMMMd().add_jm().format(item.consumedAt)}' +
-                    (item.notes.isNotEmpty ? ' • Notes: ${item.notes}' : '')),
+                'Date: ${DateFormat.yMMMd().add_jm().format(item.consumedAt)}${item.notes.isNotEmpty ? ' • Notes: ${item.notes}' : ''}'),
             trailing: Text('Plan ID: ${item.mealPlanId.substring(0, 6)}...'),
           );
         },
@@ -394,8 +390,7 @@ class _MealPlanExportScreenState extends ConsumerState<MealPlanExportScreen> {
 
           return ListTile(
             title: Text(customer['customerName'] ?? 'Unknown'),
-            subtitle: Text('Plans: ${customer['totalPlans']} • ' +
-                'Meals: ${customer['usedMeals']}/${customer['totalMeals']}'),
+            subtitle: Text('Plans: ${customer['totalPlans']} • ' 'Meals: ${customer['usedMeals']}/${customer['totalMeals']}'),
             trailing: Text('\$${customer['totalValue'].toStringAsFixed(2)}'),
           );
         },

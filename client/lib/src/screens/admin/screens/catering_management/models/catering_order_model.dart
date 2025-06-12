@@ -621,6 +621,7 @@ class CateringOrderItem {
 class CateringOrder {
   // Core identification
   final String id;
+  final String businessId; // Add business ID field
   final String customerId;
   final DateTime orderDate;
   final DateTime eventDate;
@@ -669,6 +670,7 @@ class CateringOrder {
 
   const CateringOrder({
     required this.id,
+    required this.businessId, // Add to constructor
     required this.customerId,
     required this.orderDate,
     required this.eventDate,
@@ -718,6 +720,7 @@ class CateringOrder {
 
     return CateringOrder(
       id: statsId,
+      businessId: 'statistics', // Add required businessId
       customerId: 'admin',
       orderDate: DateTime.now(),
       eventDate: DateTime.now(),
@@ -736,6 +739,7 @@ class CateringOrder {
   // Empty constructor
   factory CateringOrder.empty() => CateringOrder(
         id: '',
+        businessId: '', // Add required businessId
         customerId: '',
         orderDate: DateTime.now(),
         eventDate: DateTime.now().add(const Duration(days: 7)),
@@ -756,6 +760,7 @@ class CateringOrder {
   }) {
     return CateringOrder(
       id: id ?? '',
+      businessId: '', // Add required businessId - should be set by caller
       customerId: customerId,
       customerName: customerName ?? '',
       orderDate: DateTime.now(),
@@ -798,6 +803,7 @@ class CateringOrder {
   /// Creates a copy with optional updated fields
   CateringOrder copyWith({
     String? id,
+    String? businessId,
     String? customerId,
     DateTime? orderDate,
     DateTime? eventDate,
@@ -840,6 +846,8 @@ class CateringOrder {
   }) {
     return CateringOrder(
       id: id ?? this.id,
+      businessId:
+          businessId ?? this.businessId, // Include businessId in copyWith
       customerId: customerId ?? this.customerId,
       orderDate: orderDate ?? this.orderDate,
       eventDate: eventDate ?? this.eventDate,
@@ -928,17 +936,21 @@ class CateringOrder {
     // Add optional fields if they exist
     if (packageId != null) json['packageId'] = packageId;
     if (packageName != null) json['packageName'] = packageName;
-    if (deliveryTime != null)
+    if (deliveryTime != null) {
       json['deliveryTime'] = deliveryTime!.toIso8601String();
+    }
     if (setupTime != null) json['setupTime'] = setupTime!.toIso8601String();
-    if (lastStatusUpdate != null)
+    if (lastStatusUpdate != null) {
       json['lastStatusUpdate'] = lastStatusUpdate!.toIso8601String();
+    }
     if (assignedStaffId != null) json['assignedStaffId'] = assignedStaffId;
-    if (assignedStaffName != null)
+    if (assignedStaffName != null) {
       json['assignedStaffName'] = assignedStaffName;
+    }
     if (paymentId != null) json['paymentId'] = paymentId;
-    if (cancellationReason != null)
+    if (cancellationReason != null) {
       json['cancellationReason'] = cancellationReason;
+    }
 
     return json;
   }
@@ -947,6 +959,7 @@ class CateringOrder {
   factory CateringOrder.fromJson(Map<String, dynamic> json) {
     return CateringOrder(
       id: json['id'] as String? ?? '',
+      businessId: json['businessId'] as String? ?? '', // Parse business ID
       customerId:
           json['customerId'] as String? ?? json['userId'] as String? ?? '',
       orderDate: json['orderDate'] != null

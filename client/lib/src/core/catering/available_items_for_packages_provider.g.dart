@@ -853,7 +853,7 @@ class _PackageWithItemsProviderElement
 }
 
 String _$availableItemsRepositoryHash() =>
-    r'dc35c9c8783671fb71b19352880ef483de23054b';
+    r'd41da709a65c6f12cd9ae96bd57f67c089d3403f';
 
 /// Repository for managing available catering items/dishes
 ///

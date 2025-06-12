@@ -88,10 +88,16 @@ List<NavigationDestinationItem> allNavigationDestinations(
 @riverpod
 List<NavigationDestinationItem> navigationDestinations(
     NavigationDestinationsRef ref) {
-  final isAdmin = ref.watch(cachedAdminStatusProvider);
+  // Watch the auto-check provider to ensure admin status is checked on login
+  ref.watch(autoCheckAdminStatusProvider);
+
+  final adminStatusAsync = ref.watch(isAdminProvider);
   final authState = ref.watch(authStateChangesProvider);
   final isAuthenticated = authState.value != null;
   final allDestinations = ref.watch(allNavigationDestinationsProvider);
+
+  // Get admin status from the async provider, defaulting to false
+  final isAdmin = adminStatusAsync.valueOrNull ?? false;
 
   // Update admin tab visibility without changing the structure
   final updatedDestinations = allDestinations.map((destination) {

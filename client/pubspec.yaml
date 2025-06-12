@@ -43,6 +43,8 @@ dependencies:
   googleapis: ^13.1.0
   flutter:
     sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
 
   flutter_riverpod: ^2.6.0
   riverpod_annotation: ^2.6.0
@@ -92,6 +94,7 @@ dev_dependencies:
   random_string: ^2.3.1
   flutter_lints: ^5.0.0
   build_web_compilers: ^4.0.11
+  fake_cloud_firestore: ^3.0.3
   # a tool for running code generators
   # dart run build_runner build --delete-conflicting-outputs
   build_runner: ^2.4.10
@@ -111,7 +114,6 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    # - assets/fonts/
     - assets/
     - assets/appIcon.png
     - assets/kako-logo.png
@@ -147,3 +149,9 @@ flutter:
     - assets/dishes/pollo_arroz_ensalada_box.jpg
     - assets/dishes/pollo_camaron_arroz_box.jpg
     - assets/dishes/pollo_papas_ensalada_box.jpg
+
+  # Configure fonts to include SocialIcons from firebase_ui_auth
+  fonts:
+    - family: SocialIcons
+      fonts:
+        - asset: packages/firebase_ui_auth/fonts/SocialIcons.ttf

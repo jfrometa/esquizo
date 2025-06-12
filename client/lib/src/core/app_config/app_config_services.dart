@@ -6,7 +6,6 @@ import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/onboarding/onboarding_repository.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/setup/setup_screen_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/local_storange/local_storage_service.dart';
 
@@ -33,11 +32,8 @@ final localStorageInitProvider = FutureProvider<void>((ref) async {
   final localStorageService = ref.read(localStorageServiceProvider);
   await localStorageService.init();
 
-  // Load business ID from local storage if available
-  final storedBusinessId = await localStorageService.getString('businessId');
-  if (storedBusinessId != null && storedBusinessId.isNotEmpty) {
-    ref.read(currentBusinessIdProvider.notifier).state = storedBusinessId;
-  }
+  // Note: Business ID is now handled by URL-aware routing system
+  // The stored business ID is read by initBusinessIdProvider when needed
 });
 
 // Business configuration initialization provider

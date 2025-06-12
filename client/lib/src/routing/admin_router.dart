@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 // Existing screen imports...
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/payment/order_payment_details_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_dashboard_home.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_management/admin_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_panel_screen.dart';
@@ -25,10 +26,9 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/screens/catering_item_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/screens/catering_category_screen.dart';
 
-// --- Import Placeholder Staff Screens ---
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/staff/staff_kitchen_screen.dart'; // Create this file
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/staff/staff_waiter_screen.dart'; // Create this file
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/staff/staff_order_entry_screen.dart'; // Create this file
+// --- Import Staff Screens ---
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/staff/staff_management_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/staff/staff_order_entry_screen.dart';
 // --- End Import ---
 
 /// This class defines all admin routes based on a 5-section structure
@@ -52,13 +52,9 @@ class AdminRoutes {
   static const String dashboardOrderDetails = '$_pdPrefix/orders/:orderId';
 
   // --- Staff Sub-Paths (relative to staff path) ---
-  static const String staffKitchen = 'kitchen'; // -> /admin/staff/kitchen
-  static const String staffKitchenNew = 'kitchen/new';
-  static const String staffKitchenCurrent = 'kitchen/current';
-  static const String staffKitchenUpcoming = 'kitchen/upcoming';
-  static const String staffKitchenTurns = 'kitchen/turns';
-  static const String staffWaiter = 'waiter'; // -> /admin/staff/waiter
-  static const String staffWaiterOrderEntry = 'waiter/table/:tableId/order';
+  static const String staffKitchen = 'kitchen';
+  static const String staffWaiter = 'waiter';
+  static const String staffWaiterOrderEntry = 'table/:tableId/order';
 
   // --- Settings Sub-Paths (relative to settings path) ---
   static const String settingsUsers = 'users'; // -> /admin/settings/users
@@ -85,15 +81,13 @@ class AdminRoutes {
   static const String namePdProducts = 'product-dashboard-products';
   static const String namePdOrders = 'product-dashboard-orders';
   static const String namePdOrderDetails = 'product-dashboard-order-details';
+  static const String namePdOrderPaymentDetails =
+      'product-dashboard-order-payment-details';
   static const String namePdTables = 'product-dashboard-tables';
   static const String namePdAnalytics = 'product-dashboard-analytics';
   // Staff (NEW)
   static const String nameStaffHome = 'staff-home';
   static const String nameStaffKitchen = 'staff-kitchen';
-  static const String nameStaffKitchenNew = 'staff-kitchen-new';
-  static const String nameStaffKitchenCurrent = 'staff-kitchen-current';
-  static const String nameStaffKitchenUpcoming = 'staff-kitchen-upcoming';
-  static const String nameStaffKitchenTurns = 'staff-kitchen-turns';
   static const String nameStaffWaiter = 'staff-waiter';
   static const String nameStaffWaiterOrderEntry = 'staff-waiter-order-entry';
   // Settings
@@ -263,65 +257,48 @@ List<RouteBase> getAdminRoutes() {
                 path: 'product-dashboard/analytics',
                 name: AdminRoutes.namePdAnalytics,
                 builder: (context, state) => const AnalyticsDashboard()),
+            GoRoute(
+              path: ':orderId/payment',
+              name: AdminRoutes
+                  .namePdOrderPaymentDetails, //'product-dashboard-order-payment-details',
+              builder: (context, state) => OrderPaymentDetailsScreen(
+                orderId: state.pathParameters['orderId'] ?? '',
+              ),
+            ),
           ],
         ),
 
         // --- Staff Section (Index 1) --- NEW ---
         GoRoute(
-            path: AdminRoutes.getFullPath(AdminRoutes.staff), // /admin/staff
-            name: AdminRoutes.nameStaffHome,
-            // Redirect parent /staff to a default view, e.g., Kitchen New Orders
-            redirect: (_, __) => AdminRoutes.getFullPath(
-                '${AdminRoutes.staff}/${AdminRoutes.staffKitchenNew}'),
-            routes: [
-              // Kitchen Routes nested under /admin/staff/kitchen
-              GoRoute(
-                  path: AdminRoutes.staffKitchen, // 'kitchen'
-                  name: AdminRoutes.nameStaffKitchen,
-                  // Redirect /staff/kitchen to new orders
-                  redirect: (_, __) => AdminRoutes.getFullPath(
-                      '${AdminRoutes.staff}/${AdminRoutes.staffKitchenNew}'),
-                  routes: [
-                    GoRoute(
-                        path: 'new',
-                        name: AdminRoutes.nameStaffKitchenNew,
-                        builder: (context, state) => const StaffKitchenScreen(
-                            initialTab: KitchenTab.newOrders)),
-                    GoRoute(
-                        path: 'current',
-                        name: AdminRoutes.nameStaffKitchenCurrent,
-                        builder: (context, state) => const StaffKitchenScreen(
-                            initialTab: KitchenTab.current)),
-                    GoRoute(
-                        path: 'upcoming',
-                        name: AdminRoutes.nameStaffKitchenUpcoming,
-                        builder: (context, state) => const StaffKitchenScreen(
-                            initialTab: KitchenTab.upcoming)),
-                    GoRoute(
-                        path: 'turns',
-                        name: AdminRoutes.nameStaffKitchenTurns,
-                        builder: (context, state) => const StaffKitchenScreen(
-                            initialTab: KitchenTab.turns)),
-                  ]),
-              // Waiter Routes nested under /admin/staff/waiter
-              GoRoute(
-                  path: AdminRoutes.staffWaiter, // 'waiter'
-                  name: AdminRoutes.nameStaffWaiter,
-                  builder: (context, state) =>
-                      const StaffWaiterTableSelectScreen(), // Table selection screen
-                  routes: [
-                    GoRoute(
-                        // Path relative to waiter: 'table/:tableId/order'
-                        path: 'table/:tableId/order',
-                        name: AdminRoutes.nameStaffWaiterOrderEntry,
-                        builder: (context, state) {
-                          final tableId =
-                              state.pathParameters['tableId'] ?? 'unknown';
-                          return StaffOrderEntryScreen(
-                              tableId: tableId); // Order entry screen
-                        })
-                  ]),
-            ]),
+          path: AdminRoutes.getFullPath(AdminRoutes.staff), // /admin/staff
+          name: AdminRoutes.nameStaffHome,
+          builder: (context, state) => const StaffManagementScreen(),
+          routes: [
+            // Kitchen management route
+            GoRoute(
+              path: 'kitchen',
+              name: AdminRoutes.nameStaffKitchen,
+              builder: (context, state) =>
+                  const StaffManagementScreen(initialIndex: 0),
+            ),
+            // Waiter management route
+            GoRoute(
+              path: 'waiter',
+              name: AdminRoutes.nameStaffWaiter,
+              builder: (context, state) =>
+                  const StaffManagementScreen(initialIndex: 1),
+            ),
+            // Order entry route for waiter flow
+            GoRoute(
+              path: 'table/:tableId/order',
+              name: AdminRoutes.nameStaffWaiterOrderEntry,
+              builder: (context, state) {
+                final tableId = state.pathParameters['tableId'] ?? 'unknown';
+                return StaffOrderEntryScreen(tableId: tableId);
+              },
+            ),
+          ],
+        ),
         // --- End Staff Section ---
 
         // --- Meal Plans Section (Index 2) ---
@@ -424,55 +401,3 @@ List<RouteBase> getAdminRoutes() {
     // GoRoute(path: '/', name: AdminRoutes.nameHome, builder: ...),
   ];
 }
-
-// This is just a stub for the placeholder screen mentioned in the imports
-// In a real implementation, these would be real screen widgets
-enum KitchenTab { newOrders, current, upcoming, turns }
-
-class StaffKitchenScreen extends StatelessWidget {
-  final KitchenTab initialTab;
-  const StaffKitchenScreen({Key? key, required this.initialTab})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(child: Text('Kitchen Screen - ${initialTab.toString()}')),
-    );
-  }
-}
-
-class StaffWaiterTableSelectScreen extends StatelessWidget {
-  const StaffWaiterTableSelectScreen({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(child: Text('Waiter Table Selection')),
-    );
-  }
-}
-
-class StaffOrderEntryScreen extends StatelessWidget {
-  final String tableId;
-  const StaffOrderEntryScreen({Key? key, required this.tableId})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(child: Text('Order Entry for Table $tableId')),
-    );
-  }
-}
-
-// class OrderDetailScreen extends StatelessWidget {
-//   final String orderId;
-//   const OrderDetailScreen({super.key, required this.orderId});
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: Center(child: Text('Order Details for $orderId')),
-//     );
-//   }
-// }

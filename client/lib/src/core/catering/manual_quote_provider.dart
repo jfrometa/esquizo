@@ -27,8 +27,15 @@ class ManualQuoteNotifier extends StateNotifier<CateringOrderItem?> {
   Future<void> _loadManualQuote() async {
     final prefs = await SharedPreferences.getInstance();
     String? serializedQuote = prefs.getString('manualQuote');
-    if (serializedQuote != null) {
-      state = CateringOrderItem.fromJson(jsonDecode(serializedQuote));
+    if (serializedQuote != null && serializedQuote.isNotEmpty) {
+      try {
+        state = CateringOrderItem.fromJson(jsonDecode(serializedQuote));
+      } catch (e) {
+        debugPrint('Error deserializing manual quote: $e');
+        state = null;
+      }
+    } else {
+      state = null;
     }
   }
 

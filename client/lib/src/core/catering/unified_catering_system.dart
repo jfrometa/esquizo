@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart' as cloud_firestore;
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,6 +11,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 
 part 'unified_catering_system.g.dart';
 
@@ -222,10 +223,11 @@ class CateringCategoryRepository extends _$CateringCategoryRepository {
   @override
   Stream<List<CateringCategory>> build() {
     final firestore = ref.watch(firebaseFirestoreProvider);
+    final businessId = ref.watch(currentBusinessIdProvider);
 
     _repository = _CateringCategoryRepositoryImpl(
       firestore: firestore,
-      collectionPath: 'cateringCategories',
+      collectionPath: 'businesses/$businessId/cateringCategories',
       cacheKey: CateringCacheKeys.categoryCache,
     );
 
@@ -235,19 +237,28 @@ class CateringCategoryRepository extends _$CateringCategoryRepository {
   // Add a new category
   Future<void> addCategory(CateringCategory category) async {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
     final data = category.toJson();
     data.remove('id'); // Remove ID as Firestore will generate one
+    data['businessId'] = businessId; // Ensure business ID is set
 
-    await firestore.collection('cateringCategories').add(data);
+    await firestore
+        .collection('businesses')
+        .doc(businessId)
+        .collection('cateringCategories')
+        .add(data);
   }
 
   // Update a category
   Future<void> updateCategory(CateringCategory category) async {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
     final data = category.toJson();
     data.remove('id'); // Remove ID as it's in the document path
 
     await firestore
+        .collection('businesses')
+        .doc(businessId)
         .collection('cateringCategories')
         .doc(category.id)
         .update(data);
@@ -256,13 +267,22 @@ class CateringCategoryRepository extends _$CateringCategoryRepository {
   // Delete a category
   Future<void> deleteCategory(String id) async {
     final firestore = ref.read(firebaseFirestoreProvider);
-    await firestore.collection('cateringCategories').doc(id).delete();
+    final businessId = ref.read(currentBusinessIdProvider);
+    await firestore
+        .collection('businesses')
+        .doc(businessId)
+        .collection('cateringCategories')
+        .doc(id)
+        .delete();
   }
 
   // Toggle category status
   Future<void> toggleCategoryStatus(String id, bool isActive) async {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
     await firestore
+        .collection('businesses')
+        .doc(businessId)
         .collection('cateringCategories')
         .doc(id)
         .update({'isActive': isActive});
@@ -271,12 +291,17 @@ class CateringCategoryRepository extends _$CateringCategoryRepository {
   // Update category order
   Future<void> reorderCategories(List<CateringCategory> categories) async {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
     final batch = firestore.batch();
 
     for (var i = 0; i < categories.length; i++) {
       final category = categories[i];
       batch.update(
-        firestore.collection('cateringCategories').doc(category.id),
+        firestore
+            .collection('businesses')
+            .doc(businessId)
+            .collection('cateringCategories')
+            .doc(category.id),
         {'displayOrder': i},
       );
     }
@@ -287,8 +312,11 @@ class CateringCategoryRepository extends _$CateringCategoryRepository {
   // Get active categories only
   Stream<List<CateringCategory>> getActiveCategories() {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
 
     return firestore
+        .collection('businesses')
+        .doc(businessId)
         .collection('cateringCategories')
         .where('isActive', isEqualTo: true)
         .orderBy('displayOrder')
@@ -304,11 +332,20 @@ class CateringCategoryRepository extends _$CateringCategoryRepository {
   // Search categories by name
   Stream<List<CateringCategory>> searchCategories(String searchTerm) {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
     final searchTermLower = searchTerm.toLowerCase();
 
     final firestoreQuery = searchTerm.isEmpty
-        ? firestore.collection('cateringCategories').orderBy('displayOrder')
-        : firestore.collection('cateringCategories').orderBy('name');
+        ? firestore
+            .collection('businesses')
+            .doc(businessId)
+            .collection('cateringCategories')
+            .orderBy('displayOrder')
+        : firestore
+            .collection('businesses')
+            .doc(businessId)
+            .collection('cateringCategories')
+            .orderBy('name');
 
     return firestoreQuery.snapshots().map((snapshot) {
       final docs = snapshot.docs
@@ -346,10 +383,15 @@ class CateringCategoryRepository extends _$CateringCategoryRepository {
   // Get a single category by ID with caching
   Future<CateringCategory?> getCategoryById(String id) async {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
 
     try {
-      final doc = await firestore.collection('cateringCategories').doc(id).get(
-          const cloud_firestore.GetOptions(
+      final doc = await firestore
+          .collection('businesses')
+          .doc(businessId)
+          .collection('cateringCategories')
+          .doc(id)
+          .get(const cloud_firestore.GetOptions(
               source: cloud_firestore.Source.serverAndCache));
 
       if (!doc.exists) return null;
@@ -369,14 +411,10 @@ class CateringCategoryRepository extends _$CateringCategoryRepository {
 class _CateringCategoryRepositoryImpl
     extends BaseCateringRepository<CateringCategory> {
   _CateringCategoryRepositoryImpl({
-    required cloud_firestore.FirebaseFirestore firestore,
-    required String collectionPath,
-    required String cacheKey,
-  }) : super(
-          firestore: firestore,
-          collectionPath: collectionPath,
-          cacheKey: cacheKey,
-        );
+    required super.firestore,
+    required super.collectionPath,
+    required super.cacheKey,
+  });
 
   @override
   CateringCategory fromJson(Map<String, dynamic> json) {
@@ -397,10 +435,11 @@ class CateringItemRepository extends _$CateringItemRepository {
   @override
   Stream<List<CateringItem>> build() {
     final firestore = ref.watch(firebaseFirestoreProvider);
+    final businessId = ref.watch(currentBusinessIdProvider);
 
     _repository = _CateringItemRepositoryImpl(
       firestore: firestore,
-      collectionPath: 'cateringItems',
+      collectionPath: 'businesses/$businessId/cateringItems',
       cacheKey: CateringCacheKeys.itemCache,
     );
 
@@ -410,15 +449,25 @@ class CateringItemRepository extends _$CateringItemRepository {
   // Add a new item
   Future<void> addItem(CateringItem item) async {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
+    final data = item.toJson();
+    data.remove('id');
+    data['businessId'] = businessId; // Ensure business ID is set
+
     await firestore
+        .collection('businesses')
+        .doc(businessId)
         .collection('cateringItems')
-        .add(item.toJson()..remove('id'));
+        .add(data);
   }
 
   // Update an item
   Future<void> updateItem(CateringItem item) async {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
     await firestore
+        .collection('businesses')
+        .doc(businessId)
         .collection('cateringItems')
         .doc(item.id)
         .update(item.toJson()..remove('id'));
@@ -427,13 +476,22 @@ class CateringItemRepository extends _$CateringItemRepository {
   // Delete an item
   Future<void> deleteItem(String id) async {
     final firestore = ref.read(firebaseFirestoreProvider);
-    await firestore.collection('cateringItems').doc(id).delete();
+    final businessId = ref.read(currentBusinessIdProvider);
+    await firestore
+        .collection('businesses')
+        .doc(businessId)
+        .collection('cateringItems')
+        .doc(id)
+        .delete();
   }
 
   // Toggle item status
   Future<void> toggleItemStatus(String id, bool isActive) async {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
     await firestore
+        .collection('businesses')
+        .doc(businessId)
         .collection('cateringItems')
         .doc(id)
         .update({'isActive': isActive});
@@ -442,7 +500,10 @@ class CateringItemRepository extends _$CateringItemRepository {
   // Toggle highlighted status
   Future<void> toggleHighlighted(String id, bool isHighlighted) async {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
     await firestore
+        .collection('businesses')
+        .doc(businessId)
         .collection('cateringItems')
         .doc(id)
         .update({'isHighlighted': isHighlighted});
@@ -451,8 +512,11 @@ class CateringItemRepository extends _$CateringItemRepository {
   // Get items by category
   Stream<List<CateringItem>> getItemsByCategory(String categoryId) {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
 
     return firestore
+        .collection('businesses')
+        .doc(businessId)
         .collection('cateringItems')
         .where('categoryIds', arrayContains: categoryId)
         .where('isActive', isEqualTo: true)
@@ -469,8 +533,11 @@ class CateringItemRepository extends _$CateringItemRepository {
   // Get highlighted items
   Stream<List<CateringItem>> getHighlightedItems() {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
 
     return firestore
+        .collection('businesses')
+        .doc(businessId)
         .collection('cateringItems')
         .where('isHighlighted', isEqualTo: true)
         .where('isActive', isEqualTo: true)
@@ -487,9 +554,12 @@ class CateringItemRepository extends _$CateringItemRepository {
   // Search items by name
   Stream<List<CateringItem>> searchItems(String searchTerm) {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
     final searchTermLower = searchTerm.toLowerCase();
 
     return firestore
+        .collection('businesses')
+        .doc(businessId)
         .collection('cateringItems')
         .orderBy('name')
         .snapshots()
@@ -523,10 +593,15 @@ class CateringItemRepository extends _$CateringItemRepository {
   // Get a specific item by ID with caching
   Future<CateringItem?> getItemById(String id) async {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
 
     try {
-      final doc = await firestore.collection('cateringItems').doc(id).get(
-          const cloud_firestore.GetOptions(
+      final doc = await firestore
+          .collection('businesses')
+          .doc(businessId)
+          .collection('cateringItems')
+          .doc(id)
+          .get(const cloud_firestore.GetOptions(
               source: cloud_firestore.Source.serverAndCache));
 
       if (!doc.exists) return null;
@@ -545,14 +620,10 @@ class CateringItemRepository extends _$CateringItemRepository {
 // Implementation of BaseCateringRepository for items
 class _CateringItemRepositoryImpl extends BaseCateringRepository<CateringItem> {
   _CateringItemRepositoryImpl({
-    required cloud_firestore.FirebaseFirestore firestore,
-    required String collectionPath,
-    required String cacheKey,
-  }) : super(
-          firestore: firestore,
-          collectionPath: collectionPath,
-          cacheKey: cacheKey,
-        );
+    required super.firestore,
+    required super.collectionPath,
+    required super.cacheKey,
+  });
 
   @override
   CateringItem fromJson(Map<String, dynamic> json) {
@@ -573,10 +644,11 @@ class CateringPackageRepository extends _$CateringPackageRepository {
   @override
   Stream<List<CateringPackage>> build() {
     final firestore = ref.watch(firebaseFirestoreProvider);
+    final businessId = ref.watch(currentBusinessIdProvider);
 
     _repository = _CateringPackageRepositoryImpl(
       firestore: firestore,
-      collectionPath: 'cateringPackages',
+      collectionPath: 'businesses/$businessId/cateringPackages',
       cacheKey: CateringCacheKeys.packageCache,
     );
 
@@ -586,31 +658,52 @@ class CateringPackageRepository extends _$CateringPackageRepository {
   /// Adds a new catering package to the database
   Future<void> addPackage(CateringPackage package) async {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
     final data = package.toJson();
     data.remove('id'); // Remove ID as Firestore will generate one
+    data['businessId'] = businessId; // Ensure business ID is set
 
-    await firestore.collection('cateringPackages').add(data);
+    await firestore
+        .collection('businesses')
+        .doc(businessId)
+        .collection('cateringPackages')
+        .add(data);
   }
 
   /// Updates an existing catering package in the database
   Future<void> updatePackage(CateringPackage package) async {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
     final data = package.toJson();
     data.remove('id'); // Remove ID as it's in the document path
 
-    await firestore.collection('cateringPackages').doc(package.id).update(data);
+    await firestore
+        .collection('businesses')
+        .doc(businessId)
+        .collection('cateringPackages')
+        .doc(package.id)
+        .update(data);
   }
 
   /// Deletes a catering package from the database
   Future<void> deletePackage(String id) async {
     final firestore = ref.read(firebaseFirestoreProvider);
-    await firestore.collection('cateringPackages').doc(id).delete();
+    final businessId = ref.read(currentBusinessIdProvider);
+    await firestore
+        .collection('businesses')
+        .doc(businessId)
+        .collection('cateringPackages')
+        .doc(id)
+        .delete();
   }
 
   /// Updates the active status of a package
   Future<void> togglePackageStatus(String id, bool isActive) async {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
     await firestore
+        .collection('businesses')
+        .doc(businessId)
         .collection('cateringPackages')
         .doc(id)
         .update({'isActive': isActive});
@@ -619,7 +712,10 @@ class CateringPackageRepository extends _$CateringPackageRepository {
   /// Updates the promoted status of a package
   Future<void> togglePromotedStatus(String id, bool isPromoted) async {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
     await firestore
+        .collection('businesses')
+        .doc(businessId)
         .collection('cateringPackages')
         .doc(id)
         .update({'isPromoted': isPromoted});
@@ -628,10 +724,15 @@ class CateringPackageRepository extends _$CateringPackageRepository {
   /// Gets a single package by ID with caching
   Future<CateringPackage?> getPackageById(String id) async {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
 
     try {
-      final doc = await firestore.collection('cateringPackages').doc(id).get(
-          const cloud_firestore.GetOptions(
+      final doc = await firestore
+          .collection('businesses')
+          .doc(businessId)
+          .collection('cateringPackages')
+          .doc(id)
+          .get(const cloud_firestore.GetOptions(
               source: cloud_firestore.Source.serverAndCache));
 
       if (!doc.exists) return null;
@@ -649,8 +750,11 @@ class CateringPackageRepository extends _$CateringPackageRepository {
   /// Get active packages only with caching
   Stream<List<CateringPackage>> getActivePackages() {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
 
     return firestore
+        .collection('businesses')
+        .doc(businessId)
         .collection('cateringPackages')
         .where('isActive', isEqualTo: true)
         .orderBy('name')
@@ -666,8 +770,11 @@ class CateringPackageRepository extends _$CateringPackageRepository {
   /// Get promoted packages only
   Stream<List<CateringPackage>> getPromotedPackages() {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
 
     return firestore
+        .collection('businesses')
+        .doc(businessId)
         .collection('cateringPackages')
         .where('isActive', isEqualTo: true)
         .where('isPromoted', isEqualTo: true)
@@ -684,8 +791,11 @@ class CateringPackageRepository extends _$CateringPackageRepository {
   /// Get packages by category
   Stream<List<CateringPackage>> getPackagesByCategory(String categoryId) {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
 
     return firestore
+        .collection('businesses')
+        .doc(businessId)
         .collection('cateringPackages')
         .where('categoryIds', arrayContains: categoryId)
         .where('isActive', isEqualTo: true)
@@ -702,10 +812,13 @@ class CateringPackageRepository extends _$CateringPackageRepository {
   /// Search packages by name or description
   Stream<List<CateringPackage>> searchPackages(String searchTerm) {
     final firestore = ref.read(firebaseFirestoreProvider);
+    final businessId = ref.read(currentBusinessIdProvider);
 
     if (searchTerm.isEmpty) {
       // If empty, get all active packages
       final firestoreQuery = firestore
+          .collection('businesses')
+          .doc(businessId)
           .collection('cateringPackages')
           .where('isActive', isEqualTo: true)
           .orderBy('name');
@@ -723,6 +836,8 @@ class CateringPackageRepository extends _$CateringPackageRepository {
     // Firestore doesn't support case-insensitive searching directly,
     // so we'll fetch and filter client-side
     return firestore
+        .collection('businesses')
+        .doc(businessId)
         .collection('cateringPackages')
         .orderBy('name')
         .snapshots()
@@ -765,14 +880,10 @@ class CateringPackageRepository extends _$CateringPackageRepository {
 class _CateringPackageRepositoryImpl
     extends BaseCateringRepository<CateringPackage> {
   _CateringPackageRepositoryImpl({
-    required cloud_firestore.FirebaseFirestore firestore,
-    required String collectionPath,
-    required String cacheKey,
-  }) : super(
-          firestore: firestore,
-          collectionPath: collectionPath,
-          cacheKey: cacheKey,
-        );
+    required super.firestore,
+    required super.collectionPath,
+    required super.cacheKey,
+  });
 
   @override
   CateringPackage fromJson(Map<String, dynamic> json) {
@@ -802,14 +913,13 @@ class CateringOrderRepository extends _$CateringOrderRepository {
   // Load catering order from SharedPreferences
   Future<CateringOrderItem?> _loadCateringOrder() async {
     final prefs = await SharedPreferences.getInstance();
-    String? serializedOrder = prefs.getString(CateringCacheKeys.cateringOrder);
-    if (serializedOrder != null) {
-      try {
-        return CateringOrderItem.fromJson(jsonDecode(serializedOrder));
-      } catch (e) {
-        debugPrint('Error loading catering order: $e');
-        return null;
-      }
+    String? serializedOrder =
+        prefs.getString(CateringCacheKeys.cateringOrder) ?? "";
+    try {
+      return CateringOrderItem.fromJson(jsonDecode(serializedOrder));
+    } catch (e) {
+      debugPrint('Error loading catering order: $e');
+      return null;
     }
     return null;
   }
@@ -1007,10 +1117,15 @@ class CateringOrderRepository extends _$CateringOrderRepository {
       customerName: customerName,
     );
 
-    // Save to Firestore
-    final docRef = await _firestore
-        .collection('cateringOrders')
-        .add(order.toJson()..remove('id'));
+    // Add business ID to order data
+    final orderData = order.toJson();
+    orderData.remove('id');
+
+    // Note: Business ID should already be in the model from fromLegacyItem
+    // but ensure it's set for the specific business context if needed
+
+    // Save to Firestore (root collection, will be filtered by business ID in queries)
+    final docRef = await _firestore.collection('cateringOrders').add(orderData);
 
     // Clear the cart after submission
     clearCateringOrder();
@@ -1049,31 +1164,45 @@ class CateringOrderRepository extends _$CateringOrderRepository {
             }));
   }
 
-  // Get all catering orders (admin)
-  Stream<List<CateringOrder>> getAllOrders() {
-    return _firestore
-        .collection('cateringOrders')
+  // Get all catering orders (admin) - optionally filtered by business ID
+  Stream<List<CateringOrder>> getAllOrders({String? businessId}) {
+    cloud_firestore.Query query = _firestore.collection('cateringOrders');
+
+    // Add business ID filter if provided
+    if (businessId != null && businessId.isNotEmpty) {
+      query = query.where('businessId', isEqualTo: businessId);
+    }
+
+    return query
         .orderBy('orderDate', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs
             .map((doc) => CateringOrder.fromJson({
                   'id': doc.id,
-                  ...doc.data(),
+                  ...(doc.data() as Map<String, dynamic>),
                 }))
             .toList());
   }
 
-  // Get orders for a specific user
-  Stream<List<CateringOrder>> getUserOrders(String userId) {
-    return _firestore
+  // Get orders for a specific user - optionally filtered by business ID
+  Stream<List<CateringOrder>> getUserOrders(String userId,
+      {String? businessId}) {
+    cloud_firestore.Query query = _firestore
         .collection('cateringOrders')
-        .where('customerId', isEqualTo: userId)
+        .where('customerId', isEqualTo: userId);
+
+    // Add business ID filter if provided
+    if (businessId != null && businessId.isNotEmpty) {
+      query = query.where('businessId', isEqualTo: businessId);
+    }
+
+    return query
         .orderBy('orderDate', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs
             .map((doc) => CateringOrder.fromJson({
                   'id': doc.id,
-                  ...doc.data(),
+                  ...(doc.data() as Map<String, dynamic>),
                 }))
             .toList());
   }
@@ -1099,14 +1228,13 @@ class CateringOrderRepository extends _$CateringOrderRepository {
   // Load manual quote from SharedPreferences
   Future<CateringOrderItem?> loadManualQuote() async {
     final prefs = await SharedPreferences.getInstance();
-    String? serializedQuote = prefs.getString(CateringCacheKeys.manualQuote);
-    if (serializedQuote != null) {
-      try {
-        return CateringOrderItem.fromJson(jsonDecode(serializedQuote));
-      } catch (e) {
-        debugPrint('Error loading manual quote: $e');
-        return null;
-      }
+    String? serializedQuote =
+        prefs.getString(CateringCacheKeys.manualQuote) ?? "";
+    try {
+      return CateringOrderItem.fromJson(jsonDecode(serializedQuote));
+    } catch (e) {
+      debugPrint('Error loading manual quote: $e');
+      return null;
     }
     return null;
   }
@@ -1162,10 +1290,14 @@ class CateringOrderRepository extends _$CateringOrderRepository {
       status: CateringOrderStatus.pending,
     );
 
-    // Use Firebase to save the order
-    final docRef = await _firestore
-        .collection('cateringOrders')
-        .add(order.toJson()..remove('id'));
+    // Add business ID to order data
+    final orderData = order.toJson();
+    orderData.remove('id');
+
+    // Note: Business ID should already be in the model from fromLegacyItem
+
+    // Use Firebase to save the order (root collection, filtered by business ID in queries)
+    final docRef = await _firestore.collection('cateringOrders').add(orderData);
 
     // Clear the quote after submission
     await saveManualQuote(null);
@@ -1231,7 +1363,7 @@ class SelectedItem extends _$SelectedItem {
 
 /// Provider for active categories
 @riverpod
-Stream<List<CateringCategory>> activeCategories(ActiveCategoriesRef ref) {
+Stream<List<CateringCategory>> activeCategories(Ref ref) {
   final categoryRepo = ref.watch(cateringCategoryRepositoryProvider.notifier);
   return categoryRepo.getActiveCategories();
 }
@@ -1239,7 +1371,7 @@ Stream<List<CateringCategory>> activeCategories(ActiveCategoriesRef ref) {
 /// Provider for searching categories
 @riverpod
 Stream<List<CateringCategory>> searchCategories(
-  SearchCategoriesRef ref,
+  Ref ref,
   String searchTerm,
 ) {
   final categoryRepo = ref.watch(cateringCategoryRepositoryProvider.notifier);
@@ -1248,14 +1380,14 @@ Stream<List<CateringCategory>> searchCategories(
 
 /// Provider for active packages
 @riverpod
-Stream<List<CateringPackage>> activePackages(ActivePackagesRef ref) {
+Stream<List<CateringPackage>> activePackages(Ref ref) {
   final packageRepo = ref.watch(cateringPackageRepositoryProvider.notifier);
   return packageRepo.getActivePackages();
 }
 
 /// Provider for promoted packages
 @riverpod
-Stream<List<CateringPackage>> promotedPackages(PromotedPackagesRef ref) {
+Stream<List<CateringPackage>> promotedPackages(Ref ref) {
   final packageRepo = ref.watch(cateringPackageRepositoryProvider.notifier);
   return packageRepo.getPromotedPackages();
 }
@@ -1263,7 +1395,7 @@ Stream<List<CateringPackage>> promotedPackages(PromotedPackagesRef ref) {
 /// Provider for packages by category
 @riverpod
 Stream<List<CateringPackage>> packagesByCategory(
-  PackagesByCategoryRef ref,
+  Ref ref,
   String categoryId,
 ) {
   final packageRepo = ref.watch(cateringPackageRepositoryProvider.notifier);
@@ -1273,7 +1405,7 @@ Stream<List<CateringPackage>> packagesByCategory(
 /// Provider for searching packages
 @riverpod
 Stream<List<CateringPackage>> searchPackages(
-  SearchPackagesRef ref,
+  Ref ref,
   String searchTerm,
 ) {
   final packageRepo = ref.watch(cateringPackageRepositoryProvider.notifier);
@@ -1283,7 +1415,7 @@ Stream<List<CateringPackage>> searchPackages(
 /// Provider for items by category
 @riverpod
 Stream<List<CateringItem>> itemsByCategory(
-  ItemsByCategoryRef ref,
+  Ref ref,
   String categoryId,
 ) {
   final itemRepo = ref.watch(cateringItemRepositoryProvider.notifier);
@@ -1292,7 +1424,7 @@ Stream<List<CateringItem>> itemsByCategory(
 
 /// Provider for highlighted items
 @riverpod
-Stream<List<CateringItem>> highlightedItems(HighlightedItemsRef ref) {
+Stream<List<CateringItem>> highlightedItems(Ref ref) {
   final itemRepo = ref.watch(cateringItemRepositoryProvider.notifier);
   return itemRepo.getHighlightedItems();
 }
@@ -1300,7 +1432,7 @@ Stream<List<CateringItem>> highlightedItems(HighlightedItemsRef ref) {
 /// Provider for item categories
 @riverpod
 List<CateringCategory> itemCategories(
-  ItemCategoriesRef ref,
+  Ref ref,
   CateringItem item,
 ) {
   final allCategories =
@@ -1313,7 +1445,7 @@ List<CateringCategory> itemCategories(
 /// Provider for package categories
 @riverpod
 List<CateringCategory> packageCategories(
-  PackageCategoriesRef ref,
+  Ref ref,
   CateringPackage package,
 ) {
   final allCategories =

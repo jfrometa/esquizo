@@ -1,25 +1,31 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/app_config/app_config_services.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
+
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_analitics.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_startup.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/optimized_business_wrappers.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/go_router_refresh_stream.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/navigation_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/routing/not_found_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/scaffold_with_nested_navigation.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_dashboard_home.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_panel_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_setup_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_set_comple_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_setup_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_settings_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/product_management_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/order_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/screens/customer_meal_plan_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/all_dishes_menu_home/all_dishes_menu_home_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/authenticated_profile_screen.dart';
@@ -39,6 +45,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/onboarding/pre
 import 'package:starter_architecture_flutter_firebase/src/screens/orders/in_progress_orders_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/categories.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/home/home.dart';
+
 import 'package:starter_architecture_flutter_firebase/src/utils/web/web_utils.dart';
 import 'package:go_router/go_router.dart';
 
@@ -51,14 +58,34 @@ final _accountNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'account');
 final _landingNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'landing');
 final _cartNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'cart');
 final _adminNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'admin');
-final _OrdersNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'local');
-final _localNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'orders');
+final _ordersNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'local');
 
 // Store paths that were attempted before authentication
-// final _pendingPathProvider = StateProvider<String?>((ref) => null);
-final pendingAdminPathProvider = StateProvider<String?>((ref) => null);
+final _pendingAdminPathProvider = StateProvider<String?>((ref) => null);
 // Error state for router
 final routerErrorNotifierProvider = StateProvider<String?>((ref) => null);
+
+// Debug navigator observer
+class _DebugNavigatorObserver extends NavigatorObserver {
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    debugPrint('🚢 Navigation: PUSH to ${route.settings.name}');
+    super.didPush(route, previousRoute);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    debugPrint('🚢 Navigation: POP from ${route.settings.name}');
+    super.didPop(route, previousRoute);
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    debugPrint(
+        '🚢 Navigation: REPLACE ${oldRoute?.settings.name} → ${newRoute?.settings.name}');
+    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+  }
+}
 
 enum AppRoute {
   authenticatedProfile,
@@ -87,6 +114,9 @@ enum AppRoute {
   adminSetup,
   inProgressOrders,
   manualQuote,
+  // Business setup routes
+  businessSetup,
+  businessSetupComplete,
   // Catering management routes
   cateringManagement,
   cateringDashboard,
@@ -111,12 +141,18 @@ enum AppRoute {
 @riverpod
 GoRouter goRouter(Ref ref) {
   final authRepository = ref.watch(authRepositoryProvider);
-  final destinations = ref.watch(navigationDestinationsProvider);
+  // Use allNavigationDestinations for consistent shell branches
+  final allDestinations = ref.watch(allNavigationDestinationsProvider);
   final isFirebaseInitialized = ref.watch(isFirebaseInitializedProvider);
-  final isAdmin = ref.watch(cachedAdminStatusProvider);
+  final isAdminAsync = ref.watch(isAdminProvider);
 
-  // Watch for pending admin path
-  final pendingAdminPath = ref.watch(pendingAdminPathProvider);
+  // Force admin status check if user is logged in but admin status hasn't been determined
+  if (authRepository.currentUser != null && isAdminAsync.hasValue == false) {
+    ref.invalidate(isAdminProvider);
+  }
+
+  // Watch for business config status (same as AdminSetupScreen)
+  final businessConfigAsync = ref.watch(businessConfigProvider);
 
   // *** DIRECTLY USE WEB UTILS TO GET THE INITIAL LOCATION FROM BROWSER URL ***
   String initialLocation = '/';
@@ -127,7 +163,7 @@ GoRouter goRouter(Ref ref) {
     // Store admin path if detected
     if (initialLocation.startsWith('/admin') && initialLocation != '/admin') {
       debugPrint('📍 Storing admin path: $initialLocation');
-      ref.read(pendingAdminPathProvider.notifier).state = initialLocation;
+      ref.read(_pendingAdminPathProvider.notifier).state = initialLocation;
     }
   }
 
@@ -140,25 +176,21 @@ GoRouter goRouter(Ref ref) {
       try {
         final path = state.uri.path;
 
-        // Log router state for debugging
-        debugPrint(
-            '🧭 Router redirect, path: "$path", location: "${state.uri}"');
+        // Enhanced logging for debugging navigation issues
+        debugPrint('🧭 Router redirect triggered!');
+        debugPrint('🧭   Path: "$path"');
+        debugPrint('🧭   Full URI: "${state.uri}"');
+        debugPrint('🧭   Firebase initialized: $isFirebaseInitialized');
 
         // Skip redirect logic entirely if we're already at error
         if (path.startsWith('/error')) {
           return null;
         }
 
-        // Initialize Firebase if needed
+        // If Firebase is not initialized, redirect to startup (don't initialize here)
         if (!isFirebaseInitialized) {
-          try {
-            await Firebase.initializeApp(
-                options: DefaultFirebaseOptions.currentPlatform);
-            debugPrint("📱 Firebase initialized successfully");
-          } catch (e) {
-            debugPrint("🔥 Error initializing Firebase: $e");
-            return '/error?message=${Uri.encodeComponent(e.toString())}';
-          }
+          debugPrint("⚠️ Firebase not initialized, redirecting to startup");
+          return '/startup';
         }
 
         // Check authentication status
@@ -167,6 +199,12 @@ GoRouter goRouter(Ref ref) {
         final isOnboarding = state.uri.path == '/onboarding';
         final isAtError = state.uri.path == '/error';
         final isAtStartup = state.uri.path == '/startup';
+
+        // Allow access to business setup related paths
+        if (path.startsWith('/business-setup') ||
+            path.startsWith('/admin-setup')) {
+          return null;
+        }
 
         // Handle authentication redirects
         if (!isLoggedIn) {
@@ -177,11 +215,6 @@ GoRouter goRouter(Ref ref) {
 
           // Store the attempted path to redirect after login if not already at signin
           if (path != '/signin') {
-            // Use Future.microtask to avoid setState during build
-            Future.microtask(() {
-              ref.read(pendingAdminPathProvider.notifier).state = path;
-            });
-
             return '/signin?from=$path';
           }
           return null;
@@ -190,28 +223,98 @@ GoRouter goRouter(Ref ref) {
         // User is logged in
         if (isLoggedIn) {
           // Check for any pending path that was saved before authentication
-          final pendingPath = ref.read(pendingAdminPathProvider);
+          final pendingPath = ref.read(_pendingAdminPathProvider);
 
-          // Handle admin routes - check permissions
+          // Handle platform admin routes (/admin) - Only for PLATFORM admins
           if (path.startsWith('/admin')) {
-            if (!isAdmin) {
-              return '/'; // Redirect non-admins to home
+            // Don't redirect if admin status is still loading
+            if (isAdminAsync.isLoading) {
+              debugPrint(
+                  '⏳ Platform admin status loading, allowing navigation: $path');
+              return null; // Allow navigation while loading
             }
+
+            // Check if user is a PLATFORM admin (not just a business owner)
+            final isPlatformAdmin = await _isPlatformAdmin(ref);
+
+            debugPrint(
+                '🔐 Platform admin route access attempt: isPlatformAdmin=$isPlatformAdmin, path=$path');
+
+            // Only platform admins can access /admin routes
+            if (!isPlatformAdmin) {
+              debugPrint(
+                  '🚫 Non-platform-admin blocked from platform admin area: $path → redirecting to /');
+              return '/'; // Redirect non-platform-admins to home
+            }
+
+            debugPrint('✅ Platform admin access granted for: $path');
+
+            // Check business configuration status ONLY for platform admin users
+            final businessConfig = businessConfigAsync.value;
+            final isBusinessConfigured =
+                businessConfig != null && businessConfig.isActive;
+
+            // Only redirect to admin setup if business is definitely not set up
+            // and we're not already at the admin setup page
+            if (businessConfigAsync.hasValue &&
+                !isBusinessConfigured &&
+                path != '/admin-setup') {
+              debugPrint(
+                  '🔧 Platform admin needs business setup, redirecting to /admin-setup');
+              return '/admin-setup';
+            }
+
+            // If business is set up and user is at admin-setup, redirect to admin panel
+            if (businessConfigAsync.hasValue &&
+                isBusinessConfigured &&
+                path == '/admin-setup') {
+              debugPrint(
+                  '🔧 Business already configured, redirecting to /admin');
+              return '/admin';
+            }
+
+            // Allow platform admin route access
+            debugPrint('✅ Platform admin route allowed: $path');
+            return null;
           }
+
+          // Define system routes that should never be treated as business routes
+          final systemRoutes = {
+            '/admin',
+            '/signin',
+            '/signup',
+            '/onboarding',
+            '/error',
+            '/startup',
+            '/business-setup',
+            '/admin-setup',
+          };
+
+          // Check if this is a system route - allow immediately
+          if (systemRoutes.any((route) => path.startsWith(route))) {
+            debugPrint('🔧 System route access: $path');
+            return null;
+          }
+
+          // All other routes (default and business) are handled by route matching
+          // Let GoRouter handle the route matching - don't interfere
+          debugPrint('🌐 Route will be handled by GoRouter matching: $path');
+          return null;
 
           // If we're at startup, signin, or onboarding, go to saved path or home
           if (isAtStartup || isLoggingIn || isOnboarding) {
             if (pendingPath != null &&
                 pendingPath.isNotEmpty &&
                 pendingPath != '/') {
-              // Clear the pending path
-              Future.microtask(() {
-                ref.read(pendingAdminPathProvider.notifier).state = null;
-              });
               return pendingPath;
             }
             return '/'; // Default to home if no pending path
           }
+
+          // Allow all other routes to proceed - don't redirect unknown paths
+          // The GoRouter will handle route matching and show 404 if needed
+          debugPrint('🌐 Allowing route to proceed: $path');
+          return null;
         }
 
         return null; // No redirect needed
@@ -221,11 +324,14 @@ GoRouter goRouter(Ref ref) {
       }
     },
     observers: [
+      // Custom navigation observer for debugging
+      _DebugNavigatorObserver(),
       // Firebase Analytics Observer
       FirebaseAnalyticsObserver(
         analytics: FirebaseAnalytics.instance,
         nameExtractor: (RouteSettings settings) {
           final String? name = settings.name;
+          debugPrint('📊 Analytics Observer: Route changed to: $name');
           if (name != null && name.isNotEmpty) {
             AnalyticsService.instance.logCustomEvent(
               eventName: 'screen_view',
@@ -251,6 +357,21 @@ GoRouter goRouter(Ref ref) {
       return UnauthorizedScreen();
     },
     routes: [
+      // Business Setup Routes
+      GoRoute(
+        path: '/business-setup',
+        name: AppRoute.businessSetup.name,
+        builder: (context, state) => const BusinessSetupScreen(),
+      ),
+      GoRoute(
+        path: '/business-setup/complete/:businessId',
+        name: AppRoute.businessSetupComplete.name,
+        builder: (context, state) {
+          final businessId = state.pathParameters['businessId'] ?? '';
+          return BusinessSetupCompleteScreen(businessId: businessId);
+        },
+      ),
+
       GoRoute(
         path: '/startup',
         pageBuilder: (context, state) => NoTransitionPage(
@@ -261,13 +382,9 @@ GoRouter goRouter(Ref ref) {
       ),
       GoRoute(
         path: '/error',
-        pageBuilder: (context, state) {
-          final message =
-              state.uri.queryParameters['message'] ?? 'An error occurred';
-          return NoTransitionPage(
-            child: UnauthorizedScreen(),
-          );
-        },
+        pageBuilder: (context, state) => NoTransitionPage(
+          child: UnauthorizedScreen(),
+        ),
       ),
       GoRoute(
         path: '/onboarding',
@@ -291,19 +408,129 @@ GoRouter goRouter(Ref ref) {
           child: AdminSetupScreen(),
         ),
       ),
+
+      // Add all admin routes here BEFORE business routing to prevent conflicts
+      // This ensures /admin is matched before /:businessSlug pattern
+      ...getAdminRoutes(),
+
+      // StatefulShellRoute for default business navigation (no slug prefix)
+      // This comes FIRST to handle default routes like /menu, /carrito, /cuenta
       StatefulShellRoute.indexedStack(
         pageBuilder: (context, state, navigationShell) => NoTransitionPage(
           child: ScaffoldWithNestedNavigation(navigationShell: navigationShell),
         ),
-        branches: destinations.map((dest) => _buildBranch(dest)).toList(),
+        branches: allDestinations
+            .where((dest) =>
+                dest.path != '/admin') // Exclude admin from shell branches
+            .map((dest) => _buildBranch(dest))
+            .toList(),
       ),
-      // Add all admin routes here for proper URL handling
-      ...getAdminRoutes(),
+
+      // Optimized Business-specific routing with seamless navigation
+      // This comes AFTER StatefulShellRoute to catch remaining paths as potential business slugs
+      GoRoute(
+        path: '/:businessSlug',
+        redirect: (context, state) {
+          final businessSlug = state.pathParameters['businessSlug'];
+          debugPrint('🔍 Checking business slug: $businessSlug');
+
+          if (businessSlug != null && _isValidBusinessSlug(businessSlug)) {
+            // Valid business slug format - allow business routing
+            // The actual business existence check happens in the business context provider
+            debugPrint('🏢 Valid business slug detected: $businessSlug');
+            return null;
+          }
+          // Invalid business slug format - redirect to home
+          debugPrint(
+              '❌ Invalid business slug format: $businessSlug, redirecting to home');
+          return '/';
+        },
+        pageBuilder: (context, state) {
+          final businessSlug = state.pathParameters['businessSlug']!;
+          debugPrint('🏢 Optimized business home for: $businessSlug');
+          return NoTransitionPage(
+            child: OptimizedHomeScreenWrapper(businessSlug: businessSlug),
+          );
+        },
+        routes: [
+          // Business menu route (e.g., /kako/menu) - Optimized
+          GoRoute(
+            path: '/menu',
+            pageBuilder: (context, state) {
+              final businessSlug = state.pathParameters['businessSlug']!;
+              debugPrint('🏢 Optimized business menu for: $businessSlug');
+              return NoTransitionPage(
+                child: OptimizedMenuScreenWrapper(businessSlug: businessSlug),
+              );
+            },
+          ),
+          // Business cart route (e.g., /kako/carrito) - Optimized
+          GoRoute(
+            path: '/carrito',
+            pageBuilder: (context, state) {
+              final businessSlug = state.pathParameters['businessSlug']!;
+              debugPrint('🏢 Optimized business cart for: $businessSlug');
+              return NoTransitionPage(
+                child: OptimizedCartScreenWrapper(businessSlug: businessSlug),
+              );
+            },
+          ),
+          // Alias for cart with English route - Optimized
+          GoRoute(
+            path: '/cart',
+            pageBuilder: (context, state) {
+              final businessSlug = state.pathParameters['businessSlug']!;
+              debugPrint('🏢 Optimized business cart (EN) for: $businessSlug');
+              return NoTransitionPage(
+                child: OptimizedCartScreenWrapper(businessSlug: businessSlug),
+              );
+            },
+          ),
+          // Business account route (e.g., /kako/cuenta) - Optimized
+          GoRoute(
+            path: '/cuenta',
+            pageBuilder: (context, state) {
+              final businessSlug = state.pathParameters['businessSlug']!;
+              debugPrint('🏢 Optimized business account for: $businessSlug');
+              return NoTransitionPage(
+                child:
+                    OptimizedProfileScreenWrapper(businessSlug: businessSlug),
+              );
+            },
+          ),
+          // Business orders route (e.g., /kako/ordenes) - Optimized
+          GoRoute(
+            path: '/ordenes',
+            pageBuilder: (context, state) {
+              final businessSlug = state.pathParameters['businessSlug']!;
+              debugPrint('🏢 Optimized business orders for: $businessSlug');
+              return NoTransitionPage(
+                child: OptimizedOrdersScreenWrapper(businessSlug: businessSlug),
+              );
+            },
+          ),
+          // Business admin route (e.g., /kako/admin) - Optimized
+          GoRoute(
+            path: '/admin',
+            pageBuilder: (context, state) {
+              final businessSlug = state.pathParameters['businessSlug']!;
+              debugPrint('🏢 Optimized business admin for: $businessSlug');
+              return NoTransitionPage(
+                child: OptimizedAdminScreenWrapper(businessSlug: businessSlug),
+              );
+            },
+            routes: [
+              // Add nested admin routes for business-specific admin access
+              ...getBusinessAdminRoutes(),
+            ],
+          ),
+        ],
+      ),
     ],
   );
 }
 
-// Rest of your file with helper functions and route definitions...
+/// Helper function to get nested routes for a specific path
 List<RouteBase> _getNestedRoutes(String path) {
   switch (path) {
     case '/':
@@ -486,7 +713,7 @@ GlobalKey<NavigatorState> _getNavigatorKey(String path) {
     case '/admin':
       return _adminNavigatorKey;
     case '/ordenes':
-      return _OrdersNavigatorKey;
+      return _ordersNavigatorKey;
     default:
       return _rootNavigatorKey;
   }
@@ -577,4 +804,145 @@ class UnauthorizedScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Distinguishes platform admins from business owners
+/// Platform admins: Users in 'admins' collection or with 'admin' Firebase Auth claims
+/// Business owners: Users with 'owner' role in business_relationships collection
+Future<bool> _isPlatformAdmin(Ref ref) async {
+  try {
+    final user = ref.read(firebaseAuthProvider).currentUser;
+    if (user == null) return false;
+
+    const cacheOption = GetOptions(source: Source.serverAndCache);
+    final firestore = ref.read(firebaseFirestoreProvider);
+
+    // Check admin document in Firestore - PLATFORM ADMIN
+    final adminDoc =
+        await firestore.collection('admins').doc(user.uid).get(cacheOption);
+    if (adminDoc.exists) {
+      debugPrint('🔐 User ${user.uid} is a PLATFORM admin (admins collection)');
+      return true;
+    }
+
+    // Check admin claims in user's token - PLATFORM ADMIN
+    try {
+      final idTokenResult = await user.getIdTokenResult(true);
+      final isAdminClaim = idTokenResult.claims?['admin'] == true;
+      if (isAdminClaim) {
+        debugPrint(
+            '🔐 User ${user.uid} is a PLATFORM admin (Firebase Auth claims)');
+        return true;
+      }
+    } catch (tokenError) {
+      debugPrint('Error getting token claims: $tokenError');
+    }
+
+    // Note: We DON'T check business_relationships here because that would make
+    // business owners count as platform admins, which is not what we want.
+    // Business owners should only access /businessSlug/admin, not /admin
+
+    debugPrint('🔐 User ${user.uid} is NOT a platform admin');
+    return false;
+  } catch (e) {
+    debugPrint('Error checking platform admin status: $e');
+    return false;
+  }
+}
+
+// Helper function to validate business slugs in routing
+bool _isValidBusinessSlug(String slug) {
+  // Business slugs should:
+  // - Be at least 2 characters long
+  // - Not contain spaces or special routing characters
+  // - Only contain lowercase letters, numbers, and hyphens
+  // - Not start or end with hyphens
+  if (slug.length < 2 || slug.length > 50) return false;
+  if (slug.contains(' ') || slug.contains('?') || slug.contains('#'))
+    return false;
+  if (slug.startsWith('-') || slug.endsWith('-')) return false;
+  if (slug.contains('--')) return false; // No consecutive hyphens
+
+  // Check valid pattern: lowercase letters, numbers, and hyphens only
+  final validPattern = RegExp(r'^[a-z0-9-]+$');
+  if (!validPattern.hasMatch(slug)) return false;
+
+  // Check against reserved words (including default routes)
+  final reservedSlugs = {
+    'admin',
+    'api',
+    'www',
+    'app',
+    'help',
+    'support',
+    'about',
+    'contact',
+    'signin',
+    'signup',
+    'login',
+    'logout',
+    'register',
+    'dashboard',
+    'settings',
+    'profile',
+    'account',
+    'billing',
+    'pricing',
+    'terms',
+    'privacy',
+    'legal',
+    'security',
+    'status',
+    'blog',
+    'news',
+    'docs',
+    'documentation',
+    'guide',
+    'tutorial',
+    'faq',
+    'mail',
+    'email',
+    'static',
+    'assets',
+    'images',
+    'css',
+    'js',
+    'javascript',
+    'fonts',
+    'menu', // Default route
+    'carrito', // Default route
+    'cuenta', // Default route
+    'ordenes', // Default route
+    'startup',
+    'error',
+    'onboarding',
+    'business-setup',
+    'admin-setup'
+  };
+
+  return !reservedSlugs.contains(slug);
+}
+
+/// Helper function to get business-specific admin routes
+/// These are simplified admin routes that work within business context
+List<RouteBase> getBusinessAdminRoutes() {
+  return [
+    // Basic business admin sub-routes - simplified for business context
+    GoRoute(
+      path: '/dashboard',
+      builder: (context, state) => const AdminDashboardHome(),
+    ),
+    GoRoute(
+      path: '/products',
+      builder: (context, state) => const ProductManagementScreen(),
+    ),
+    GoRoute(
+      path: '/orders',
+      builder: (context, state) => const OrderManagementScreen(),
+    ),
+    GoRoute(
+      path: '/settings',
+      builder: (context, state) => const BusinessSettingsScreen(),
+    ),
+  ];
 }

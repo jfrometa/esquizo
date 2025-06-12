@@ -39,7 +39,26 @@ class UnifiedAdminService {
         debugPrint('Error getting token claims: $tokenError');
       }
 
-      return adminDoc.exists || isAdminClaim;
+      // Check if user is a business owner
+      bool isBusinessOwner = false;
+      try {
+        final ownershipQuery = await _firestore
+            .collection('business_relationships')
+            .where('userId', isEqualTo: user.uid)
+            .where('role', isEqualTo: 'owner')
+            .limit(1)
+            .get(cacheOption);
+
+        isBusinessOwner = ownershipQuery.docs.isNotEmpty;
+
+        if (isBusinessOwner) {
+          debugPrint('🔐 User ${user.uid} has business owner privileges');
+        }
+      } catch (businessError) {
+        debugPrint('Error checking business ownership: $businessError');
+      }
+
+      return adminDoc.exists || isAdminClaim || isBusinessOwner;
     } catch (e) {
       debugPrint('Error checking admin status: $e');
       return false;
@@ -199,12 +218,19 @@ final adminsStreamProvider = StreamProvider<List<AdminUser>>((ref) {
 final isAdminProvider = FutureProvider<bool>((ref) async {
   // Listen to auth state changes for cache invalidation
   ref.listen(authStateChangesProvider, (_, next) {
-    if (next == null) {
-      // User signed out, reset cached admin status
-      ref.invalidateSelf();
-      ref.read(cachedAdminStatusProvider.notifier).state = false;
-    }
+    // Clear cache when auth state changes
+    ref.read(cachedAdminStatusProvider.notifier).state = false;
+    // Invalidate this provider to re-check admin status
+    ref.invalidateSelf();
   });
+
+  final authState = ref.watch(authStateChangesProvider);
+
+  // If user is not authenticated, they can't be admin
+  if (authState.value == null) {
+    ref.read(cachedAdminStatusProvider.notifier).state = false;
+    return false;
+  }
 
   // Check cached value first for performance
   final cachedStatus = ref.read(cachedAdminStatusProvider);
@@ -214,13 +240,38 @@ final isAdminProvider = FutureProvider<bool>((ref) async {
   final adminService = ref.watch(unifiedAdminServiceProvider);
   final isAdmin = await adminService.isCurrentUserAdmin();
 
-  // Update cache if admin
-  if (isAdmin) {
-    ref.read(cachedAdminStatusProvider.notifier).state = true;
-  }
+  // Update cache with the result
+  ref.read(cachedAdminStatusProvider.notifier).state = isAdmin;
 
   return isAdmin;
 });
 
 // Single, centralized cache provider
-final cachedAdminStatusProvider = StateProvider<bool>((ref) => false);
+final cachedAdminStatusProvider = StateProvider<bool>((ref) {
+  // Listen to auth state changes to clear cache
+  ref.listen(authStateChangesProvider, (_, next) {
+    // Clear admin status when auth state changes
+    if (next.value == null) {
+      // User logged out, clear admin status
+      // Note: We can't modify state in this callback, it will be handled
+      // by the isAdminProvider instead
+    }
+  });
+
+  return false;
+});
+
+// Provider that automatically checks admin status when user logs in
+final autoCheckAdminStatusProvider = Provider<void>((ref) {
+  ref.listen(authStateChangesProvider, (previous, next) async {
+    // When user logs in (from null to authenticated)
+    if (previous?.value == null && next.value != null) {
+      // Force check admin status
+      try {
+        await ref.read(isAdminProvider.future);
+      } catch (e) {
+        debugPrint('Error checking admin status after login: $e');
+      }
+    }
+  });
+});

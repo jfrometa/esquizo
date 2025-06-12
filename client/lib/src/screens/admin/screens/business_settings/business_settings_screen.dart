@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_service.dart';
- 
+
 class BusinessSettingsScreen extends ConsumerStatefulWidget {
   const BusinessSettingsScreen({super.key});
 
   @override
-  ConsumerState<BusinessSettingsScreen> createState() => _BusinessSettingsScreenState();
+  ConsumerState<BusinessSettingsScreen> createState() =>
+      _BusinessSettingsScreenState();
 }
 
-class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen> with SingleTickerProviderStateMixin {
+class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
-  
+
   // Form controllers
   late TextEditingController _nameController;
   late TextEditingController _descriptionController;
@@ -26,22 +28,22 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
   Map<String, dynamic> _hours = {};
   Map<String, dynamic> _settings = {};
   List<String> _features = [];
-  
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    
+
     // Initialize controllers
     _nameController = TextEditingController();
     _descriptionController = TextEditingController();
     _logoUrlController = TextEditingController();
     _coverImageUrlController = TextEditingController();
-    
+
     // Load business config
     _loadBusinessConfig();
   }
-  
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -51,10 +53,10 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
     _coverImageUrlController.dispose();
     super.dispose();
   }
-  
+
   void _loadBusinessConfig() {
     final businessConfigAsync = ref.read(businessConfigProvider);
-    
+
     businessConfigAsync.whenData((config) {
       if (config != null) {
         setState(() {
@@ -77,54 +79,55 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: ref.watch(businessConfigProvider).when(
-        data: (config) {
-          if (config == null) {
-            return const Center(
-              child: Text('Business configuration not found'),
-            );
-          }
-          
-          return Column(
-            children: [
-              // Tabs
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: TabBar(
-                  controller: _tabController,
-                  tabs: const [
-                    Tab(text: 'General'),
-                    Tab(text: 'Contact & Location'),
-                    Tab(text: 'Hours & Availability'),
-                    Tab(text: 'Features & Settings'),
-                  ],
-                  indicatorSize: TabBarIndicatorSize.label,
-                  labelColor: Theme.of(context).colorScheme.primary,
-                  unselectedLabelColor: Theme.of(context).colorScheme.onSurface,
-                  isScrollable: true,
-                ),
-              ),
-              
-              // Tab content
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildGeneralTab(config),
-                    _buildContactLocationTab(config),
-                    _buildHoursTab(config),
-                    _buildFeaturesSettingsTab(config),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(child: Text('Error: $error')),
-      ),
+            data: (config) {
+              if (config == null) {
+                return const Center(
+                  child: Text('Business configuration not found'),
+                );
+              }
+
+              return Column(
+                children: [
+                  // Tabs
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: TabBar(
+                      controller: _tabController,
+                      tabs: const [
+                        Tab(text: 'General'),
+                        Tab(text: 'Contact & Location'),
+                        Tab(text: 'Hours & Availability'),
+                        Tab(text: 'Features & Settings'),
+                      ],
+                      indicatorSize: TabBarIndicatorSize.label,
+                      labelColor: Theme.of(context).colorScheme.primary,
+                      unselectedLabelColor:
+                          Theme.of(context).colorScheme.onSurface,
+                      isScrollable: true,
+                    ),
+                  ),
+
+                  // Tab content
+                  Expanded(
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildGeneralTab(config),
+                        _buildContactLocationTab(config),
+                        _buildHoursTab(config),
+                        _buildFeaturesSettingsTab(config),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stackTrace) => Center(child: Text('Error: $error')),
+          ),
     );
   }
-  
+
   Widget _buildGeneralTab(BusinessConfig config) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
@@ -138,7 +141,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 16),
-            
+
             // Business name
             TextFormField(
               controller: _nameController,
@@ -155,7 +158,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
               },
             ),
             const SizedBox(height: 16),
-            
+
             // Business type
             DropdownButtonFormField<String>(
               value: _businessType,
@@ -164,11 +167,13 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
                 border: OutlineInputBorder(),
               ),
               items: const [
-                DropdownMenuItem(value: 'restaurant', child: Text('Restaurant')),
+                DropdownMenuItem(
+                    value: 'restaurant', child: Text('Restaurant')),
                 DropdownMenuItem(value: 'cafe', child: Text('Café')),
                 DropdownMenuItem(value: 'bar', child: Text('Bar')),
                 DropdownMenuItem(value: 'retail', child: Text('Retail Store')),
-                DropdownMenuItem(value: 'service', child: Text('Service Business')),
+                DropdownMenuItem(
+                    value: 'service', child: Text('Service Business')),
                 DropdownMenuItem(value: 'hotel', child: Text('Hotel')),
                 DropdownMenuItem(value: 'other', child: Text('Other')),
               ],
@@ -179,7 +184,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
               },
             ),
             const SizedBox(height: 16),
-            
+
             // Business description
             TextFormField(
               controller: _descriptionController,
@@ -191,7 +196,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
               maxLines: 3,
             ),
             const SizedBox(height: 16),
-            
+
             // Logo URL
             TextFormField(
               controller: _logoUrlController,
@@ -202,7 +207,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Cover image URL
             TextFormField(
               controller: _coverImageUrlController,
@@ -213,7 +218,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // Preview section
             Text(
               'Preview',
@@ -222,7 +227,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
             const SizedBox(height: 16),
             _buildBusinessPreview(),
             const SizedBox(height: 24),
-            
+
             // Save button
             SizedBox(
               width: double.infinity,
@@ -238,12 +243,12 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
       ),
     );
   }
-  
+
   Widget _buildContactLocationTab(BusinessConfig config) {
     // Clone the contactInfo and address maps for editing
     final contactInfo = Map<String, dynamic>.from(_contactInfo);
     final address = Map<String, dynamic>.from(_address);
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -254,7 +259,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 16),
-          
+
           // Phone
           TextFormField(
             initialValue: contactInfo['phone'] ?? '',
@@ -268,7 +273,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
             },
           ),
           const SizedBox(height: 16),
-          
+
           // Email
           TextFormField(
             initialValue: contactInfo['email'] ?? '',
@@ -282,7 +287,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
             },
           ),
           const SizedBox(height: 16),
-          
+
           // Website
           TextFormField(
             initialValue: contactInfo['website'] ?? '',
@@ -296,13 +301,13 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
             },
           ),
           const SizedBox(height: 24),
-          
+
           Text(
             'Address',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 16),
-          
+
           // Street
           TextFormField(
             initialValue: address['street'] ?? '',
@@ -316,7 +321,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
             },
           ),
           const SizedBox(height: 16),
-          
+
           // City and ZIP
           Row(
             children: [
@@ -351,7 +356,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // State and Country
           Row(
             children: [
@@ -385,7 +390,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // Google Maps coordinates
           Row(
             children: [
@@ -419,18 +424,20 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
             ],
           ),
           const SizedBox(height: 24),
-          
+
           // Save button
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _isLoading ? null : () {
-                setState(() {
-                  _contactInfo = contactInfo;
-                  _address = address;
-                });
-                _saveContactLocation(config);
-              },
+              onPressed: _isLoading
+                  ? null
+                  : () {
+                      setState(() {
+                        _contactInfo = contactInfo;
+                        _address = address;
+                      });
+                      _saveContactLocation(config);
+                    },
               child: _isLoading
                   ? const CircularProgressIndicator()
                   : const Text('Save Changes'),
@@ -440,7 +447,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
       ),
     );
   }
-  
+
   Widget _buildHoursTab(BusinessConfig config) {
     // Create a clone of hours for editing
     final hours = Map<String, dynamic>.from(_hours);
@@ -453,7 +460,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
       'saturday',
       'sunday',
     ];
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -464,7 +471,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 16),
-          
+
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -474,7 +481,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
               final day = daysOfWeek[index];
               final dayData = hours[day] as Map<String, dynamic>? ?? {};
               final isOpen = dayData['isOpen'] ?? false;
-              
+
               return Column(
                 children: [
                   Row(
@@ -493,7 +500,8 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
                             if (hours[day] == null) {
                               hours[day] = {};
                             }
-                            (hours[day] as Map<String, dynamic>)['isOpen'] = value;
+                            (hours[day] as Map<String, dynamic>)['isOpen'] =
+                                value;
                           });
                         },
                       ),
@@ -501,7 +509,6 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
                       Text(isOpen ? 'Open' : 'Closed'),
                     ],
                   ),
-                  
                   if (isOpen) ...[
                     const SizedBox(height: 8),
                     Row(
@@ -514,7 +521,8 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
                               border: OutlineInputBorder(),
                             ),
                             onChanged: (value) {
-                              (hours[day] as Map<String, dynamic>)['openTime'] = value;
+                              (hours[day] as Map<String, dynamic>)['openTime'] =
+                                  value;
                             },
                           ),
                         ),
@@ -527,13 +535,14 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
                               border: OutlineInputBorder(),
                             ),
                             onChanged: (value) {
-                              (hours[day] as Map<String, dynamic>)['closeTime'] = value;
+                              (hours[day]
+                                  as Map<String, dynamic>)['closeTime'] = value;
                             },
                           ),
                         ),
                       ],
                     ),
-                    
+
                     // Break times
                     const SizedBox(height: 8),
                     CheckboxListTile(
@@ -541,13 +550,14 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
                       value: dayData['hasBreak'] ?? false,
                       onChanged: (value) {
                         setState(() {
-                          (hours[day] as Map<String, dynamic>)['hasBreak'] = value;
+                          (hours[day] as Map<String, dynamic>)['hasBreak'] =
+                              value;
                         });
                       },
                       controlAffinity: ListTileControlAffinity.leading,
                       contentPadding: EdgeInsets.zero,
                     ),
-                    
+
                     if (dayData['hasBreak'] == true) ...[
                       Row(
                         children: [
@@ -559,7 +569,9 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
                                 border: OutlineInputBorder(),
                               ),
                               onChanged: (value) {
-                                (hours[day] as Map<String, dynamic>)['breakStart'] = value;
+                                (hours[day]
+                                        as Map<String, dynamic>)['breakStart'] =
+                                    value;
                               },
                             ),
                           ),
@@ -572,7 +584,9 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
                                 border: OutlineInputBorder(),
                               ),
                               onChanged: (value) {
-                                (hours[day] as Map<String, dynamic>)['breakEnd'] = value;
+                                (hours[day]
+                                        as Map<String, dynamic>)['breakEnd'] =
+                                    value;
                               },
                             ),
                           ),
@@ -584,39 +598,42 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
               );
             },
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Special hours / holidays
           Text(
             'Special Hours / Holidays',
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
-          
+
           OutlinedButton.icon(
             icon: const Icon(Icons.add),
             label: const Text('Add Special Hours'),
             onPressed: () {
               // TODO: Implement special hours dialog
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Special hours feature coming soon')),
+                const SnackBar(
+                    content: Text('Special hours feature coming soon')),
               );
             },
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Save button
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _isLoading ? null : () {
-                setState(() {
-                  _hours = hours;
-                });
-                _saveHours(config);
-              },
+              onPressed: _isLoading
+                  ? null
+                  : () {
+                      setState(() {
+                        _hours = hours;
+                      });
+                      _saveHours(config);
+                    },
               child: _isLoading
                   ? const CircularProgressIndicator()
                   : const Text('Save Changes'),
@@ -626,15 +643,15 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
       ),
     );
   }
-  
+
   Widget _buildFeaturesSettingsTab(BusinessConfig config) {
     // Create copies for editing
     final features = List<String>.from(_features);
     final settings = Map<String, dynamic>.from(_settings);
-    
+
     // Define available features for your business type
     final availableFeatures = _getAvailableFeatures();
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -650,7 +667,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 16),
-          
+
           // Features list
           ListView.builder(
             shrinkWrap: true,
@@ -659,7 +676,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
             itemBuilder: (context, index) {
               final feature = availableFeatures[index];
               final isEnabled = features.contains(feature.key);
-              
+
               return CheckboxListTile(
                 title: Text(feature.name),
                 subtitle: Text(feature.description),
@@ -678,9 +695,9 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
               );
             },
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           Text(
             'Settings',
             style: Theme.of(context).textTheme.headlineSmall,
@@ -691,7 +708,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 16),
-          
+
           // Tax rate setting
           TextFormField(
             initialValue: (settings['taxRate'] ?? 0.0).toString(),
@@ -709,7 +726,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
             },
           ),
           const SizedBox(height: 16),
-          
+
           // Service charge setting
           TextFormField(
             initialValue: (settings['serviceCharge'] ?? 0.0).toString(),
@@ -727,7 +744,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
             },
           ),
           const SizedBox(height: 16),
-          
+
           // Currency setting
           DropdownButtonFormField<String>(
             value: settings['currency'] as String? ?? 'USD',
@@ -738,9 +755,11 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
             items: const [
               DropdownMenuItem(value: 'USD', child: Text('USD - US Dollar')),
               DropdownMenuItem(value: 'EUR', child: Text('EUR - Euro')),
-              DropdownMenuItem(value: 'GBP', child: Text('GBP - British Pound')),
+              DropdownMenuItem(
+                  value: 'GBP', child: Text('GBP - British Pound')),
               DropdownMenuItem(value: 'MXN', child: Text('MXN - Mexican Peso')),
-              DropdownMenuItem(value: 'CAD', child: Text('CAD - Canadian Dollar')),
+              DropdownMenuItem(
+                  value: 'CAD', child: Text('CAD - Canadian Dollar')),
               DropdownMenuItem(value: 'JPY', child: Text('JPY - Japanese Yen')),
               // Add more currencies as needed
             ],
@@ -751,7 +770,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
             },
           ),
           const SizedBox(height: 16),
-          
+
           // Theme settings
           DropdownButtonFormField<String>(
             value: settings['theme'] as String? ?? 'system',
@@ -771,18 +790,20 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
             },
           ),
           const SizedBox(height: 24),
-          
+
           // Save button
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _isLoading ? null : () {
-                setState(() {
-                  _features = features;
-                  _settings = settings;
-                });
-                _saveFeaturesSettings(config);
-              },
+              onPressed: _isLoading
+                  ? null
+                  : () {
+                      setState(() {
+                        _features = features;
+                        _settings = settings;
+                      });
+                      _saveFeaturesSettings(config);
+                    },
               child: _isLoading
                   ? const CircularProgressIndicator()
                   : const Text('Save Changes'),
@@ -792,7 +813,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
       ),
     );
   }
-  
+
   Widget _buildBusinessPreview() {
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -820,7 +841,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
                     ),
                   ),
           ),
-          
+
           // Business info
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -828,41 +849,42 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
               children: [
                 // Logo
                 Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: _logoUrlController.text.isNotEmpty
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            _logoUrlController.text,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => const Icon(Icons.business),
-                          ),
-                        )
-                      :  ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                 'assets/appIcon.png', 
-                  height: 40,
-                  width: 40,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const Icon(Icons.business),
-                ),
-            )
-                ),
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: _logoUrlController.text.isNotEmpty
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              _logoUrlController.text,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) =>
+                                  const Icon(Icons.business),
+                            ),
+                          )
+                        : ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.asset(
+                              'assets/appIcon.png',
+                              height: 40,
+                              width: 40,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) =>
+                                  const Icon(Icons.business),
+                            ),
+                          )),
                 const SizedBox(width: 16),
-                
+
                 // Business details
                 Expanded(
                   child: Column(
@@ -900,23 +922,24 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
       ),
     );
   }
-  
+
   // Save operations
   Future<void> _saveGeneralInfo(BusinessConfig config) async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    
+
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       // Create updated business config
       final updatedConfig = BusinessConfig(
         id: config.id,
         name: _nameController.text,
         type: _businessType,
+        slug: config.slug,
         logoUrl: _logoUrlController.text,
         coverImageUrl: _coverImageUrlController.text,
         description: _descriptionController.text,
@@ -927,14 +950,15 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
         features: _features,
         isActive: config.isActive,
       );
-      
+
       // Update in Firestore
       final businessConfigService = ref.read(businessConfigServiceProvider);
       await businessConfigService.updateBusinessConfig(updatedConfig);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Business information updated successfully')),
+          const SnackBar(
+              content: Text('Business information updated successfully')),
         );
       }
     } catch (e) {
@@ -949,18 +973,19 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
       });
     }
   }
-  
+
   Future<void> _saveContactLocation(BusinessConfig config) async {
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       // Create updated business config
       final updatedConfig = BusinessConfig(
         id: config.id,
         name: _nameController.text,
         type: _businessType,
+        slug: config.slug,
         logoUrl: _logoUrlController.text,
         coverImageUrl: _coverImageUrlController.text,
         description: _descriptionController.text,
@@ -971,14 +996,15 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
         features: _features,
         isActive: config.isActive,
       );
-      
+
       // Update in Firestore
       final businessConfigService = ref.read(businessConfigServiceProvider);
       await businessConfigService.updateBusinessConfig(updatedConfig);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Contact and location updated successfully')),
+          const SnackBar(
+              content: Text('Contact and location updated successfully')),
         );
       }
     } catch (e) {
@@ -993,18 +1019,19 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
       });
     }
   }
-  
+
   Future<void> _saveHours(BusinessConfig config) async {
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       // Create updated business config
       final updatedConfig = BusinessConfig(
         id: config.id,
         name: _nameController.text,
         type: _businessType,
+        slug: config.slug,
         logoUrl: _logoUrlController.text,
         coverImageUrl: _coverImageUrlController.text,
         description: _descriptionController.text,
@@ -1015,11 +1042,11 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
         features: _features,
         isActive: config.isActive,
       );
-      
+
       // Update in Firestore
       final businessConfigService = ref.read(businessConfigServiceProvider);
       await businessConfigService.updateBusinessConfig(updatedConfig);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Business hours updated successfully')),
@@ -1037,18 +1064,19 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
       });
     }
   }
-  
+
   Future<void> _saveFeaturesSettings(BusinessConfig config) async {
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       // Create updated business config
       final updatedConfig = BusinessConfig(
         id: config.id,
         name: _nameController.text,
         type: _businessType,
+        slug: config.slug,
         logoUrl: _logoUrlController.text,
         coverImageUrl: _coverImageUrlController.text,
         description: _descriptionController.text,
@@ -1059,14 +1087,15 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
         features: _features,
         isActive: config.isActive,
       );
-      
+
       // Update in Firestore
       final businessConfigService = ref.read(businessConfigServiceProvider);
       await businessConfigService.updateBusinessConfig(updatedConfig);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Features and settings updated successfully')),
+          const SnackBar(
+              content: Text('Features and settings updated successfully')),
         );
       }
     } catch (e) {
@@ -1081,7 +1110,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
       });
     }
   }
-  
+
   // Helper methods
   List<FeatureItem> _getAvailableFeatures() {
     // Define common features
@@ -1107,7 +1136,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
         description: 'Sell and accept gift cards',
       ),
     ];
-    
+
     // Add business-type specific features
     switch (_businessType) {
       case 'restaurant':
@@ -1161,7 +1190,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
         return commonFeatures;
     }
   }
-  
+
   String _capitalizeFirst(String text) {
     if (text.isEmpty) return text;
     return text[0].toUpperCase() + text.substring(1);
@@ -1172,7 +1201,7 @@ class FeatureItem {
   final String key;
   final String name;
   final String description;
-  
+
   const FeatureItem({
     required this.key,
     required this.name,

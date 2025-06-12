@@ -1,5 +1,5 @@
 // Library directive must come first
-library web_utils_web;
+library;
 
 import 'dart:html' as html;
 import 'package:flutter/foundation.dart';
@@ -26,11 +26,23 @@ class _WebImpl {
     try {
       // Direct access to pathname via dart:html
       final pathname = html.window.location.pathname;
-      debugPrint(
-          '🌐 WebUtils raw path: "$pathname", full URL: "${html.window.location.href}"');
+      final fullUrl = html.window.location.href;
 
-      // Return the path or '/' if empty
-      return pathname?.isEmpty == true ? '/' : pathname ?? '/';
+      debugPrint('🌐 WebUtils raw path: "$pathname"');
+      debugPrint('🌐 WebUtils full URL: "$fullUrl"');
+
+      // Additional checks to ensure we're getting the right path
+      if (pathname == null || pathname.isEmpty) {
+        debugPrint('⚠️ WebUtils: pathname is null or empty, defaulting to "/"');
+        return '/';
+      }
+
+      // Clean the pathname - remove trailing slashes except for root
+      final cleanPath =
+          pathname == '/' ? '/' : pathname.replaceAll(RegExp(r'/+$'), '');
+
+      debugPrint('🌐 WebUtils cleaned path: "$cleanPath"');
+      return cleanPath;
     } catch (e) {
       debugPrint('❌ Error getting current path: $e');
       return '/';

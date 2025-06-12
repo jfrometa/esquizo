@@ -1,8 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/app_config/app_config_services.dart';
-import '../constants/app_sizes.dart';
 
 /// Widget class to manage asynchronous app initialization
 class AppStartupWidget extends ConsumerStatefulWidget {

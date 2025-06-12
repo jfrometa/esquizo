@@ -3,12 +3,19 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 
-final orderStorageProvider = Provider((ref) => OrderStorageService());
+final orderStorageProvider = Provider((ref) {
+  final businessId = ref.watch(currentBusinessIdProvider);
+  return OrderStorageService(businessId: businessId);
+});
 
 class OrderStorageService {
   final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
+  final String _businessId;
+
+  OrderStorageService({required String businessId}) : _businessId = businessId;
 
   String get _userId => _auth.currentUser?.uid ?? 'anon';
   String _getEmail(Map<String, String>? contactInfo) =>
@@ -40,9 +47,14 @@ class OrderStorageService {
         'items': [item.toJson()],
         'paymentMethod': paymentMethod,
         'totalAmount': price * quantity,
+        'businessId': _businessId, // Add business ID
         'timestamp': FieldValue.serverTimestamp(),
       };
-      await _firestore.collection('orders').add(orderData);
+      await _firestore
+          .collection('businesses')
+          .doc(_businessId)
+          .collection('orders')
+          .add(orderData);
     }
   }
 
@@ -72,13 +84,19 @@ class OrderStorageService {
         'items': [item.toJson()],
         'paymentMethod': paymentMethod,
         'totalAmount': price * quantity,
+        'businessId': _businessId, // Add business ID
         'timestamp': FieldValue.serverTimestamp(),
       };
-      final orderRef = await _firestore.collection('orders').add(orderData);
+      final orderRef = await _firestore
+          .collection('businesses')
+          .doc(_businessId)
+          .collection('orders')
+          .add(orderData);
 
       final subscriptionData = {
         'email': email,
         'userId': _userId,
+        'businessId': _businessId, // Add business ID
         'planName': item.title,
         'status': 'active',
         'startDate': orderDate.toIso8601String(),
@@ -116,9 +134,14 @@ class OrderStorageService {
       'items': order.dishes.map((dish) => dish.toJson()).toList(),
       'paymentMethod': paymentMethod,
       'totalAmount': order.totalPrice ?? 0.0,
+      'businessId': _businessId, // Add business ID
       'timestamp': FieldValue.serverTimestamp(),
     };
-    await _firestore.collection('orders').add(orderData);
+    await _firestore
+        .collection('businesses')
+        .doc(_businessId)
+        .collection('orders')
+        .add(orderData);
   }
 
   Future<void> saveQuoteOrder(
@@ -150,13 +173,14 @@ class OrderStorageService {
       'allergies': quote.alergias,
       'additionalNotes': quote.adicionales,
       'contactInfo': contactInfo,
+      'businessId': _businessId, // Add business ID
       'timestamp': FieldValue.serverTimestamp(),
     };
 
-    // Save to quotes collection
+    // Save to quotes collection - these remain in root for cross-business access
     final quoteRef = await _firestore.collection('quotes').add(quoteData);
 
-    // Create a notification document for admin
+    // Create a notification document for admin - these remain in root for cross-business access
     await _firestore.collection('notifications').add({
       'type': 'new_quote',
       'quoteId': quoteRef.id,
@@ -184,9 +208,14 @@ class OrderStorageService {
         'orderDate': orderDate.toIso8601String(),
         'mealNumber': i + 1,
         'totalMeals': quantity,
+        'businessId': _businessId, // Add business ID
         'timestamp': FieldValue.serverTimestamp(),
       };
-      await _firestore.collection('meals').add(mealData);
+      await _firestore
+          .collection('businesses')
+          .doc(_businessId)
+          .collection('meals')
+          .add(mealData);
     }
   }
 }

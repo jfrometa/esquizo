@@ -1,12 +1,19 @@
 {
   "version": "0.2.0",
   "configurations": [
-  
     {
       "name": "Flutter",
       "type": "dart",
       "request": "launch",
       "program": "lib/main.dart"
+    },
+    {
+      "name": "client (Flutter Web Server)",
+      "program": "lib/main.dart",
+      "cwd": "client",
+      "deviceId": "web-server",
+      "request": "launch",
+      "type": "dart"
     }
   ],
   "tasks": {
@@ -15,20 +22,23 @@
       {
         "label": "Start Docker",
         "type": "shell",
-        "command": "docker-compose up -d", // Assuming you have a docker-compose.yml in your project
+        "command": "docker-compose up -d",
         "problemMatcher": [],
         "group": "build"
       },
       {
         "label": "Run Prisma Migrate",
         "type": "shell",
-        "command": "pnpm prisma migrate dev", // Adjust based on your Prisma setup
+        "command": "pnpm prisma migrate dev",
         "problemMatcher": [],
         "group": "build"
       },
       {
         "label": "Start Docker and Prisma Migrate",
-        "dependsOn": ["Start Docker", "Run Prisma Migrate"],
+        "dependsOn": [
+          "Start Docker",
+          "Run Prisma Migrate"
+        ],
         "dependsOrder": "sequence",
         "problemMatcher": []
       }
