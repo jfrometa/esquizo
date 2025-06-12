@@ -129,7 +129,7 @@ class OptimizedHomeScreenWrapper extends ConsumerWidget {
 
     return OptimizedBusinessWrapper(
       businessSlug: businessSlug,
-      route: '/',
+      route: '/$businessSlug', // Use the full business route, not just '/'
       child: const MenuHome(),
     );
   }
@@ -150,7 +150,7 @@ class OptimizedMenuScreenWrapper extends ConsumerWidget {
 
     return OptimizedBusinessWrapper(
       businessSlug: businessSlug,
-      route: '/menu',
+      route: '/$businessSlug/menu', // Use full business route
       child: const MenuScreen(),
     );
   }
@@ -171,7 +171,7 @@ class OptimizedCartScreenWrapper extends ConsumerWidget {
 
     return OptimizedBusinessWrapper(
       businessSlug: businessSlug,
-      route: '/carrito',
+      route: '/$businessSlug/carrito', // Use full business route
       child: const CartScreen(isAuthenticated: true),
     );
   }
@@ -192,7 +192,7 @@ class OptimizedProfileScreenWrapper extends ConsumerWidget {
 
     return OptimizedBusinessWrapper(
       businessSlug: businessSlug,
-      route: '/cuenta',
+      route: '/$businessSlug/cuenta', // Use full business route
       child: const CustomProfileScreen(),
     );
   }
@@ -213,7 +213,7 @@ class OptimizedOrdersScreenWrapper extends ConsumerWidget {
 
     return OptimizedBusinessWrapper(
       businessSlug: businessSlug,
-      route: '/ordenes',
+      route: '/$businessSlug/ordenes', // Use full business route
       child: const InProgressOrdersScreen(),
     );
   }
@@ -234,7 +234,7 @@ class OptimizedAdminScreenWrapper extends ConsumerWidget {
 
     return OptimizedBusinessWrapper(
       businessSlug: businessSlug,
-      route: '/admin',
+      route: '/$businessSlug/admin', // Use full business route
       child:
           const AdminDashboardHome(), // Use dashboard home for business admin
     );
