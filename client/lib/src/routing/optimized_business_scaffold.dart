@@ -31,9 +31,6 @@ class _OptimizedBusinessScaffoldState
   late final AnimationController _transitionController;
   late final Animation<double> _fadeAnimation;
 
-  String? _previousRoute;
-  Widget? _previousChild;
-
   @override
   void initState() {
     super.initState();
@@ -56,9 +53,6 @@ class _OptimizedBusinessScaffoldState
         oldWidget.currentRoute != widget.currentRoute) {
       debugPrint(
           '🔄 Optimized route transition: ${oldWidget.currentRoute} -> ${widget.currentRoute}');
-
-      _previousRoute = oldWidget.currentRoute;
-      _previousChild = oldWidget.child;
 
       // Animate transition
       _transitionController.reset();

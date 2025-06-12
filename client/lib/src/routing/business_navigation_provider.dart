@@ -112,8 +112,7 @@ class BusinessNavigationController extends _$BusinessNavigationController {
   /// Update just the route within the current business
   void updateRoute(String route) {
     final currentState = state;
-    if (currentState != null) {
-      debugPrint('🔄 Updating route in ${currentState.businessSlug}: $route');
+    if (currentState != null && currentState.currentRoute != route) {
       state = currentState.copyWith(currentRoute: route);
       _currentRoute = route;
     }

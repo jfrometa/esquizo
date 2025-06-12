@@ -88,35 +88,28 @@ class UnifiedBusinessContext extends _$UnifiedBusinessContext {
   /// Build business context for specific business slug
   Future<BusinessContext> _buildBusinessContext(String businessSlug) async {
     try {
-      debugPrint('🏢 Building context for business slug: $businessSlug');
+      debugPrint('🏢 Building business context for slug: $businessSlug');
 
-      // Get business ID from slug
+      // Fetch business ID from slug service
       final slugService = ref.read(businessSlugServiceProvider);
       final businessId = await slugService.getBusinessIdFromSlug(businessSlug);
 
       if (businessId != null) {
-        debugPrint(
-            '🏢 Resolved business ID: $businessId for slug: $businessSlug');
+        debugPrint('🏢 Resolved business ID: $businessId for slug: $businessSlug');
 
         // Update local storage to maintain persistence
         final localStorage = ref.read(localStorageServiceProvider);
         await localStorage.setString('businessId', businessId);
 
-        // Invalidate all business-dependent providers
-        await _invalidateBusinessDependentProviders();
-
-        final context = BusinessContext(
+        // Create and return the business context
+        return BusinessContext(
           businessId: businessId,
-          businessSlug: businessSlug,
+          businessSlug: '/$businessSlug',
           isDefault: false,
           lastUpdated: DateTime.now(),
         );
-
-        debugPrint('✅ Business context built: $context');
-        return context;
       } else {
-        debugPrint(
-            '⚠️ Business slug not found: $businessSlug, falling back to default');
+        debugPrint('⚠️ Business slug not found: $businessSlug, falling back to default');
         return await _buildDefaultContext();
       }
     } catch (e) {
@@ -133,18 +126,14 @@ class UnifiedBusinessContext extends _$UnifiedBusinessContext {
       // Get default business ID from storage or use fallback
       final storedBusinessId = await ref.read(initBusinessIdProvider.future);
 
-      final context = BusinessContext(
+      return BusinessContext(
         businessId: storedBusinessId,
         businessSlug: null,
         isDefault: true,
         lastUpdated: DateTime.now(),
       );
-
-      debugPrint('✅ Default business context built: $context');
-      return context;
     } catch (e) {
       debugPrint('❌ Error building default context: $e');
-      // Fallback to hardcoded default
       return BusinessContext(
         businessId: 'default',
         businessSlug: null,

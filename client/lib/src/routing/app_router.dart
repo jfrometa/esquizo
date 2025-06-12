@@ -14,6 +14,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/business/business
 import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_analitics.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_startup.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/business_routing_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/optimized_business_wrappers.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/go_router_refresh_stream.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/navigation_provider.dart';
@@ -143,16 +144,13 @@ GoRouter goRouter(Ref ref) {
   final authRepository = ref.watch(authRepositoryProvider);
   // Use allNavigationDestinations for consistent shell branches
   final allDestinations = ref.watch(allNavigationDestinationsProvider);
-  final isFirebaseInitialized = ref.watch(isFirebaseInitializedProvider);
+  // final isFirebaseInitialized = ref.watch(isFirebaseInitializedProvider);
   final isAdminAsync = ref.watch(isAdminProvider);
-
+ final businessSlug = ref.watch(currentBusinessSlugProvider);
   // Force admin status check if user is logged in but admin status hasn't been determined
   if (authRepository.currentUser != null && isAdminAsync.hasValue == false) {
     ref.invalidate(isAdminProvider);
   }
-
-  // Watch for business config status (same as AdminSetupScreen)
-  final businessConfigAsync = ref.watch(businessConfigProvider);
 
   // *** DIRECTLY USE WEB UTILS TO GET THE INITIAL LOCATION FROM BROWSER URL ***
   String initialLocation = '/';
@@ -173,155 +171,20 @@ GoRouter goRouter(Ref ref) {
     debugLogDiagnostics: kDebugMode,
     refreshListenable: GoRouterRefreshStream(authRepository.authStateChanges()),
     redirect: (context, state) async {
-      try {
-        final path = state.uri.path;
+      final path = state.uri.path;
 
-        // Enhanced logging for debugging navigation issues
-        debugPrint('🧭 Router redirect triggered!');
-        debugPrint('🧭   Path: "$path"');
-        debugPrint('🧭   Full URI: "${state.uri}"');
-        debugPrint('🧭   Firebase initialized: $isFirebaseInitialized');
-
-        // Skip redirect logic entirely if we're already at error
-        if (path.startsWith('/error')) {
-          return null;
+      // Ensure business slug is prefixed to all routes
+      if (businessSlug != null && businessSlug.isNotEmpty) {
+        if (path == '/') {
+          // Redirect root to business root
+          return '/$businessSlug';
+        } else if (!path.startsWith('/$businessSlug')) {
+          // Prefix slug to other routes
+          return '/$businessSlug${path.startsWith('/') ? path : '/$path'}';
         }
-
-        // If Firebase is not initialized, redirect to startup (don't initialize here)
-        if (!isFirebaseInitialized) {
-          debugPrint("⚠️ Firebase not initialized, redirecting to startup");
-          return '/startup';
-        }
-
-        // Check authentication status
-        final isLoggedIn = authRepository.currentUser != null;
-        final isLoggingIn = state.uri.path == '/signin';
-        final isOnboarding = state.uri.path == '/onboarding';
-        final isAtError = state.uri.path == '/error';
-        final isAtStartup = state.uri.path == '/startup';
-
-        // Allow access to business setup related paths
-        if (path.startsWith('/business-setup') ||
-            path.startsWith('/admin-setup')) {
-          return null;
-        }
-
-        // Handle authentication redirects
-        if (!isLoggedIn) {
-          // Allow access to public routes and error routes
-          if (isLoggingIn || isOnboarding || isAtError || isAtStartup) {
-            return null;
-          }
-
-          // Store the attempted path to redirect after login if not already at signin
-          if (path != '/signin') {
-            return '/signin?from=$path';
-          }
-          return null;
-        }
-
-        // User is logged in
-        if (isLoggedIn) {
-          // Check for any pending path that was saved before authentication
-          final pendingPath = ref.read(_pendingAdminPathProvider);
-
-          // Handle platform admin routes (/admin) - Only for PLATFORM admins
-          if (path.startsWith('/admin')) {
-            // Don't redirect if admin status is still loading
-            if (isAdminAsync.isLoading) {
-              debugPrint(
-                  '⏳ Platform admin status loading, allowing navigation: $path');
-              return null; // Allow navigation while loading
-            }
-
-            // Check if user is a PLATFORM admin (not just a business owner)
-            final isPlatformAdmin = await _isPlatformAdmin(ref);
-
-            debugPrint(
-                '🔐 Platform admin route access attempt: isPlatformAdmin=$isPlatformAdmin, path=$path');
-
-            // Only platform admins can access /admin routes
-            if (!isPlatformAdmin) {
-              debugPrint(
-                  '🚫 Non-platform-admin blocked from platform admin area: $path → redirecting to /');
-              return '/'; // Redirect non-platform-admins to home
-            }
-
-            debugPrint('✅ Platform admin access granted for: $path');
-
-            // Check business configuration status ONLY for platform admin users
-            final businessConfig = businessConfigAsync.value;
-            final isBusinessConfigured =
-                businessConfig != null && businessConfig.isActive;
-
-            // Only redirect to admin setup if business is definitely not set up
-            // and we're not already at the admin setup page
-            if (businessConfigAsync.hasValue &&
-                !isBusinessConfigured &&
-                path != '/admin-setup') {
-              debugPrint(
-                  '🔧 Platform admin needs business setup, redirecting to /admin-setup');
-              return '/admin-setup';
-            }
-
-            // If business is set up and user is at admin-setup, redirect to admin panel
-            if (businessConfigAsync.hasValue &&
-                isBusinessConfigured &&
-                path == '/admin-setup') {
-              debugPrint(
-                  '🔧 Business already configured, redirecting to /admin');
-              return '/admin';
-            }
-
-            // Allow platform admin route access
-            debugPrint('✅ Platform admin route allowed: $path');
-            return null;
-          }
-
-          // Define system routes that should never be treated as business routes
-          final systemRoutes = {
-            '/admin',
-            '/signin',
-            '/signup',
-            '/onboarding',
-            '/error',
-            '/startup',
-            '/business-setup',
-            '/admin-setup',
-          };
-
-          // Check if this is a system route - allow immediately
-          if (systemRoutes.any((route) => path.startsWith(route))) {
-            debugPrint('🔧 System route access: $path');
-            return null;
-          }
-
-          // All other routes (default and business) are handled by route matching
-          // Let GoRouter handle the route matching - don't interfere
-          debugPrint('🌐 Route will be handled by GoRouter matching: $path');
-          return null;
-
-          // If we're at startup, signin, or onboarding, go to saved path or home
-          if (isAtStartup || isLoggingIn || isOnboarding) {
-            if (pendingPath != null &&
-                pendingPath.isNotEmpty &&
-                pendingPath != '/') {
-              return pendingPath;
-            }
-            return '/'; // Default to home if no pending path
-          }
-
-          // Allow all other routes to proceed - don't redirect unknown paths
-          // The GoRouter will handle route matching and show 404 if needed
-          debugPrint('🌐 Allowing route to proceed: $path');
-          return null;
-        }
-
-        return null; // No redirect needed
-      } catch (e) {
-        debugPrint("🔥 Router error: $e");
-        return '/error?message=${Uri.encodeComponent(e.toString())}';
       }
+
+      return null;
     },
     observers: [
       // Custom navigation observer for debugging
