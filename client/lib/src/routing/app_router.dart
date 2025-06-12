@@ -414,7 +414,7 @@ GoRouter goRouter(Ref ref) {
       ...getAdminRoutes(),
 
       // StatefulShellRoute for default business navigation (no slug prefix)
-      // This MUST come BEFORE business-specific routing to handle default routes first
+      // This comes FIRST to handle default routes like /menu, /carrito, /cuenta
       StatefulShellRoute.indexedStack(
         pageBuilder: (context, state, navigationShell) => NoTransitionPage(
           child: ScaffoldWithNestedNavigation(navigationShell: navigationShell),
@@ -427,7 +427,7 @@ GoRouter goRouter(Ref ref) {
       ),
 
       // Optimized Business-specific routing with seamless navigation
-      // This comes AFTER admin routes and StatefulShellRoute so they are handled first
+      // This comes AFTER StatefulShellRoute to catch remaining paths as potential business slugs
       GoRoute(
         path: '/:businessSlug',
         redirect: (context, state) {
@@ -435,13 +435,14 @@ GoRouter goRouter(Ref ref) {
           debugPrint('🔍 Checking business slug: $businessSlug');
 
           if (businessSlug != null && _isValidBusinessSlug(businessSlug)) {
-            // Valid business slug - allow business routing
+            // Valid business slug format - allow business routing
+            // The actual business existence check happens in the business context provider
             debugPrint('🏢 Valid business slug detected: $businessSlug');
             return null;
           }
-          // Invalid business slug - redirect to home
+          // Invalid business slug format - redirect to home
           debugPrint(
-              '❌ Invalid business slug: $businessSlug, redirecting to home');
+              '❌ Invalid business slug format: $businessSlug, redirecting to home');
           return '/';
         },
         pageBuilder: (context, state) {

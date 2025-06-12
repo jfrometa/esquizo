@@ -7,7 +7,7 @@ part of 'unified_business_context_provider.dart';
 // **************************************************************************
 
 String _$currentBusinessIdFromContextHash() =>
-    r'2fa63471d960f33c522d6d9d921b797f3dc7c24f';
+    r'fb43520c752c741e0ec126c48fff5e84bf72eca2';
 
 /// Provider for current business ID (simplified access)
 ///
@@ -28,7 +28,7 @@ final currentBusinessIdFromContextProvider =
 // ignore: unused_element
 typedef CurrentBusinessIdFromContextRef = AutoDisposeProviderRef<String>;
 String _$currentBusinessSlugFromContextHash() =>
-    r'5ffe3c78c7f8acd573d6d77302441fe2d8a92deb';
+    r'b8a3c7c41c359a62dac77335e727e1ec4c3b424e';
 
 /// Provider for current business slug (simplified access)
 ///
@@ -49,7 +49,7 @@ final currentBusinessSlugFromContextProvider =
 // ignore: unused_element
 typedef CurrentBusinessSlugFromContextRef = AutoDisposeProviderRef<String?>;
 String _$isDefaultBusinessContextHash() =>
-    r'092e40df5a66d4888fa7748e5ae307fff092b7ea';
+    r'b3ab44654a086c14df685a485e30e606d47d10eb';
 
 /// Provider to check if currently using default business
 ///
@@ -69,7 +69,7 @@ final isDefaultBusinessContextProvider = AutoDisposeProvider<bool>.internal(
 // ignore: unused_element
 typedef IsDefaultBusinessContextRef = AutoDisposeProviderRef<bool>;
 String _$isBusinessSpecificContextHash() =>
-    r'9e30b0d4e81a2ab7ebdfe069b3dbd1522b02f82e';
+    r'5558a9018c7c0db1967cbcac79a237a792c0ca14';
 
 /// Provider to check if currently using business-specific context
 ///
@@ -89,7 +89,7 @@ final isBusinessSpecificContextProvider = AutoDisposeProvider<bool>.internal(
 // ignore: unused_element
 typedef IsBusinessSpecificContextRef = AutoDisposeProviderRef<bool>;
 String _$currentRoutingBusinessIdHash() =>
-    r'2895a4adc93dca45b956a34961a8e223cd158c93';
+    r'097cf2dbd224be23bae06e6eaf766342c77bd015';
 
 /// Provider that returns the current business ID based on routing context
 /// - If on business-specific route (e.g., /g3), returns the business ID for that slug
@@ -112,7 +112,7 @@ final currentRoutingBusinessIdProvider =
 // ignore: unused_element
 typedef CurrentRoutingBusinessIdRef = AutoDisposeFutureProviderRef<String>;
 String _$isBusinessSpecificRoutingHash() =>
-    r'8d76adb93c6e999137be4266105c09f8436149c0';
+    r'3dc583c51a21f69794bc551c19314ee5cde086ac';
 
 /// Provider that checks if we're currently in business-specific routing mode
 ///
@@ -132,7 +132,7 @@ final isBusinessSpecificRoutingProvider = AutoDisposeProvider<bool>.internal(
 // ignore: unused_element
 typedef IsBusinessSpecificRoutingRef = AutoDisposeProviderRef<bool>;
 String _$currentBusinessSlugHash() =>
-    r'3cb2fc8802bc56c046a3585ef93d1851350f8b35';
+    r'5c75cc882fbd7b707fe1fde730fdc25fd07daa61';
 
 /// Provider that returns the current business slug (null for default routing)
 ///
@@ -152,7 +152,7 @@ final currentBusinessSlugProvider = AutoDisposeProvider<String?>.internal(
 // ignore: unused_element
 typedef CurrentBusinessSlugRef = AutoDisposeProviderRef<String?>;
 String _$unifiedBusinessContextHash() =>
-    r'bdfa1e518fd881650b9505c3462bf08d670eb219';
+    r'884be86571cd53476326b616d8f61fd61db5d7b1';
 
 /// Unified business context provider that watches for slug changes and manages business context
 ///
