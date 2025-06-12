@@ -92,9 +92,11 @@ class UnifiedBusinessContext extends _$UnifiedBusinessContext {
 
       // Fetch business ID from slug service
       final slugService = ref.read(businessSlugServiceProvider);
+      debugPrint('🔍 Fetching business ID for slug: $businessSlug');
       final businessId = await slugService.getBusinessIdFromSlug(businessSlug);
 
       if (businessId != null) {
+        debugPrint('✅ Business ID resolved: $businessId');
         debugPrint('🏢 Resolved business ID: $businessId for slug: $businessSlug');
 
         // Update local storage to maintain persistence
@@ -109,6 +111,7 @@ class UnifiedBusinessContext extends _$UnifiedBusinessContext {
           lastUpdated: DateTime.now(),
         );
       } else {
+        debugPrint('❌ Failed to resolve business ID for slug: $businessSlug');
         debugPrint('⚠️ Business slug not found: $businessSlug, falling back to default');
         return await _buildDefaultContext();
       }

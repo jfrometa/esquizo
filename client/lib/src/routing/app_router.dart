@@ -25,6 +25,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_set_comple_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_setup_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_settings_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/meal_plan_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/product_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/order_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/screens/customer_meal_plan_screen.dart';
@@ -173,17 +174,27 @@ GoRouter goRouter(Ref ref) {
     redirect: (context, state) async {
       final path = state.uri.path;
 
-      // Ensure business slug is prefixed to all routes
+      // Handle business slug prefixing
       if (businessSlug != null && businessSlug.isNotEmpty) {
         if (path == '/') {
           // Redirect root to business root
           return '/$businessSlug';
         } else if (!path.startsWith('/$businessSlug')) {
-          // Prefix slug to other routes
+          // Prefix slug to all routes
           return '/$businessSlug${path.startsWith('/') ? path : '/$path'}';
         }
       }
 
+      // Synchronize browser URL with router state
+      if (kIsWeb) {
+        final browserPath = WebUtils.getCurrentPath();
+        if (browserPath != path) {
+          debugPrint('⚠️ Browser URL mismatch detected: $browserPath vs $path');
+          return browserPath.startsWith('/$businessSlug') ? browserPath : '/$businessSlug$browserPath';
+        }
+      }
+
+      // Allow all navigation without restrictions
       return null;
     },
     observers: [
@@ -342,10 +353,10 @@ GoRouter goRouter(Ref ref) {
           GoRoute(
             path: '/cart',
             pageBuilder: (context, state) {
-              final businessSlug = state.pathParameters['businessSlug']!;
+              final businessSlug = state.pathParameters['businessSlug'];
               debugPrint('🏢 Optimized business cart (EN) for: $businessSlug');
               return NoTransitionPage(
-                child: OptimizedCartScreenWrapper(businessSlug: businessSlug),
+                child: OptimizedCartScreenWrapper(businessSlug: businessSlug ?? ''),
               );
             },
           ),
@@ -353,11 +364,10 @@ GoRouter goRouter(Ref ref) {
           GoRoute(
             path: '/cuenta',
             pageBuilder: (context, state) {
-              final businessSlug = state.pathParameters['businessSlug']!;
+              final businessSlug = state.pathParameters['businessSlug'];
               debugPrint('🏢 Optimized business account for: $businessSlug');
               return NoTransitionPage(
-                child:
-                    OptimizedProfileScreenWrapper(businessSlug: businessSlug),
+                child: OptimizedProfileScreenWrapper(businessSlug: businessSlug ?? ''),
               );
             },
           ),
@@ -365,10 +375,10 @@ GoRouter goRouter(Ref ref) {
           GoRoute(
             path: '/ordenes',
             pageBuilder: (context, state) {
-              final businessSlug = state.pathParameters['businessSlug']!;
+              final businessSlug = state.pathParameters['businessSlug'];
               debugPrint('🏢 Optimized business orders for: $businessSlug');
               return NoTransitionPage(
-                child: OptimizedOrdersScreenWrapper(businessSlug: businessSlug),
+                child: OptimizedOrdersScreenWrapper(businessSlug: businessSlug ?? ''),
               );
             },
           ),
@@ -376,10 +386,10 @@ GoRouter goRouter(Ref ref) {
           GoRoute(
             path: '/admin',
             pageBuilder: (context, state) {
-              final businessSlug = state.pathParameters['businessSlug']!;
+              final businessSlug = state.pathParameters['businessSlug'];
               debugPrint('🏢 Optimized business admin for: $businessSlug');
               return NoTransitionPage(
-                child: OptimizedAdminScreenWrapper(businessSlug: businessSlug),
+                child: OptimizedAdminScreenWrapper(businessSlug: businessSlug ?? ''),
               );
             },
             routes: [
@@ -438,122 +448,9 @@ List<RouteBase> _getNestedRoutes(String path) {
             GoRoute(
               path: 'quote',
               name: AppRoute.manualQuote.name,
-              pageBuilder: (context, state) {
-                return MaterialPage(child: ManualQuoteScreen());
-              },
-            ),
-            GoRoute(
-              path: 'menu',
-              name: AppRoute.cateringMenu.name,
-              pageBuilder: (context, state) {
-                return MaterialPage(child: CateringSelectionScreen());
-              },
-            ),
-          ],
-        ),
-        GoRoute(
-          path: 'populares',
-          name: AppRoute.allDishes.name,
-          pageBuilder: (context, state) => const MaterialPage(
-            child: AllDishesMenuHomeScreen(),
-          ),
-        ),
-        GoRoute(
-          path: 'carrito/:itemId',
-          name: AppRoute.addToOrder.name,
-          pageBuilder: (context, state) {
-            final itemId = state.pathParameters['itemId']!;
-            return MaterialPage(
-              child: DishDetailsScreen(
-                id: itemId,
-              ),
-            );
-          },
-        ),
-        GoRoute(
-          path: 'categorias',
-          name: AppRoute.category.name,
-          pageBuilder: (context, state) => const MaterialPage(
-            child: Categories(),
-          ),
-          routes: [
-            GoRoute(
-              path: 'subscripciones',
-              name: AppRoute.mealPlans.name,
               pageBuilder: (context, state) => const MaterialPage(
-                child: CustomerMealPlanScreen(),
+                child: QuoteScreen(),
               ),
-            ),
-            GoRoute(
-              path: 'catering',
-              name: AppRoute.catering.name,
-              pageBuilder: (context, state) => const MaterialPage(
-                child: CateringEntryScreen(),
-              ),
-            ),
-          ],
-        ),
-        GoRoute(
-          path: 'platos',
-          name: AppRoute.details.name,
-          pageBuilder: (context, state) => const MaterialPage(
-            child: AllDishesMenuHomeScreen(),
-          ),
-          routes: [
-            GoRoute(
-              path: 'detalle/:dishId',
-              name: AppRoute.addDishToOrder.name,
-              pageBuilder: (context, state) {
-                final itemId = state.pathParameters['dishId']!;
-                return MaterialPage(
-                  child: DishDetailsScreen(
-                    id: itemId,
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ];
-
-    case '/carrito':
-      return [
-        GoRoute(
-          path: 'completar-orden',
-          name: AppRoute.checkout.name,
-          pageBuilder: (context, state) {
-            final type = (state.extra ?? 'platos') as String;
-            return MaterialPage(
-              child: CheckoutScreen(
-                displayType: type.toLowerCase(),
-              ),
-            );
-          },
-        ),
-      ];
-    case '/cuenta':
-      return [
-        GoRoute(
-          path: '/authenticated-profile',
-          name: AppRoute.authenticatedProfile.name,
-          builder: (context, state) {
-            final user = state.extra as User?;
-            return AuthenticatedProfileScreen(user: user!);
-          },
-        ),
-        // Customer meal plans route in account section
-        GoRoute(
-          path: 'meal-plans',
-          name: AppRoute.customerMealPlan.name,
-          builder: (context, state) => const CustomerMealPlanScreen(),
-          routes: [
-            GoRoute(
-              path: ':planId',
-              name: AppRoute.mealPlanDetails.name,
-              builder: (context, state) {
-                final planId = state.pathParameters['planId']!;
-                return PlanDetailsScreen(planId: planId);
-              },
             ),
           ],
         ),
@@ -669,51 +566,7 @@ class UnauthorizedScreen extends StatelessWidget {
   }
 }
 
-/// Distinguishes platform admins from business owners
-/// Platform admins: Users in 'admins' collection or with 'admin' Firebase Auth claims
-/// Business owners: Users with 'owner' role in business_relationships collection
-Future<bool> _isPlatformAdmin(Ref ref) async {
-  try {
-    final user = ref.read(firebaseAuthProvider).currentUser;
-    if (user == null) return false;
-
-    const cacheOption = GetOptions(source: Source.serverAndCache);
-    final firestore = ref.read(firebaseFirestoreProvider);
-
-    // Check admin document in Firestore - PLATFORM ADMIN
-    final adminDoc =
-        await firestore.collection('admins').doc(user.uid).get(cacheOption);
-    if (adminDoc.exists) {
-      debugPrint('🔐 User ${user.uid} is a PLATFORM admin (admins collection)');
-      return true;
-    }
-
-    // Check admin claims in user's token - PLATFORM ADMIN
-    try {
-      final idTokenResult = await user.getIdTokenResult(true);
-      final isAdminClaim = idTokenResult.claims?['admin'] == true;
-      if (isAdminClaim) {
-        debugPrint(
-            '🔐 User ${user.uid} is a PLATFORM admin (Firebase Auth claims)');
-        return true;
-      }
-    } catch (tokenError) {
-      debugPrint('Error getting token claims: $tokenError');
-    }
-
-    // Note: We DON'T check business_relationships here because that would make
-    // business owners count as platform admins, which is not what we want.
-    // Business owners should only access /businessSlug/admin, not /admin
-
-    debugPrint('🔐 User ${user.uid} is NOT a platform admin');
-    return false;
-  } catch (e) {
-    debugPrint('Error checking platform admin status: $e');
-    return false;
-  }
-}
-
-// Helper function to validate business slugs in routing
+/// Helper function to validate business slugs in routing
 bool _isValidBusinessSlug(String slug) {
   // Business slugs should:
   // - Be at least 2 characters long
@@ -721,69 +574,20 @@ bool _isValidBusinessSlug(String slug) {
   // - Only contain lowercase letters, numbers, and hyphens
   // - Not start or end with hyphens
   if (slug.length < 2 || slug.length > 50) return false;
-  if (slug.contains(' ') || slug.contains('?') || slug.contains('#'))
-    return false;
+  if (slug.contains(' ') || slug.contains('?') || slug.contains('#')) return false;
   if (slug.startsWith('-') || slug.endsWith('-')) return false;
-  if (slug.contains('--')) return false; // No consecutive hyphens
 
   // Check valid pattern: lowercase letters, numbers, and hyphens only
   final validPattern = RegExp(r'^[a-z0-9-]+$');
   if (!validPattern.hasMatch(slug)) return false;
 
-  // Check against reserved words (including default routes)
+  // Allow reserved slugs for business-specific routing
   final reservedSlugs = {
-    'admin',
-    'api',
-    'www',
-    'app',
-    'help',
-    'support',
-    'about',
-    'contact',
-    'signin',
-    'signup',
-    'login',
-    'logout',
-    'register',
-    'dashboard',
-    'settings',
-    'profile',
-    'account',
-    'billing',
-    'pricing',
-    'terms',
-    'privacy',
-    'legal',
-    'security',
-    'status',
-    'blog',
-    'news',
-    'docs',
-    'documentation',
-    'guide',
-    'tutorial',
-    'faq',
-    'mail',
-    'email',
-    'static',
-    'assets',
-    'images',
-    'css',
-    'js',
-    'javascript',
-    'fonts',
-    'menu', // Default route
-    'carrito', // Default route
-    'cuenta', // Default route
-    'ordenes', // Default route
-    'startup',
-    'error',
-    'onboarding',
-    'business-setup',
-    'admin-setup'
+    'admin', 'menu', 'carrito', 'cuenta', 'ordenes', 'business-setup', 'business-setup-complete', 'startup', 'error', 'onboarding', 'signin', 'admin-setup'
   };
+  if (reservedSlugs.contains(slug)) return true;
 
-  return !reservedSlugs.contains(slug);
+  return true;
 }
 
 /// Helper function to get business-specific admin routes
@@ -804,8 +608,13 @@ List<RouteBase> getBusinessAdminRoutes() {
       builder: (context, state) => const OrderManagementScreen(),
     ),
     GoRoute(
+      path: '/meal-plans',
+      builder: (context, state) => const MealPlanManagementScreen(),
+    ),
+    GoRoute(
       path: '/settings',
       builder: (context, state) => const BusinessSettingsScreen(),
     ),
+    // Add more business-specific admin routes as needed
   ];
 }

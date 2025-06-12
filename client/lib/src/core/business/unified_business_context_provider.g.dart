@@ -152,7 +152,7 @@ final currentBusinessSlugProvider = AutoDisposeProvider<String?>.internal(
 // ignore: unused_element
 typedef CurrentBusinessSlugRef = AutoDisposeProviderRef<String?>;
 String _$unifiedBusinessContextHash() =>
-    r'884be86571cd53476326b616d8f61fd61db5d7b1';
+    r'd69a3a3f0d45081ca687e5a7537eebc0a2c6c812';
 
 /// Unified business context provider that watches for slug changes and manages business context
 ///

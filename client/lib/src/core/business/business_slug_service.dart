@@ -15,6 +15,7 @@ class BusinessSlugService {
   /// Get business ID from slug
   Future<String?> getBusinessIdFromSlug(String slug) async {
     try {
+      debugPrint('🔍 Querying Firestore for slug: $slug');
       final querySnapshot = await _firestore
           .collection('businesses')
           .where('slug', isEqualTo: slug)
@@ -23,7 +24,10 @@ class BusinessSlugService {
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
+        debugPrint('✅ Business found for slug: $slug');
         return querySnapshot.docs.first.id;
+      } else {
+        debugPrint('❌ No active business found for slug: $slug');
       }
 
       return null;
@@ -54,6 +58,7 @@ class BusinessSlugService {
   /// Check if a slug exists and is available
   Future<bool> isSlugAvailable(String slug) async {
     try {
+      debugPrint('🔍 Checking availability for slug: $slug');
       final querySnapshot = await _firestore
           .collection('businesses')
           .where('slug', isEqualTo: slug)
@@ -61,7 +66,14 @@ class BusinessSlugService {
           .limit(1)
           .get();
 
-      return querySnapshot.docs.isEmpty;
+      final isAvailable = querySnapshot.docs.isEmpty;
+      if (isAvailable) {
+        debugPrint('✅ Slug is available: $slug');
+      } else {
+        debugPrint('❌ Slug is already taken: $slug');
+      }
+
+      return isAvailable;
     } catch (e) {
       debugPrint('Error checking slug availability: $e');
       return false;
@@ -82,6 +94,7 @@ class BusinessSlugService {
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
+      debugPrint('✅ Slug updated successfully: $newSlug');
       return true;
     } catch (e) {
       debugPrint('Error updating business slug: $e');
