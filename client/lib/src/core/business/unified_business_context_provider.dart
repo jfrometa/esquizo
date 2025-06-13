@@ -7,7 +7,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_slug_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catering/unified_catering_system.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/local_storange/local_storage_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/business_routing_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catalog/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catalog/product_service.dart';
@@ -143,19 +142,14 @@ class UnifiedBusinessContext extends _$UnifiedBusinessContext {
         return true;
       }
 
-      // Check local storage for the current business ID
-      final localStorage = ref.read(localStorageServiceProvider);
-      final storedBusinessId = localStorage.getString('businessId');
-
       // Also check the current business ID provider to detect any changes
       final currentBusinessId = ref.read(currentBusinessIdProvider);
 
-      final hasChanged = storedBusinessId != newBusinessId ||
-          currentBusinessId != newBusinessId;
+      final hasChanged = currentBusinessId != newBusinessId;
 
       if (hasChanged) {
         debugPrint(
-            '🔄 Business ID changed: $currentBusinessId (current) / $storedBusinessId (stored) -> $newBusinessId');
+            '🔄 Business ID changed: $currentBusinessId (current) -> $newBusinessId');
       }
 
       return hasChanged;
@@ -182,10 +176,7 @@ class UnifiedBusinessContext extends _$UnifiedBusinessContext {
         final shouldInvalidate = await _shouldInvalidateProviders(businessId);
 
         if (shouldInvalidate) {
-          // Update local storage to maintain persistence
-          final localStorage = ref.read(localStorageServiceProvider);
-          await localStorage.setString('businessId', businessId);
-
+          // NO LOCALSTORAGE - business context is purely URL-based
           // Invalidate all business-dependent providers when business changes
           await _invalidateBusinessDependentProviders();
           debugPrint('🔄 Providers invalidated due to business change');
@@ -220,6 +211,7 @@ class UnifiedBusinessContext extends _$UnifiedBusinessContext {
 
       // IMPORTANT: Always use 'default' business when accessing routes without business slugs
       // This ensures that accessing '/', '/menu', '/carrito', etc. always fetches the 'default' business
+      // NO LOCALSTORAGE - business logic is purely URL-based
       const defaultBusinessId = 'default';
 
       // Check if business ID has changed to decide on provider invalidation
@@ -227,10 +219,6 @@ class UnifiedBusinessContext extends _$UnifiedBusinessContext {
           await _shouldInvalidateProviders(defaultBusinessId);
 
       if (shouldInvalidate) {
-        // Update local storage to maintain persistence only if needed
-        final localStorage = ref.read(localStorageServiceProvider);
-        await localStorage.setString('businessId', defaultBusinessId);
-
         // Invalidate all business-dependent providers when business changes
         await _invalidateBusinessDependentProviders();
         debugPrint(
@@ -245,7 +233,7 @@ class UnifiedBusinessContext extends _$UnifiedBusinessContext {
       );
 
       debugPrint(
-          '✅ Default business context built: $context (always using "default")');
+          '✅ Default business context built: $context (always using "default") - NO LOCALSTORAGE');
       return context;
     } catch (e) {
       debugPrint('❌ Error building default context: $e');
@@ -339,11 +327,8 @@ class ExplicitBusinessContext extends _$ExplicitBusinessContext {
             await _shouldInvalidateProvidersExplicit(businessId);
 
         if (shouldInvalidate) {
-          // Update local storage to maintain persistence
-          final localStorage = ref.read(localStorageServiceProvider);
-          await localStorage.setString('businessId', businessId);
-
-          // Invalidate all business-dependent providers only if business actually changed
+          // NO LOCALSTORAGE - business context is purely URL-based
+          // Invalidate all business-dependent providers when business changes
           await _invalidateBusinessDependentProviders();
           debugPrint(
               '🔄 Providers invalidated due to business change (explicit)');
@@ -382,19 +367,14 @@ class ExplicitBusinessContext extends _$ExplicitBusinessContext {
         return true;
       }
 
-      // Check local storage for the current business ID
-      final localStorage = ref.read(localStorageServiceProvider);
-      final storedBusinessId = localStorage.getString('businessId');
-
       // Also check the current business ID provider to detect any changes
       final currentBusinessId = ref.read(currentBusinessIdProvider);
 
-      final hasChanged = storedBusinessId != newBusinessId ||
-          currentBusinessId != newBusinessId;
+      final hasChanged = currentBusinessId != newBusinessId;
 
       if (hasChanged) {
         debugPrint(
-            '🔄 Business ID changed (explicit): $currentBusinessId (current) / $storedBusinessId (stored) -> $newBusinessId');
+            '🔄 Business ID changed (explicit): $currentBusinessId (current) -> $newBusinessId');
       }
 
       return hasChanged;
@@ -419,10 +399,7 @@ class ExplicitBusinessContext extends _$ExplicitBusinessContext {
           await _shouldInvalidateProvidersExplicit(defaultBusinessId);
 
       if (shouldInvalidate) {
-        // Update local storage to maintain persistence only if needed
-        final localStorage = ref.read(localStorageServiceProvider);
-        await localStorage.setString('businessId', defaultBusinessId);
-
+        // NO LOCALSTORAGE - business context is purely URL-based
         // Invalidate all business-dependent providers when business changes
         await _invalidateBusinessDependentProviders();
         debugPrint(

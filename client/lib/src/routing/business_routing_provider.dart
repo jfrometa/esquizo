@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_slug_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/local_storange/local_storage_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/utils/web/web_utils.dart';
 
 part 'business_routing_provider.g.dart';
@@ -235,8 +234,7 @@ class UrlAwareBusinessId extends _$UrlAwareBusinessId {
         debugPrint(
             '✅ Business ID resolved: $businessId for slug: $urlBusinessSlug');
 
-        // OPTIMIZED: Store to localStorage asynchronously to avoid blocking build
-        _storeBusinessIdAsync(businessId);
+        // NO LOCALSTORAGE - business context is purely URL-based
 
         _lastResolvedBusinessId = businessId;
         _logBusinessAccess(urlBusinessSlug, businessId);
@@ -264,19 +262,6 @@ class UrlAwareBusinessId extends _$UrlAwareBusinessId {
     }
 
     return storedBusinessId;
-  }
-
-  /// OPTIMIZED: Store business ID asynchronously to avoid blocking the build method
-  void _storeBusinessIdAsync(String businessId) {
-    Future.microtask(() async {
-      try {
-        final localStorage = ref.read(localStorageServiceProvider);
-        await localStorage.setString('businessId', businessId);
-        debugPrint('💾 Business ID stored to localStorage: $businessId');
-      } catch (e) {
-        debugPrint('⚠️ Failed to store business ID to localStorage: $e');
-      }
-    });
   }
 
   /// Force refresh the business ID (useful when URL changes)
