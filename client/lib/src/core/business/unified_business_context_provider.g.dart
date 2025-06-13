@@ -152,7 +152,7 @@ final currentBusinessSlugProvider = AutoDisposeProvider<String?>.internal(
 // ignore: unused_element
 typedef CurrentBusinessSlugRef = AutoDisposeProviderRef<String?>;
 String _$unifiedBusinessContextHash() =>
-    r'782562ee506ab3a960ec2c6732d490672ffbe828';
+    r'81c8a3de6b85c65d9b53282a0706c4d5078e7c66';
 
 /// Unified business context provider that watches for slug changes and manages business context
 ///
@@ -171,7 +171,7 @@ final unifiedBusinessContextProvider = AutoDisposeAsyncNotifierProvider<
 
 typedef _$UnifiedBusinessContext = AutoDisposeAsyncNotifier<BusinessContext>;
 String _$explicitBusinessContextHash() =>
-    r'2d390bb8e3efca2069d99b00c3711807dcda5c68';
+    r'47be4775749a7d6ef35f6292b4ffadf317775738';
 
 /// Copied from Dart SDK
 class _SystemHash {

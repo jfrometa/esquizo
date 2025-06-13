@@ -7,17 +7,42 @@ import '../local_storange/local_storage_service.dart';
 import '../firebase/firebase_providers.dart';
 import '../../routing/business_routing_provider.dart';
 
-// Provider for business ID - now URL-aware
-final currentBusinessIdProvider = Provider<String>((ref) {
-  // Watch the URL-aware business ID provider
-  final urlAwareBusinessIdAsync = ref.watch(urlAwareBusinessIdProvider);
-
-  return urlAwareBusinessIdAsync.when(
-    data: (businessId) => businessId,
-    loading: () => 'default', // Fallback while loading
-    error: (_, __) => 'default', // Fallback on error
-  );
+// OPTIMIZED: Provider for business ID with better rebuild control
+// Uses a StateNotifier pattern to avoid rebuilding on every async state change
+final currentBusinessIdProvider =
+    StateNotifierProvider<_CurrentBusinessIdNotifier, String>((ref) {
+  return _CurrentBusinessIdNotifier(ref);
 });
+
+class _CurrentBusinessIdNotifier extends StateNotifier<String> {
+  final Ref _ref;
+  String? _lastResolvedId;
+
+  _CurrentBusinessIdNotifier(this._ref) : super('default') {
+    _initializeBusinessId();
+  }
+
+  void _initializeBusinessId() {
+    // Listen to the URL-aware business ID changes
+    _ref.listen(urlAwareBusinessIdProvider, (previous, next) {
+      next.whenData((businessId) {
+        if (_lastResolvedId != businessId) {
+          debugPrint('🔄 Business ID changed: $_lastResolvedId -> $businessId');
+          _lastResolvedId = businessId;
+          state = businessId;
+        }
+      });
+    });
+
+    // Get initial value
+    final urlAwareAsync = _ref.read(urlAwareBusinessIdProvider);
+    urlAwareAsync.whenData((businessId) {
+      debugPrint('✅ Initial business ID: $businessId');
+      _lastResolvedId = businessId;
+      state = businessId;
+    });
+  }
+}
 
 // Provider to initialize business ID from storage (now used by URL-aware provider)
 final initBusinessIdProvider = FutureProvider<String>((ref) async {
