@@ -11,6 +11,10 @@ import 'package:starter_architecture_flutter_firebase/src/routing/business_routi
 import 'package:starter_architecture_flutter_firebase/src/core/catalog/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catalog/product_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/cart/cart_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/order/unified_order_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/restaurant/table_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_stats_provider.dart'
+    as admin_stats;
 
 part 'unified_business_context_provider.g.dart';
 
@@ -270,6 +274,37 @@ class UnifiedBusinessContext extends _$UnifiedBusinessContext {
 
       // Cart provider (business-specific cart)
       ref.invalidate(cartProvider);
+
+      // Order providers - business-specific orders
+      ref.invalidate(activeOrdersStreamProvider);
+      ref.invalidate(allOrdersStreamProvider);
+      ref.invalidate(pendingOrdersProvider);
+      ref.invalidate(preparingOrdersProvider);
+      ref.invalidate(readyOrdersProvider);
+      ref.invalidate(admin_stats.orderStatsProvider);
+
+      // Table management providers - business-specific tables
+      ref.invalidate(tablesStreamProvider);
+      ref.invalidate(activeTablesProvider);
+      ref.invalidate(availableTablesProvider);
+
+      // Admin stats providers - business-specific statistics
+      ref.invalidate(admin_stats.combinedAdminStatsProvider);
+      ref.invalidate(admin_stats.tableStatsProvider);
+      ref.invalidate(admin_stats.productStatsProvider);
+      ref.invalidate(admin_stats.recentOrdersProvider);
+      ref.invalidate(admin_stats.salesStatsProvider);
+
+      // Restaurant service providers
+      ref.invalidate(tableServiceProvider);
+      ref.invalidate(orderServiceProvider);
+
+      // Business configuration providers that depend on current business
+      ref.invalidate(businessConfigProvider);
+      ref.invalidate(businessTypeProvider);
+      ref.invalidate(businessNameProvider);
+      ref.invalidate(businessFeaturesProvider);
+      ref.invalidate(businessSettingsProvider);
 
       debugPrint('✅ Business-dependent providers invalidated successfully');
     } catch (e) {
