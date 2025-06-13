@@ -26,10 +26,13 @@ String? businessSlugFromUrl(BusinessSlugFromUrlRef ref) {
 /// - /admin -> null (admin doesn't use business routing)
 /// - /signin -> null (auth pages don't use business routing)
 String? extractBusinessSlugFromPath(String path) {
-  // Remove leading slash
-  if (path.startsWith('/')) {
-    path = path.substring(1);
+  // Only handle paths that start with '/'
+  if (!path.startsWith('/')) {
+    return null;
   }
+
+  // Remove leading slash
+  path = path.substring(1);
 
   // Skip empty paths
   if (path.isEmpty) return null;
@@ -39,7 +42,9 @@ String? extractBusinessSlugFromPath(String path) {
   final firstSegment = segments.first;
 
   // Skip system/auth routes that don't represent business slugs
+  // These are all the root-level paths defined in the router
   final systemRoutes = {
+    // System/auth routes
     'admin',
     'signin',
     'signup',
@@ -48,10 +53,29 @@ String? extractBusinessSlugFromPath(String path) {
     'startup',
     'business-setup',
     'admin-setup',
-    'menu', // For default/root access
-    'carrito', // For default/root access
-    'cuenta', // For default/root access
-    'ordenes', // For default/root access
+    'authenticated-profile',
+
+    // Default business routes (when no business slug is present)
+    'menu',
+    'carrito',
+    'cart',
+    'cuenta',
+    'ordenes',
+    'catering-menu',
+    'catering-quote',
+    'subscripciones',
+    'catering',
+    'populares',
+    'categorias',
+    'platos',
+    'completar-orden',
+    'meal-plans',
+
+    // Admin panel routes
+    'dashboard',
+    'products',
+    'orders',
+    'settings',
   };
 
   if (systemRoutes.contains(firstSegment)) {

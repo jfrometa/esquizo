@@ -1,0 +1,13 @@
+{
+  "name": "flutter-spa-server",
+  "version": "1.0.0",
+  "description": "Simple SPA server for Flutter web app with proper routing fallback",
+  "main": "spa_server.js",
+  "scripts": {
+    "start": "node spa_server.js",
+    "build-and-serve": "flutter build web && node spa_server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
