@@ -218,17 +218,34 @@ class UnifiedBusinessContext extends _$UnifiedBusinessContext {
     try {
       debugPrint('🏢 Building default business context');
 
-      // Get default business ID from storage or use fallback
-      final storedBusinessId = await ref.read(initBusinessIdProvider.future);
+      // IMPORTANT: Always use 'default' business when accessing routes without business slugs
+      // This ensures that accessing '/', '/menu', '/carrito', etc. always fetches the 'default' business
+      const defaultBusinessId = 'default';
+
+      // Check if business ID has changed to decide on provider invalidation
+      final shouldInvalidate =
+          await _shouldInvalidateProviders(defaultBusinessId);
+
+      if (shouldInvalidate) {
+        // Update local storage to maintain persistence only if needed
+        final localStorage = ref.read(localStorageServiceProvider);
+        await localStorage.setString('businessId', defaultBusinessId);
+
+        // Invalidate all business-dependent providers when business changes
+        await _invalidateBusinessDependentProviders();
+        debugPrint(
+            '🔄 Providers invalidated due to business change to default');
+      }
 
       final context = BusinessContext(
-        businessId: storedBusinessId,
+        businessId: defaultBusinessId,
         businessSlug: null,
         isDefault: true,
         lastUpdated: DateTime.now(),
       );
 
-      debugPrint('✅ Default business context built: $context');
+      debugPrint(
+          '✅ Default business context built: $context (always using "default")');
       return context;
     } catch (e) {
       debugPrint('❌ Error building default context: $e');
@@ -393,17 +410,34 @@ class ExplicitBusinessContext extends _$ExplicitBusinessContext {
     try {
       debugPrint('🏢 Building default business context from explicit provider');
 
-      // Get default business ID from storage or use fallback
-      final storedBusinessId = await ref.read(initBusinessIdProvider.future);
+      // IMPORTANT: Always use 'default' business when accessing routes without business slugs
+      // This ensures that accessing '/', '/menu', '/carrito', etc. always fetches the 'default' business
+      const defaultBusinessId = 'default';
+
+      // Check if business ID has changed to decide on provider invalidation
+      final shouldInvalidate =
+          await _shouldInvalidateProvidersExplicit(defaultBusinessId);
+
+      if (shouldInvalidate) {
+        // Update local storage to maintain persistence only if needed
+        final localStorage = ref.read(localStorageServiceProvider);
+        await localStorage.setString('businessId', defaultBusinessId);
+
+        // Invalidate all business-dependent providers when business changes
+        await _invalidateBusinessDependentProviders();
+        debugPrint(
+            '🔄 Providers invalidated due to business change to default (explicit)');
+      }
 
       final context = BusinessContext(
-        businessId: storedBusinessId,
+        businessId: defaultBusinessId,
         businessSlug: null,
         isDefault: true,
         lastUpdated: DateTime.now(),
       );
 
-      debugPrint('✅ Default business context built: $context');
+      debugPrint(
+          '✅ Default business context built: $context (always using "default")');
       return context;
     } catch (e) {
       debugPrint('❌ Error building default context: $e');
