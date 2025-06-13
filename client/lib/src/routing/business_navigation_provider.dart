@@ -67,7 +67,8 @@ class BusinessNavigationController extends _$BusinessNavigationController {
 
     // Check if we're already on this business/route combination
     if (_currentBusinessSlug == businessSlug && _currentRoute == route) {
-      debugPrint('✅ Already on $businessSlug$route, skipping navigation');
+      final fullPath = route == '/' ? '/$businessSlug' : '/$businessSlug$route';
+      debugPrint('✅ Already on $fullPath, skipping navigation');
       return;
     }
 
@@ -102,7 +103,9 @@ class BusinessNavigationController extends _$BusinessNavigationController {
       _currentBusinessSlug = businessSlug;
       _currentRoute = route;
 
-      debugPrint('✅ Business navigation set: $businessSlug$route');
+      // Construct the proper full path for logging
+      final fullPath = route == '/' ? '/$businessSlug' : '/$businessSlug$route';
+      debugPrint('✅ Business navigation set: $fullPath');
     } catch (error) {
       debugPrint('❌ Error setting business navigation: $error');
       rethrow;

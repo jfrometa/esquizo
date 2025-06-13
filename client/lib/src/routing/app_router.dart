@@ -15,7 +15,6 @@ import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_an
 import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_startup.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/optimized_business_wrappers.dart';
-import 'package:starter_architecture_flutter_firebase/src/routing/go_router_refresh_stream.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/navigation_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/scaffold_with_nested_navigation.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_dashboard_home.dart';
@@ -46,7 +45,6 @@ import 'package:starter_architecture_flutter_firebase/src/screens/orders/in_prog
 import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/categories.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/home/home.dart';
 
-import 'package:starter_architecture_flutter_firebase/src/utils/web/web_utils.dart';
 import 'package:go_router/go_router.dart';
 
 part 'app_router.g.dart';
@@ -60,29 +58,34 @@ final _cartNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'cart');
 final _adminNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'admin');
 final _ordersNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'local');
 
-// Store paths that were attempted before authentication
-final _pendingAdminPathProvider = StateProvider<String?>((ref) => null);
 // Error state for router
 final routerErrorNotifierProvider = StateProvider<String?>((ref) => null);
 
-// Debug navigator observer
+// Debug navigator observer - reduced logging
 class _DebugNavigatorObserver extends NavigatorObserver {
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    debugPrint('🚢 Navigation: PUSH to ${route.settings.name}');
+    // Only log admin routes to reduce noise
+    if (kDebugMode && route.settings.name?.startsWith('/admin') == true) {
+      debugPrint('🚢 Navigation: PUSH to ${route.settings.name}');
+    }
     super.didPush(route, previousRoute);
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    debugPrint('🚢 Navigation: POP from ${route.settings.name}');
+    if (kDebugMode && route.settings.name?.startsWith('/admin') == true) {
+      debugPrint('🚢 Navigation: POP from ${route.settings.name}');
+    }
     super.didPop(route, previousRoute);
   }
 
   @override
   void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
-    debugPrint(
-        '🚢 Navigation: REPLACE ${oldRoute?.settings.name} → ${newRoute?.settings.name}');
+    if (kDebugMode && newRoute?.settings.name?.startsWith('/admin') == true) {
+      debugPrint(
+          '🚢 Navigation: REPLACE ${oldRoute?.settings.name} → ${newRoute?.settings.name}');
+    }
     super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
   }
 }
@@ -140,47 +143,38 @@ enum AppRoute {
 
 @riverpod
 GoRouter goRouter(Ref ref) {
+  // ⚠️ CRITICAL: Only watch essential providers to prevent constant rebuilds
   final authRepository = ref.watch(authRepositoryProvider);
-  // Use allNavigationDestinations for consistent shell branches
-  final allDestinations = ref.watch(allNavigationDestinationsProvider);
   final isFirebaseInitialized = ref.watch(isFirebaseInitializedProvider);
-  final isAdminAsync = ref.watch(isAdminProvider);
 
-  // Force admin status check if user is logged in but admin status hasn't been determined
-  if (authRepository.currentUser != null && isAdminAsync.hasValue == false) {
-    ref.invalidate(isAdminProvider);
-  }
+  // ⚠️ READ (not watch) these to prevent rebuilds when they change
+  final allDestinations = ref.read(allNavigationDestinationsProvider);
+  final isAdminAsync = ref.read(isAdminProvider);
+  final businessConfigAsync = ref.read(businessConfigProvider);
 
-  // Watch for business config status (same as AdminSetupScreen)
-  final businessConfigAsync = ref.watch(businessConfigProvider);
+  // *** CRITICAL FIX: Let GoRouter handle initial location automatically ***
+  // With path URL strategy, GoRouter will automatically detect the browser URL
+  // Don't override it with a hardcoded value
 
-  // *** DIRECTLY USE WEB UTILS TO GET THE INITIAL LOCATION FROM BROWSER URL ***
-  String initialLocation = '/';
-  if (kIsWeb) {
-    initialLocation = WebUtils.getCurrentPath();
-    debugPrint('📍 Direct initial location: $initialLocation');
-
-    // Store admin path if detected
-    if (initialLocation.startsWith('/admin') && initialLocation != '/admin') {
-      debugPrint('📍 Storing admin path: $initialLocation');
-      ref.read(_pendingAdminPathProvider.notifier).state = initialLocation;
-    }
+  if (kDebugMode) {
+    debugPrint(
+        '📍 Router provider creating - letting GoRouter handle initial location');
   }
 
   return GoRouter(
-    initialLocation: initialLocation,
+    // ⚠️ REMOVED: Don't set initialLocation - let GoRouter handle it with URL strategy
     navigatorKey: _rootNavigatorKey,
     debugLogDiagnostics: kDebugMode,
-    refreshListenable: GoRouterRefreshStream(authRepository.authStateChanges()),
+    // ⚠️ REMOVED: Aggressive refresh stream that was causing constant redirects
+    // refreshListenable: GoRouterRefreshStream(authRepository.authStateChanges()),
     redirect: (context, state) async {
       try {
         final path = state.uri.path;
 
-        // Enhanced logging for debugging navigation issues
-        debugPrint('🧭 Router redirect triggered!');
-        debugPrint('🧭   Path: "$path"');
-        debugPrint('🧭   Full URI: "${state.uri}"');
-        debugPrint('🧭   Firebase initialized: $isFirebaseInitialized');
+        // ⚠️ CRITICAL: Only log for admin routes to reduce noise
+        if (kDebugMode && path.startsWith('/admin')) {
+          debugPrint('🧭 Router evaluating admin route: "$path"');
+        }
 
         // Skip redirect logic entirely if we're already at error
         if (path.startsWith('/error')) {
@@ -193,7 +187,17 @@ GoRouter goRouter(Ref ref) {
           return '/startup';
         }
 
-        // Check authentication status
+        // ⚠️ CRITICAL FIX: Only handle redirects for ADMIN routes
+        // Let ALL business routes proceed without any interference
+        if (!path.startsWith('/admin') &&
+            !path.startsWith('/signin') &&
+            !path.startsWith('/error') &&
+            !path.startsWith('/startup')) {
+          // This is a business route or default route - let it proceed
+          return null;
+        }
+
+        // Check authentication status - ONLY for admin routes
         final isLoggedIn = authRepository.currentUser != null;
         final isLoggingIn = state.uri.path == '/signin';
         final isOnboarding = state.uri.path == '/onboarding';
@@ -206,118 +210,62 @@ GoRouter goRouter(Ref ref) {
           return null;
         }
 
-        // Handle authentication redirects
+        // Handle authentication redirects - ONLY for truly protected routes
         if (!isLoggedIn) {
           // Allow access to public routes and error routes
           if (isLoggingIn || isOnboarding || isAtError || isAtStartup) {
             return null;
           }
 
-          // Store the attempted path to redirect after login if not already at signin
-          if (path != '/signin') {
+          // Only redirect to signin for admin routes - let business routes work publicly
+          if (path.startsWith('/admin')) {
             return '/signin?from=$path';
           }
+
+          // Allow all other routes (including business routes) to proceed
           return null;
         }
 
-        // User is logged in
-        if (isLoggedIn) {
-          // Check for any pending path that was saved before authentication
-          final pendingPath = ref.read(_pendingAdminPathProvider);
+        // User is logged in - only handle admin routes specifically
+        if (isLoggedIn && path.startsWith('/admin')) {
+          // Don't redirect if admin status is still loading
+          if (isAdminAsync.isLoading) {
+            return null; // Allow navigation while loading
+          }
 
-          // Handle platform admin routes (/admin) - Only for PLATFORM admins
-          if (path.startsWith('/admin')) {
-            // Don't redirect if admin status is still loading
-            if (isAdminAsync.isLoading) {
-              debugPrint(
-                  '⏳ Platform admin status loading, allowing navigation: $path');
-              return null; // Allow navigation while loading
-            }
+          // Check if user is a PLATFORM admin (not just a business owner)
+          final isPlatformAdmin = await _isPlatformAdmin(ref);
 
-            // Check if user is a PLATFORM admin (not just a business owner)
-            final isPlatformAdmin = await _isPlatformAdmin(ref);
-
+          // Only platform admins can access /admin routes
+          if (!isPlatformAdmin) {
             debugPrint(
-                '🔐 Platform admin route access attempt: isPlatformAdmin=$isPlatformAdmin, path=$path');
-
-            // Only platform admins can access /admin routes
-            if (!isPlatformAdmin) {
-              debugPrint(
-                  '🚫 Non-platform-admin blocked from platform admin area: $path → redirecting to /');
-              return '/'; // Redirect non-platform-admins to home
-            }
-
-            debugPrint('✅ Platform admin access granted for: $path');
-
-            // Check business configuration status ONLY for platform admin users
-            final businessConfig = businessConfigAsync.value;
-            final isBusinessConfigured =
-                businessConfig != null && businessConfig.isActive;
-
-            // Only redirect to admin setup if business is definitely not set up
-            // and we're not already at the admin setup page
-            if (businessConfigAsync.hasValue &&
-                !isBusinessConfigured &&
-                path != '/admin-setup') {
-              debugPrint(
-                  '🔧 Platform admin needs business setup, redirecting to /admin-setup');
-              return '/admin-setup';
-            }
-
-            // If business is set up and user is at admin-setup, redirect to admin panel
-            if (businessConfigAsync.hasValue &&
-                isBusinessConfigured &&
-                path == '/admin-setup') {
-              debugPrint(
-                  '🔧 Business already configured, redirecting to /admin');
-              return '/admin';
-            }
-
-            // Allow platform admin route access
-            debugPrint('✅ Platform admin route allowed: $path');
-            return null;
+                '🚫 Non-platform-admin blocked from platform admin area');
+            return '/'; // Redirect non-platform-admins to home
           }
 
-          // Define system routes that should never be treated as business routes
-          final systemRoutes = {
-            '/admin',
-            '/signin',
-            '/signup',
-            '/onboarding',
-            '/error',
-            '/startup',
-            '/business-setup',
-            '/admin-setup',
-          };
+          // Check business configuration for admin setup flow
+          final businessConfig = businessConfigAsync.value;
+          final isBusinessConfigured =
+              businessConfig != null && businessConfig.isActive;
 
-          // Check if this is a system route - allow immediately
-          if (systemRoutes.any((route) => path.startsWith(route))) {
-            debugPrint('🔧 System route access: $path');
-            return null;
+          // Only redirect to admin setup if business is definitely not set up
+          if (businessConfigAsync.hasValue &&
+              !isBusinessConfigured &&
+              path != '/admin-setup') {
+            return '/admin-setup';
           }
 
-          // All other routes (default and business) are handled by route matching
-          // Let GoRouter handle the route matching - don't interfere
-          debugPrint('🌐 Route will be handled by GoRouter matching: $path');
-          return null;
-
-          // If we're at startup, signin, or onboarding, go to saved path or home
-          if (isAtStartup || isLoggingIn || isOnboarding) {
-            if (pendingPath != null &&
-                pendingPath.isNotEmpty &&
-                pendingPath != '/') {
-              return pendingPath;
-            }
-            return '/'; // Default to home if no pending path
+          // If business is set up and user is at admin-setup, redirect to admin panel
+          if (businessConfigAsync.hasValue &&
+              isBusinessConfigured &&
+              path == '/admin-setup') {
+            return '/admin';
           }
-
-          // Allow all other routes to proceed - don't redirect unknown paths
-          // The GoRouter will handle route matching and show 404 if needed
-          debugPrint('🌐 Allowing route to proceed: $path');
-          return null;
         }
 
-        return null; // No redirect needed
+        // ⚠️ CRITICAL: Let ALL other routes proceed without interference
+        // This allows the URL strategy to work properly for business routes
+        return null;
       } catch (e) {
         debugPrint("🔥 Router error: $e");
         return '/error?message=${Uri.encodeComponent(e.toString())}';
@@ -326,12 +274,15 @@ GoRouter goRouter(Ref ref) {
     observers: [
       // Custom navigation observer for debugging
       _DebugNavigatorObserver(),
-      // Firebase Analytics Observer
+      // Firebase Analytics Observer - reduced logging
       FirebaseAnalyticsObserver(
         analytics: FirebaseAnalytics.instance,
         nameExtractor: (RouteSettings settings) {
           final String? name = settings.name;
-          debugPrint('📊 Analytics Observer: Route changed to: $name');
+          // Only log admin routes to reduce noise
+          if (kDebugMode && name?.startsWith('/admin') == true) {
+            debugPrint('📊 Analytics Observer: Route changed to: $name');
+          }
           if (name != null && name.isNotEmpty) {
             AnalyticsService.instance.logCustomEvent(
               eventName: 'screen_view',
@@ -420,8 +371,7 @@ GoRouter goRouter(Ref ref) {
           child: ScaffoldWithNestedNavigation(navigationShell: navigationShell),
         ),
         branches: allDestinations
-            .where((dest) =>
-                dest.path != '/admin') // Exclude admin from shell branches
+            // Exclude admin from shell branches
             .map((dest) => _buildBranch(dest))
             .toList(),
       ),
@@ -430,21 +380,8 @@ GoRouter goRouter(Ref ref) {
       // This comes AFTER StatefulShellRoute to catch remaining paths as potential business slugs
       GoRoute(
         path: '/:businessSlug',
-        redirect: (context, state) {
-          final businessSlug = state.pathParameters['businessSlug'];
-          debugPrint('🔍 Checking business slug: $businessSlug');
-
-          if (businessSlug != null && _isValidBusinessSlug(businessSlug)) {
-            // Valid business slug format - allow business routing
-            // The actual business existence check happens in the business context provider
-            debugPrint('🏢 Valid business slug detected: $businessSlug');
-            return null;
-          }
-          // Invalid business slug format - redirect to home
-          debugPrint(
-              '❌ Invalid business slug format: $businessSlug, redirecting to home');
-          return '/';
-        },
+        // ⚠️ REMOVED: Aggressive redirect that was interfering with URL strategy
+        // Let the route proceed and handle invalid slugs in the business context provider
         pageBuilder: (context, state) {
           final businessSlug = state.pathParameters['businessSlug']!;
           debugPrint('🏢 Optimized business home for: $businessSlug');
@@ -851,78 +788,6 @@ Future<bool> _isPlatformAdmin(Ref ref) async {
 }
 
 // Helper function to validate business slugs in routing
-bool _isValidBusinessSlug(String slug) {
-  // Business slugs should:
-  // - Be at least 2 characters long
-  // - Not contain spaces or special routing characters
-  // - Only contain lowercase letters, numbers, and hyphens
-  // - Not start or end with hyphens
-  if (slug.length < 2 || slug.length > 50) return false;
-  if (slug.contains(' ') || slug.contains('?') || slug.contains('#'))
-    return false;
-  if (slug.startsWith('-') || slug.endsWith('-')) return false;
-  if (slug.contains('--')) return false; // No consecutive hyphens
-
-  // Check valid pattern: lowercase letters, numbers, and hyphens only
-  final validPattern = RegExp(r'^[a-z0-9-]+$');
-  if (!validPattern.hasMatch(slug)) return false;
-
-  // Check against reserved words (including default routes)
-  final reservedSlugs = {
-    'admin',
-    'api',
-    'www',
-    'app',
-    'help',
-    'support',
-    'about',
-    'contact',
-    'signin',
-    'signup',
-    'login',
-    'logout',
-    'register',
-    'dashboard',
-    'settings',
-    'profile',
-    'account',
-    'billing',
-    'pricing',
-    'terms',
-    'privacy',
-    'legal',
-    'security',
-    'status',
-    'blog',
-    'news',
-    'docs',
-    'documentation',
-    'guide',
-    'tutorial',
-    'faq',
-    'mail',
-    'email',
-    'static',
-    'assets',
-    'images',
-    'css',
-    'js',
-    'javascript',
-    'fonts',
-    'menu', // Default route
-    'carrito', // Default route
-    'cuenta', // Default route
-    'ordenes', // Default route
-    'startup',
-    'error',
-    'onboarding',
-    'business-setup',
-    'admin-setup'
-  };
-
-  return !reservedSlugs.contains(slug);
-}
-
 /// Helper function to get business-specific admin routes
 /// These are simplified admin routes that work within business context
 List<RouteBase> getBusinessAdminRoutes() {

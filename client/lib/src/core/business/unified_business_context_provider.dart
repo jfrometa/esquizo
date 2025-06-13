@@ -65,14 +65,34 @@ class BusinessContext {
 /// Unified business context provider that watches for slug changes and manages business context
 @riverpod
 class UnifiedBusinessContext extends _$UnifiedBusinessContext {
+  // Track the last processed business slug to prevent unnecessary rebuilds
+  String? _lastProcessedSlug;
+  BusinessContext? _cachedContext;
+
   @override
   Future<BusinessContext> build() async {
     // Watch for URL-based business slug changes
     final urlBusinessSlug = ref.watch(businessSlugFromUrlProvider);
 
+    // ⚠️ OPTIMIZATION: Skip rebuild if slug hasn't actually changed
+    if (_lastProcessedSlug == urlBusinessSlug && _cachedContext != null) {
+      debugPrint('⚡ Using cached context for ${urlBusinessSlug ?? 'default'}');
+      return _cachedContext!;
+    }
+
     debugPrint('🏢 Building unified business context...');
     debugPrint('🌐 URL business slug: $urlBusinessSlug');
+    debugPrint('🔄 Slug changed from $_lastProcessedSlug to $urlBusinessSlug');
 
+    _lastProcessedSlug = urlBusinessSlug;
+    final context = await _buildContextForSlug(urlBusinessSlug);
+    _cachedContext = context;
+
+    return context;
+  }
+
+  /// Build context for the given slug (or null for default)
+  Future<BusinessContext> _buildContextForSlug(String? urlBusinessSlug) async {
     if (urlBusinessSlug != null && urlBusinessSlug.isNotEmpty) {
       // Business-specific routing (e.g., /g3, /kako)
       debugPrint(
@@ -82,6 +102,37 @@ class UnifiedBusinessContext extends _$UnifiedBusinessContext {
       // Default business routing (e.g., /, /menu, /carrito)
       debugPrint('🏠 Using default business routing');
       return await _buildDefaultContext();
+    }
+  }
+
+  /// Check if providers should be invalidated based on business ID change
+  Future<bool> _shouldInvalidateProviders(String newBusinessId) async {
+    try {
+      // Check if we have a cached context with the same business ID
+      if (_cachedContext != null &&
+          _cachedContext!.businessId == newBusinessId) {
+        return false; // Same business ID, no need to invalidate
+      }
+
+      // Check local storage for the current business ID
+      final localStorage = ref.read(localStorageServiceProvider);
+      final storedBusinessId = localStorage.getString('businessId');
+
+      // Also check the current business ID provider to avoid unnecessary invalidations
+      final currentBusinessId = ref.read(currentBusinessIdProvider);
+
+      final hasChanged = storedBusinessId != newBusinessId &&
+          currentBusinessId != newBusinessId;
+
+      if (hasChanged) {
+        debugPrint(
+            '🔄 Business ID changed: $currentBusinessId -> $newBusinessId');
+      }
+
+      return hasChanged;
+    } catch (e) {
+      debugPrint('⚠️ Error checking if providers should be invalidated: $e');
+      return true; // When in doubt, invalidate to be safe
     }
   }
 
@@ -98,12 +149,20 @@ class UnifiedBusinessContext extends _$UnifiedBusinessContext {
         debugPrint(
             '🏢 Resolved business ID: $businessId for slug: $businessSlug');
 
-        // Update local storage to maintain persistence
-        final localStorage = ref.read(localStorageServiceProvider);
-        await localStorage.setString('businessId', businessId);
+        // Check if business ID has actually changed to avoid unnecessary invalidations
+        final shouldInvalidate = await _shouldInvalidateProviders(businessId);
 
-        // Invalidate all business-dependent providers
-        await _invalidateBusinessDependentProviders();
+        if (shouldInvalidate) {
+          // Update local storage to maintain persistence
+          final localStorage = ref.read(localStorageServiceProvider);
+          await localStorage.setString('businessId', businessId);
+
+          // Invalidate all business-dependent providers only if business actually changed
+          await _invalidateBusinessDependentProviders();
+          debugPrint('🔄 Providers invalidated due to business change');
+        } else {
+          debugPrint('⚡ Business ID unchanged, skipping provider invalidation');
+        }
 
         final context = BusinessContext(
           businessId: businessId,
@@ -156,15 +215,20 @@ class UnifiedBusinessContext extends _$UnifiedBusinessContext {
 
   /// Invalidate all business-dependent providers when business context changes
   Future<void> _invalidateBusinessDependentProviders() async {
+    // Reduce logging noise - only log the start of invalidation
     debugPrint('🔄 Invalidating business-dependent providers...');
 
     try {
-      // Core business providers
+      // Core business providers - these MUST be invalidated
       ref.invalidate(currentBusinessIdProvider);
-      ref.invalidate(businessConfigProvider);
       ref.invalidate(urlAwareBusinessIdProvider);
 
-      // Catalog and menu providers
+      // ⚠️ CRITICAL FIX: Don't invalidate businessConfigProvider
+      // This causes theme providers to rebuild which restarts the entire app
+      // Business config should only change when switching between different businesses
+      // ref.invalidate(businessConfigProvider);
+
+      // Data providers - these should be invalidated for business changes
       ref.invalidate(catalogItemsProvider);
       ref.invalidate(menuProductsProvider);
       ref.invalidate(menuCategoriesProvider);
@@ -172,13 +236,11 @@ class UnifiedBusinessContext extends _$UnifiedBusinessContext {
       // Catering providers
       ref.invalidate(cateringItemRepositoryProvider);
       ref.invalidate(cateringCategoryRepositoryProvider);
-      // ref.invalidate(allCateringItemsProvider);
-      // ref.invalidate(allCateringCategoriesProvider);
 
       // Cart provider (business-specific cart)
       ref.invalidate(cartProvider);
 
-      debugPrint('✅ All business-dependent providers invalidated');
+      // Only log completion, no detailed success message
     } catch (e) {
       debugPrint('⚠️ Error invalidating some providers: $e');
     }
@@ -186,23 +248,26 @@ class UnifiedBusinessContext extends _$UnifiedBusinessContext {
 
   /// Force refresh the business context (useful for manual context switching)
   void refresh() {
+    // Clear cache to force rebuild on next access
+    _lastProcessedSlug = null;
+    _cachedContext = null;
     ref.invalidateSelf();
   }
 
   /// Switch to a specific business slug
   Future<void> switchToBusiness(String businessSlug) async {
     debugPrint('🔄 Switching to business: $businessSlug');
-
-    // This will be handled by the URL routing, but we can force a refresh
-    ref.invalidateSelf();
+    // Clear cache and let the URL routing handle the change
+    _lastProcessedSlug = null;
+    _cachedContext = null;
   }
 
   /// Switch to default business context
   Future<void> switchToDefault() async {
     debugPrint('🔄 Switching to default business');
-
-    // This will be handled by the URL routing, but we can force a refresh
-    ref.invalidateSelf();
+    // Clear cache and let the URL routing handle the change
+    _lastProcessedSlug = null;
+    _cachedContext = null;
   }
 }
 
@@ -223,12 +288,23 @@ class ExplicitBusinessContext extends _$ExplicitBusinessContext {
         debugPrint(
             '🏢 Resolved business ID: $businessId for slug: $businessSlug');
 
-        // Update local storage to maintain persistence
-        final localStorage = ref.read(localStorageServiceProvider);
-        await localStorage.setString('businessId', businessId);
+        // Check if business ID has actually changed to avoid unnecessary invalidations
+        final shouldInvalidate =
+            await _shouldInvalidateProvidersExplicit(businessId);
 
-        // Invalidate all business-dependent providers
-        await _invalidateBusinessDependentProviders();
+        if (shouldInvalidate) {
+          // Update local storage to maintain persistence
+          final localStorage = ref.read(localStorageServiceProvider);
+          await localStorage.setString('businessId', businessId);
+
+          // Invalidate all business-dependent providers only if business actually changed
+          await _invalidateBusinessDependentProviders();
+          debugPrint(
+              '🔄 Providers invalidated due to business change (explicit)');
+        } else {
+          debugPrint(
+              '⚡ Business ID unchanged, skipping provider invalidation (explicit)');
+        }
 
         final context = BusinessContext(
           businessId: businessId,
@@ -247,6 +323,32 @@ class ExplicitBusinessContext extends _$ExplicitBusinessContext {
     } catch (e) {
       debugPrint('❌ Error building explicit business context: $e');
       return await _buildDefaultContext();
+    }
+  }
+
+  /// Check if providers should be invalidated based on business ID change (explicit context)
+  Future<bool> _shouldInvalidateProvidersExplicit(String newBusinessId) async {
+    try {
+      // Check local storage for the current business ID
+      final localStorage = ref.read(localStorageServiceProvider);
+      final storedBusinessId = localStorage.getString('businessId');
+
+      // Also check the current business ID provider to avoid unnecessary invalidations
+      final currentBusinessId = ref.read(currentBusinessIdProvider);
+
+      final hasChanged = storedBusinessId != newBusinessId &&
+          currentBusinessId != newBusinessId;
+
+      if (hasChanged) {
+        debugPrint(
+            '🔄 Business ID changed (explicit): $currentBusinessId -> $newBusinessId');
+      }
+
+      return hasChanged;
+    } catch (e) {
+      debugPrint(
+          '⚠️ Error checking if providers should be invalidated (explicit): $e');
+      return true; // When in doubt, invalidate to be safe
     }
   }
 
@@ -281,31 +383,30 @@ class ExplicitBusinessContext extends _$ExplicitBusinessContext {
 
   /// Invalidate all business-dependent providers when business context changes
   Future<void> _invalidateBusinessDependentProviders() async {
-    debugPrint('🔄 Invalidating business-dependent providers...');
+    // Reduce logging noise - only log when invalidating
+    debugPrint('🔄 Invalidating business-dependent providers (explicit)...');
 
     try {
-      // Core business providers
+      // Core business providers - these MUST be invalidated
       ref.invalidate(currentBusinessIdProvider);
-      ref.invalidate(businessConfigProvider);
       ref.invalidate(urlAwareBusinessIdProvider);
 
-      // Catalog and menu providers
+      // ⚠️ CRITICAL FIX: Don't invalidate businessConfigProvider
+      // This causes theme providers to rebuild which restarts the entire app
+      // Business config should only change when switching between different businesses
+      // ref.invalidate(businessConfigProvider);
+
+      // Data providers - these should be invalidated for business changes
       ref.invalidate(catalogItemsProvider);
       ref.invalidate(menuProductsProvider);
       ref.invalidate(menuCategoriesProvider);
 
-      // Catering providers
-      // ref.invalidate(cateringItemRepositoryProvider);
-      // ref.invalidate(cateringCategoryRepositoryProvider);
-      // ref.invalidate(allCateringItemsProvider);
-      // ref.invalidate(allCateringCategoriesProvider);
-
       // Cart provider (business-specific cart)
       ref.invalidate(cartProvider);
 
-      debugPrint('✅ All business-dependent providers invalidated');
+      // Only log completion if there are issues
     } catch (e) {
-      debugPrint('⚠️ Error invalidating some providers: $e');
+      debugPrint('⚠️ Error invalidating some providers (explicit): $e');
     }
   }
 

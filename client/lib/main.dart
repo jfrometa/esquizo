@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_web_plugins/url_strategy.dart'; // Import for usePathUrlStrategy
 import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 import 'package:starter_architecture_flutter_firebase/src/app.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
@@ -22,6 +21,7 @@ import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_an
 import 'package:starter_architecture_flutter_firebase/src/localization/string_hardcoded.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/utils/web/web_utils.dart';
+import 'package:url_strategy/url_strategy.dart';
 
 // Using dynamic type to handle different device info types across platforms
 late final dynamic deviceInfo;
@@ -36,7 +36,7 @@ Future<void> main() async {
   // Configure URL strategy for web (use path URLs instead of hash fragments)
   if (kIsWeb) {
     // This is the FIRST thing we do to ensure it's applied before any routing happens
-    usePathUrlStrategy();
+    setPathUrlStrategy();
     debugPrint('🌐 Path URL strategy initialized');
   }
 
@@ -110,7 +110,7 @@ Future<void> main() async {
     }
 
     // Run a minimal error app to show the user something went wrong
-    runApp(MaterialApp(
+    runApp(ProviderScope(child: MaterialApp(
       home: Scaffold(
         body: Center(
           child: Padding(
@@ -150,7 +150,7 @@ Future<void> main() async {
           ),
         ),
       ),
-    ));
+    )));
   }
 }
 
