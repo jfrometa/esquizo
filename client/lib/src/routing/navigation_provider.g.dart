@@ -6,8 +6,28 @@ part of 'navigation_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+String _$isAdminComputedHash() => r'd1615325617c1c0ee32399092df742ba344f0240';
+
+/// Computed provider that returns a simple boolean for admin status
+/// This prevents unnecessary rebuilds when watching AsyncValue
+///
+/// Copied from [isAdminComputed].
+@ProviderFor(isAdminComputed)
+final isAdminComputedProvider = AutoDisposeProvider<bool>.internal(
+  isAdminComputed,
+  name: r'isAdminComputedProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$isAdminComputedHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef IsAdminComputedRef = AutoDisposeProviderRef<bool>;
 String _$allNavigationDestinationsHash() =>
-    r'91fe991dd79577ed6905d32fb37381f26bba9c61';
+    r'5c2a1fb7fa7e521e5268b26bf459b0d95f932f23';
 
 /// Provider for all possible navigation destinations (including admin)
 ///
@@ -29,9 +49,9 @@ final allNavigationDestinationsProvider =
 typedef AllNavigationDestinationsRef
     = AutoDisposeProviderRef<List<NavigationDestinationItem>>;
 String _$navigationDestinationsHash() =>
-    r'3397f48ee0c8557ea293663504dc007358adb1c8';
+    r'27435597151ab76e348e33c388559bfe48ae8e23';
 
-/// Provider for visible navigation destinations
+/// Provider for visible navigation destinations (optimized)
 ///
 /// Copied from [navigationDestinations].
 @ProviderFor(navigationDestinations)
@@ -51,7 +71,7 @@ final navigationDestinationsProvider =
 typedef NavigationDestinationsRef
     = AutoDisposeProviderRef<List<NavigationDestinationItem>>;
 String _$findTabIndexFromPathHash() =>
-    r'75ecc7288c5d14e60b99711dba2d3eb30fbd1aaa';
+    r'd02f8656844c7dbe4261aad65441f7a138ab5058';
 
 /// Copied from Dart SDK
 class _SystemHash {

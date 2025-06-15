@@ -43,6 +43,32 @@ class NavigationDestinationItem {
   }
 }
 
+/// Computed provider that returns a simple boolean for admin status
+/// This prevents unnecessary rebuilds when watching AsyncValue
+@riverpod
+bool isAdminComputed(IsAdminComputedRef ref) {
+  final adminStatusAsync = ref.watch(isAdminProvider);
+  final authState = ref.watch(authStateChangesProvider);
+  final isAuthenticated = authState.value != null;
+
+  // Return false if not authenticated
+  if (!isAuthenticated) return false;
+
+  // Return computed admin status from AsyncValue
+  final isAdmin = adminStatusAsync.when(
+    data: (isAdmin) => isAdmin,
+    loading: () => false, // While loading, don't show admin
+    error: (error, stackTrace) {
+      debugPrint('❌ Error in admin provider: $error');
+      return false;
+    },
+  );
+
+  debugPrint(
+      '🔐 Admin status computed: $isAdmin (authenticated: $isAuthenticated)');
+  return isAdmin;
+}
+
 /// Provider for all possible navigation destinations (including admin)
 @riverpod
 List<NavigationDestinationItem> allNavigationDestinations(
@@ -68,12 +94,12 @@ List<NavigationDestinationItem> allNavigationDestinations(
       selectedIcon: Icons.shopping_cart,
     ),
     const NavigationDestinationItem(
-      label: 'Account',
-      path: '/cuenta',
-      icon: Icons.person_outline,
-      selectedIcon: Icons.person,
+      label: 'Orders',
+      path: '/ordenes',
+      icon: Icons.receipt_long_outlined,
+      selectedIcon: Icons.receipt_long,
     ),
-    // Admin tab is always in the list but visibility is controlled
+    // Admin tab appears next to the orders icon
     const NavigationDestinationItem(
       label: 'Admin',
       path: '/admin',
@@ -81,42 +107,52 @@ List<NavigationDestinationItem> allNavigationDestinations(
       selectedIcon: Icons.admin_panel_settings,
       isVisible: false, // Hidden by default
     ),
+    const NavigationDestinationItem(
+      label: 'Account',
+      path: '/cuenta',
+      icon: Icons.person_outline,
+      selectedIcon: Icons.person,
+    ),
   ];
 }
 
-/// Provider for visible navigation destinations
+/// Provider for visible navigation destinations (optimized)
 @riverpod
 List<NavigationDestinationItem> navigationDestinations(
     NavigationDestinationsRef ref) {
   // Watch the auto-check provider to ensure admin status is checked on login
   ref.watch(autoCheckAdminStatusProvider);
 
-  final adminStatusAsync = ref.watch(isAdminProvider);
-  final authState = ref.watch(authStateChangesProvider);
-  final isAuthenticated = authState.value != null;
+  // Use the computed admin status provider to avoid unnecessary rebuilds
+  final isAdmin = ref.watch(isAdminComputedProvider);
   final allDestinations = ref.watch(allNavigationDestinationsProvider);
 
-  // Get admin status from the async provider, defaulting to false
-  final isAdmin = adminStatusAsync.valueOrNull ?? false;
+  debugPrint('🧭 Navigation Provider Update:');
+  debugPrint('  � Is Admin (computed): $isAdmin');
 
   // Update admin tab visibility without changing the structure
   final updatedDestinations = allDestinations.map((destination) {
     // Only modify the admin tab's visibility
     if (destination.path == '/admin') {
-      return destination.copyWith(isVisible: isAdmin && isAuthenticated);
+      debugPrint('  🎯 Admin destination visibility: $isAdmin');
+      return destination.copyWith(isVisible: isAdmin);
     }
     return destination;
   }).toList();
 
   // Return only visible destinations
-  return updatedDestinations.where((item) => item.isVisible).toList();
+  final visibleDestinations =
+      updatedDestinations.where((item) => item.isVisible).toList();
+  debugPrint(
+      '  📍 Visible destinations: ${visibleDestinations.map((d) => '${d.label}(${d.path})').join(', ')}');
+
+  return visibleDestinations;
 }
 
 /// Provider to determine the current tab index based on a path
 @riverpod
 int findTabIndexFromPath(FindTabIndexFromPathRef ref, String path) {
-  final destinations = ref.watch(allNavigationDestinationsProvider);
-  // final allDestinations = ref.watch(allNavigationDestinationsProvider);
+  final destinations = ref.watch(navigationDestinationsProvider);
 
   // Find the index of the destination whose path is a prefix of the given path
   for (int i = 0; i < destinations.length; i++) {

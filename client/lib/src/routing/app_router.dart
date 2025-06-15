@@ -22,6 +22,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/order_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/product_management_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/custom_sign_in_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/debug/admin_debug_widget.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/onboarding/presentation/onboarding_screen.dart';
 import 'package:go_router/go_router.dart';
 
@@ -323,6 +324,17 @@ GoRouter goRouter(Ref ref) {
           child: CustomSignInScreen(),
         ),
       ),
+      // Temporary debug route for testing admin navigation
+      GoRoute(
+        path: '/debug',
+        name: 'debug',
+        pageBuilder: (context, state) => NoTransitionPage(
+          child: Scaffold(
+            appBar: AppBar(title: const Text('Debug Admin Navigation')),
+            body: const AdminDebugWidget(),
+          ),
+        ),
+      ),
       // Admin setup route
       GoRoute(
         path: '/admin-setup',
@@ -374,20 +386,20 @@ GoRouter goRouter(Ref ref) {
         ),
       ),
 
-          GoRoute(
-            path: '/admin',
-            pageBuilder: (context, state) {
-              final businessSlug = state.pathParameters['businessSlug']!;
-              debugPrint('🏢 Optimized business admin for: $businessSlug');
-              return NoTransitionPage(
-                child: OptimizedAdminScreenWrapper(businessSlug: businessSlug),
-              );
-            },
-            routes: [
-              // Add nested admin routes for business-specific admin access
-              ...getBusinessAdminRoutes(),
-            ],
-          ),
+      GoRoute(
+        path: '/admin',
+        pageBuilder: (context, state) {
+          final businessSlug = state.pathParameters['businessSlug']!;
+          debugPrint('🏢 Optimized business admin for: $businessSlug');
+          return NoTransitionPage(
+            child: OptimizedAdminScreenWrapper(businessSlug: businessSlug),
+          );
+        },
+        routes: [
+          // Add nested admin routes for business-specific admin access
+          ...getBusinessAdminRoutes(),
+        ],
+      ),
       // Optimized Business-specific routing with seamless navigation
       // This comes AFTER StatefulShellRoute to catch remaining paths as potential business slugs
       GoRoute(

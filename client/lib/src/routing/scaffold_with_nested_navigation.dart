@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/cart/cart_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catering/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/navigation_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/animated_admin_icon.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_cart.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_panel_screen.dart';
 
 // --- Cart and Badge Providers (Unchanged) ---
 final cateringItemCountProvider = StateProvider<int>((ref) {
@@ -75,6 +76,13 @@ class ScaffoldWithNestedNavigation extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final size = MediaQuery.of(context).size;
+    final currentPath = GoRouterState.of(context).uri.path;
+    final isAdmin = ref.watch(isAdminComputedProvider);
+
+    // If on an admin route and user is admin, show dedicated admin navigation
+    if (isAdmin && currentPath.startsWith('/admin')) {
+      return AdminPanelScreen(child: navigationShell!);
+    }
 
     // The root scaffold is now extremely simple. It only decides which layout to show.
     return size.width < 600
@@ -84,87 +92,56 @@ class ScaffoldWithNestedNavigation extends ConsumerWidget {
 }
 
 // --------------------------------------------------------------------------
-// 4. ScaffoldWithNavigationBar (Mobile View)
+// 4. ScaffoldWithNavigationBar (Mobile View) - Optimized
 // --------------------------------------------------------------------------
-class ScaffoldWithNavigationBar extends ConsumerStatefulWidget {
+class ScaffoldWithNavigationBar extends ConsumerWidget {
   const ScaffoldWithNavigationBar({super.key, required this.navigationShell});
   final StatefulNavigationShell navigationShell;
 
   @override
-  ScaffoldWithNavigationBarState createState() =>
-      ScaffoldWithNavigationBarState();
-}
-
-class ScaffoldWithNavigationBarState
-    extends ConsumerState<ScaffoldWithNavigationBar>
-    with TickerProviderStateMixin {
-  late final AnimationController _adminIconController;
-
-  @override
-  void initState() {
-    super.initState();
-    _adminIconController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-  }
-
-  @override
-  void dispose() {
-    _adminIconController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Watch the providers to get the current state
     final destinations = ref.watch(navigationDestinationsProvider);
-    final allDestinations = ref.watch(allNavigationDestinationsProvider);
-    // Filter out admin from shell destinations since it's handled separately
-    final shellDestinations =
-        allDestinations.where((dest) => dest.path != '/admin').toList();
-    final adminStatusAsync = ref.watch(isAdminProvider);
     final currentPath = GoRouterState.of(context).uri.path;
 
-    // Get admin status from async provider, defaulting to false
-    final isAdmin = adminStatusAsync.valueOrNull ?? false;
+    // Debug print to see what destinations we have
+    debugPrint('🏠 ScaffoldWithNavigationBar Build:');
+    debugPrint('  📍 Current Path: $currentPath');
+    debugPrint(
+        '🔍 Navigation destinations: ${destinations.map((d) => '${d.label}(${d.path})').join(', ')}');
 
-    // Drive the animation based on the admin status
-    if (isAdmin) {
-      _adminIconController.forward();
-    } else {
-      _adminIconController.reverse();
+    // Simple selected index logic based on current path
+    int selectedIndex = 0;
+    for (int i = 0; i < destinations.length; i++) {
+      final dest = destinations[i];
+      if (currentPath == dest.path ||
+          (dest.path == '/' && currentPath == '/') ||
+          (dest.path != '/' && currentPath.startsWith(dest.path))) {
+        selectedIndex = i;
+        break;
+      }
     }
 
-    // Determine the correct selected index by mapping from shell currentIndex to visible destinations
-    int selectedIndex = 0;
-
-    // If we're on admin path and admin is visible, select admin
+    // Special handling for admin route
     if (currentPath.startsWith('/admin')) {
       final adminIndex = destinations.indexWhere((d) => d.path == '/admin');
       if (adminIndex >= 0) {
         selectedIndex = adminIndex;
       }
-    } else {
-      // Find the current destination in destinations based on shell index
-      final shellIndex = widget.navigationShell.currentIndex;
-      if (shellIndex >= 0 && shellIndex < shellDestinations.length) {
-        final currentDest = shellDestinations[shellIndex];
-        final visibleIndex =
-            destinations.indexWhere((d) => d.path == currentDest.path);
-        if (visibleIndex >= 0) {
-          selectedIndex = visibleIndex;
-        }
-      }
     }
 
+    debugPrint(
+        '🏠 Selected navigation index: $selectedIndex for path: $currentPath');
+
     return Scaffold(
-      body: widget.navigationShell,
+      body: navigationShell,
       bottomNavigationBar: NavigationBar(
         selectedIndex: selectedIndex,
         onDestinationSelected: (int index) {
           if (index >= 0 && index < destinations.length) {
             final dest = destinations[index];
+            debugPrint('🏠 Navigation selected: ${dest.label} (${dest.path})');
+
             if (dest.path == '/admin') {
               // Admin routes are handled separately from shell branches
               // Use the root context to navigate to admin
@@ -181,16 +158,9 @@ class ScaffoldWithNavigationBarState
           // Handle the admin destination specifically to wrap it in animations
           if (dest.path == '/admin') {
             return NavigationDestination(
-              icon: AnimatedSize(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                child: SizedBox(
-                  width: isAdmin ? null : 0, // Collapses when not admin
-                  child: FadeTransition(
-                    opacity: _adminIconController,
-                    child: Icon(dest.icon),
-                  ),
-                ),
+              icon: AnimatedAdminIcon(
+                icon: dest.icon,
+                isNavigationRail: false,
               ),
               label: 'Admin',
             );
@@ -202,6 +172,15 @@ class ScaffoldWithNavigationBarState
               icon: CartBadge(icon: Icons.shopping_cart_outlined),
               selectedIcon: CartBadge(icon: Icons.shopping_cart),
               label: 'Cart',
+            );
+          }
+
+          // Handle the orders destination
+          if (dest.path == '/ordenes') {
+            return NavigationDestination(
+              icon: Icon(dest.icon),
+              selectedIcon: Icon(dest.selectedIcon),
+              label: 'Orders',
             );
           }
 
@@ -218,79 +197,40 @@ class ScaffoldWithNavigationBarState
 }
 
 // --------------------------------------------------------------------------
-// 5. ScaffoldWithNavigationRail (Desktop View)
+// 5. ScaffoldWithNavigationRail (Desktop View) - Optimized
 // --------------------------------------------------------------------------
-class ScaffoldWithNavigationRail extends ConsumerStatefulWidget {
+class ScaffoldWithNavigationRail extends ConsumerWidget {
   const ScaffoldWithNavigationRail({super.key, required this.navigationShell});
   final StatefulNavigationShell navigationShell;
 
   @override
-  _ScaffoldWithNavigationRailState createState() =>
-      _ScaffoldWithNavigationRailState();
-}
-
-class _ScaffoldWithNavigationRailState
-    extends ConsumerState<ScaffoldWithNavigationRail>
-    with TickerProviderStateMixin {
-  late final AnimationController _adminIconController;
-
-  @override
-  void initState() {
-    super.initState();
-    _adminIconController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-  }
-
-  @override
-  void dispose() {
-    _adminIconController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Watch providers to get the current state
     final destinations = ref.watch(navigationDestinationsProvider);
-    final allDestinations = ref.watch(allNavigationDestinationsProvider);
-    // Filter out admin from shell destinations since it's handled separately
-    final shellDestinations =
-        allDestinations.where((dest) => dest.path != '/admin').toList();
-    final adminStatusAsync = ref.watch(isAdminProvider);
     final currentPath = GoRouterState.of(context).uri.path;
 
-    // Get admin status from async provider, defaulting to false
-    final isAdmin = adminStatusAsync.valueOrNull ?? false;
-
-    // Drive the animation
-    if (isAdmin) {
-      _adminIconController.forward();
-    } else {
-      _adminIconController.reverse();
+    // Simple selected index logic based on current path
+    int selectedIndex = 0;
+    for (int i = 0; i < destinations.length; i++) {
+      final dest = destinations[i];
+      if (currentPath == dest.path ||
+          (dest.path == '/' && currentPath == '/') ||
+          (dest.path != '/' && currentPath.startsWith(dest.path))) {
+        selectedIndex = i;
+        break;
+      }
     }
 
-    // Determine the correct selected index by mapping from shell currentIndex to visible destinations
-    int selectedIndex = 0;
-
-    // If we're on admin path and admin is visible, select admin
+    // Special handling for admin route
     if (currentPath.startsWith('/admin')) {
       final adminIndex = destinations.indexWhere((d) => d.path == '/admin');
       if (adminIndex >= 0) {
         selectedIndex = adminIndex;
       }
-    } else {
-      // Find the current destination in destinations based on shell index
-      final shellIndex = widget.navigationShell.currentIndex;
-      if (shellIndex >= 0 && shellIndex < shellDestinations.length) {
-        final currentDest = shellDestinations[shellIndex];
-        final visibleIndex =
-            destinations.indexWhere((d) => d.path == currentDest.path);
-        if (visibleIndex >= 0) {
-          selectedIndex = visibleIndex;
-        }
-      }
     }
+
+    debugPrint(
+        '🏠 NavigationRail selected index: $selectedIndex for path: $currentPath');
 
     return Scaffold(
       body: Row(
@@ -300,6 +240,9 @@ class _ScaffoldWithNavigationRailState
             onDestinationSelected: (int index) {
               if (index >= 0 && index < destinations.length) {
                 final dest = destinations[index];
+                debugPrint(
+                    '🏠 NavigationRail selected: ${dest.label} (${dest.path})');
+
                 if (dest.path == '/admin') {
                   // Admin routes are handled separately from shell branches
                   // Use the root context to navigate to admin
@@ -317,20 +260,11 @@ class _ScaffoldWithNavigationRailState
               // Handle the admin destination specifically for animation
               if (dest.path == '/admin') {
                 return NavigationRailDestination(
-                  icon: AnimatedSize(
-                    duration: const Duration(milliseconds: 300),
-                    child: SizedBox(
-                      width: isAdmin ? 56 : 0, // Fixed width for rail icon area
-                      child: FadeTransition(
-                        opacity: _adminIconController,
-                        child: Icon(dest.icon),
-                      ),
-                    ),
+                  icon: AnimatedAdminIcon(
+                    icon: dest.icon,
+                    isNavigationRail: true,
                   ),
-                  label: FadeTransition(
-                    opacity: _adminIconController,
-                    child: Text(dest.label),
-                  ),
+                  label: const Text('Admin'),
                 );
               }
 
@@ -343,6 +277,15 @@ class _ScaffoldWithNavigationRailState
                 );
               }
 
+              // Handle the orders destination
+              if (dest.path == '/ordenes') {
+                return NavigationRailDestination(
+                  icon: Icon(dest.icon),
+                  selectedIcon: Icon(dest.selectedIcon),
+                  label: const Text('Orders'),
+                );
+              }
+
               // Return regular destinations
               return NavigationRailDestination(
                 icon: Icon(dest.icon),
@@ -352,7 +295,7 @@ class _ScaffoldWithNavigationRailState
             }).toList(),
           ),
           const VerticalDivider(thickness: 1, width: 1),
-          Expanded(child: widget.navigationShell),
+          Expanded(child: navigationShell),
         ],
       ),
     );
@@ -400,30 +343,68 @@ class BusinessScaffoldWithNavigationBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final destinations = ref.watch(navigationDestinationsProvider);
-    final businessDestinations =
-        destinations.where((dest) => dest.path != '/admin').toList();
+    final isAdmin = ref.watch(isAdminComputedProvider);
+
+    // Include admin destination for business routes if user is admin
+    final businessDestinations = destinations.where((dest) {
+      if (dest.path == '/admin') {
+        return isAdmin; // Only include admin if user is admin
+      }
+      return true;
+    }).toList();
 
     // Get current path to determine selected index
     final currentPath =
         GoRouter.of(context).routerDelegate.currentConfiguration.uri.path;
-    final selectedIndex = _getBusinessSelectedIndex(currentPath, businessSlug);
+    final selectedIndex = _getBusinessSelectedIndex(
+        currentPath, businessSlug, businessDestinations);
 
     return Scaffold(
       body: child,
       bottomNavigationBar: NavigationBar(
         selectedIndex: selectedIndex,
         destinations: businessDestinations.map((dest) {
+          // Handle admin destination for business context
+          if (dest.path == '/admin') {
+            return NavigationDestination(
+              icon: AnimatedAdminIcon(
+                icon: dest.icon,
+                isNavigationRail: false,
+              ),
+              label: 'Admin',
+            );
+          }
+
           if (dest.path == '/carrito') {
             return NavigationDestination(
               icon: const CartBadge(icon: Icons.shopping_cart_outlined),
               selectedIcon: const CartBadge(icon: Icons.shopping_cart),
-              label: dest.label,
+              label: 'Cart',
             );
           }
+
+          // Handle the orders destination
+          if (dest.path == '/ordenes') {
+            return NavigationDestination(
+              icon: Icon(dest.icon),
+              selectedIcon: Icon(dest.selectedIcon),
+              label: 'Orders',
+            );
+          }
+
           return dest.toNavigationDestination();
         }).toList(),
         onDestinationSelected: (index) {
           final dest = businessDestinations[index];
+          debugPrint(
+              '🏢 Business navigation selected: ${dest.label} (${dest.path}) for /$businessSlug');
+
+          // Handle admin navigation for business context
+          if (dest.path == '/admin') {
+            context.go('/$businessSlug/admin');
+            return;
+          }
+
           // Always navigate within business context, preserving the business slug
           String businessPath;
           if (dest.path == '/') {
@@ -456,13 +437,21 @@ class BusinessScaffoldWithNavigationRail extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final destinations = ref.watch(navigationDestinationsProvider);
-    final businessDestinations =
-        destinations.where((dest) => dest.path != '/admin').toList();
+    final isAdmin = ref.watch(isAdminComputedProvider);
+
+    // Include admin destination for business routes if user is admin
+    final businessDestinations = destinations.where((dest) {
+      if (dest.path == '/admin') {
+        return isAdmin; // Only include admin if user is admin
+      }
+      return true;
+    }).toList();
 
     // Get current path to determine selected index
     final currentPath =
         GoRouter.of(context).routerDelegate.currentConfiguration.uri.path;
-    final selectedIndex = _getBusinessSelectedIndex(currentPath, businessSlug);
+    final selectedIndex = _getBusinessSelectedIndex(
+        currentPath, businessSlug, businessDestinations);
 
     return Scaffold(
       body: Row(
@@ -471,6 +460,13 @@ class BusinessScaffoldWithNavigationRail extends ConsumerWidget {
             selectedIndex: selectedIndex,
             onDestinationSelected: (index) {
               final dest = businessDestinations[index];
+
+              // Handle admin navigation for business context
+              if (dest.path == '/admin') {
+                context.go('/$businessSlug/admin');
+                return;
+              }
+
               // Always navigate within business context, preserving the business slug
               String businessPath;
               if (dest.path == '/') {
@@ -484,6 +480,17 @@ class BusinessScaffoldWithNavigationRail extends ConsumerWidget {
             },
             labelType: NavigationRailLabelType.all,
             destinations: businessDestinations.map((dest) {
+              // Handle admin destination for business context
+              if (dest.path == '/admin') {
+                return NavigationRailDestination(
+                  icon: AnimatedAdminIcon(
+                    icon: dest.icon,
+                    isNavigationRail: true,
+                  ),
+                  label: const Text('Admin'),
+                );
+              }
+
               if (dest.path == '/carrito') {
                 return const NavigationRailDestination(
                   icon: CartBadge(icon: Icons.shopping_cart_outlined),
@@ -509,21 +516,33 @@ class BusinessScaffoldWithNavigationRail extends ConsumerWidget {
 // --------------------------------------------------------------------------
 // Helper functions for business routing
 // --------------------------------------------------------------------------
-int _getBusinessSelectedIndex(String currentPath, String businessSlug) {
+int _getBusinessSelectedIndex(String currentPath, String businessSlug,
+    List<NavigationDestinationItem> destinations) {
   // Remove business slug prefix to get the route path
   final pathWithoutSlug = currentPath.replaceFirst('/$businessSlug', '');
   final cleanPath = pathWithoutSlug.isEmpty ? '/' : pathWithoutSlug;
 
-  switch (cleanPath) {
-    case '/':
-      return 0; // Home
-    case '/menu':
-      return 1; // Menu
-    case '/carrito':
-      return 2; // Cart
-    case '/cuenta':
-      return 3; // Account
-    default:
-      return 0; // Default to home
+  debugPrint('🏢 Business path matching: $currentPath -> $cleanPath');
+
+  // Find the index in the visible destinations list
+  for (int i = 0; i < destinations.length; i++) {
+    final dest = destinations[i];
+    if (dest.path == cleanPath) {
+      debugPrint('🏢 Found matching destination: ${dest.label} at index $i');
+      return i;
+    }
   }
+
+  // Special handling for admin routes in business context
+  if (cleanPath.startsWith('/admin')) {
+    final adminIndex = destinations.indexWhere((d) => d.path == '/admin');
+    if (adminIndex >= 0) {
+      debugPrint('🏢 Found admin destination at index $adminIndex');
+      return adminIndex;
+    }
+  }
+
+  debugPrint('🏢 No match found, defaulting to home (index 0)');
+  // Default to home if no match found
+  return 0;
 }

@@ -4,8 +4,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/business_navigation_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/scaffold_with_nested_navigation.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_panel_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/navigation_provider.dart';
 
 /// Optimized business scaffold that provides seamless navigation
 class OptimizedBusinessScaffold extends ConsumerStatefulWidget {
@@ -70,6 +73,17 @@ class _OptimizedBusinessScaffoldState
   Widget build(BuildContext context) {
     final navigationState = ref.watch(businessNavigationControllerProvider);
     final size = MediaQuery.of(context).size;
+    final isAdmin = ref.watch(isAdminComputedProvider);
+    final currentPath = widget.currentRoute;
+
+    // If on a business admin route and user is admin, show dedicated admin navigation
+    if (isAdmin &&
+        (currentPath == '/admin' ||
+            currentPath.startsWith('/admin/') ||
+            currentPath.endsWith('/admin'))) {
+      // Use the AdminPanelScreen for business context as well
+      return AdminPanelScreen(child: widget.child);
+    }
 
     // Show loading if business context is not ready
     if (navigationState == null) {
@@ -157,8 +171,10 @@ class _OptimizedBusinessScaffoldState
         return 2;
       case '/cuenta':
         return 3;
-      case '/admin':
+      case '/ordenes':
         return 4;
+      case '/admin':
+        return 5;
       default:
         return 0;
     }
@@ -219,6 +235,11 @@ class _OptimizedBusinessScaffoldState
       const NavigationRailDestination(
         icon: Icon(Icons.receipt_long_outlined),
         selectedIcon: Icon(Icons.receipt_long),
+        label: Text('Ordenes'),
+      ),
+      const NavigationRailDestination(
+        icon: Icon(Icons.receipt_long_outlined),
+        selectedIcon: Icon(Icons.receipt_long),
         label: Text('Admin'),
       ),
     ];
@@ -226,7 +247,11 @@ class _OptimizedBusinessScaffoldState
 
   List<NavigationDestination> _getBusinessNavigationDestinations(
       String businessSlug) {
-    return [
+    // Get admin status to determine if admin destination should be included
+    final adminStatusAsync = ref.watch(isAdminProvider);
+    final isAdmin = adminStatusAsync.valueOrNull ?? false;
+
+    final destinations = [
       const NavigationDestination(
         icon: Icon(Icons.home_outlined),
         selectedIcon: Icon(Icons.home),
@@ -243,16 +268,29 @@ class _OptimizedBusinessScaffoldState
         label: 'Carrito',
       ),
       const NavigationDestination(
+        icon: Icon(Icons.receipt_long_outlined),
+        selectedIcon: Icon(Icons.receipt_long),
+        label: 'Orders', // Fixed: was incorrectly labeled as "Admin"
+      ),
+      const NavigationDestination(
         icon: Icon(Icons.person_outline),
         selectedIcon: Icon(Icons.person),
         label: 'Cuenta',
       ),
-      const NavigationDestination(
-        icon: Icon(Icons.receipt_long_outlined),
-        selectedIcon: Icon(Icons.receipt_long),
-        label: 'Admin',
-      ),
     ];
+
+    // Add admin destination if user is admin (between orders and account)
+    if (isAdmin) {
+      destinations.insert(
+          4,
+          const NavigationDestination(
+            icon: Icon(Icons.admin_panel_settings_outlined),
+            selectedIcon: Icon(Icons.admin_panel_settings),
+            label: 'Admin',
+          ));
+    }
+
+    return destinations;
   }
 }
 
