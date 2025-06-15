@@ -14,6 +14,7 @@ import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.d
 import 'package:starter_architecture_flutter_firebase/src/routing/app_startup.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/optimized_business_wrappers.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_dashboard_home.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_panel_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_setup_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_set_comple_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_settings_screen.dart';
@@ -373,12 +374,24 @@ GoRouter goRouter(Ref ref) {
         ),
       ),
 
+          GoRoute(
+            path: '/admin',
+            pageBuilder: (context, state) {
+              final businessSlug = state.pathParameters['businessSlug']!;
+              debugPrint('🏢 Optimized business admin for: $businessSlug');
+              return NoTransitionPage(
+                child: OptimizedAdminScreenWrapper(businessSlug: businessSlug),
+              );
+            },
+            routes: [
+              // Add nested admin routes for business-specific admin access
+              ...getBusinessAdminRoutes(),
+            ],
+          ),
       // Optimized Business-specific routing with seamless navigation
       // This comes AFTER StatefulShellRoute to catch remaining paths as potential business slugs
       GoRoute(
         path: '/:businessSlug',
-        // ⚠️ REMOVED: Aggressive redirect that was interfering with URL strategy
-        // Let the route proceed and handle invalid slugs in the business context provider
         pageBuilder: (context, state) {
           final businessSlug = state.pathParameters['businessSlug']!;
           debugPrint('🏢 Optimized business home for: $businessSlug');

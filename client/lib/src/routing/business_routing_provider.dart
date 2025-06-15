@@ -10,25 +10,21 @@ import 'package:starter_architecture_flutter_firebase/src/utils/web/web_utils.da
 
 part 'business_routing_provider.g.dart';
 
-/// Provider that gets the current route location without circular dependencies
-/// OPTIMIZED: Uses direct browser URL reading instead of watching goRouter
+/// Provider that gets the current route location
+/// SIMPLIFIED: Direct WebUtils access - reactivity handled at app level
 @riverpod
 String currentRouteLocation(CurrentRouteLocationRef ref) {
   if (!kIsWeb) return '/';
 
-  // CRITICAL FIX: Get current path directly from browser instead of watching goRouter
-  // This breaks the circular dependency: currentRouteLocation -> goRouter -> ... -> currentRouteLocation
-  String currentPath = '/';
+  // Use WebUtils.getCurrentPath() - simple and reliable
   try {
-    currentPath = WebUtils.getCurrentPath();
-    debugPrint('🧭 Current route location (direct browser): $currentPath');
+    final currentPath = WebUtils.getCurrentPath();
+    debugPrint('🧭 Current route location: $currentPath');
+    return currentPath;
   } catch (e) {
-    debugPrint('⚠️ Error getting current path from browser: $e');
-    // Fallback to root path
-    currentPath = '/';
+    debugPrint('⚠️ Error getting current path: $e');
+    return '/';
   }
-
-  return currentPath;
 }
 
 /// Provider for immediate URL detection during app startup

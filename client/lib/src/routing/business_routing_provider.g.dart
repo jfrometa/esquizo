@@ -7,10 +7,10 @@ part of 'business_routing_provider.dart';
 // **************************************************************************
 
 String _$currentRouteLocationHash() =>
-    r'3baf83b721b80d0678b3b94382fe0df885d8cf08';
+    r'62b54eb9ecfe238c45aa8343eb229a19794b41cf';
 
-/// Provider that gets the current route location without circular dependencies
-/// OPTIMIZED: Uses direct browser URL reading instead of watching goRouter
+/// Provider that gets the current route location
+/// SIMPLIFIED: Direct WebUtils access - reactivity handled at app level
 ///
 /// Copied from [currentRouteLocation].
 @ProviderFor(currentRouteLocation)
