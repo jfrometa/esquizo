@@ -42,6 +42,16 @@ class _CurrentBusinessIdNotifier extends StateNotifier<String> {
       state = businessId;
     });
   }
+
+  // Public method to set the business ID from outside the notifier
+  void setBusinessId(String businessId) {
+    if (_lastResolvedId != businessId) {
+      debugPrint(
+          '🔄 [setBusinessId] Business ID changed: \\$_lastResolvedId -> \\$businessId');
+      _lastResolvedId = businessId;
+      state = businessId;
+    }
+  }
 }
 
 // Provider to initialize business ID from storage (now used by URL-aware provider)

@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/unified_business_context_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/business_routing_provider.dart';
 
 part 'business_navigation_provider.g.dart';
@@ -99,6 +100,11 @@ class BusinessNavigationController extends _$BusinessNavigationController {
     try {
       final businessContext =
           await ref.read(explicitBusinessContextProvider(businessSlug).future);
+
+      // Update the currentBusinessIdProvider to match the new business context
+      ref
+          .read(currentBusinessIdProvider.notifier)
+          .setBusinessId(businessContext.businessId);
 
       state = BusinessNavigationState(
         businessSlug: businessSlug,
