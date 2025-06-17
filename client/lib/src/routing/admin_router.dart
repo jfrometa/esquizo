@@ -116,6 +116,51 @@ class AdminRoutes {
   static const String nameHelp = 'help';
   static const String nameHome = 'home';
 
+  // --- Business-specific route names (to avoid conflicts with regular admin routes) ---
+  // Product Dashboard
+  static const String nameBusinessPdHome = 'business-product-dashboard-home';
+  static const String nameBusinessPdProducts =
+      'business-product-dashboard-products';
+  static const String nameBusinessPdOrders =
+      'business-product-dashboard-orders';
+  static const String nameBusinessPdOrderDetails =
+      'business-product-dashboard-order-details';
+  static const String nameBusinessPdOrderPaymentDetails =
+      'business-product-dashboard-order-payment-details';
+  static const String nameBusinessPdTables =
+      'business-product-dashboard-tables';
+  static const String nameBusinessPdAnalytics =
+      'business-product-dashboard-analytics';
+
+  // Staff
+  static const String nameBusinessStaffHome = 'business-staff-home';
+  static const String nameBusinessStaffKitchen = 'business-staff-kitchen';
+  static const String nameBusinessStaffWaiter = 'business-staff-waiter';
+  static const String nameBusinessStaffWaiterOrderEntry =
+      'business-staff-waiter-order-entry';
+
+  // Meal Plans
+  static const String nameBusinessMpHome = 'business-meal-plans-home';
+  static const String nameBusinessMpManagement =
+      'business-meal-plans-management';
+  static const String nameBusinessMpItems = 'business-meal-plans-items';
+  static const String nameBusinessMpAnalytics = 'business-meal-plans-analytics';
+  static const String nameBusinessMpExport = 'business-meal-plans-export';
+  static const String nameBusinessMpScanner = 'business-meal-plans-scanner';
+  static const String nameBusinessMpPos = 'business-meal-plans-pos';
+  static const String nameBusinessMpQr = 'business-meal-plans-qr';
+
+  // Catering
+  static const String nameBusinessCtHome = 'business-catering-home';
+  static const String nameBusinessCtDashboard = 'business-catering-dashboard';
+  static const String nameBusinessCtOrders = 'business-catering-orders';
+  static const String nameBusinessCtPackages = 'business-catering-packages';
+  static const String nameBusinessCtItems = 'business-catering-items';
+  static const String nameBusinessCtCategories = 'business-catering-categories';
+
+  // Settings
+  static const String nameBusinessSettings = 'business-settings';
+  static const String nameBusinessSettingsUsers = 'business-settings-users';
   // Get full path by combining base path with relative path
   static String getFullPath(String relativePath) {
     if (relativePath.isEmpty || relativePath == '/') return basePath;
@@ -399,5 +444,189 @@ List<RouteBase> getAdminRoutes() {
     // GoRoute(path: '/profile', name: AdminRoutes.nameProfile, builder: ...),
     // GoRoute(path: '/help', name: AdminRoutes.nameHelp, builder: ...),
     // GoRoute(path: '/', name: AdminRoutes.nameHome, builder: ...),
+  ];
+}
+
+/// Helper function to get business-slugged admin routes
+List<RouteBase> getBusinessSluggedAdminRoutes() {
+  debugPrint('🏗️ Building business-slugged admin routes');
+  // These are subroutes under /:businessSlug, e.g., /:businessSlug/admin, /:businessSlug/admin/staff, etc.
+  return [
+    ShellRoute(
+      builder: (context, state, child) {
+        final businessSlug = state.pathParameters['businessSlug'] ?? '';
+        // Remove duplicate declaration of currentRoute
+        final currentRoute = state.matchedLocation;
+        debugPrint(
+            '🔄 BusinessAdminShellRoute: $businessSlug, route: "$currentRoute"');
+        final index = AdminRoutes.getIndexFromRoute(
+            currentRoute.replaceFirst('/$businessSlug', ''));
+        return AdminPanelScreen(
+          initialIndex: index,
+          child: child,
+        );
+      },
+      routes: [
+        // --- Product Dashboard Section (Index 0) ---
+        GoRoute(
+          path: 'admin',
+          name: AdminRoutes.nameBusinessPdHome,
+          builder: (context, state) => const AdminDashboardHome(),
+          routes: [
+            GoRoute(
+              path: AdminRoutes.dashboardProducts
+                  .substring(1), // Remove leading slash for sub-route
+              name: AdminRoutes.nameBusinessPdProducts,
+              builder: (context, state) => const ProductManagementScreen(),
+            ),
+            GoRoute(
+              path: AdminRoutes.dashboardOrders
+                  .substring(1), // Remove leading slash for sub-route
+              name: AdminRoutes.nameBusinessPdOrders,
+              builder: (context, state) => const OrderManagementScreen(),
+              routes: [
+                GoRoute(
+                    path: ':orderId',
+                    name: AdminRoutes.nameBusinessPdOrderDetails,
+                    builder: (context, state) => OrderDetailScreen(
+                        orderId: state.pathParameters['orderId'] ?? '')),
+              ],
+            ),
+            GoRoute(
+                path: AdminRoutes.dashboardTables
+                    .substring(1), // Remove leading slash for sub-route
+                name: AdminRoutes.nameBusinessPdTables,
+                builder: (context, state) => const TableManagementScreen()),
+            GoRoute(
+                path: AdminRoutes.dashboardAnalytics
+                    .substring(1), // Remove leading slash for sub-route
+                name: AdminRoutes.nameBusinessPdAnalytics,
+                builder: (context, state) => const AnalyticsDashboard()),
+            GoRoute(
+              path: ':orderId/payment',
+              name: AdminRoutes.nameBusinessPdOrderPaymentDetails,
+              builder: (context, state) => OrderPaymentDetailsScreen(
+                orderId: state.pathParameters['orderId'] ?? '',
+              ),
+            ),
+          ],
+        ),
+
+        // --- Staff Section (Index 1) --- NEW ---
+        GoRoute(
+          path: 'admin${AdminRoutes.staff}', // admin/staff
+          name: AdminRoutes.nameBusinessStaffHome,
+          builder: (context, state) => const StaffManagementScreen(),
+          routes: [
+            // Kitchen management route
+            GoRoute(
+              path: AdminRoutes.staffKitchen,
+              name: AdminRoutes.nameBusinessStaffKitchen,
+              builder: (context, state) =>
+                  const StaffManagementScreen(initialIndex: 0),
+            ),
+            // Waiter management route
+            GoRoute(
+              path: AdminRoutes.staffWaiter,
+              name: AdminRoutes.nameBusinessStaffWaiter,
+              builder: (context, state) =>
+                  const StaffManagementScreen(initialIndex: 1),
+            ),
+            // Order entry route for waiter flow
+            GoRoute(
+              path: AdminRoutes.staffWaiterOrderEntry,
+              name: AdminRoutes.nameBusinessStaffWaiterOrderEntry,
+              builder: (context, state) {
+                final tableId = state.pathParameters['tableId'] ?? 'unknown';
+                return StaffOrderEntryScreen(tableId: tableId);
+              },
+            ),
+          ],
+        ),
+        // --- End Staff Section ---
+
+        // --- Meal Plans Section (Index 2) ---
+        GoRoute(
+          path: 'admin${AdminRoutes.mealPlans}', // admin/meal-plans
+          name: AdminRoutes.nameBusinessMpHome,
+          builder: (context, state) => const MealPlanManagementScreen(),
+          routes: [
+            GoRoute(
+                path: AdminRoutes.mealPlanManagement,
+                name: AdminRoutes.nameBusinessMpManagement,
+                builder: (context, state) => const MealPlanManagementScreen()),
+            GoRoute(
+                path: AdminRoutes.mealPlanItems,
+                name: AdminRoutes.nameBusinessMpItems,
+                builder: (context, state) => const MealPlanItemsScreen()),
+            GoRoute(
+                path: AdminRoutes.mealPlanAnalytics,
+                name: AdminRoutes.nameBusinessMpAnalytics,
+                builder: (context, state) => const MealPlanAnalyticsScreen()),
+            GoRoute(
+                path: AdminRoutes.mealPlanExport,
+                name: AdminRoutes.nameBusinessMpExport,
+                builder: (context, state) => const MealPlanExportScreen()),
+            GoRoute(
+                path: AdminRoutes.mealPlanScanner,
+                name: AdminRoutes.nameBusinessMpScanner,
+                builder: (context, state) =>
+                    MealPlanScanner(onMealPlanScanned: (_) {})),
+            GoRoute(
+                path: AdminRoutes.mealPlanPos,
+                name: AdminRoutes.nameBusinessMpPos,
+                builder: (context, state) =>
+                    POSMealPlanWidget(onMealPlanUsed: (_) {})),
+            GoRoute(
+                path: AdminRoutes.mealPlanQr,
+                name: AdminRoutes.nameBusinessMpQr,
+                builder: (context, state) => MealPlanQRCode(
+                    mealPlanId: state.pathParameters['planId'] ?? '')),
+          ],
+        ),
+
+        // --- Catering Section (Index 3) ---
+        GoRoute(
+          path: 'admin${AdminRoutes.catering}', // admin/catering
+          name: AdminRoutes.nameBusinessCtHome,
+          builder: (context, state) => const CateringManagementScreen(),
+          routes: [
+            GoRoute(
+                path: AdminRoutes.cateringDashboard,
+                name: AdminRoutes.nameBusinessCtDashboard,
+                builder: (context, state) => const CateringDashboardScreen()),
+            GoRoute(
+                path: AdminRoutes.cateringOrders,
+                name: AdminRoutes.nameBusinessCtOrders,
+                builder: (context, state) => const CateringOrdersScreen()),
+            GoRoute(
+                path: AdminRoutes.cateringPackages,
+                name: AdminRoutes.nameBusinessCtPackages,
+                builder: (context, state) => const CateringPackageScreen()),
+            GoRoute(
+                path: AdminRoutes.cateringItems,
+                name: AdminRoutes.nameBusinessCtItems,
+                builder: (context, state) => const CateringItemScreen()),
+            GoRoute(
+                path: AdminRoutes.cateringCategories,
+                name: AdminRoutes.nameBusinessCtCategories,
+                builder: (context, state) => const CateringCategoryScreen()),
+          ],
+        ),
+
+        // --- Settings Section (Index 4) ---
+        GoRoute(
+          path: 'admin${AdminRoutes.settings}', // admin/settings
+          name: AdminRoutes.nameBusinessSettings,
+          builder: (context, state) => const BusinessSettingsScreen(),
+          routes: [
+            GoRoute(
+                path: AdminRoutes.settingsUsers,
+                name: AdminRoutes.nameBusinessSettingsUsers,
+                builder: (context, state) => const AdminManagementScreen()),
+          ],
+        ),
+      ],
+    ),
   ];
 }

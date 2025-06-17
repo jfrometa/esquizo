@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/business_aware_navigation.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/widgets/meal_plan_admin_section.dart';
 
@@ -110,30 +111,37 @@ class SidebarMenu extends ConsumerWidget {
                 // Dashboard item (always first)
                 _buildMenuItem(
                   context: context,
+                  ref: ref,
                   index: 0,
                   icon: Icons.dashboard,
                   title: 'Dashboard',
                   isExpanded: isExpanded,
+                  onTap: () {
+                    // Navigate to dashboard with business-aware navigation
+                    BusinessAwareNavigation.go(context, ref, '/admin');
+                  },
                 ),
 
                 const Divider(),
 
                 // Build menu items for the rest of the screens
                 for (int i = 1; i < screenTitles.length; i++)
-                  _buildScreenMenuItem(context, i, screenTitles[i], isExpanded),
+                  _buildScreenMenuItem(
+                      context, ref, i, screenTitles[i], isExpanded),
 
                 const Divider(),
 
                 // Settings item
                 _buildMenuItem(
                   context: context,
+                  ref: ref,
                   index: -1, // Special index for settings
                   icon: Icons.settings,
                   title: 'Settings',
                   isExpanded: isExpanded,
                   onTap: () {
-                    // Navigate to settings
-                    context.go('/admin/settings');
+                    // Navigate to settings with business-aware navigation
+                    BusinessAwareNavigation.go(context, ref, '/admin/settings');
                   },
                 ),
               ],
@@ -167,9 +175,22 @@ class SidebarMenu extends ConsumerWidget {
     );
   }
 
-  Widget _buildScreenMenuItem(
-      BuildContext context, int index, String title, bool isExpanded) {
+  Widget _buildScreenMenuItem(BuildContext context, WidgetRef ref, int index,
+      String title, bool isExpanded) {
     // Check the title to use the appropriate icon and builder
+    if (title == 'Staff') {
+      return _buildMenuItem(
+        context: context,
+        ref: ref,
+        index: index,
+        icon: Icons.people_alt_rounded,
+        title: title,
+        isExpanded: isExpanded,
+        onTap: () {
+          BusinessAwareNavigation.go(context, ref, '/admin/staff');
+        },
+      );
+    }
     if (title == 'Meal Plans') {
       return buildMealPlanMenuItem(
         context: context,
@@ -181,15 +202,20 @@ class SidebarMenu extends ConsumerWidget {
     } else if (title == 'Catering') {
       return _buildMenuItem(
         context: context,
+        ref: ref,
         index: index,
         icon: Icons.restaurant,
         title: title,
         isExpanded: isExpanded,
+        onTap: () {
+          BusinessAwareNavigation.go(context, ref, '/admin/catering');
+        },
       );
     } else {
       // Default menu item
       return _buildMenuItem(
         context: context,
+        ref: ref,
         index: index,
         icon: Icons.business,
         title: title,
@@ -200,6 +226,7 @@ class SidebarMenu extends ConsumerWidget {
 
   Widget _buildMenuItem({
     required BuildContext context,
+    required WidgetRef ref,
     required int index,
     required IconData icon,
     required String title,

@@ -268,6 +268,21 @@ class BusinessAwareRoutingHelper {
       }
     }
 
+    // Special handling for admin routes and all subroutes: always prefix with business slug (even for default)
+    if (targetPath.startsWith('/admin') ||
+        targetPath.startsWith('/admin-setup')) {
+      final businessSlug =
+          navigationController.activeBusinessContext ?? 'default';
+      if (businessSlug == 'default') {
+        return targetPath;
+      }
+      // If already prefixed with /<slug>/admin, do not double-prefix
+      if (targetPath.startsWith('/$businessSlug/admin')) {
+        return targetPath;
+      }
+      return '/$businessSlug$targetPath';
+    }
+
     // Return original path if no business context or path already has business context
     return targetPath;
   }
@@ -275,14 +290,13 @@ class BusinessAwareRoutingHelper {
   /// Check if a path is a system route that shouldn't be business-aware
   static bool _isSystemRoute(String path) {
     final systemRoutes = {
-      '/admin',
       '/signin',
       '/signup',
       '/onboarding',
       '/error',
       '/startup',
-      '/business-setup',
-      '/admin-setup'
+      '/business-setup'
+      // '/admin', '/admin-setup' removed to allow business-aware admin routes
     };
     return systemRoutes.any((route) => path.startsWith(route));
   }

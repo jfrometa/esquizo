@@ -24,6 +24,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/custom_sign_in_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/debug/admin_debug_widget.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/onboarding/presentation/onboarding_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/landing/landing-page-home.dart';
 import 'package:go_router/go_router.dart';
 
 part 'app_router.g.dart';
@@ -348,60 +349,17 @@ GoRouter goRouter(Ref ref) {
       // This ensures /admin is matched before /:businessSlug pattern
       ...getAdminRoutes(),
 
-      // Default business routes (no slug prefix) - These will work with business context persistence
+      // Root route - Landing page
       GoRoute(
         path: '/',
-        pageBuilder: (context, state) => NoTransitionPage(
-          child: OptimizedHomeScreenWrapper(businessSlug: 'default'),
-        ),
-      ),
-      GoRoute(
-        path: '/menu',
-        pageBuilder: (context, state) => NoTransitionPage(
-          child: OptimizedMenuScreenWrapper(businessSlug: 'default'),
-        ),
-      ),
-      GoRoute(
-        path: '/carrito',
-        pageBuilder: (context, state) => NoTransitionPage(
-          child: OptimizedCartScreenWrapper(businessSlug: 'default'),
-        ),
-      ),
-      GoRoute(
-        path: '/cart',
-        pageBuilder: (context, state) => NoTransitionPage(
-          child: OptimizedCartScreenWrapper(businessSlug: 'default'),
-        ),
-      ),
-      GoRoute(
-        path: '/cuenta',
-        pageBuilder: (context, state) => NoTransitionPage(
-          child: OptimizedProfileScreenWrapper(businessSlug: 'default'),
-        ),
-      ),
-      GoRoute(
-        path: '/ordenes',
-        pageBuilder: (context, state) => NoTransitionPage(
-          child: OptimizedOrdersScreenWrapper(businessSlug: 'default'),
+        name: AppRoute.landing.name,
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: ResponsiveLandingPage(),
         ),
       ),
 
-      GoRoute(
-        path: '/admin',
-        pageBuilder: (context, state) {
-          final businessSlug = state.pathParameters['businessSlug']!;
-          debugPrint('🏢 Optimized business admin for: $businessSlug');
-          return NoTransitionPage(
-            child: OptimizedAdminScreenWrapper(businessSlug: businessSlug),
-          );
-        },
-        routes: [
-          // Add nested admin routes for business-specific admin access
-          ...getBusinessAdminRoutes(),
-        ],
-      ),
-      // Optimized Business-specific routing with seamless navigation
-      // This comes AFTER StatefulShellRoute to catch remaining paths as potential business slugs
+      // --- Business-slugged admin routes ---
+      // Add all admin routes under /:businessSlug/admin/... as well
       GoRoute(
         path: '/:businessSlug',
         pageBuilder: (context, state) {
@@ -414,7 +372,7 @@ GoRouter goRouter(Ref ref) {
         routes: [
           // Business menu route (e.g., /kako/menu) - Optimized
           GoRoute(
-            path: '/menu',
+            path: 'menu',
             pageBuilder: (context, state) {
               final businessSlug = state.pathParameters['businessSlug']!;
               debugPrint('🏢 Optimized business menu for: $businessSlug');
@@ -425,7 +383,7 @@ GoRouter goRouter(Ref ref) {
           ),
           // Business cart route (e.g., /kako/carrito) - Optimized
           GoRoute(
-            path: '/carrito',
+            path: 'carrito',
             pageBuilder: (context, state) {
               final businessSlug = state.pathParameters['businessSlug']!;
               debugPrint('🏢 Optimized business cart for: $businessSlug');
@@ -436,7 +394,7 @@ GoRouter goRouter(Ref ref) {
           ),
           // Alias for cart with English route - Optimized
           GoRoute(
-            path: '/cart',
+            path: 'cart',
             pageBuilder: (context, state) {
               final businessSlug = state.pathParameters['businessSlug']!;
               debugPrint('🏢 Optimized business cart (EN) for: $businessSlug');
@@ -447,7 +405,7 @@ GoRouter goRouter(Ref ref) {
           ),
           // Business account route (e.g., /kako/cuenta) - Optimized
           GoRoute(
-            path: '/cuenta',
+            path: 'cuenta',
             pageBuilder: (context, state) {
               final businessSlug = state.pathParameters['businessSlug']!;
               debugPrint('🏢 Optimized business account for: $businessSlug');
@@ -459,7 +417,7 @@ GoRouter goRouter(Ref ref) {
           ),
           // Business orders route (e.g., /kako/ordenes) - Optimized
           GoRoute(
-            path: '/ordenes',
+            path: 'ordenes',
             pageBuilder: (context, state) {
               final businessSlug = state.pathParameters['businessSlug']!;
               debugPrint('🏢 Optimized business orders for: $businessSlug');
@@ -468,21 +426,8 @@ GoRouter goRouter(Ref ref) {
               );
             },
           ),
-          // Business admin route (e.g., /kako/admin) - Optimized
-          GoRoute(
-            path: '/admin',
-            pageBuilder: (context, state) {
-              final businessSlug = state.pathParameters['businessSlug']!;
-              debugPrint('🏢 Optimized business admin for: $businessSlug');
-              return NoTransitionPage(
-                child: OptimizedAdminScreenWrapper(businessSlug: businessSlug),
-              );
-            },
-            routes: [
-              // Add nested admin routes for business-specific admin access
-              ...getBusinessAdminRoutes(),
-            ],
-          ),
+          // --- Business-slugged admin routes ---
+          ...getBusinessSluggedAdminRoutes(),
         ],
       ),
     ],

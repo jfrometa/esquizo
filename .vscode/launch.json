@@ -2,18 +2,12 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Flutter",
-      "type": "dart",
-      "request": "launch",
-      "program": "lib/main.dart"
-    },
-    {
-      "name": "client (Flutter Web Server)",
+      "name": "client (web)",
       "program": "lib/main.dart",
       "cwd": "client",
-      "deviceId": "web-server",
       "request": "launch",
-      "type": "dart"
+      "type": "dart",
+      "args": ["-d", "chrome", "--web-experimental-hot-reload"]
     }
   ],
   "tasks": {
@@ -35,10 +29,7 @@
       },
       {
         "label": "Start Docker and Prisma Migrate",
-        "dependsOn": [
-          "Start Docker",
-          "Run Prisma Migrate"
-        ],
+        "dependsOn": ["Start Docker", "Run Prisma Migrate"],
         "dependsOrder": "sequence",
         "problemMatcher": []
       }

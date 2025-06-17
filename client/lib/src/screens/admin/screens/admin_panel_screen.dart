@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/business_aware_navigation.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_stats_provider.dart';
@@ -287,10 +288,23 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
   // Trigger navigation to a specific subroute
   void _navigateToSubroute(int parentIndex, String routeName,
       {Map<String, String> params = const {}}) {
-    /* ... no change ... */
-    final currentRouteName = GoRouterState.of(context).name;
-    final currentParams = GoRouterState.of(context).pathParameters;
-    if (currentRouteName == routeName && currentParams == params) return;
+    // Use business-aware navigation for subroutes
+    final subroutes = _navigationItems[parentIndex].subroutes;
+    _SubRoute? found;
+    if (subroutes != null) {
+      for (final sr in subroutes) {
+        if (sr.routeName == routeName) {
+          found = sr;
+          break;
+        }
+      }
+    }
+    final path = found?.route;
+    if (path != null) {
+      BusinessAwareNavigation.go(context, ref, path);
+      return;
+    }
+    // fallback to named route if path not found
     _navigateByName(routeName, params: params);
   }
 
