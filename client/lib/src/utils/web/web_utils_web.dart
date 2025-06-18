@@ -1,14 +1,17 @@
 // Library directive must come first
 library;
 
-import 'dart:html' as html;
+import 'dart:async';
+
+// Conditional import for web-specific functionality
+import 'package:web/web.dart' as web;
 import 'package:flutter/foundation.dart';
 
-// A simpler implementation that uses dart:html directly instead of complex JS interop
+// A simpler implementation that uses package:web directly instead of complex JS interop
 class _WebImpl {
   static void reloadPage() {
     try {
-      html.window.location.reload();
+      web.window.location.reload();
     } catch (e) {
       debugPrint('Error reloading page: $e');
     }
@@ -16,7 +19,7 @@ class _WebImpl {
 
   static void goToHomePage() {
     try {
-      html.window.location.href = '/';
+      web.window.location.href = '/';
     } catch (e) {
       debugPrint('Error navigating to home: $e');
     }
@@ -24,9 +27,9 @@ class _WebImpl {
 
   static String getCurrentPath() {
     try {
-      // Direct access to pathname via dart:html
-      final pathname = html.window.location.pathname;
-      final fullUrl = html.window.location.href;
+      // Direct access to pathname via package:web
+      final pathname = web.window.location.pathname;
+      final fullUrl = web.window.location.href;
 
       debugPrint('🌐 WebUtils raw path: "$pathname"');
       debugPrint('🌐 WebUtils full URL: "$fullUrl"');
@@ -52,7 +55,7 @@ class _WebImpl {
   // Get the full URL for debugging
   static String getFullUrl() {
     try {
-      return html.window.location.href;
+      return web.window.location.href;
     } catch (e) {
       debugPrint('❌ Error getting full URL: $e');
       return 'error';
