@@ -118,6 +118,9 @@ class Order {
   final String? adminName;
   final bool isArchived;
   final Map<String, dynamic>? adminMetadata;
+  final String? serviceType; // Add service type field
+  final bool? isDineIn; // Add dine-in flag
+  final double? serviceCharge; // Add service charge field
 
   Order({
     this.orderNumber = '',
@@ -177,6 +180,9 @@ class Order {
     this.adminName,
     this.isArchived = false,
     this.adminMetadata,
+    this.serviceType,
+    this.isDineIn,
+    this.serviceCharge,
   })  :
         // Initialize orderDate and location with default values if not provided
         timestamp = Timestamp.now(),
@@ -264,6 +270,9 @@ class Order {
       isReviewed: data['isReviewed'] ?? false,
       assignedToId: data['assignedToId'],
       assignedToName: data['assignedToName'],
+      serviceType: data['serviceType'],
+      isDineIn: data['isDineIn'],
+      serviceCharge: (data['serviceCharge'] ?? 0.0).toDouble(),
     );
   }
 
@@ -312,6 +321,9 @@ class Order {
     if (deliveryTime != null) map['deliveryTime'] = deliveryTime;
     if (assignedToId != null) map['assignedToId'] = assignedToId;
     if (assignedToName != null) map['assignedToName'] = assignedToName;
+    if (serviceType != null) map['serviceType'] = serviceType;
+    if (isDineIn != null) map['isDineIn'] = isDineIn;
+    if (serviceCharge != null) map['serviceCharge'] = serviceCharge;
 
     return map;
   }
@@ -459,6 +471,17 @@ class Order {
     bool? isReviewed,
     String? assignedToId,
     String? assignedToName,
+    String? businessId,
+    String? resourceId, // Added to match create_order.dart
+    String? adminNotes,
+    DateTime? adminReviewedAt,
+    String? adminId,
+    String? adminName,
+    bool? isArchived,
+    Map<String, dynamic>? adminMetadata,
+    String? serviceType,
+    bool? isDineIn,
+    double? serviceCharge,
   }) {
     return Order(
       orderNumber: orderNumber ?? this.orderNumber,
@@ -500,6 +523,9 @@ class Order {
       isReviewed: isReviewed ?? this.isReviewed,
       assignedToId: assignedToId ?? this.assignedToId,
       assignedToName: assignedToName ?? this.assignedToName,
+      serviceType: serviceType ?? this.serviceType,
+      isDineIn: isDineIn ?? this.isDineIn,
+      serviceCharge: serviceCharge ?? this.serviceCharge,
     );
   }
 }
