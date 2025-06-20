@@ -1,7 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/payment/payment_models.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/payment/payment_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
+
+final paymentServiceProvider = Provider<PaymentService>((ref) {
+  final firestore = ref.watch(firebaseFirestoreProvider);
+  final businessId = ref.watch(currentBusinessIdProvider);
+  return PaymentService(firestore: firestore, businessId: businessId ?? '');
+});
 
 /// Provider for managing payment processing
 class PaymentProcessor extends StateNotifier<AsyncValue<Payment?>> {
@@ -257,12 +265,6 @@ final staffTipDistributionsProvider = FutureProvider.family<List<TipDistribution
   );
 });
 
-/// Provider for daily service summary
-final dailyServiceSummaryProvider = FutureProvider<Map<String, dynamic>>((ref) async {
-  final paymentService = ref.watch(paymentServiceProvider);
-  return paymentService.getDailyServiceSummary();
-});
-
 /// Provider for payment by order ID
 final paymentByOrderIdProvider = FutureProvider.family<Payment?, String>((ref, orderId) async {
   final paymentService = ref.watch(paymentServiceProvider);
@@ -295,22 +297,6 @@ final activeTablesProvider = StreamProvider<List<Map<String, dynamic>>>((ref) {
       'status': 'payment',
     },
   ]);
-});
-      .snapshots()
-      .map((doc) => doc.exists 
-          ? ServiceTracking.fromJson(doc.data() as Map<String, dynamic>)
-          : null);
-});
-
-/// Provider for tip distributions by staff
-final staffTipDistributionsProvider = FutureProvider.family<List<TipDistribution>, 
-    ({String staffId, DateTime startDate, DateTime endDate})>((ref, params) async {
-  final paymentService = ref.watch(paymentServiceProvider);
-  return paymentService.getTipDistributions(
-    startDate: params.startDate,
-    endDate: params.endDate,
-    staffId: params.staffId,
-  );
 });
 
 /// Provider for managing tip distribution

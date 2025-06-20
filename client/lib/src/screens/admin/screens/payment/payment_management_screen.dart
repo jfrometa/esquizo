@@ -8,11 +8,11 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/responsive_layout.dart';
 
 class PaymentManagementScreen extends ConsumerStatefulWidget {
-  final int initialIndex;
+  final int initialTab;
   
   const PaymentManagementScreen({
     super.key,
-    this.initialIndex = 0,
+    this.initialTab = 0,
   });
 
   @override
@@ -33,7 +33,7 @@ class _PaymentManagementScreenState extends ConsumerState<PaymentManagementScree
     _tabController = TabController(
       length: 5,
       vsync: this,
-      initialIndex: widget.initialIndex,
+      initialIndex: widget.initialTab,
     );
     _searchController.addListener(_onSearchChanged);
   }
@@ -190,11 +190,8 @@ class _PaymentManagementScreenState extends ConsumerState<PaymentManagementScree
                   startDate: _startDate,
                   endDate: _endDate,
                 ),
-                PaymentServiceTrackingTab(
-                  startDate: _startDate,
-                  endDate: _endDate,
-                  searchQuery: _searchQuery,
-                ),
+                // Service Tracking Tab
+                const PaymentServiceTrackingTab(),
               ],
             ),
           ),

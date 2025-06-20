@@ -9,12 +9,13 @@ import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin
 import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.dart'; // Use updated router
 import 'dart:async';
 
-// Define constants for the global indices (0-4) matching AdminRoutes logic - UPDATED
+// Define constants for the global indices (0-5) matching AdminRoutes logic - UPDATED
 const int _productDashboardIndex = 0;
-const int _staffIndex = 1; // NEW
-const int _mealPlansIndex = 2; // Shifted
-const int _cateringIndex = 3; // Shifted
-const int _settingsIndex = 4; // Shifted
+const int _paymentsIndex = 1; // NEW
+const int _staffIndex = 2; // Shifted
+const int _mealPlansIndex = 3; // Shifted  
+const int _cateringIndex = 4; // Shifted
+const int _settingsIndex = 5; // Shifted
 
 class AdminPanelScreen extends ConsumerStatefulWidget {
   final Widget child;
@@ -40,11 +41,11 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
 
   bool _isVerifyingIndex = false;
 
-  // _navigationItems list based on the 5 main sections - REMAINS THE SAME
+  // _navigationItems list based on the 6 main sections - UPDATED
   final List<_AdminNavigationItem> _navigationItems = [
     // Index 0 - Product Dashboard
     _AdminNavigationItem(
-      title: 'Dashboard', // Shortened for UI
+      title: 'Dashboard',
       icon: Icons.dashboard,
       route: AdminRoutes.getFullPath(AdminRoutes.productDashboard),
       routeName: AdminRoutes.namePdHome,
@@ -61,12 +62,6 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
             detailRouteName: AdminRoutes.namePdOrderDetails,
             route: AdminRoutes.getFullPath(AdminRoutes.dashboardOrders)),
         _SubRoute(
-            title: 'Payment Details',
-            routeName: AdminRoutes.namePdOrderPaymentDetails,
-            icon: Icons.payment,
-            isDetailRoute: false,
-            route: AdminRoutes.getFullPath(':orderId/payment')),
-        _SubRoute(
             title: 'Tables',
             routeName: AdminRoutes.namePdTables,
             icon: Icons.table_bar,
@@ -77,14 +72,55 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
             routeName: AdminRoutes.namePdAnalytics,
             icon: Icons.bar_chart,
             route: AdminRoutes.getFullPath(AdminRoutes.dashboardAnalytics)),
+        // Remove payments from here - it's now a top-level section
       ],
     ),
-    // Index 1 - Staff (NEW)
+    // Index 1 - Payments (NEW)
+    _AdminNavigationItem(
+      title: 'Payments',
+      icon: Icons.payments,
+      route: AdminRoutes.getFullPath(AdminRoutes.payments),
+      routeName: AdminRoutes.namePaymentsHome,
+      subroutes: [
+        _SubRoute(
+            title: 'Overview',
+            routeName: AdminRoutes.namePaymentsOverview,
+            icon: Icons.dashboard,
+            route: AdminRoutes.getFullPath('${AdminRoutes.payments}/${AdminRoutes.paymentsOverview}')),
+        _SubRoute(
+            title: 'Transactions',
+            routeName: AdminRoutes.namePaymentsTransactions,
+            icon: Icons.receipt,
+            route: AdminRoutes.getFullPath('${AdminRoutes.payments}/${AdminRoutes.paymentsTransactions}')),
+        _SubRoute(
+            title: 'Tips',
+            routeName: AdminRoutes.namePaymentsTips,
+            icon: Icons.volunteer_activism,
+            route: AdminRoutes.getFullPath('${AdminRoutes.payments}/${AdminRoutes.paymentsTips}')),
+        _SubRoute(
+            title: 'Taxes',
+            routeName: AdminRoutes.namePaymentsTaxes,
+            icon: Icons.account_balance,
+            route: AdminRoutes.getFullPath('${AdminRoutes.payments}/${AdminRoutes.paymentsTaxes}')),
+        _SubRoute(
+            title: 'Service Tracking',
+            routeName: AdminRoutes.namePaymentsService,
+            icon: Icons.track_changes,
+            route: AdminRoutes.getFullPath('${AdminRoutes.payments}/${AdminRoutes.paymentsService}')),
+        _SubRoute(
+            title: 'Order Payment Details',
+            routeName: AdminRoutes.namePaymentsOrderDetails,
+            icon: Icons.payment,
+            isDetailRoute: true,
+            route: AdminRoutes.getFullPath('${AdminRoutes.payments}/${AdminRoutes.paymentsOrderDetails}')),
+      ],
+    ),
+    // Index 2 - Staff (Shifted)
     _AdminNavigationItem(
       title: 'Staff',
       icon: Icons.people_alt_rounded,
       route: AdminRoutes.getFullPath(AdminRoutes.staff),
-      routeName: AdminRoutes.nameStaffHome, // Navigates to /admin/staff
+      routeName: AdminRoutes.nameStaffHome,
       subroutes: [
         // Kitchen management route
         _SubRoute(
@@ -111,7 +147,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                 '${AdminRoutes.staff}/${AdminRoutes.staffWaiterOrderEntry}')),
       ],
     ),
-    // Index 2 - Meal Plans (Shifted)
+    // Index 3 - Meal Plans (Shifted)
     _AdminNavigationItem(
       title: 'Meal Plans',
       icon: Icons.lunch_dining,
@@ -164,7 +200,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                 '${AdminRoutes.mealPlans}/${AdminRoutes.mealPlanQr}')),
       ],
     ),
-    // Index 3 - Catering (Shifted)
+    // Index 4 - Catering (Shifted)
     _AdminNavigationItem(
       title: 'Catering',
       icon: Icons.inventory_2,
@@ -203,7 +239,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                 '${AdminRoutes.catering}/${AdminRoutes.cateringCategories}')),
       ],
     ),
-    // Index 4 - Settings (Shifted)
+    // Index 5 - Settings (Shifted)
     _AdminNavigationItem(
       title: 'Settings', // Shortened
       icon: Icons.settings,
@@ -307,13 +343,26 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
         return AdminRoutes.nameBusinessPdOrders;
       case AdminRoutes.namePdOrderDetails:
         return AdminRoutes.nameBusinessPdOrderDetails;
-      case AdminRoutes.namePdOrderPaymentDetails:
-        return AdminRoutes.nameBusinessPdOrderPaymentDetails;
       case AdminRoutes.namePdTables:
         return AdminRoutes.nameBusinessPdTables;
       case AdminRoutes.namePdAnalytics:
         return AdminRoutes.nameBusinessPdAnalytics;
-      // Staff
+      // Payments (NEW)
+      case AdminRoutes.namePaymentsHome:
+        return AdminRoutes.nameBusinessPaymentsHome;
+      case AdminRoutes.namePaymentsOverview:
+        return AdminRoutes.nameBusinessPaymentsOverview;
+      case AdminRoutes.namePaymentsTransactions:
+        return AdminRoutes.nameBusinessPaymentsTransactions;
+      case AdminRoutes.namePaymentsTips:
+        return AdminRoutes.nameBusinessPaymentsTips;
+      case AdminRoutes.namePaymentsTaxes:
+        return AdminRoutes.nameBusinessPaymentsTaxes;
+      case AdminRoutes.namePaymentsService:
+        return AdminRoutes.nameBusinessPaymentsService;
+      case AdminRoutes.namePaymentsOrderDetails:
+        return AdminRoutes.nameBusinessPaymentsOrderDetails;
+      // Staff (shifted)
       case AdminRoutes.nameStaffHome:
         return AdminRoutes.nameBusinessStaffHome;
       case AdminRoutes.nameStaffKitchen:
@@ -475,7 +524,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
             selectedIndex:
                 currentSelectedIndex, // Use passed index for highlighting
             onDestinationSelected: _onItemSelected, // Triggers navigation
-            destinations: _navigationItems // Now 5 items
+            destinations: _navigationItems // Now 6 items
                 .map((item) => NavigationRailDestination(
                     icon: Icon(item.icon), label: Text(item.title)))
                 .toList(),
@@ -587,7 +636,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
             selectedIndex:
                 currentSelectedIndex, // Use passed index for highlighting
             onDestinationSelected: _onItemSelected, // Triggers navigation
-            destinations: _navigationItems // Now 5 items
+            destinations: _navigationItems // Now 6 items
                 .map((item) => NavigationRailDestination(
                     icon: Icon(item.icon), label: Text(item.title)))
                 .toList(),
@@ -895,23 +944,21 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
       ),
       // --- Mobile Bottom Navigation (4 Items - Modal Logic Restored) ---
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _getMobileBottomBarIndex(
-            currentSelectedIndex), // Use passed index for highlighting
+        currentIndex: _getMobileBottomBarIndex(currentSelectedIndex),
         onTap: (tappedMobileIndex) {
-          // Use the currentRouteName captured at the start of build
           switch (tappedMobileIndex) {
             case 0:
-              _showDashboardGroupOptions(currentRouteName);
-              break; // Pass name
+              _onItemSelected(_productDashboardIndex);
+              break;
             case 1:
-              _showSubrouteOptions(_mealPlansIndex, currentRouteName);
-              break; // Pass name
+              _onItemSelected(_paymentsIndex); // Direct navigation to Payments
+              break;
             case 2:
-              _showSubrouteOptions(_cateringIndex, currentRouteName);
-              break; // Pass name
+              _showSubrouteOptions(_mealPlansIndex, currentRouteName);
+              break;
             case 3:
               _showMoreOptions(currentRouteName);
-              break; // Pass name (More now includes Staff & Settings)
+              break;
           }
         },
         type: BottomNavigationBarType.fixed,
@@ -926,16 +973,16 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
         items: [
           BottomNavigationBarItem(
               icon: Icon(_navigationItems[_productDashboardIndex].icon),
-              label: 'Dashboard'), // Group
+              label: 'Dashboard'),
+          BottomNavigationBarItem(
+              icon: Icon(_navigationItems[_paymentsIndex].icon),
+              label: 'Payments'), // NEW
           BottomNavigationBarItem(
               icon: Icon(_navigationItems[_mealPlansIndex].icon),
               label: 'Meal Plans'),
-          BottomNavigationBarItem(
-              icon: Icon(_navigationItems[_cateringIndex].icon),
-              label: 'Catering'),
           const BottomNavigationBarItem(
               icon: Icon(Icons.more_horiz),
-              label: 'More'), // Staff & Settings go here
+              label: 'More'), // Catering, Staff & Settings
         ],
       ),
       // --- End Mobile Bottom Navigation ---
@@ -944,19 +991,19 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
 
   // --- Helper Functions ---
 
-  // Maps global index (0-4) to mobile bottom bar index (0-3) - UPDATED
+  // Maps global index (0-5) to mobile bottom bar index (0-3) - UPDATED
   int _getMobileBottomBarIndex(int globalIndex) {
     switch (globalIndex) {
       case _productDashboardIndex:
-        return 0; // Dashboard Group
+        return 0; // Dashboard
+      case _paymentsIndex:
+        return 1; // Payments
       case _mealPlansIndex:
-        return 1; // Meal Plans
+        return 2; // Meal Plans
       case _cateringIndex:
-        return 2; // Catering
       case _staffIndex:
-        return 3; // Staff goes under More
       case _settingsIndex:
-        return 3; // Settings goes under More
+        return 3; // More (Catering, Staff, Settings)
       default:
         return 0; // Fallback
     }
@@ -1124,13 +1171,12 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
   // Shows the More options (Staff, Settings) - UPDATED
   void _showMoreOptions(String? currentRouteName) {
     final theme = Theme.of(context);
+    final cateringItem = _navigationItems[_cateringIndex];
     final staffItem = _navigationItems[_staffIndex];
     final settingsItem = _navigationItems[_settingsIndex];
-    final staffSubroutes =
-        staffItem.subroutes?.where((sr) => !sr.isDetailRoute).toList() ?? [];
-    final settingsSubroutes =
-        settingsItem.subroutes?.where((sr) => !sr.isDetailRoute).toList() ?? [];
-
+    
+    // ...existing code...
+    
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1147,38 +1193,51 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
               child: ListView(
                 shrinkWrap: true,
                 children: [
+                  // --- Catering Section ---
+                  ListTile(
+                    leading: Icon(cateringItem.icon),
+                    title: Text(cateringItem.title),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _onItemSelected(_cateringIndex);
+                    },
+                  ),
+                  // Indented Catering Subroutes
+                  ...cateringItem.subroutes!.map((subroute) =>
+                      _buildSubrouteMoreMenuTile(
+                          _cateringIndex, subroute, currentRouteName,
+                          indent: true)),
+
+                  const Divider(),
+                  
                   // --- Staff Section ---
                   ListTile(
                     leading: Icon(staffItem.icon),
                     title: Text(staffItem.title),
-                    selected: selectedIndex ==
-                        _staffIndex, // Highlight if Staff section is active
                     onTap: () {
-                      Navigator.pop(modalContext);
+                      Navigator.pop(context);
                       _onItemSelected(_staffIndex);
                     },
                   ),
                   // Indented Staff Subroutes
-                  ...staffSubroutes.map((subroute) =>
+                  ...staffItem.subroutes!.map((subroute) =>
                       _buildSubrouteMoreMenuTile(
                           _staffIndex, subroute, currentRouteName,
                           indent: true)),
 
                   const Divider(),
-
+                  
                   // --- Settings Section ---
                   ListTile(
                     leading: Icon(settingsItem.icon),
                     title: Text(settingsItem.title),
-                    selected: selectedIndex ==
-                        _settingsIndex, // Highlight if Settings section is active
                     onTap: () {
-                      Navigator.pop(modalContext);
+                      Navigator.pop(context);
                       _onItemSelected(_settingsIndex);
                     },
                   ),
                   // Indented Settings Subroutes (Users)
-                  ...settingsSubroutes.map((subroute) =>
+                  ...settingsItem.subroutes!.map((subroute) =>
                       _buildSubrouteMoreMenuTile(
                           _settingsIndex, subroute, currentRouteName,
                           indent: true)),

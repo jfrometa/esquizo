@@ -105,7 +105,6 @@ class PaymentService {
         id: _uuid.v4(),
         orderId: order.id,
         userId: order.userId,
-        businessId: _businessId,
         status: PaymentStatus.pending,
         method: method,
         amount: order.total ?? finalAmount,
@@ -449,7 +448,7 @@ class PaymentService {
             (transactionsByMethod[methodName] ?? 0) + 1;
 
         // Discounts by type
-        for (final discount in payment.discounts) {
+        for (final discount in payment.appliedDiscounts) {
           final typeName = discount.type.name;
           discountsByType[typeName] =
               (discountsByType[typeName] ?? 0) + discount.amountApplied;
@@ -842,29 +841,6 @@ class PaymentService {
     return distributions;
   }
 
-  // Create service tracking
-  Future<ServiceTracking> createServiceTracking({
-    required String orderId,
-    required ServiceType serviceType,
-    String? tableNumber,
-    String? serverId,
-    String? serverName,
-  }) async {
-    final tracking = ServiceTracking(
-      orderId: orderId,
-      startTime: DateTime.now(),
-      serviceType: serviceType,
-      tableNumber: tableNumber,
-      staffContributions: {},
-      events: [],
-      isActive: true,
-    );
-    
-    await _serviceTrackingCollection.doc(orderId).set(tracking.toJson());
-    
-    return tracking;
-  }
-
   // Add staff contribution to service
   Future<void> addStaffContribution({
     required String orderId,
@@ -886,40 +862,13 @@ class PaymentService {
     });
   }
 
-  // Distribute tips
-  Future<TipDistribution> distributeTips({
-    required String paymentId,
-    required String orderId,
-    required double totalTipAmount,
-    required DistributionMethod method,
-    required List<StaffTipAllocation> allocations,
-    required String distributedBy,
-    String? notes,
-  }) async {
-    final distribution = TipDistribution(
-      id: _tipDistributionsCollection.doc().id,
-      paymentId: paymentId,
-      orderId: orderId,
-      totalTipAmount: totalTipAmount,
-      method: method,
-      allocations: allocations,
-      distributedAt: DateTime.now(),
-      distributedBy: distributedBy,
-      notes: notes,
-    );
-    
-    await _tipDistributionsCollection.doc(distribution.id).set(distribution.toJson());
-    
-    return distribution;
-  }
-
   // Calculate peak service hours
   Future<Map<String, dynamic>> _calculatePeakHours(List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) async {
     Map<int, int> hourCounts = {};
     
     for (final doc in docs) {
       final tracking = ServiceTracking.fromJson(doc.data());
-      final hour = tracking.startTime.hour;
+      final hour = (tracking.startTime ?? tracking.serviceStartTime).hour;
       hourCounts[hour] = (hourCounts[hour] ?? 0) + 1;
     }
     

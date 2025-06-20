@@ -2,12 +2,20 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "client (web)",
+      "name": "client (wasm web)",
       "program": "lib/main.dart",
       "cwd": "client",
       "request": "launch",
       "type": "dart",
       "args": ["-d", "chrome", "--wasm"]
+    },
+    {
+      "name": "client (web)",
+      "program": "lib/main.dart",
+      "cwd": "client",
+      "request": "launch",
+      "type": "dart",
+      "args": ["-d", "chrome"]
     }
   ],
   "tasks": {

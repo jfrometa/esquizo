@@ -122,7 +122,7 @@ class ScaffoldWithNavigationBar extends ConsumerWidget {
       }
     }
 
-    // Special handling for admin route
+    // Special handling for admin routes
     if (currentPath.startsWith('/admin')) {
       final adminIndex = destinations.indexWhere((d) => d.path == '/admin');
       if (adminIndex >= 0) {
@@ -143,8 +143,7 @@ class ScaffoldWithNavigationBar extends ConsumerWidget {
             debugPrint('🏠 Navigation selected: ${dest.label} (${dest.path})');
 
             if (dest.path == '/admin') {
-              // Admin routes are handled separately from shell branches
-              // Use the root context to navigate to admin
+              // Admin routes (including payments) are handled through admin panel
               final router = GoRouter.of(context);
               router.go('/admin');
             } else {
@@ -221,7 +220,7 @@ class ScaffoldWithNavigationRail extends ConsumerWidget {
       }
     }
 
-    // Special handling for admin route
+    // Special handling for admin routes
     if (currentPath.startsWith('/admin')) {
       final adminIndex = destinations.indexWhere((d) => d.path == '/admin');
       if (adminIndex >= 0) {
@@ -244,8 +243,7 @@ class ScaffoldWithNavigationRail extends ConsumerWidget {
                     '🏠 NavigationRail selected: ${dest.label} (${dest.path})');
 
                 if (dest.path == '/admin') {
-                  // Admin routes are handled separately from shell branches
-                  // Use the root context to navigate to admin
+                  // Admin routes (including payments) are handled through admin panel
                   final router = GoRouter.of(context);
                   router.go('/admin');
                 } else {
@@ -399,7 +397,7 @@ class BusinessScaffoldWithNavigationBar extends ConsumerWidget {
           debugPrint(
               '🏢 Business navigation selected: ${dest.label} (${dest.path}) for /$businessSlug');
 
-          // Handle admin navigation for business context
+          // Handle admin navigation for business context (includes payments)
           if (dest.path == '/admin') {
             context.go('/$businessSlug/admin');
             return;
@@ -461,7 +459,7 @@ class BusinessScaffoldWithNavigationRail extends ConsumerWidget {
             onDestinationSelected: (index) {
               final dest = businessDestinations[index];
 
-              // Handle admin navigation for business context
+              // Handle admin navigation for business context (includes payments)
               if (dest.path == '/admin') {
                 context.go('/$businessSlug/admin');
                 return;

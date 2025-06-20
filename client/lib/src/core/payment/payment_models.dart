@@ -46,6 +46,24 @@ enum DistributionMethod {
   pointsSystem,
 }
 
+/// Reimbursement status enum
+enum ReimbursementStatus {
+  requested,
+  approved,
+  rejected,
+  completed,
+  cancelled,
+}
+
+/// Discount type enum
+enum DiscountType {
+  percentage,
+  fixed,
+  coupon,
+  bogo,
+  freeItem,
+}
+
 /// Staff role enum
 enum StaffRole {
   waiter,
@@ -56,6 +74,15 @@ enum StaffRole {
   host,
   manager,
   cashier,
+  other,
+}
+
+/// Offer type enum
+enum OfferType {
+  percentage,
+  fixedAmount,
+  bogo,
+  freeItem,
   other,
 }
 
@@ -83,6 +110,7 @@ class Payment {
   final List<Discount> appliedDiscounts;
   final List<String> appliedCouponCodes;
   final PaymentProof? proof;
+  final List<PaymentProof> proofs;
   final ServiceType? serviceType;
   final String? serverId;
   final String? serverName;
@@ -114,6 +142,7 @@ class Payment {
     this.appliedDiscounts = const [],
     this.appliedCouponCodes = const [],
     this.proof,
+    this.proofs = const [],
     this.serviceType,
     this.serverId,
     this.serverName,
@@ -161,6 +190,10 @@ class Payment {
       proof: json['proof'] != null
           ? PaymentProof.fromJson(json['proof'])
           : null,
+      proofs: (json['proofs'] as List<dynamic>?)
+              ?.map((p) => PaymentProof.fromJson(p))
+              .toList() ??
+          [],
       serviceType: json['serviceType'] != null
           ? ServiceType.values.firstWhere(
               (e) => e.name == json['serviceType'],
@@ -203,6 +236,7 @@ class Payment {
           appliedDiscounts.map((d) => d.toJson()).toList(),
       'appliedCouponCodes': appliedCouponCodes,
       'proof': proof?.toJson(),
+      'proofs': proofs.map((p) => p.toJson()).toList(),
       'serviceType': serviceType?.name,
       'serverId': serverId,
       'serverName': serverName,
@@ -211,6 +245,72 @@ class Payment {
       'refundedAmount': refundedAmount,
       'refundIds': refundIds,
     };
+  }
+
+  Payment copyWith({
+    String? id,
+    String? orderId,
+    String? userId,
+    String? customerName,
+    String? customerEmail,
+    String? customerPhone,
+    PaymentMethod? method,
+    PaymentStatus? status,
+    double? baseAmount,
+    double? taxAmount,
+    double? tipAmount,
+    double? serviceCharge,
+    double? discountAmount,
+    double? finalAmount,
+    String? currency,
+    DateTime? createdAt,
+    DateTime? completedAt,
+    String? transactionId,
+    Map<String, dynamic>? metadata,
+    List<Discount>? appliedDiscounts,
+    List<String>? appliedCouponCodes,
+    PaymentProof? proof,
+    List<PaymentProof>? proofs,
+    ServiceType? serviceType,
+    String? serverId,
+    String? serverName,
+    String? tableNumber,
+    bool? isRefundable,
+    double? refundedAmount,
+    List<String>? refundIds,
+  ) {
+    return Payment(
+      id: id ?? this.id,
+      orderId: orderId ?? this.orderId,
+      userId: userId ?? this.userId,
+      customerName: customerName ?? this.customerName,
+      customerEmail: customerEmail ?? this.customerEmail,
+      customerPhone: customerPhone ?? this.customerPhone,
+      method: method ?? this.method,
+      status: status ?? this.status,
+      baseAmount: baseAmount ?? this.baseAmount,
+      taxAmount: taxAmount ?? this.taxAmount,
+      tipAmount: tipAmount ?? this.tipAmount,
+      serviceCharge: serviceCharge ?? this.serviceCharge,
+      discountAmount: discountAmount ?? this.discountAmount,
+      finalAmount: finalAmount ?? this.finalAmount,
+      currency: currency ?? this.currency,
+      createdAt: createdAt ?? this.createdAt,
+      completedAt: completedAt ?? this.completedAt,
+      transactionId: transactionId ?? this.transactionId,
+      metadata: metadata ?? this.metadata,
+      appliedDiscounts: appliedDiscounts ?? this.appliedDiscounts,
+      appliedCouponCodes: appliedCouponCodes ?? this.appliedCouponCodes,
+      proof: proof ?? this.proof,
+      proofs: proofs ?? this.proofs,
+      serviceType: serviceType ?? this.serviceType,
+      serverId: serverId ?? this.serverId,
+      serverName: serverName ?? this.serverName,
+      tableNumber: tableNumber ?? this.tableNumber,
+      isRefundable: isRefundable ?? this.isRefundable,
+      refundedAmount: refundedAmount ?? this.refundedAmount,
+      refundIds: refundIds ?? this.refundIds,
+    );
   }
 }
 
@@ -409,651 +509,94 @@ class Reimbursement {
       'metadata': metadata,
     };
   }
-}
 
-/// Payment summary model
-class PaymentSummary {
-  final DateTime startDate;
-  final DateTime endDate;
-  final double totalRevenue;
-  final double totalDiscounts;
-  final double totalReimbursements;
-  final double netRevenue;
-  final int totalTransactions;
-  final Map<String, int> transactionsByMethod;
-  final Map<String, double> revenueByMethod;
-  final Map<String, double> discountsByType;
-
-  PaymentSummary({
-    required this.startDate,
-    required this.endDate,
-    required this.totalRevenue,
-    required this.totalDiscounts,
-    required this.totalReimbursements,
-    required this.netRevenue,
-    required this.totalTransactions,
-    required this.transactionsByMethod,
-    required this.revenueByMethod,
-    required this.discountsByType,
-  });
-
-  factory PaymentSummary.fromJson(Map<String, dynamic> json) {
-    return PaymentSummary(
-      startDate: (json['startDate'] as Timestamp).toDate(),
-      endDate: (json['endDate'] as Timestamp).toDate(),
-      totalRevenue: (json['totalRevenue'] ?? 0).toDouble(),
-      totalDiscounts: (json['totalDiscounts'] ?? 0).toDouble(),
-      totalReimbursements: (json['totalReimbursements'] ?? 0).toDouble(),
-      netRevenue: (json['netRevenue'] ?? 0).toDouble(),
-      totalTransactions: json['totalTransactions'] ?? 0,
-      transactionsByMethod:
-          Map<String, int>.from(json['transactionsByMethod'] ?? {}),
-      revenueByMethod:
-          Map<String, double>.from(json['revenueByMethod'] ?? {}),
-      discountsByType:
-          Map<String, double>.from(json['discountsByType'] ?? {}),
+  Reimbursement copyWith({
+    String? id,
+    String? paymentId,
+    String? orderId,
+    String? userId,
+    double? amount,
+    String? reason,
+    String? status,
+    DateTime? requestedAt,
+    DateTime? processedAt,
+    String? processedBy,
+    String? notes,
+    List<String>? itemIds,
+    Map<String, dynamic>? metadata,
+  }) {
+    return Reimbursement(
+      id: id ?? this.id,
+      paymentId: paymentId ?? this.paymentId,
+      orderId: orderId ?? this.orderId,
+      userId: userId ?? this.userId,
+      amount: amount ?? this.amount,
+      reason: reason ?? this.reason,
+      status: status ?? this.status,
+      requestedAt: requestedAt ?? this.requestedAt,
+      processedAt: processedAt ?? this.processedAt,
+      processedBy: processedBy ?? this.processedBy,
+      notes: notes ?? this.notes,
+      itemIds: itemIds ?? this.itemIds,
+      metadata: metadata ?? this.metadata,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'startDate': Timestamp.fromDate(startDate),
-      'endDate': Timestamp.fromDate(endDate),
-      'totalRevenue': totalRevenue,
-      'totalDiscounts': totalDiscounts,
-      'totalReimbursements': totalReimbursements,
-      'netRevenue': netRevenue,
-      'totalTransactions': totalTransactions,
-      'transactionsByMethod': transactionsByMethod,
-      'revenueByMethod': revenueByMethod,
-      'discountsByType': discountsByType,
-    };
-  }
-}
-
-/// Tax configuration model
-class TaxConfiguration {
-  final String id;
-  final String name;
-  final double rate;
-  final TaxType type;
-  final ServiceType? applicableServiceType;
-  final bool isActive;
-  final String? description;
-  final DateTime createdAt;
-  final DateTime? modifiedAt;
-
-  TaxConfiguration({
-    required this.id,
-    required this.name,
-    required this.rate,
-    required this.type,
-    this.applicableServiceType,
-    required this.isActive,
-    this.description,
-    required this.createdAt,
-    this.modifiedAt,
-  });
-
-  factory TaxConfiguration.fromJson(Map<String, dynamic> json) {
-    return TaxConfiguration(
-      id: json['id'],
-      name: json['name'],
-      rate: (json['rate'] ?? 0).toDouble(),
-      type: TaxType.values.firstWhere(
-        (e) => e.name == json['type'],
-        orElse: () => TaxType.percentage,
-      ),
-      applicableServiceType: json['applicableServiceType'] != null
-          ? ServiceType.values.firstWhere(
-              (e) => e.name == json['applicableServiceType'],
-              orElse: () => ServiceType.dineIn,
-            )
-          : null,
-      isActive: json['isActive'] ?? true,
-      description: json['description'],
-      createdAt: (json['createdAt'] as Timestamp).toDate(),
-      modifiedAt: json['modifiedAt'] != null
-          ? (json['modifiedAt'] as Timestamp).toDate()
-          : null,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'rate': rate,
-      'type': type.name,
-      'applicableServiceType': applicableServiceType?.name,
-      'isActive': isActive,
-      'description': description,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'modifiedAt': modifiedAt != null
-          ? Timestamp.fromDate(modifiedAt!)
-          : null,
-    };
-  }
-}
-
-/// Service tracking model
-class ServiceTracking {
-  final String orderId;
-  final DateTime startTime;
-  final DateTime? endTime;
-  final ServiceType serviceType;
-  final String? tableNumber;
-  final Map<String, StaffContribution> staffContributions;
-  final List<ServiceEvent> events;
-  final double? serviceCharge;
-  final bool isActive;
-
-  ServiceTracking({
-    required this.orderId,
-    required this.startTime,
-    this.endTime,
-    required this.serviceType,
-    this.tableNumber,
-    required this.staffContributions,
-    required this.events,
-    this.serviceCharge,
-    required this.isActive,
-  });
-
-  factory ServiceTracking.fromJson(Map<String, dynamic> json) {
-    return ServiceTracking(
-      orderId: json['orderId'],
-      startTime: (json['startTime'] as Timestamp).toDate(),
-      endTime: json['endTime'] != null
-          ? (json['endTime'] as Timestamp).toDate()
-          : null,
-      serviceType: ServiceType.values.firstWhere(
-        (e) => e.name == json['serviceType'],
-        orElse: () => ServiceType.dineIn,
-      ),
-      tableNumber: json['tableNumber'],
-      staffContributions: (json['staffContributions'] as Map<String, dynamic>)
-          .map((key, value) => MapEntry(
-              key, StaffContribution.fromJson(value))),
-      events: (json['events'] as List<dynamic>)
-          .map((e) => ServiceEvent.fromJson(e))
-          .toList(),
-      serviceCharge: json['serviceCharge']?.toDouble(),
-      isActive: json['isActive'] ?? true,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'orderId': orderId,
-      'startTime': Timestamp.fromDate(startTime),
-      'endTime': endTime != null ? Timestamp.fromDate(endTime!) : null,
-      'serviceType': serviceType.name,
-      'tableNumber': tableNumber,
-      'staffContributions': staffContributions
-          .map((key, value) => MapEntry(key, value.toJson())),
-      'events': events.map((e) => e.toJson()).toList(),
-      'serviceCharge': serviceCharge,
-      'isActive': isActive,
-    };
-  }
-}
-
-/// Staff contribution model
-class StaffContribution {
-  final String staffId;
-  final String staffName;
-  final StaffRole role;
-  final DateTime startTime;
-  final DateTime? endTime;
-  final double contributionPercentage;
-
-  StaffContribution({
-    required this.staffId,
-    required this.staffName,
-    required this.role,
-    required this.startTime,
-    this.endTime,
-    required this.contributionPercentage,
-  });
-
-  factory StaffContribution.fromJson(Map<String, dynamic> json) {
-    return StaffContribution(
-      staffId: json['staffId'],
-      staffName: json['staffName'],
-      role: StaffRole.values.firstWhere(
-        (e) => e.name == json['role'],
-        orElse: () => StaffRole.other,
-      ),
-      startTime: (json['startTime'] as Timestamp).toDate(),
-      endTime: json['endTime'] != null
-          ? (json['endTime'] as Timestamp).toDate()
-          : null,
-      contributionPercentage:
-          (json['contributionPercentage'] ?? 0).toDouble(),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'staffId': staffId,
-      'staffName': staffName,
-      'role': role.name,
-      'startTime': Timestamp.fromDate(startTime),
-      'endTime': endTime != null ? Timestamp.fromDate(endTime!) : null,
-      'contributionPercentage': contributionPercentage,
-    };
-  }
-}
-
-/// Service event model
-class ServiceEvent {
-  final String type; // order_placed, food_ready, payment_requested, etc.
-  final DateTime timestamp;
-  final String? staffId;
-  final String? staffName;
-  final Map<String, dynamic>? metadata;
-
-  ServiceEvent({
-    required this.type,
-    required this.timestamp,
-    this.staffId,
-    this.staffName,
-    this.metadata,
-  });
-
-  factory ServiceEvent.fromJson(Map<String, dynamic> json) {
-    return ServiceEvent(
-      type: json['type'],
-      timestamp: (json['timestamp'] as Timestamp).toDate(),
-      staffId: json['staffId'],
-      staffName: json['staffName'],
-      metadata: json['metadata'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'type': type,
-      'timestamp': Timestamp.fromDate(timestamp),
-      'staffId': staffId,
-      'staffName': staffName,
-      'metadata': metadata,
-    };
-  }
-}
-
-/// Tip distribution model
-class TipDistribution {
-  final String id;
-  final String paymentId;
-  final String orderId;
-  final double totalTipAmount;
-  final DistributionMethod method;
-  final List<StaffTipAllocation> allocations;
-  final DateTime distributedAt;
-  final String distributedBy;
-  final String? notes;
-
-  TipDistribution({
-    required this.id,
-    required this.paymentId,
-    required this.orderId,
-    required this.totalTipAmount,
-    required this.method,
-    required this.allocations,
-    required this.distributedAt,
-    required this.distributedBy,
-    this.notes,
-  });
-
-  factory TipDistribution.fromJson(Map<String, dynamic> json) {
-    return TipDistribution(
-      id: json['id'],
-      paymentId: json['paymentId'],
-      orderId: json['orderId'],
-      totalTipAmount: (json['totalTipAmount'] ?? 0).toDouble(),
-      method: DistributionMethod.values.firstWhere(
-        (e) => e.name == json['method'],
-        orElse: () => DistributionMethod.manual,
-      ),
-      allocations: (json['allocations'] as List<dynamic>)
-          .map((a) => StaffTipAllocation.fromJson(a))
-          .toList(),
-      distributedAt: (json['distributedAt'] as Timestamp).toDate(),
-      distributedBy: json['distributedBy'],
-      notes: json['notes'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'paymentId': paymentId,
-      'orderId': orderId,
-      'totalTipAmount': totalTipAmount,
-      'method': method.name,
-      'allocations': allocations.map((a) => a.toJson()).toList(),
-      'distributedAt': Timestamp.fromDate(distributedAt),
-      'distributedBy': distributedBy,
-      'notes': notes,
-    };
-  }
-}
-
-/// Staff tip allocation model
-class StaffTipAllocation {
-  final String staffId;
-  final String staffName;
-  final StaffRole role;
-  final double amount;
-  final double percentage;
-
-  StaffTipAllocation({
-    required this.staffId,
-    required this.staffName,
-    required this.role,
-    required this.amount,
-    required this.percentage,
-  });
-
-  factory StaffTipAllocation.fromJson(Map<String, dynamic> json) {
-    return StaffTipAllocation(
-      staffId: json['staffId'],
-      staffName: json['staffName'],
-      role: StaffRole.values.firstWhere(
-        (e) => e.name == json['role'],
-        orElse: () => StaffRole.other,
-      ),
-      amount: (json['amount'] ?? 0).toDouble(),
-      percentage: (json['percentage'] ?? 0).toDouble(),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'staffId': staffId,
-      'staffName': staffName,
-      'role': role.name,
-      'amount': amount,
-      'percentage': percentage,
-    };
-  }
-}
-    required this.name,
-    required this.description,
-    required this.type,
-    required this.validFrom,
-    required this.validUntil,
-    this.isActive = true,
-    this.conditions = const [],
-    this.rewards = const [],
-    this.currentUses = 0,
-    this.maxUses,
-    this.isAutoApplied = false,
-    this.imageUrl,
-    this.metadata,
-  });
-
-  factory SpecialOffer.fromJson(Map<String, dynamic> json) {
-    return SpecialOffer(
-      id: json['id'] as String,
-      businessId: json['businessId'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      type: OfferType.values.firstWhere(
-        (e) => e.name == json['type'],
-        orElse: () => OfferType.other,
-      ),
-      validFrom: (json['validFrom'] as Timestamp).toDate(),
-      validUntil: (json['validUntil'] as Timestamp).toDate(),
-      isActive: json['isActive'] ?? true,
-      conditions: (json['conditions'] as List<dynamic>?)
-              ?.map((e) => OfferCondition.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      rewards: (json['rewards'] as List<dynamic>?)
-              ?.map((e) => OfferReward.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      currentUses: json['currentUses'] ?? 0,
-      maxUses: json['maxUses'],
-      isAutoApplied: json['isAutoApplied'] ?? false,
-      imageUrl: json['imageUrl'],
-      metadata: json['metadata'] as Map<String, dynamic>?,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'businessId': businessId,
-      'name': name,
-      'description': description,
-      'type': type.name,
-      'validFrom': Timestamp.fromDate(validFrom),
-      'validUntil': Timestamp.fromDate(validUntil),
-      'isActive': isActive,
-      'conditions': conditions.map((e) => e.toJson()).toList(),
-      'rewards': rewards.map((e) => e.toJson()).toList(),
-      'currentUses': currentUses,
-      'maxUses': maxUses,
-      'isAutoApplied': isAutoApplied,
-      'imageUrl': imageUrl,
-      'metadata': metadata,
-    };
-  }
-}
-
-/// Offer condition model
-class OfferCondition {
-  final String type;
-  final Map<String, dynamic> parameters;
-
-  OfferCondition({
-    required this.type,
-    required this.parameters,
-  });
-
-  factory OfferCondition.fromJson(Map<String, dynamic> json) {
-    return OfferCondition(
-      type: json['type'] as String,
-      parameters: json['parameters'] as Map<String, dynamic>,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'type': type,
-      'parameters': parameters,
-    };
-  }
-}
-
-/// Offer reward model
-class OfferReward {
-  final String type;
-  final Map<String, dynamic> parameters;
-
-  OfferReward({
-    required this.type,
-    required this.parameters,
-  });
-
-  factory OfferReward.fromJson(Map<String, dynamic> json) {
-    return OfferReward(
-      type: json['type'] as String,
-      parameters: json['parameters'] as Map<String, dynamic>,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'type': type,
-      'parameters': parameters,
-    };
-  }
-}
-
-/// Bundle model
-class Bundle {
-  final String id;
-  final String businessId;
-  final String name;
-  final String description;
-  final double originalPrice;
-  final double bundlePrice;
-  final DateTime validFrom;
-  final DateTime validUntil;
-  final bool isActive;
-  final List<BundleItem> items;
-  final int maxQuantity;
-  final int currentSales;
-  final String? imageUrl;
-  final Map<String, dynamic>? metadata;
-
-  Bundle({
-    required this.id,
-    required this.businessId,
-    required this.name,
-    required this.description,
-    required this.originalPrice,
-    required this.bundlePrice,
-    required this.validFrom,
-    required this.validUntil,
-    this.isActive = true,
-    this.items = const [],
-    this.maxQuantity = 0,
-    this.currentSales = 0,
-    this.imageUrl,
-    this.metadata,
-  });
-
-  factory Bundle.fromJson(Map<String, dynamic> json) {
-    return Bundle(
-      id: json['id'] as String,
-      businessId: json['businessId'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      originalPrice: (json['originalPrice'] ?? 0).toDouble(),
-      bundlePrice: (json['bundlePrice'] ?? 0).toDouble(),
-      validFrom: (json['validFrom'] as Timestamp).toDate(),
-      validUntil: (json['validUntil'] as Timestamp).toDate(),
-      isActive: json['isActive'] ?? true,
-      items: (json['items'] as List<dynamic>?)
-              ?.map((e) => BundleItem.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      maxQuantity: json['maxQuantity'] ?? 0,
-      currentSales: json['currentSales'] ?? 0,
-      imageUrl: json['imageUrl'],
-      metadata: json['metadata'] as Map<String, dynamic>?,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'businessId': businessId,
-      'name': name,
-      'description': description,
-      'originalPrice': originalPrice,
-      'bundlePrice': bundlePrice,
-      'validFrom': Timestamp.fromDate(validFrom),
-      'validUntil': Timestamp.fromDate(validUntil),
-      'isActive': isActive,
-      'items': items.map((e) => e.toJson()).toList(),
-      'maxQuantity': maxQuantity,
-      'currentSales': currentSales,
-      'imageUrl': imageUrl,
-      'metadata': metadata,
-    };
-  }
-}
-
-/// Bundle item model
-class BundleItem {
-  final String productId;
-  final String productName;
-  final int quantity;
-  final double originalPrice;
-  final String? notes;
-
-  BundleItem({
-    required this.productId,
-    required this.productName,
-    required this.quantity,
-    required this.originalPrice,
-    this.notes,
-  });
-
-  factory BundleItem.fromJson(Map<String, dynamic> json) {
-    return BundleItem(
-      productId: json['productId'] as String,
-      productName: json['productName'] as String,
-      quantity: json['quantity'] as int,
-      originalPrice: (json['originalPrice'] ?? 0).toDouble(),
-      notes: json['notes'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'productId': productId,
-      'productName': productName,
-      'quantity': quantity,
-      'originalPrice': originalPrice,
-      'notes': notes,
-    };
   }
 }
 
 /// Payment summary model
 class PaymentSummary {
-  final String businessId;
-  final DateTime date;
+  // For date range summary
+  final DateTime? startDate;
+  final DateTime? endDate;
+  // For business/day summary
+  final String? businessId;
+  final DateTime? date;
+  // Common fields
   final double totalRevenue;
   final double totalDiscounts;
   final double totalReimbursements;
   final double netRevenue;
   final int totalTransactions;
-  final int successfulTransactions;
-  final int failedTransactions;
-  final Map<String, double> revenueByMethod;
+  final int? successfulTransactions;
+  final int? failedTransactions;
   final Map<String, int> transactionsByMethod;
+  final Map<String, double> revenueByMethod;
   final Map<String, double> discountsByType;
   final Map<String, dynamic>? metadata;
 
   PaymentSummary({
-    required this.businessId,
-    required this.date,
+    this.startDate,
+    this.endDate,
+    this.businessId,
+    this.date,
     required this.totalRevenue,
     required this.totalDiscounts,
     required this.totalReimbursements,
     required this.netRevenue,
     required this.totalTransactions,
-    required this.successfulTransactions,
-    required this.failedTransactions,
-    required this.revenueByMethod,
+    this.successfulTransactions,
+    this.failedTransactions,
     required this.transactionsByMethod,
+    required this.revenueByMethod,
     required this.discountsByType,
     this.metadata,
   });
 
   factory PaymentSummary.fromJson(Map<String, dynamic> json) {
     return PaymentSummary(
-      businessId: json['businessId'] as String,
-      date: (json['date'] as Timestamp).toDate(),
+      startDate: json['startDate'] != null ? (json['startDate'] as Timestamp).toDate() : null,
+      endDate: json['endDate'] != null ? (json['endDate'] as Timestamp).toDate() : null,
+      businessId: json['businessId'],
+      date: json['date'] != null ? (json['date'] as Timestamp).toDate() : null,
       totalRevenue: (json['totalRevenue'] ?? 0).toDouble(),
       totalDiscounts: (json['totalDiscounts'] ?? 0).toDouble(),
       totalReimbursements: (json['totalReimbursements'] ?? 0).toDouble(),
       netRevenue: (json['netRevenue'] ?? 0).toDouble(),
       totalTransactions: json['totalTransactions'] ?? 0,
-      successfulTransactions: json['successfulTransactions'] ?? 0,
-      failedTransactions: json['failedTransactions'] ?? 0,
+      successfulTransactions: json['successfulTransactions'],
+      failedTransactions: json['failedTransactions'],
+      transactionsByMethod: Map<String, int>.from(json['transactionsByMethod'] ?? {}),
       revenueByMethod: Map<String, double>.from(json['revenueByMethod'] ?? {}),
-      transactionsByMethod:
-          Map<String, int>.from(json['transactionsByMethod'] ?? {}),
       discountsByType: Map<String, double>.from(json['discountsByType'] ?? {}),
       metadata: json['metadata'] as Map<String, dynamic>?,
     );
@@ -1061,321 +604,21 @@ class PaymentSummary {
 
   Map<String, dynamic> toJson() {
     return {
-      'businessId': businessId,
-      'date': Timestamp.fromDate(date),
+      if (startDate != null) 'startDate': Timestamp.fromDate(startDate!),
+      if (endDate != null) 'endDate': Timestamp.fromDate(endDate!),
+      if (businessId != null) 'businessId': businessId,
+      if (date != null) 'date': Timestamp.fromDate(date!),
       'totalRevenue': totalRevenue,
       'totalDiscounts': totalDiscounts,
       'totalReimbursements': totalReimbursements,
       'netRevenue': netRevenue,
       'totalTransactions': totalTransactions,
-      'successfulTransactions': successfulTransactions,
-      'failedTransactions': failedTransactions,
-      'revenueByMethod': revenueByMethod,
+      if (successfulTransactions != null) 'successfulTransactions': successfulTransactions,
+      if (failedTransactions != null) 'failedTransactions': failedTransactions,
       'transactionsByMethod': transactionsByMethod,
+      'revenueByMethod': revenueByMethod,
       'discountsByType': discountsByType,
-      'metadata': metadata,
-    };
-  }
-}
-
-/// Service tracking model
-class ServiceTracking {
-  final String orderId;
-  final ServiceType serviceType;
-  final String? tableId;
-  final int? tableNumber;
-  final String? serverId;
-  final String? serverName;
-  final DateTime serviceStartTime;
-  final DateTime? serviceEndTime;
-  final List<ServiceEvent> events;
-  final Map<String, StaffContribution> staffContributions;
-  final ServiceQuality? serviceQuality;
-  final Map<String, dynamic>? metadata;
-
-  ServiceTracking({
-    required this.orderId,
-    required this.serviceType,
-    this.tableId,
-    this.tableNumber,
-    this.serverId,
-    this.serverName,
-    required this.serviceStartTime,
-    this.serviceEndTime,
-    required this.events,
-    required this.staffContributions,
-    this.serviceQuality,
-    this.metadata,
-  });
-
-  factory ServiceTracking.fromJson(Map<String, dynamic> json) {
-    return ServiceTracking(
-      orderId: json['orderId'] as String,
-      serviceType: ServiceType.values.firstWhere(
-        (e) => e.name == json['serviceType'],
-        orElse: () => ServiceType.dineIn,
-      ),
-      tableId: json['tableId'],
-      tableNumber: json['tableNumber'],
-      serverId: json['serverId'],
-      serverName: json['serverName'],
-      serviceStartTime: (json['serviceStartTime'] as Timestamp).toDate(),
-      serviceEndTime: json['serviceEndTime'] != null
-          ? (json['serviceEndTime'] as Timestamp).toDate()
-          : null,
-      events: (json['events'] as List<dynamic>?)
-              ?.map((e) => ServiceEvent.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      staffContributions: (json['staffContributions'] as Map<String, dynamic>?)
-              ?.map((k, v) => MapEntry(
-                  k, StaffContribution.fromJson(v as Map<String, dynamic>))) ??
-          {},
-      serviceQuality: json['serviceQuality'] != null
-          ? ServiceQuality.fromJson(
-              json['serviceQuality'] as Map<String, dynamic>)
-          : null,
-      metadata: json['metadata'] as Map<String, dynamic>?,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'orderId': orderId,
-      'serviceType': serviceType.name,
-      'tableId': tableId,
-      'tableNumber': tableNumber,
-      'serverId': serverId,
-      'serverName': serverName,
-      'serviceStartTime': Timestamp.fromDate(serviceStartTime),
-      'serviceEndTime':
-          serviceEndTime != null ? Timestamp.fromDate(serviceEndTime!) : null,
-      'events': events.map((e) => e.toJson()).toList(),
-      'staffContributions':
-          staffContributions.map((k, v) => MapEntry(k, v.toJson())),
-      'serviceQuality': serviceQuality?.toJson(),
-      'metadata': metadata,
-    };
-  }
-}
-
-/// Service event model
-class ServiceEvent {
-  final String eventType;
-  final DateTime timestamp;
-  final String staffId;
-  final String staffName;
-  final String? description;
-  final Map<String, dynamic>? data;
-
-  ServiceEvent({
-    required this.eventType,
-    required this.timestamp,
-    required this.staffId,
-    required this.staffName,
-    this.description,
-    this.data,
-  });
-
-  factory ServiceEvent.fromJson(Map<String, dynamic> json) {
-    return ServiceEvent(
-      eventType: json['eventType'] as String,
-      timestamp: (json['timestamp'] as Timestamp).toDate(),
-      staffId: json['staffId'] as String,
-      staffName: json['staffName'] as String,
-      description: json['description'],
-      data: json['data'] as Map<String, dynamic>?,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'eventType': eventType,
-      'timestamp': Timestamp.fromDate(timestamp),
-      'staffId': staffId,
-      'staffName': staffName,
-      'description': description,
-      'data': data,
-    };
-  }
-}
-
-/// Staff contribution model
-class StaffContribution {
-  final String staffId;
-  final String staffName;
-  final StaffRole role;
-  final double contributionPercentage;
-  final List<String> tasks;
-  final DateTime startTime;
-  final DateTime? endTime;
-
-  StaffContribution({
-    required this.staffId,
-    required this.staffName,
-    required this.role,
-    required this.contributionPercentage,
-    required this.tasks,
-    required this.startTime,
-    this.endTime,
-  });
-
-  factory StaffContribution.fromJson(Map<String, dynamic> json) {
-    return StaffContribution(
-      staffId: json['staffId'] as String,
-      staffName: json['staffName'] as String,
-      role: StaffRole.values.firstWhere(
-        (e) => e.name == json['role'],
-        orElse: () => StaffRole.other,
-      ),
-      contributionPercentage: (json['contributionPercentage'] ?? 0).toDouble(),
-      tasks: List<String>.from(json['tasks'] ?? []),
-      startTime: (json['startTime'] as Timestamp).toDate(),
-      endTime: json['endTime'] != null
-          ? (json['endTime'] as Timestamp).toDate()
-          : null,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'staffId': staffId,
-      'staffName': staffName,
-      'role': role.name,
-      'contributionPercentage': contributionPercentage,
-      'tasks': tasks,
-      'startTime': Timestamp.fromDate(startTime),
-      'endTime': endTime != null ? Timestamp.fromDate(endTime!) : null,
-    };
-  }
-}
-
-/// Staff role enum
-enum StaffRole {
-  waiter,
-  cook,
-  chef,
-  bartender,
-  busser,
-  host,
-  manager,
-  cashier,
-  other,
-}
-
-/// Distribution method enum
-enum DistributionMethod {
-  equalSplit,
-  percentageBased,
-  roleBased,
-  manual,
-  pointsSystem,
-}
-
-/// Service quality model
-class ServiceQuality {
-  final double rating;
-  final String? feedback;
-  final Map<String, double> aspectRatings;
-  final DateTime ratedAt;
-  final String? customerId;
-
-  ServiceQuality({
-    required this.rating,
-    this.feedback,
-    required this.aspectRatings,
-    required this.ratedAt,
-    this.customerId,
-  });
-
-  factory ServiceQuality.fromJson(Map<String, dynamic> json) {
-    return ServiceQuality(
-      rating: (json['rating'] ?? 0).toDouble(),
-      feedback: json['feedback'],
-      aspectRatings: Map<String, double>.from(json['aspectRatings'] ?? {}),
-      ratedAt: (json['ratedAt'] as Timestamp).toDate(),
-      customerId: json['customerId'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'rating': rating,
-      'feedback': feedback,
-      'aspectRatings': aspectRatings,
-      'ratedAt': Timestamp.fromDate(ratedAt),
-      'customerId': customerId,
-    };
-  }
-}
-
-/// Tax configuration model
-class TaxConfiguration {
-  final String id;
-  final String businessId;
-  final String name;
-  final double rate;
-  final TaxType type;
-  final ServiceType? applicableServiceType;
-  final bool isActive;
-  final DateTime validFrom;
-  final DateTime? validUntil;
-  final String? description;
-  final Map<String, dynamic>? conditions;
-
-  TaxConfiguration({
-    required this.id,
-    required this.businessId,
-    required this.name,
-    required this.rate,
-    required this.type,
-    this.applicableServiceType,
-    this.isActive = true,
-    required this.validFrom,
-    this.validUntil,
-    this.description,
-    this.conditions,
-  });
-
-  factory TaxConfiguration.fromJson(Map<String, dynamic> json) {
-    return TaxConfiguration(
-      id: json['id'] as String,
-      businessId: json['businessId'] as String,
-      name: json['name'] as String,
-      rate: (json['rate'] ?? 0).toDouble(),
-      type: TaxType.values.firstWhere(
-        (e) => e.name == json['type'],
-        orElse: () => TaxType.percentage,
-      ),
-      applicableServiceType: json['applicableServiceType'] != null
-          ? ServiceType.values.firstWhere(
-              (e) => e.name == json['applicableServiceType'],
-              orElse: () => ServiceType.dineIn,
-            )
-          : null,
-      isActive: json['isActive'] ?? true,
-      validFrom: (json['validFrom'] as Timestamp).toDate(),
-      validUntil: json['validUntil'] != null
-          ? (json['validUntil'] as Timestamp).toDate()
-          : null,
-      description: json['description'],
-      conditions: json['conditions'] as Map<String, dynamic>?,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'businessId': businessId,
-      'name': name,
-      'rate': rate,
-      'type': type.name,
-      'applicableServiceType': applicableServiceType?.name,
-      'isActive': isActive,
-      'validFrom': Timestamp.fromDate(validFrom),
-      'validUntil': validUntil != null ? Timestamp.fromDate(validUntil!) : null,
-      'description': description,
-      'conditions': conditions,
+      if (metadata != null) 'metadata': metadata,
     };
   }
 }
@@ -1515,6 +758,256 @@ class StaffTipAllocation {
       'amount': amount,
       'percentage': percentage,
       'notes': notes,
+    };
+  }
+}
+
+/// Service tracking model for tracking staff service
+class ServiceTracking {
+  final String orderId;
+  final ServiceType serviceType;
+  final String? tableId;
+  final String? tableNumber;
+  final String? serverId;
+  final String? serverName;
+  final DateTime serviceStartTime;
+  final DateTime? serviceEndTime;
+  final List<ServiceEvent> events;
+  final Map<String, StaffContribution> staffContributions;
+  final bool isActive;
+  final DateTime? startTime;
+  final DateTime? endTime;
+
+  ServiceTracking({
+    required this.orderId,
+    required this.serviceType,
+    this.tableId,
+    this.tableNumber,
+    this.serverId,
+    this.serverName,
+    required this.serviceStartTime,
+    this.serviceEndTime,
+    required this.events,
+    required this.staffContributions,
+    this.isActive = true,
+    this.startTime,
+    this.endTime,
+  });
+
+  factory ServiceTracking.fromJson(Map<String, dynamic> json) {
+    return ServiceTracking(
+      orderId: json['orderId'] as String,
+      serviceType: ServiceType.values.firstWhere(
+        (e) => e.name == json['serviceType'],
+        orElse: () => ServiceType.dineIn,
+      ),
+      tableId: json['tableId'],
+      tableNumber: json['tableNumber'],
+      serverId: json['serverId'],
+      serverName: json['serverName'],
+      serviceStartTime: (json['serviceStartTime'] as Timestamp?)?.toDate() ??
+          (json['startTime'] as Timestamp?)?.toDate() ??
+          DateTime.now(),
+      serviceEndTime: (json['serviceEndTime'] as Timestamp?)?.toDate() ??
+          (json['endTime'] as Timestamp?)?.toDate(),
+      events: (json['events'] as List<dynamic>?)
+              ?.map((e) => ServiceEvent.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      staffContributions: Map<String, StaffContribution>.from(
+        (json['staffContributions'] as Map<String, dynamic>?)?.map(
+              (key, value) => MapEntry(
+                key,
+                StaffContribution.fromJson(value as Map<String, dynamic>),
+              ),
+            ) ??
+            {},
+      ),
+      isActive: json['isActive'] ?? true,
+      startTime: (json['startTime'] as Timestamp?)?.toDate(),
+      endTime: (json['endTime'] as Timestamp?)?.toDate(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'orderId': orderId,
+      'serviceType': serviceType.name,
+      'tableId': tableId,
+      'tableNumber': tableNumber,
+      'serverId': serverId,
+      'serverName': serverName,
+      'serviceStartTime': Timestamp.fromDate(serviceStartTime),
+      'serviceEndTime':
+          serviceEndTime != null ? Timestamp.fromDate(serviceEndTime!) : null,
+      'events': events.map((e) => e.toJson()).toList(),
+      'staffContributions': staffContributions
+          .map((key, value) => MapEntry(key, value.toJson())),
+      'isActive': isActive,
+      'startTime': startTime != null ? Timestamp.fromDate(startTime!) : null,
+      'endTime': endTime != null ? Timestamp.fromDate(endTime!) : null,
+    };
+  }
+}
+
+/// Service event model
+class ServiceEvent {
+  final String eventType;
+  final DateTime timestamp;
+  final String staffId;
+  final String staffName;
+  final String? description;
+  final Map<String, dynamic>? data;
+
+  ServiceEvent({
+    required this.eventType,
+    required this.timestamp,
+    required this.staffId,
+    required this.staffName,
+    this.description,
+    this.data,
+  });
+
+  factory ServiceEvent.fromJson(Map<String, dynamic> json) {
+    return ServiceEvent(
+      eventType: json['eventType'] as String,
+      timestamp: (json['timestamp'] as Timestamp).toDate(),
+      staffId: json['staffId'] as String,
+      staffName: json['staffName'] as String,
+      description: json['description'],
+      data: json['data'] as Map<String, dynamic>?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'eventType': eventType,
+      'timestamp': Timestamp.fromDate(timestamp),
+      'staffId': staffId,
+      'staffName': staffName,
+      'description': description,
+      'data': data,
+    };
+  }
+}
+
+/// Staff contribution model
+class StaffContribution {
+  final String staffId;
+  final String staffName;
+  final StaffRole role;
+  final double contributionPercentage;
+  final List<String> tasks;
+  final DateTime startTime;
+  final DateTime? endTime;
+
+  StaffContribution({
+    required this.staffId,
+    required this.staffName,
+    required this.role,
+    required this.contributionPercentage,
+    required this.tasks,
+    required this.startTime,
+    this.endTime,
+  });
+
+  factory StaffContribution.fromJson(Map<String, dynamic> json) {
+    return StaffContribution(
+      staffId: json['staffId'] as String,
+      staffName: json['staffName'] as String,
+      role: StaffRole.values.firstWhere(
+        (e) => e.name == json['role'],
+        orElse: () => StaffRole.other,
+      ),
+      contributionPercentage: (json['contributionPercentage'] ?? 0).toDouble(),
+      tasks: List<String>.from(json['tasks'] ?? []),
+      startTime: (json['startTime'] as Timestamp).toDate(),
+      endTime: (json['endTime'] as Timestamp?)?.toDate(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'staffId': staffId,
+      'staffName': staffName,
+      'role': role.name,
+      'contributionPercentage': contributionPercentage,
+      'tasks': tasks,
+      'startTime': Timestamp.fromDate(startTime),
+      'endTime': endTime != null ? Timestamp.fromDate(endTime!) : null,
+    };
+  }
+}
+
+/// Tax configuration model
+class TaxConfiguration {
+  final String id;
+  final String businessId;
+  final String name;
+  final double rate;
+  final TaxType type;
+  final ServiceType? applicableServiceType;
+  final DateTime validFrom;
+  final DateTime? validUntil;
+  final String? description;
+  final bool isActive;
+  final Map<String, dynamic>? conditions;
+  final Map<String, dynamic>? metadata;
+
+  TaxConfiguration({
+    required this.id,
+    required this.businessId,
+    required this.name,
+    required this.rate,
+    required this.type,
+    this.applicableServiceType,
+    required this.validFrom,
+    this.validUntil,
+    this.description,
+    this.isActive = true,
+    this.conditions,
+    this.metadata,
+  });
+
+  factory TaxConfiguration.fromJson(Map<String, dynamic> json) {
+    return TaxConfiguration(
+      id: json['id'] as String,
+      businessId: json['businessId'] as String,
+      name: json['name'] as String,
+      rate: (json['rate'] ?? 0).toDouble(),
+      type: TaxType.values.firstWhere(
+        (e) => e.name == json['type'],
+        orElse: () => TaxType.percentage,
+      ),
+      applicableServiceType: json['applicableServiceType'] != null
+          ? ServiceType.values.firstWhere(
+              (e) => e.name == json['applicableServiceType'],
+              orElse: () => ServiceType.dineIn,
+            )
+          : null,
+      validFrom: (json['validFrom'] as Timestamp).toDate(),
+      validUntil: (json['validUntil'] as Timestamp?)?.toDate(),
+      description: json['description'],
+      isActive: json['isActive'] ?? true,
+      conditions: json['conditions'] as Map<String, dynamic>?,
+      metadata: json['metadata'] as Map<String, dynamic>?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'businessId': businessId,
+      'name': name,
+      'rate': rate,
+      'type': type.name,
+      'applicableServiceType': applicableServiceType?.name,
+      'validFrom': Timestamp.fromDate(validFrom),
+      'validUntil': validUntil != null ? Timestamp.fromDate(validUntil!) : null,
+      'description': description,
+      'isActive': isActive,
+      'conditions': conditions,
+      'metadata': metadata,
     };
   }
 }
