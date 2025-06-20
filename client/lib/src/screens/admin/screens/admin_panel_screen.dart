@@ -36,7 +36,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Timer? _refreshTimer;
   bool _isLoading = false;
-  late int selectedIndex; // Corresponds to indices 0-4
+  late int selectedIndex; // Corresponds to indices 0-5
 
   bool _isVerifyingIndex = false;
 
@@ -527,9 +527,18 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
           normalizedPath.replaceFirst('/${widget.businessSlug}', '');
     }
 
+    // Normalize both the path and item routes by removing leading slashes for comparison
+    String cleanNormalizedPath = normalizedPath.startsWith('/')
+        ? normalizedPath.substring(1)
+        : normalizedPath;
+
     // First, check if the current path matches a main route (home route of a section)
     for (final item in _navigationItems) {
-      if (item.route == '/$normalizedPath') {
+      String cleanItemRoute =
+          item.route.startsWith('/') ? item.route.substring(1) : item.route;
+      if (cleanItemRoute == cleanNormalizedPath ||
+          normalizedPath == item.route ||
+          (cleanNormalizedPath.isEmpty && cleanItemRoute.isEmpty)) {
         return item;
       }
     }
@@ -538,8 +547,13 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
     for (final item in _navigationItems) {
       if (item.subroutes != null) {
         for (final subroute in item.subroutes!) {
+          String cleanSubrouteRoute = subroute.route.startsWith('/')
+              ? subroute.route.substring(1)
+              : subroute.route;
           // Check if the path starts with the subroute path (for detail routes with parameters)
-          if (normalizedPath == subroute.route ||
+          if (cleanNormalizedPath == cleanSubrouteRoute ||
+              normalizedPath == subroute.route ||
+              cleanNormalizedPath.startsWith('$cleanSubrouteRoute/') ||
               normalizedPath.startsWith('${subroute.route}/')) {
             return item;
           }
@@ -562,19 +576,43 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
         : _navigationItems[selectedIndex];
   }
 
+  // Helper method to get the current route path correctly based on context
+  String? _getCurrentRoutePath() {
+    final routerState = GoRouterState.of(context);
+    // For business routes, use uri.path to get the full path including business slug
+    // For regular admin routes, use matchedLocation
+    return widget.businessSlug != null && widget.businessSlug!.isNotEmpty
+        ? routerState.uri.path
+        : routerState.matchedLocation;
+  }
+
   // Helper method to get the correct index based on current route path
   int _getIndexFromRoutePath(String? currentRoutePath) {
     if (currentRoutePath == null) return selectedIndex;
 
     // Remove business slug from path if present for consistent matching
     String normalizedPath = currentRoutePath;
+    debugPrint(
+        '🔧 [getIndexFromRoutePath] Original path: $currentRoutePath, businessSlug: ${widget.businessSlug}');
+
+    // Try both matchedLocation and uri.path to see which one gives us the correct path
+    final routerState = GoRouterState.of(context);
+    final uriPath = routerState.uri.path;
+    debugPrint(
+        '🔧 [getIndexFromRoutePath] matchedLocation: ${routerState.matchedLocation}');
+    debugPrint('🔧 [getIndexFromRoutePath] uri.path: $uriPath');
+
+    // Use uri.path instead of matchedLocation for business routes
     if (widget.businessSlug != null && widget.businessSlug!.isNotEmpty) {
-      normalizedPath =
-          normalizedPath.replaceFirst('/${widget.businessSlug}', '');
+      normalizedPath = uriPath.replaceFirst('/${widget.businessSlug}', '');
     }
+    debugPrint(
+        '🔧 [getIndexFromRoutePath] Normalized path after slug removal: $normalizedPath');
 
     // Use the existing AdminRoutes.getIndexFromRoute method which works with paths
-    return AdminRoutes.getIndexFromRoute(normalizedPath);
+    final index = AdminRoutes.getIndexFromRoute(normalizedPath);
+    debugPrint('🔧 [getIndexFromRoutePath] Computed index: $index');
+    return index;
   }
 
   // --- State Verification Logic ---
@@ -587,8 +625,8 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
         return;
       }
 
-      // Get the current route path (matchedLocation is the only reliable way)
-      final currentRoutePath = GoRouterState.of(context).matchedLocation;
+      // Get the current route path - use helper method for consistency
+      final String? currentRoutePath = _getCurrentRoutePath();
       final correctIndex = _getIndexFromRoutePath(currentRoutePath);
 
       if (selectedIndex != correctIndex) {
@@ -614,7 +652,20 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
     final isDesktop = size.width >= 1100;
     final isTablet = size.width >= 600;
 
-    _verifyIndexWithRoute(); // Ensure index is correct before build
+    // ALWAYS verify index before building - this ensures immediate response to route changes
+    final String? currentRoutePath = _getCurrentRoutePath();
+    final correctIndex = _getIndexFromRoutePath(currentRoutePath);
+
+    // Update selectedIndex synchronously if it's different
+    if (selectedIndex != correctIndex) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            selectedIndex = correctIndex;
+          });
+        }
+      });
+    }
 
     final currentSelectedIndex = selectedIndex;
 
@@ -626,8 +677,6 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
               child: CircularProgressIndicator(
                   key: ValueKey('AdminPanelLoading'))));
     }
-
-    final String? currentRoutePath = GoRouterState.of(context).matchedLocation;
 
     if (isDesktop) {
       return _buildDesktopLayout(
@@ -701,8 +750,18 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
               normalizedPath.replaceFirst('/${widget.businessSlug}', '');
         }
 
+        // Normalize both paths by removing leading slashes for comparison
+        String cleanNormalizedPath = normalizedPath.startsWith('/')
+            ? normalizedPath.substring(1)
+            : normalizedPath;
+        String cleanSubrouteRoute = subroute.route.startsWith('/')
+            ? subroute.route.substring(1)
+            : subroute.route;
+
         // Check if current path matches the subroute path
-        if (normalizedPath == subroute.route ||
+        if (cleanNormalizedPath == cleanSubrouteRoute ||
+            normalizedPath == subroute.route ||
+            cleanNormalizedPath.startsWith('$cleanSubrouteRoute/') ||
             normalizedPath.startsWith('${subroute.route}/')) {
           isSelected = true;
         }
@@ -834,9 +893,9 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
     );
   }
 
-  // --- AppBar Title Builder (Accepts index and route name) ---
+  // --- AppBar Title Builder (Accepts index and route path) ---
   Widget _buildAppBarTitle(BuildContext context, int currentSelectedIndex,
-      String? currentRouteName) {
+      String? currentRoutePath) {
     final params = GoRouterState.of(context).pathParameters;
     if (currentSelectedIndex < 0 ||
         currentSelectedIndex >= _navigationItems.length) {
@@ -845,40 +904,53 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
     final parentItem = _navigationItems[currentSelectedIndex];
     final mainSectionTitle = parentItem.title;
     String titleText = mainSectionTitle;
-    if (currentRouteName == null) return Text(titleText);
+    if (currentRoutePath == null) return Text(titleText);
 
-    // Normalize the current route name for comparison
-    final normalizedRouteName = _getRegularRouteName(currentRouteName);
+    // Normalize the current route path for comparison
+    String normalizedPath = currentRoutePath;
+    if (widget.businessSlug != null && widget.businessSlug!.isNotEmpty) {
+      normalizedPath =
+          normalizedPath.replaceFirst('/${widget.businessSlug}', '');
+    }
 
     _SubRoute? currentSubroute;
     if (parentItem.subroutes != null && parentItem.subroutes!.isNotEmpty) {
       try {
+        // Normalize both paths for comparison
+        String cleanNormalizedPath = normalizedPath.startsWith('/')
+            ? normalizedPath.substring(1)
+            : normalizedPath;
+
         currentSubroute = parentItem.subroutes!.firstWhere(
-          (sr) =>
-              sr.routeName == normalizedRouteName ||
-              sr.detailRouteName == normalizedRouteName,
+          (sr) {
+            String cleanSubrouteRoute =
+                sr.route.startsWith('/') ? sr.route.substring(1) : sr.route;
+            return cleanNormalizedPath.startsWith(cleanSubrouteRoute) ||
+                normalizedPath.startsWith(sr.route) ||
+                (sr.detailRouteName != null &&
+                    normalizedPath.contains(sr.detailRouteName!));
+          },
         );
       } catch (e) {
         currentSubroute = null;
       }
     }
-    if (normalizedRouteName != parentItem.routeName &&
-        currentSubroute != null) {
+    if (normalizedPath != parentItem.route && currentSubroute != null) {
       titleText = '$mainSectionTitle > ${currentSubroute.title}';
-      if (normalizedRouteName == AdminRoutes.namePdOrderDetails &&
+      if (normalizedPath.contains('/orders/') &&
           params.containsKey('orderId')) {
         titleText += ' #${params['orderId']}';
-      } else if (normalizedRouteName == AdminRoutes.nameMpQr &&
+      } else if (normalizedPath.contains('/qr/') &&
           params.containsKey('planId')) {/* Optional */}
     }
     return Text(titleText, overflow: TextOverflow.ellipsis);
   }
   // --- End AppBar Title Builder ---
 
-  // --- Mobile Layout (Accepts index and route name) ---
+  // --- Mobile Layout (Accepts index and route path) ---
   Widget _buildMobileLayout(BuildContext context, int currentSelectedIndex,
-      String? currentRouteName) {
-    final item = _getNavigationItemForRoute(currentRouteName);
+      String? currentRoutePath) {
+    final item = _getNavigationItemForRoute(currentRoutePath);
     final visibleSubroutes =
         item.subroutes?.where((sr) => !sr.isDetailRoute).toList() ?? [];
     final hasVisibleSubroutes = visibleSubroutes.isNotEmpty;
@@ -889,7 +961,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
       key: _scaffoldKey,
       appBar: AppBar(
         title: _buildAppBarTitle(context, currentSelectedIndex,
-            currentRouteName), // Pass index & name
+            currentRoutePath), // Pass index & path
         leading: IconButton(
             icon: const Icon(Icons.menu),
             onPressed: () => _scaffoldKey.currentState?.openDrawer()),
@@ -986,11 +1058,32 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                       isSectionActive, // Expand based on section index
                   children: visibleSubroutes.map((subroute) {
                     bool isSubrouteSelected = false;
-                    // Use passed currentRouteName for highlighting
-                    if (currentRouteName == subroute.routeName ||
-                        (subroute.detailRouteName != null &&
-                            currentRouteName == subroute.detailRouteName)) {
-                      isSubrouteSelected = true;
+                    // Use passed currentRoutePath for highlighting with path-based matching
+                    if (currentRoutePath != null) {
+                      // Normalize the current path
+                      String normalizedPath = currentRoutePath;
+                      if (widget.businessSlug != null &&
+                          widget.businessSlug!.isNotEmpty) {
+                        normalizedPath = normalizedPath.replaceFirst(
+                            '/${widget.businessSlug}', '');
+                      }
+
+                      // Normalize both paths for comparison
+                      String cleanNormalizedPath =
+                          normalizedPath.startsWith('/')
+                              ? normalizedPath.substring(1)
+                              : normalizedPath;
+                      String cleanSubrouteRoute = subroute.route.startsWith('/')
+                          ? subroute.route.substring(1)
+                          : subroute.route;
+
+                      // Check if current path matches this subroute
+                      isSubrouteSelected =
+                          cleanNormalizedPath.startsWith(cleanSubrouteRoute) ||
+                              normalizedPath.startsWith(subroute.route) ||
+                              (subroute.detailRouteName != null &&
+                                  normalizedPath
+                                      .contains(subroute.detailRouteName!));
                     }
                     return ListTile(
                       leading: Icon(subroute.icon,
@@ -1045,17 +1138,31 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                       builder: (context) {
                         _SubRoute? activeSubroute;
                         String subrouteTitle = "Overview";
+
+                        // Normalize the current path for comparison
+                        String? normalizedPath = currentRoutePath;
+                        if (normalizedPath != null &&
+                            widget.businessSlug != null &&
+                            widget.businessSlug!.isNotEmpty) {
+                          normalizedPath = normalizedPath.replaceFirst(
+                              '/${widget.businessSlug}', '');
+                        }
+
                         try {
-                          activeSubroute = visibleSubroutes.firstWhere(
-                            (sr) =>
-                                sr.routeName == currentRouteName ||
-                                sr.detailRouteName == currentRouteName,
-                          );
+                          if (normalizedPath != null) {
+                            activeSubroute = visibleSubroutes.firstWhere(
+                              (sr) =>
+                                  normalizedPath!.startsWith(sr.route) ||
+                                  (sr.detailRouteName != null &&
+                                      normalizedPath
+                                          .contains(sr.detailRouteName!)),
+                            );
+                          }
                         } catch (e) {
                           activeSubroute = null;
                         }
                         if (activeSubroute == null &&
-                            currentRouteName != item.routeName) {
+                            normalizedPath != item.route) {
                           subrouteTitle = "Details";
                         } else if (activeSubroute != null) {
                           subrouteTitle = activeSubroute.title;
@@ -1097,10 +1204,10 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
               _onItemSelected(_paymentsIndex); // Direct navigation to Payments
               break;
             case 2:
-              _showSubrouteOptions(_mealPlansIndex, currentRouteName);
+              _showSubrouteOptions(_mealPlansIndex, currentRoutePath);
               break;
             case 3:
-              _showMoreOptions(currentRouteName);
+              _showMoreOptions(currentRoutePath);
               break;
           }
         },
@@ -1152,14 +1259,14 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
     }
   }
 
-  // Desktop Header (Accepts index and route name)
+  // Desktop Header (Accepts index and route path)
   Widget _buildDesktopHeader(BuildContext context, int currentSelectedIndex,
-      String? currentRouteName) {
+      String? currentRoutePath) {
     if (currentSelectedIndex < 0 ||
         currentSelectedIndex >= _navigationItems.length) {
       return AppBar(title: const Text("Admin Panel"));
     }
-    final item = _getNavigationItemForRoute(currentRouteName);
+    final item = _getNavigationItemForRoute(currentRoutePath);
     final visibleSubroutes =
         item.subroutes?.where((sr) => !sr.isDetailRoute).toList() ?? [];
     final hasVisibleSubroutes = visibleSubroutes.isNotEmpty;
@@ -1169,7 +1276,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
       children: [
         AppBar(
           title: _buildAppBarTitle(
-              context, currentSelectedIndex, currentRouteName),
+              context, currentSelectedIndex, currentRoutePath),
           actions: [
             /* ... actions ... */
             IconButton(
@@ -1199,11 +1306,11 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.symmetric(horizontal: 24),
                         children: _buildSubrouteItems(item.subroutes!,
-                            colorScheme, context, currentRouteName))
+                            colorScheme, context, currentRoutePath))
                     : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: _buildSubrouteItems(item.subroutes!,
-                            colorScheme, context, currentRouteName));
+                            colorScheme, context, currentRoutePath));
               },
             ),
           ),
@@ -1213,9 +1320,31 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
 
   // --- Modal Bottom Sheet Logic (RESTORED & UPDATED) ---
 
+  // Helper method to check if current route path matches an item route
+  bool _isCurrentRoutePathForItem(String? currentRoutePath, String itemRoute) {
+    if (currentRoutePath == null) return false;
+
+    // Normalize the current path
+    String normalizedPath = currentRoutePath;
+    if (widget.businessSlug != null && widget.businessSlug!.isNotEmpty) {
+      normalizedPath =
+          normalizedPath.replaceFirst('/${widget.businessSlug}', '');
+    }
+
+    // Normalize both paths for comparison
+    String cleanNormalizedPath = normalizedPath.startsWith('/')
+        ? normalizedPath.substring(1)
+        : normalizedPath;
+    String cleanItemRoute =
+        itemRoute.startsWith('/') ? itemRoute.substring(1) : itemRoute;
+
+    return cleanNormalizedPath.startsWith(cleanItemRoute) ||
+        normalizedPath.startsWith(itemRoute);
+  }
+
   // Shows subroute options for Meal Plans, Catering
-  // ACCEPTS currentRouteName
-  void _showSubrouteOptions(int globalIndex, String? currentRouteName) {
+  // ACCEPTS currentRoutePath
+  void _showSubrouteOptions(int globalIndex, String? currentRoutePath) {
     final theme = Theme.of(context);
     if (globalIndex < 0 || globalIndex >= _navigationItems.length) return;
     final item = _navigationItems[globalIndex];
@@ -1245,7 +1374,8 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                   ListTile(
                       leading: Icon(item.icon),
                       title: Text('${item.title} Home'),
-                      selected: currentRouteName == item.routeName,
+                      selected: _isCurrentRoutePathForItem(
+                          currentRoutePath, item.route),
                       onTap: () {
                         Navigator.pop(modalContext);
                         _onItemSelected(globalIndex);
@@ -1253,7 +1383,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                   const Divider(),
                   ...visibleSubroutes.map((subroute) =>
                       _buildSubrouteMoreMenuTile(
-                          globalIndex, subroute, currentRouteName)),
+                          globalIndex, subroute, currentRoutePath)),
                 ],
               ),
             ),
@@ -1264,7 +1394,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
   }
 
   // Shows the More options (Staff, Settings) - UPDATED
-  void _showMoreOptions(String? currentRouteName) {
+  void _showMoreOptions(String? currentRoutePath) {
     final theme = Theme.of(context);
     final cateringItem = _navigationItems[_cateringIndex];
     final staffItem = _navigationItems[_staffIndex];
@@ -1298,7 +1428,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                   // Indented Catering Subroutes
                   ...cateringItem.subroutes!.map((subroute) =>
                       _buildSubrouteMoreMenuTile(
-                          _cateringIndex, subroute, currentRouteName,
+                          _cateringIndex, subroute, currentRoutePath,
                           indent: true)),
 
                   const Divider(),
@@ -1315,7 +1445,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                   // Indented Staff Subroutes
                   ...staffItem.subroutes!.map((subroute) =>
                       _buildSubrouteMoreMenuTile(
-                          _staffIndex, subroute, currentRouteName,
+                          _staffIndex, subroute, currentRoutePath,
                           indent: true)),
 
                   const Divider(),
@@ -1332,7 +1462,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                   // Indented Settings Subroutes (Users)
                   ...settingsItem.subroutes!.map((subroute) =>
                       _buildSubrouteMoreMenuTile(
-                          _settingsIndex, subroute, currentRouteName,
+                          _settingsIndex, subroute, currentRoutePath,
                           indent: true)),
                 ],
               ),
@@ -1457,6 +1587,14 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
   // Trigger navigation to the primary screen of the selected section index
   void _onItemSelected(int index) {
     if (index < 0 || index >= _navigationItems.length) return;
+
+    // Update selectedIndex immediately to ensure UI responsiveness
+    if (selectedIndex != index) {
+      setState(() {
+        selectedIndex = index;
+      });
+    }
+
     final targetRouteName = _navigationItems[index].routeName;
 
     // Use the appropriate route name based on business context
@@ -1471,6 +1609,15 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
   // Trigger navigation to a specific subroute
   void _navigateToSubroute(int parentIndex, String routeName,
       {Map<String, String> params = const {}}) {
+    // Update selectedIndex to the parent section immediately for UI responsiveness
+    if (selectedIndex != parentIndex &&
+        parentIndex >= 0 &&
+        parentIndex < _navigationItems.length) {
+      setState(() {
+        selectedIndex = parentIndex;
+      });
+    }
+
     // If we have a businessSlug, ensure it's included in params
     final navParams = Map<String, String>.from(params);
     if (widget.businessSlug != null && widget.businessSlug!.isNotEmpty) {

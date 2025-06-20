@@ -6,6 +6,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/catering/catering
 import 'package:starter_architecture_flutter_firebase/src/core/catering/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/navigation_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/animated_admin_icon.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_panel_screen.dart';
 
@@ -80,8 +81,35 @@ class ScaffoldWithNestedNavigation extends ConsumerWidget {
     final isAdmin = ref.watch(isAdminComputedProvider);
 
     // If on an admin route and user is admin, show dedicated admin navigation
-    if (isAdmin && currentPath.startsWith('/admin')) {
-      return AdminPanelScreen(child: navigationShell!);
+    if (isAdmin &&
+        (currentPath.startsWith('/admin') || currentPath.contains('/admin'))) {
+      // Extract business slug from path if present (format: /businessSlug/admin/...)
+      String? detectedBusinessSlug;
+      if (businessSlug != null && businessSlug!.isNotEmpty) {
+        detectedBusinessSlug = businessSlug;
+      } else {
+        // Try to detect business slug from current path
+        final pathSegments =
+            currentPath.split('/').where((s) => s.isNotEmpty).toList();
+        if (pathSegments.length >= 2 && pathSegments[1] == 'admin') {
+          detectedBusinessSlug = pathSegments[0];
+        }
+      }
+
+      // Calculate the correct initial index based on current route
+      String routeForIndex = currentPath;
+      if (detectedBusinessSlug != null && detectedBusinessSlug.isNotEmpty) {
+        routeForIndex = currentPath.replaceFirst('/$detectedBusinessSlug', '');
+      }
+
+      // Import AdminRoutes to use getIndexFromRoute
+      final initialIndex = AdminRoutes.getIndexFromRoute(routeForIndex);
+
+      return AdminPanelScreen(
+        businessSlug: detectedBusinessSlug,
+        initialIndex: initialIndex >= 0 ? initialIndex : 0,
+        child: navigationShell!,
+      );
     }
 
     // The root scaffold is now extremely simple. It only decides which layout to show.
