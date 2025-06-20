@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
-import 'package:starter_architecture_flutter_firebase/src/routing/business_aware_navigation.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_stats_provider.dart';
@@ -13,7 +12,7 @@ import 'dart:async';
 const int _productDashboardIndex = 0;
 const int _paymentsIndex = 1; // NEW
 const int _staffIndex = 2; // Shifted
-const int _mealPlansIndex = 3; // Shifted  
+const int _mealPlansIndex = 3; // Shifted
 const int _cateringIndex = 4; // Shifted
 const int _settingsIndex = 5; // Shifted
 
@@ -86,33 +85,39 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
             title: 'Overview',
             routeName: AdminRoutes.namePaymentsOverview,
             icon: Icons.dashboard,
-            route: AdminRoutes.getFullPath('${AdminRoutes.payments}/${AdminRoutes.paymentsOverview}')),
+            route: AdminRoutes.getFullPath(
+                '${AdminRoutes.payments}/${AdminRoutes.paymentsOverview}')),
         _SubRoute(
             title: 'Transactions',
             routeName: AdminRoutes.namePaymentsTransactions,
             icon: Icons.receipt,
-            route: AdminRoutes.getFullPath('${AdminRoutes.payments}/${AdminRoutes.paymentsTransactions}')),
+            route: AdminRoutes.getFullPath(
+                '${AdminRoutes.payments}/${AdminRoutes.paymentsTransactions}')),
         _SubRoute(
             title: 'Tips',
             routeName: AdminRoutes.namePaymentsTips,
             icon: Icons.volunteer_activism,
-            route: AdminRoutes.getFullPath('${AdminRoutes.payments}/${AdminRoutes.paymentsTips}')),
+            route: AdminRoutes.getFullPath(
+                '${AdminRoutes.payments}/${AdminRoutes.paymentsTips}')),
         _SubRoute(
             title: 'Taxes',
             routeName: AdminRoutes.namePaymentsTaxes,
             icon: Icons.account_balance,
-            route: AdminRoutes.getFullPath('${AdminRoutes.payments}/${AdminRoutes.paymentsTaxes}')),
+            route: AdminRoutes.getFullPath(
+                '${AdminRoutes.payments}/${AdminRoutes.paymentsTaxes}')),
         _SubRoute(
             title: 'Service Tracking',
             routeName: AdminRoutes.namePaymentsService,
             icon: Icons.track_changes,
-            route: AdminRoutes.getFullPath('${AdminRoutes.payments}/${AdminRoutes.paymentsService}')),
+            route: AdminRoutes.getFullPath(
+                '${AdminRoutes.payments}/${AdminRoutes.paymentsService}')),
         _SubRoute(
             title: 'Order Payment Details',
             routeName: AdminRoutes.namePaymentsOrderDetails,
             icon: Icons.payment,
             isDetailRoute: true,
-            route: AdminRoutes.getFullPath('${AdminRoutes.payments}/${AdminRoutes.paymentsOrderDetails}')),
+            route: AdminRoutes.getFullPath(
+                '${AdminRoutes.payments}/${AdminRoutes.paymentsOrderDetails}')),
       ],
     ),
     // Index 2 - Staff (Shifted)
@@ -417,30 +422,123 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
     }
   }
 
-  // Trigger navigation to a specific subroute
-  void _navigateToSubroute(int parentIndex, String routeName,
-      {Map<String, String> params = const {}}) {
-    // If we have a businessSlug, ensure it's included in params
-    final navParams = Map<String, String>.from(params);
-    if (widget.businessSlug != null && widget.businessSlug!.isNotEmpty) {
-      navParams['businessSlug'] = widget.businessSlug!;
-    }
+  // Helper method to map business route names back to regular ones for comparison
+  String _getRegularRouteName(String? routeName) {
+    if (routeName == null) return '';
 
-    _navigateByName(routeName, params: navParams);
+    // Map business-specific route names back to regular ones
+    switch (routeName) {
+      // Product Dashboard
+      case AdminRoutes.nameBusinessPdHome:
+        return AdminRoutes.namePdHome;
+      case AdminRoutes.nameBusinessPdProducts:
+        return AdminRoutes.namePdProducts;
+      case AdminRoutes.nameBusinessPdOrders:
+        return AdminRoutes.namePdOrders;
+      case AdminRoutes.nameBusinessPdOrderDetails:
+        return AdminRoutes.namePdOrderDetails;
+      case AdminRoutes.nameBusinessPdTables:
+        return AdminRoutes.namePdTables;
+      case AdminRoutes.nameBusinessPdAnalytics:
+        return AdminRoutes.namePdAnalytics;
+      // Payments
+      case AdminRoutes.nameBusinessPaymentsHome:
+        return AdminRoutes.namePaymentsHome;
+      case AdminRoutes.nameBusinessPaymentsOverview:
+        return AdminRoutes.namePaymentsOverview;
+      case AdminRoutes.nameBusinessPaymentsTransactions:
+        return AdminRoutes.namePaymentsTransactions;
+      case AdminRoutes.nameBusinessPaymentsTips:
+        return AdminRoutes.namePaymentsTips;
+      case AdminRoutes.nameBusinessPaymentsTaxes:
+        return AdminRoutes.namePaymentsTaxes;
+      case AdminRoutes.nameBusinessPaymentsService:
+        return AdminRoutes.namePaymentsService;
+      case AdminRoutes.nameBusinessPaymentsOrderDetails:
+        return AdminRoutes.namePaymentsOrderDetails;
+      // Staff
+      case AdminRoutes.nameBusinessStaffHome:
+        return AdminRoutes.nameStaffHome;
+      case AdminRoutes.nameBusinessStaffKitchen:
+        return AdminRoutes.nameStaffKitchen;
+      case AdminRoutes.nameBusinessStaffWaiter:
+        return AdminRoutes.nameStaffWaiter;
+      case AdminRoutes.nameBusinessStaffWaiterOrderEntry:
+        return AdminRoutes.nameStaffWaiterOrderEntry;
+      // Meal Plans
+      case AdminRoutes.nameBusinessMpHome:
+        return AdminRoutes.nameMpHome;
+      case AdminRoutes.nameBusinessMpManagement:
+        return AdminRoutes.nameMpManagement;
+      case AdminRoutes.nameBusinessMpItems:
+        return AdminRoutes.nameMpItems;
+      case AdminRoutes.nameBusinessMpAnalytics:
+        return AdminRoutes.nameMpAnalytics;
+      case AdminRoutes.nameBusinessMpExport:
+        return AdminRoutes.nameMpExport;
+      case AdminRoutes.nameBusinessMpScanner:
+        return AdminRoutes.nameMpScanner;
+      case AdminRoutes.nameBusinessMpPos:
+        return AdminRoutes.nameMpPos;
+      case AdminRoutes.nameBusinessMpQr:
+        return AdminRoutes.nameMpQr;
+      case AdminRoutes.nameBusinessMpOrders:
+        return AdminRoutes.nameMpOrders;
+      case AdminRoutes.nameBusinessMpOrderDetails:
+        return AdminRoutes.nameMpOrderDetails;
+      // Catering
+      case AdminRoutes.nameBusinessCtHome:
+        return AdminRoutes.nameCtHome;
+      case AdminRoutes.nameBusinessCtDashboard:
+        return AdminRoutes.nameCtDashboard;
+      case AdminRoutes.nameBusinessCtOrders:
+        return AdminRoutes.nameCtOrders;
+      case AdminRoutes.nameBusinessCtOrderDetails:
+        return AdminRoutes.nameCtOrderDetails;
+      case AdminRoutes.nameBusinessCtPackages:
+        return AdminRoutes.nameCtPackages;
+      case AdminRoutes.nameBusinessCtItems:
+        return AdminRoutes.nameCtItems;
+      case AdminRoutes.nameBusinessCtCategories:
+        return AdminRoutes.nameCtCategories;
+      // Settings
+      case AdminRoutes.nameBusinessSettings:
+        return AdminRoutes.nameSettings;
+      case AdminRoutes.nameBusinessSettingsUsers:
+        return AdminRoutes.nameSettingsUsers;
+      default:
+        return routeName;
+    }
   }
 
-  // Trigger navigation to the primary screen of the selected section index
-  void _onItemSelected(int index) {
-    if (index < 0 || index >= _navigationItems.length) return;
-    final targetRouteName = _navigationItems[index].routeName;
+  // Helper method to find which navigation item contains the current route
+  _AdminNavigationItem _getNavigationItemForRoute(String? currentRouteName) {
+    if (currentRouteName == null) return _navigationItems[selectedIndex];
 
-    // Use the appropriate route name based on business context
-    if (widget.businessSlug != null && widget.businessSlug!.isNotEmpty) {
-      final businessRouteName = _getBusinessRouteName(targetRouteName);
-      _navigateByName(businessRouteName);
-    } else {
-      _navigateByName(targetRouteName);
+    final normalizedRouteName = _getRegularRouteName(currentRouteName);
+
+    // First, check if the current route is a main route (home route of a section)
+    for (final item in _navigationItems) {
+      if (item.routeName == normalizedRouteName) {
+        return item;
+      }
     }
+
+    // Then, check if the current route is a subroute of any section
+    for (final item in _navigationItems) {
+      if (item.subroutes != null) {
+        for (final subroute in item.subroutes!) {
+          if (subroute.routeName == normalizedRouteName ||
+              (subroute.detailRouteName != null &&
+                  subroute.detailRouteName == normalizedRouteName)) {
+            return item;
+          }
+        }
+      }
+    }
+
+    // Fallback to current selected index if no match found
+    return _navigationItems[selectedIndex];
   }
 
   // --- State Verification Logic ---
@@ -562,10 +660,11 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
 
     return visibleSubroutes.map((subroute) {
       bool isSelected = false;
-      // Use passed currentRouteName for comparison
-      if (currentRouteName == subroute.routeName ||
+      // Normalize currentRouteName for comparison (convert business route names to regular ones)
+      final normalizedRouteName = _getRegularRouteName(currentRouteName);
+      if (normalizedRouteName == subroute.routeName ||
           (subroute.detailRouteName != null &&
-              currentRouteName == subroute.detailRouteName)) {
+              normalizedRouteName == subroute.detailRouteName)) {
         isSelected = true;
       }
 
@@ -621,7 +720,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
 
   Widget _buildTabletLayout(BuildContext context, int currentSelectedIndex,
       String? currentRouteName) {
-    final item = _navigationItems[currentSelectedIndex];
+    final item = _getNavigationItemForRoute(currentRouteName);
     final visibleSubroutes =
         item.subroutes?.where((sr) => !sr.isDetailRoute).toList() ?? [];
     final hasVisibleSubroutes = visibleSubroutes.isNotEmpty;
@@ -698,7 +797,6 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
   // --- AppBar Title Builder (Accepts index and route name) ---
   Widget _buildAppBarTitle(BuildContext context, int currentSelectedIndex,
       String? currentRouteName) {
-    /* ... no change ... */
     final params = GoRouterState.of(context).pathParameters;
     if (currentSelectedIndex < 0 ||
         currentSelectedIndex >= _navigationItems.length) {
@@ -708,24 +806,29 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
     final mainSectionTitle = parentItem.title;
     String titleText = mainSectionTitle;
     if (currentRouteName == null) return Text(titleText);
+
+    // Normalize the current route name for comparison
+    final normalizedRouteName = _getRegularRouteName(currentRouteName);
+
     _SubRoute? currentSubroute;
     if (parentItem.subroutes != null && parentItem.subroutes!.isNotEmpty) {
       try {
         currentSubroute = parentItem.subroutes!.firstWhere(
           (sr) =>
-              sr.routeName == currentRouteName ||
-              sr.detailRouteName == currentRouteName,
+              sr.routeName == normalizedRouteName ||
+              sr.detailRouteName == normalizedRouteName,
         );
       } catch (e) {
         currentSubroute = null;
       }
     }
-    if (currentRouteName != parentItem.routeName && currentSubroute != null) {
+    if (normalizedRouteName != parentItem.routeName &&
+        currentSubroute != null) {
       titleText = '$mainSectionTitle > ${currentSubroute.title}';
-      if (currentRouteName == AdminRoutes.namePdOrderDetails &&
+      if (normalizedRouteName == AdminRoutes.namePdOrderDetails &&
           params.containsKey('orderId')) {
         titleText += ' #${params['orderId']}';
-      } else if (currentRouteName == AdminRoutes.nameMpQr &&
+      } else if (normalizedRouteName == AdminRoutes.nameMpQr &&
           params.containsKey('planId')) {/* Optional */}
     }
     return Text(titleText, overflow: TextOverflow.ellipsis);
@@ -735,7 +838,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
   // --- Mobile Layout (Accepts index and route name) ---
   Widget _buildMobileLayout(BuildContext context, int currentSelectedIndex,
       String? currentRouteName) {
-    final item = _navigationItems[currentSelectedIndex];
+    final item = _getNavigationItemForRoute(currentRouteName);
     final visibleSubroutes =
         item.subroutes?.where((sr) => !sr.isDetailRoute).toList() ?? [];
     final hasVisibleSubroutes = visibleSubroutes.isNotEmpty;
@@ -1018,7 +1121,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
         currentSelectedIndex >= _navigationItems.length) {
       return AppBar(title: const Text("Admin Panel"));
     }
-    final item = _navigationItems[currentSelectedIndex];
+    final item = _getNavigationItemForRoute(currentRouteName);
     final visibleSubroutes =
         item.subroutes?.where((sr) => !sr.isDetailRoute).toList() ?? [];
     final hasVisibleSubroutes = visibleSubroutes.isNotEmpty;
@@ -1071,52 +1174,6 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
   }
 
   // --- Modal Bottom Sheet Logic (RESTORED & UPDATED) ---
-
-  // Shows Dashboard Group options (Products, Orders, Tables, Analytics)
-  void _showDashboardGroupOptions(String? currentRouteName) {
-    final theme = Theme.of(context);
-    final item = _navigationItems[_productDashboardIndex];
-    final visibleSubroutes =
-        item.subroutes?.where((sr) => !sr.isDetailRoute).toList() ?? [];
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-      builder: (modalContext) => Container(
-        constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(modalContext).size.height * 0.7),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildBottomSheetHeader(theme, item.title), // Use section title
-            Flexible(
-              child: ListView(
-                shrinkWrap: true,
-                children: [
-                  // Link to main Dashboard Home
-                  ListTile(
-                      leading: Icon(item.icon),
-                      title: Text('${item.title} Home'),
-                      selected: currentRouteName == item.routeName,
-                      onTap: () {
-                        Navigator.pop(modalContext);
-                        _onItemSelected(_productDashboardIndex);
-                      }),
-                  const Divider(),
-                  // Subroutes
-                  ...visibleSubroutes.map((subroute) =>
-                      _buildSubrouteMoreMenuTile(
-                          _productDashboardIndex, subroute, currentRouteName)),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   // Shows subroute options for Meal Plans, Catering
   // ACCEPTS currentRouteName
@@ -1174,9 +1231,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
     final cateringItem = _navigationItems[_cateringIndex];
     final staffItem = _navigationItems[_staffIndex];
     final settingsItem = _navigationItems[_settingsIndex];
-    
-    // ...existing code...
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1209,7 +1264,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                           indent: true)),
 
                   const Divider(),
-                  
+
                   // --- Staff Section ---
                   ListTile(
                     leading: Icon(staffItem.icon),
@@ -1226,7 +1281,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                           indent: true)),
 
                   const Divider(),
-                  
+
                   // --- Settings Section ---
                   ListTile(
                     leading: Icon(settingsItem.icon),
@@ -1311,26 +1366,21 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
   // --- End Modal Bottom Sheet Logic ---
 
   // --- User Menu ---
-  void _showUserMenu() {
-    // Update _showUserMenu to use AdminRoutes constants and handle business context
+  void _showUserMenu() async {
     final authService = ref.read(authServiceProvider);
-    final RenderBox? overlay =
-        Overlay.of(context).context.findRenderObject() as RenderBox?;
-    final RenderBox? button = context.findRenderObject() as RenderBox?;
-    RelativeRect position;
-    if (button != null && overlay != null) {
-      position = RelativeRect.fromRect(
-              Rect.fromPoints(
-                  button.localToGlobal(Offset.zero, ancestor: overlay),
-                  button.localToGlobal(button.size.bottomRight(Offset.zero),
-                      ancestor: overlay)),
-              Offset.zero & overlay.size)
-          .shift(const Offset(0, 8));
-    } else {
-      position = RelativeRect.fromLTRB(
-          MediaQuery.sizeOf(context).width - 160, kToolbarHeight + 16, 16, 0);
-    }
-    showMenu(
+    final RenderBox button = context.findRenderObject() as RenderBox;
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RelativeRect position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        button.localToGlobal(Offset.zero, ancestor: overlay),
+        button.localToGlobal(button.size.bottomRight(Offset.zero),
+            ancestor: overlay),
+      ),
+      Offset.zero & overlay.size,
+    );
+
+    await showMenu(
       context: context,
       position: position,
       items: [
@@ -1364,6 +1414,32 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
             }),
       ],
     );
+  }
+
+  // Trigger navigation to the primary screen of the selected section index
+  void _onItemSelected(int index) {
+    if (index < 0 || index >= _navigationItems.length) return;
+    final targetRouteName = _navigationItems[index].routeName;
+
+    // Use the appropriate route name based on business context
+    if (widget.businessSlug != null && widget.businessSlug!.isNotEmpty) {
+      final businessRouteName = _getBusinessRouteName(targetRouteName);
+      _navigateByName(businessRouteName);
+    } else {
+      _navigateByName(targetRouteName);
+    }
+  }
+
+  // Trigger navigation to a specific subroute
+  void _navigateToSubroute(int parentIndex, String routeName,
+      {Map<String, String> params = const {}}) {
+    // If we have a businessSlug, ensure it's included in params
+    final navParams = Map<String, String>.from(params);
+    if (widget.businessSlug != null && widget.businessSlug!.isNotEmpty) {
+      navParams['businessSlug'] = widget.businessSlug!;
+    }
+
+    _navigateByName(routeName, params: navParams);
   }
 }
 

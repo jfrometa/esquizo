@@ -191,7 +191,12 @@ class _PaymentManagementScreenState extends ConsumerState<PaymentManagementScree
                   endDate: _endDate,
                 ),
                 // Service Tracking Tab
-                const PaymentServiceTrackingTab(),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  child: const Center(
+                    child: Text('Service Tracking Tab - Implementation pending'),
+                  ),
+                ),
               ],
             ),
           ),

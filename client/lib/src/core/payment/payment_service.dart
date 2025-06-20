@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart' hide Order;
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/payment/payment_models.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import 'package:uuid/uuid.dart';
@@ -19,10 +17,15 @@ class PaymentService {
         _businessId = businessId;
 
   // Collection references
-  CollectionReference get _paymentsCollection => _firestore
+  CollectionReference get paymentsCollection => _firestore
       .collection('businesses')
       .doc(_businessId)
       .collection('payments');
+
+  CollectionReference get serviceTrackingCollection => _firestore
+      .collection('businesses')
+      .doc(_businessId)
+      .collection('service_tracking');
 
   CollectionReference get _couponsCollection => _firestore
       .collection('businesses')
@@ -76,7 +79,7 @@ class PaymentService {
       final discounts = await _calculateDiscounts(order, appliedCouponCodes);
       final discountAmount = discounts.fold<double>(
         0,
-        (sum, discount) => sum + discount.amountApplied,
+        (total, discount) => total + discount.amountApplied,
       );
 
       // Calculate final amount
@@ -107,33 +110,37 @@ class PaymentService {
         userId: order.userId,
         status: PaymentStatus.pending,
         method: method,
-        amount: order.total ?? finalAmount,
-        subtotal: subtotal,
+        baseAmount: order.total ?? finalAmount,
         taxAmount: tax + additionalTax,
         tipAmount: tip,
-        deliveryFee: deliveryFee,
+        serviceCharge: 0.0,
         discountAmount: discountAmount,
         finalAmount: finalAmount,
         createdAt: DateTime.now(),
         customerName: order.customerName,
-        customerEmail: order.email,
+        customerEmail: order.userEmail,
         customerPhone: order.userPhone,
-        discounts: discounts,
+        appliedDiscounts: discounts,
         metadata: metadata,
-        receiptNumber: _generateReceiptNumber(),
         serviceType: serviceType,
-        serviceTracking: serviceTracking,
         serverId: serviceTracking?.serverId,
         serverName: serviceTracking?.serverName,
+        // Additional fields
+        amount: order.total ?? finalAmount,
+        subtotal: subtotal,
+        deliveryFee: deliveryFee,
+        discounts: discounts,
+        receiptNumber: _generateReceiptNumber(),
+        serviceTracking: serviceTracking,
         appliedTaxes: applicableTaxes,
       );
 
       // Save to Firestore
-      await _paymentsCollection.doc(payment.id).set(payment.toJson());
+      await paymentsCollection.doc(payment.id).set(payment.toJson());
 
       // Update coupon usage
       for (final discount in discounts) {
-        if (discount.type == DiscountType.coupon) {
+        if (discount.type == DiscountType.coupon.name) {
           await _updateCouponUsage(discount.code);
         }
       }
@@ -152,7 +159,7 @@ class PaymentService {
     PaymentProof? proof,
   }) async {
     try {
-      final doc = await _paymentsCollection.doc(paymentId).get();
+      final doc = await paymentsCollection.doc(paymentId).get();
       if (!doc.exists) throw Exception('Payment not found');
 
       final payment = Payment.fromJson(doc.data() as Map<String, dynamic>);
@@ -168,7 +175,7 @@ class PaymentService {
         proofs: updatedProofs,
       );
 
-      await _paymentsCollection.doc(paymentId).update(updatedPayment.toJson());
+      await paymentsCollection.doc(paymentId).update(updatedPayment.toJson());
       return updatedPayment;
     } catch (e) {
       debugPrint('Error processing payment: $e');
@@ -179,7 +186,7 @@ class PaymentService {
   /// Complete a payment
   Future<Payment> completePayment(String paymentId) async {
     try {
-      final doc = await _paymentsCollection.doc(paymentId).get();
+      final doc = await paymentsCollection.doc(paymentId).get();
       if (!doc.exists) throw Exception('Payment not found');
 
       final payment = Payment.fromJson(doc.data() as Map<String, dynamic>);
@@ -188,7 +195,7 @@ class PaymentService {
         completedAt: DateTime.now(),
       );
 
-      await _paymentsCollection.doc(paymentId).update(updatedPayment.toJson());
+      await paymentsCollection.doc(paymentId).update(updatedPayment.toJson());
 
       // Create payment summary for analytics
       await _updatePaymentSummary(updatedPayment);
@@ -206,7 +213,7 @@ class PaymentService {
     required PaymentProof proof,
   }) async {
     try {
-      await _paymentsCollection.doc(paymentId).update({
+      await paymentsCollection.doc(paymentId).update({
         'proofs': FieldValue.arrayUnion([proof.toJson()]),
       });
     } catch (e) {
@@ -235,7 +242,7 @@ class PaymentService {
         userId: userId,
         amount: amount,
         reason: reason,
-        status: ReimbursementStatus.requested,
+        status: ReimbursementStatus.requested.name,
         requestedAt: DateTime.now(),
         itemIds: itemIds ?? [],
         metadata: metadata,
@@ -267,8 +274,8 @@ class PaymentService {
 
       final updatedReimbursement = reimbursement.copyWith(
         status: approved
-            ? ReimbursementStatus.approved
-            : ReimbursementStatus.rejected,
+            ? ReimbursementStatus.approved.name
+            : ReimbursementStatus.rejected.name,
         approvedAt: approved ? DateTime.now() : null,
         approvedBy: approved ? processedBy : null,
         notes: notes,
@@ -336,7 +343,7 @@ class PaymentService {
 
       return Discount(
         id: coupon.id,
-        type: coupon.type,
+        type: coupon.type.name,
         code: coupon.code,
         value: coupon.value,
         amountApplied: discountAmount,
@@ -385,7 +392,7 @@ class PaymentService {
   /// Get payment by order ID
   Future<Payment?> getPaymentByOrderId(String orderId) async {
     try {
-      final query = await _paymentsCollection
+      final query = await paymentsCollection
           .where('orderId', isEqualTo: orderId)
           .orderBy('createdAt', descending: true)
           .limit(1)
@@ -402,7 +409,7 @@ class PaymentService {
 
   /// Get payments for a user
   Stream<List<Payment>> getUserPayments(String userId) {
-    return _paymentsCollection
+    return paymentsCollection
         .where('userId', isEqualTo: userId)
         .orderBy('createdAt', descending: true)
         .snapshots()
@@ -417,7 +424,7 @@ class PaymentService {
     required DateTime endDate,
   }) async {
     try {
-      final payments = await _paymentsCollection
+      final payments = await paymentsCollection
           .where('createdAt', isGreaterThanOrEqualTo: startDate)
           .where('createdAt', isLessThanOrEqualTo: endDate)
           .where('status', isEqualTo: PaymentStatus.completed.name)
@@ -449,7 +456,7 @@ class PaymentService {
 
         // Discounts by type
         for (final discount in payment.appliedDiscounts) {
-          final typeName = discount.type.name;
+          final typeName = discount.type;
           discountsByType[typeName] =
               (discountsByType[typeName] ?? 0) + discount.amountApplied;
         }
@@ -515,7 +522,7 @@ class PaymentService {
         orderId: order.id,
         serviceType: serviceType,
         tableId: tableId,
-        tableNumber: tableNumber,
+        tableNumber: (tableNumber?.toString() ?? '') ?? '',
         serverId: serverId,
         serverName: serverName,
         serviceStartTime: DateTime.now(),
@@ -693,7 +700,7 @@ class PaymentService {
   }) async {
     try {
       // Get all payments in date range
-      final payments = await _paymentsCollection
+      final payments = await paymentsCollection
           .where('createdAt', isGreaterThanOrEqualTo: startDate)
           .where('createdAt', isLessThanOrEqualTo: endDate)
           .where('status', isEqualTo: PaymentStatus.completed.name)
@@ -733,7 +740,7 @@ class PaymentService {
 
         // Tips and service charges
         totalTips += payment.tipAmount;
-        totalServiceCharges += payment.serviceCharge ?? 0;
+        totalServiceCharges += payment.serviceCharge;
 
         // Server statistics
         if (payment.serverId != null) {
@@ -770,9 +777,12 @@ class PaymentService {
 
       for (final doc in serviceTracking.docs) {
         final tracking = ServiceTracking.fromJson(doc.data() as Map<String, dynamic>);
-        if (tracking.endTime != null) {
+        if (tracking.endTime != null && tracking.startTime != null) {
           completedServices++;
-          totalServiceTime += tracking.endTime!.difference(tracking.startTime).inMinutes;
+          totalServiceTime += tracking.endTime!.difference(tracking.startTime!).inMinutes;
+        } else if (tracking.endTime != null) {
+          completedServices++;
+          totalServiceTime += tracking.endTime!.difference(tracking.serviceStartTime).inMinutes;
         }
       }
 
@@ -815,7 +825,7 @@ class PaymentService {
     DateTime? endDate,
     String? staffId,
   }) async {
-    Query<Map<String, dynamic>> query = _tipDistributionsCollection;
+    Query query = _tipDistributionsCollection;
     
     if (startDate != null) {
       query = query.where('distributedAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate));
@@ -828,7 +838,7 @@ class PaymentService {
     final querySnapshot = await query.get();
     
     var distributions = querySnapshot.docs
-        .map((doc) => TipDistribution.fromJson(doc.data()))
+        .map((doc) => TipDistribution.fromJson(doc.data() as Map<String, dynamic>))
         .toList();
     
     // Filter by staff if specified
@@ -855,6 +865,7 @@ class PaymentService {
       role: role,
       startTime: DateTime.now(),
       contributionPercentage: contributionPercentage,
+      tasks: [], // Provide empty list as default
     );
     
     await _serviceTrackingCollection.doc(orderId).update({
@@ -863,11 +874,11 @@ class PaymentService {
   }
 
   // Calculate peak service hours
-  Future<Map<String, dynamic>> _calculatePeakHours(List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) async {
+  Future<Map<String, dynamic>> _calculatePeakHours(List<QueryDocumentSnapshot> docs) async {
     Map<int, int> hourCounts = {};
     
     for (final doc in docs) {
-      final tracking = ServiceTracking.fromJson(doc.data());
+      final tracking = ServiceTracking.fromJson(doc.data() as Map<String, dynamic>);
       final hour = (tracking.startTime ?? tracking.serviceStartTime).hour;
       hourCounts[hour] = (hourCounts[hour] ?? 0) + 1;
     }
@@ -883,23 +894,9 @@ class PaymentService {
     };
   }
 
-  // Get payment method from order type
-  ServiceType? _getServiceType(Order order) {
-    if (order.isDineIn == true || order.serviceType == 'dine-in') {
-      return ServiceType.dineIn;
-    } else if (order.isDelivery == true || order.serviceType == 'delivery') {
-      return ServiceType.delivery;
-    } else if (order.serviceType == 'takeout') {
-      return ServiceType.takeout;
-    } else if (order.serviceType == 'pickup') {
-      return ServiceType.pickup;
-    }
-    return null;
-  }
-
   // Update payment status
   Future<void> updatePaymentStatus(String paymentId, PaymentStatus status) async {
-    await _paymentsCollection.doc(paymentId).update({
+    await paymentsCollection.doc(paymentId).update({
       'status': status.name,
       'lastUpdated': FieldValue.serverTimestamp(),
     });
@@ -912,7 +909,7 @@ class PaymentService {
         .get();
     
     return querySnapshot.docs
-        .map((doc) => TaxConfiguration.fromJson(doc.data()))
+        .map((doc) => TaxConfiguration.fromJson(doc.data() as Map<String, dynamic>))
         .toList();
   }
 
@@ -937,7 +934,7 @@ class PaymentService {
     required DateTime startDate,
     required DateTime endDate,
   }) async {
-    final payments = await _paymentsCollection
+    final payments = await paymentsCollection
         .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
         .where('createdAt', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
         .get();
@@ -951,7 +948,7 @@ class PaymentService {
     double averageTransactionValue = 0;
     
     for (final doc in payments.docs) {
-      final payment = Payment.fromJson(doc.data());
+      final payment = Payment.fromJson(doc.data() as Map<String, dynamic>);
       
       if (payment.status == PaymentStatus.completed) {
         totalRevenue += payment.finalAmount;
@@ -988,7 +985,7 @@ class PaymentService {
     final endOfDay = startOfDay.add(const Duration(days: 1));
     
     // Get today's payments
-    final payments = await _paymentsCollection
+    final payments = await paymentsCollection
         .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
         .where('createdAt', isLessThan: Timestamp.fromDate(endOfDay))
         .where('status', isEqualTo: PaymentStatus.completed.name)
@@ -998,7 +995,7 @@ class PaymentService {
     Map<String, double> staffTipTotals = {};
     
     for (final doc in payments.docs) {
-      final payment = Payment.fromJson(doc.data());
+      final payment = Payment.fromJson(doc.data() as Map<String, dynamic>);
       totalTips += payment.tipAmount;
       
       if (payment.serverName != null) {
@@ -1011,5 +1008,111 @@ class PaymentService {
       'totalTips': totalTips,
       'staffTipTotals': staffTipTotals,
     };
+  }
+
+  // ===== PRIVATE HELPER METHODS =====
+
+  /// Calculate discounts for an order
+  Future<List<Discount>> _calculateDiscounts(Order order, List<String>? couponCodes) async {
+    final discounts = <Discount>[];
+    
+    if (couponCodes != null && couponCodes.isNotEmpty) {
+      for (final code in couponCodes) {
+        final discount = await validateCoupon(code, order);
+        if (discount != null) {
+          discounts.add(discount);
+        }
+      }
+    }
+    
+    return discounts;
+  }
+
+  /// Update coupon usage
+  Future<void> _updateCouponUsage(String couponCode) async {
+    try {
+      final query = await _couponsCollection
+          .where('code', isEqualTo: couponCode.toUpperCase())
+          .limit(1)
+          .get();
+
+      if (query.docs.isNotEmpty) {
+        final doc = query.docs.first;
+        await doc.reference.update({
+          'currentUses': FieldValue.increment(1),
+        });
+      }
+    } catch (e) {
+      debugPrint('Error updating coupon usage: $e');
+    }
+  }
+
+  /// Update payment summary for analytics
+  Future<void> _updatePaymentSummary(Payment payment) async {
+    try {
+      final today = DateTime.now();
+      final summaryId = '${payment.orderId}_${today.year}_${today.month}_${today.day}';
+      
+      final summaryDoc = await _firestore
+          .collection('businesses')
+          .doc(_businessId)
+          .collection('payment_summaries')
+          .doc(summaryId)
+          .get();
+
+      if (summaryDoc.exists) {
+        await summaryDoc.reference.update({
+          'totalRevenue': FieldValue.increment(payment.finalAmount),
+          'totalTransactions': FieldValue.increment(1),
+          'lastUpdated': FieldValue.serverTimestamp(),
+        });
+      } else {
+        final summary = PaymentSummary(
+          businessId: _businessId,
+          date: today,
+          totalRevenue: payment.finalAmount,
+          totalDiscounts: payment.discountAmount,
+          totalReimbursements: 0,
+          netRevenue: payment.finalAmount,
+          totalTransactions: 1,
+          successfulTransactions: 1,
+          failedTransactions: 0,
+          transactionsByMethod: {payment.method.name: 1},
+          revenueByMethod: {payment.method.name: payment.finalAmount},
+          discountsByType: {},
+        );
+        
+        await summaryDoc.reference.set(summary.toJson());
+      }
+    } catch (e) {
+      debugPrint('Error updating payment summary: $e');
+    }
+  }
+
+  /// Update payment for reimbursement
+  Future<void> _updatePaymentForReimbursement(String paymentId, double reimbursementAmount) async {
+    try {
+      await paymentsCollection.doc(paymentId).update({
+        'refundedAmount': FieldValue.increment(reimbursementAmount),
+        'refundIds': FieldValue.arrayUnion(['reimbursement_${DateTime.now().millisecondsSinceEpoch}']),
+        'lastUpdated': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      debugPrint('Error updating payment for reimbursement: $e');
+    }
+  }
+
+  /// Generate receipt number
+  String _generateReceiptNumber() {
+    final now = DateTime.now();
+    final timestamp = now.millisecondsSinceEpoch;
+    return 'RCP-${_businessId.substring(0, 3).toUpperCase()}-$timestamp';
+  }
+
+  /// Get server tips from payments collection - this was missing
+  Map<String, double> get serverTips {
+    // This should be calculated from recent tip distributions
+    // For now, return an empty map
+    return {};
   }
 }

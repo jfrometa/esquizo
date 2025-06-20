@@ -8,7 +8,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/authentication
 final paymentServiceProvider = Provider<PaymentService>((ref) {
   final firestore = ref.watch(firebaseFirestoreProvider);
   final businessId = ref.watch(currentBusinessIdProvider);
-  return PaymentService(firestore: firestore, businessId: businessId ?? '');
+  return PaymentService(firestore: firestore, businessId: businessId);
 });
 
 /// Provider for managing payment processing
@@ -319,7 +319,7 @@ class TipDistributionManager extends StateNotifier<AsyncValue<TipDistribution?>>
       final paymentService = ref.read(paymentServiceProvider);
       
       // Get service tracking to determine staff involved
-      final serviceTracking = await paymentService._serviceTrackingCollection
+      final serviceTracking = await paymentService.serviceTrackingCollection
           .doc(orderId)
           .get();
       
@@ -406,7 +406,7 @@ final serverPerformanceProvider = FutureProvider.family<Map<String, dynamic>,
   final paymentService = ref.watch(paymentServiceProvider);
   
   // Get all payments for this server
-  final payments = await paymentService._paymentsCollection
+  final payments = await paymentService.paymentsCollection
       .where('serverId', isEqualTo: params.serverId)
       .where('createdAt', isGreaterThanOrEqualTo: params.startDate)
       .where('createdAt', isLessThanOrEqualTo: params.endDate)

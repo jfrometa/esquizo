@@ -395,7 +395,7 @@ List<RouteBase> getAdminRoutes() {
               ),
             ),
           ],
-        );
+        ),
         // --- End Payments Section ---
 
         // --- Staff Section (Index 2) --- Shifted ---
@@ -428,7 +428,7 @@ List<RouteBase> getAdminRoutes() {
               },
             ),
           ],
-        );
+        ),
         // --- End Staff Section ---
 
         // --- Meal Plans Section (Index 3) ---
@@ -484,7 +484,7 @@ List<RouteBase> getAdminRoutes() {
                 builder: (context, state) => MealPlanQRCode(
                     mealPlanId: state.pathParameters['planId'] ?? '')),
           ],
-        );
+        ),
 
         // --- Catering Section (Index 4) ---
         GoRoute(
@@ -524,7 +524,7 @@ List<RouteBase> getAdminRoutes() {
                 name: AdminRoutes.nameCtCategories,
                 builder: (context, state) => const CateringCategoryScreen()),
           ],
-        );
+        ),
 
         // --- Settings Section (Index 5) ---
         GoRoute(
@@ -658,7 +658,7 @@ List<RouteBase> getBusinessSluggedAdminRoutes() {
               ),
             ),
           ],
-        );
+        ),
         // --- End Payments Section ---
 
         // --- Staff Section (Index 2) --- Shifted ---
@@ -745,7 +745,7 @@ List<RouteBase> getBusinessSluggedAdminRoutes() {
                 builder: (context, state) => MealPlanQRCode(
                     mealPlanId: state.pathParameters['planId'] ?? '')),
           ],
-        );
+        ),
 
         // --- Catering Section (Index 4) ---
         GoRoute(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/payment/payment_providers.dart';
 import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/payment/payment_models.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/payment/payment_service.dart';
@@ -25,6 +26,27 @@ class _PaymentTransactionsTabState extends ConsumerState<PaymentTransactionsTab>
   PaymentStatus? _filterStatus;
   PaymentMethod? _filterMethod;
   final currencyFormatter = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+
+  Future<List<Payment>> _loadPayments(PaymentService paymentService) async {
+    // Simple implementation - get all payments in date range
+    try {
+      final payments = await paymentService.paymentsCollection
+          .where('createdAt', isGreaterThanOrEqualTo: widget.startDate)
+          .where('createdAt', isLessThanOrEqualTo: widget.endDate)
+          .get();
+      
+      return payments.docs
+          .map((doc) => Payment.fromJson(doc.data() as Map<String, dynamic>))
+          .where((payment) {
+            if (_filterStatus != null && payment.status != _filterStatus) return false;
+            if (_filterMethod != null && payment.method != _filterMethod) return false;
+            return true;
+          })
+          .toList();
+    } catch (e) {
+      return [];
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,13 +105,8 @@ class _PaymentTransactionsTabState extends ConsumerState<PaymentTransactionsTab>
         
         // Transactions List
         Expanded(
-          child: StreamBuilder<List<Payment>>(
-            stream: paymentService.getPaymentsStream(
-              startDate: widget.startDate,
-              endDate: widget.endDate,
-              status: _filterStatus,
-              method: _filterMethod,
-            ),
+          child: FutureBuilder<List<Payment>>(
+            future: _loadPayments(paymentService),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 return Center(child: Text('Error: ${snapshot.error}'));

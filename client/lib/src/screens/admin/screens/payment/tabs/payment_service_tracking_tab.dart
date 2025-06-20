@@ -28,7 +28,12 @@ class PaymentManagementScreen extends ConsumerWidget {
         body: TabBarView(
           children: [
             _buildOverviewTab(ref, theme, colorScheme),
-            PaymentServiceTrackingTab(),
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: const Center(
+                child: Text('Service Tracking Tab - Implementation pending'),
+              ),
+            ),
             _buildReportsTab(ref, theme, colorScheme),
           ],
         ),

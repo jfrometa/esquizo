@@ -118,6 +118,14 @@ class Payment {
   final bool isRefundable;
   final double refundedAmount;
   final List<String> refundIds;
+  // Added fields for payment service compatibility
+  final double? amount;
+  final double? subtotal;
+  final double? deliveryFee;
+  final List<Discount>? discounts;
+  final String? receiptNumber;
+  final ServiceTracking? serviceTracking;
+  final List<TaxConfiguration>? appliedTaxes;
 
   Payment({
     required this.id,
@@ -150,6 +158,14 @@ class Payment {
     this.isRefundable = true,
     this.refundedAmount = 0.0,
     this.refundIds = const [],
+    // Initialize new fields
+    this.amount,
+    this.subtotal,
+    this.deliveryFee,
+    this.discounts,
+    this.receiptNumber,
+    this.serviceTracking,
+    this.appliedTaxes,
   });
 
   factory Payment.fromJson(Map<String, dynamic> json) {
@@ -206,6 +222,21 @@ class Payment {
       isRefundable: json['isRefundable'] ?? true,
       refundedAmount: (json['refundedAmount'] ?? 0).toDouble(),
       refundIds: List<String>.from(json['refundIds'] ?? []),
+      // Parse new fields
+      amount: (json['amount'] ?? 0).toDouble(),
+      subtotal: (json['subtotal'] ?? 0).toDouble(),
+      deliveryFee: (json['deliveryFee'] ?? 0).toDouble(),
+      discounts: (json['discounts'] as List<dynamic>?)
+          ?.map((d) => Discount.fromJson(d))
+          .toList(),
+      receiptNumber: json['receiptNumber'],
+      serviceTracking: json['serviceTracking'] != null
+          ? ServiceTracking.fromJson(
+              json['serviceTracking'] as Map<String, dynamic>)
+          : null,
+      appliedTaxes: (json['appliedTaxes'] as List<dynamic>?)
+          ?.map((t) => TaxConfiguration.fromJson(t))
+          .toList(),
     );
   }
 
@@ -244,6 +275,14 @@ class Payment {
       'isRefundable': isRefundable,
       'refundedAmount': refundedAmount,
       'refundIds': refundIds,
+      // Serialize new fields
+      'amount': amount,
+      'subtotal': subtotal,
+      'deliveryFee': deliveryFee,
+      'discounts': discounts?.map((d) => d.toJson()).toList(),
+      'receiptNumber': receiptNumber,
+      'serviceTracking': serviceTracking?.toJson(),
+      'appliedTaxes': appliedTaxes?.map((t) => t.toJson()).toList(),
     };
   }
 
@@ -278,7 +317,14 @@ class Payment {
     bool? isRefundable,
     double? refundedAmount,
     List<String>? refundIds,
-  ) {
+    double? amount,
+    double? subtotal,
+    double? deliveryFee,
+    List<Discount>? discounts,
+    String? receiptNumber,
+    ServiceTracking? serviceTracking,
+    List<TaxConfiguration>? appliedTaxes,
+  }) {
     return Payment(
       id: id ?? this.id,
       orderId: orderId ?? this.orderId,
@@ -310,8 +356,17 @@ class Payment {
       isRefundable: isRefundable ?? this.isRefundable,
       refundedAmount: refundedAmount ?? this.refundedAmount,
       refundIds: refundIds ?? this.refundIds,
+      // Initialize new fields
+      amount: amount ?? this.amount,
+      subtotal: subtotal ?? this.subtotal,
+      deliveryFee: deliveryFee ?? this.deliveryFee,
+      discounts: discounts ?? this.discounts,
+      receiptNumber: receiptNumber ?? this.receiptNumber,
+      serviceTracking: serviceTracking ?? this.serviceTracking,
+      appliedTaxes: appliedTaxes ?? this.appliedTaxes,
     );
   }
+
 }
 
 /// Discount model
@@ -453,6 +508,10 @@ class Reimbursement {
   final String? notes;
   final List<String>? itemIds;
   final Map<String, dynamic>? metadata;
+  // Added fields for payment service compatibility
+  final DateTime? approvedAt;
+  final String? approvedBy;
+  final DateTime? completedAt;
 
   Reimbursement({
     required this.id,
@@ -468,6 +527,10 @@ class Reimbursement {
     this.notes,
     this.itemIds,
     this.metadata,
+    // Added fields
+    this.approvedAt,
+    this.approvedBy,
+    this.completedAt,
   });
 
   factory Reimbursement.fromJson(Map<String, dynamic> json) {
@@ -487,6 +550,13 @@ class Reimbursement {
       notes: json['notes'],
       itemIds: List<String>.from(json['itemIds'] ?? []),
       metadata: json['metadata'],
+      approvedAt: json['approvedAt'] != null
+          ? (json['approvedAt'] as Timestamp).toDate()
+          : null,
+      approvedBy: json['approvedBy'],
+      completedAt: json['completedAt'] != null
+          ? (json['completedAt'] as Timestamp).toDate()
+          : null,
     );
   }
 
@@ -507,6 +577,13 @@ class Reimbursement {
       'notes': notes,
       'itemIds': itemIds,
       'metadata': metadata,
+      'approvedAt': approvedAt != null
+          ? Timestamp.fromDate(approvedAt!)
+          : null,
+      'approvedBy': approvedBy,
+      'completedAt': completedAt != null
+          ? Timestamp.fromDate(completedAt!)
+          : null,
     };
   }
 
@@ -524,6 +601,9 @@ class Reimbursement {
     String? notes,
     List<String>? itemIds,
     Map<String, dynamic>? metadata,
+    DateTime? approvedAt,
+    String? approvedBy,
+    DateTime? completedAt,
   }) {
     return Reimbursement(
       id: id ?? this.id,
@@ -539,6 +619,9 @@ class Reimbursement {
       notes: notes ?? this.notes,
       itemIds: itemIds ?? this.itemIds,
       metadata: metadata ?? this.metadata,
+      approvedAt: approvedAt ?? this.approvedAt,
+      approvedBy: approvedBy ?? this.approvedBy,
+      completedAt: completedAt ?? this.completedAt,
     );
   }
 }
@@ -1008,6 +1091,278 @@ class TaxConfiguration {
       'isActive': isActive,
       'conditions': conditions,
       'metadata': metadata,
+    };
+  }
+}
+
+/// Coupon model for discount coupons
+class Coupon {
+  final String id;
+  final String code;
+  final DiscountType type;
+  final double value;
+  final String? description;
+  final DateTime validFrom;
+  final DateTime validUntil;
+  final bool isActive;
+  final int maxUses;
+  final int currentUses;
+  final double? minimumOrderAmount;
+  final double? maximumDiscountAmount;
+  final List<String>? applicableCategories;
+  final List<String>? applicableProducts;
+  final Map<String, dynamic>? metadata;
+
+  Coupon({
+    required this.id,
+    required this.code,
+    required this.type,
+    required this.value,
+    this.description,
+    required this.validFrom,
+    required this.validUntil,
+    this.isActive = true,
+    this.maxUses = 0,
+    this.currentUses = 0,
+    this.minimumOrderAmount,
+    this.maximumDiscountAmount,
+    this.applicableCategories,
+    this.applicableProducts,
+    this.metadata,
+  });
+
+  factory Coupon.fromJson(Map<String, dynamic> json) {
+    return Coupon(
+      id: json['id'] as String,
+      code: json['code'] as String,
+      type: DiscountType.values.firstWhere(
+        (e) => e.name == json['type'],
+        orElse: () => DiscountType.percentage,
+      ),
+      value: (json['value'] ?? 0).toDouble(),
+      description: json['description'],
+      validFrom: (json['validFrom'] as Timestamp).toDate(),
+      validUntil: (json['validUntil'] as Timestamp).toDate(),
+      isActive: json['isActive'] ?? true,
+      maxUses: json['maxUses'] ?? 0,
+      currentUses: json['currentUses'] ?? 0,
+      minimumOrderAmount: json['minimumOrderAmount']?.toDouble(),
+      maximumDiscountAmount: json['maximumDiscountAmount']?.toDouble(),
+      applicableCategories: List<String>.from(json['applicableCategories'] ?? []),
+      applicableProducts: List<String>.from(json['applicableProducts'] ?? []),
+      metadata: json['metadata'] as Map<String, dynamic>?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'code': code,
+      'type': type.name,
+      'value': value,
+      'description': description,
+      'validFrom': Timestamp.fromDate(validFrom),
+      'validUntil': Timestamp.fromDate(validUntil),
+      'isActive': isActive,
+      'maxUses': maxUses,
+      'currentUses': currentUses,
+      'minimumOrderAmount': minimumOrderAmount,
+      'maximumDiscountAmount': maximumDiscountAmount,
+      'applicableCategories': applicableCategories,
+      'applicableProducts': applicableProducts,
+      'metadata': metadata,
+    };
+  }
+}
+
+/// Special offer model
+class SpecialOffer {
+  final String id;
+  final String title;
+  final String description;
+  final OfferType type;
+  final double value;
+  final DateTime validFrom;
+  final DateTime validUntil;
+  final bool isActive;
+  final String? imageUrl;
+  final List<String>? applicableProducts;
+  final List<String>? applicableCategories;
+  final double? minimumOrderAmount;
+  final int? maxRedemptions;
+  final int currentRedemptions;
+  final Map<String, dynamic>? metadata;
+
+  SpecialOffer({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.type,
+    required this.value,
+    required this.validFrom,
+    required this.validUntil,
+    this.isActive = true,
+    this.imageUrl,
+    this.applicableProducts,
+    this.applicableCategories,
+    this.minimumOrderAmount,
+    this.maxRedemptions,
+    this.currentRedemptions = 0,
+    this.metadata,
+  });
+
+  factory SpecialOffer.fromJson(Map<String, dynamic> json) {
+    return SpecialOffer(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      description: json['description'] as String,
+      type: OfferType.values.firstWhere(
+        (e) => e.name == json['type'],
+        orElse: () => OfferType.percentage,
+      ),
+      value: (json['value'] ?? 0).toDouble(),
+      validFrom: (json['validFrom'] as Timestamp).toDate(),
+      validUntil: (json['validUntil'] as Timestamp).toDate(),
+      isActive: json['isActive'] ?? true,
+      imageUrl: json['imageUrl'],
+      applicableProducts: List<String>.from(json['applicableProducts'] ?? []),
+      applicableCategories: List<String>.from(json['applicableCategories'] ?? []),
+      minimumOrderAmount: json['minimumOrderAmount']?.toDouble(),
+      maxRedemptions: json['maxRedemptions'],
+      currentRedemptions: json['currentRedemptions'] ?? 0,
+      metadata: json['metadata'] as Map<String, dynamic>?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'type': type.name,
+      'value': value,
+      'validFrom': Timestamp.fromDate(validFrom),
+      'validUntil': Timestamp.fromDate(validUntil),
+      'isActive': isActive,
+      'imageUrl': imageUrl,
+      'applicableProducts': applicableProducts,
+      'applicableCategories': applicableCategories,
+      'minimumOrderAmount': minimumOrderAmount,
+      'maxRedemptions': maxRedemptions,
+      'currentRedemptions': currentRedemptions,
+      'metadata': metadata,
+    };
+  }
+}
+
+/// Bundle model for product bundles
+class Bundle {
+  final String id;
+  final String name;
+  final String description;
+  final double price;
+  final double originalPrice;
+  final List<BundleItem> items;
+  final DateTime validFrom;
+  final DateTime validUntil;
+  final bool isActive;
+  final String? imageUrl;
+  final int? maxRedemptions;
+  final int currentRedemptions;
+  final Map<String, dynamic>? metadata;
+
+  Bundle({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.price,
+    required this.originalPrice,
+    required this.items,
+    required this.validFrom,
+    required this.validUntil,
+    this.isActive = true,
+    this.imageUrl,
+    this.maxRedemptions,
+    this.currentRedemptions = 0,
+    this.metadata,
+  });
+
+  factory Bundle.fromJson(Map<String, dynamic> json) {
+    return Bundle(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      description: json['description'] as String,
+      price: (json['price'] ?? 0).toDouble(),
+      originalPrice: (json['originalPrice'] ?? 0).toDouble(),
+      items: (json['items'] as List<dynamic>)
+          .map((item) => BundleItem.fromJson(item as Map<String, dynamic>))
+          .toList(),
+      validFrom: (json['validFrom'] as Timestamp).toDate(),
+      validUntil: (json['validUntil'] as Timestamp).toDate(),
+      isActive: json['isActive'] ?? true,
+      imageUrl: json['imageUrl'],
+      maxRedemptions: json['maxRedemptions'],
+      currentRedemptions: json['currentRedemptions'] ?? 0,
+      metadata: json['metadata'] as Map<String, dynamic>?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'price': price,
+      'originalPrice': originalPrice,
+      'items': items.map((item) => item.toJson()).toList(),
+      'validFrom': Timestamp.fromDate(validFrom),
+      'validUntil': Timestamp.fromDate(validUntil),
+      'isActive': isActive,
+      'imageUrl': imageUrl,
+      'maxRedemptions': maxRedemptions,
+      'currentRedemptions': currentRedemptions,
+      'metadata': metadata,
+    };
+  }
+}
+
+/// Bundle item model
+class BundleItem {
+  final String productId;
+  final String productName;
+  final int quantity;
+  final double originalPrice;
+  final double bundlePrice;
+  final bool isOptional;
+
+  BundleItem({
+    required this.productId,
+    required this.productName,
+    required this.quantity,
+    required this.originalPrice,
+    required this.bundlePrice,
+    this.isOptional = false,
+  });
+
+  factory BundleItem.fromJson(Map<String, dynamic> json) {
+    return BundleItem(
+      productId: json['productId'] as String,
+      productName: json['productName'] as String,
+      quantity: json['quantity'] as int,
+      originalPrice: (json['originalPrice'] ?? 0).toDouble(),
+      bundlePrice: (json['bundlePrice'] ?? 0).toDouble(),
+      isOptional: json['isOptional'] ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'productId': productId,
+      'productName': productName,
+      'quantity': quantity,
+      'originalPrice': originalPrice,
+      'bundlePrice': bundlePrice,
+      'isOptional': isOptional,
     };
   }
 }
