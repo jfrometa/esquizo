@@ -86,39 +86,6 @@ class _CateringManagementScreenState
     return Scaffold(
       body: Row(
         children: [
-          // // Navigation rail
-          // NavigationRail(
-          //   selectedIndex: _selectedIndex,
-          //   onDestinationSelected: _onItemTapped,
-          //   extended: true,
-          //   backgroundColor: colorScheme.surface,
-          //   selectedIconTheme: IconThemeData(color: colorScheme.primary),
-          //   selectedLabelTextStyle: TextStyle(
-          //     color: colorScheme.primary,
-          //     fontWeight: FontWeight.bold,
-          //   ),
-          //   unselectedIconTheme:
-          //       IconThemeData(color: colorScheme.onSurfaceVariant),
-          //   unselectedLabelTextStyle:
-          //       TextStyle(color: colorScheme.onSurfaceVariant),
-          //   destinations: _navigationItems
-          //       .map(
-          //         (item) => NavigationRailDestination(
-          //           icon: Icon(item.icon),
-          //           selectedIcon: Icon(item.selectedIcon),
-          //           label: Text(item.title),
-          //         ),
-          //       )
-          //       .toList(),
-          // ),
-
-          // // Vertical divider
-          // VerticalDivider(
-          //   width: 1,
-          //   thickness: 1,
-          //   color: colorScheme.outlineVariant,
-          // ),
-
           // Main content
           Expanded(
             child: PageView(
@@ -136,39 +103,6 @@ class _CateringManagementScreenState
     return Scaffold(
       body: Row(
         children: [
-          // Navigation rail (compact)
-          // NavigationRail(
-          //   selectedIndex: _selectedIndex,
-          //   onDestinationSelected: _onItemTapped,
-          //   labelType: NavigationRailLabelType.selected,
-          //   backgroundColor: colorScheme.surface,
-          //   selectedIconTheme: IconThemeData(color: colorScheme.primary),
-          //   selectedLabelTextStyle: TextStyle(
-          //     color: colorScheme.primary,
-          //     fontWeight: FontWeight.bold,
-          //   ),
-          //   unselectedIconTheme:
-          //       IconThemeData(color: colorScheme.onSurfaceVariant),
-          //   unselectedLabelTextStyle:
-          //       TextStyle(color: colorScheme.onSurfaceVariant),
-          //   destinations: _navigationItems
-          //       .map(
-          //         (item) => NavigationRailDestination(
-          //           icon: Icon(item.icon),
-          //           selectedIcon: Icon(item.selectedIcon),
-          //           label: Text(item.title),
-          //         ),
-          //       )
-          //       .toList(),
-          // ),
-
-          // // Vertical divider
-          // VerticalDivider(
-          //   width: 1,
-          //   thickness: 1,
-          //   color: colorScheme.outlineVariant,
-          // ),
-
           // Main content
           Expanded(
             child: PageView(
@@ -188,19 +122,6 @@ class _CateringManagementScreenState
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),
         children: _navigationItems.map((item) => item.screen).toList(),
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: _onItemTapped,
-        destinations: _navigationItems
-            .map(
-              (item) => NavigationDestination(
-                icon: Icon(item.icon),
-                selectedIcon: Icon(item.selectedIcon),
-                label: item.title,
-              ),
-            )
-            .toList(),
       ),
     );
   }

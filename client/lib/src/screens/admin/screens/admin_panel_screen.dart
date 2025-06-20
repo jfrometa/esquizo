@@ -19,11 +19,13 @@ const int _settingsIndex = 4; // Shifted
 class AdminPanelScreen extends ConsumerStatefulWidget {
   final Widget child;
   final int initialIndex; // This index corresponds to _navigationItems (0-4)
+  final String? businessSlug; // Add this parameter
 
   const AdminPanelScreen({
     super.key,
     required this.child,
     this.initialIndex = _productDashboardIndex,
+    this.businessSlug, // Add this parameter
   });
 
   @override
@@ -268,49 +270,133 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
   // Navigate using named routes
   void _navigateByName(String routeName,
       {Map<String, String> params = const {}}) {
-    /* ... no change ... */
     final currentState = GoRouterState.of(context);
-    if (currentState.name == routeName &&
-        currentState.pathParameters == params) {
-      return;
+
+    // If we have a businessSlug, use business-specific route names
+    if (widget.businessSlug != null && widget.businessSlug!.isNotEmpty) {
+      // Map regular route names to business-specific ones
+      final businessRouteName = _getBusinessRouteName(routeName);
+      final businessParams = Map<String, String>.from(params);
+      businessParams['businessSlug'] = widget.businessSlug!;
+
+      if (currentState.name == businessRouteName &&
+          currentState.pathParameters == businessParams) {
+        return;
+      }
+      context.goNamed(businessRouteName, pathParameters: businessParams);
+    } else {
+      // Regular admin navigation without business context
+      if (currentState.name == routeName &&
+          currentState.pathParameters == params) {
+        return;
+      }
+      context.goNamed(routeName, pathParameters: params);
     }
-    context.goNamed(routeName, pathParameters: params);
   }
 
-  // Trigger navigation to the primary screen of the selected section index
-  void _onItemSelected(int index) {
-    /* ... no change ... */
-    if (index < 0 || index >= _navigationItems.length) return;
-    final targetRouteName = _navigationItems[index].routeName;
-    _navigateByName(targetRouteName);
+  // Helper method to map regular route names to business-specific ones
+  String _getBusinessRouteName(String routeName) {
+    // Map regular admin route names to business-specific ones
+    switch (routeName) {
+      // Product Dashboard
+      case AdminRoutes.namePdHome:
+        return AdminRoutes.nameBusinessPdHome;
+      case AdminRoutes.namePdProducts:
+        return AdminRoutes.nameBusinessPdProducts;
+      case AdminRoutes.namePdOrders:
+        return AdminRoutes.nameBusinessPdOrders;
+      case AdminRoutes.namePdOrderDetails:
+        return AdminRoutes.nameBusinessPdOrderDetails;
+      case AdminRoutes.namePdOrderPaymentDetails:
+        return AdminRoutes.nameBusinessPdOrderPaymentDetails;
+      case AdminRoutes.namePdTables:
+        return AdminRoutes.nameBusinessPdTables;
+      case AdminRoutes.namePdAnalytics:
+        return AdminRoutes.nameBusinessPdAnalytics;
+      // Staff
+      case AdminRoutes.nameStaffHome:
+        return AdminRoutes.nameBusinessStaffHome;
+      case AdminRoutes.nameStaffKitchen:
+        return AdminRoutes.nameBusinessStaffKitchen;
+      case AdminRoutes.nameStaffWaiter:
+        return AdminRoutes.nameBusinessStaffWaiter;
+      case AdminRoutes.nameStaffWaiterOrderEntry:
+        return AdminRoutes.nameBusinessStaffWaiterOrderEntry;
+      // Meal Plans
+      case AdminRoutes.nameMpHome:
+        return AdminRoutes.nameBusinessMpHome;
+      case AdminRoutes.nameMpManagement:
+        return AdminRoutes.nameBusinessMpManagement;
+      case AdminRoutes.nameMpItems:
+        return AdminRoutes.nameBusinessMpItems;
+      case AdminRoutes.nameMpAnalytics:
+        return AdminRoutes.nameBusinessMpAnalytics;
+      case AdminRoutes.nameMpExport:
+        return AdminRoutes.nameBusinessMpExport;
+      case AdminRoutes.nameMpScanner:
+        return AdminRoutes.nameBusinessMpScanner;
+      case AdminRoutes.nameMpPos:
+        return AdminRoutes.nameBusinessMpPos;
+      case AdminRoutes.nameMpQr:
+        return AdminRoutes.nameBusinessMpQr;
+      case AdminRoutes.nameMpOrders:
+        return AdminRoutes.nameBusinessMpOrders;
+      case AdminRoutes.nameMpOrderDetails:
+        return AdminRoutes.nameBusinessMpOrderDetails;
+      // Catering
+      case AdminRoutes.nameCtHome:
+        return AdminRoutes.nameBusinessCtHome;
+      case AdminRoutes.nameCtDashboard:
+        return AdminRoutes.nameBusinessCtDashboard;
+      case AdminRoutes.nameCtOrders:
+        return AdminRoutes.nameBusinessCtOrders;
+      case AdminRoutes.nameCtOrderDetails:
+        return AdminRoutes.nameBusinessCtOrderDetails;
+      case AdminRoutes.nameCtPackages:
+        return AdminRoutes.nameBusinessCtPackages;
+      case AdminRoutes.nameCtItems:
+        return AdminRoutes.nameBusinessCtItems;
+      case AdminRoutes.nameCtCategories:
+        return AdminRoutes.nameBusinessCtCategories;
+      // Settings
+      case AdminRoutes.nameSettings:
+        return AdminRoutes.nameBusinessSettings;
+      case AdminRoutes.nameSettingsUsers:
+        return AdminRoutes.nameBusinessSettingsUsers;
+      default:
+        return routeName;
+    }
   }
 
   // Trigger navigation to a specific subroute
   void _navigateToSubroute(int parentIndex, String routeName,
       {Map<String, String> params = const {}}) {
-    // Use business-aware navigation for subroutes
-    final subroutes = _navigationItems[parentIndex].subroutes;
-    _SubRoute? found;
-    if (subroutes != null) {
-      for (final sr in subroutes) {
-        if (sr.routeName == routeName) {
-          found = sr;
-          break;
-        }
-      }
+    // If we have a businessSlug, ensure it's included in params
+    final navParams = Map<String, String>.from(params);
+    if (widget.businessSlug != null && widget.businessSlug!.isNotEmpty) {
+      navParams['businessSlug'] = widget.businessSlug!;
     }
-    final path = found?.route;
-    if (path != null) {
-      BusinessAwareNavigation.go(context, ref, path);
-      return;
+
+    _navigateByName(routeName, params: navParams);
+  }
+
+  // Trigger navigation to the primary screen of the selected section index
+  void _onItemSelected(int index) {
+    if (index < 0 || index >= _navigationItems.length) return;
+    final targetRouteName = _navigationItems[index].routeName;
+
+    // Use the appropriate route name based on business context
+    if (widget.businessSlug != null && widget.businessSlug!.isNotEmpty) {
+      final businessRouteName = _getBusinessRouteName(targetRouteName);
+      _navigateByName(businessRouteName);
+    } else {
+      _navigateByName(targetRouteName);
     }
-    // fallback to named route if path not found
-    _navigateByName(routeName, params: params);
   }
 
   // --- State Verification Logic ---
   void _verifyIndexWithRoute() {
-    /* ... no change ... */
+    // Update _verifyIndexWithRoute to use AdminRoutes constants
     if (!mounted || _isVerifyingIndex) return;
     _isVerifyingIndex = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -318,7 +404,13 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
         _isVerifyingIndex = false;
         return;
       }
-      final currentRoute = GoRouterState.of(context).matchedLocation;
+      var currentRoute = GoRouterState.of(context).matchedLocation;
+
+      // Remove business slug from route if present for index calculation
+      if (widget.businessSlug != null && widget.businessSlug!.isNotEmpty) {
+        currentRoute = currentRoute.replaceFirst('/${widget.businessSlug}', '');
+      }
+
       final correctIndex = AdminRoutes.getIndexFromRoute(currentRoute);
       if (selectedIndex != correctIndex) {
         setState(() {
@@ -1161,7 +1253,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
 
   // --- User Menu ---
   void _showUserMenu() {
-    /* ... no change ... */
+    // Update _showUserMenu to use AdminRoutes constants and handle business context
     final authService = ref.read(authServiceProvider);
     final RenderBox? overlay =
         Overlay.of(context).context.findRenderObject() as RenderBox?;
@@ -1185,7 +1277,15 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
       items: [
         PopupMenuItem(
             child: const Text('Profile'),
-            onTap: () => context.pushNamed(AdminRoutes.nameProfile)),
+            onTap: () {
+              // Handle profile navigation with business context
+              if (widget.businessSlug != null &&
+                  widget.businessSlug!.isNotEmpty) {
+                context.go('/${widget.businessSlug}/cuenta');
+              } else {
+                context.pushNamed(AdminRoutes.nameProfile);
+              }
+            }),
         PopupMenuItem(
             child: const Text('Help'),
             onTap: () => context.pushNamed(AdminRoutes.nameHelp)),
@@ -1193,7 +1293,15 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
             child: const Text('Logout'),
             onTap: () async {
               await authService.signOut();
-              if (mounted) context.goNamed(AdminRoutes.nameLogin);
+              if (mounted) {
+                // Navigate to home or landing page based on business context
+                if (widget.businessSlug != null &&
+                    widget.businessSlug!.isNotEmpty) {
+                  context.go('/${widget.businessSlug}');
+                } else {
+                  context.goNamed(AdminRoutes.nameHome);
+                }
+              }
             }),
       ],
     );
@@ -1251,8 +1359,19 @@ class UnauthorizedScreen extends StatelessWidget {
             const Text('You do not have access to this area'),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () =>
-                  context.goNamed(AdminRoutes.nameHome), // Use named route
+              onPressed: () {
+                // Check if we're in a business context
+                final routerState = GoRouterState.of(context);
+                final businessSlug = routerState.pathParameters['businessSlug'];
+
+                if (businessSlug != null && businessSlug.isNotEmpty) {
+                  // Navigate to business home
+                  context.go('/$businessSlug');
+                } else {
+                  // Navigate to platform home
+                  context.goNamed(AdminRoutes.nameHome);
+                }
+              },
               child: const Text('Go to Home'),
             ),
           ],

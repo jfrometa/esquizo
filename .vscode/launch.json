@@ -7,7 +7,7 @@
       "cwd": "client",
       "request": "launch",
       "type": "dart",
-      "args": ["-d", "chrome", "--web-experimental-hot-reload", "--wasm"]
+      "args": ["-d", "chrome", "--wasm"]
     }
   ],
   "tasks": {
