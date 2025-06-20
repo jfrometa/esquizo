@@ -752,7 +752,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen>
             onSuccess: (order) {
               Navigator.pop(context);
               context.pushNamed(
-                AdminRoutes.namePdOrderDetails,
+                AdminRoutes.nameOrderDetails,
                 pathParameters: {'orderId': order.id},
               );
             },

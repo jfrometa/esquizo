@@ -1102,7 +1102,7 @@ class _StaffWaiterTableSelectScreenState
   void _viewTableOrder(RestaurantTable table) {
     if (table.currentOrderId != null) {
       context.goNamed(
-        AdminRoutes.namePdOrderDetails,
+        AdminRoutes.nameOrderDetails,
         pathParameters: {'orderId': table.currentOrderId!},
       );
     }
@@ -1110,7 +1110,7 @@ class _StaffWaiterTableSelectScreenState
 
   void _viewOrderDetails(Order order) {
     context.goNamed(
-      AdminRoutes.namePdOrderDetails,
+      AdminRoutes.nameOrderDetails,
       pathParameters: {'orderId': order.id},
     );
   }

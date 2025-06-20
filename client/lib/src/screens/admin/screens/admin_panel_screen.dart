@@ -8,13 +8,13 @@ import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin
 import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.dart'; // Use updated router
 import 'dart:async';
 
-// Define constants for the global indices (0-5) matching AdminRoutes logic - UPDATED
-const int _productDashboardIndex = 0;
-const int _paymentsIndex = 1; // NEW
-const int _staffIndex = 2; // Shifted
-const int _mealPlansIndex = 3; // Shifted
-const int _cateringIndex = 4; // Shifted
-const int _settingsIndex = 5; // Shifted
+// Define constants for the global indices (0-5) matching AdminRoutes logic - OPTION 1
+const int _dashboardIndex = 0;
+const int _paymentsIndex = 1;
+const int _staffIndex = 2;
+const int _mealPlansIndex = 3;
+const int _cateringIndex = 4;
+const int _settingsIndex = 5;
 
 class AdminPanelScreen extends ConsumerStatefulWidget {
   final Widget child;
@@ -24,7 +24,7 @@ class AdminPanelScreen extends ConsumerStatefulWidget {
   const AdminPanelScreen({
     super.key,
     required this.child,
-    this.initialIndex = _productDashboardIndex,
+    this.initialIndex = _dashboardIndex,
     this.businessSlug, // Add this parameter
   });
 
@@ -40,41 +40,50 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
 
   bool _isVerifyingIndex = false;
 
-  // _navigationItems list based on the 6 main sections - UPDATED
+  // _navigationItems list based on the 10 main sections - OPTION 2
   final List<_AdminNavigationItem> _navigationItems = [
-    // Index 0 - Product Dashboard
+    // Index 0 - Dashboard (Main section with subroutes)
     _AdminNavigationItem(
       title: 'Dashboard',
       icon: Icons.dashboard,
-      route: AdminRoutes.getFullPath(AdminRoutes.productDashboard),
-      routeName: AdminRoutes.namePdHome,
+      route: AdminRoutes.getFullPath(AdminRoutes.dashboard),
+      routeName: AdminRoutes.nameDashboard,
       subroutes: [
         _SubRoute(
             title: 'Products',
-            routeName: AdminRoutes.namePdProducts,
+            routeName: AdminRoutes.nameProducts,
             icon: Icons.restaurant_menu,
-            route: AdminRoutes.getFullPath(AdminRoutes.dashboardProducts)),
+            route: AdminRoutes.getFullPath(
+                '${AdminRoutes.dashboard}/${AdminRoutes.products}')),
         _SubRoute(
             title: 'Orders',
-            routeName: AdminRoutes.namePdOrders,
+            routeName: AdminRoutes.nameOrders,
             icon: Icons.receipt_long,
-            detailRouteName: AdminRoutes.namePdOrderDetails,
-            route: AdminRoutes.getFullPath(AdminRoutes.dashboardOrders)),
+            route: AdminRoutes.getFullPath(
+                '${AdminRoutes.dashboard}/${AdminRoutes.orders}')),
+        _SubRoute(
+            title: 'Order Details',
+            routeName: AdminRoutes.nameOrderDetails,
+            icon: Icons.info,
+            isDetailRoute: true,
+            detailRouteName: AdminRoutes.nameOrderDetails,
+            route: AdminRoutes.getFullPath(
+                '${AdminRoutes.dashboard}/${AdminRoutes.orders}/:orderId')),
         _SubRoute(
             title: 'Tables',
-            routeName: AdminRoutes.namePdTables,
+            routeName: AdminRoutes.nameTables,
             icon: Icons.table_bar,
-            detailRouteName: AdminRoutes.namePdTables,
-            route: AdminRoutes.getFullPath(AdminRoutes.dashboardTables)),
+            route: AdminRoutes.getFullPath(
+                '${AdminRoutes.dashboard}/${AdminRoutes.tables}')),
         _SubRoute(
             title: 'Analytics',
-            routeName: AdminRoutes.namePdAnalytics,
+            routeName: AdminRoutes.nameAnalytics,
             icon: Icons.bar_chart,
-            route: AdminRoutes.getFullPath(AdminRoutes.dashboardAnalytics)),
-        // Remove payments from here - it's now a top-level section
+            route: AdminRoutes.getFullPath(
+                '${AdminRoutes.dashboard}/${AdminRoutes.analytics}')),
       ],
     ),
-    // Index 1 - Payments (NEW)
+    // Index 1 - Payments
     _AdminNavigationItem(
       title: 'Payments',
       icon: Icons.payments,
@@ -120,13 +129,19 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                 '${AdminRoutes.payments}/${AdminRoutes.paymentsOrderDetails}')),
       ],
     ),
-    // Index 2 - Staff (Shifted)
+    // Index 2 - Staff
     _AdminNavigationItem(
       title: 'Staff',
       icon: Icons.people_alt_rounded,
       route: AdminRoutes.getFullPath(AdminRoutes.staff),
       routeName: AdminRoutes.nameStaffHome,
       subroutes: [
+        // Overview route for Staff section
+        _SubRoute(
+            title: 'Overview',
+            routeName: AdminRoutes.nameStaffOverview,
+            icon: Icons.dashboard,
+            route: AdminRoutes.getFullPath('${AdminRoutes.staff}/overview')),
         // Kitchen management route
         _SubRoute(
             title: 'Kitchen',
@@ -152,13 +167,20 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                 '${AdminRoutes.staff}/${AdminRoutes.staffWaiterOrderEntry}')),
       ],
     ),
-    // Index 3 - Meal Plans (Shifted)
+    // Index 3 - Meal Plans
     _AdminNavigationItem(
       title: 'Meal Plans',
       icon: Icons.lunch_dining,
       route: AdminRoutes.getFullPath(AdminRoutes.mealPlans),
       routeName: AdminRoutes.nameMpHome,
       subroutes: [
+        // Overview route for Meal Plans section
+        _SubRoute(
+            title: 'Overview',
+            routeName: AdminRoutes.nameMpOverview,
+            icon: Icons.dashboard,
+            route:
+                AdminRoutes.getFullPath('${AdminRoutes.mealPlans}/overview')),
         _SubRoute(
             title: 'Management',
             routeName: AdminRoutes.nameMpManagement,
@@ -205,13 +227,19 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                 '${AdminRoutes.mealPlans}/${AdminRoutes.mealPlanQr}')),
       ],
     ),
-    // Index 4 - Catering (Shifted)
+    // Index 4 - Catering
     _AdminNavigationItem(
       title: 'Catering',
       icon: Icons.inventory_2,
       route: AdminRoutes.getFullPath(AdminRoutes.catering),
       routeName: AdminRoutes.nameCtHome,
       subroutes: [
+        // Overview route for Catering section
+        _SubRoute(
+            title: 'Overview',
+            routeName: AdminRoutes.nameCtOverview,
+            icon: Icons.dashboard,
+            route: AdminRoutes.getFullPath('${AdminRoutes.catering}/overview')),
         _SubRoute(
             title: 'Dashboard',
             routeName: AdminRoutes.nameCtDashboard,
@@ -244,13 +272,19 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                 '${AdminRoutes.catering}/${AdminRoutes.cateringCategories}')),
       ],
     ),
-    // Index 5 - Settings (Shifted)
+    // Index 5 - Settings
     _AdminNavigationItem(
-      title: 'Settings', // Shortened
+      title: 'Settings',
       icon: Icons.settings,
       route: AdminRoutes.getFullPath(AdminRoutes.settings),
       routeName: AdminRoutes.nameSettings,
       subroutes: [
+        // Overview route for Settings section
+        _SubRoute(
+            title: 'Overview',
+            routeName: AdminRoutes.nameSettingsOverview,
+            icon: Icons.dashboard,
+            route: AdminRoutes.getFullPath('${AdminRoutes.settings}/overview')),
         _SubRoute(
             title: 'Users & Staff',
             routeName: AdminRoutes.nameSettingsUsers,
@@ -274,6 +308,8 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
   @override
   void didUpdateWidget(covariant AdminPanelScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    // Handle widget updates (route changes, etc.)
     if (widget.initialIndex != oldWidget.initialIndex) {
       if (mounted && selectedIndex != widget.initialIndex) {
         setState(() {
@@ -281,7 +317,15 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
         });
       }
     }
-    _verifyIndexWithRoute();
+
+    // Also handle business slug changes
+    if (widget.businessSlug != oldWidget.businessSlug) {
+      // Business context changed, re-verify the index
+      _verifyIndexWithRoute();
+    } else {
+      // Always verify index with route for consistency
+      _verifyIndexWithRoute();
+    }
   }
 
   @override
@@ -339,19 +383,23 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
   String _getBusinessRouteName(String routeName) {
     // Map regular admin route names to business-specific ones
     switch (routeName) {
-      // Product Dashboard
-      case AdminRoutes.namePdHome:
-        return AdminRoutes.nameBusinessPdHome;
-      case AdminRoutes.namePdProducts:
-        return AdminRoutes.nameBusinessPdProducts;
-      case AdminRoutes.namePdOrders:
-        return AdminRoutes.nameBusinessPdOrders;
-      case AdminRoutes.namePdOrderDetails:
-        return AdminRoutes.nameBusinessPdOrderDetails;
-      case AdminRoutes.namePdTables:
-        return AdminRoutes.nameBusinessPdTables;
-      case AdminRoutes.namePdAnalytics:
-        return AdminRoutes.nameBusinessPdAnalytics;
+      // Dashboard (Overview only)
+      case AdminRoutes.nameDashboard:
+        return AdminRoutes.nameBusinessDashboard;
+      // Products (NEW top-level section)
+      case AdminRoutes.nameProducts:
+        return AdminRoutes.nameBusinessProducts;
+      // Orders (NEW top-level section)
+      case AdminRoutes.nameOrders:
+        return AdminRoutes.nameBusinessOrders;
+      case AdminRoutes.nameOrderDetails:
+        return AdminRoutes.nameBusinessOrderDetails;
+      // Tables (NEW top-level section)
+      case AdminRoutes.nameTables:
+        return AdminRoutes.nameBusinessTables;
+      // Analytics (NEW top-level section)
+      case AdminRoutes.nameAnalytics:
+        return AdminRoutes.nameBusinessAnalytics;
       // Payments (NEW)
       case AdminRoutes.namePaymentsHome:
         return AdminRoutes.nameBusinessPaymentsHome;
@@ -370,6 +418,8 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
       // Staff (shifted)
       case AdminRoutes.nameStaffHome:
         return AdminRoutes.nameBusinessStaffHome;
+      case AdminRoutes.nameStaffOverview:
+        return AdminRoutes.nameBusinessStaffOverview;
       case AdminRoutes.nameStaffKitchen:
         return AdminRoutes.nameBusinessStaffKitchen;
       case AdminRoutes.nameStaffWaiter:
@@ -379,6 +429,8 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
       // Meal Plans
       case AdminRoutes.nameMpHome:
         return AdminRoutes.nameBusinessMpHome;
+      case AdminRoutes.nameMpOverview:
+        return AdminRoutes.nameBusinessMpOverview;
       case AdminRoutes.nameMpManagement:
         return AdminRoutes.nameBusinessMpManagement;
       case AdminRoutes.nameMpItems:
@@ -400,6 +452,8 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
       // Catering
       case AdminRoutes.nameCtHome:
         return AdminRoutes.nameBusinessCtHome;
+      case AdminRoutes.nameCtOverview:
+        return AdminRoutes.nameBusinessCtOverview;
       case AdminRoutes.nameCtDashboard:
         return AdminRoutes.nameBusinessCtDashboard;
       case AdminRoutes.nameCtOrders:
@@ -415,97 +469,10 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
       // Settings
       case AdminRoutes.nameSettings:
         return AdminRoutes.nameBusinessSettings;
+      case AdminRoutes.nameSettingsOverview:
+        return AdminRoutes.nameBusinessSettingsOverview;
       case AdminRoutes.nameSettingsUsers:
         return AdminRoutes.nameBusinessSettingsUsers;
-      default:
-        return routeName;
-    }
-  }
-
-  // Helper method to map business route names back to regular ones for comparison
-  String _getRegularRouteName(String? routeName) {
-    if (routeName == null) return '';
-
-    // Map business-specific route names back to regular ones
-    switch (routeName) {
-      // Product Dashboard
-      case AdminRoutes.nameBusinessPdHome:
-        return AdminRoutes.namePdHome;
-      case AdminRoutes.nameBusinessPdProducts:
-        return AdminRoutes.namePdProducts;
-      case AdminRoutes.nameBusinessPdOrders:
-        return AdminRoutes.namePdOrders;
-      case AdminRoutes.nameBusinessPdOrderDetails:
-        return AdminRoutes.namePdOrderDetails;
-      case AdminRoutes.nameBusinessPdTables:
-        return AdminRoutes.namePdTables;
-      case AdminRoutes.nameBusinessPdAnalytics:
-        return AdminRoutes.namePdAnalytics;
-      // Payments
-      case AdminRoutes.nameBusinessPaymentsHome:
-        return AdminRoutes.namePaymentsHome;
-      case AdminRoutes.nameBusinessPaymentsOverview:
-        return AdminRoutes.namePaymentsOverview;
-      case AdminRoutes.nameBusinessPaymentsTransactions:
-        return AdminRoutes.namePaymentsTransactions;
-      case AdminRoutes.nameBusinessPaymentsTips:
-        return AdminRoutes.namePaymentsTips;
-      case AdminRoutes.nameBusinessPaymentsTaxes:
-        return AdminRoutes.namePaymentsTaxes;
-      case AdminRoutes.nameBusinessPaymentsService:
-        return AdminRoutes.namePaymentsService;
-      case AdminRoutes.nameBusinessPaymentsOrderDetails:
-        return AdminRoutes.namePaymentsOrderDetails;
-      // Staff
-      case AdminRoutes.nameBusinessStaffHome:
-        return AdminRoutes.nameStaffHome;
-      case AdminRoutes.nameBusinessStaffKitchen:
-        return AdminRoutes.nameStaffKitchen;
-      case AdminRoutes.nameBusinessStaffWaiter:
-        return AdminRoutes.nameStaffWaiter;
-      case AdminRoutes.nameBusinessStaffWaiterOrderEntry:
-        return AdminRoutes.nameStaffWaiterOrderEntry;
-      // Meal Plans
-      case AdminRoutes.nameBusinessMpHome:
-        return AdminRoutes.nameMpHome;
-      case AdminRoutes.nameBusinessMpManagement:
-        return AdminRoutes.nameMpManagement;
-      case AdminRoutes.nameBusinessMpItems:
-        return AdminRoutes.nameMpItems;
-      case AdminRoutes.nameBusinessMpAnalytics:
-        return AdminRoutes.nameMpAnalytics;
-      case AdminRoutes.nameBusinessMpExport:
-        return AdminRoutes.nameMpExport;
-      case AdminRoutes.nameBusinessMpScanner:
-        return AdminRoutes.nameMpScanner;
-      case AdminRoutes.nameBusinessMpPos:
-        return AdminRoutes.nameMpPos;
-      case AdminRoutes.nameBusinessMpQr:
-        return AdminRoutes.nameMpQr;
-      case AdminRoutes.nameBusinessMpOrders:
-        return AdminRoutes.nameMpOrders;
-      case AdminRoutes.nameBusinessMpOrderDetails:
-        return AdminRoutes.nameMpOrderDetails;
-      // Catering
-      case AdminRoutes.nameBusinessCtHome:
-        return AdminRoutes.nameCtHome;
-      case AdminRoutes.nameBusinessCtDashboard:
-        return AdminRoutes.nameCtDashboard;
-      case AdminRoutes.nameBusinessCtOrders:
-        return AdminRoutes.nameCtOrders;
-      case AdminRoutes.nameBusinessCtOrderDetails:
-        return AdminRoutes.nameCtOrderDetails;
-      case AdminRoutes.nameBusinessCtPackages:
-        return AdminRoutes.nameCtPackages;
-      case AdminRoutes.nameBusinessCtItems:
-        return AdminRoutes.nameCtItems;
-      case AdminRoutes.nameBusinessCtCategories:
-        return AdminRoutes.nameCtCategories;
-      // Settings
-      case AdminRoutes.nameBusinessSettings:
-        return AdminRoutes.nameSettings;
-      case AdminRoutes.nameBusinessSettingsUsers:
-        return AdminRoutes.nameSettingsUsers;
       default:
         return routeName;
     }
@@ -615,6 +582,75 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
     return index;
   }
 
+  // --- Initial Subroute Redirection Logic ---
+  void _handleInitialSubrouteRedirection() {
+    if (!mounted) return;
+
+    final String? currentRoutePath = _getCurrentRoutePath();
+    if (currentRoutePath == null) return;
+
+    // Normalize the path using the same logic as _getIndexFromRoutePath
+    String normalizedPath = currentRoutePath;
+
+    // Remove business slug if this is a business route
+    if (widget.businessSlug != null &&
+        normalizedPath.startsWith('/${widget.businessSlug}')) {
+      normalizedPath =
+          normalizedPath.replaceFirst('/${widget.businessSlug}', '');
+    }
+
+    // Check if we're on a section root and need to redirect to first subroute
+    for (int i = 0; i < _navigationItems.length; i++) {
+      final item = _navigationItems[i];
+      final itemRoute = item.route;
+
+      // Normalize item route by removing leading slash for comparison
+      String cleanItemRoute =
+          itemRoute.startsWith('/') ? itemRoute.substring(1) : itemRoute;
+      String cleanNormalizedPath = normalizedPath.startsWith('/')
+          ? normalizedPath.substring(1)
+          : normalizedPath;
+
+      // If we're exactly on a section root (no subroute) and the section has subroutes
+      if ((cleanNormalizedPath == cleanItemRoute ||
+              normalizedPath == itemRoute) &&
+          item.subroutes != null &&
+          item.subroutes!.isNotEmpty) {
+        final firstSubroute = item.subroutes![0];
+
+        // Get the business slug if we're on a business route
+        final businessSlug = _getBusinessSlugFromPath(currentRoutePath);
+        final redirectPath = businessSlug != null
+            ? '/$businessSlug${firstSubroute.route}'
+            : firstSubroute.route;
+
+        debugPrint(
+            'AdminPanel: Redirecting from section root "$normalizedPath" to first subroute "$redirectPath"');
+
+        // Navigate to the first subroute
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            context.go(redirectPath);
+          }
+        });
+        return;
+      }
+    }
+  }
+
+  // Helper to extract business slug from path
+  String? _getBusinessSlugFromPath(String path) {
+    final segments = path.split('/').where((s) => s.isNotEmpty).toList();
+
+    // Check if this is a business route (e.g., /slug/admin/...)
+    if (segments.length >= 2 && segments[1] == 'admin') {
+      return segments[0];
+    }
+
+    return null;
+  }
+  // --- End Initial Subroute Redirection Logic ---
+
   // --- State Verification Logic ---
   void _verifyIndexWithRoute() {
     if (!mounted || _isVerifyingIndex) return;
@@ -624,6 +660,9 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
         _isVerifyingIndex = false;
         return;
       }
+
+      // First, handle initial subroute redirection if needed
+      _handleInitialSubrouteRedirection();
 
       // Get the current route path - use helper method for consistency
       final String? currentRoutePath = _getCurrentRoutePath();
@@ -652,22 +691,41 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
     final isDesktop = size.width >= 1100;
     final isTablet = size.width >= 600;
 
-    // ALWAYS verify index before building - this ensures immediate response to route changes
-    final String? currentRoutePath = _getCurrentRoutePath();
-    final correctIndex = _getIndexFromRoutePath(currentRoutePath);
+    // Watch the GoRouter state to ensure rebuilds on route changes
+    final routerState = GoRouterState.of(context);
+    final currentRoutePath =
+        widget.businessSlug != null && widget.businessSlug!.isNotEmpty
+            ? routerState.uri.path
+            : routerState.matchedLocation;
 
-    // Update selectedIndex synchronously if it's different
+    // Compute correct index based on current route
+    final correctIndex = _getIndexFromRoutePath(currentRoutePath);
+    debugPrint(
+        '🏗️ [build] Current selectedIndex: $selectedIndex, correctIndex: $correctIndex, currentRoutePath: $currentRoutePath');
+    debugPrint(
+        '🏗️ [build] About to pass currentSelectedIndex to navigation: will be determined below');
+
+    // Use the correct index from the route - trust the getIndexFromRoute method
+    int currentSelectedIndex = correctIndex;
+
+    // Update selectedIndex if it's different
     if (selectedIndex != correctIndex) {
+      debugPrint(
+          '🏗️ [build] Index mismatch detected! Updating selectedIndex from $selectedIndex to $correctIndex');
+      selectedIndex = correctIndex;
+
+      // Schedule a setState to ensure proper widget lifecycle
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           setState(() {
-            selectedIndex = correctIndex;
+            // State is already updated above, this just ensures proper rebuild
           });
         }
       });
     }
 
-    final currentSelectedIndex = selectedIndex;
+    debugPrint(
+        '🏗️ [build] FINAL: currentSelectedIndex that will be passed to navigation: $currentSelectedIndex');
 
     // Guard for invalid selectedIndex
     if (currentSelectedIndex < 0 ||
@@ -775,8 +833,14 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                 item.subroutes
                     ?.any((sr) => sr.routeName == subroute.routeName) ??
                 false);
+            debugPrint(
+                '🔍 [SubrouteClick] Searching for parent of subroute: ${subroute.routeName}');
+            debugPrint('🔍 [SubrouteClick] Found parentIndex: $parentIndex');
             if (parentIndex != -1) {
               _navigateToSubroute(parentIndex, subroute.routeName);
+            } else {
+              debugPrint(
+                  '❌ [SubrouteClick] ERROR: Could not find parent section for subroute: ${subroute.routeName}');
             }
           },
           borderRadius: BorderRadius.circular(8),
@@ -1105,6 +1169,8 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                           isSubrouteSelected, // Highlighting based on route name
                       onTap: () {
                         Navigator.pop(context);
+                        debugPrint(
+                            '🔍 [DrawerSubrouteClick] Using parent index: $index for subroute: ${subroute.routeName}');
                         _navigateToSubroute(index, subroute.routeName);
                       },
                     );
@@ -1198,16 +1264,14 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
         onTap: (tappedMobileIndex) {
           switch (tappedMobileIndex) {
             case 0:
-              _onItemSelected(_productDashboardIndex);
+              _onItemSelected(_dashboardIndex);
               break;
             case 1:
               _onItemSelected(_paymentsIndex); // Direct navigation to Payments
               break;
             case 2:
-              _showSubrouteOptions(_mealPlansIndex, currentRoutePath);
-              break;
-            case 3:
-              _showMoreOptions(currentRoutePath);
+              _showMoreOptions(
+                  currentRoutePath); // Staff/Meal Plans/Catering/Settings
               break;
           }
         },
@@ -1219,20 +1283,17 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
         unselectedFontSize: 12,
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
         elevation: 8.0,
-        // Define the 4 items for the bottom bar
+        // Define the 3 items for the bottom bar (Option 1)
         items: [
           BottomNavigationBarItem(
-              icon: Icon(_navigationItems[_productDashboardIndex].icon),
+              icon: Icon(_navigationItems[_dashboardIndex].icon),
               label: 'Dashboard'),
           BottomNavigationBarItem(
               icon: Icon(_navigationItems[_paymentsIndex].icon),
-              label: 'Payments'), // NEW
-          BottomNavigationBarItem(
-              icon: Icon(_navigationItems[_mealPlansIndex].icon),
-              label: 'Meal Plans'),
+              label: 'Payments'),
           const BottomNavigationBarItem(
               icon: Icon(Icons.more_horiz),
-              label: 'More'), // Catering, Staff & Settings
+              label: 'More'), // Staff/Meal Plans/Catering/Settings
         ],
       ),
       // --- End Mobile Bottom Navigation ---
@@ -1241,19 +1302,18 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
 
   // --- Helper Functions ---
 
-  // Maps global index (0-5) to mobile bottom bar index (0-3) - UPDATED
+  // Maps global index (0-5) to mobile bottom bar index (0-2) - OPTION 1
   int _getMobileBottomBarIndex(int globalIndex) {
     switch (globalIndex) {
-      case _productDashboardIndex:
-        return 0; // Dashboard
+      case _dashboardIndex:
+        return 0; // Dashboard (and its subroutes)
       case _paymentsIndex:
         return 1; // Payments
-      case _mealPlansIndex:
-        return 2; // Meal Plans
-      case _cateringIndex:
       case _staffIndex:
+      case _mealPlansIndex:
+      case _cateringIndex:
       case _settingsIndex:
-        return 3; // More (Catering, Staff, Settings)
+        return 2; // Staff/Meal Plans/Catering/Settings → "More"
       default:
         return 0; // Fallback
     }
@@ -1342,62 +1402,12 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
         normalizedPath.startsWith(itemRoute);
   }
 
-  // Shows subroute options for Meal Plans, Catering
-  // ACCEPTS currentRoutePath
-  void _showSubrouteOptions(int globalIndex, String? currentRoutePath) {
-    final theme = Theme.of(context);
-    if (globalIndex < 0 || globalIndex >= _navigationItems.length) return;
-    final item = _navigationItems[globalIndex];
-    final visibleSubroutes =
-        item.subroutes?.where((sr) => !sr.isDetailRoute).toList() ?? [];
-    if (visibleSubroutes.isEmpty) {
-      _onItemSelected(globalIndex);
-      return;
-    }
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-      builder: (modalContext) => Container(
-        constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(modalContext).size.height * 0.7),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildBottomSheetHeader(theme, item.title),
-            Flexible(
-              child: ListView(
-                shrinkWrap: true,
-                children: [
-                  ListTile(
-                      leading: Icon(item.icon),
-                      title: Text('${item.title} Home'),
-                      selected: _isCurrentRoutePathForItem(
-                          currentRoutePath, item.route),
-                      onTap: () {
-                        Navigator.pop(modalContext);
-                        _onItemSelected(globalIndex);
-                      }),
-                  const Divider(),
-                  ...visibleSubroutes.map((subroute) =>
-                      _buildSubrouteMoreMenuTile(
-                          globalIndex, subroute, currentRoutePath)),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Shows the More options (Staff, Settings) - UPDATED
+  // Shows the More options (Staff, Meal Plans, Catering, Settings) - OPTION 1
   void _showMoreOptions(String? currentRoutePath) {
     final theme = Theme.of(context);
-    final cateringItem = _navigationItems[_cateringIndex];
+    final mealPlansItem = _navigationItems[_mealPlansIndex];
     final staffItem = _navigationItems[_staffIndex];
+    final cateringItem = _navigationItems[_cateringIndex];
     final settingsItem = _navigationItems[_settingsIndex];
 
     showModalBottomSheet(
@@ -1416,19 +1426,23 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
               child: ListView(
                 shrinkWrap: true,
                 children: [
-                  // --- Catering Section ---
+                  // --- Meal Plans Section ---
                   ListTile(
-                    leading: Icon(cateringItem.icon),
-                    title: Text(cateringItem.title),
+                    leading: Icon(mealPlansItem.icon),
+                    title: Text(mealPlansItem.title),
+                    selected: _isCurrentRoutePathForItem(
+                        currentRoutePath, mealPlansItem.route),
+                    selectedTileColor:
+                        theme.colorScheme.primaryContainer.withOpacity(0.2),
                     onTap: () {
                       Navigator.pop(context);
-                      _onItemSelected(_cateringIndex);
+                      _onItemSelected(_mealPlansIndex);
                     },
                   ),
-                  // Indented Catering Subroutes
-                  ...cateringItem.subroutes!.map((subroute) =>
+                  // Indented Meal Plans Subroutes
+                  ...mealPlansItem.subroutes!.map((subroute) =>
                       _buildSubrouteMoreMenuTile(
-                          _cateringIndex, subroute, currentRoutePath,
+                          _mealPlansIndex, subroute, currentRoutePath,
                           indent: true)),
 
                   const Divider(),
@@ -1437,6 +1451,10 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                   ListTile(
                     leading: Icon(staffItem.icon),
                     title: Text(staffItem.title),
+                    selected: _isCurrentRoutePathForItem(
+                        currentRoutePath, staffItem.route),
+                    selectedTileColor:
+                        theme.colorScheme.primaryContainer.withOpacity(0.2),
                     onTap: () {
                       Navigator.pop(context);
                       _onItemSelected(_staffIndex);
@@ -1450,16 +1468,41 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
 
                   const Divider(),
 
+                  // --- Catering Section ---
+                  ListTile(
+                    leading: Icon(cateringItem.icon),
+                    title: Text(cateringItem.title),
+                    selected: _isCurrentRoutePathForItem(
+                        currentRoutePath, cateringItem.route),
+                    selectedTileColor:
+                        theme.colorScheme.primaryContainer.withOpacity(0.2),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _onItemSelected(_cateringIndex);
+                    },
+                  ),
+                  // Indented Catering Subroutes
+                  ...cateringItem.subroutes!.map((subroute) =>
+                      _buildSubrouteMoreMenuTile(
+                          _cateringIndex, subroute, currentRoutePath,
+                          indent: true)),
+
+                  const Divider(),
+
                   // --- Settings Section ---
                   ListTile(
                     leading: Icon(settingsItem.icon),
                     title: Text(settingsItem.title),
+                    selected: _isCurrentRoutePathForItem(
+                        currentRoutePath, settingsItem.route),
+                    selectedTileColor:
+                        theme.colorScheme.primaryContainer.withOpacity(0.2),
                     onTap: () {
                       Navigator.pop(context);
                       _onItemSelected(_settingsIndex);
                     },
                   ),
-                  // Indented Settings Subroutes (Users)
+                  // Indented Settings Subroutes
                   ...settingsItem.subroutes!.map((subroute) =>
                       _buildSubrouteMoreMenuTile(
                           _settingsIndex, subroute, currentRoutePath,
@@ -1502,15 +1545,37 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
 
   // Builds tile for subroute items in modals - ADDED indent option
   Widget _buildSubrouteMoreMenuTile(
-      int parentIndex, _SubRoute subroute, String? currentRouteName,
+      int parentIndex, _SubRoute subroute, String? currentRoutePath,
       {bool indent = false}) {
     final theme = Theme.of(context);
     bool isSelected = false;
-    // Use the PASSED currentRouteName for comparison
-    if (currentRouteName == subroute.routeName ||
-        (subroute.detailRouteName != null &&
-            currentRouteName == subroute.detailRouteName)) {
-      isSelected = true;
+
+    // Use path-based matching instead of route name comparison
+    if (currentRoutePath != null) {
+      // Remove business slug from path if present for consistent matching
+      String normalizedPath = currentRoutePath;
+      if (widget.businessSlug != null && widget.businessSlug!.isNotEmpty) {
+        normalizedPath =
+            normalizedPath.replaceFirst('/${widget.businessSlug}', '');
+      }
+
+      // Normalize both paths by removing leading slashes for comparison
+      String cleanNormalizedPath = normalizedPath.startsWith('/')
+          ? normalizedPath.substring(1)
+          : normalizedPath;
+      String cleanSubrouteRoute = subroute.route.startsWith('/')
+          ? subroute.route.substring(1)
+          : subroute.route;
+
+      // Check if current path matches the subroute path
+      if (cleanNormalizedPath == cleanSubrouteRoute ||
+          normalizedPath == subroute.route ||
+          cleanNormalizedPath.startsWith('$cleanSubrouteRoute/') ||
+          normalizedPath.startsWith('${subroute.route}/') ||
+          (subroute.detailRouteName != null &&
+              normalizedPath.contains(subroute.detailRouteName!))) {
+        isSelected = true;
+      }
     }
 
     return ListTile(
@@ -1528,6 +1593,8 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
         dense: indent, // Make indented items denser
         onTap: () {
           Navigator.pop(context);
+          debugPrint(
+              '🔍 [ModalSubrouteClick] Using parent index: $parentIndex for subroute: ${subroute.routeName}');
           _navigateToSubroute(parentIndex, subroute.routeName);
         });
   }
@@ -1609,6 +1676,11 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
   // Trigger navigation to a specific subroute
   void _navigateToSubroute(int parentIndex, String routeName,
       {Map<String, String> params = const {}}) {
+    debugPrint(
+        '🚀 [_navigateToSubroute] Called with parentIndex: $parentIndex, routeName: $routeName');
+    debugPrint(
+        '🚀 [_navigateToSubroute] Current selectedIndex before: $selectedIndex');
+
     // Update selectedIndex to the parent section immediately for UI responsiveness
     if (selectedIndex != parentIndex &&
         parentIndex >= 0 &&
@@ -1616,6 +1688,8 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
       setState(() {
         selectedIndex = parentIndex;
       });
+      debugPrint(
+          '🚀 [_navigateToSubroute] Updated selectedIndex to: $selectedIndex');
     }
 
     // If we have a businessSlug, ensure it's included in params
@@ -1624,6 +1698,8 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
       navParams['businessSlug'] = widget.businessSlug!;
     }
 
+    debugPrint(
+        '🚀 [_navigateToSubroute] About to navigate to route: $routeName with params: $navParams');
     _navigateByName(routeName, params: navParams);
   }
 }
