@@ -141,6 +141,14 @@ class _KakoAppState extends ConsumerState<KakoApp> with WidgetsBindingObserver {
         debugShowCheckedModeBanner: false,
         title: 'KakoApp',
         restorationScopeId: 'app',
+        // Performance optimizations
+        scrollBehavior: const MaterialScrollBehavior().copyWith(
+          // Enable smooth scrolling on web
+          scrollbars: kIsWeb,
+          physics: kIsWeb
+              ? const BouncingScrollPhysics()
+              : const ClampingScrollPhysics(),
+        ),
         // Error widget for Flutter framework errors
         builder: (context, child) {
           // Add your global error handling widgets here

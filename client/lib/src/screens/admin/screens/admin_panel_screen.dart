@@ -1,4 +1,7 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart'; // Add for performance scheduling
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
@@ -6,7 +9,6 @@ import 'package:starter_architecture_flutter_firebase/src/core/auth_services/aut
 import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_stats_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.dart'; // Use updated router
-import 'dart:async';
 
 // Define constants for the global indices (0-5) matching AdminRoutes logic - OPTION 1
 const int _dashboardIndex = 0;

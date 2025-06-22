@@ -2,15 +2,23 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "client (wasm web)",
+      "name": "client (canvaskit renderer)",
       "program": "lib/main.dart",
       "cwd": "client",
       "request": "launch",
       "type": "dart",
-      "args": ["-d", "chrome", "--wasm"]
+      "args": ["-d", "chrome"]
     },
     {
-      "name": "client (web)",
+      "name": "client (html renderer)",
+      "program": "lib/main.dart",
+      "cwd": "client",
+      "request": "launch",
+      "type": "dart",
+      "args": ["-d", "chrome"]
+    },
+    {
+      "name": "client (auto renderer)",
       "program": "lib/main.dart",
       "cwd": "client",
       "request": "launch",

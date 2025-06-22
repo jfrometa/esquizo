@@ -1,0 +1,15 @@
+{
+  "rendererSettings": {
+    "useSkia": true,
+    "preferCanvasKit": false,
+    "enableExperimentalFeatures": false
+  },
+  "debugSettings": {
+    "showPerformanceStats": false,
+    "enableDebugPaint": false
+  },
+  "compatibility": {
+    "fallbackToHtml": true,
+    "detectWebGLSupport": true
+  }
+}

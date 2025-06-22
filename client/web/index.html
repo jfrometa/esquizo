@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <!--
+<html lang="es">
+  <head>
+    <!--
     If you are serving your web app in a path other than the root, change the
     href value below to reflect the base path you are serving from.
 
@@ -14,25 +14,139 @@
     This is a placeholder for base href that will be replaced by the value of
     the `--base-href` argument provided to `flutter build`.
   -->
-  <base href="$FLUTTER_BASE_HREF">
+    <base href="$FLUTTER_BASE_HREF" />
 
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+    <meta charset="UTF-8" />
+    <meta content="IE=Edge" http-equiv="X-UA-Compatible" />
+    <meta name="description" content="A new Flutter project." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Performance optimizations -->
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="msapplication-navbutton-color" content="#000000" />
+    <!-- Already have apple-mobile-web-app-status-bar-style below for iOS support -->
 
-  <!-- iOS meta tags & icons -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="starter_architecture_flutter_firebase">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+    <!-- Preload critical resources -->
+    <link rel="preload" href="flutter_bootstrap.js" as="script" />
+    <link rel="preload" href="main.dart.js" as="script" />
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+    <!-- DNS prefetch for external resources -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="//www.gstatic.com" />
 
-  <title>starter_architecture_flutter_firebase</title>
-  <link rel="manifest" href="manifest.json">
-</head>
-<body>
-  <script src="flutter_bootstrap.js" async></script>
-</body>
+    <!-- iOS meta tags & icons -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta
+      name="apple-mobile-web-app-title"
+      content="starter_architecture_flutter_firebase"
+    />
+    <link rel="apple-touch-icon" href="icons/Icon-192.png" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png" />
+
+    <title>Kako</title>
+    <link rel="manifest" href="manifest.json" />
+
+    <!-- Loading indicator -->
+    <style>
+      .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        font-family: Arial, sans-serif;
+        flex-direction: column;
+      }
+      .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 2s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Loading indicator -->
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Loading application...</p>
+    </div>
+
+    <script>
+      // Enhanced error handling for Flutter web
+      window.addEventListener('error', function (e) {
+        console.error('Global error:', e.error);
+        // Show user-friendly error message
+        const loading = document.getElementById('loading');
+        if (loading) {
+          loading.innerHTML =
+            '<p>Error loading application. Please refresh the page.</p>';
+        }
+      });
+
+      // Performance monitoring
+      let frameCount = 0;
+      let lastTime = performance.now();
+
+      function monitorPerformance() {
+        const currentTime = performance.now();
+        frameCount++;
+
+        if (currentTime - lastTime >= 1000) {
+          const fps = Math.round(
+            (frameCount * 1000) / (currentTime - lastTime)
+          );
+          if (fps < 30) {
+            console.warn(`Low FPS detected: ${fps}`);
+          }
+          frameCount = 0;
+          lastTime = currentTime;
+        }
+
+        requestAnimationFrame(monitorPerformance);
+      }
+
+      // Start monitoring after Flutter loads
+      window.addEventListener('flutter-first-frame', () => {
+        console.log('Flutter first frame rendered');
+        const loading = document.getElementById('loading');
+        if (loading) {
+          loading.style.display = 'none';
+        }
+        monitorPerformance();
+      });
+
+      // Modern Flutter web initialization approach
+      _flutter = {};
+
+      // Wait for Flutter engine to be available
+      window.addEventListener('load', async function () {
+        const engineInitializer = await window.flutterEngineInitializer;
+        // Initialize engine with performance-optimized configuration
+        const appRunner = await engineInitializer.initializeEngine({
+          renderer: 'html', // Use HTML renderer for better performance on web
+          hostElement: document.body,
+          // Canvas Kit configuration (if needed)
+          canvasKitBaseUrl: 'https://www.gstatic.com/flutter-canvaskit/',
+        });
+
+        // Run the app after engine is initialized
+        await appRunner.runApp();
+      });
+    </script>
+
+    <script src="flutter_bootstrap.js" defer></script>
+  </body>
 </html>

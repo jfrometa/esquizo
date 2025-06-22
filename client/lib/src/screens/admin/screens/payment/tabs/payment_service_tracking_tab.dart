@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/payment/payment_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/payment/tabs/payment_service_tracking_tab.dart';
 
 class PaymentManagementScreen extends ConsumerWidget {
   const PaymentManagementScreen({super.key});
@@ -41,7 +38,8 @@ class PaymentManagementScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildOverviewTab(WidgetRef ref, ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildOverviewTab(
+      WidgetRef ref, ThemeData theme, ColorScheme colorScheme) {
     // Overview tab content
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -56,7 +54,8 @@ class PaymentManagementScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildReportsTab(WidgetRef ref, ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildReportsTab(
+      WidgetRef ref, ThemeData theme, ColorScheme colorScheme) {
     // Reports tab content
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
