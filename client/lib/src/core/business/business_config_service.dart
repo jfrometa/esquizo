@@ -1,7 +1,10 @@
 // File: lib/src/core/business/business_config_service.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+
+import 'business_features_service.dart';
 
 class BusinessConfig {
   final String id;
@@ -357,9 +360,13 @@ class BusinessConfig {
 
 class BusinessConfigService {
   final FirebaseFirestore _firestore;
+  final FirebaseDatabase _database;
 
-  BusinessConfigService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+  BusinessConfigService({
+    FirebaseFirestore? firestore,
+    FirebaseDatabase? database,
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _database = database ?? FirebaseDatabase.instance;
 
   // Get business configuration
   Future<BusinessConfig?> getBusinessConfig(String businessId) async {
@@ -393,14 +400,59 @@ class BusinessConfigService {
   // Update business configuration
   Future<void> updateBusinessConfig(BusinessConfig config) async {
     try {
+      // Update in Firestore
       await _firestore
           .collection('businesses')
           .doc(config.id)
           .update(config.toFirestore());
+
+      // Sync features with Realtime Database
+      await _syncBusinessFeaturesWithRTDB(config);
     } catch (e) {
       debugPrint('Error updating business config: $e');
       throw Exception('Failed to update business configuration: $e');
     }
+  }
+
+  // Synchronize Firestore business features with Realtime Database
+  Future<void> _syncBusinessFeaturesWithRTDB(BusinessConfig config) async {
+    try {
+      final businessFeaturesService =
+          BusinessFeaturesService(database: _database);
+      final businessId = config.id;
+
+      // Map Firestore features to Realtime Database features
+      // This ensures that both datastores have consistent feature flags
+      final businessFeatures = _mapFirestoreFeaturesToRTDB(config.features);
+
+      // Update in Realtime Database
+      await businessFeaturesService.updateBusinessFeatures(
+          businessId, businessFeatures);
+
+      debugPrint('✅ Synchronized business features with RTDB for $businessId');
+    } catch (e) {
+      debugPrint('❌ Error syncing business features with RTDB: $e');
+      // Don't throw here, as we want the main Firestore update to succeed even if RTDB sync fails
+    }
+  }
+
+  // Map Firestore feature strings to RTDB BusinessFeatures object
+  BusinessFeatures _mapFirestoreFeaturesToRTDB(List<String> firestoreFeatures) {
+    // Default all to false, then enable based on Firestore features
+    return BusinessFeatures(
+      catering: firestoreFeatures.contains('catering') ||
+          firestoreFeatures.contains('online_catering'),
+      mealPlans: firestoreFeatures.contains('meal_plans') ||
+          firestoreFeatures.contains('meal_subscriptions'),
+      inDine: firestoreFeatures.contains('in_dine') ||
+          firestoreFeatures.contains('table_management'),
+      staff: firestoreFeatures.contains('staff') ||
+          firestoreFeatures.contains('employee_management'),
+      kitchen: firestoreFeatures.contains('kitchen') ||
+          firestoreFeatures.contains('kitchen_display'),
+      reservations: firestoreFeatures.contains('reservations') ||
+          firestoreFeatures.contains('table_reservations'),
+    );
   }
 
   // Create a new business configuration

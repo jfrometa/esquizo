@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_features_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_setup_screen.dart';
+import 'rtdb_features_settings_screen.dart';
 
 class BusinessSettingsScreen extends ConsumerStatefulWidget {
   const BusinessSettingsScreen({super.key});
@@ -32,7 +36,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
 
     // Initialize controllers
     _nameController = TextEditingController();
@@ -98,6 +102,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
                         Tab(text: 'Contact & Location'),
                         Tab(text: 'Hours & Availability'),
                         Tab(text: 'Features & Settings'),
+                        Tab(text: 'Setup Wizard'),
                       ],
                       indicatorSize: TabBarIndicatorSize.label,
                       labelColor: Theme.of(context).colorScheme.primary,
@@ -116,6 +121,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
                         _buildContactLocationTab(config),
                         _buildHoursTab(config),
                         _buildFeaturesSettingsTab(config),
+                        const BusinessSetupScreen(),
                       ],
                     ),
                   ),
@@ -657,6 +663,52 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Advanced Settings Section
+          Card(
+            margin: const EdgeInsets.only(bottom: 24),
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.admin_panel_settings),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Advanced Settings',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Manage feature flags in the Realtime Database to control which UI elements are visible in the app.',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const RtdbFeaturesSettingsScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.settings),
+                    label: const Text('Manage Realtime Database Features'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
           Text(
             'Features',
             style: Theme.of(context).textTheme.headlineSmall,
@@ -686,10 +738,16 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
                     if (value == true) {
                       if (!features.contains(feature.key)) {
                         features.add(feature.key);
+                        // Update main state variable immediately
+                        _features.add(feature.key);
                       }
                     } else {
                       features.remove(feature.key);
+                      // Update main state variable immediately
+                      _features.remove(feature.key);
                     }
+                    debugPrint(
+                        'Checkbox updated: ${feature.key} is now ${value == true ? 'enabled' : 'disabled'}');
                   });
                 },
               );
@@ -798,8 +856,8 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
               onPressed: _isLoading
                   ? null
                   : () {
+                      // Only update settings since _features is already updated by the checkboxes
                       setState(() {
-                        _features = features;
                         _settings = settings;
                       });
                       _saveFeaturesSettings(config);
@@ -1071,6 +1129,12 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
     });
 
     try {
+      // Print for debugging - check the state of features list
+      debugPrint('Features to save: $_features (${_features.length} items)');
+      for (var feature in _features) {
+        debugPrint('  - $feature');
+      }
+
       // Create updated business config
       final updatedConfig = BusinessConfig(
         id: config.id,
@@ -1090,7 +1154,24 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
 
       // Update in Firestore
       final businessConfigService = ref.read(businessConfigServiceProvider);
+      debugPrint('Updating business config in Firestore...');
       await businessConfigService.updateBusinessConfig(updatedConfig);
+      debugPrint('✅ Firestore update successful');
+
+      // Manually sync with Realtime Database to make sure UI components update correctly
+      try {
+        final businessFeaturesService =
+            ref.read(businessFeaturesServiceProvider);
+        final businessFeatures =
+            _mapFirestoreFeaturesToBusinessFeatures(_features);
+        debugPrint('Syncing features to RTDB: ${businessFeatures.toMap()}');
+        await businessFeaturesService.updateBusinessFeatures(
+            config.id, businessFeatures);
+        debugPrint('✅ Features synced to RTDB manually');
+      } catch (syncError) {
+        debugPrint('❌ Error syncing features to RTDB: $syncError');
+        // Continue even if RTDB sync fails
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1109,6 +1190,25 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
         _isLoading = false;
       });
     }
+  }
+
+  // Helper method to map Firestore features to BusinessFeatures object
+  BusinessFeatures _mapFirestoreFeaturesToBusinessFeatures(
+      List<String> firestoreFeatures) {
+    return BusinessFeatures(
+      catering: firestoreFeatures.contains('catering') ||
+          firestoreFeatures.contains('online_catering'),
+      mealPlans: firestoreFeatures.contains('meal_plans') ||
+          firestoreFeatures.contains('meal_subscriptions'),
+      inDine: firestoreFeatures.contains('in_dine') ||
+          firestoreFeatures.contains('table_management'),
+      staff: firestoreFeatures.contains('staff') ||
+          firestoreFeatures.contains('employee_management'),
+      kitchen: firestoreFeatures.contains('kitchen_display') ||
+          firestoreFeatures.contains('kitchen'),
+      reservations: firestoreFeatures.contains('reservations') ||
+          firestoreFeatures.contains('table_reservations'),
+    );
   }
 
   // Helper methods

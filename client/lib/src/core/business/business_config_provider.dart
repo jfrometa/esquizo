@@ -66,7 +66,8 @@ final initBusinessIdProvider = FutureProvider<String>((ref) async {
 // Provider for business config service
 final businessConfigServiceProvider = Provider<BusinessConfigService>((ref) {
   final firestore = ref.watch(firebaseFirestoreProvider);
-  return BusinessConfigService(firestore: firestore);
+  final database = ref.watch(firebaseDatabaseProvider);
+  return BusinessConfigService(firestore: firestore, database: database);
 });
 
 // Provider for business configuration

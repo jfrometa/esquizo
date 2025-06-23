@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_features_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/business_navigation_provider.dart';
 
 part 'navigation_provider.g.dart';
 
@@ -127,15 +129,49 @@ List<NavigationDestinationItem> navigationDestinations(
   final isAdmin = ref.watch(isAdminComputedProvider);
   final allDestinations = ref.watch(allNavigationDestinationsProvider);
 
+  // Get current business navigation info to identify the business
+  final businessInfo = ref.watch(currentBusinessNavigationProvider);
+  final String? businessSlug = businessInfo?.businessSlug;
+
+  // Default UI settings (shown by default if no business identified)
+  bool showLandingPage = true;
+  bool showOrders = true;
+
+  // If we have a business slug, use it as the business ID for feature flags
+  if (businessSlug != null) {
+    // Get business UI settings asynchronously if a business is identified
+    final businessUIAsync = ref.watch(businessUIProvider(businessSlug));
+
+    // Apply UI settings if data is available, otherwise use defaults
+    businessUIAsync.whenData((uiSettings) {
+      showLandingPage = uiSettings.landingPage;
+      showOrders = uiSettings.orders;
+      debugPrint(
+          '🏠 Business UI settings loaded - Landing page: $showLandingPage, Orders: $showOrders');
+    });
+  }
+
   debugPrint('🧭 Navigation Provider Update:');
   debugPrint('  � Is Admin (computed): $isAdmin');
+  debugPrint('  � Business Slug: ${businessSlug ?? 'None'}');
+  debugPrint('  � Show Landing: $showLandingPage, Show Orders: $showOrders');
 
-  // Update admin tab visibility without changing the structure
+  // Update visibility for admin tab and feature-controlled tabs
   final updatedDestinations = allDestinations.map((destination) {
-    // Only modify the admin tab's visibility
+    // Only modify specific tabs' visibility
     if (destination.path == '/admin') {
       debugPrint('  🎯 Admin destination visibility: $isAdmin');
       return destination.copyWith(isVisible: isAdmin);
+    } else if (destination.path == '/' &&
+        !showLandingPage &&
+        businessSlug != null) {
+      debugPrint('  🏠 Landing page visibility: $showLandingPage');
+      return destination.copyWith(isVisible: showLandingPage);
+    } else if (destination.path == '/ordenes' &&
+        !showOrders &&
+        businessSlug != null) {
+      debugPrint('  🧾 Orders page visibility: $showOrders');
+      return destination.copyWith(isVisible: showOrders);
     }
     return destination;
   }).toList();

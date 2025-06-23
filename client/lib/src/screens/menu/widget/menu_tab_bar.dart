@@ -6,11 +6,15 @@ import 'package:starter_architecture_flutter_firebase/src/core/menu/menu_provide
 class MenuTabBar extends ConsumerStatefulWidget {
   final TabController tabController;
   final Function(int) onTabChanged;
+  final bool showMealPlans;
+  final bool showCatering;
 
   const MenuTabBar({
     super.key,
     required this.tabController,
     required this.onTabChanged,
+    this.showMealPlans = true,
+    this.showCatering = true,
   });
 
   @override
@@ -20,30 +24,42 @@ class MenuTabBar extends ConsumerStatefulWidget {
 class MenuTabBarState extends ConsumerState<MenuTabBar> {
   // Cache tab items to avoid rebuilding them frequently
   late final List<Tab> _tabItems;
-  
+
   // Track current tab for local state management
   int _currentTabIndex = 0;
-  
+
   @override
   void initState() {
     super.initState();
     _initTabItems();
-    
+
     // Initialize current tab index
     _currentTabIndex = widget.tabController.index;
-    
+
     // Listen for tab controller changes to update active state
     widget.tabController.addListener(_handleTabChange);
   }
-  
+
+  @override
+  void didUpdateWidget(MenuTabBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // If the feature flags have changed, rebuild the tab items
+    if (oldWidget.showMealPlans != widget.showMealPlans ||
+        oldWidget.showCatering != widget.showCatering) {
+      _initTabItems();
+      setState(() {}); // Force rebuild
+    }
+  }
+
   @override
   void dispose() {
     widget.tabController.removeListener(_handleTabChange);
     super.dispose();
   }
-  
+
   void _handleTabChange() {
-    if (!widget.tabController.indexIsChanging && 
+    if (!widget.tabController.indexIsChanging &&
         widget.tabController.index != _currentTabIndex) {
       // Only update state when necessary
       setState(() {
@@ -51,15 +67,28 @@ class MenuTabBarState extends ConsumerState<MenuTabBar> {
       });
     }
   }
-  
+
   void _initTabItems() {
-    // Use shorter labels and fixed width to avoid overflow
-    _tabItems = [
-      _buildTabItem(Icons.restaurant, 'Menu', 0),
-      _buildTabItem(Icons.lunch_dining, 'Plans', 1),
-      _buildTabItem(Icons.food_bank, 'Cater', 2),
-      _buildTabItem(Icons.star, 'Deals', 3),
-    ];
+    // Start with the Menu tab which is always present
+    _tabItems = [_buildTabItem(Icons.restaurant, 'Menu', 0)];
+
+    // Track the current index
+    int currentIndex = 1;
+
+    // Add Meal Plans tab if enabled
+    if (widget.showMealPlans) {
+      _tabItems.add(_buildTabItem(Icons.lunch_dining, 'Plans', currentIndex));
+      currentIndex++;
+    }
+
+    // Add Catering tab if enabled
+    if (widget.showCatering) {
+      _tabItems.add(_buildTabItem(Icons.food_bank, 'Cater', currentIndex));
+      currentIndex++;
+    }
+
+    // Add Deals tab which is always present
+    _tabItems.add(_buildTabItem(Icons.star, 'Deals', currentIndex));
   }
 
   // Create a tab with fixed sizes to prevent overflow
@@ -89,14 +118,18 @@ class MenuTabBarState extends ConsumerState<MenuTabBar> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final enabled = ref.watch(tabsEnabledProvider);
-    
+
     // Pre-calculate values to reduce calculations in build
-    final labelColor = enabled ? colorScheme.onPrimary : colorScheme.onSurfaceVariant.withOpacity(0.5);
-    final unselectedLabelColor = colorScheme.onSurfaceVariant.withOpacity(enabled ? 1.0 : 0.5);
-    final indicatorColor = enabled ? colorScheme.primary : colorScheme.surfaceContainerHighest;
-    
+    final labelColor = enabled
+        ? colorScheme.onPrimary
+        : colorScheme.onSurfaceVariant.withOpacity(0.5);
+    final unselectedLabelColor =
+        colorScheme.onSurfaceVariant.withOpacity(enabled ? 1.0 : 0.5);
+    final indicatorColor =
+        enabled ? colorScheme.primary : colorScheme.surfaceContainerHighest;
+
     // Use const for unchanging widgets
-    final boxShadow = enabled 
+    final boxShadow = enabled
         ? [
             BoxShadow(
               color: colorScheme.shadow.withOpacity(0.1),
@@ -105,7 +138,7 @@ class MenuTabBarState extends ConsumerState<MenuTabBar> {
             ),
           ]
         : null;
-    
+
     return RepaintBoundary(
       child: DecoratedBox(
         decoration: BoxDecoration(
@@ -146,7 +179,8 @@ class MenuTabBarState extends ConsumerState<MenuTabBar> {
             indicatorSize: TabBarIndicatorSize.tab,
             padding: const EdgeInsets.all(4),
             splashBorderRadius: BorderRadius.circular(100),
-            labelPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0), // Reduce padding
+            labelPadding: const EdgeInsets.symmetric(
+                horizontal: 4, vertical: 0), // Reduce padding
             tabAlignment: TabAlignment.fill,
             isScrollable: false, // Force equal distribution
             overlayColor: WidgetStateProperty.resolveWith(

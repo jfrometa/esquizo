@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_features_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/cart/cart_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/business_navigation_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/widget/menu_search_interface.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/widget/menu_tab_bar.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
@@ -46,7 +48,6 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
 
   // Animation controllers
   late final AnimationController _headerAnimationController;
-  late final Animation<double> _headerOpacityAnimation;
 
   // Table data
   late final QRCodeData _tableData;
@@ -55,6 +56,13 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
   final Map<int, Widget> _cachedTabViews = {};
   bool _areTabViewsInitialized = false;
 
+  // Track which feature tabs are enabled
+  bool _showMealPlans = true;
+  bool _showCatering = true;
+
+  // List of tab indices
+  final List<int> _enabledTabIndices = [];
+
   @override
   void initState() {
     super.initState();
@@ -62,7 +70,10 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
     // Initialize table data
     _initializeTableData();
 
-    // Setup controllers
+    // Default to showing all tabs, will be updated in didChangeDependencies
+    _enabledTabIndices.addAll([0, 1, 2, 3]);
+
+    // Setup controllers - initial length is 4, may be updated later
     _tabController = TabController(length: 4, vsync: this);
     _tabController.addListener(_handleTabChange);
 
@@ -93,13 +104,6 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       vsync: this,
     );
 
-    _headerOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _headerAnimationController,
-        curve: Curves.easeOut,
-      ),
-    );
-
     // Setup listeners
     _searchController.addListener(_handleSearchChanges);
     _searchFocusNode.addListener(_handleFocusChanges);
@@ -108,6 +112,51 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    // Get current business navigation info to identify the business
+    final businessInfo = ref.watch(currentBusinessNavigationProvider);
+    final String? businessSlug = businessInfo?.businessSlug;
+
+    // Update feature flags based on business configuration
+    if (businessSlug != null) {
+      // Get business features from provider
+      final businessFeaturesAsync =
+          ref.watch(businessFeaturesProvider(businessSlug));
+
+      // Update flags based on features
+      businessFeaturesAsync.whenData((features) {
+        if (mounted) {
+          final shouldUpdateTabs = _showMealPlans != features.mealPlans ||
+              _showCatering != features.catering;
+
+          setState(() {
+            _showMealPlans = features.mealPlans;
+            _showCatering = features.catering;
+
+            // Recalculate enabled tabs
+            _enabledTabIndices.clear();
+            _enabledTabIndices.add(0); // Menu tab always enabled
+
+            if (_showMealPlans) _enabledTabIndices.add(1);
+            if (_showCatering) _enabledTabIndices.add(2);
+            _enabledTabIndices
+                .add(_enabledTabIndices.length); // Deals tab is always the last
+
+            // Recreate tab controller if needed
+            if (shouldUpdateTabs) {
+              _tabController.dispose();
+              _tabController =
+                  TabController(length: _enabledTabIndices.length, vsync: this);
+              _tabController.addListener(_handleTabChange);
+              _areTabViewsInitialized = false;
+            }
+          });
+
+          debugPrint(
+              '🍽 Menu features updated - Meal Plans: $_showMealPlans, Catering: $_showCatering');
+        }
+      });
+    }
 
     // Initialize tab views after dependencies are available
     if (!_areTabViewsInitialized) {
@@ -118,22 +167,77 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
   void _initCachedTabViews() {
     // Ensure _tableData is initialized
     setState(() {
+      _cachedTabViews.clear();
+
+      // Calculate which tab indices to use
+      final List<int> tabIndices = [];
+      tabIndices.add(0); // Menu tab always enabled at index 0
+
+      // Add other tabs based on feature flags
+      int indexCounter = 1;
+
+      // Add meal plans tab if enabled
+      if (_showMealPlans) {
+        tabIndices.add(indexCounter);
+        indexCounter++;
+      }
+
+      // Add catering tab if enabled
+      if (_showCatering) {
+        tabIndices.add(indexCounter);
+        indexCounter++;
+      }
+
+      // Add deals tab at the end
+      tabIndices.add(indexCounter);
+
       // Create each tab view with a separate scroll controller
+      for (int i = 0; i < tabIndices.length; i++) {
+        // Create appropriate scroll controller if needed
+        if (!_tabScrollControllers.containsKey(i)) {
+          _tabScrollControllers[i] = ScrollController();
+          _tabScrollControllers[i]!.addListener(() {
+            if (_tabScrollControllers[i]!.hasClients) {
+              ref.read(menuScrollOffsetProvider.notifier).state =
+                  _tabScrollControllers[i]!.offset;
+            }
+          });
+        }
+      }
+
+      // Menu tab is always at index 0
       _cachedTabViews[0] = CategoryView(
         scrollController: _tabScrollControllers[0]!,
         tableData: _tableData,
       );
-      _cachedTabViews[1] = MealPlansView(
-        scrollController: _tabScrollControllers[1]!,
-      );
-      _cachedTabViews[2] = CateringView(
-        scrollController: _tabScrollControllers[2]!,
-      );
-      _cachedTabViews[3] = SpecialOffersView(
-        scrollController: _tabScrollControllers[3]!,
+
+      int viewIndex = 1;
+
+      // Add Meal Plans tab if enabled
+      if (_showMealPlans) {
+        _cachedTabViews[viewIndex] = MealPlansView(
+          scrollController: _tabScrollControllers[viewIndex]!,
+        );
+        viewIndex++;
+      }
+
+      // Add Catering tab if enabled
+      if (_showCatering) {
+        _cachedTabViews[viewIndex] = CateringView(
+          scrollController: _tabScrollControllers[viewIndex]!,
+        );
+        viewIndex++;
+      }
+
+      // Special Offers is always the last tab
+      _cachedTabViews[viewIndex] = SpecialOffersView(
+        scrollController: _tabScrollControllers[viewIndex]!,
       );
 
       _areTabViewsInitialized = true;
+
+      debugPrint(
+          '🧩 Menu tabs initialized - Total tabs: ${_cachedTabViews.length}');
     });
   }
 
@@ -257,18 +361,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
     );
   }
 
-  void _scrollToTop() {
-    final activeIndex = _tabController.index;
-    final controller = _tabScrollControllers[activeIndex];
-
-    if (controller != null && controller.hasClients) {
-      controller.animateTo(
-        0,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
-      );
-    }
-  }
+  // Controller methods are defined above
 
   void _showSearchInterface() {
     if (!mounted) return;
@@ -589,6 +682,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                       onTabChanged: (index) {
                         ref.read(menuActiveTabProvider.notifier).state = index;
                       },
+                      showMealPlans: _showMealPlans,
+                      showCatering: _showCatering,
                     ),
                   ),
 
