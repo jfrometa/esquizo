@@ -21,71 +21,137 @@ class _RtdbFeaturesSettingsScreenState
   BusinessFeatures? _features;
   BusinessUI? _ui;
 
+  bool _isInitialized = false;
+
   @override
   void initState() {
     super.initState();
-    // Load features on init using the current business ID
-    _loadFeaturesFromCurrentBusinessId();
+    // We'll load features in didChangeDependencies instead
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Load features when dependencies are available, but only once
+    if (!_isInitialized) {
+      _loadFeaturesFromCurrentBusinessId();
+      _isInitialized = true;
+    }
   }
 
   void _loadFeaturesFromCurrentBusinessId() {
+    debugPrint(
+        'RtdbFeaturesSettingsScreen: Loading features from current business ID');
     final businessId = ref.read(currentBusinessIdProvider);
 
     if (businessId.isNotEmpty) {
-      debugPrint('Loading features for business ID: $businessId');
+      debugPrint(
+          'RtdbFeaturesSettingsScreen: Loading features for business ID: $businessId');
       _loadFeatures(businessId);
     } else {
-      debugPrint('No valid business ID found from provider');
+      debugPrint(
+          'RtdbFeaturesSettingsScreen: No valid business ID found from provider');
+      // Show a message if context is available (we're mounted)
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content:
+                Text('No business ID available. Please select a business.'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
     }
   }
 
   Future<void> _loadFeatures(String businessId) async {
+    if (!mounted) {
+      debugPrint(
+          'RtdbFeaturesSettingsScreen: Widget not mounted, canceling _loadFeatures');
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
 
     try {
+      debugPrint(
+          'RtdbFeaturesSettingsScreen: Starting to load features for $businessId');
       final service = ref.read(businessFeaturesServiceProvider);
-      debugPrint('Fetching features and UI for business ID: $businessId');
 
       // Create a stream subscription to get the current values
       final featuresStream = service.getBusinessFeatures(businessId);
       final uiStream = service.getBusinessUI(businessId);
 
       // Get the first (current) value from each stream
+      debugPrint('RtdbFeaturesSettingsScreen: Awaiting features stream');
       final features = await featuresStream.first;
+      debugPrint('RtdbFeaturesSettingsScreen: Awaiting UI stream');
       final ui = await uiStream.first;
 
+      // Check if we're still mounted after the async operations
       if (mounted) {
+        debugPrint(
+            'RtdbFeaturesSettingsScreen: Setting state with loaded features');
         setState(() {
           _features = features;
           _ui = ui;
           _isLoading = false;
         });
-        debugPrint('Features and UI loaded successfully');
+        debugPrint(
+            'RtdbFeaturesSettingsScreen: Features and UI loaded successfully');
+      } else {
+        debugPrint(
+            'RtdbFeaturesSettingsScreen: Widget no longer mounted after loading features');
       }
     } catch (e) {
-      debugPrint('Error loading RTDB features: $e');
+      debugPrint('RtdbFeaturesSettingsScreen: Error loading RTDB features: $e');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading features: $e')),
+          SnackBar(
+            content: Text('Error loading features: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
 
         setState(() {
           _isLoading = false;
         });
+      } else {
+        debugPrint(
+            'RtdbFeaturesSettingsScreen: Widget not mounted, can\'t show error message');
       }
     }
   }
 
   Future<void> _saveFeatures() async {
+    // Initial validation checks
+    if (!mounted) {
+      debugPrint(
+          'RtdbFeaturesSettingsScreen: Widget not mounted, canceling save operation');
+      return;
+    }
+
     if (_features == null || _ui == null) {
+      debugPrint(
+          'RtdbFeaturesSettingsScreen: Features or UI is null, cannot save');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error: Features data not fully loaded'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       return;
     }
 
     final businessId = ref.read(currentBusinessIdProvider);
     if (businessId.isEmpty) {
+      debugPrint(
+          'RtdbFeaturesSettingsScreen: Empty business ID, cannot save features');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -103,11 +169,16 @@ class _RtdbFeaturesSettingsScreenState
 
     try {
       final service = ref.read(businessFeaturesServiceProvider);
-      debugPrint('Saving features and UI for business ID: $businessId');
+      debugPrint(
+          'RtdbFeaturesSettingsScreen: Saving features and UI for business ID: $businessId');
 
       // Update both features and UI
+      debugPrint('RtdbFeaturesSettingsScreen: Updating business features');
       await service.updateBusinessFeatures(businessId, _features!);
+      debugPrint('RtdbFeaturesSettingsScreen: Updating business UI');
       await service.updateBusinessUI(businessId, _ui!);
+      debugPrint(
+          'RtdbFeaturesSettingsScreen: Features and UI saved successfully');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -116,9 +187,12 @@ class _RtdbFeaturesSettingsScreenState
             backgroundColor: Colors.green,
           ),
         );
+      } else {
+        debugPrint(
+            'RtdbFeaturesSettingsScreen: Widget no longer mounted after saving');
       }
     } catch (e) {
-      debugPrint('Error saving RTDB features: $e');
+      debugPrint('RtdbFeaturesSettingsScreen: Error saving RTDB features: $e');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -127,12 +201,18 @@ class _RtdbFeaturesSettingsScreenState
             backgroundColor: Colors.red,
           ),
         );
+      } else {
+        debugPrint(
+            'RtdbFeaturesSettingsScreen: Widget not mounted, can\'t show error message');
       }
     } finally {
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
+      } else {
+        debugPrint(
+            'RtdbFeaturesSettingsScreen: Widget not mounted in finally block');
       }
     }
   }

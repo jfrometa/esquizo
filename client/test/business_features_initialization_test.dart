@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_features_service.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:mockito/mockito.dart';
-import 'package:flutter/material.dart';
 
 class MockDatabaseReference extends Mock implements DatabaseReference {
   @override

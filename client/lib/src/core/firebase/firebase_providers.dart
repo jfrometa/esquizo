@@ -4,6 +4,8 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:starter_architecture_flutter_firebase/firebase_options.dart';
 
 /// Centralized Firebase providers to maintain a single source of truth
 /// for all Firebase instances throughout the application.
@@ -33,7 +35,21 @@ final firebaseStorageProvider = Provider<FirebaseStorage>((ref) {
 
 // Realtime Database provider
 final firebaseDatabaseProvider = Provider<FirebaseDatabase>((ref) {
-  final database = FirebaseDatabase.instance;
+  // Prefer an explicit instanceFor with databaseURL to ensure the
+  // Realtime Database connects to the configured project, especially on web.
+  final databaseUrl = DefaultFirebaseOptions.currentPlatform.databaseURL;
+
+  FirebaseDatabase database;
+  try {
+    database = FirebaseDatabase.instanceFor(
+      app: Firebase.app(),
+      databaseURL: databaseUrl,
+    );
+  } catch (e) {
+    debugPrint('Error creating FirebaseDatabase instanceFor: $e');
+    // Fallback to the default instance if instanceFor fails
+    database = FirebaseDatabase.instance;
+  }
 
   // Enable persistence for offline capabilities only on non-web platforms
   // Web platforms don't support setPersistenceEnabled

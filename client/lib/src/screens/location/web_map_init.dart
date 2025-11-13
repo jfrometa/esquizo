@@ -1,15 +1,18 @@
 // lib/src/utils/maps_initializer_web.dart
 
 import 'dart:async';
-// Import the core js_interop library.
-import 'dart:js_interop' as js;
+// Core js_interop types
+import 'dart:js_interop' as js_interop;
+// Annotations like @JS
+import 'package:js/js.dart' as js;
+// Converters like JSPromise.toDart
 
 // Define the JS function signature using js_interop.
 // This assumes 'initMapsWhenNeeded' is a function attached to the global
 // window object in your web environment (e.g., defined in index.html)
 // and that it returns a JavaScript Promise.
 @js.JS('initMapsWhenNeeded')
-external js.JSPromise _initMapsWhenNeededJS(); // The external JS function
+external js_interop.JSPromise _initMapsWhenNeededJS(); // The external JS function
 
 // Actual web implementation that calls the JavaScript function.
 // This file is used ONLY when the application is compiled for the web.

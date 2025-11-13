@@ -7,9 +7,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_setup_manager.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_features_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/local_storange/local_storage_service.dart';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/setup/color_picker_widget.dart';
 
@@ -23,7 +23,7 @@ class BusinessSetupScreen extends ConsumerStatefulWidget {
 
 class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _pageController = PageController();
+  late PageController _pageController;
 
   // Form data
   final _businessNameController = TextEditingController();
@@ -66,6 +66,11 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
   String? _existingBusinessId;
   BusinessConfig? _existingConfig;
 
+  // Business features settings
+  BusinessFeatures? _businessFeatures;
+  BusinessUI? _businessUI;
+  bool _featuresLoading = false;
+
   // Business types for dropdown
   final List<String> _businessTypes = [
     'restaurant',
@@ -80,8 +85,12 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
   @override
   void initState() {
     super.initState();
+    _pageController = PageController();
     // Load existing business data if available
     _loadExistingBusinessData();
+    // Initialize default features
+    _businessFeatures = const BusinessFeatures();
+    _businessUI = const BusinessUI();
   }
 
   Future<void> _loadExistingBusinessData() async {
@@ -112,37 +121,44 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
 
                 // Set contact info if available
                 if (config.contactInfo.containsKey('email')) {
+                  final emailValue = config.contactInfo['email'];
                   _emailController.text =
-                      config.contactInfo['email'] as String? ?? '';
+                      (emailValue is String) ? emailValue : '';
                 }
                 if (config.contactInfo.containsKey('phone')) {
+                  final phoneValue = config.contactInfo['phone'];
                   _phoneController.text =
-                      config.contactInfo['phone'] as String? ?? '';
+                      (phoneValue is String) ? phoneValue : '';
                 }
                 if (config.contactInfo.containsKey('website')) {
+                  final websiteValue = config.contactInfo['website'];
                   _websiteController.text =
-                      config.contactInfo['website'] as String? ?? '';
+                      (websiteValue is String) ? websiteValue : '';
                 }
 
                 // Set address if available
                 if (config.address.containsKey('street')) {
+                  final streetValue = config.address['street'];
                   _addressController.text =
-                      config.address['street'] as String? ?? '';
+                      (streetValue is String) ? streetValue : '';
                 }
                 if (config.address.containsKey('city')) {
-                  _cityController.text =
-                      config.address['city'] as String? ?? '';
+                  final cityValue = config.address['city'];
+                  _cityController.text = (cityValue is String) ? cityValue : '';
                 }
                 if (config.address.containsKey('state')) {
+                  final stateValue = config.address['state'];
                   _stateController.text =
-                      config.address['state'] as String? ?? '';
+                      (stateValue is String) ? stateValue : '';
                 }
                 if (config.address.containsKey('zip')) {
-                  _zipController.text = config.address['zip'] as String? ?? '';
+                  final zipValue = config.address['zip'];
+                  _zipController.text = (zipValue is String) ? zipValue : '';
                 }
                 if (config.address.containsKey('country')) {
+                  final countryValue = config.address['country'];
                   _countryController.text =
-                      config.address['country'] as String? ?? '';
+                      (countryValue is String) ? countryValue : '';
                 }
 
                 // Set image URLs
@@ -152,14 +168,23 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
 
                 // Set colors
                 if (config.settings.containsKey('primaryColor')) {
-                  final primaryColorHex =
-                      config.settings['primaryColor'] as String? ?? '#6200EE';
-                  final secondaryColorHex =
-                      config.settings['secondaryColor'] as String? ?? '#03DAC6';
-                  final tertiaryColorHex =
-                      config.settings['tertiaryColor'] as String? ?? '#FFC107';
-                  final accentColorHex =
-                      config.settings['accentColor'] as String? ?? '#FF4081';
+                  final primaryColorValue = config.settings['primaryColor'];
+                  final secondaryColorValue = config.settings['secondaryColor'];
+                  final tertiaryColorValue = config.settings['tertiaryColor'];
+                  final accentColorValue = config.settings['accentColor'];
+
+                  final primaryColorHex = (primaryColorValue is String)
+                      ? primaryColorValue
+                      : '#6200EE';
+                  final secondaryColorHex = (secondaryColorValue is String)
+                      ? secondaryColorValue
+                      : '#03DAC6';
+                  final tertiaryColorHex = (tertiaryColorValue is String)
+                      ? tertiaryColorValue
+                      : '#FFC107';
+                  final accentColorHex = (accentColorValue is String)
+                      ? accentColorValue
+                      : '#FF4081';
 
                   // Extract colors
                   final primaryColor = _hexToColor(primaryColorHex);
@@ -192,12 +217,53 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
           },
         );
       }
+
+      // Also load RTDB features
+      await _loadBusinessFeatures();
     } catch (e) {
       debugPrint('Error loading existing business data: $e');
     } finally {
       setState(() {
         _isInitLoading = false;
       });
+    }
+  }
+
+  Future<void> _loadBusinessFeatures() async {
+    if (_existingBusinessId == null || _existingBusinessId!.isEmpty) {
+      return;
+    }
+
+    setState(() {
+      _featuresLoading = true;
+    });
+
+    try {
+      final service = ref.read(businessFeaturesServiceProvider);
+
+      // Get features and UI settings
+      final featuresStream = service.getBusinessFeatures(_existingBusinessId!);
+      final uiStream = service.getBusinessUI(_existingBusinessId!);
+
+      // Wait for both streams to complete
+      final features = await featuresStream.first;
+      final ui = await uiStream.first;
+
+      if (mounted) {
+        setState(() {
+          _businessFeatures = features;
+          _businessUI = ui;
+          _featuresLoading = false;
+          debugPrint('Loaded business features and UI settings successfully');
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _featuresLoading = false;
+        });
+        debugPrint('Error loading business features: $e');
+      }
     }
   }
 
@@ -394,6 +460,9 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       // Refresh the business config provider to trigger app state change
       ref.invalidate(businessConfigProvider);
 
+      // Save features to RTDB
+      await _saveBusinessFeatures();
+
       // Load the updated data
       await _loadExistingBusinessData();
     } catch (e) {
@@ -416,8 +485,51 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
     }
   }
 
+  Future<void> _saveBusinessFeatures() async {
+    if (_existingBusinessId == null || _existingBusinessId!.isEmpty) {
+      debugPrint('Cannot save features - no business ID available');
+      return;
+    }
+
+    if (_businessFeatures == null || _businessUI == null) {
+      debugPrint('Cannot save features - features or UI is null');
+      return;
+    }
+
+    try {
+      final service = ref.read(businessFeaturesServiceProvider);
+
+      // Update both features and UI
+      await service.updateBusinessFeatures(
+          _existingBusinessId!, _businessFeatures!);
+      await service.updateBusinessUI(_existingBusinessId!, _businessUI!);
+
+      debugPrint('✅ Business features and UI updated successfully');
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Features and UI settings saved successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('❌ Error saving business features: $e');
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error saving features: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   void _nextPage() {
-    if (_currentPage < 3) {
+    if (_currentPage < 4) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -522,6 +634,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                     _buildBasicInfoPage(theme),
                     _buildBrandingPage(theme),
                     _buildColorsPage(theme, selectedColors),
+                    _buildFeaturesPage(theme),
                     _buildReviewPage(theme, selectedColors),
                   ],
                 ),
@@ -591,9 +704,9 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          for (int i = 0; i < 4; i++)
+          for (int i = 0; i < 5; i++)
             Container(
-              width: 70,
+              width: 55,
               height: 4,
               margin: const EdgeInsets.symmetric(horizontal: 4),
               decoration: BoxDecoration(
@@ -1179,26 +1292,6 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
     );
   }
 
-  Widget _buildPreviewButton(Color color, Color textColor, String label) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: textColor,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildReviewPage(ThemeData theme, Map<String, Color> selectedColors) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -1256,6 +1349,147 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                       label: 'Phone',
                       value: _phoneController.text,
                     ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Features and UI
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Features & UI',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  if (_businessFeatures != null) ...[
+                    _buildReviewItem(
+                      icon: Icons.restaurant_menu,
+                      label: 'Catering',
+                      value:
+                          _businessFeatures!.catering ? 'Enabled' : 'Disabled',
+                      chip: Icon(
+                        _businessFeatures!.catering
+                            ? Icons.check_circle
+                            : Icons.cancel,
+                        color: _businessFeatures!.catering
+                            ? Colors.green
+                            : Colors.red,
+                        size: 20,
+                      ),
+                    ),
+                    _buildReviewItem(
+                      icon: Icons.calendar_today,
+                      label: 'Meal Plans',
+                      value:
+                          _businessFeatures!.mealPlans ? 'Enabled' : 'Disabled',
+                      chip: Icon(
+                        _businessFeatures!.mealPlans
+                            ? Icons.check_circle
+                            : Icons.cancel,
+                        color: _businessFeatures!.mealPlans
+                            ? Colors.green
+                            : Colors.red,
+                        size: 20,
+                      ),
+                    ),
+                    _buildReviewItem(
+                      icon: Icons.people,
+                      label: 'Staff',
+                      value: _businessFeatures!.staff ? 'Enabled' : 'Disabled',
+                      chip: Icon(
+                        _businessFeatures!.staff
+                            ? Icons.check_circle
+                            : Icons.cancel,
+                        color: _businessFeatures!.staff
+                            ? Colors.green
+                            : Colors.red,
+                        size: 20,
+                      ),
+                    ),
+                    _buildReviewItem(
+                      icon: Icons.table_restaurant,
+                      label: 'In-Dine',
+                      value: _businessFeatures!.inDine ? 'Enabled' : 'Disabled',
+                      chip: Icon(
+                        _businessFeatures!.inDine
+                            ? Icons.check_circle
+                            : Icons.cancel,
+                        color: _businessFeatures!.inDine
+                            ? Colors.green
+                            : Colors.red,
+                        size: 20,
+                      ),
+                    ),
+                    _buildReviewItem(
+                      icon: Icons.kitchen,
+                      label: 'Kitchen',
+                      value:
+                          _businessFeatures!.kitchen ? 'Enabled' : 'Disabled',
+                      chip: Icon(
+                        _businessFeatures!.kitchen
+                            ? Icons.check_circle
+                            : Icons.cancel,
+                        color: _businessFeatures!.kitchen
+                            ? Colors.green
+                            : Colors.red,
+                        size: 20,
+                      ),
+                    ),
+                    _buildReviewItem(
+                      icon: Icons.book_online,
+                      label: 'Reservations',
+                      value: _businessFeatures!.reservations
+                          ? 'Enabled'
+                          : 'Disabled',
+                      chip: Icon(
+                        _businessFeatures!.reservations
+                            ? Icons.check_circle
+                            : Icons.cancel,
+                        color: _businessFeatures!.reservations
+                            ? Colors.green
+                            : Colors.red,
+                        size: 20,
+                      ),
+                    ),
+                    if (_businessUI != null) ...[
+                      const Divider(height: 24),
+                      _buildReviewItem(
+                        icon: Icons.web,
+                        label: 'Landing Page UI',
+                        value: _businessUI!.landingPage ? 'Visible' : 'Hidden',
+                        chip: Icon(
+                          _businessUI!.landingPage
+                              ? Icons.check_circle
+                              : Icons.cancel,
+                          color: _businessUI!.landingPage
+                              ? Colors.green
+                              : Colors.red,
+                          size: 20,
+                        ),
+                      ),
+                      _buildReviewItem(
+                        icon: Icons.shopping_cart,
+                        label: 'Orders UI',
+                        value: _businessUI!.orders ? 'Visible' : 'Hidden',
+                        chip: Icon(
+                          _businessUI!.orders
+                              ? Icons.check_circle
+                              : Icons.cancel,
+                          color:
+                              _businessUI!.orders ? Colors.green : Colors.red,
+                          size: 20,
+                        ),
+                      ),
+                    ],
+                  ],
                 ],
               ),
             ),
@@ -1430,18 +1664,350 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                     : const SizedBox.shrink(),
                 if (_isLoading) const SizedBox(width: 8),
                 Text(
-                  _currentPage < 3
+                  _currentPage < 4
                       ? 'Continue'
                       : (_existingBusinessId != null
                           ? 'Update Business'
                           : 'Create Business'),
                 ),
-                if (!_isLoading && _currentPage < 3)
+                if (!_isLoading && _currentPage < 4)
                   const Icon(Icons.arrow_forward, size: 16),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFeaturesPage(ThemeData theme) {
+    if (_featuresLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final features = _businessFeatures;
+    final ui = _businessUI;
+
+    if (features == null || ui == null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const SizedBox(height: 16),
+            const Text('Failed to load features'),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadBusinessFeatures,
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Create modifiable copies
+    final businessFeatures = features.copyWith();
+    final businessUI = ui.copyWith();
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Feature Management',
+            style: theme.textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Control which features and UI elements are enabled',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Features section
+          _buildFeaturesSection(theme, businessFeatures),
+
+          const SizedBox(height: 32),
+
+          // UI components section
+          _buildUIComponentsSection(theme, businessUI),
+
+          const SizedBox(height: 24),
+
+          // Info card about features
+          Card(
+            margin: const EdgeInsets.only(bottom: 16),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.info_outline,
+                          color: theme.colorScheme.primary),
+                      const SizedBox(width: 8),
+                      Text(
+                        'About Business Features',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'These settings control which features and UI elements will be available in your business app. '
+                    'You can change these settings later in the admin panel.',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeaturesSection(ThemeData theme, BusinessFeatures features) {
+    return Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(
+              'Business Features',
+              style: theme.textTheme.titleLarge,
+            ),
+          ),
+          const Divider(height: 1),
+
+          // Catering toggle
+          SwitchListTile(
+            title: const Text('Catering'),
+            subtitle: const Text('Enable catering services and menu'),
+            value: features.catering,
+            onChanged: (value) {
+              setState(() {
+                _businessFeatures =
+                    _businessFeatures?.copyWith(catering: value);
+              });
+            },
+          ),
+
+          const Divider(height: 1),
+          // Meal Plans toggle
+          SwitchListTile(
+            title: const Text('Meal Plans'),
+            subtitle: const Text('Enable meal subscriptions and plans'),
+            value: features.mealPlans,
+            onChanged: (value) {
+              setState(() {
+                _businessFeatures =
+                    _businessFeatures?.copyWith(mealPlans: value);
+              });
+            },
+          ),
+
+          const Divider(height: 1),
+          // InDine toggle
+          SwitchListTile(
+            title: const Text('In-Dine'),
+            subtitle: const Text('Enable in-restaurant dining features'),
+            value: features.inDine,
+            onChanged: (value) {
+              setState(() {
+                _businessFeatures = _businessFeatures?.copyWith(inDine: value);
+              });
+            },
+          ),
+
+          const Divider(height: 1),
+          // Staff toggle
+          SwitchListTile(
+            title: const Text('Staff Management'),
+            subtitle: const Text('Enable staff scheduling and management'),
+            value: features.staff,
+            onChanged: (value) {
+              setState(() {
+                _businessFeatures = _businessFeatures?.copyWith(staff: value);
+              });
+            },
+          ),
+
+          const Divider(height: 1),
+          // Kitchen toggle
+          SwitchListTile(
+            title: const Text('Kitchen Display'),
+            subtitle: const Text('Enable kitchen display and order management'),
+            value: features.kitchen,
+            onChanged: (value) {
+              setState(() {
+                _businessFeatures = _businessFeatures?.copyWith(kitchen: value);
+              });
+            },
+          ),
+
+          const Divider(height: 1),
+          // Reservations toggle
+          SwitchListTile(
+            title: const Text('Reservations'),
+            subtitle: const Text('Enable table reservations'),
+            value: features.reservations,
+            onChanged: (value) {
+              setState(() {
+                _businessFeatures =
+                    _businessFeatures?.copyWith(reservations: value);
+              });
+            },
+          ),
+
+          const Divider(height: 1),
+          // Action buttons
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _businessFeatures = const BusinessFeatures(
+                        catering: false,
+                        mealPlans: false,
+                        inDine: false,
+                        staff: false,
+                        kitchen: false,
+                        reservations: false,
+                      );
+                    });
+                  },
+                  icon: const Icon(Icons.clear_all),
+                  label: const Text('Disable All'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _businessFeatures = const BusinessFeatures(
+                        catering: true,
+                        mealPlans: true,
+                        inDine: true,
+                        staff: true,
+                        kitchen: true,
+                        reservations: true,
+                      );
+                    });
+                  },
+                  icon: const Icon(Icons.check_circle_outline),
+                  label: const Text('Enable All'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUIComponentsSection(ThemeData theme, BusinessUI ui) {
+    return Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(
+              'UI Components',
+              style: theme.textTheme.titleLarge,
+            ),
+          ),
+          const Divider(height: 1),
+
+          // Landing Page toggle
+          SwitchListTile(
+            title: const Text('Landing Page'),
+            subtitle: const Text('Show landing page in navigation'),
+            value: ui.landingPage,
+            onChanged: (value) {
+              setState(() {
+                _businessUI = _businessUI?.copyWith(landingPage: value);
+              });
+            },
+          ),
+
+          const Divider(height: 1),
+          // Orders toggle
+          SwitchListTile(
+            title: const Text('Orders'),
+            subtitle: const Text('Show orders tab in navigation'),
+            value: ui.orders,
+            onChanged: (value) {
+              setState(() {
+                _businessUI = _businessUI?.copyWith(orders: value);
+              });
+            },
+          ),
+
+          const Divider(height: 1),
+          // Action buttons
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _businessUI = const BusinessUI(
+                        landingPage: false,
+                        orders: false,
+                      );
+                    });
+                  },
+                  icon: const Icon(Icons.clear_all),
+                  label: const Text('Disable All'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _businessUI = const BusinessUI(
+                        landingPage: true,
+                        orders: true,
+                      );
+                    });
+                  },
+                  icon: const Icon(Icons.check_circle_outline),
+                  label: const Text('Enable All'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPreviewButton(Color color, Color textColor, String label) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: textColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
     );
   }
