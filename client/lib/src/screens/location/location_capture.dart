@@ -622,6 +622,7 @@ class LocationCaptureBottomSheetState
   }
 
   Widget _buildMapView(ColorScheme colorScheme, ThemeData theme) {
+    final size = MediaQuery.sizeOf(context);
     if (_isLoading) {
       return Center(
         child: Column(
@@ -729,7 +730,8 @@ class LocationCaptureBottomSheetState
             ),
           ),
         const SizedBox(height: 16),
-        Expanded(
+        SizedBox(
+          height: size.height * 0.5, // 50% of screen height
           child: Stack(
             children: [
               ClipRRect(

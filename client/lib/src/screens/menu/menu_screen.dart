@@ -42,7 +42,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
   final double _parallaxFactor = 0.5;
 
   // Tab and scroll controllers
-  late final TabController _tabController;
+  TabController? _tabController;
   final ScrollController _mainScrollController = ScrollController();
   final Map<int, ScrollController> _tabScrollControllers = {};
 
@@ -75,7 +75,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
 
     // Setup controllers - initial length is 4, may be updated later
     _tabController = TabController(length: 4, vsync: this);
-    _tabController.addListener(_handleTabChange);
+    _tabController?.addListener(_handleTabChange);
 
     // Setup scroll controllers for each tab
     for (int i = 0; i < 4; i++) {
@@ -144,10 +144,15 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
 
             // Recreate tab controller if needed
             if (shouldUpdateTabs) {
-              _tabController.dispose();
+              final oldController = _tabController;
               _tabController =
                   TabController(length: _enabledTabIndices.length, vsync: this);
-              _tabController.addListener(_handleTabChange);
+              _tabController?.addListener(_handleTabChange);
+
+              // Dispose old controller after new one is set to avoid gaps
+              oldController?.removeListener(_handleTabChange);
+              oldController?.dispose();
+
               _areTabViewsInitialized = false;
             }
           });
@@ -248,8 +253,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
     _searchController.dispose();
     _searchFocusNode.removeListener(_handleFocusChanges);
     _searchFocusNode.dispose();
-    _tabController.removeListener(_handleTabChange);
-    _tabController.dispose();
+    _tabController?.removeListener(_handleTabChange);
+    _tabController?.dispose();
     _mainScrollController.dispose();
 
     // Dispose all tab scroll controllers
@@ -262,8 +267,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
   }
 
   void _handleTabChange() {
-    if (!_tabController.indexIsChanging) {
-      ref.read(menuActiveTabProvider.notifier).state = _tabController.index;
+    if (_tabController != null && !_tabController!.indexIsChanging) {
+      ref.read(menuActiveTabProvider.notifier).state = _tabController!.index;
     }
   }
 
@@ -432,8 +437,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
     final activeTabIndex = ref.watch(menuActiveTabProvider);
 
     // Update TabController when activeTabIndex changes
-    if (_tabController.index != activeTabIndex) {
-      _tabController.animateTo(activeTabIndex);
+    if (_tabController != null && _tabController!.index != activeTabIndex) {
+      _tabController!.animateTo(activeTabIndex);
     }
 
     return DefaultTabController(
@@ -463,8 +468,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                     padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 4.0),
                     child: MenuTabBar(
                       key: ValueKey(
-                          'menu_tab_bar_${_enabledTabIndices.length}_${_tabController.index}'),
-                      tabController: _tabController,
+                          'menu_tab_bar_${_enabledTabIndices.length}_${_tabController?.index}'),
+                      tabController: _tabController!,
                       onTabChanged: (index) {
                         ref.read(menuActiveTabProvider.notifier).state = index;
                       },
@@ -507,7 +512,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                             child: TabBarView(
                               key: ValueKey(
                                   'menu_tab_view_${_enabledTabIndices.length}'),
-                              controller: _tabController,
+                              controller: _tabController!,
                               physics: const BouncingScrollPhysics(),
                               children: List.generate(_enabledTabIndices.length,
                                   (index) => _buildTabView(index)),

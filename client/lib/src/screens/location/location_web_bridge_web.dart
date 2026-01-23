@@ -285,9 +285,18 @@ window.initializeAdvancedMap = async function(elementId, latitude, longitude, ad
   }
   
   try {
-    const mapElement = document.getElementById(elementId);
+    const getMapElement = () => document.getElementById(elementId);
+    let mapElement = getMapElement();
+    
+    // If not immediately found, wait briefly (handling Flutter platform view lag)
     if (!mapElement) {
-      console.error("Map element not found:", elementId);
+      console.log("Map element not found immediately, waiting...");
+      await new Promise(resolve => setTimeout(resolve, 300));
+      mapElement = getMapElement();
+    }
+    
+    if (!mapElement) {
+      console.error("Map element still not found after wait:", elementId);
       return false;
     }
     
