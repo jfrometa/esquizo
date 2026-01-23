@@ -266,7 +266,7 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
           IconButton(
             icon: const Icon(Icons.restaurant_menu),
             tooltip: 'Menu',
-            onPressed: () => GoRouter.of(context).goNamed(AppRoute.home.name),
+            onPressed: () => context.goToBusinessHome(),
           ),
           IconButton(
             icon: const Icon(Icons.event_seat),

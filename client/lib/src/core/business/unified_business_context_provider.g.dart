@@ -7,7 +7,7 @@ part of 'unified_business_context_provider.dart';
 // **************************************************************************
 
 String _$currentBusinessIdFromContextHash() =>
-    r'fb43520c752c741e0ec126c48fff5e84bf72eca2';
+    r'bd999e0cd825e58710e7cc6f81ff5633169fd606';
 
 /// Provider for current business ID (simplified access)
 ///
@@ -92,8 +92,6 @@ String _$currentRoutingBusinessIdHash() =>
     r'097cf2dbd224be23bae06e6eaf766342c77bd015';
 
 /// Provider that returns the current business ID based on routing context
-/// - If on business-specific route (e.g., /g3), returns the business ID for that slug
-/// - If on default route (e.g., /menu), returns the default business ID
 ///
 /// Copied from [currentRoutingBusinessId].
 @ProviderFor(currentRoutingBusinessId)
@@ -152,7 +150,7 @@ final currentBusinessSlugProvider = AutoDisposeProvider<String?>.internal(
 // ignore: unused_element
 typedef CurrentBusinessSlugRef = AutoDisposeProviderRef<String?>;
 String _$unifiedBusinessContextHash() =>
-    r'c14bd0845804fa0e4bdfcc864bbc075d16009e0f';
+    r'7d2a493a622855984c94e2e58f62d7b299773a25';
 
 /// Unified business context provider that watches for slug changes and manages business context
 ///
@@ -171,7 +169,7 @@ final unifiedBusinessContextProvider = AutoDisposeAsyncNotifierProvider<
 
 typedef _$UnifiedBusinessContext = AutoDisposeAsyncNotifier<BusinessContext>;
 String _$explicitBusinessContextHash() =>
-    r'a6537bc84735952a5d5c5efb2444fa82f9548687';
+    r'ef52b1cb85a65739d63c42171f961c93cb0e6a33';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -204,26 +202,26 @@ abstract class _$ExplicitBusinessContext
 }
 
 /// Explicit business context provider that works with a specific business slug
-/// This avoids race conditions with URL detection during navigation
+/// Use this during programmatic navigation to avoid race conditions with URL detection
 ///
 /// Copied from [ExplicitBusinessContext].
 @ProviderFor(ExplicitBusinessContext)
 const explicitBusinessContextProvider = ExplicitBusinessContextFamily();
 
 /// Explicit business context provider that works with a specific business slug
-/// This avoids race conditions with URL detection during navigation
+/// Use this during programmatic navigation to avoid race conditions with URL detection
 ///
 /// Copied from [ExplicitBusinessContext].
 class ExplicitBusinessContextFamily
     extends Family<AsyncValue<BusinessContext>> {
   /// Explicit business context provider that works with a specific business slug
-  /// This avoids race conditions with URL detection during navigation
+  /// Use this during programmatic navigation to avoid race conditions with URL detection
   ///
   /// Copied from [ExplicitBusinessContext].
   const ExplicitBusinessContextFamily();
 
   /// Explicit business context provider that works with a specific business slug
-  /// This avoids race conditions with URL detection during navigation
+  /// Use this during programmatic navigation to avoid race conditions with URL detection
   ///
   /// Copied from [ExplicitBusinessContext].
   ExplicitBusinessContextProvider call(
@@ -259,14 +257,14 @@ class ExplicitBusinessContextFamily
 }
 
 /// Explicit business context provider that works with a specific business slug
-/// This avoids race conditions with URL detection during navigation
+/// Use this during programmatic navigation to avoid race conditions with URL detection
 ///
 /// Copied from [ExplicitBusinessContext].
 class ExplicitBusinessContextProvider
     extends AutoDisposeAsyncNotifierProviderImpl<ExplicitBusinessContext,
         BusinessContext> {
   /// Explicit business context provider that works with a specific business slug
-  /// This avoids race conditions with URL detection during navigation
+  /// Use this during programmatic navigation to avoid race conditions with URL detection
   ///
   /// Copied from [ExplicitBusinessContext].
   ExplicitBusinessContextProvider(

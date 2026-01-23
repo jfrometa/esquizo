@@ -39,7 +39,7 @@ class _CustomSignInScreenState extends ConsumerState<CustomSignInScreen> {
 
               // Navigate to home with animation
               if (context.mounted) {
-                context.goNamed(AppRoute.home.name);
+                context.goToBusinessHome();
               }
               return;
             }

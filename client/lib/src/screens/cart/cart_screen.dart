@@ -366,7 +366,7 @@ class _CartScreenState extends ConsumerState<CartScreen>
             ),
             const SizedBox(height: 32),
             FilledButton.icon(
-              onPressed: () => context.goNamed(AppRoute.home.name),
+              onPressed: () => context.goToBusinessHome(),
               icon: const Icon(Icons.restaurant_menu),
               label: const Text('Explorar Menú'),
               style: FilledButton.styleFrom(

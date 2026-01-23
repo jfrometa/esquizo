@@ -9,6 +9,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/app_config/app_co
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_constants.dart';
 import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_analitics.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_startup.dart';
@@ -71,6 +72,38 @@ abstract class RoutePaths {
     final cleanSubRoute =
         subRoute.startsWith('/') ? subRoute.substring(1) : subRoute;
     return '/$businessSlug/$cleanSubRoute';
+  }
+}
+
+// =============================================================================
+// Navigation Helpers - Safe navigation with automatic businessSlug
+// =============================================================================
+
+/// Extension on BuildContext for safe business-aware navigation
+extension BusinessNavigationExtension on BuildContext {
+  /// Navigate to business home with automatic slug detection
+  /// Falls back to default business if no slug is available
+  void goToBusinessHome([String? businessSlug]) {
+    final slug = businessSlug ?? BusinessConstants.defaultSlug;
+    GoRouter.of(this).go(RoutePaths.forBusiness(slug));
+  }
+
+  /// Navigate to business menu
+  void goToBusinessMenu([String? businessSlug]) {
+    final slug = businessSlug ?? BusinessConstants.defaultSlug;
+    GoRouter.of(this).go(RoutePaths.forBusiness(slug, RoutePaths.menu));
+  }
+
+  /// Navigate to business cart
+  void goToBusinessCart([String? businessSlug]) {
+    final slug = businessSlug ?? BusinessConstants.defaultSlug;
+    GoRouter.of(this).go(RoutePaths.forBusiness(slug, RoutePaths.cart));
+  }
+
+  /// Navigate to business profile
+  void goToBusinessProfile([String? businessSlug]) {
+    final slug = businessSlug ?? BusinessConstants.defaultSlug;
+    GoRouter.of(this).go(RoutePaths.forBusiness(slug, RoutePaths.profile));
   }
 }
 

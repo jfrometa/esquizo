@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/cart/cart_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catering/manual_quote_provider.dart';
@@ -17,7 +17,7 @@ class OrderProcessor {
   final String phoneNumber;
 
   // OrderProcessor(this.ref, this.context, {this.phoneNumber = '+18493590832'});
-    OrderProcessor(this.ref, this.context, {this.phoneNumber = '+18099880275'});
+  OrderProcessor(this.ref, this.context, {this.phoneNumber = '+18099880275'});
 
   Future<void> processRegularOrder(
     List<CartItem> items,
@@ -28,16 +28,15 @@ class OrderProcessor {
     String orderDetails,
   ) async {
     try {
-    await _sendWhatsAppMessage(orderDetails, () => _clearRegularCart());
+      await _sendWhatsAppMessage(orderDetails, () => _clearRegularCart());
 
-    await ref.read(orderStorageProvider).saveRegularOrder(
-              items,
-              contactInfo,
-              paymentMethod,
-              location,
-              delivery,
-            );
-
+      await ref.read(orderStorageProvider).saveRegularOrder(
+            items,
+            contactInfo,
+            paymentMethod,
+            location,
+            delivery,
+          );
     } catch (error) {
       _showError(error);
     }
@@ -60,7 +59,6 @@ class OrderProcessor {
             location,
             delivery,
           );
-     
     } catch (error) {
       _showError(error);
     }
@@ -82,7 +80,7 @@ class OrderProcessor {
             paymentMethod,
             location,
             delivery,
-          ); 
+          );
     } catch (error) {
       _showError(error);
     }
@@ -105,7 +103,6 @@ class OrderProcessor {
             location,
             delivery,
           );
-      
     } catch (error) {
       _showError(error);
     }
@@ -135,8 +132,6 @@ class OrderProcessor {
     }
   }
 
-
-
   void _showError(Object error) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -147,7 +142,7 @@ class OrderProcessor {
   }
 
   void _clearRegularCart() {
-     ref.read(cartProvider.notifier).clearCart();
+    ref.read(cartProvider.notifier).clearCart();
   }
 
   void _clearSubscriptionCart() {
@@ -155,24 +150,21 @@ class OrderProcessor {
   }
 
   void _clearCateringCart() {
-     ref.read(cateringOrderProvider.notifier).clearCateringOrder();
+    ref.read(cateringOrderProvider.notifier).clearCateringOrder();
   }
 
-    void _clearCateringQuoteCart() {
-     ref.read(manualQuoteProvider.notifier).clearManualQuote();
+  void _clearCateringQuoteCart() {
+    ref.read(manualQuoteProvider.notifier).clearManualQuote();
   }
 
-    void _pop() {
+  void _pop() {
     // Check if the current route can be popped (i.e., there's a previous screen in the stack)
     if (GoRouter.of(context).canPop()) {
       GoRouter.of(context)
           .pop(); // Pop the checkout screen to return to the previous screen
     } else {
       // If there's no previous screen, directly navigate to the home screen
-      GoRouter.of(context).goNamed(AppRoute.home.name);
+      GoRouter.of(context).go(RoutePaths.forBusiness('kako'));
     }
   }
-
- 
-
 }

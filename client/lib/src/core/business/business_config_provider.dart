@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'business_config_service.dart';
+import 'business_constants.dart';
 import '../local_storange/local_storage_service.dart';
 import '../firebase/firebase_providers.dart';
 import '../../routing/business_routing_provider.dart';
@@ -18,7 +19,8 @@ class _CurrentBusinessIdNotifier extends StateNotifier<String> {
   final Ref _ref;
   String? _lastResolvedId;
 
-  _CurrentBusinessIdNotifier(this._ref) : super('default') {
+  _CurrentBusinessIdNotifier(this._ref)
+      : super(BusinessConstants.defaultBusinessId) {
     _initializeBusinessId();
   }
 
@@ -59,8 +61,8 @@ final initBusinessIdProvider = FutureProvider<String>((ref) async {
   final localStorage = ref.watch(localStorageServiceProvider);
   final businessId = await localStorage.getString('businessId');
 
-  // Return the business ID or default
-  return businessId ?? 'default';
+  // Return the business ID or default (kako)
+  return businessId ?? BusinessConstants.defaultBusinessId;
 });
 
 // Provider for business config service
