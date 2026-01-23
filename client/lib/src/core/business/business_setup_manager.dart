@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,7 +14,61 @@ import '../firebase/firebase_providers.dart';
 import '../local_storange/local_storage_service.dart';
 import '../business/business_features_service.dart';
 
+part 'business_setup_manager.g.dart';
+
 // Manages the business setup process
+@riverpod
+BusinessSetupManager businessSetupManager(Ref ref) {
+  final firestore = ref.watch(firebaseFirestoreProvider);
+  final storage = ref.watch(firebaseStorageProvider);
+  final auth = ref.watch(firebaseAuthProvider);
+  final database = ref.watch(firebaseDatabaseProvider);
+  final localStorage = ref.watch(localStorageServiceProvider);
+
+  return BusinessSetupManager(
+    firestore: firestore,
+    storage: storage,
+    auth: auth,
+    database: database,
+    localStorageService: localStorage,
+  );
+}
+
+// Provider to check if business is set up
+@riverpod
+Future<bool> isBusinessSetup(Ref ref) async {
+  final setupManager = ref.watch(businessSetupManagerProvider);
+  return setupManager.isBusinessSetup();
+}
+
+// Default business colors provider
+@riverpod
+Map<String, Color> defaultBusinessColors(Ref ref) {
+  return {
+    'primary': Colors.deepPurple,
+    'secondary': Colors.teal,
+    'tertiary': Colors.amber,
+    'accent': Colors.pinkAccent,
+  };
+}
+
+// Selected business colors provider for setup
+@riverpod
+class SelectedBusinessColors extends _$SelectedBusinessColors {
+  @override
+  Map<String, Color> build() {
+    return ref.watch(defaultBusinessColorsProvider);
+  }
+
+  void updateColor(String key, Color color) {
+    state = {...state, key: color};
+  }
+
+  void reset(Map<String, Color> defaultColors) {
+    state = defaultColors;
+  }
+}
+
 class BusinessSetupManager {
   final FirebaseFirestore _firestore;
   final FirebaseStorage _storage;
@@ -534,7 +589,7 @@ class BusinessSetupManager {
 
   // Convert Color to hex string
   String _colorToHex(Color color) {
-    return '#${color.value.toRadixString(16).padLeft(8, '0').substring(2)}';
+    return '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}';
   }
 
   // Generate a unique slug for the business
@@ -589,58 +644,4 @@ class BusinessCreationResult {
     required this.businessId,
     required this.businessSlug,
   });
-}
-
-// Provider for BusinessSetupManager
-final businessSetupManagerProvider = Provider<BusinessSetupManager>((ref) {
-  final firestore = ref.watch(firebaseFirestoreProvider);
-  final storage = ref.watch(firebaseStorageProvider);
-  final auth = ref.watch(firebaseAuthProvider);
-  final database = ref.watch(firebaseDatabaseProvider);
-  final localStorage = ref.watch(localStorageServiceProvider);
-
-  return BusinessSetupManager(
-    firestore: firestore,
-    storage: storage,
-    auth: auth,
-    database: database,
-    localStorageService: localStorage,
-  );
-});
-
-// Provider to check if business is set up
-final isBusinessSetupProvider = FutureProvider<bool>((ref) async {
-  final setupManager = ref.watch(businessSetupManagerProvider);
-  return setupManager.isBusinessSetup();
-});
-
-// Default business colors provider
-final defaultBusinessColorsProvider = Provider<Map<String, Color>>((ref) {
-  return {
-    'primary': Colors.deepPurple,
-    'secondary': Colors.teal,
-    'tertiary': Colors.amber,
-    'accent': Colors.pinkAccent,
-  };
-});
-
-// Selected business colors provider for setup
-final selectedBusinessColorsProvider =
-    StateNotifierProvider<SelectedBusinessColorsNotifier, Map<String, Color>>(
-        (ref) {
-  final defaultColors = ref.watch(defaultBusinessColorsProvider);
-  return SelectedBusinessColorsNotifier(defaultColors);
-});
-
-// Notifier for selected business colors
-class SelectedBusinessColorsNotifier extends StateNotifier<Map<String, Color>> {
-  SelectedBusinessColorsNotifier(super.initialColors);
-
-  void updateColor(String key, Color color) {
-    state = {...state, key: color};
-  }
-
-  void reset(Map<String, Color> defaultColors) {
-    state = defaultColors;
-  }
 }

@@ -41,7 +41,13 @@ part 'app_router.g.dart';
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 // Error state for router
-final routerErrorNotifierProvider = StateProvider<String?>((ref) => null);
+@riverpod
+class RouterErrorNotifier extends _$RouterErrorNotifier {
+  @override
+  String? build() => null;
+
+  void setError(String? error) => state = error;
+}
 
 // =============================================================================
 // Route Path Constants - Single source of truth for all route paths
@@ -427,8 +433,16 @@ GoRouter goRouter(Ref ref) {
         // If Firebase is not initialized, redirect to startup (don't initialize here)
         if (!isFirebaseInitialized) {
           debugPrint(
-              "[Router] Firebase not initialized, redirecting to startup");
-          return '/startup';
+              "[Router] Firebase not initialized, redirecting to startup from $path");
+          return '/startup?from=$path';
+        }
+
+        // If we are at startup but Firebase is already initialized, redirect to where we came from
+        if (path == '/startup' && isFirebaseInitialized) {
+          final from = state.uri.queryParameters['from'] ?? '/';
+          debugPrint(
+              "[Router] Firebase initialized, redirecting back to $from");
+          return from;
         }
 
         // ⚠️ CRITICAL FIX: Only handle redirects for ADMIN routes

@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
- 
+
 import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catering/manual_quote_provider.dart';
 
@@ -21,27 +21,30 @@ class ItemsList extends ConsumerWidget {
       separatorBuilder: (_, __) => const SizedBox(height: 2),
       itemBuilder: (context, index) {
         final dish = items[index];
-        return    ListTile(
-            title: Text(
-              dish.title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
-            ),
-            subtitle: Text(
-              dish.hasUnitSelection
-                  ? 'Cantidad: ${dish.quantity}'
-                  : 'Para ${dish.peopleCount} personas',
-              style: const TextStyle(color: Colors.grey, fontSize: 14),
-            ),
-            trailing: IconButton(
-              icon: const Icon(Icons.close,size: 20, color: Colors.red),
-              onPressed: () {
-                if (isQuote) {
-                  ref.read(manualQuoteProvider.notifier).removeFromCart(index);
-                } else {
-                  ref.read(cateringOrderProvider.notifier).removeFromCart(index);
-                }
-              },
-            ), 
+        return ListTile(
+          title: Text(
+            dish.title,
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
+          ),
+          subtitle: Text(
+            dish.hasUnitSelection
+                ? 'Cantidad: ${dish.quantity}'
+                : 'Para ${dish.peopleCount} personas',
+            style: const TextStyle(color: Colors.grey, fontSize: 14),
+          ),
+          trailing: IconButton(
+            icon: const Icon(Icons.close, size: 20, color: Colors.red),
+            onPressed: () {
+              if (isQuote) {
+                ref.read(manualQuoteProvider.notifier).removeFromCart(index);
+              } else {
+                ref
+                    .read(cateringOrderNotifierProvider.notifier)
+                    .removeFromCart(index);
+              }
+            },
+          ),
         );
       },
     );

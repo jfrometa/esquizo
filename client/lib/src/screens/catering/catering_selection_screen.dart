@@ -9,7 +9,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/catering/widge
 import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_order_provider.dart';
 
 final localCateringItemCountProvider = StateProvider<int>((ref) {
-  final cateringOrder = ref.watch(cateringOrderProvider);
+  final cateringOrder = ref.watch(cateringOrderNotifierProvider);
   return cateringOrder?.dishes.length ?? 0;
 });
 
@@ -40,7 +40,7 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
 
   // Update the item count whenever the screen is shown
   void _updateItemCount(WidgetRef ref) {
-    final cateringOrder = ref.read(cateringOrderProvider);
+    final cateringOrder = ref.read(cateringOrderNotifierProvider);
     final itemCount = cateringOrder?.dishes.length ?? 0;
     ref.read(localCateringItemCountProvider.notifier).state = itemCount;
   }
@@ -88,7 +88,7 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
   void _showCateringForm(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final order = ref.read(cateringOrderProvider);
+    final order = ref.read(cateringOrderNotifierProvider);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -100,7 +100,9 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
         title: 'Detalles de la Orden',
         initialData: order,
         onSubmit: (formData) {
-          ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(
+          ref
+              .read(cateringOrderNotifierProvider.notifier)
+              .finalizeCateringOrder(
                 title: order?.title ?? '',
                 img: order?.img ?? '',
                 description: order?.title ?? '',
@@ -276,10 +278,10 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
       String preferencia,
       String adicionales,
       int cantidadPersonas) {
-    final cateringOrderProviderNotifier =
-        ref.read(cateringOrderProvider.notifier);
+    final cateringOrderNotifier =
+        ref.read(cateringOrderNotifierProvider.notifier);
 
-    cateringOrderProviderNotifier.finalizeCateringOrder(
+    cateringOrderNotifier.finalizeCateringOrder(
       title: 'Orden de Catering',
       img: 'assets/image.png',
       description: 'Buffet personalizado • $eventType • $preferencia',

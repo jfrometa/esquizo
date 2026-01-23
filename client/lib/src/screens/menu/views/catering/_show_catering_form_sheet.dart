@@ -60,7 +60,7 @@ void showCateringFormSheet({
                     controller: scrollController,
                     initialData: isQuote
                         ? ref.read(manualQuoteProvider)
-                        : ref.read(cateringOrderProvider),
+                        : ref.read(cateringOrderNotifierProvider),
                     onSubmit: (formData) {
                       if (isQuote) {
                         // Handle quote submission
@@ -86,9 +86,10 @@ void showCateringFormSheet({
                         );
                       } else {
                         // Handle package submission
-                        final currentOrder = ref.read(cateringOrderProvider);
+                        final currentOrder =
+                            ref.read(cateringOrderNotifierProvider);
                         ref
-                            .read(cateringOrderProvider.notifier)
+                            .read(cateringOrderNotifierProvider.notifier)
                             .finalizeCateringOrder(
                               title: package?['title'] ?? '',
                               img: '',

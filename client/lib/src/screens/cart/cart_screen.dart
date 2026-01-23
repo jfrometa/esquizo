@@ -12,6 +12,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/catering/catering
 import 'package:starter_architecture_flutter_firebase/src/core/catering/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
 import 'cart_item_view.dart';
 
 class CartScreen extends ConsumerStatefulWidget {
@@ -93,7 +94,7 @@ class _CartScreenState extends ConsumerState<CartScreen>
   Widget build(BuildContext context) {
     // Watch providers to rebuild when they change
     final cartItems = ref.watch(cartProvider);
-    final cateringOrder = ref.watch(cateringOrderProvider);
+    final cateringOrder = ref.watch(cateringOrderNotifierProvider);
     final manualQuote = ref.watch(manualQuoteProvider);
     final mealItems = ref.watch(mealOrderProvider);
 
@@ -451,7 +452,7 @@ class _CartScreenState extends ConsumerState<CartScreen>
     Color buttonColor = colorScheme.primary;
 
     if (type.toLowerCase() == 'catering') {
-      final cateringOrder = ref.read(cateringOrderProvider);
+      final cateringOrder = ref.read(cateringOrderNotifierProvider);
       final isPersonasSelected = cateringOrder?.peopleCount != null &&
           ((cateringOrder!.peopleCount ?? 0) > 0);
       isDisabled = !isPersonasSelected;
@@ -501,6 +502,36 @@ class _CartScreenState extends ConsumerState<CartScreen>
   }
 
   void _proceedToCheckout(BuildContext context, String type) {
+    // Check if user is authenticated (not null and not anonymous)
+    final authState = ref.read(authStateChangesProvider);
+    final user = authState.value;
+    final isAuthenticated = user != null && !user.isAnonymous;
+
+    if (!isAuthenticated) {
+      debugPrint(
+          '🛡️ Authentication required for checkout. Redirecting to sign-in.');
+
+      // Show a snackbar to inform the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+              'Por favor, inicia sesión para continuar con tu compra.'),
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          action: SnackBarAction(
+            label: 'ENTENDIDO',
+            onPressed: () {},
+          ),
+        ),
+      );
+
+      // Save current location to return after sign-in?
+      // GoRouter handles redirects if configured, but here we'll just go to signIn.
+      context.goNamedSafe(AppRoute.signIn.name);
+      return;
+    }
+
     try {
       // Show loading indicator
       setState(() => _isLoading = true);
@@ -634,8 +665,9 @@ class _CartScreenState extends ConsumerState<CartScreen>
             onDelete: () => _confirmDelete(
               context,
               'orden de catering',
-              () =>
-                  ref.read(cateringOrderProvider.notifier).clearCateringOrder(),
+              () => ref
+                  .read(cateringOrderNotifierProvider.notifier)
+                  .clearCateringOrder(),
             ),
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -659,8 +691,9 @@ class _CartScreenState extends ConsumerState<CartScreen>
             ref: ref,
             items: cateringOrder.dishes,
             personCount: cateringOrder.peopleCount,
-            onRemove: (index) =>
-                ref.read(cateringOrderProvider.notifier).removeFromCart(index),
+            onRemove: (index) => ref
+                .read(cateringOrderNotifierProvider.notifier)
+                .removeFromCart(index),
             onAdd: () => _handleAddItemPressed('catering'),
           ),
         ],
@@ -1201,7 +1234,7 @@ class _CartScreenState extends ConsumerState<CartScreen>
 
   void _handleAddItemPressed(String type) {
     if (type.toLowerCase() == 'catering') {
-      final order = ref.read(cateringOrderProvider);
+      final order = ref.read(cateringOrderNotifierProvider);
       if (order == null || (order.peopleCount ?? 0) <= 0) {
         // Show catering form first
         _showCateringForm(context, ref);
@@ -1280,7 +1313,7 @@ class _CartScreenState extends ConsumerState<CartScreen>
   }
 
   void _showCateringForm(BuildContext context, WidgetRef ref) {
-    final order = ref.read(cateringOrderProvider);
+    final order = ref.read(cateringOrderNotifierProvider);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1301,7 +1334,9 @@ class _CartScreenState extends ConsumerState<CartScreen>
             initialData: order,
             onSubmit: (formData) {
               try {
-                ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(
+                ref
+                    .read(cateringOrderNotifierProvider.notifier)
+                    .finalizeCateringOrder(
                       title: order?.title ?? '',
                       img: order?.img ?? '',
                       description: order?.title ?? '',
@@ -1401,7 +1436,9 @@ class _CartScreenState extends ConsumerState<CartScreen>
             onPressed: () {
               // Clear all cart items
               ref.read(cartProvider.notifier).clearCart();
-              ref.read(cateringOrderProvider.notifier).clearCateringOrder();
+              ref
+                  .read(cateringOrderNotifierProvider.notifier)
+                  .clearCateringOrder();
               ref.read(manualQuoteProvider.notifier).clearManualQuote();
               ref.read(mealOrderProvider.notifier).clearCart();
 

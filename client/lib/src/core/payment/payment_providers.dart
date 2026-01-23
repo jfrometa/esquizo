@@ -1,21 +1,25 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/payment/payment_models.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/payment/payment_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 
-final paymentServiceProvider = Provider<PaymentService>((ref) {
+part 'payment_providers.g.dart';
+
+@Riverpod(keepAlive: true)
+PaymentService paymentService(Ref ref) {
   final firestore = ref.watch(firebaseFirestoreProvider);
   final businessId = ref.watch(currentBusinessIdProvider);
   return PaymentService(firestore: firestore, businessId: businessId);
-});
+}
 
 /// Provider for managing payment processing
-class PaymentProcessor extends StateNotifier<AsyncValue<Payment?>> {
-  final Ref ref;
-
-  PaymentProcessor(this.ref) : super(const AsyncValue.data(null));
+@Riverpod(keepAlive: true)
+class PaymentProcessor extends _$PaymentProcessor {
+  @override
+  AsyncValue<Payment?> build() => const AsyncValue.data(null);
 
   /// Process a payment for an order
   Future<void> processOrderPayment({
@@ -28,10 +32,10 @@ class PaymentProcessor extends StateNotifier<AsyncValue<Payment?>> {
     state = const AsyncValue.loading();
 
     try {
-      final paymentService = ref.read(paymentServiceProvider);
+      final pService = ref.read(paymentServiceProvider);
 
       // Create payment
-      var payment = await paymentService.createPayment(
+      var payment = await pService.createPayment(
         order: order,
         method: method,
         appliedCouponCodes: couponCodes,
@@ -40,7 +44,7 @@ class PaymentProcessor extends StateNotifier<AsyncValue<Payment?>> {
 
       // Process payment
       if (proof != null) {
-        payment = await paymentService.processPayment(
+        payment = await pService.processPayment(
           paymentId: payment.id,
           proof: proof,
         );
@@ -48,7 +52,7 @@ class PaymentProcessor extends StateNotifier<AsyncValue<Payment?>> {
 
       // Auto-complete for cash payments
       if (method == PaymentMethod.cash) {
-        payment = await paymentService.completePayment(payment.id);
+        payment = await pService.completePayment(payment.id);
       }
 
       state = AsyncValue.data(payment);
@@ -63,15 +67,14 @@ class PaymentProcessor extends StateNotifier<AsyncValue<Payment?>> {
     required PaymentProof proof,
   }) async {
     try {
-      final paymentService = ref.read(paymentServiceProvider);
-      await paymentService.addPaymentProof(
+      final pService = ref.read(paymentServiceProvider);
+      await pService.addPaymentProof(
         paymentId: paymentId,
         proof: proof,
       );
 
       // Refresh payment
-      final updatedPayment =
-          await paymentService.getPaymentByOrderId(paymentId);
+      final updatedPayment = await pService.getPaymentByOrderId(paymentId);
       state = AsyncValue.data(updatedPayment);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -79,17 +82,11 @@ class PaymentProcessor extends StateNotifier<AsyncValue<Payment?>> {
   }
 }
 
-final paymentProcessorProvider =
-    StateNotifierProvider<PaymentProcessor, AsyncValue<Payment?>>((ref) {
-  return PaymentProcessor(ref);
-});
-
 /// Provider for managing reimbursements
-class ReimbursementManager
-    extends StateNotifier<AsyncValue<List<Reimbursement>>> {
-  final Ref ref;
-
-  ReimbursementManager(this.ref) : super(const AsyncValue.data([]));
+@Riverpod(keepAlive: true)
+class ReimbursementManager extends _$ReimbursementManager {
+  @override
+  AsyncValue<List<Reimbursement>> build() => const AsyncValue.data([]);
 
   /// Request a new reimbursement
   Future<void> requestReimbursement({
@@ -103,8 +100,8 @@ class ReimbursementManager
     state = const AsyncValue.loading();
 
     try {
-      final paymentService = ref.read(paymentServiceProvider);
-      final reimbursement = await paymentService.requestReimbursement(
+      final pService = ref.read(paymentServiceProvider);
+      final reimbursement = await pService.requestReimbursement(
         paymentId: paymentId,
         orderId: orderId,
         userId: userId,
@@ -128,8 +125,8 @@ class ReimbursementManager
     String? notes,
   }) async {
     try {
-      final paymentService = ref.read(paymentServiceProvider);
-      final updatedReimbursement = await paymentService.processReimbursement(
+      final pService = ref.read(paymentServiceProvider);
+      final updatedReimbursement = await pService.processReimbursement(
         reimbursementId: reimbursementId,
         approved: approved,
         processedBy: processedBy,
@@ -148,24 +145,19 @@ class ReimbursementManager
   }
 }
 
-final reimbursementManagerProvider = StateNotifierProvider<ReimbursementManager,
-    AsyncValue<List<Reimbursement>>>((ref) {
-  return ReimbursementManager(ref);
-});
-
 /// Provider for coupon validation
-class CouponValidator extends StateNotifier<AsyncValue<Discount?>> {
-  final Ref ref;
-
-  CouponValidator(this.ref) : super(const AsyncValue.data(null));
+@riverpod
+class CouponValidator extends _$CouponValidator {
+  @override
+  AsyncValue<Discount?> build() => const AsyncValue.data(null);
 
   /// Validate a coupon code
   Future<void> validateCoupon(String code, Order order) async {
     state = const AsyncValue.loading();
 
     try {
-      final paymentService = ref.read(paymentServiceProvider);
-      final discount = await paymentService.validateCoupon(code, order);
+      final pService = ref.read(paymentServiceProvider);
+      final discount = await pService.validateCoupon(code, order);
 
       if (discount == null) {
         state =
@@ -184,14 +176,11 @@ class CouponValidator extends StateNotifier<AsyncValue<Discount?>> {
   }
 }
 
-final couponValidatorProvider =
-    StateNotifierProvider<CouponValidator, AsyncValue<Discount?>>((ref) {
-  return CouponValidator(ref);
-});
-
 /// Provider for managing applied discounts
-class AppliedDiscounts extends StateNotifier<List<Discount>> {
-  AppliedDiscounts() : super([]);
+@Riverpod(keepAlive: true)
+class AppliedDiscounts extends _$AppliedDiscounts {
+  @override
+  List<Discount> build() => [];
 
   /// Add a discount
   void addDiscount(Discount discount) {
@@ -217,62 +206,64 @@ class AppliedDiscounts extends StateNotifier<List<Discount>> {
   }
 }
 
-final appliedDiscountsProvider =
-    StateNotifierProvider<AppliedDiscounts, List<Discount>>((ref) {
-  return AppliedDiscounts();
-});
-
 /// Payment statistics provider
-final paymentStatisticsProvider = FutureProvider.family<Map<String, dynamic>,
-    ({DateTime startDate, DateTime endDate})>((ref, params) async {
-  final paymentService = ref.watch(paymentServiceProvider);
-  return paymentService.getPaymentStatistics(
+@riverpod
+Future<Map<String, dynamic>> paymentStatistics(
+    Ref ref, ({DateTime startDate, DateTime endDate}) params) async {
+  final pService = ref.watch(paymentServiceProvider);
+  return pService.getPaymentStatistics(
     startDate: params.startDate,
     endDate: params.endDate,
   );
-});
+}
 
 /// Service statistics provider
-final serviceStatisticsProvider = FutureProvider.family<Map<String, dynamic>,
-    ({DateTime startDate, DateTime endDate})>((ref, params) async {
-  final paymentService = ref.watch(paymentServiceProvider);
-  return paymentService.getServiceStatistics(
+@riverpod
+Future<Map<String, dynamic>> serviceStatistics(
+    Ref ref, ({DateTime startDate, DateTime endDate}) params) async {
+  final pService = ref.watch(paymentServiceProvider);
+  return pService.getServiceStatistics(
     startDate: params.startDate,
     endDate: params.endDate,
   );
-});
+}
 
 /// Provider for pending reimbursements
-final pendingReimbursementsProvider = StreamProvider<List<Reimbursement>>((ref) {
-  final paymentService = ref.watch(paymentServiceProvider);
-  return paymentService.getPendingReimbursementsStream();
-});
+@riverpod
+Stream<List<Reimbursement>> pendingReimbursements(Ref ref) {
+  final pService = ref.watch(paymentServiceProvider);
+  return pService.getPendingReimbursementsStream();
+}
 
 /// Provider for tax configurations
-final taxConfigurationsProvider = StreamProvider<List<TaxConfiguration>>((ref) {
-  final paymentService = ref.watch(paymentServiceProvider);
-  return paymentService.getActiveTaxConfigurations().asStream();
-});
+@riverpod
+Stream<List<TaxConfiguration>> taxConfigurations(Ref ref) {
+  final pService = ref.watch(paymentServiceProvider);
+  return pService.getActiveTaxConfigurations().asStream();
+}
 
 /// Provider for staff tip distributions
-final staffTipDistributionsProvider = FutureProvider.family<List<TipDistribution>, 
-    ({String staffId, DateTime startDate, DateTime endDate})>((ref, params) async {
-  final paymentService = ref.watch(paymentServiceProvider);
-  return paymentService.getTipDistributions(
+@riverpod
+Future<List<TipDistribution>> staffTipDistributions(Ref ref,
+    ({String staffId, DateTime startDate, DateTime endDate}) params) async {
+  final pService = ref.watch(paymentServiceProvider);
+  return pService.getTipDistributions(
     staffId: params.staffId,
     startDate: params.startDate,
     endDate: params.endDate,
   );
-});
+}
 
 /// Provider for payment by order ID
-final paymentByOrderIdProvider = FutureProvider.family<Payment?, String>((ref, orderId) async {
-  final paymentService = ref.watch(paymentServiceProvider);
-  return paymentService.getPaymentByOrderId(orderId);
-});
+@riverpod
+Future<Payment?> paymentByOrderId(Ref ref, String orderId) async {
+  final pService = ref.watch(paymentServiceProvider);
+  return pService.getPaymentByOrderId(orderId);
+}
 
 /// Provider for active tables (mock for now)
-final activeTablesProvider = StreamProvider<List<Map<String, dynamic>>>((ref) {
+@riverpod
+Stream<List<Map<String, dynamic>>> activeTables(Ref ref) {
   // TODO: Implement actual active tables stream from order service
   return Stream.value([
     {
@@ -297,13 +288,13 @@ final activeTablesProvider = StreamProvider<List<Map<String, dynamic>>>((ref) {
       'status': 'payment',
     },
   ]);
-});
+}
 
 /// Provider for managing tip distribution
-class TipDistributionManager extends StateNotifier<AsyncValue<TipDistribution?>> {
-  final Ref ref;
-  
-  TipDistributionManager(this.ref) : super(const AsyncValue.data(null));
+@Riverpod(keepAlive: true)
+class TipDistributionManager extends _$TipDistributionManager {
+  @override
+  AsyncValue<TipDistribution?> build() => const AsyncValue.data(null);
 
   /// Calculate and distribute tips
   Future<void> distributeTips({
@@ -314,26 +305,25 @@ class TipDistributionManager extends StateNotifier<AsyncValue<TipDistribution?>>
     Map<String, double>? customPercentages,
   }) async {
     state = const AsyncValue.loading();
-    
+
     try {
-      final paymentService = ref.read(paymentServiceProvider);
-      
+      final pService = ref.read(paymentServiceProvider);
+
       // Get service tracking to determine staff involved
-      final serviceTracking = await paymentService.serviceTrackingCollection
-          .doc(orderId)
-          .get();
-      
+      final serviceTracking =
+          await pService.serviceTrackingCollection.doc(orderId).get();
+
       if (!serviceTracking.exists) {
         throw Exception('Service tracking not found for order');
       }
-      
+
       final tracking = ServiceTracking.fromJson(
           serviceTracking.data() as Map<String, dynamic>);
-      
+
       // Calculate percentages based on method
       Map<String, double> percentages = {};
       Map<String, StaffRole> roles = {};
-      
+
       if (method == DistributionMethod.manual && customPercentages != null) {
         percentages = customPercentages;
       } else if (method == DistributionMethod.equalSplit) {
@@ -350,7 +340,7 @@ class TipDistributionManager extends StateNotifier<AsyncValue<TipDistribution?>>
           StaffRole.busser: 10.0,
           StaffRole.host: 10.0,
         };
-        
+
         double totalPercentage = 0;
         tracking.staffContributions.forEach((staffId, contribution) {
           final rolePercentage = rolePercentages[contribution.role] ?? 0;
@@ -358,14 +348,14 @@ class TipDistributionManager extends StateNotifier<AsyncValue<TipDistribution?>>
           roles[staffId] = contribution.role;
           totalPercentage += rolePercentage;
         });
-        
+
         // Normalize to 100%
         if (totalPercentage > 0) {
           percentages.updateAll((key, value) => value * 100 / totalPercentage);
         }
       }
-      
-      final distribution = await paymentService.distributeTips(
+
+      final distribution = await pService.distributeTips(
         paymentId: paymentId,
         orderId: orderId,
         totalTipAmount: totalTipAmount,
@@ -373,7 +363,7 @@ class TipDistributionManager extends StateNotifier<AsyncValue<TipDistribution?>>
         staffPercentages: percentages,
         staffRoles: roles,
       );
-      
+
       state = AsyncValue.data(distribution);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -381,59 +371,56 @@ class TipDistributionManager extends StateNotifier<AsyncValue<TipDistribution?>>
   }
 }
 
-final tipDistributionManagerProvider = 
-    StateNotifierProvider<TipDistributionManager, AsyncValue<TipDistribution?>>((ref) {
-  return TipDistributionManager(ref);
-});
-
 /// Provider for daily service summary
-final dailyServiceSummaryProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
+@riverpod
+Future<Map<String, dynamic>> dailyServiceSummary(Ref ref) async {
   final now = DateTime.now();
   final startOfDay = DateTime(now.year, now.month, now.day);
   final endOfDay = startOfDay.add(const Duration(days: 1));
-  
+
   final stats = await ref.watch(serviceStatisticsProvider((
     startDate: startOfDay,
     endDate: endOfDay,
   )).future);
-  
+
   return stats;
-});
+}
 
 /// Provider for server performance metrics
-final serverPerformanceProvider = FutureProvider.family<Map<String, dynamic>, 
-    ({String serverId, DateTime startDate, DateTime endDate})>((ref, params) async {
-  final paymentService = ref.watch(paymentServiceProvider);
-  
+@riverpod
+Future<Map<String, dynamic>> serverPerformance(Ref ref,
+    ({String serverId, DateTime startDate, DateTime endDate}) params) async {
+  final pService = ref.watch(paymentServiceProvider);
+
   // Get all payments for this server
-  final payments = await paymentService.paymentsCollection
+  final payments = await pService.paymentsCollection
       .where('serverId', isEqualTo: params.serverId)
       .where('createdAt', isGreaterThanOrEqualTo: params.startDate)
       .where('createdAt', isLessThanOrEqualTo: params.endDate)
       .get();
-  
+
   double totalRevenue = 0;
   double totalTips = 0;
   int orderCount = 0;
   Map<String, int> serviceTypeCounts = {};
-  
+
   for (final doc in payments.docs) {
     final payment = Payment.fromJson(doc.data() as Map<String, dynamic>);
     totalRevenue += payment.finalAmount;
     totalTips += payment.tipAmount;
     orderCount++;
-    
+
     final serviceType = payment.serviceType?.name ?? 'unknown';
     serviceTypeCounts[serviceType] = (serviceTypeCounts[serviceType] ?? 0) + 1;
   }
-  
+
   // Get tip distributions
   final tipDists = await ref.watch(staffTipDistributionsProvider((
     staffId: params.serverId,
     startDate: params.startDate,
     endDate: params.endDate,
   )).future);
-  
+
   double totalTipReceived = 0;
   for (final dist in tipDists) {
     final allocation = dist.allocations.firstWhere(
@@ -448,7 +435,7 @@ final serverPerformanceProvider = FutureProvider.family<Map<String, dynamic>,
     );
     totalTipReceived += allocation.amount;
   }
-  
+
   return {
     'totalRevenue': totalRevenue,
     'totalTips': totalTips,
@@ -458,4 +445,4 @@ final serverPerformanceProvider = FutureProvider.family<Map<String, dynamic>,
     'averageTipPerOrder': orderCount > 0 ? totalTips / orderCount : 0,
     'serviceTypeCounts': serviceTypeCounts,
   };
-});
+}

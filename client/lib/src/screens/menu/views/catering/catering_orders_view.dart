@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_order_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
 /// A view displaying active catering orders
 class CateringOrdersView extends ConsumerWidget {
   /// Scroll controller for the list view
   final ScrollController scrollController;
-  
+
   /// Callback to add items to the order
   final VoidCallback? onAddItems;
 
@@ -22,13 +22,13 @@ class CateringOrdersView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final cateringOrder = ref.watch(cateringOrderProvider);
-    
+    final cateringOrder = ref.watch(cateringOrderNotifierProvider);
+
     // No active order
     if (cateringOrder == null || cateringOrder.dishes.isEmpty) {
       return _buildEmptyState(context, theme, colorScheme);
     }
-    
+
     // Active order exists
     return ListView(
       controller: scrollController,
@@ -50,7 +50,7 @@ class CateringOrdersView extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 16),
-        
+
         // Order summary card
         Card(
           elevation: 2,
@@ -84,14 +84,17 @@ class CateringOrdersView extends ConsumerWidget {
                           Text(
                             'Event Type: ${cateringOrder.eventType.isNotEmpty ? cateringOrder.eventType : "Not specified"}',
                             style: TextStyle(
-                              color: colorScheme.onPrimaryContainer.withOpacity(0.8),
+                              color: colorScheme.onPrimaryContainer
+                                  .withOpacity(0.8),
                             ),
                           ),
-                          if (cateringOrder.peopleCount != null && cateringOrder.peopleCount! > 0)
+                          if (cateringOrder.peopleCount != null &&
+                              cateringOrder.peopleCount! > 0)
                             Text(
                               'People: ${cateringOrder.peopleCount}',
                               style: TextStyle(
-                                color: colorScheme.onPrimaryContainer.withOpacity(0.8),
+                                color: colorScheme.onPrimaryContainer
+                                    .withOpacity(0.8),
                               ),
                             ),
                         ],
@@ -114,10 +117,10 @@ class CateringOrdersView extends ConsumerWidget {
                   ],
                 ),
               ),
-              
+
               // Divider
               Divider(height: 1, color: colorScheme.outlineVariant),
-              
+
               // Order items summary
               Padding(
                 padding: const EdgeInsets.all(16),
@@ -141,21 +144,23 @@ class CateringOrdersView extends ConsumerWidget {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    
+
                     // List of items (limited to first 3 with "more" indicator)
-                    ...cateringOrder.dishes.take(3).map((dish) => _buildOrderItemTile(context, dish, theme, colorScheme)),
-                    
+                    ...cateringOrder.dishes.take(3).map((dish) =>
+                        _buildOrderItemTile(context, dish, theme, colorScheme)),
+
                     if (cateringOrder.dishes.length > 3)
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
                         child: TextButton(
                           onPressed: () => _viewOrderDetails(context, ref),
-                          child: Text('${cateringOrder.dishes.length - 3} more items...'),
+                          child: Text(
+                              '${cateringOrder.dishes.length - 3} more items...'),
                         ),
                       ),
-                      
+
                     const SizedBox(height: 16),
-                    
+
                     // Totals and checkout button
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -197,9 +202,9 @@ class CateringOrdersView extends ConsumerWidget {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Suggestions section
         Card(
           elevation: 1,
@@ -226,7 +231,8 @@ class CateringOrdersView extends ConsumerWidget {
                     _buildSuggestionChip(context, 'Appetizers', Icons.tapas),
                     _buildSuggestionChip(context, 'Desserts', Icons.cake),
                     _buildSuggestionChip(context, 'Beverages', Icons.local_bar),
-                    _buildSuggestionChip(context, 'Side Dishes', Icons.dinner_dining),
+                    _buildSuggestionChip(
+                        context, 'Side Dishes', Icons.dinner_dining),
                   ],
                 ),
               ],
@@ -236,8 +242,9 @@ class CateringOrdersView extends ConsumerWidget {
       ],
     );
   }
-  
-  Widget _buildEmptyState(BuildContext context, ThemeData theme, ColorScheme colorScheme) {
+
+  Widget _buildEmptyState(
+      BuildContext context, ThemeData theme, ColorScheme colorScheme) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -274,7 +281,7 @@ class CateringOrdersView extends ConsumerWidget {
                   // Switch to catering packages tab
                   final tabController = DefaultTabController.of(context);
                   tabController.animateTo(0);
-                                },
+                },
                 icon: const Icon(Icons.restaurant_menu),
                 label: const Text('Browse Packages'),
                 style: ElevatedButton.styleFrom(
@@ -298,8 +305,9 @@ class CateringOrdersView extends ConsumerWidget {
       ),
     );
   }
-  
-  Widget _buildOrderItemTile(BuildContext context, dynamic dish, ThemeData theme, ColorScheme colorScheme) {
+
+  Widget _buildOrderItemTile(BuildContext context, dynamic dish,
+      ThemeData theme, ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(
@@ -350,8 +358,9 @@ class CateringOrdersView extends ConsumerWidget {
       ),
     );
   }
-  
-  Widget _buildSuggestionChip(BuildContext context, String label, IconData icon) {
+
+  Widget _buildSuggestionChip(
+      BuildContext context, String label, IconData icon) {
     return ActionChip(
       avatar: Icon(icon, size: 18),
       label: Text(label),
@@ -362,16 +371,16 @@ class CateringOrdersView extends ConsumerWidget {
       },
     );
   }
-  
+
   void _viewOrderDetails(BuildContext context, WidgetRef ref) {
-    final id = ref.watch(cateringOrderProvider)?.id ?? "no id";
+    final id = ref.watch(cateringOrderNotifierProvider)?.id ?? "no id";
     // Replace Navigator.push with GoRouter navigation
     context.pushNamed(
       AppRoute.cateringOrderDetails.name,
       pathParameters: {'orderId': id},
     );
   }
-  
+
   void _proceedToCheckout(BuildContext context) {
     GoRouter.of(context).pushNamed(AppRoute.homecart.name, extra: 'catering');
   }

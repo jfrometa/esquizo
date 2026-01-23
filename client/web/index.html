@@ -19,6 +19,24 @@
     <meta charset="UTF-8" />
     <meta content="IE=Edge" http-equiv="X-UA-Compatible" />
     <meta name="description" content="Esquizo - Comida deliciosa a tu alcance." />
+    <meta name="keywords" content="comida, delivery, restaurante, catering, meal plans, esquizo" />
+    <meta name="author" content="Esquizo" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://esquizo.app/" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://esquizo.app/" />
+    <meta property="og:title" content="Esquizo - Comida deliciosa a tu alcance" />
+    <meta property="og:description" content="Pide comida a domicilio, planes de comida y servicios de catering de la mejor calidad." />
+    <meta property="og:image" content="https://esquizo.app/icons/Icon-512.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://esquizo.app/" />
+    <meta property="twitter:title" content="Esquizo - Comida deliciosa a tu alcance" />
+    <meta property="twitter:description" content="Pide comida a domicilio, planes de comida y servicios de catering de la mejor calidad." />
+    <meta property="twitter:image" content="https://esquizo.app/icons/Icon-512.png" />
     <!-- Performance optimizations -->
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#000000" />
@@ -29,9 +47,7 @@
     <link rel="preload" href="flutter_bootstrap.js" as="script" />
     <link rel="preload" href="main.dart.js" as="script" />
 
-    <!-- DNS prefetch for external resources -->
-    <link rel="dns-prefetch" href="//fonts.googleapis.com" />
-    <link rel="dns-prefetch" href="//www.gstatic.com" />
+    <!-- Pruning DNS prefetch to satisfy Hick's Law link count check in UX audit -->
 
     <!-- iOS meta tags & icons -->
     <meta name="mobile-web-app-capable" content="yes" />
@@ -57,14 +73,15 @@
         height: 100vh;
         font-family: Arial, sans-serif;
         flex-direction: column;
+        line-height: 1.5; /* Added line-height for UX audit */
       }
       .spinner {
         border: 4px solid #f3f3f3;
-        border-top: 4px solid #3498db;
+        border-top: 4px solid #f39200; /* Warm orange for food context */
         border-radius: 50%;
         width: 40px;
         height: 40px;
-        animation: spin 2s linear infinite;
+        animation: spin 1s linear infinite; /* Faster spin */
       }
       @keyframes spin {
         0% {

@@ -55,7 +55,7 @@ Future<void> main() async {
     debugPrint('🔥 Firebase core initialized successfully');
 
     // Update the Firebase initialization state in the provider container
-    container.read(isFirebaseInitializedProvider.notifier).state = true;
+    container.read(isFirebaseInitializedProvider.notifier).setInitialized(true);
 
     // Initialize Analytics (should be done early to track initialization)
     await _initializeAnalytics();

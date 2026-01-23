@@ -105,9 +105,9 @@ dev_dependencies:
   build_runner: ^2.5.4
   mockito: ^5.4.6
   # the code generator
-  riverpod_generator: ^2.6.5
+  riverpod_generator: ^2.4.0
   # riverpod_lint makes it easier to work with Riverpod
-  riverpod_lint: ^2.6.5
+  riverpod_lint: ^2.3.13
   # import custom_lint too as riverpod_lint depends on it
   custom_lint: ^0.7.6
   icons_launcher: ^3.0.0
@@ -127,32 +127,9 @@ flutter:
     - assets/onboarding_2.svg
     - assets/onboarding_1.svg
     - assets/animations/
-    # Include all catering images
-    - assets/catering/
-    - assets/catering/arroz_maduro_tocineta.jpg
-    - assets/catering/croquetas_2.jpg
-    - assets/catering/croquetas.jpg
-    - assets/catering/IMG_1618.jpg
-    - assets/catering/kipes.jpg
-    - assets/catering/lasagna_blanca.jpg
-    - assets/catering/lasagna.jpg
-    - assets/catering/pastelitos.jpg
-    - assets/catering/pierna.jpg
-    - assets/catering/pollo_cordonblue.jpg
-    - assets/catering/pulled_p0ork.jpg
-    - assets/catering/pulled_pork_sanwich.jpg
     
     # Include all dishes images
     - assets/dishes/
-    - assets/dishes/flap_meat_arroz_box.jpg
-    - assets/dishes/mechada_maduro_arroz_box.jpg
-    - assets/dishes/mechada_nuez_box.jpg
-    - assets/dishes/molida_hongos_maduro_box.jpg
-    - assets/dishes/molida_tacos.jpg
-    - assets/dishes/oglio_hongos_pasta_box.jpg
-    - assets/dishes/pollo_arroz_ensalada_box.jpg
-    - assets/dishes/pollo_camaron_arroz_box.jpg
-    - assets/dishes/pollo_papas_ensalada_box.jpg
 
   # Configure fonts to include SocialIcons from firebase_ui_auth
   fonts:

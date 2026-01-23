@@ -12,7 +12,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/
 
 // --- Cart and Badge Providers (Unchanged) ---
 final cateringItemCountProvider = StateProvider<int>((ref) {
-  final cateringOrder = ref.watch(cateringOrderProvider);
+  final cateringOrder = ref.watch(cateringOrderNotifierProvider);
   final manualQuote = ref.watch(manualQuoteProvider);
   final hasCateringOrder = (cateringOrder?.dishes.length ?? 0) > 0 ? 1 : 0;
   final hasManualQuote = (manualQuote?.dishes.length ?? 0) > 0 ? 1 : 0;

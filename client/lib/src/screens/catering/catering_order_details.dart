@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_order_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart'
+    as model;
 
 class CateringOrderDetailsScreen extends ConsumerStatefulWidget {
   final String orderId;
@@ -41,7 +42,7 @@ class CateringOrderDetailsScreenState
     tempCantidadPersonas = 0;
   }
 
-  void _initTempValues(CateringOrder order) {
+  void _initTempValues(model.CateringOrder order) {
     tempHasChef = order.hasChef;
     tempAlergias = order.alergias;
     tempEventType = order.eventType;
@@ -50,9 +51,9 @@ class CateringOrderDetailsScreenState
     tempCantidadPersonas = order.guestCount;
   }
 
-  void _saveChanges(CateringOrder order) {
+  void _saveChanges(model.CateringOrder order) {
     // Save changes to Firestore using the provider
-    ref.read(cateringOrderProvider.notifier).updateFirestoreOrder(
+    ref.read(cateringOrderNotifierProvider.notifier).updateFirestoreOrder(
           order.copyWith(
             guestCount: tempCantidadPersonas,
             hasChef: tempHasChef,
@@ -79,7 +80,7 @@ class CateringOrderDetailsScreenState
     });
   }
 
-  void _cancelEditing(CateringOrder order) {
+  void _cancelEditing(model.CateringOrder order) {
     // Revert temporary values to original
     setState(() {
       _initTempValues(order);
@@ -95,50 +96,39 @@ class CateringOrderDetailsScreenState
     final orderStream = ref.watch(cateringOrderStreamProvider(widget.orderId));
 
     return Scaffold(
-      body: FutureBuilder<CateringOrder>(
-        future: orderStream.first,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline,
-                      size: 48, color: Theme.of(context).colorScheme.error),
-                  const SizedBox(height: 16),
-                  Text('Error loading order: ${snapshot.error}'),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Go Back'),
-                  ),
-                ],
-              ),
-            );
-          } else if (!snapshot.hasData) {
-            return const Center(
-              child: Text('Order not found'),
-            );
-          }
-
-          final order = snapshot.data!;
-
+      body: orderStream.when(
+        data: (order) {
           // Initialize temp values if not editing
           if (!isEditing) {
             _initTempValues(order);
           }
-
           return _buildScreenWithOrder(context, order);
         },
+        loading: () => const Center(
+          child: CircularProgressIndicator(),
+        ),
+        error: (error, stack) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline,
+                  size: 48, color: Theme.of(context).colorScheme.error),
+              const SizedBox(height: 16),
+              Text('Error loading order: $error'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Go Back'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildScreenWithOrder(BuildContext context, CateringOrder order) {
+  Widget _buildScreenWithOrder(
+      BuildContext context, model.CateringOrder order) {
     final bool hasItems = order.items.isNotEmpty;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -234,7 +224,7 @@ class CateringOrderDetailsScreenState
   }
 
   Widget _buildOrderDetails(
-      CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
+      model.CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
@@ -441,10 +431,12 @@ class CateringOrderDetailsScreenState
                               // For now, just go back
                               Navigator.pop(context);
                             },
-                            icon: order.status == CateringOrderStatus.pending
+                            icon: order.status ==
+                                    model.CateringOrderStatus.pending
                                 ? const Icon(Icons.payment)
                                 : const Icon(Icons.visibility),
-                            label: order.status == CateringOrderStatus.pending
+                            label: order.status ==
+                                    model.CateringOrderStatus.pending
                                 ? const Text('Checkout')
                                 : const Text('View Status'),
                             style: FilledButton.styleFrom(
@@ -608,7 +600,7 @@ class CateringOrderDetailsScreenState
   }
 
   Widget _buildOrderItemCard({
-    required CateringOrderItem item,
+    required model.CateringOrderItem item,
     required int index,
     required ThemeData theme,
     required ColorScheme colorScheme,
@@ -705,7 +697,7 @@ class CateringOrderDetailsScreenState
   }
 
   void _editItemDialog(
-      BuildContext context, CateringOrderItem item, int index) {
+      BuildContext context, model.CateringOrderItem item, int index) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final quantityController =
@@ -766,19 +758,22 @@ class CateringOrderDetailsScreenState
               }
 
               // Get the current order from the stream's value
-              final orderAsyncValue = await ref
-                  .read(cateringOrderStreamProvider(widget.orderId))
-                  .first;
+              final orderAsyncValue =
+                  ref.read(cateringOrderStreamProvider(widget.orderId)).value;
+
+              if (orderAsyncValue == null) return;
 
               // Use the AsyncValue.when pattern to safely access the data
 
               // Create a new list of items with the updated quantity
               final updatedItems =
-                  List<CateringOrderItem>.from(orderAsyncValue.items);
+                  List<model.CateringOrderItem>.from(orderAsyncValue.items);
               updatedItems[index] = item.copyWith(quantity: parsedValue);
 
               // Update the order with the new items
-              ref.read(cateringOrderProvider.notifier).updateFirestoreOrder(
+              ref
+                  .read(cateringOrderNotifierProvider.notifier)
+                  .updateFirestoreOrder(
                     orderAsyncValue.copyWith(items: updatedItems),
                   );
 
@@ -822,16 +817,20 @@ class CateringOrderDetailsScreenState
           FilledButton.icon(
             onPressed: () async {
               // Get the current order
-              final order = await ref
-                  .read(cateringOrderStreamProvider(widget.orderId))
-                  .first;
+              final order =
+                  ref.read(cateringOrderStreamProvider(widget.orderId)).value;
+
+              if (order == null) return;
 
               // Create a new list of items without the removed item
-              final updatedItems = List<CateringOrderItem>.from(order.items)
-                ..removeAt(index);
+              final updatedItems =
+                  List<model.CateringOrderItem>.from(order.items)
+                    ..removeAt(index);
 
               // Update the order with the new items
-              ref.read(cateringOrderProvider.notifier).updateFirestoreOrder(
+              ref
+                  .read(cateringOrderNotifierProvider.notifier)
+                  .updateFirestoreOrder(
                     order.copyWith(items: updatedItems),
                   );
 

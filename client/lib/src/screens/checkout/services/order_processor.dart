@@ -150,7 +150,7 @@ class OrderProcessor {
   }
 
   void _clearCateringCart() {
-    ref.read(cateringOrderProvider.notifier).clearCateringOrder();
+    ref.read(cateringOrderNotifierProvider.notifier).clearCateringOrder();
   }
 
   void _clearCateringQuoteCart() {

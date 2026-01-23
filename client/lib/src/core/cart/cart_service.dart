@@ -5,11 +5,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
-
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';
+
+part 'cart_service.g.dart';
 
 /// Unified Cart model that contains all cart-related functionality
 class Cart {
@@ -827,7 +829,8 @@ class CartService {
 // ===== RIVERPOD PROVIDERS =====
 
 /// Provider for cart service
-final cartServiceProvider = Provider<CartService>((ref) {
+@riverpod
+CartService cartService(Ref ref) {
   final businessId = ref.watch(currentBusinessIdProvider);
   final userId = ref.watch(currentUserIdProvider);
 
@@ -840,23 +843,17 @@ final cartServiceProvider = Provider<CartService>((ref) {
   cartService.loadCart();
 
   return cartService;
-});
-
-/// Provider for accessing the cart state
-final cartProvider = StateNotifierProvider<CartNotifier, Cart>((ref) {
-  debugPrint('🛒 Fetching cart for business: '
-      '\u001b[32m${ref.watch(currentBusinessIdProvider)}\u001b[0m');
-  final cartService = ref.watch(cartServiceProvider);
-  return CartNotifier(cartService);
-});
+}
 
 /// Notifier for cart state
-class CartNotifier extends StateNotifier<Cart> {
-  final CartService _cartService;
+@Riverpod(keepAlive: true)
+class CartNotifier extends _$CartNotifier {
+  late CartService _cartService;
 
-  CartNotifier(this._cartService) : super(_cartService.cart) {
-    // Listen for cart updates
-    _updateStateFromService();
+  @override
+  Cart build() {
+    _cartService = ref.watch(cartServiceProvider);
+    return _cartService.cart;
   }
 
   void _updateStateFromService() {
@@ -986,43 +983,51 @@ class CartNotifier extends StateNotifier<Cart> {
 /// Helper providers for accessing cart properties
 
 /// Provider for cart item count
-final cartItemCountProvider = Provider<int>((ref) {
+@riverpod
+int cartItemCount(Ref ref) {
   final cart = ref.watch(cartProvider);
   return cart.itemCount;
-});
+}
 
 /// Provider for cart subtotal
-final cartSubtotalProvider = Provider<double>((ref) {
+@riverpod
+double cartSubtotal(Ref ref) {
   final cart = ref.watch(cartProvider);
   return cart.subtotal;
-});
+}
 
 /// Provider for cart total
-final cartTotalProvider = Provider<double>((ref) {
+@riverpod
+double cartTotal(Ref ref) {
   final cart = ref.watch(cartProvider);
   return cart.total;
-});
+}
 
 /// Provider for meal plans in cart
-final cartMealPlansProvider = Provider<List<CartItem>>((ref) {
+@riverpod
+List<CartItem> cartMealPlans(Ref ref) {
   final cart = ref.watch(cartProvider);
   return cart.mealPlans;
-});
+}
 
 /// Provider for catering items in cart
-final cartCateringItemsProvider = Provider<List<CartItem>>((ref) {
+@riverpod
+List<CartItem> cartCateringItems(Ref ref) {
   final cart = ref.watch(cartProvider);
   return cart.cateringItems;
-});
+}
 
 /// Provider for regular items in cart
-final cartRegularItemsProvider = Provider<List<CartItem>>((ref) {
+@riverpod
+List<CartItem> cartRegularItems(Ref ref) {
   final cart = ref.watch(cartProvider);
   return cart.regularItems;
-});
+}
 
 /// Provider for meal plan dishes in cart
-final cartMealPlanDishesProvider = Provider<List<CartItem>>((ref) {
+@riverpod
+List<CartItem> cartMealPlanDishes(Ref ref) {
   final cart = ref.watch(cartProvider);
   return cart.mealPlanDishes;
-});
+}
+final cartProvider = cartNotifierProvider;

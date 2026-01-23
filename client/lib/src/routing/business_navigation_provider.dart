@@ -101,9 +101,15 @@ class BusinessNavigationController extends _$BusinessNavigationController {
           await ref.read(explicitBusinessContextProvider(businessSlug).future);
 
       // Update the currentBusinessIdProvider to match the new business context
-      ref
-          .read(currentBusinessIdProvider.notifier)
-          .setBusinessId(businessContext.businessId);
+      // ONLY if it's different to prevent circular rebuilds of the top-level app
+      final currentId = ref.read(currentBusinessIdProvider);
+      if (currentId != businessContext.businessId) {
+        debugPrint(
+            '🔄 Updating global business ID to: ${businessContext.businessId}');
+        ref
+            .read(currentBusinessIdProvider.notifier)
+            .setBusinessId(businessContext.businessId);
+      }
 
       state = BusinessNavigationState(
         businessSlug: businessSlug,

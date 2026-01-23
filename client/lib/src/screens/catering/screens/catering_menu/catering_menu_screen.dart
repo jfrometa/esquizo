@@ -79,11 +79,11 @@ class _CateringMenuScreenState extends ConsumerState<CateringMenuScreen> {
               child: CateringForm(
                 title: 'Detalles del ${package['title']}',
                 controller: scrollController,
-                initialData: ref.read(cateringOrderProvider),
+                initialData: ref.read(cateringOrderNotifierProvider),
                 onSubmit: (formData) {
-                  final currentOrder = ref.read(cateringOrderProvider);
+                  final currentOrder = ref.read(cateringOrderNotifierProvider);
                   ref
-                      .read(cateringOrderProvider.notifier)
+                      .read(cateringOrderNotifierProvider.notifier)
                       .finalizeCateringOrder(
                         title: package['title'],
                         img: '',

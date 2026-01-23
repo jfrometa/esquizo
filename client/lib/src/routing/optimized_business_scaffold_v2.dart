@@ -4,11 +4,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/business_navigation_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/scaffold_with_nested_navigation.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_panel_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/navigation_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
 /// Optimized business scaffold that provides seamless navigation
 class OptimizedBusinessScaffold extends ConsumerStatefulWidget {
@@ -76,6 +78,11 @@ class _OptimizedBusinessScaffoldState
     final isAdmin = ref.watch(isAdminComputedProvider);
     final currentPath = widget.currentRoute;
 
+    // Use authStateChangesProvider to track authentication status
+    final authState = ref.watch(authStateChangesProvider);
+    final user = authState.value;
+    final isAuthenticated = user != null && !user.isAnonymous;
+
     // If on a business admin route and user is admin, show dedicated admin navigation
     if (isAdmin &&
         (currentPath == '/admin' ||
@@ -94,23 +101,57 @@ class _OptimizedBusinessScaffoldState
       );
     }
 
-    // Create navigation destinations for business
-    final businessDestinations =
-        _getBusinessNavigationDestinations(widget.businessSlug);
+    // Define navigation items dynamically
+    final items = _getNavigationItems(isAdmin, isAuthenticated);
+    final currentIndex = _getSelectedIndex(items, widget.currentRoute);
 
-    // For desktop, use NavigationRail layout similar to BusinessScaffoldWithNavigationRail
+    // Create navigation destinations for business
+    final businessDestinations = items.map((item) {
+      return NavigationDestination(
+        icon: item.iconWidget ?? Icon(item.icon),
+        selectedIcon: item.selectedIconWidget ?? Icon(item.selectedIcon),
+        label: item.label,
+      );
+    }).toList();
+
+    final appBar = AppBar(
+      title: Consumer(
+        builder: (context, ref, _) {
+          final businessName = ref.watch(businessNameProvider);
+          return Text(
+            businessName,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          );
+        },
+      ),
+      centerTitle: false,
+      actions: [
+        _ProfileAppBarButton(businessSlug: widget.businessSlug),
+        const SizedBox(width: 8),
+      ],
+    );
+
+    // For desktop, use NavigationRail layout
     if (size.width >= 600) {
       return Scaffold(
+        appBar: appBar,
         body: Row(
           children: [
             // Desktop navigation rail
             NavigationRail(
-              selectedIndex: _getCurrentIndex(widget.currentRoute),
+              selectedIndex: currentIndex,
               onDestinationSelected: (index) {
-                _handleNavigation(context, ref, index);
+                _handleNavigation(context, ref, items[index].route);
               },
               labelType: NavigationRailLabelType.all,
-              destinations: _getBusinessNavigationRailDestinations(),
+              destinations: items.map((item) {
+                return NavigationRailDestination(
+                  icon: item.iconWidget ?? Icon(item.icon),
+                  selectedIcon:
+                      item.selectedIconWidget ?? Icon(item.selectedIcon),
+                  label: Text(item.label),
+                );
+              }).toList(),
             ),
             const VerticalDivider(thickness: 1, width: 1),
             // Main content area
@@ -132,76 +173,87 @@ class _OptimizedBusinessScaffoldState
 
     // For mobile, use bottom navigation bar layout
     return Scaffold(
-      body: Column(
-        children: [
-          // Main content area
-          Expanded(
-            child: AnimatedBuilder(
-              animation: _fadeAnimation,
-              builder: (context, child) {
-                return Opacity(
-                  opacity: _fadeAnimation.value,
-                  child: widget.child,
-                );
-              },
-            ),
-          ),
-        ],
+      appBar: appBar,
+      body: AnimatedBuilder(
+        animation: _fadeAnimation,
+        builder: (context, child) {
+          return Opacity(
+            opacity: _fadeAnimation.value,
+            child: widget.child,
+          );
+        },
       ),
 
       // Business-specific navigation for mobile
-      bottomNavigationBar: _BusinessBottomNavigationBar(
-        businessSlug: widget.businessSlug,
-        currentRoute: widget.currentRoute,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: currentIndex,
         destinations: businessDestinations,
-        onDestinationSelected: _handleNavigation,
-        getCurrentIndex: _getCurrentIndex,
+        onDestinationSelected: (index) {
+          _handleNavigation(context, ref, items[index].route);
+        },
       ),
     );
   }
 
-  int _getCurrentIndex(String route) {
-    // Map routes to navigation indices
-    // Must match the order in _getBusinessNavigationDestinations
-    final isAdmin = ref.watch(isAdminComputedProvider);
+  List<_NavigationItem> _getNavigationItems(
+      bool isAdmin, bool isAuthenticated) {
+    final List<_NavigationItem> items = [
+      const _NavigationItem(
+        route: '/',
+        label: 'Inicio',
+        icon: Icons.home_outlined,
+        selectedIcon: Icons.home,
+      ),
+      const _NavigationItem(
+        route: '/menu',
+        label: 'Menú',
+        icon: Icons.restaurant_menu_outlined,
+        selectedIcon: Icons.restaurant_menu,
+      ),
+      const _NavigationItem(
+        route: '/carrito',
+        label: 'Carrito',
+        icon: Icons.shopping_cart_outlined,
+        selectedIcon: Icons.shopping_cart,
+        iconWidget: CartBadge(icon: Icons.shopping_cart_outlined),
+        selectedIconWidget: CartBadge(icon: Icons.shopping_cart),
+      ),
+    ];
 
-    switch (route) {
-      case '/':
-        return 0;
-      case '/menu':
-        return 1;
-      case '/carrito':
-        return 2;
-      case '/ordenes':
-        return 3;
-      case '/admin':
-        return isAdmin ? 4 : 0; // Admin is index 4 if present
-      case '/cuenta':
-        return isAdmin ? 5 : 4; // Cuenta is last
-      default:
-        return 0;
+    // Conditionally show Orders
+    if (isAuthenticated) {
+      items.add(const _NavigationItem(
+        route: '/ordenes',
+        label: 'Ordenes',
+        icon: Icons.receipt_long_outlined,
+        selectedIcon: Icons.receipt_long,
+      ));
     }
+
+    // Conditionally show Admin
+    if (isAdmin) {
+      items.add(const _NavigationItem(
+        route: '/admin',
+        label: 'Admin',
+        icon: Icons.admin_panel_settings_outlined,
+        selectedIcon: Icons.admin_panel_settings,
+      ));
+    }
+
+    return items;
   }
 
-  void _handleNavigation(BuildContext context, WidgetRef ref, int index) {
-    final isAdmin = ref.watch(isAdminComputedProvider);
-
-    // Determine the target route based on index and admin status
-    String targetRoute;
-    if (isAdmin) {
-      final routes = [
-        '/',
-        '/menu',
-        '/carrito',
-        '/ordenes',
-        '/admin',
-        '/cuenta'
-      ];
-      targetRoute = routes[index];
-    } else {
-      final routes = ['/', '/menu', '/carrito', '/ordenes', '/cuenta'];
-      targetRoute = routes[index];
+  int _getSelectedIndex(List<_NavigationItem> items, String currentRoute) {
+    for (int i = 0; i < items.length; i++) {
+      if (items[i].route == currentRoute) {
+        return i;
+      }
     }
+    return 0;
+  }
+
+  void _handleNavigation(
+      BuildContext context, WidgetRef ref, String targetRoute) {
     final targetPath = targetRoute == '/'
         ? '/${widget.businessSlug}'
         : '/${widget.businessSlug}$targetRoute';
@@ -227,119 +279,6 @@ class _OptimizedBusinessScaffoldState
       debugPrint('🌐 Standard navigation to: $targetPath');
       context.go(targetPath);
     }
-  }
-
-  List<NavigationRailDestination> _getBusinessNavigationRailDestinations() {
-    return [
-      const NavigationRailDestination(
-        icon: Icon(Icons.home_outlined),
-        selectedIcon: Icon(Icons.home),
-        label: Text('Inicio'),
-      ),
-      const NavigationRailDestination(
-        icon: Icon(Icons.restaurant_menu_outlined),
-        selectedIcon: Icon(Icons.restaurant_menu),
-        label: Text('Menú'),
-      ),
-      const NavigationRailDestination(
-        icon: CartBadge(icon: Icons.shopping_cart_outlined),
-        selectedIcon: CartBadge(icon: Icons.shopping_cart),
-        label: Text('Carrito'),
-      ),
-      const NavigationRailDestination(
-        icon: Icon(Icons.person_outline),
-        selectedIcon: Icon(Icons.person),
-        label: Text('Cuenta'),
-      ),
-      const NavigationRailDestination(
-        icon: Icon(Icons.receipt_long_outlined),
-        selectedIcon: Icon(Icons.receipt_long),
-        label: Text('Ordenes'),
-      ),
-      const NavigationRailDestination(
-        icon: Icon(Icons.receipt_long_outlined),
-        selectedIcon: Icon(Icons.receipt_long),
-        label: Text('Admin'),
-      ),
-    ];
-  }
-
-  List<NavigationDestination> _getBusinessNavigationDestinations(
-      String businessSlug) {
-    // Get admin status to determine if admin destination should be included
-    final adminStatusAsync = ref.watch(isAdminProvider);
-    final isAdmin = adminStatusAsync.valueOrNull ?? false;
-
-    final destinations = [
-      const NavigationDestination(
-        icon: Icon(Icons.home_outlined),
-        selectedIcon: Icon(Icons.home),
-        label: 'Inicio',
-      ),
-      const NavigationDestination(
-        icon: Icon(Icons.restaurant_menu_outlined),
-        selectedIcon: Icon(Icons.restaurant_menu),
-        label: 'Menú',
-      ),
-      const NavigationDestination(
-        icon: CartBadge(icon: Icons.shopping_cart_outlined),
-        selectedIcon: CartBadge(icon: Icons.shopping_cart),
-        label: 'Carrito',
-      ),
-      const NavigationDestination(
-        icon: Icon(Icons.receipt_long_outlined),
-        selectedIcon: Icon(Icons.receipt_long),
-        label: 'Ordenes',
-      ),
-      const NavigationDestination(
-        icon: Icon(Icons.person_outline),
-        selectedIcon: Icon(Icons.person),
-        label: 'Cuenta',
-      ),
-    ];
-
-    // Add admin destination if user is admin (between orders and account)
-    if (isAdmin) {
-      destinations.insert(
-          4,
-          const NavigationDestination(
-            icon: Icon(Icons.admin_panel_settings_outlined),
-            selectedIcon: Icon(Icons.admin_panel_settings),
-            label: 'Admin',
-          ));
-    }
-
-    return destinations;
-  }
-}
-
-/// Business-specific bottom navigation bar
-class _BusinessBottomNavigationBar extends ConsumerWidget {
-  const _BusinessBottomNavigationBar({
-    required this.businessSlug,
-    required this.currentRoute,
-    required this.destinations,
-    required this.onDestinationSelected,
-    required this.getCurrentIndex,
-  });
-
-  final String businessSlug;
-  final String currentRoute;
-  final List<NavigationDestination> destinations;
-  final Function(BuildContext, WidgetRef, int) onDestinationSelected;
-  final Function(String) getCurrentIndex;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final currentIndex = getCurrentIndex(currentRoute);
-
-    return NavigationBar(
-      selectedIndex: currentIndex,
-      destinations: destinations,
-      onDestinationSelected: (index) {
-        onDestinationSelected(context, ref, index);
-      },
-    );
   }
 }
 
@@ -415,6 +354,57 @@ class _BusinessRouteTransitionState extends State<BusinessRouteTransition>
         opacity: _fadeAnimation,
         child: widget.child,
       ),
+    );
+  }
+}
+
+/// Navigation item helper
+class _NavigationItem {
+  final String route;
+  final String label;
+  final IconData icon;
+  final IconData selectedIcon;
+  final Widget? iconWidget;
+  final Widget? selectedIconWidget;
+
+  const _NavigationItem({
+    required this.route,
+    required this.label,
+    required this.icon,
+    required this.selectedIcon,
+    this.iconWidget,
+    this.selectedIconWidget,
+  });
+}
+
+/// Profile button for the AppBar
+class _ProfileAppBarButton extends ConsumerWidget {
+  const _ProfileAppBarButton({required this.businessSlug});
+
+  final String businessSlug;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authStateChangesProvider);
+    final user = authState.value;
+    final isAuthenticated = user != null && !user.isAnonymous;
+
+    return IconButton(
+      icon: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primaryContainer,
+          shape: BoxShape.circle,
+        ),
+        padding: const EdgeInsets.all(4),
+        child: Icon(
+          isAuthenticated ? Icons.person : Icons.person_outline,
+          color: Theme.of(context).colorScheme.onPrimaryContainer,
+        ),
+      ),
+      onPressed: () {
+        context.goNamedSafe(AppRoute.profile.name);
+      },
+      tooltip: isAuthenticated ? 'Perfil' : 'Iniciar sesión',
     );
   }
 }

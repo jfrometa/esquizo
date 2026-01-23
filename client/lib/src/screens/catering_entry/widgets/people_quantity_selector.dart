@@ -24,7 +24,7 @@ class _PeopleQuantitySelectorState
   @override
   void initState() {
     super.initState();
-    final order = ref.read(cateringOrderProvider);
+    final order = ref.read(cateringOrderNotifierProvider);
     customPersonasController = TextEditingController(
       text: order?.peopleCount?.toString() ?? '',
     );
@@ -39,7 +39,7 @@ class _PeopleQuantitySelectorState
 
   @override
   Widget build(BuildContext context) {
-    final order = ref.watch(cateringOrderProvider);
+    final order = ref.watch(cateringOrderNotifierProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,9 +125,9 @@ class _PeopleQuantitySelectorState
   }
 
   void _updateOrderQuantity(int count) {
-    final order = ref.read(cateringOrderProvider);
+    final order = ref.read(cateringOrderNotifierProvider);
     if (order != null) {
-      ref.read(cateringOrderProvider.notifier).updateOrder(
+      ref.read(cateringOrderNotifierProvider.notifier).updateOrder(
             order.copyWith(peopleCount: count),
           );
     }

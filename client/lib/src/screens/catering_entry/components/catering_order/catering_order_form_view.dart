@@ -1,20 +1,21 @@
 // UPDATED CateringOrderForm.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
 
 class CateringOrderForm extends ConsumerWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onConfirm;
-  
+
   const CateringOrderForm({
-    super.key, 
+    super.key,
     this.onEdit,
     this.onConfirm,
   });
 
-  Widget _buildCateringOrderDetailItem(String label, String value, ThemeData theme) {
+  Widget _buildCateringOrderDetailItem(
+      String label, String value, ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -47,7 +48,7 @@ class CateringOrderForm extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final order = ref.watch(cateringOrderProvider);
+    final order = ref.watch(cateringOrderNotifierProvider);
     final isDesktop = MediaQuery.sizeOf(context).width > 600;
 
     if (order == null) {
@@ -80,19 +81,21 @@ class CateringOrderForm extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _buildCateringOrderDetailItem('Personas', '${order.peopleCount ?? 0}', theme),
-                    _buildCateringOrderDetailItem('Tipo de Evento', order.eventType, theme),
                     _buildCateringOrderDetailItem(
-                      'Chef Incluido',
-                      order.hasChef ?? false ? 'Sí' : 'No', 
-                      theme
-                    ),
+                        'Personas', '${order.peopleCount ?? 0}', theme),
+                    _buildCateringOrderDetailItem(
+                        'Tipo de Evento', order.eventType, theme),
+                    _buildCateringOrderDetailItem('Chef Incluido',
+                        order.hasChef ?? false ? 'Sí' : 'No', theme),
                     if (order.alergias.isNotEmpty)
-                      _buildCateringOrderDetailItem('Alergias', order.alergias, theme),
+                      _buildCateringOrderDetailItem(
+                          'Alergias', order.alergias, theme),
                     if (order.preferencia.isNotEmpty)
-                      _buildCateringOrderDetailItem('Preferencia', order.preferencia, theme),
+                      _buildCateringOrderDetailItem(
+                          'Preferencia', order.preferencia, theme),
                     if (order.adicionales.isNotEmpty)
-                      _buildCateringOrderDetailItem('Notas', order.adicionales, theme),
+                      _buildCateringOrderDetailItem(
+                          'Notas', order.adicionales, theme),
                   ],
                 ),
               ),
@@ -111,9 +114,9 @@ class CateringOrderForm extends ConsumerWidget {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Order items summary
         if (items.isNotEmpty)
           Card(
@@ -144,11 +147,11 @@ class CateringOrderForm extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   const Divider(),
-                  
+
                   // Item list with delete option
                   ...items.asMap().entries.map((entry) {
                     final index = entry.key;
@@ -197,7 +200,7 @@ class CateringOrderForm extends ConsumerWidget {
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 8, 
+                              horizontal: 8,
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
@@ -220,7 +223,9 @@ class CateringOrderForm extends ConsumerWidget {
                               size: 20,
                             ),
                             onPressed: () {
-                              ref.read(cateringOrderProvider.notifier).removeFromCart(index);
+                              ref
+                                  .read(cateringOrderNotifierProvider.notifier)
+                                  .removeFromCart(index);
                             },
                             tooltip: 'Eliminar',
                             padding: EdgeInsets.zero,
@@ -230,9 +235,9 @@ class CateringOrderForm extends ConsumerWidget {
                       ),
                     );
                   }),
-                  
+
                   const Divider(),
-                  
+
                   // Total
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -256,9 +261,9 @@ class CateringOrderForm extends ConsumerWidget {
               ),
             ),
           ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Desktop complete order button
         if (isDesktop && items.isNotEmpty && onConfirm != null)
           SizedBox(
@@ -275,7 +280,7 @@ class CateringOrderForm extends ConsumerWidget {
       ],
     );
   }
-  
+
   // Calculate total from items
   String _calculateTotal(List<CateringDish> items) {
     double total = 0;

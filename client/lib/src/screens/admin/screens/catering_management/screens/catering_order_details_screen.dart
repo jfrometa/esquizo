@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_order_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart'
+    as model;
 
 class CateringOrderDetailsScreen extends ConsumerStatefulWidget {
   final String orderId;
@@ -25,7 +26,7 @@ class _CateringOrderDetailsScreenState
 
   @override
   Widget build(BuildContext context) {
-    final orderAsync = ref.watch(rawCateringOrderStream(widget.orderId));
+    final orderAsync = ref.watch(cateringOrderStreamProvider(widget.orderId));
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -92,10 +93,10 @@ class _CateringOrderDetailsScreenState
   }
 
   Widget _buildOrderDetails(
-      CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
+      model.CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
     return RefreshIndicator(
       onRefresh: () async {
-        ref.invalidate(cateringOrderProvider);
+        ref.invalidate(cateringOrderNotifierProvider);
       },
       child: ListView(
         padding: const EdgeInsets.all(16),
@@ -162,7 +163,7 @@ class _CateringOrderDetailsScreenState
   }
 
   Widget _buildStatusCard(
-      CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
+      model.CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
     final statusColor = order.status.color;
 
     return Card(
@@ -244,7 +245,7 @@ class _CateringOrderDetailsScreenState
   }
 
   Widget _buildOrderInfoCard(
-      CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
+      model.CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -354,7 +355,7 @@ class _CateringOrderDetailsScreenState
   }
 
   Widget _buildCustomerInfoCard(
-      CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
+      model.CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -463,7 +464,7 @@ class _CateringOrderDetailsScreenState
   }
 
   Widget _buildOrderItemsCard(
-      CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
+      model.CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
     final currencyFormat = NumberFormat.currency(symbol: '\$');
     final subtotal = order.items
         .fold<double>(0, (sum, item) => sum + (item.price * item.quantity));
@@ -637,7 +638,7 @@ class _CateringOrderDetailsScreenState
   }
 
   Widget _buildEventDetailsCard(
-      CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
+      model.CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -724,7 +725,7 @@ class _CateringOrderDetailsScreenState
   }
 
   Widget _buildTimingCard(
-      CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
+      model.CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -819,7 +820,7 @@ class _CateringOrderDetailsScreenState
   }
 
   Widget _buildPaymentCard(
-      CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
+      model.CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
     final currencyFormat = NumberFormat.currency(symbol: '\$');
 
     return Card(
@@ -914,7 +915,7 @@ class _CateringOrderDetailsScreenState
   }
 
   Widget _buildAssignmentCard(
-      CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
+      model.CateringOrder order, ThemeData theme, ColorScheme colorScheme) {
     final bool isAssigned = order.assignedStaffId != null;
 
     return Card(
@@ -1094,12 +1095,13 @@ class _CateringOrderDetailsScreenState
       context: context,
       builder: (context) => Consumer(
         builder: (context, ref, _) {
-          final orderAsync = ref.watch(rawCateringOrderStream(widget.orderId));
+          final orderAsync =
+              ref.watch(cateringOrderStreamProvider(widget.orderId));
 
           return orderAsync.when(
             data: (order) {
               final allowedStatuses = order.status.allowedTransitions;
-              CateringOrderStatus? selectedStatus;
+              model.CateringOrderStatus? selectedStatus;
 
               return StatefulBuilder(builder: (context, setState) {
                 return AlertDialog(
@@ -1120,7 +1122,8 @@ class _CateringOrderDetailsScreenState
                       else
                         SizedBox(
                           width: double.maxFinite,
-                          child: DropdownButtonFormField<CateringOrderStatus>(
+                          child: DropdownButtonFormField<
+                              model.CateringOrderStatus>(
                             initialValue: selectedStatus,
                             isExpanded: true,
                             decoration: const InputDecoration(
@@ -1128,8 +1131,8 @@ class _CateringOrderDetailsScreenState
                             ),
                             items: allowedStatuses
                                 .map(
-                                  (status) =>
-                                      DropdownMenuItem<CateringOrderStatus>(
+                                  (status) => DropdownMenuItem<
+                                      model.CateringOrderStatus>(
                                     value: status,
                                     child: Row(
                                       children: [
@@ -1168,7 +1171,8 @@ class _CateringOrderDetailsScreenState
 
                               try {
                                 await ref
-                                    .read(cateringOrderProvider.notifier)
+                                    .read(
+                                        cateringOrderNotifierProvider.notifier)
                                     .updateOrderStatus(
                                         widget.orderId, selectedStatus!);
 
@@ -1232,7 +1236,8 @@ class _CateringOrderDetailsScreenState
       context: context,
       builder: (context) => Consumer(
         builder: (context, ref, _) {
-          final orderAsync = ref.watch(rawCateringOrderStream(widget.orderId));
+          final orderAsync =
+              ref.watch(cateringOrderStreamProvider(widget.orderId));
 
           return orderAsync.when(
             data: (order) {
@@ -1306,7 +1311,7 @@ class _CateringOrderDetailsScreenState
 
                         try {
                           await ref
-                              .read(cateringOrderProvider.notifier)
+                              .read(cateringOrderNotifierProvider.notifier)
                               .updatePaymentStatus(
                                 widget.orderId,
                                 selectedStatus,

@@ -7,7 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart'
+    as model;
 
 class CateringOrdersScreen extends ConsumerStatefulWidget {
   const CateringOrdersScreen({super.key});
@@ -21,7 +22,7 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
-  CateringOrderStatus? _statusFilter;
+  model.CateringOrderStatus? _statusFilter;
   DateTime? _dateFilter;
   String _searchQuery = '';
 
@@ -164,11 +165,10 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen>
                 // All Orders
                 Consumer(
                   builder: (context, ref, child) {
-                    final ordersAsync =
-                        ref.watch(cateringOrderStatisticsProvider);
+                    final ordersAsync = ref.watch(allCateringOrdersProvider);
                     return ordersAsync.when(
                       data: (orders) => _buildOrdersList(
-                        applyFilters([orders]),
+                        applyFilters(orders),
                         colorScheme,
                       ),
                       loading: () =>
@@ -191,7 +191,8 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen>
                     final ordersAsync =
                         ref.watch(upcomingCateringOrdersProvider);
                     return ordersAsync.when(
-                      data: (orders) => _buildOrdersList(
+                      data: (List<model.CateringOrder> orders) =>
+                          _buildOrdersList(
                         applyFilters(orders),
                         colorScheme,
                       ),
@@ -214,7 +215,8 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen>
                   builder: (context, ref, child) {
                     final ordersAsync = ref.watch(todayCateringOrdersProvider);
                     return ordersAsync.when(
-                      data: (orders) => _buildOrdersList(
+                      data: (List<model.CateringOrder> orders) =>
+                          _buildOrdersList(
                         applyFilters(orders),
                         colorScheme,
                       ),
@@ -244,7 +246,7 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen>
     );
   }
 
-  List<CateringOrder> applyFilters(List<CateringOrder> orders) {
+  List<model.CateringOrder> applyFilters(List<model.CateringOrder> orders) {
     var filteredOrders = orders;
 
     // Apply status filter if set
@@ -291,7 +293,8 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen>
     return filteredOrders;
   }
 
-  Widget _buildOrdersList(List<CateringOrder> orders, ColorScheme colorScheme) {
+  Widget _buildOrdersList(
+      List<model.CateringOrder> orders, ColorScheme colorScheme) {
     if (orders.isEmpty) {
       return Center(
         child: Column(
@@ -357,7 +360,7 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen>
     );
   }
 
-  Widget _buildOrderCard(CateringOrder order, ColorScheme colorScheme) {
+  Widget _buildOrderCard(model.CateringOrder order, ColorScheme colorScheme) {
     final statusColor = order.status.color;
 
     return Card(
@@ -658,7 +661,7 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen>
     );
   }
 
-  Widget _buildStatusUpdateButton(CateringOrder order) {
+  Widget _buildStatusUpdateButton(model.CateringOrder order) {
     final theme = Theme.of(context);
 
     // Get next logical status
@@ -725,7 +728,7 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen>
     );
   }
 
-  void _updateOrderStatus(String orderId, CateringOrderStatus newStatus) {
+  void _updateOrderStatus(String orderId, model.CateringOrderStatus newStatus) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -740,7 +743,7 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen>
           FilledButton(
             onPressed: () {
               ref
-                  .read(cateringOrderProvider.notifier)
+                  .read(cateringOrderNotifierProvider.notifier)
                   .updateOrderStatus(orderId, newStatus);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
@@ -782,8 +785,8 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen>
           child: ListView(
             shrinkWrap: true,
             children: [
-              ...CateringOrderStatus.values.map(
-                (status) => RadioListTile<CateringOrderStatus>(
+              ...model.CateringOrderStatus.values.map(
+                (status) => RadioListTile<model.CateringOrderStatus>(
                   title: Row(
                     children: [
                       Icon(status.icon, color: status.color, size: 20),
@@ -801,7 +804,7 @@ class _CateringOrdersScreenState extends ConsumerState<CateringOrdersScreen>
                   },
                 ),
               ),
-              RadioListTile<CateringOrderStatus?>(
+              RadioListTile<model.CateringOrderStatus?>(
                 title: const Text('All Statuses'),
                 value: null,
                 groupValue: _statusFilter,

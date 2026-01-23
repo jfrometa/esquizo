@@ -159,7 +159,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     // Fetch items based on displayType
     final List<CartItem> cartItems = ref.watch(cartProvider).items;
-    final CateringOrderItem? cateringOrder = ref.watch(cateringOrderProvider);
+    final CateringOrderItem? cateringOrder =
+        ref.watch(cateringOrderNotifierProvider);
     final CateringOrderItem? cateringQuote = ref.watch(manualQuoteProvider);
     final List<CartItem> mealItems = ref.watch(mealOrderProvider) ?? [];
 
@@ -472,7 +473,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Widget _buildFinalSummaryStep(ColorScheme colorScheme) {
     // Fetch items based on displayType
     final List<CartItem> cartItems = ref.watch(cartProvider).items;
-    final CateringOrderItem? cateringOrder = ref.watch(cateringOrderProvider);
+    final CateringOrderItem? cateringOrder =
+        ref.watch(cateringOrderNotifierProvider);
     final CateringOrderItem? cateringQuote = ref.watch(manualQuoteProvider);
     final List<CartItem> mealItems = ref.watch(mealOrderProvider) ?? [];
 
@@ -898,7 +900,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Widget _buildCheckoutContent() {
     // Fetch items based on displayType
     final List<CartItem> cartItems = ref.watch(cartProvider).items;
-    final CateringOrderItem? cateringOrder = ref.watch(cateringOrderProvider);
+    final CateringOrderItem? cateringOrder =
+        ref.watch(cateringOrderNotifierProvider);
     final CateringOrderItem? cateringQuote = ref.watch(manualQuoteProvider);
     final List<CartItem> mealItems = ref.watch(mealOrderProvider) ?? [];
     final colorScheme = Theme.of(context).colorScheme;

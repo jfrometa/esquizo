@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/widgets/catering_form.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_order_provider.dart'; 
- 
+import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_order_provider.dart';
+
 class CateringCartItemView extends ConsumerWidget {
   final CateringOrderItem order;
   final VoidCallback onRemoveFromCart;
   final FocusNode customPersonasFocusNode = FocusNode();
-  final FocusNode customUnitsFocusNode = FocusNode(); // New focus node for units
+  final FocusNode customUnitsFocusNode =
+      FocusNode(); // New focus node for units
   bool isCustomSelected = false;
   bool isCustomUnitsSelected = false; // New flag for units
 
@@ -22,7 +23,8 @@ class CateringCartItemView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final isPersonasSelected = order.peopleCount != null && order.peopleCount! > 0;
+    final isPersonasSelected =
+        order.peopleCount != null && order.peopleCount! > 0;
 
     return Card(
       margin: const EdgeInsets.all(8.0),
@@ -59,9 +61,9 @@ class CateringCartItemView extends ConsumerWidget {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Order details in a styled container
             Container(
               padding: const EdgeInsets.all(12),
@@ -80,7 +82,6 @@ class CateringCartItemView extends ConsumerWidget {
                     Icons.people_outline,
                   ),
                   const SizedBox(height: 8),
-                  
                   _buildInfoRow(
                     context,
                     'Chef en sitio',
@@ -88,22 +89,23 @@ class CateringCartItemView extends ConsumerWidget {
                     Icons.restaurant,
                   ),
                   const SizedBox(height: 8),
-                  
                   _buildInfoRow(
                     context,
                     'Alergias',
-                    order.alergias.trim().isNotEmpty ? order.alergias : "Ninguna",
+                    order.alergias.trim().isNotEmpty
+                        ? order.alergias
+                        : "Ninguna",
                     Icons.health_and_safety_outlined,
                   ),
                   const SizedBox(height: 8),
-                  
                   _buildInfoRow(
                     context,
                     'Tipo de evento',
-                    order.eventType.isEmpty ? 'Solicitud de Catering' : order.eventType,
+                    order.eventType.isEmpty
+                        ? 'Solicitud de Catering'
+                        : order.eventType,
                     Icons.event_outlined,
                   ),
-                  
                   if (order.adicionales.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     _buildInfoRow(
@@ -116,9 +118,9 @@ class CateringCartItemView extends ConsumerWidget {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Order items section
             Text(
               'Platos seleccionados',
@@ -128,7 +130,7 @@ class CateringCartItemView extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 8),
-            
+
             // Dishes list with better styling
             Container(
               decoration: BoxDecoration(
@@ -183,7 +185,7 @@ class CateringCartItemView extends ConsumerWidget {
             ),
 
             const SizedBox(height: 24),
-            
+
             // Total price section
             Container(
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -212,7 +214,7 @@ class CateringCartItemView extends ConsumerWidget {
             ),
 
             const SizedBox(height: 16),
-            
+
             // Button to complete the catering order
             if (!isPersonasSelected)
               SizedBox(
@@ -242,7 +244,7 @@ class CateringCartItemView extends ConsumerWidget {
   ) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -322,9 +324,10 @@ class CateringCartItemView extends ConsumerWidget {
                       padding: const EdgeInsets.only(bottom: 16),
                       child: Text(
                         'Detalles del Catering',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -336,7 +339,9 @@ class CateringCartItemView extends ConsumerWidget {
                           initialData: order,
                           onSubmit: (formData) {
                             try {
-                              ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(
+                              ref
+                                  .read(cateringOrderNotifierProvider.notifier)
+                                  .finalizeCateringOrder(
                                     title: order.title,
                                     img: order.img,
                                     description: order.description,
@@ -350,8 +355,10 @@ class CateringCartItemView extends ConsumerWidget {
 
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: const Text('Se actualizó el Catering'),
-                                  backgroundColor: Theme.of(context).colorScheme.tertiary,
+                                  content:
+                                      const Text('Se actualizó el Catering'),
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.tertiary,
                                   behavior: SnackBarBehavior.floating,
                                   duration: const Duration(seconds: 2),
                                 ),
@@ -360,8 +367,10 @@ class CateringCartItemView extends ConsumerWidget {
                             } catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: const Text('Error al actualizar el catering'),
-                                  backgroundColor: Theme.of(context).colorScheme.error,
+                                  content: const Text(
+                                      'Error al actualizar el catering'),
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.error,
                                   behavior: SnackBarBehavior.floating,
                                 ),
                               );
@@ -392,9 +401,9 @@ class CateringCartItemView extends ConsumerWidget {
     int cantidadPersonas,
   ) {
     try {
-      final cateringOrderProviderNotifier =
-          ref.read(cateringOrderProvider.notifier);
-      cateringOrderProviderNotifier.finalizeCateringOrder(
+      final cateringOrderNotifier =
+          ref.read(cateringOrderNotifierProvider.notifier);
+      cateringOrderNotifier.finalizeCateringOrder(
         title: 'Orden de Catering',
         img: 'assets/image.png',
         description: 'Catering',
