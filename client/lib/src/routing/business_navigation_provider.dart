@@ -152,21 +152,41 @@ class BusinessNavigationController extends _$BusinessNavigationController {
 }
 
 /// Provider for cached business context - prevents re-fetching
+/// Enhanced with TTL-based cache invalidation
 @riverpod
 class CachedBusinessContext extends _$CachedBusinessContext {
   final Map<String, BusinessContext> _cache = {};
+  final Map<String, DateTime> _cacheTimestamps = {};
+
+  /// Cache time-to-live duration
+  static const Duration cacheTTL = Duration(minutes: 15);
 
   @override
   BusinessContext? build(String businessSlug) {
     return _cache[businessSlug];
   }
 
-  /// Get business context with caching
-  Future<BusinessContext> getBusinessContext(String businessSlug) async {
-    // Return cached version if available
-    if (_cache.containsKey(businessSlug)) {
+  /// Check if cache entry is stale
+  bool _isStale(String businessSlug) {
+    final timestamp = _cacheTimestamps[businessSlug];
+    if (timestamp == null) return true;
+    return DateTime.now().difference(timestamp) > cacheTTL;
+  }
+
+  /// Get business context with caching and TTL
+  Future<BusinessContext> getBusinessContext(String businessSlug,
+      {bool forceRefresh = false}) async {
+    // Return cached version if available and not stale
+    if (!forceRefresh &&
+        _cache.containsKey(businessSlug) &&
+        !_isStale(businessSlug)) {
       debugPrint('📦 Using cached business context for: $businessSlug');
       return _cache[businessSlug]!;
+    }
+
+    // Check if cache is stale
+    if (_cache.containsKey(businessSlug) && _isStale(businessSlug)) {
+      debugPrint('⏰ Cache stale for $businessSlug, refreshing...');
     }
 
     // Fetch and cache
@@ -175,22 +195,45 @@ class CachedBusinessContext extends _$CachedBusinessContext {
         await ref.read(explicitBusinessContextProvider(businessSlug).future);
 
     _cache[businessSlug] = context;
+    _cacheTimestamps[businessSlug] = DateTime.now();
     state = context;
 
     debugPrint('📦 Cached business context for: $businessSlug');
     return context;
   }
 
+  /// Get cache age for a business slug
+  Duration? getCacheAge(String businessSlug) {
+    final timestamp = _cacheTimestamps[businessSlug];
+    if (timestamp == null) return null;
+    return DateTime.now().difference(timestamp);
+  }
+
   /// Clear cache for a specific business
   void clearCache(String businessSlug) {
     _cache.remove(businessSlug);
+    _cacheTimestamps.remove(businessSlug);
     ref.invalidateSelf();
   }
 
   /// Clear all cached contexts
   void clearAllCache() {
     _cache.clear();
+    _cacheTimestamps.clear();
     ref.invalidateSelf();
+  }
+
+  /// Preload cache for multiple businesses (useful for startup)
+  Future<void> preloadCache(List<String> businessSlugs) async {
+    for (final slug in businessSlugs) {
+      if (!_cache.containsKey(slug) || _isStale(slug)) {
+        try {
+          await getBusinessContext(slug);
+        } catch (e) {
+          debugPrint('⚠️ Failed to preload cache for $slug: $e');
+        }
+      }
+    }
   }
 }
 

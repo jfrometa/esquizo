@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/business_navigation_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/optimized_business_scaffold_v2.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/landing/landing-page-home.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/screens/landing/landing-page-home.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/menu_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/cart_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/custom_profile_screen.dart';
@@ -28,6 +28,8 @@ class OptimizedBusinessWrapper extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    debugPrint(
+        '[Wrapper] Building OptimizedBusinessWrapper for: $businessSlug (route: $route)');
     // Use cached business context to avoid re-fetching
     final cachedContext =
         ref.watch(cachedBusinessContextProvider(businessSlug));
@@ -42,7 +44,7 @@ class OptimizedBusinessWrapper extends ConsumerWidget {
     // If we have cached context, use it immediately
     if (cachedContext != null) {
       final fullPath = route == '/' ? '/$businessSlug' : '/$businessSlug$route';
-      debugPrint('⚡ Using cached context for $fullPath');
+      debugPrint('[Wrapper] Using cached context for $fullPath');
       return OptimizedBusinessScaffold(
         businessSlug: businessSlug,
         currentRoute: route,
@@ -75,7 +77,8 @@ class OptimizedBusinessWrapper extends ConsumerWidget {
         }
 
         if (snapshot.hasError) {
-          debugPrint('❌ Error loading business context: ${snapshot.error}');
+          debugPrint(
+              '[Wrapper] Error loading business context: ${snapshot.error}');
           return Scaffold(
             body: Center(
               child: Column(
@@ -126,7 +129,8 @@ class OptimizedHomeScreenWrapper extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    debugPrint('🏠 Optimized home screen for: $businessSlug');
+    debugPrint(
+        '[Wrapper] Building OptimizedHomeScreenWrapper for: $businessSlug');
 
     return OptimizedBusinessWrapper(
       businessSlug: businessSlug,

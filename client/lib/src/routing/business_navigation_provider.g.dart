@@ -239,7 +239,7 @@ final businessNavigationControllerProvider = AutoDisposeNotifierProvider<
 typedef _$BusinessNavigationController
     = AutoDisposeNotifier<BusinessNavigationState?>;
 String _$cachedBusinessContextHash() =>
-    r'87d577fa2caaadfb47324ee51e95736d0cf5eb42';
+    r'fbd50a7ab7fc037a60ef20ae6e483518ae03a8f1';
 
 abstract class _$CachedBusinessContext
     extends BuildlessAutoDisposeNotifier<BusinessContext?> {
@@ -251,21 +251,25 @@ abstract class _$CachedBusinessContext
 }
 
 /// Provider for cached business context - prevents re-fetching
+/// Enhanced with TTL-based cache invalidation
 ///
 /// Copied from [CachedBusinessContext].
 @ProviderFor(CachedBusinessContext)
 const cachedBusinessContextProvider = CachedBusinessContextFamily();
 
 /// Provider for cached business context - prevents re-fetching
+/// Enhanced with TTL-based cache invalidation
 ///
 /// Copied from [CachedBusinessContext].
 class CachedBusinessContextFamily extends Family<BusinessContext?> {
   /// Provider for cached business context - prevents re-fetching
+  /// Enhanced with TTL-based cache invalidation
   ///
   /// Copied from [CachedBusinessContext].
   const CachedBusinessContextFamily();
 
   /// Provider for cached business context - prevents re-fetching
+  /// Enhanced with TTL-based cache invalidation
   ///
   /// Copied from [CachedBusinessContext].
   CachedBusinessContextProvider call(
@@ -301,11 +305,13 @@ class CachedBusinessContextFamily extends Family<BusinessContext?> {
 }
 
 /// Provider for cached business context - prevents re-fetching
+/// Enhanced with TTL-based cache invalidation
 ///
 /// Copied from [CachedBusinessContext].
 class CachedBusinessContextProvider extends AutoDisposeNotifierProviderImpl<
     CachedBusinessContext, BusinessContext?> {
   /// Provider for cached business context - prevents re-fetching
+  /// Enhanced with TTL-based cache invalidation
   ///
   /// Copied from [CachedBusinessContext].
   CachedBusinessContextProvider(

@@ -61,13 +61,13 @@ bool isAdminComputed(IsAdminComputedRef ref) {
     data: (isAdmin) => isAdmin,
     loading: () => false, // While loading, don't show admin
     error: (error, stackTrace) {
-      debugPrint('❌ Error in admin provider: $error');
+      debugPrint('[Navigation] Error in admin provider: $error');
       return false;
     },
   );
 
   debugPrint(
-      '🔐 Admin status computed: $isAdmin (authenticated: $isAuthenticated)');
+      "[Navigation] Admin status computed: $isAdmin (authenticated: $isAuthenticated)");
   return isAdmin;
 }
 
@@ -147,30 +147,30 @@ List<NavigationDestinationItem> navigationDestinations(
       showLandingPage = uiSettings.landingPage;
       showOrders = uiSettings.orders;
       debugPrint(
-          '🏠 Business UI settings loaded - Landing page: $showLandingPage, Orders: $showOrders');
+          '[Business UI] Settings loaded - Landing page: $showLandingPage, Orders: $showOrders');
     });
   }
 
-  debugPrint('🧭 Navigation Provider Update:');
-  debugPrint('  � Is Admin (computed): $isAdmin');
-  debugPrint('  � Business Slug: ${businessSlug ?? 'None'}');
-  debugPrint('  � Show Landing: $showLandingPage, Show Orders: $showOrders');
+  debugPrint('[Navigation] Navigation Provider Update:');
+  debugPrint("  - Is Admin (computed): $isAdmin");
+  debugPrint("  - Business Slug: ${businessSlug ?? "None"}");
+  debugPrint("  - Show Landing: $showLandingPage, Show Orders: $showOrders");
 
   // Update visibility for admin tab and feature-controlled tabs
   final updatedDestinations = allDestinations.map((destination) {
     // Only modify specific tabs' visibility
     if (destination.path == '/admin') {
-      debugPrint('  🎯 Admin destination visibility: $isAdmin');
+      debugPrint('  - Admin destination visibility: $isAdmin');
       return destination.copyWith(isVisible: isAdmin);
     } else if (destination.path == '/' &&
         !showLandingPage &&
         businessSlug != null) {
-      debugPrint('  🏠 Landing page visibility: $showLandingPage');
+      debugPrint('  - Landing page visibility: $showLandingPage');
       return destination.copyWith(isVisible: showLandingPage);
     } else if (destination.path == '/ordenes' &&
         !showOrders &&
         businessSlug != null) {
-      debugPrint('  🧾 Orders page visibility: $showOrders');
+      debugPrint('  - Orders page visibility: $showOrders');
       return destination.copyWith(isVisible: showOrders);
     }
     return destination;
@@ -180,7 +180,7 @@ List<NavigationDestinationItem> navigationDestinations(
   final visibleDestinations =
       updatedDestinations.where((item) => item.isVisible).toList();
   debugPrint(
-      '  📍 Visible destinations: ${visibleDestinations.map((d) => '${d.label}(${d.path})').join(', ')}');
+      '[Navigation] Visible destinations: ${visibleDestinations.map((d) => "${d.label}(${d.path})").join(", ")}');
 
   return visibleDestinations;
 }

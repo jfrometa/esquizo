@@ -14,7 +14,6 @@ import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.d
 import 'package:starter_architecture_flutter_firebase/src/routing/app_startup.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/optimized_business_wrappers.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_dashboard_home.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_panel_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/admin_setup_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_set_comple_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_settings_screen.dart';
@@ -34,6 +33,50 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 // Error state for router
 final routerErrorNotifierProvider = StateProvider<String?>((ref) => null);
+
+// =============================================================================
+// Route Path Constants - Single source of truth for all route paths
+// =============================================================================
+
+/// Centralized route path constants for type-safe routing
+abstract class RoutePaths {
+  // System routes
+  static const root = '/';
+  static const signin = '/signin';
+  static const onboarding = '/onboarding';
+  static const startup = '/startup';
+  static const error = '/error';
+  static const debug = '/debug';
+
+  // Admin routes
+  static const admin = '/admin';
+  static const adminSetup = '/admin-setup';
+
+  // Business setup
+  static const businessSetup = '/business-setup';
+  static const businessSetupComplete = '/business-setup/complete';
+
+  // Business sub-routes (relative paths)
+  static const menu = 'menu';
+  static const cart = 'carrito';
+  static const cartEn = 'cart';
+  static const profile = 'cuenta';
+  static const orders = 'ordenes';
+
+  /// Build a business-prefixed path
+  static String forBusiness(String businessSlug, [String? subRoute]) {
+    if (subRoute == null || subRoute.isEmpty || subRoute == '/') {
+      return '/$businessSlug';
+    }
+    final cleanSubRoute =
+        subRoute.startsWith('/') ? subRoute.substring(1) : subRoute;
+    return '/$businessSlug/$cleanSubRoute';
+  }
+}
+
+// =============================================================================
+// Debug Navigator Observer
+// =============================================================================
 
 // Debug navigator observer - reduced logging
 class _DebugNavigatorObserver extends NavigatorObserver {
@@ -64,6 +107,10 @@ class _DebugNavigatorObserver extends NavigatorObserver {
   }
 }
 
+// =============================================================================
+// AppRoute Enum
+// =============================================================================
+
 enum AppRoute {
   authenticatedProfile,
   onboarding,
@@ -87,6 +134,7 @@ enum AppRoute {
   cateringQuote,
   landing,
   local,
+  menu,
   adminPanel,
   adminSetup,
   inProgressOrders,
@@ -113,6 +161,65 @@ enum AppRoute {
   mealPlanPos,
   customerMealPlan,
   mealPlanDetails
+}
+
+// =============================================================================
+// Type-Safe Route Extensions
+// =============================================================================
+
+/// Extension for type-safe path generation from AppRoute enum
+extension AppRouteExtension on AppRoute {
+  /// Get the base path template for this route
+  String get basePath {
+    switch (this) {
+      case AppRoute.landing:
+        return RoutePaths.root;
+      case AppRoute.signIn:
+        return RoutePaths.signin;
+      case AppRoute.onboarding:
+        return RoutePaths.onboarding;
+      case AppRoute.adminSetup:
+        return RoutePaths.adminSetup;
+      case AppRoute.businessSetup:
+        return RoutePaths.businessSetup;
+      case AppRoute.home:
+        return '/:businessSlug';
+      case AppRoute.menu:
+        return '/:businessSlug/${RoutePaths.menu}';
+      case AppRoute.homecart:
+        return '/:businessSlug/${RoutePaths.cart}';
+      case AppRoute.profile:
+        return '/:businessSlug/${RoutePaths.profile}';
+      case AppRoute.inProgressOrders:
+        return '/:businessSlug/${RoutePaths.orders}';
+      default:
+        return '/${name}';
+    }
+  }
+
+  /// Build a complete path with optional business slug
+  String path({String? businessSlug, Map<String, String>? params}) {
+    String result = basePath;
+
+    // Replace businessSlug placeholder
+    if (businessSlug != null) {
+      result = result.replaceAll(':businessSlug', businessSlug);
+    }
+
+    // Replace other parameters
+    if (params != null) {
+      params.forEach((key, value) {
+        result = result.replaceAll(':$key', value);
+      });
+    }
+
+    return result;
+  }
+
+  /// Check if this route requires a business context
+  bool get requiresBusinessContext {
+    return basePath.contains(':businessSlug');
+  }
 }
 
 @riverpod
@@ -144,9 +251,9 @@ GoRouter goRouter(Ref ref) {
       try {
         final path = state.uri.path;
 
-        // ⚠️ CRITICAL: Only log for admin routes to reduce noise
-        if (kDebugMode && path.startsWith('/admin')) {
-          debugPrint('🧭 Router evaluating admin route: "$path"');
+        // [Router] Evaluating path: "$path"
+        if (kDebugMode) {
+          debugPrint('[Router] Evaluating route: "$path"');
         }
 
         // Skip redirect logic entirely if we're already at error
@@ -156,7 +263,8 @@ GoRouter goRouter(Ref ref) {
 
         // If Firebase is not initialized, redirect to startup (don't initialize here)
         if (!isFirebaseInitialized) {
-          debugPrint("⚠️ Firebase not initialized, redirecting to startup");
+          debugPrint(
+              "[Router] Firebase not initialized, redirecting to startup");
           return '/startup';
         }
 
@@ -213,7 +321,7 @@ GoRouter goRouter(Ref ref) {
           // Only platform admins can access /admin routes
           if (!isPlatformAdmin) {
             debugPrint(
-                '🚫 Non-platform-admin blocked from platform admin area');
+                '[Router] Non-platform-admin blocked from platform admin area');
             return '/'; // Redirect non-platform-admins to home
           }
 
@@ -241,7 +349,7 @@ GoRouter goRouter(Ref ref) {
         // This allows the URL strategy to work properly for business routes
         return null;
       } catch (e) {
-        debugPrint("🔥 Router error: $e");
+        debugPrint("[Router] Error: $e");
         return '/error?message=${Uri.encodeComponent(e.toString())}';
       }
     },
@@ -362,6 +470,7 @@ GoRouter goRouter(Ref ref) {
       // Add all admin routes under /:businessSlug/admin/... as well
       GoRoute(
         path: '/:businessSlug',
+        name: AppRoute.home.name,
         pageBuilder: (context, state) {
           final businessSlug = state.pathParameters['businessSlug']!;
           debugPrint('🏢 Optimized business home for: $businessSlug');
@@ -373,6 +482,7 @@ GoRouter goRouter(Ref ref) {
           // Business menu route (e.g., /kako/menu) - Optimized
           GoRoute(
             path: 'menu',
+            name: AppRoute.menu.name,
             pageBuilder: (context, state) {
               final businessSlug = state.pathParameters['businessSlug']!;
               debugPrint('🏢 Optimized business menu for: $businessSlug');
@@ -384,6 +494,7 @@ GoRouter goRouter(Ref ref) {
           // Business cart route (e.g., /kako/carrito) - Optimized
           GoRoute(
             path: 'carrito',
+            name: AppRoute.homecart.name,
             pageBuilder: (context, state) {
               final businessSlug = state.pathParameters['businessSlug']!;
               debugPrint('🏢 Optimized business cart for: $businessSlug');
@@ -395,6 +506,7 @@ GoRouter goRouter(Ref ref) {
           // Alias for cart with English route - Optimized
           GoRoute(
             path: 'cart',
+            name: 'cart_en', // Unique name for English alias
             pageBuilder: (context, state) {
               final businessSlug = state.pathParameters['businessSlug']!;
               debugPrint('🏢 Optimized business cart (EN) for: $businessSlug');
@@ -406,6 +518,7 @@ GoRouter goRouter(Ref ref) {
           // Business account route (e.g., /kako/cuenta) - Optimized
           GoRoute(
             path: 'cuenta',
+            name: AppRoute.profile.name,
             pageBuilder: (context, state) {
               final businessSlug = state.pathParameters['businessSlug']!;
               debugPrint('🏢 Optimized business account for: $businessSlug');
@@ -418,6 +531,7 @@ GoRouter goRouter(Ref ref) {
           // Business orders route (e.g., /kako/ordenes) - Optimized
           GoRoute(
             path: 'ordenes',
+            name: AppRoute.inProgressOrders.name,
             pageBuilder: (context, state) {
               final businessSlug = state.pathParameters['businessSlug']!;
               debugPrint('🏢 Optimized business orders for: $businessSlug');
@@ -434,29 +548,181 @@ GoRouter goRouter(Ref ref) {
   );
 }
 
-/// Helper function to get nested routes for a specific path
-// Include bare minimum of UnauthorizedScreen to make the code complete
+// =============================================================================
+// Error Screens
+// =============================================================================
+
+/// Error type for router errors
+enum RouterErrorType {
+  unauthorized,
+  notFound,
+  businessNotFound,
+  networkError,
+  unknown,
+}
+
+/// Enhanced error screen with contextual information and recovery options
+class RouterErrorScreen extends StatelessWidget {
+  const RouterErrorScreen({
+    super.key,
+    this.errorType = RouterErrorType.unknown,
+    this.message,
+    this.returnPath,
+  });
+
+  final RouterErrorType errorType;
+  final String? message;
+  final String? returnPath;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildIcon(colorScheme),
+                const SizedBox(height: 24),
+                Text(
+                  _getTitle(),
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  message ?? _getDefaultMessage(),
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                _buildActions(context, colorScheme),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIcon(ColorScheme colorScheme) {
+    IconData icon;
+    Color color;
+
+    switch (errorType) {
+      case RouterErrorType.unauthorized:
+        icon = Icons.lock_outline;
+        color = colorScheme.error;
+        break;
+      case RouterErrorType.notFound:
+        icon = Icons.search_off;
+        color = colorScheme.tertiary;
+        break;
+      case RouterErrorType.businessNotFound:
+        icon = Icons.store_mall_directory_outlined;
+        color = colorScheme.secondary;
+        break;
+      case RouterErrorType.networkError:
+        icon = Icons.wifi_off;
+        color = colorScheme.error;
+        break;
+      case RouterErrorType.unknown:
+        icon = Icons.error_outline;
+        color = colorScheme.error;
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(icon, size: 64, color: color),
+    );
+  }
+
+  String _getTitle() {
+    switch (errorType) {
+      case RouterErrorType.unauthorized:
+        return 'Access Denied';
+      case RouterErrorType.notFound:
+        return 'Page Not Found';
+      case RouterErrorType.businessNotFound:
+        return 'Business Not Found';
+      case RouterErrorType.networkError:
+        return 'Connection Error';
+      case RouterErrorType.unknown:
+        return 'Something Went Wrong';
+    }
+  }
+
+  String _getDefaultMessage() {
+    switch (errorType) {
+      case RouterErrorType.unauthorized:
+        return 'You do not have permission to access this area. Please sign in with an authorized account.';
+      case RouterErrorType.notFound:
+        return 'The page you\'re looking for doesn\'t exist or has been moved.';
+      case RouterErrorType.businessNotFound:
+        return 'We couldn\'t find the business you\'re looking for. Please check the URL and try again.';
+      case RouterErrorType.networkError:
+        return 'Unable to connect. Please check your internet connection and try again.';
+      case RouterErrorType.unknown:
+        return 'An unexpected error occurred. Please try again.';
+    }
+  }
+
+  Widget _buildActions(BuildContext context, ColorScheme colorScheme) {
+    return Column(
+      children: [
+        FilledButton.icon(
+          onPressed: () => context.go(returnPath ?? RoutePaths.root),
+          icon: const Icon(Icons.home),
+          label: const Text('Go to Home'),
+        ),
+        const SizedBox(height: 12),
+        if (errorType == RouterErrorType.unauthorized)
+          OutlinedButton.icon(
+            onPressed: () => context.go(RoutePaths.signin),
+            icon: const Icon(Icons.login),
+            label: const Text('Sign In'),
+          ),
+        if (errorType == RouterErrorType.networkError)
+          OutlinedButton.icon(
+            onPressed: () {
+              // Trigger a reload by navigating to current path
+              final currentPath = GoRouter.of(context)
+                  .routerDelegate
+                  .currentConfiguration
+                  .uri
+                  .path;
+              context.go(currentPath);
+            },
+            icon: const Icon(Icons.refresh),
+            label: const Text('Try Again'),
+          ),
+      ],
+    );
+  }
+}
+
+/// Backwards-compatible alias for UnauthorizedScreen
 class UnauthorizedScreen extends StatelessWidget {
   const UnauthorizedScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.lock, size: 64),
-            const SizedBox(height: 16),
-            const Text('You do not have access to this area'),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => context.go('/'),
-              child: const Text('Go to Home'),
-            ),
-          ],
-        ),
-      ),
+    return const RouterErrorScreen(
+      errorType: RouterErrorType.unauthorized,
     );
   }
 }

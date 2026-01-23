@@ -6,7 +6,7 @@ part of 'navigation_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$isAdminComputedHash() => r'd1615325617c1c0ee32399092df742ba344f0240';
+String _$isAdminComputedHash() => r'9914e072873568cf539effc8c77e053d630fb47e';
 
 /// Computed provider that returns a simple boolean for admin status
 /// This prevents unnecessary rebuilds when watching AsyncValue
@@ -49,7 +49,7 @@ final allNavigationDestinationsProvider =
 typedef AllNavigationDestinationsRef
     = AutoDisposeProviderRef<List<NavigationDestinationItem>>;
 String _$navigationDestinationsHash() =>
-    r'1c38b59a74b80acefa5d49ce2fa136904d3c9e7d';
+    r'67a940d92f0ecdcedd2fb08b8298b61c7d30380d';
 
 /// Provider for visible navigation destinations (optimized)
 ///
