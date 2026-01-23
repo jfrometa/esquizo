@@ -6,7 +6,7 @@ part of 'admin_management_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$isAdminHash() => r'ccd3dbe1d054d4777af0b6c901331e939cb21068';
+String _$isAdminHash() => r'9a06d001dac104e98ec829012e6663a6963476d8';
 
 /// See also [isAdmin].
 @ProviderFor(isAdmin)
@@ -41,7 +41,7 @@ final refreshAdminStatusProvider = AutoDisposeFutureProvider<void>.internal(
 // ignore: unused_element
 typedef RefreshAdminStatusRef = AutoDisposeFutureProviderRef<void>;
 String _$autoCheckAdminStatusHash() =>
-    r'f8888e5aaa61c278b4b04610d540dd753be244eb';
+    r'b0734aa009201aab14d346380046ef2635246b2f';
 
 /// See also [autoCheckAdminStatus].
 @ProviderFor(autoCheckAdminStatus)

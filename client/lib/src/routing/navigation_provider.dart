@@ -49,25 +49,31 @@ class NavigationDestinationItem {
 /// This prevents unnecessary rebuilds when watching AsyncValue
 @riverpod
 bool isAdminComputed(IsAdminComputedRef ref) {
-  final adminStatusAsync = ref.watch(isAdminProvider);
   final authState = ref.watch(authStateChangesProvider);
   final isAuthenticated = authState.value != null;
 
   // Return false if not authenticated
   if (!isAuthenticated) return false;
 
-  // Return computed admin status from AsyncValue
-  final isAdmin = adminStatusAsync.when(
-    data: (isAdmin) => isAdmin,
-    loading: () => false, // While loading, don't show admin
-    error: (error, stackTrace) {
-      debugPrint('[Navigation] Error in admin provider: $error');
-      return false;
-    },
-  );
+  // Watch the cached status for immediate updates
+  final isCachedAdmin = ref.watch(cachedAdminStatusProvider);
+
+  // Still watch the async provider to trigger the check if not cached
+  final adminStatusAsync = ref.watch(isAdminProvider);
+
+  // Return true if either the cache says so or the async provider has confirmed it
+  final isAdmin = isCachedAdmin ||
+      adminStatusAsync.when(
+        data: (isAdmin) => isAdmin,
+        loading: () => false,
+        error: (error, stackTrace) {
+          debugPrint('[Navigation] Error in admin provider: $error');
+          return false;
+        },
+      );
 
   debugPrint(
-      "[Navigation] Admin status computed: $isAdmin (authenticated: $isAuthenticated)");
+      "[Navigation] Admin status computed: $isAdmin (authenticated: $isAuthenticated, cached: $isCachedAdmin)");
   return isAdmin;
 }
 

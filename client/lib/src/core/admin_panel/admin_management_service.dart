@@ -219,6 +219,7 @@ class UnifiedAdminService extends _$UnifiedAdminService {
 @riverpod
 Future<bool> isAdmin(Ref ref) async {
   // Listen to auth state changes for cache invalidation
+  // This is a "safe" use of ref.listen within a provider for reactive invalidation
   ref.listen(authStateChangesProvider, (_, next) {
     debugPrint('🔄 Auth state changed, invalidating admin status cache');
     // Clear cache when auth state changes by invalidating the state provider
@@ -233,12 +234,12 @@ Future<bool> isAdmin(Ref ref) async {
 
   // If user is not authenticated, they can't be admin
   if (authState.value == null) {
-    debugPrint('❌ User not authenticated, setting admin status to false');
-    ref.read(cachedAdminStatusProvider.notifier).updateStatus(false);
+    debugPrint('❌ User not authenticated, returning false');
     return false;
   }
 
   // Check cached value first for performance
+  // Note: We read the state here, which is fine, but we don't modify other providers
   final cachedStatus = ref.read(cachedAdminStatusProvider);
   if (cachedStatus) {
     debugPrint('✅ Using cached admin status: true');
@@ -248,13 +249,11 @@ Future<bool> isAdmin(Ref ref) async {
   // If not cached, check from service
   debugPrint('🔍 No cached admin status, checking from service...');
   final adminService = ref.watch(unifiedAdminServiceProvider.notifier);
-  final isAdmin = await adminService.isCurrentUserAdmin();
+  final isAdminResult = await adminService.isCurrentUserAdmin();
 
-  // Update cache with the result
-  ref.read(cachedAdminStatusProvider.notifier).updateStatus(isAdmin);
-  debugPrint('📝 Cached admin status updated: $isAdmin');
+  debugPrint('🎯 Admin check result: $isAdminResult');
 
-  return isAdmin;
+  return isAdminResult;
 }
 
 // Single, centralized cache provider using generated syntax
@@ -293,6 +292,8 @@ void autoCheckAdminStatus(Ref ref) {
       try {
         final adminResult = await ref.read(isAdminProvider.future);
         debugPrint('✅ Admin status check completed: $adminResult');
+        // Update cache AFTER the async check is complete, in a listener callback
+        ref.read(cachedAdminStatusProvider.notifier).updateStatus(adminResult);
       } catch (e) {
         debugPrint('❌ Error checking admin status after login: $e');
       }
@@ -301,8 +302,19 @@ void autoCheckAdminStatus(Ref ref) {
     // When user logs out (from authenticated to null)
     if (previous?.value != null && next.value == null) {
       debugPrint('🔒 User logged out, clearing admin status');
-      ref.invalidate(cachedAdminStatusProvider);
+      ref.read(cachedAdminStatusProvider.notifier).updateStatus(false);
     }
+  });
+
+  // Also listen to isAdminProvider itself to keep the cache in sync
+  ref.listen(isAdminProvider, (previous, next) {
+    next.whenData((isAdmin) {
+      if (ref.read(cachedAdminStatusProvider) != isAdmin) {
+        debugPrint(
+            '📝 Syncing cachedAdminStatus with isAdminProvider: $isAdmin');
+        ref.read(cachedAdminStatusProvider.notifier).updateStatus(isAdmin);
+      }
+    });
   });
 }
 

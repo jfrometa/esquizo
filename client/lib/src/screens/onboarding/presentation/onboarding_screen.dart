@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
+// import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/onboarding/presentation/onboarding_controller.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
@@ -52,7 +52,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             },
             child: const Text(
               'Saltar',
-             
             ),
           ),
         ],
@@ -168,7 +167,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   void _completeOnboarding(WidgetRef ref) async {
     await ref.read(onboardingControllerProvider.notifier).completeOnboarding();
     if (context.mounted) {
-      context.goNamed(AppRoute.signIn.name);
+      context.goNamedSafe(AppRoute.signIn.name);
     }
   }
 }

@@ -507,9 +507,9 @@ class _CartScreenState extends ConsumerState<CartScreen>
 
       // Add a small delay to show animation
       Future.delayed(const Duration(milliseconds: 300), () {
-        if (mounted) {
+        if (mounted && context.mounted) {
           setState(() => _isLoading = false);
-          GoRouter.of(context).goNamed(AppRoute.checkout.name, extra: type);
+          context.goNamedSafe(AppRoute.checkout.name, extra: type);
         }
       });
     } catch (e) {

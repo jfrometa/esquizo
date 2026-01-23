@@ -110,6 +110,76 @@ extension BusinessNavigationExtension on BuildContext {
     final slug = businessSlug ?? BusinessConstants.defaultSlug;
     GoRouter.of(this).go(RoutePaths.forBusiness(slug, RoutePaths.profile));
   }
+
+  /// Safe version of goNamed that automatically injects the current businessSlug
+  /// if it is missing from pathParameters but required by the route.
+  void goNamedSafe(
+    String name, {
+    Map<String, String> pathParameters = const <String, String>{},
+    Map<String, dynamic> queryParameters = const <String, dynamic>{},
+    Object? extra,
+  }) {
+    final route = _findAppRouteByName(name);
+    final finalPathParameters = Map<String, String>.from(pathParameters);
+
+    // If the route requires a business context and businessSlug is missing, inject it
+    if (route != null &&
+        route.requiresBusinessContext &&
+        !finalPathParameters.containsKey('businessSlug')) {
+      final currentSlug =
+          GoRouterState.of(this).pathParameters['businessSlug'] ??
+              BusinessConstants.defaultSlug;
+      finalPathParameters['businessSlug'] = currentSlug;
+      debugPrint('[Navigation] Injected missing businessSlug: $currentSlug');
+    }
+
+    GoRouter.of(this).goNamed(
+      name,
+      pathParameters: finalPathParameters,
+      queryParameters: queryParameters,
+      extra: extra,
+    );
+  }
+
+  /// Safe version of pushNamed that automatically injects the current businessSlug
+  /// if it is missing from pathParameters but required by the route.
+  Future<T?> pushNamedSafe<T extends Object?>(
+    String name, {
+    Map<String, String> pathParameters = const <String, String>{},
+    Map<String, dynamic> queryParameters = const <String, dynamic>{},
+    Object? extra,
+  }) {
+    final route = _findAppRouteByName(name);
+    final finalPathParameters = Map<String, String>.from(pathParameters);
+
+    // If the route requires a business context and businessSlug is missing, inject it
+    if (route != null &&
+        route.requiresBusinessContext &&
+        !finalPathParameters.containsKey('businessSlug')) {
+      final currentSlug =
+          GoRouterState.of(this).pathParameters['businessSlug'] ??
+              BusinessConstants.defaultSlug;
+      finalPathParameters['businessSlug'] = currentSlug;
+      debugPrint(
+          '[Navigation] Injected missing businessSlug (push): $currentSlug');
+    }
+
+    return GoRouter.of(this).pushNamed<T>(
+      name,
+      pathParameters: finalPathParameters,
+      queryParameters: queryParameters,
+      extra: extra,
+    );
+  }
+
+  /// Helper to find AppRoute by name
+  AppRoute? _findAppRouteByName(String name) {
+    try {
+      return AppRoute.values.firstWhere((e) => e.name == name);
+    } catch (_) {
+      return null;
+    }
+  }
 }
 
 // =============================================================================

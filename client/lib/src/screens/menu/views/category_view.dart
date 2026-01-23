@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+// import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catalog/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/helpers/scroll_bahaviour.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/QR/models/qr_code_data.dart';
@@ -56,7 +56,7 @@ class CategoryView extends ConsumerWidget {
                   ),
                   TextButton(
                     onPressed: () {
-                      context.goNamed(AppRoute.category.name);
+                      context.goNamedSafe(AppRoute.category.name);
                     },
                     child: const Text('View All'),
                   ),
@@ -219,7 +219,7 @@ class CategoryView extends ConsumerWidget {
                   ),
                   TextButton(
                     onPressed: () {
-                      context.goNamed(AppRoute.allDishes.name);
+                      context.goNamedSafe(AppRoute.allDishes.name);
                     },
                     child: const Text('View All'),
                   ),
@@ -293,7 +293,7 @@ class CategoryView extends ConsumerWidget {
                         return DishCard(
                           dish: dishMap,
                           onTap: () {
-                            context.pushNamed(
+                            context.pushNamedSafe(
                               AppRoute.addDishToOrder.name,
                               pathParameters: {'dishId': dish.id},
                             );

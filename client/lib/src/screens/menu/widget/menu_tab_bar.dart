@@ -44,6 +44,19 @@ class MenuTabBarState extends ConsumerState<MenuTabBar> {
   void didUpdateWidget(MenuTabBar oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    // If the tab controller has changed, swap listeners
+    if (oldWidget.tabController != widget.tabController) {
+      oldWidget.tabController.removeListener(_handleTabChange);
+      widget.tabController.addListener(_handleTabChange);
+
+      // Update current index if the new controller has a different index
+      if (_currentTabIndex != widget.tabController.index) {
+        setState(() {
+          _currentTabIndex = widget.tabController.index;
+        });
+      }
+    }
+
     // If the feature flags have changed, rebuild the tab items
     if (oldWidget.showMealPlans != widget.showMealPlans ||
         oldWidget.showCatering != widget.showCatering) {

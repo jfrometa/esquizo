@@ -6,7 +6,7 @@ part of 'navigation_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$isAdminComputedHash() => r'9914e072873568cf539effc8c77e053d630fb47e';
+String _$isAdminComputedHash() => r'5befb0c62c6f538d210dbe03d50ad56f1b4ce6a8';
 
 /// Computed provider that returns a simple boolean for admin status
 /// This prevents unnecessary rebuilds when watching AsyncValue

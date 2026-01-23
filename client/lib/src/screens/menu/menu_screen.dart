@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+// import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_features_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/cart/cart_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/business_navigation_provider.dart';
@@ -707,7 +707,7 @@ class _MenuAppBar extends ConsumerWidget {
                         color: appBarFgColor),
                     tooltip: 'View cart',
                     onPressed: () {
-                      context.goNamed(AppRoute.homecart.name);
+                      context.goNamedSafe(AppRoute.homecart.name);
                       HapticFeedback.selectionClick();
                     },
                   ),
