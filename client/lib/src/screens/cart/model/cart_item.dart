@@ -1,5 +1,5 @@
 import 'dart:convert';
- 
+
 // CartItem Model
 // CartItem Model
 class CartItem {
@@ -33,7 +33,7 @@ class CartItem {
   final String alergias;
   final String eventType;
   final String preferencia;
-  
+
   // Getter to return the pricing as a num
   num get numericPrice {
     try {
@@ -73,7 +73,8 @@ class CartItem {
     this.sideRequest = '',
     this.options = const {},
     this.notes,
-  }) : expirationDate = expirationDate ?? DateTime.now().add(const Duration(days: 40));
+  }) : expirationDate =
+            expirationDate ?? DateTime.now().add(const Duration(days: 40));
 
   CartItem copyWith({
     bool? hasChef,
@@ -161,32 +162,53 @@ class CartItem {
 
   // fromJson factory constructor for deserialization
   factory CartItem.fromJson(Map<String, dynamic> json) {
-    return CartItem(
-      id: json['id'] as String,
-      img: json['img'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String,
-      pricing: json['pricing'] as String,
-      offertPricing: json['offertPricing'] as String?,
-      ingredients: List<String>.from(json['ingredients'] as List<dynamic>),
-      isSpicy: json['isSpicy'] as bool,
-      foodType: json['foodType'] as String,
-      quantity: json['quantity'] as int,
-      isOffer: json['isOffer'] as bool,
-      hasChef: json['hasChef'] as bool?,
-      alergias: json['alergias'] as String? ?? '',
-      eventType: json['eventType'] as String? ?? '',
-      preferencia: json['preferencia'] as String? ?? '',
-      isMealSubscription: json['isMealSubscription'] as bool,
-      totalMeals: json['totalMeals'] as int,
-      remainingMeals: json['remainingMeals'] as int,
-      expirationDate: DateTime.parse(json['expirationDate'] as String),
-      peopleCount: json['peopleCount'] as int,
-      sideRequest: json['sideRequest'] as String,
-      options: json['options'] as Map<String, dynamic>? ?? {},
-      notes: json['notes'] as String?,
-      isMealPlanDish: json['isMealPlanDish'] as bool? ?? false,
-    );
+    try {
+      return CartItem(
+        id: (json['id'] ?? '').toString(),
+        img: (json['img'] ?? '').toString(),
+        title: (json['title'] ?? '').toString(),
+        description: (json['description'] ?? '').toString(),
+        pricing: (json['pricing'] ?? '0').toString(),
+        offertPricing: json['offertPricing']?.toString(),
+        ingredients: json['ingredients'] != null
+            ? List<String>.from(json['ingredients'] as List<dynamic>)
+            : [],
+        isSpicy: json['isSpicy'] as bool? ?? false,
+        foodType: (json['foodType'] ?? '').toString(),
+        quantity: json['quantity'] as int? ?? 1,
+        isOffer: json['isOffer'] as bool? ?? false,
+        hasChef: json['hasChef'] as bool?,
+        alergias: json['alergias'] as String? ?? '',
+        eventType: json['eventType'] as String? ?? '',
+        preferencia: json['preferencia'] as String? ?? '',
+        isMealSubscription: json['isMealSubscription'] as bool? ?? false,
+        totalMeals: json['totalMeals'] as int? ?? 0,
+        remainingMeals: json['remainingMeals'] as int? ?? 0,
+        expirationDate: json['expirationDate'] != null
+            ? DateTime.tryParse(json['expirationDate'] as String) ??
+                DateTime.now().add(const Duration(days: 40))
+            : DateTime.now().add(const Duration(days: 40)),
+        peopleCount: json['peopleCount'] as int? ?? 0,
+        sideRequest: (json['sideRequest'] ?? '').toString(),
+        options: json['options'] as Map<String, dynamic>? ?? {},
+        notes: json['notes'] as String?,
+        isMealPlanDish: json['isMealPlanDish'] as bool? ?? false,
+      );
+    } catch (e) {
+      // Fallback for malformed JSON
+      return CartItem(
+        id: 'error',
+        img: '',
+        title: 'Error loading item',
+        description: '',
+        pricing: '0',
+        ingredients: [],
+        isSpicy: false,
+        foodType: '',
+        quantity: 1,
+        isOffer: false,
+      );
+    }
   }
 }
 
@@ -196,6 +218,14 @@ String serializeCart(List<CartItem> cartItems) {
 }
 
 List<CartItem> deserializeCart(String jsonString) {
-  List<dynamic> jsonData = jsonDecode(jsonString);
-  return jsonData.map((item) => CartItem.fromJson(item)).toList();
+  if (jsonString.isEmpty || jsonString == 'null' || jsonString == 'undefined') {
+    return [];
+  }
+  try {
+    List<dynamic> jsonData = jsonDecode(jsonString);
+    return jsonData.map((item) => CartItem.fromJson(item)).toList();
+  } catch (e) {
+    print('Error decoding cart JSON: $e');
+    return [];
+  }
 }

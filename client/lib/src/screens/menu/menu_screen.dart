@@ -462,6 +462,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 4.0),
                     child: MenuTabBar(
+                      key: ValueKey(
+                          'menu_tab_bar_${_enabledTabIndices.length}_${_tabController.index}'),
                       tabController: _tabController,
                       onTabChanged: (index) {
                         ref.read(menuActiveTabProvider.notifier).state = index;
@@ -503,10 +505,12 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                               return false;
                             },
                             child: TabBarView(
+                              key: ValueKey(
+                                  'menu_tab_view_${_enabledTabIndices.length}'),
                               controller: _tabController,
                               physics: const BouncingScrollPhysics(),
-                              children: List.generate(
-                                  4, (index) => _buildTabView(index)),
+                              children: List.generate(_enabledTabIndices.length,
+                                  (index) => _buildTabView(index)),
                             ),
                           ),
                         ),

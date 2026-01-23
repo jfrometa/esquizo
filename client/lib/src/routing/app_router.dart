@@ -28,7 +28,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/landing/landin
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/dish_details/dish_details_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/dish_caterogy/category_dishes_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/all_dishes_menu_home/all_dishes_menu_home_screen.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/checkout/checkout_creen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/checkout/checkout_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/QR/models/qr_code_data.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/business_routing_provider.dart';
 import 'package:go_router/go_router.dart';

@@ -69,8 +69,18 @@ class MealOrderNotifier extends StateNotifier<List<CartItem>> {
 
   // Deserialize method
   List<CartItem> deserializeCart(String jsonString) {
-    List<dynamic> jsonData = jsonDecode(jsonString);
-    return jsonData.map((item) => CartItem.fromJson(item)).toList();
+    if (jsonString.isEmpty ||
+        jsonString == 'null' ||
+        jsonString == 'undefined') {
+      return [];
+    }
+    try {
+      List<dynamic> jsonData = jsonDecode(jsonString);
+      return jsonData.map((item) => CartItem.fromJson(item)).toList();
+    } catch (e) {
+      debugPrint('Error decoding meal cart JSON: $e');
+      return [];
+    }
   }
 
   // Serialize method

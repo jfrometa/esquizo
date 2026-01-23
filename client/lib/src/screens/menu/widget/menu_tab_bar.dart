@@ -67,7 +67,12 @@ class MenuTabBarState extends ConsumerState<MenuTabBar> {
 
   @override
   void dispose() {
-    widget.tabController.removeListener(_handleTabChange);
+    // Check if the controller is already disposed or if the widget is still mounted
+    try {
+      widget.tabController.removeListener(_handleTabChange);
+    } catch (_) {
+      // Ignore if already disposed
+    }
     super.dispose();
   }
 

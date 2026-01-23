@@ -1,7 +1,8 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart'; 
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DeliveryLocation {
   final String address;
@@ -56,9 +57,13 @@ class DeliveryLocationNotifier extends StateNotifier<DeliveryLocation?> {
 
   Future<void> _loadLocation() async {
     final prefs = await SharedPreferences.getInstance();
-    String? serializedLocation = prefs.getString(_key) ?? "";
-    state = _deserializeLocation(serializedLocation);
+    String? serializedLocation = prefs.getString(_key);
+    if (serializedLocation != null && serializedLocation.isNotEmpty) {
+      state = _deserializeLocation(serializedLocation);
+    } else {
+      state = null;
     }
+  }
 
   Future<void> _saveLocation() async {
     final prefs = await SharedPreferences.getInstance();
@@ -77,8 +82,18 @@ class DeliveryLocationNotifier extends StateNotifier<DeliveryLocation?> {
   }
 
   DeliveryLocation? _deserializeLocation(String jsonString) {
-    Map<String, dynamic> jsonData = jsonDecode(jsonString);
-    return DeliveryLocation.fromJson(jsonData);
+    if (jsonString.isEmpty ||
+        jsonString == 'null' ||
+        jsonString == 'undefined') {
+      return null;
+    }
+    try {
+      Map<String, dynamic> jsonData = jsonDecode(jsonString);
+      return DeliveryLocation.fromJson(jsonData);
+    } catch (e) {
+      debugPrint('Error decoding delivery location JSON: $e');
+      return null;
+    }
   }
 
   String _serializeLocation(DeliveryLocation location) {

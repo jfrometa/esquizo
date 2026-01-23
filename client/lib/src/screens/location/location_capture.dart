@@ -312,22 +312,27 @@ class LocationCaptureBottomSheetState
     try {
       // Use a free geolocation API
       final response = await http.get(Uri.parse('https://ipapi.co/json/'));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final lat = data['latitude'];
-        final lng = data['longitude'];
+      if (response.statusCode == 200 && response.body.isNotEmpty) {
+        try {
+          final data = json.decode(response.body);
+          final lat = data['latitude'];
+          final lng = data['longitude'];
 
-        if (lat != null && lng != null) {
-          setState(() {
-            _latitude = lat.toString();
-            _longitude = lng.toString();
-            _currentPosition = LatLng(lat, lng);
-            _isLowAccuracy = true; // IP geolocation is always low accuracy
-            _accuracyInMeters = 1000; // Assume 1km accuracy for IP geolocation
-          });
+          if (lat != null && lng != null) {
+            setState(() {
+              _latitude = lat.toString();
+              _longitude = lng.toString();
+              _currentPosition = LatLng(lat, lng);
+              _isLowAccuracy = true; // IP geolocation is always low accuracy
+              _accuracyInMeters =
+                  1000; // Assume 1km accuracy for IP geolocation
+            });
 
-          // Fetch address for this location
-          await _getHumanReadableAddress(_latitude!, _longitude!);
+            // Fetch address for this location
+            await _getHumanReadableAddress(_latitude!, _longitude!);
+          }
+        } catch (e) {
+          debugPrint('Error parsing IP location: $e');
         }
       }
     } catch (e) {
@@ -403,18 +408,26 @@ class LocationCaptureBottomSheetState
 
     try {
       final response = await http.get(Uri.parse(geocodeUrl));
-      if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
-        if (jsonResponse['results'].isNotEmpty) {
-          setState(() {
-            _address = jsonResponse['results'][0]['formatted_address'];
-          });
+      if (response.statusCode == 200 && response.body.isNotEmpty) {
+        try {
+          final jsonResponse = json.decode(response.body);
+          if (jsonResponse['results'] != null &&
+              (jsonResponse['results'] as List).isNotEmpty) {
+            setState(() {
+              _address = jsonResponse['results'][0]['formatted_address'];
+            });
 
-          // Populate the address field for manual editing too
-          _addressController.text = _address ?? '';
-        } else {
+            // Populate the address field for manual editing too
+            _addressController.text = _address ?? '';
+          } else {
+            setState(() {
+              _address = 'Dirección no encontrada';
+            });
+          }
+        } catch (e) {
+          debugPrint('Error decoding geocode response: $e');
           setState(() {
-            _address = 'Dirección no encontrada';
+            _address = 'Error al procesar dirección';
           });
         }
       } else {
@@ -552,9 +565,11 @@ class LocationCaptureBottomSheetState
             _buildHeader(colorScheme, theme),
             const SizedBox(height: 24),
             Expanded(
-              child: _isMapView
-                  ? _buildMapView(colorScheme, theme)
-                  : _buildAddressFormView(colorScheme, theme),
+              child: SingleChildScrollView(
+                child: _isMapView
+                    ? _buildMapView(colorScheme, theme)
+                    : _buildAddressFormView(colorScheme, theme),
+              ),
             ),
             const SizedBox(height: 24),
             _buildActionButtons(colorScheme, theme),

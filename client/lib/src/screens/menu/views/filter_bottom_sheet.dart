@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-
-
-
-
-
 // FILTER BOTTOM SHEET
 class FilterBottomSheet extends StatefulWidget {
   const FilterBottomSheet({super.key});
@@ -15,9 +10,7 @@ class FilterBottomSheet extends StatefulWidget {
 }
 
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
-
 // ... previous code ...
-
 
   double _priceRange = 100.0;
   List<String> _selectedCategories = [];
@@ -45,12 +38,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final mediaQuery = MediaQuery.sizeOf(context);
     final mediaQueryInset = MediaQuery.viewInsetsOf(context);
     return Container(
-      constraints: BoxConstraints(
-        maxHeight: mediaQuery.height * 0.85,
-      ),
       padding: EdgeInsets.only(
         left: 24,
         right: 24,
@@ -85,7 +74,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               ],
             ),
             const SizedBox(height: 24),
-            
+
             // Price range filter
             Text(
               'Price Range',
@@ -114,9 +103,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 Text('S/ 200'),
               ],
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Cuisine type filter
             Text(
               'Cuisine Type',
@@ -146,9 +135,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 );
               }).toList(),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Dietary restrictions filter
             Text(
               'Dietary Restrictions',
@@ -178,9 +167,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 );
               }).toList(),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Special offers switch
             SwitchListTile(
               title: const Text('Special Offers Only'),
@@ -193,9 +182,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               },
               contentPadding: EdgeInsets.zero,
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Action buttons
             Row(
               children: [

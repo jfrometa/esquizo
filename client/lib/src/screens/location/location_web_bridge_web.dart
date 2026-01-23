@@ -190,6 +190,30 @@ class LocationWebBridge {
       return;
     }
 
+    // Attempt to find if Google Maps API is already being loaded
+    bool isGoogleMapsLoading = false;
+    final scripts = web.document.getElementsByTagName('script');
+    for (int i = 0; i < scripts.length; i++) {
+      final script = scripts.item(i) as web.HTMLScriptElement;
+      if (script.src.contains('maps.googleapis.com/maps/api/js')) {
+        isGoogleMapsLoading = true;
+        break;
+      }
+    }
+
+    // If not loading, inject the Google Maps API script
+    if (!isGoogleMapsLoading) {
+      final googleMapsScript =
+          web.document.createElement('script') as web.HTMLScriptElement;
+      // Using a known key from the app for initialization
+      const apiKey = 'AIzaSyAlk83WpDsAWqaa4RqI4mxa5IYPiuZldek';
+      googleMapsScript.src =
+          'https://maps.googleapis.com/maps/api/js?key=$apiKey&libraries=places,marker&v=beta';
+      googleMapsScript.async = true;
+      googleMapsScript.defer = true;
+      web.document.head?.append(googleMapsScript);
+    }
+
     const String mapScripts = r'''
 // Track if maps have been initialized
 let mapsInitialized = false;
