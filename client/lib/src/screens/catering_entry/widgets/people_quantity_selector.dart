@@ -4,17 +4,19 @@ import '../../../core/catering/catering_order_provider.dart';
 
 class PeopleQuantitySelector extends ConsumerStatefulWidget {
   final List<int> quantities;
-  
+
   const PeopleQuantitySelector({
     super.key,
     required this.quantities,
   });
 
   @override
-  ConsumerState<PeopleQuantitySelector> createState() => _PeopleQuantitySelectorState();
+  ConsumerState<PeopleQuantitySelector> createState() =>
+      _PeopleQuantitySelectorState();
 }
 
-class _PeopleQuantitySelectorState extends ConsumerState<PeopleQuantitySelector> {
+class _PeopleQuantitySelectorState
+    extends ConsumerState<PeopleQuantitySelector> {
   bool isCustomSelected = false;
   final customPersonasFocusNode = FocusNode();
   late TextEditingController customPersonasController;
@@ -38,7 +40,7 @@ class _PeopleQuantitySelectorState extends ConsumerState<PeopleQuantitySelector>
   @override
   Widget build(BuildContext context) {
     final order = ref.watch(cateringOrderProvider);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -48,7 +50,7 @@ class _PeopleQuantitySelectorState extends ConsumerState<PeopleQuantitySelector>
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<int>(
-          value: isCustomSelected ||
+          initialValue: isCustomSelected ||
                   order?.peopleCount == null ||
                   !widget.quantities.contains(order?.peopleCount)
               ? null
@@ -86,7 +88,8 @@ class _PeopleQuantitySelectorState extends ConsumerState<PeopleQuantitySelector>
                   labelText: 'Cantidad Personalizada',
                   border: OutlineInputBorder(),
                   filled: true,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 ),
                 keyboardType: TextInputType.number,
                 onChanged: _handleCustomQuantityChange,
@@ -125,8 +128,8 @@ class _PeopleQuantitySelectorState extends ConsumerState<PeopleQuantitySelector>
     final order = ref.read(cateringOrderProvider);
     if (order != null) {
       ref.read(cateringOrderProvider.notifier).updateOrder(
-        order.copyWith(peopleCount: count),
-      );
+            order.copyWith(peopleCount: count),
+          );
     }
   }
 }

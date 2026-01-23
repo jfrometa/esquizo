@@ -634,8 +634,7 @@ final selectedBusinessColorsProvider =
 
 // Notifier for selected business colors
 class SelectedBusinessColorsNotifier extends StateNotifier<Map<String, Color>> {
-  SelectedBusinessColorsNotifier(Map<String, Color> initialColors)
-      : super(initialColors);
+  SelectedBusinessColorsNotifier(super.initialColors);
 
   void updateColor(String key, Color color) {
     state = {...state, key: color};

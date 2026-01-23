@@ -25,20 +25,22 @@
       "name": "Run (web)",
       "request": "launch",
       "type": "dart",
-      "args": ["-d", "chrome", "-v"]
+      "args": ["-d", "chrome", "--wasm", "-v"]
     },
     {
       "name": "Run (Android)",
       "request": "launch",
       "type": "dart",
-      "deviceId": "sdk gphone64 arm64 (mobile)"
+      "deviceId": "sdk gphone64 arm64 (mobile)",
+      "preLaunchTask": "start-android-emulator"
     },
     {
       "name": "Run iOS Simulator",
       "request": "launch",
       "type": "dart",
       "program": "lib/main.dart",
-      "args": ["-d", "apple_ios_simulator"]
+      "args": ["-d", "apple_ios_simulator"],
+      "preLaunchTask": "start-ios-simulator"
     }
   ]
 }

@@ -648,8 +648,9 @@ class OrderItem {
     }
 
     // Include meal plan fields if present
-    if (isMealSubscription != null)
+    if (isMealSubscription != null) {
       map['isMealSubscription'] = isMealSubscription;
+    }
     if (isMealPlanDish != null) map['isMealPlanDish'] = isMealPlanDish;
     if (mealPlanId != null) map['mealPlanId'] = mealPlanId;
     if (totalMeals != null) map['totalMeals'] = totalMeals;

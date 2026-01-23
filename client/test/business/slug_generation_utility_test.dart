@@ -8,7 +8,8 @@ void main() {
         {
           'name': 'Café & Restaurante "El Patrón"',
           'expected': 'cafe-restaurante-el-patron',
-          'description': 'Business name with accented characters and special symbols'
+          'description':
+              'Business name with accented characters and special symbols'
         },
         {
           'name': 'Restaurant 123 & Café 2024',
@@ -18,7 +19,8 @@ void main() {
         {
           'name': 'The   Best    Pizza Place!!!',
           'expected': 'the-best-pizza-place',
-          'description': 'Business name with multiple spaces and exclamation marks'
+          'description':
+              'Business name with multiple spaces and exclamation marks'
         },
         {
           'name': 'José\'s Taco & Burrito Bar',
@@ -36,7 +38,8 @@ void main() {
           'description': 'Spanish business name with tilde'
         },
         {
-          'name': 'This is a very long restaurant name that exceeds normal length limits for business names in most systems and should be truncated properly',
+          'name':
+              'This is a very long restaurant name that exceeds normal length limits for business names in most systems and should be truncated properly',
           'expected': null, // We'll check length constraint instead
           'description': 'Very long business name that should be truncated'
         },
@@ -59,7 +62,7 @@ void main() {
 
       for (final testCase in testCases) {
         final businessName = testCase['name'] as String;
-        final expectedSlug = testCase['expected'] as String?;
+        final expectedSlug = testCase['expected'];
         final description = testCase['description'] as String;
 
         print('\n--- Testing: $description ---');
@@ -84,7 +87,8 @@ void main() {
         // Test that all generated slugs follow the format rules
         if (generatedSlug.isNotEmpty) {
           expect(RegExp(r'^[a-z0-9-]+$').hasMatch(generatedSlug), isTrue,
-              reason: 'Slug should only contain lowercase letters, numbers, and hyphens');
+              reason:
+                  'Slug should only contain lowercase letters, numbers, and hyphens');
           expect(generatedSlug.startsWith('-'), isFalse,
               reason: 'Slug should not start with hyphen');
           expect(generatedSlug.endsWith('-'), isFalse,
@@ -109,14 +113,8 @@ void main() {
           'name': 'مطعم الشام',
           'description': 'Arabic characters (should be removed)'
         },
-        {
-          'name': 'Café Français',
-          'description': 'French accented characters'
-        },
-        {
-          'name': 'Straße Restaurant',
-          'description': 'German eszett character'
-        },
+        {'name': 'Café Français', 'description': 'French accented characters'},
+        {'name': 'Straße Restaurant', 'description': 'German eszett character'},
       ];
 
       for (final testCase in unicodeTestCases) {
@@ -174,7 +172,7 @@ void main() {
         print('\n--- Testing sanitization: "$input" ---');
         final sanitized = BusinessConfig.sanitizeSlug(input);
         print('Sanitized: "$sanitized"');
-        
+
         if (sanitized.isNotEmpty) {
           expect(RegExp(r'^[a-z0-9-]+$').hasMatch(sanitized), isTrue,
               reason: 'Sanitized slug should only contain valid characters');

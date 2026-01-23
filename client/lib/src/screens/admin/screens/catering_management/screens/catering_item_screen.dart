@@ -171,7 +171,7 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
                         ),
                         prefixIcon: const Icon(Icons.category_outlined),
                       ),
-                      value: _selectedCategoryId,
+                      initialValue: _selectedCategoryId,
                       items: [
                         const DropdownMenuItem<String?>(
                           value: null,

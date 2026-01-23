@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../../lib/src/routing/business_routing_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/business_routing_provider.dart';
 
 void main() {
   group('Router Integration Tests', () {

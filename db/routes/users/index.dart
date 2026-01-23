@@ -17,7 +17,7 @@ Future<Response> onRequest(RequestContext context) async {
       await userService.prisma.$disconnect();
     }
   } else if (context.request.method == HttpMethod.post) {
-    final body = await context.request.json();
+    final body = await context.request.json() as Map<String, dynamic>;
     final email = body['email'] as String?;
     final name = body['name'] as String?;
 

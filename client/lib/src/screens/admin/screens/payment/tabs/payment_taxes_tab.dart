@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/payment/payment_models.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/payment/payment_providers.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/payment/payment_service.dart';
 
 class PaymentTaxesTab extends ConsumerStatefulWidget {
   final DateTime startDate;
@@ -23,7 +22,7 @@ class _PaymentTaxesTabState extends ConsumerState<PaymentTaxesTab> {
   final _nameController = TextEditingController();
   final _rateController = TextEditingController();
   final _descriptionController = TextEditingController();
-  
+
   TaxType _selectedType = TaxType.percentage;
   ServiceType? _selectedServiceType;
   bool _isAddingNew = false;
@@ -32,7 +31,7 @@ class _PaymentTaxesTabState extends ConsumerState<PaymentTaxesTab> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     final taxConfigsAsync = ref.watch(taxConfigurationsProvider);
 
     return Column(
@@ -55,14 +54,15 @@ class _PaymentTaxesTabState extends ConsumerState<PaymentTaxesTab> {
             ],
           ),
         ),
-        
+
         // Tax configurations list or form
         Expanded(
           child: _isAddingNew
               ? _buildTaxForm(context)
               : taxConfigsAsync.when(
                   data: (configs) => _buildTaxList(configs, colorScheme),
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (error, stack) => Center(child: Text('Error: $error')),
                 ),
         ),
@@ -70,7 +70,8 @@ class _PaymentTaxesTabState extends ConsumerState<PaymentTaxesTab> {
     );
   }
 
-  Widget _buildTaxList(List<TaxConfiguration> configs, ColorScheme colorScheme) {
+  Widget _buildTaxList(
+      List<TaxConfiguration> configs, ColorScheme colorScheme) {
     if (configs.isEmpty) {
       return Center(
         child: Column(
@@ -96,7 +97,8 @@ class _PaymentTaxesTabState extends ConsumerState<PaymentTaxesTab> {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: configs.length,
-      itemBuilder: (context, index) => _buildTaxCard(configs[index], colorScheme),
+      itemBuilder: (context, index) =>
+          _buildTaxCard(configs[index], colorScheme),
     );
   }
 
@@ -107,7 +109,9 @@ class _PaymentTaxesTabState extends ConsumerState<PaymentTaxesTab> {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: config.isActive ? Colors.green.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+            color: config.isActive
+                ? Colors.green.withOpacity(0.1)
+                : Colors.grey.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -164,7 +168,7 @@ class _PaymentTaxesTabState extends ConsumerState<PaymentTaxesTab> {
               label: const Text('Back to List'),
             ),
             const SizedBox(height: 16),
-            
+
             // Form fields
             TextFormField(
               controller: _nameController,
@@ -181,21 +185,24 @@ class _PaymentTaxesTabState extends ConsumerState<PaymentTaxesTab> {
               },
             ),
             const SizedBox(height: 16),
-            
+
             Row(
               children: [
                 Expanded(
                   child: DropdownButtonFormField<TaxType>(
-                    value: _selectedType,
+                    initialValue: _selectedType,
                     decoration: const InputDecoration(
                       labelText: 'Tax Type',
                       border: OutlineInputBorder(),
                     ),
-                    items: TaxType.values.map((type) => DropdownMenuItem(
-                      value: type,
-                      child: Text(_formatTaxType(type)),
-                    )).toList(),
-                    onChanged: (value) => setState(() => _selectedType = value!),
+                    items: TaxType.values
+                        .map((type) => DropdownMenuItem(
+                              value: type,
+                              child: Text(_formatTaxType(type)),
+                            ))
+                        .toList(),
+                    onChanged: (value) =>
+                        setState(() => _selectedType = value!),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -203,10 +210,13 @@ class _PaymentTaxesTabState extends ConsumerState<PaymentTaxesTab> {
                   child: TextFormField(
                     controller: _rateController,
                     decoration: InputDecoration(
-                      labelText: _selectedType == TaxType.percentage ? 'Rate (%)' : 'Amount (\$)',
+                      labelText: _selectedType == TaxType.percentage
+                          ? 'Rate (%)'
+                          : 'Amount (\$)',
                       border: const OutlineInputBorder(),
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter a rate';
@@ -222,24 +232,26 @@ class _PaymentTaxesTabState extends ConsumerState<PaymentTaxesTab> {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             DropdownButtonFormField<ServiceType?>(
-              value: _selectedServiceType,
+              initialValue: _selectedServiceType,
               decoration: const InputDecoration(
                 labelText: 'Applies To Service Type',
                 border: OutlineInputBorder(),
               ),
               items: [
-                const DropdownMenuItem(value: null, child: Text('All Service Types')),
+                const DropdownMenuItem(
+                    value: null, child: Text('All Service Types')),
                 ...ServiceType.values.map((type) => DropdownMenuItem(
-                  value: type,
-                  child: Text(_formatServiceType(type)),
-                )),
+                      value: type,
+                      child: Text(_formatServiceType(type)),
+                    )),
               ],
-              onChanged: (value) => setState(() => _selectedServiceType = value),
+              onChanged: (value) =>
+                  setState(() => _selectedServiceType = value),
             ),
             const SizedBox(height: 16),
-            
+
             TextFormField(
               controller: _descriptionController,
               decoration: const InputDecoration(
@@ -249,7 +261,7 @@ class _PaymentTaxesTabState extends ConsumerState<PaymentTaxesTab> {
               maxLines: 3,
             ),
             const SizedBox(height: 24),
-            
+
             // Actions
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -278,20 +290,22 @@ class _PaymentTaxesTabState extends ConsumerState<PaymentTaxesTab> {
     if (_formKey.currentState!.validate()) {
       try {
         final paymentService = ref.read(paymentServiceProvider);
-        
+
         await paymentService.createTaxConfiguration(
           name: _nameController.text,
           rate: double.parse(_rateController.text),
           type: _selectedType,
           applicableServiceType: _selectedServiceType,
-          description: _descriptionController.text.isEmpty ? null : _descriptionController.text,
+          description: _descriptionController.text.isEmpty
+              ? null
+              : _descriptionController.text,
         );
-        
+
         setState(() {
           _isAddingNew = false;
           _clearForm();
         });
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Tax configuration saved')),

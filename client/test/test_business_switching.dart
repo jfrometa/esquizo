@@ -1,9 +1,5 @@
 // Test script to verify business context switching functionality
-import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/business_routing_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/routing/business_screen_wrappers.dart';
 
 void main() {
   print('🧪 Testing business context switching...');

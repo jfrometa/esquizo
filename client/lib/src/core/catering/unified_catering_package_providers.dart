@@ -283,6 +283,8 @@ class SelectedCateringPackage extends _$SelectedCateringPackage {
 class SelectedCateringPackageNotifier extends StateNotifier<CateringPackage?> {
   SelectedCateringPackageNotifier() : super(null);
 
+  CateringPackage? get value => state;
+
   /// Sets the selected package
   void setSelectedPackage(CateringPackage? package) {
     state = package;
@@ -413,7 +415,7 @@ final selectedPackageProvider =
 
   // Sync changes from the riverpod provider to the StateNotifier
   ref.listen(selectedCateringPackageProvider, (previous, next) {
-    if (next != notifier.state) {
+    if (next != notifier.value) {
       notifier.setSelectedPackage(next);
     }
   });

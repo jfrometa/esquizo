@@ -713,7 +713,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                 borderRadius: BorderRadius.circular(2),
                 color: i <= _currentPage
                     ? theme.colorScheme.primary
-                    : theme.colorScheme.surfaceVariant,
+                    : theme.colorScheme.surfaceContainerHighest,
               ),
             ),
         ],
@@ -758,7 +758,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
 
           // Business type
           DropdownButtonFormField<String>(
-            value: _businessType,
+            initialValue: _businessType,
             decoration: const InputDecoration(
               labelText: 'Business Type',
             ),
@@ -1029,7 +1029,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                 height: 150,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceVariant,
+                  color: theme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: _buildImagePreview(imageUrl, imageBytes, imageFile),
@@ -1645,8 +1645,8 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
             onPressed: _isLoading ? null : _nextPage,
             style: buttonStyle.copyWith(
               backgroundColor:
-                  MaterialStatePropertyAll(theme.colorScheme.primary),
-              foregroundColor: MaterialStatePropertyAll(Colors.white),
+                  WidgetStatePropertyAll(theme.colorScheme.primary),
+              foregroundColor: WidgetStatePropertyAll(Colors.white),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,

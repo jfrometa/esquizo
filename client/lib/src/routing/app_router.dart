@@ -25,6 +25,11 @@ import 'package:starter_architecture_flutter_firebase/src/screens/authentication
 import 'package:starter_architecture_flutter_firebase/src/screens/debug/admin_debug_widget.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/onboarding/presentation/onboarding_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/landing/landing-page-home.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/dishes/dish_details/dish_details_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/dishes/dish_caterogy/category_dishes_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/all_dishes_menu_home/all_dishes_menu_home_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/checkout/checkout_creen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/QR/models/qr_code_data.dart';
 import 'package:go_router/go_router.dart';
 
 part 'app_router.g.dart';
@@ -226,7 +231,7 @@ extension AppRouteExtension on AppRoute {
       case AppRoute.inProgressOrders:
         return '/:businessSlug/${RoutePaths.orders}';
       default:
-        return '/${name}';
+        return '/$name';
     }
   }
 
@@ -570,6 +575,60 @@ GoRouter goRouter(Ref ref) {
               debugPrint('🏢 Optimized business orders for: $businessSlug');
               return NoTransitionPage(
                 child: OptimizedOrdersScreenWrapper(businessSlug: businessSlug),
+              );
+            },
+          ),
+          // Dish details route (e.g., /kako/platillo/:dishId)
+          GoRoute(
+            path: 'platillo/:dishId',
+            name: AppRoute.addDishToOrder.name,
+            pageBuilder: (context, state) {
+              final dishId = state.pathParameters['dishId']!;
+              return NoTransitionPage(
+                child: DishDetailsScreen(id: dishId),
+              );
+            },
+          ),
+          // Category dishes route (e.g., /kako/categorias)
+          GoRoute(
+            path: 'categorias',
+            name: AppRoute.category.name,
+            pageBuilder: (context, state) {
+              // Note: This route might need more parameters if it's used from scratch
+              // But for now, we provide dummy table data if not coming from somewhere specific
+              return NoTransitionPage(
+                child: CategoryDishesScreen(
+                  categoryId: '',
+                  categoryName: 'Categorías',
+                  tableData: QRCodeData(
+                    tableId: '',
+                    tableName: '',
+                    restaurantId: '',
+                    generatedAt: DateTime.now(),
+                  ),
+                  sortIndex: 0,
+                ),
+              );
+            },
+          ),
+          // All dishes route (e.g., /kako/platillos)
+          GoRoute(
+            path: 'platillos',
+            name: AppRoute.allDishes.name,
+            pageBuilder: (context, state) {
+              return const NoTransitionPage(
+                child: AllDishesMenuHomeScreen(),
+              );
+            },
+          ),
+          // Checkout route (e.g., /kako/checkout)
+          GoRoute(
+            path: 'checkout',
+            name: AppRoute.checkout.name,
+            pageBuilder: (context, state) {
+              final type = state.extra as String? ?? 'platos';
+              return NoTransitionPage(
+                child: CheckoutScreen(displayType: type),
               );
             },
           ),

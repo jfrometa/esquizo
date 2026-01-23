@@ -26,7 +26,7 @@ void main() {
 
       for (final testCase in testCases) {
         final path = testCase[0] as String;
-        final expectedSlug = testCase[1] as String?;
+        final expectedSlug = testCase[1];
         final actualSlug = extractBusinessSlugFromPath(path);
 
         debugPrint('Path: "$path" → Business Slug: "$actualSlug"');
@@ -76,8 +76,8 @@ void main() {
       ];
 
       for (final businessCase in businessCases) {
-        final businessId = businessCase[0] as String;
-        final businessName = businessCase[1] as String;
+        final businessId = businessCase[0];
+        final businessName = businessCase[1];
 
         debugPrint('\n=== $businessName (ID: $businessId) ===');
         debugPrint('Menu Items: businesses/$businessId/menu_items');
@@ -99,8 +99,9 @@ bool _isValidBusinessSlug(String slug) {
   // - Only contain lowercase letters, numbers, and hyphens
   // - Not start or end with hyphens
   if (slug.length < 2 || slug.length > 50) return false;
-  if (slug.contains(' ') || slug.contains('?') || slug.contains('#'))
+  if (slug.contains(' ') || slug.contains('?') || slug.contains('#')) {
     return false;
+  }
   if (slug.startsWith('-') || slug.endsWith('-')) return false;
   if (slug.contains('--')) return false; // No consecutive hyphens
 

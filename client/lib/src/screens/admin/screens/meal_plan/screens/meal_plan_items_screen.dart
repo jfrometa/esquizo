@@ -272,7 +272,7 @@ class _MealPlanItemsScreenState extends ConsumerState<MealPlanItemsScreen> {
                             }
 
                             return DropdownButtonFormField<String>(
-                              value: selectedCategoryId.isNotEmpty
+                              initialValue: selectedCategoryId.isNotEmpty
                                   ? selectedCategoryId
                                   : null,
                               decoration: const InputDecoration(
@@ -429,7 +429,7 @@ class _MealPlanItemsScreenState extends ConsumerState<MealPlanItemsScreen> {
                             }
 
                             return DropdownButtonFormField<String>(
-                              value: selectedCategoryId.isNotEmpty
+                              initialValue: selectedCategoryId.isNotEmpty
                                   ? selectedCategoryId
                                   : null,
                               decoration: const InputDecoration(

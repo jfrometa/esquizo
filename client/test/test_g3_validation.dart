@@ -1,8 +1,9 @@
 // Test the business slug validation for 'g3'
 bool isValidBusinessSlug(String slug) {
   if (slug.length < 2 || slug.length > 50) return false;
-  if (slug.contains(' ') || slug.contains('?') || slug.contains('#'))
+  if (slug.contains(' ') || slug.contains('?') || slug.contains('#')) {
     return false;
+  }
   if (slug.startsWith('-') || slug.endsWith('-')) return false;
   if (slug.contains('--')) return false;
 

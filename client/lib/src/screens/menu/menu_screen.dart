@@ -425,21 +425,119 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
           );
   }
 
-  // Improved header with smooth transitions, using the global scroll provider
-  Widget _buildHeader() {
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final activeTabIndex = ref.watch(menuActiveTabProvider);
 
-    // Get the current scroll offset from the shared provider
+    // Update TabController when activeTabIndex changes
+    if (_tabController.index != activeTabIndex) {
+      _tabController.animateTo(activeTabIndex);
+    }
+
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      body: SafeArea(
+        top: false,
+        child: Stack(
+          children: [
+            // Extracted header widget that watches scroll position independently
+            _MenuHeader(
+              threshold: _headerThreshold,
+              parallaxFactor: _parallaxFactor,
+            ),
+
+            Column(
+              children: [
+                // Extracted app bar widget that watches scroll position independently
+                _MenuAppBar(
+                  threshold: _headerThreshold,
+                  onSearchPressed: _showSearchInterface,
+                ),
+
+                // Tab bar - doesn't need to rebuild on scroll
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 4.0),
+                  child: MenuTabBar(
+                    tabController: _tabController,
+                    onTabChanged: (index) {
+                      ref.read(menuActiveTabProvider.notifier).state = index;
+                    },
+                    showMealPlans: _showMealPlans,
+                    showCatering: _showCatering,
+                  ),
+                ),
+
+                // Tab content area - optimize with RepaintBoundary
+                Expanded(
+                  child: RepaintBoundary(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface,
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(28),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.shadow.withValues(alpha: 0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, -2),
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.only(top: 4),
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(28),
+                        ),
+                        child: NotificationListener<ScrollNotification>(
+                          onNotification: (notification) {
+                            if (notification is ScrollUpdateNotification) {
+                              ref
+                                  .read(menuScrollOffsetProvider.notifier)
+                                  .state = notification.metrics.pixels;
+                            }
+                            return false;
+                          },
+                          child: TabBarView(
+                            controller: _tabController,
+                            physics: const BouncingScrollPhysics(),
+                            children: List.generate(
+                                4, (index) => _buildTabView(index)),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Extracted header widget to isolate scroll-based rebuilds
+class _MenuHeader extends ConsumerWidget {
+  final double threshold;
+  final double parallaxFactor;
+
+  const _MenuHeader({
+    required this.threshold,
+    required this.parallaxFactor,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final scrollOffset = ref.watch(menuScrollOffsetProvider);
 
-    // Calculate opacity based on scroll position
-    // Header starts hiding immediately as scrolling begins
-    final headerOpacity =
-        1.0 - (scrollOffset / _headerThreshold).clamp(0.0, 1.0);
-
-    // Calculate header offset for parallax effect
-    final headerOffset = -scrollOffset * _parallaxFactor;
+    final headerOpacity = 1.0 - (scrollOffset / threshold).clamp(0.0, 1.0);
+    final headerOffset = -scrollOffset * parallaxFactor;
 
     return Opacity(
       opacity: headerOpacity,
@@ -453,13 +551,12 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
               end: Alignment.bottomCenter,
               colors: [
                 colorScheme.primary,
-                colorScheme.primary.withOpacity(0.8),
+                colorScheme.primary.withValues(alpha: 0.8),
               ],
             ),
           ),
           child: Stack(
             children: [
-              // Background design elements
               Positioned(
                 bottom: 0,
                 left: 0,
@@ -472,22 +569,20 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        colorScheme.onPrimary.withOpacity(0.1),
+                        colorScheme.onPrimary.withValues(alpha: 0.1),
                       ],
                     ),
                   ),
                 ),
               ),
-
-              // Progress indicator
               Align(
                 alignment: Alignment.bottomCenter,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 100),
                   height: 2,
-                  color: colorScheme.onPrimary.withOpacity(0.5),
-                  width: MediaQuery.of(context).size.width *
-                      (scrollOffset / (_headerThreshold * 2)).clamp(0.0, 1.0),
+                  color: colorScheme.onPrimary.withValues(alpha: 0.5),
+                  width: MediaQuery.sizeOf(context).width *
+                      (scrollOffset / (threshold * 2)).clamp(0.0, 1.0),
                 ),
               ),
             ],
@@ -496,27 +591,29 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       ),
     );
   }
+}
+
+/// Extracted app bar widget to isolate scroll-based rebuilds
+class _MenuAppBar extends ConsumerWidget {
+  final double threshold;
+  final VoidCallback onSearchPressed;
+
+  const _MenuAppBar({
+    required this.threshold,
+    required this.onSearchPressed,
+  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final activeTabIndex = ref.watch(menuActiveTabProvider);
+    final scrollOffset = ref.watch(menuScrollOffsetProvider);
     final cartItemCount = ref.watch(cartProvider).items.length;
 
-    // Get scroll offset from the shared provider
-    final scrollOffset = ref.watch(menuScrollOffsetProvider);
-
-    // Update TabController when activeTabIndex changes
-    if (_tabController.index != activeTabIndex) {
-      _tabController.animateTo(activeTabIndex);
-    }
-
-    // Calculate app bar properties based on scroll position
-    final scrollProgress = (scrollOffset / _headerThreshold).clamp(0.0, 1.0);
+    final scrollProgress = (scrollOffset / threshold).clamp(0.0, 1.0);
     final appBarBgColor = ColorTween(
       begin: Colors.transparent,
-      end: colorScheme.surface.withOpacity(0.97),
+      end: colorScheme.surface.withValues(alpha: 0.97),
     ).transform(scrollProgress)!;
 
     final appBarFgColor = ColorTween(
@@ -524,232 +621,127 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       end: colorScheme.onSurface,
     ).transform(scrollProgress)!;
 
-    // Define our main scaffold
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      body: SafeArea(
-        // Use SafeArea to prevent UI elements from being blocked by system UI
-        top: false, // Let the content extend behind the status bar
-        child: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: scrollProgress > 0.5
-              ? SystemUiOverlayStyle.dark.copyWith(
-                  statusBarColor: Colors.transparent,
-                  systemNavigationBarColor: colorScheme.surface,
-                )
-              : SystemUiOverlayStyle.light.copyWith(
-                  statusBarColor: Colors.transparent,
-                  systemNavigationBarColor: colorScheme.surface,
-                ),
-          child: Stack(
-            children: [
-              // Header background - placed at bottom of stack
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: _buildHeader(),
-              ),
-
-              // Use a simple Column layout with CustomScrollView
-              Column(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: scrollProgress > 0.5
+          ? SystemUiOverlayStyle.dark.copyWith(
+              statusBarColor: Colors.transparent,
+              systemNavigationBarColor: colorScheme.surface,
+            )
+          : SystemUiOverlayStyle.light.copyWith(
+              statusBarColor: Colors.transparent,
+              systemNavigationBarColor: colorScheme.surface,
+            ),
+      child: Container(
+        height: kToolbarHeight + MediaQuery.paddingOf(context).top,
+        padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
+        decoration: BoxDecoration(
+          color: appBarBgColor,
+          boxShadow: scrollProgress > 0.5
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Row(
                 children: [
-                  // App bar with search and cart buttons
-                  Container(
-                    height: kToolbarHeight + MediaQuery.of(context).padding.top,
-                    padding: EdgeInsets.only(
-                        top: MediaQuery.of(context).padding.top),
+                  const SizedBox(width: 16),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    height: 32 + ((1 - scrollProgress) * 4),
+                    width: 32 + ((1 - scrollProgress) * 4),
                     decoration: BoxDecoration(
-                      color: appBarBgColor,
-                      boxShadow: scrollProgress > 0.5
-                          ? [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ]
-                          : null,
-                    ),
-                    child: Row(
-                      children: [
-                        // Title with icon
-                        Expanded(
-                          child: Row(
-                            children: [
-                              const SizedBox(width: 16),
-                              AnimatedContainer(
-                                duration: const Duration(milliseconds: 300),
-                                height: 32 + ((1 - scrollProgress) * 4),
-                                width: 32 + ((1 - scrollProgress) * 4),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(
-                                          0.1 + ((1 - scrollProgress) * 0.1)),
-                                      blurRadius:
-                                          4 + ((1 - scrollProgress) * 4),
-                                      spreadRadius:
-                                          scrollProgress > 0.5 ? 0 : 1,
-                                    ),
-                                  ],
-                                ),
-                                padding: const EdgeInsets.all(2.0),
-                                child: ClipOval(
-                                  child: Image.asset(
-                                    'assets/appIcon.png',
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return const Icon(Icons.restaurant,
-                                          size: 24);
-                                    },
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Opacity(
-                                opacity: scrollProgress,
-                                child: Text(
-                                  'Menu',
-                                  style: theme.textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: appBarFgColor,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        // Actions
-                        IconButton(
-                          icon: Icon(Icons.search, color: appBarFgColor),
-                          tooltip: 'Search',
-                          onPressed: _showSearchInterface,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              IconButton(
-                                icon: Icon(Icons.shopping_cart_outlined,
-                                    color: appBarFgColor),
-                                tooltip: 'View cart',
-                                onPressed: () {
-                                  context.goNamed(AppRoute.homecart.name);
-                                  HapticFeedback.selectionClick();
-                                },
-                              ),
-                              if (cartItemCount > 0)
-                                Positioned(
-                                  top: 8,
-                                  right: 8,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(2),
-                                    decoration: BoxDecoration(
-                                      color: colorScheme.error,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    constraints: const BoxConstraints(
-                                      minWidth: 16,
-                                      minHeight: 16,
-                                    ),
-                                    child: Text(
-                                      cartItemCount.toString(),
-                                      style: TextStyle(
-                                        color: colorScheme.onError,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(
+                              alpha: 0.1 + ((1 - scrollProgress) * 0.1)),
+                          blurRadius: 4 + ((1 - scrollProgress) * 4),
+                          spreadRadius: scrollProgress > 0.5 ? 0 : 1,
                         ),
                       ],
                     ),
-                  ),
-
-                  // Tab bar
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 4.0),
-                    child: MenuTabBar(
-                      tabController: _tabController,
-                      onTabChanged: (index) {
-                        ref.read(menuActiveTabProvider.notifier).state = index;
-                      },
-                      showMealPlans: _showMealPlans,
-                      showCatering: _showCatering,
+                    padding: const EdgeInsets.all(2.0),
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/appIcon.png',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.restaurant, size: 24),
+                      ),
                     ),
                   ),
-
-                  // Tab content area
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: colorScheme.surface,
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(28),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: colorScheme.shadow.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, -2),
-                          ),
-                        ],
-                      ),
-                      // Add padding to top for more content space
-                      padding: const EdgeInsets.only(top: 4),
-                      child: ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(28),
-                        ),
-                        child: NotificationListener<ScrollNotification>(
-                          onNotification: (notification) {
-                            // Update the shared scroll provider from any scroll events inside tabs
-                            if (notification is ScrollUpdateNotification) {
-                              ref
-                                  .read(menuScrollOffsetProvider.notifier)
-                                  .state = notification.metrics.pixels;
-                            }
-                            return false; // Continue propagating the notification
-                          },
-                          child: TabBarView(
-                            controller: _tabController,
-                            physics: const BouncingScrollPhysics(),
-                            children: List.generate(
-                                4, (index) => _buildTabView(index)),
-                          ),
-                        ),
+                  const SizedBox(width: 12),
+                  Opacity(
+                    opacity: scrollProgress,
+                    child: Text(
+                      'Menu',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: appBarFgColor,
                       ),
                     ),
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+            IconButton(
+              icon: Icon(Icons.search, color: appBarFgColor),
+              tooltip: 'Search',
+              onPressed: onSearchPressed,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.shopping_cart_outlined,
+                        color: appBarFgColor),
+                    tooltip: 'View cart',
+                    onPressed: () {
+                      context.goNamed(AppRoute.homecart.name);
+                      HapticFeedback.selectionClick();
+                    },
+                  ),
+                  if (cartItemCount > 0)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: colorScheme.error,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Text(
+                          cartItemCount.toString(),
+                          style: TextStyle(
+                            color: colorScheme.onError,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
-      // Scroll to top button - visible when scrolling down
-      // floatingActionButton: AnimatedSlide(
-      //   duration: const Duration(milliseconds: 200),
-      //   offset: scrollOffset > 100 ? Offset.zero : const Offset(0, 2),
-      //   child: AnimatedOpacity(
-      //     duration: const Duration(milliseconds: 200),
-      //     opacity: scrollOffset > 100 ? 1.0 : 0.0,
-      //     child: FloatingActionButton.small(
-      //       onPressed: _scrollToTop,
-      //       elevation: 4,
-      //       tooltip: 'Scroll to top ',
-      //       child: const Icon(Icons.keyboard_arrow_up),
-      //     ),
-      //   ),
-      // ),
     );
   }
 }

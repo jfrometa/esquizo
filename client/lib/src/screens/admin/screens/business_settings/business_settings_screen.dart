@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_features_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_setup_screen.dart';
 import 'rtdb_features_settings_screen.dart';
 
@@ -167,7 +166,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
 
             // Business type
             DropdownButtonFormField<String>(
-              value: _businessType,
+              initialValue: _businessType,
               decoration: const InputDecoration(
                 labelText: 'Business Type',
                 border: OutlineInputBorder(),
@@ -1001,7 +1000,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
                 'Using currency value: $currencyValue (${currencyValue.runtimeType})');
 
             return DropdownButtonFormField<String>(
-              value: currencyValue,
+              initialValue: currencyValue,
               decoration: const InputDecoration(
                 labelText: 'Currency',
                 border: OutlineInputBorder(),
@@ -1040,7 +1039,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
                   'Using theme value: $themeValue (${themeValue.runtimeType})');
 
               return DropdownButtonFormField<String>(
-                value: themeValue,
+                initialValue: themeValue,
                 decoration: const InputDecoration(
                   labelText: 'Default Theme',
                   border: OutlineInputBorder(),

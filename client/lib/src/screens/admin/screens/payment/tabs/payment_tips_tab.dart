@@ -21,15 +21,16 @@ class PaymentTipsTab extends ConsumerStatefulWidget {
 }
 
 class _PaymentTipsTabState extends ConsumerState<PaymentTipsTab> {
-  final currencyFormatter = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+  final currencyFormatter =
+      NumberFormat.currency(symbol: '\$', decimalDigits: 2);
   String? _selectedStaffId;
-  bool _showDistributionDialog = false;
+  final bool _showDistributionDialog = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     final tipsAsync = ref.watch(staffTipDistributionsProvider((
       staffId: _selectedStaffId ?? '',
       startDate: widget.startDate,
@@ -45,17 +46,19 @@ class _PaymentTipsTabState extends ConsumerState<PaymentTipsTab> {
             children: [
               Expanded(
                 child: DropdownButtonFormField<String?>(
-                  value: _selectedStaffId,
+                  initialValue: _selectedStaffId,
                   decoration: const InputDecoration(
                     labelText: 'Filter by Staff',
                     border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
                   items: const [
                     DropdownMenuItem(value: null, child: Text('All Staff')),
                     // TODO: Load staff members from service
                   ],
-                  onChanged: (value) => setState(() => _selectedStaffId = value),
+                  onChanged: (value) =>
+                      setState(() => _selectedStaffId = value),
                 ),
               ),
               const SizedBox(width: 16),
@@ -67,15 +70,15 @@ class _PaymentTipsTabState extends ConsumerState<PaymentTipsTab> {
             ],
           ),
         ),
-        
+
         // Tips summary
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: _buildTipsSummary(),
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Tips distributions list
         Expanded(
           child: tipsAsync.when(
@@ -85,18 +88,20 @@ class _PaymentTipsTabState extends ConsumerState<PaymentTipsTab> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.volunteer_activism, size: 64, color: Colors.grey),
+                      Icon(Icons.volunteer_activism,
+                          size: 64, color: Colors.grey),
                       SizedBox(height: 16),
                       Text('No tip distributions found'),
                     ],
                   ),
                 );
               }
-              
+
               return ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: distributions.length,
-                itemBuilder: (context, index) => _buildDistributionCard(distributions[index], colorScheme),
+                itemBuilder: (context, index) =>
+                    _buildDistributionCard(distributions[index], colorScheme),
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -109,65 +114,76 @@ class _PaymentTipsTabState extends ConsumerState<PaymentTipsTab> {
 
   Widget _buildTipsSummary() {
     return ref.watch(dailyServiceSummaryProvider).when(
-      data: (summary) {
-        final totalTips = summary['totalTips'] ?? 0.0;
-        final staffTipTotals = summary['staffTipTotals'] as Map<String, double>? ?? {};
-        
-        return Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          data: (summary) {
+            final totalTips = summary['totalTips'] ?? 0.0;
+            final staffTipTotals =
+                summary['staffTipTotals'] as Map<String, double>? ?? {};
+
+            return Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Tips Summary',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      currencyFormatter.format(totalTips),
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.green),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Total tips for selected period',
-                  style: TextStyle(color: Colors.grey[600]),
-                ),
-                if (staffTipTotals.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Top Recipients',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 8),
-                  ...staffTipTotals.entries.take(3).map((entry) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(entry.key), // Should be staff name
-                        Text(currencyFormatter.format(entry.value)),
+                        const Text(
+                          'Tips Summary',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          currencyFormatter.format(totalTips),
+                          style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green),
+                        ),
                       ],
                     ),
-                  )),
-                ],
-              ],
-            ),
-          ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Total tips for selected period',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                    if (staffTipTotals.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      const Divider(),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Top Recipients',
+                        style: TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(height: 8),
+                      ...staffTipTotals.entries.take(3).map((entry) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(entry.key), // Should be staff name
+                                Text(currencyFormatter.format(entry.value)),
+                              ],
+                            ),
+                          )),
+                    ],
+                  ],
+                ),
+              ),
+            );
+          },
+          loading: () => const Card(
+              child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: CircularProgressIndicator())),
+          error: (error, stack) => Card(
+              child: Padding(
+                  padding: EdgeInsets.all(16), child: Text('Error: $error'))),
         );
-      },
-      loading: () => const Card(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator())),
-      error: (error, stack) => Card(child: Padding(padding: EdgeInsets.all(16), child: Text('Error: $error'))),
-    );
   }
 
-  Widget _buildDistributionCard(TipDistribution distribution, ColorScheme colorScheme) {
+  Widget _buildDistributionCard(
+      TipDistribution distribution, ColorScheme colorScheme) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ExpansionTile(
@@ -218,43 +234,46 @@ class _PaymentTipsTabState extends ConsumerState<PaymentTipsTab> {
                 ),
                 const SizedBox(height: 8),
                 ...distribution.allocations.map((allocation) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Row(
-                    children: [
-                      Icon(
-                        _getRoleIcon(allocation.role),
-                        size: 20,
-                        color: Colors.grey[600],
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(allocation.staffName),
-                            Text(
-                              _formatRole(allocation.role),
-                              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
                         children: [
-                          Text(
-                            currencyFormatter.format(allocation.amount),
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          Icon(
+                            _getRoleIcon(allocation.role),
+                            size: 20,
+                            color: Colors.grey[600],
                           ),
-                          Text(
-                            '${allocation.percentage.toStringAsFixed(1)}%',
-                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(allocation.staffName),
+                                Text(
+                                  _formatRole(allocation.role),
+                                  style: TextStyle(
+                                      fontSize: 12, color: Colors.grey[600]),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                currencyFormatter.format(allocation.amount),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                '${allocation.percentage.toStringAsFixed(1)}%',
+                                style: TextStyle(
+                                    fontSize: 12, color: Colors.grey[600]),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                )),
+                    )),
                 if (distribution.notes != null) ...[
                   const SizedBox(height: 12),
                   const Divider(),

@@ -44,7 +44,22 @@ class _CateringFormState extends ConsumerState<CateringForm> {
   bool hasChef = false;
   int? cantidadPersonas;
 
-  final peopleQuantity = [10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, 2000, 5000, 10000];
+  final peopleQuantity = [
+    10,
+    20,
+    30,
+    40,
+    50,
+    100,
+    200,
+    300,
+    400,
+    500,
+    1000,
+    2000,
+    5000,
+    10000
+  ];
   final List<String> eventTypes = [
     'Corporativo',
     'Cumpleaños',
@@ -62,13 +77,18 @@ class _CateringFormState extends ConsumerState<CateringForm> {
 
   void _initializeData() {
     final initialData = widget.initialData;
-    eventTypeController = TextEditingController(text: initialData?.eventType ?? '');
-    adicionalesController = TextEditingController(text: initialData?.adicionales ?? '');
+    eventTypeController =
+        TextEditingController(text: initialData?.eventType ?? '');
+    adicionalesController =
+        TextEditingController(text: initialData?.adicionales ?? '');
     hasChef = initialData?.hasChef ?? false;
     cantidadPersonas = initialData?.peopleCount ?? 20; // Default to 20 people
-    alergiasList = initialData?.alergias.split(',').where((e) => e.isNotEmpty).toList() ?? [];
+    alergiasList =
+        initialData?.alergias.split(',').where((e) => e.isNotEmpty).toList() ??
+            [];
 
-    if (cantidadPersonas != null && !peopleQuantity.contains(cantidadPersonas)) {
+    if (cantidadPersonas != null &&
+        !peopleQuantity.contains(cantidadPersonas)) {
       isCustomSelected = true;
     }
   }
@@ -107,7 +127,7 @@ class _CateringFormState extends ConsumerState<CateringForm> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Form(
       key: _formKey,
       child: Column(
@@ -134,14 +154,14 @@ class _CateringFormState extends ConsumerState<CateringForm> {
               ),
             ],
           ),
-            
+
           Divider(color: colorScheme.outline.withValues(alpha: 0.2)),
           const SizedBox(height: 24),
-          
+
           // Number of people section
           _buildSectionTitle('Cantidad de Personas', Icons.people, colorScheme),
           const SizedBox(height: 12),
-          
+
           // People count slider for better UX
           Card(
             elevation: 0,
@@ -158,14 +178,14 @@ class _CateringFormState extends ConsumerState<CateringForm> {
                   Row(
                     children: [
                       Icon(
-                        Icons.group, 
+                        Icons.group,
                         color: colorScheme.primary,
                         size: 20,
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        isCustomSelected 
-                            ? 'Personalizado: ${cantidadPersonas ?? 0}' 
+                        isCustomSelected
+                            ? 'Personalizado: ${cantidadPersonas ?? 0}'
                             : '${cantidadPersonas ?? 0} personas',
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
@@ -173,28 +193,29 @@ class _CateringFormState extends ConsumerState<CateringForm> {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Show preset quantity chips for quick selection
                   Wrap(
                     spacing: 8.0,
                     runSpacing: 8.0,
                     children: [
-                      ...peopleQuantity.take(6).map((number) => 
-                        ChoiceChip(
-                          selected: !isCustomSelected && cantidadPersonas == number,
-                          label: Text('$number'),
-                          onSelected: (selected) {
-                            if (selected) {
-                              setState(() {
-                                isCustomSelected = false;
-                                cantidadPersonas = number;
-                              });
-                            }
-                          },
-                        ),
-                      ),
+                      ...peopleQuantity.take(6).map(
+                            (number) => ChoiceChip(
+                              selected: !isCustomSelected &&
+                                  cantidadPersonas == number,
+                              label: Text('$number'),
+                              onSelected: (selected) {
+                                if (selected) {
+                                  setState(() {
+                                    isCustomSelected = false;
+                                    cantidadPersonas = number;
+                                  });
+                                }
+                              },
+                            ),
+                          ),
                       ChoiceChip(
                         selected: isCustomSelected,
                         label: const Text('Personalizado'),
@@ -202,7 +223,8 @@ class _CateringFormState extends ConsumerState<CateringForm> {
                           if (selected) {
                             setState(() {
                               isCustomSelected = true;
-                              Future.delayed(const Duration(milliseconds: 200), () {
+                              Future.delayed(const Duration(milliseconds: 200),
+                                  () {
                                 customPersonasFocusNode.requestFocus();
                               });
                             });
@@ -211,7 +233,7 @@ class _CateringFormState extends ConsumerState<CateringForm> {
                       ),
                     ],
                   ),
-                  
+
                   if (isCustomSelected) ...[
                     const SizedBox(height: 16),
                     TextFormField(
@@ -249,16 +271,16 @@ class _CateringFormState extends ConsumerState<CateringForm> {
               ),
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Event type section
           _buildSectionTitle('Tipo de Evento', Icons.event, colorScheme),
           const SizedBox(height: 12),
-          
+
           // Event type selection with suggestions
           DropdownButtonFormField<String>(
-            value: eventTypes.contains(eventTypeController.text) 
+            initialValue: eventTypes.contains(eventTypeController.text)
                 ? eventTypeController.text
                 : null,
             decoration: InputDecoration(
@@ -293,7 +315,7 @@ class _CateringFormState extends ConsumerState<CateringForm> {
               }
             },
           ),
-          
+
           // Custom event type for "Otro" option
           if (eventTypeController.text == 'Otro') ...[
             const SizedBox(height: 12),
@@ -319,9 +341,9 @@ class _CateringFormState extends ConsumerState<CateringForm> {
               },
             ),
           ],
-          
+
           const SizedBox(height: 24),
-          
+
           // Chef service section
           Card(
             elevation: 0,
@@ -356,13 +378,14 @@ class _CateringFormState extends ConsumerState<CateringForm> {
               ),
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Allergies section
-          _buildSectionTitle('Alergias y Restricciones', Icons.health_and_safety, colorScheme),
+          _buildSectionTitle(
+              'Alergias y Restricciones', Icons.health_and_safety, colorScheme),
           const SizedBox(height: 12),
-          
+
           // Allergies chips with better visual style
           Container(
             decoration: BoxDecoration(
@@ -405,13 +428,14 @@ class _CateringFormState extends ConsumerState<CateringForm> {
                     if (alergiasList.length < 10)
                       ActionChip(
                         avatar: Icon(
-                          Icons.add, 
+                          Icons.add,
                           color: colorScheme.primary,
                         ),
                         backgroundColor: colorScheme.primaryContainer,
                         label: Text(
                           'Agregar',
-                          style: TextStyle(color: colorScheme.onPrimaryContainer),
+                          style:
+                              TextStyle(color: colorScheme.onPrimaryContainer),
                         ),
                         onPressed: _showAllergyDialog,
                       ),
@@ -420,13 +444,13 @@ class _CateringFormState extends ConsumerState<CateringForm> {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Additional notes section
           _buildSectionTitle('Notas Adicionales', Icons.note_alt, colorScheme),
           const SizedBox(height: 12),
-          
+
           TextFormField(
             controller: adicionalesController,
             maxLines: 3,
@@ -444,9 +468,9 @@ class _CateringFormState extends ConsumerState<CateringForm> {
               ),
             ),
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           // Submit button
           SizedBox(
             width: double.infinity,
@@ -457,15 +481,16 @@ class _CateringFormState extends ConsumerState<CateringForm> {
               onPressed: _handleSubmit,
             ),
           ),
-          
+
           const SizedBox(height: 16),
         ],
       ),
     );
   }
-  
+
   // Helper method to build section titles
-  Widget _buildSectionTitle(String title, IconData icon, ColorScheme colorScheme) {
+  Widget _buildSectionTitle(
+      String title, IconData icon, ColorScheme colorScheme) {
     return Row(
       children: [
         Icon(
@@ -488,7 +513,7 @@ class _CateringFormState extends ConsumerState<CateringForm> {
   Future<void> _showAllergyDialog() async {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     String? allergyInput;
     final newAllergy = await showDialog<String>(
       context: context,

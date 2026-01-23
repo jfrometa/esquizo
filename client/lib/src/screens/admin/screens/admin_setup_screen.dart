@@ -184,7 +184,7 @@ class _AdminSetupScreenState extends ConsumerState<AdminSetupScreen> {
                         labelText: 'Business Type',
                         border: OutlineInputBorder(),
                       ),
-                      value: _businessType,
+                      initialValue: _businessType,
                       items: _businessTypes.map((type) {
                         return DropdownMenuItem<String>(
                           value: type,

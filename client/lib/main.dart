@@ -21,7 +21,7 @@ import 'package:starter_architecture_flutter_firebase/src/extensions/firebase_an
 import 'package:starter_architecture_flutter_firebase/src/localization/string_hardcoded.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/utils/web/web_utils.dart';
-import 'package:url_strategy/url_strategy.dart';
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 // Using dynamic type to handle different device info types across platforms
 late final dynamic deviceInfo;
@@ -37,7 +37,7 @@ Future<void> main() async {
   // Configure URL strategy for web (use path URLs instead of hash fragments)
   if (kIsWeb) {
     // This is the FIRST thing we do to ensure it's applied before any routing happens
-    setPathUrlStrategy();
+    usePathUrlStrategy();
     debugPrint('🌐 Path URL strategy initialized');
   }
 

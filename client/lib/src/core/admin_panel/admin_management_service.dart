@@ -2,20 +2,25 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/admin_user.dart';
 
-/// Unified admin service that handles all admin-related operations.
-/// Consolidates functionality from both AdminManagementService and AdminService.
-class UnifiedAdminService {
-  final FirebaseFirestore _firestore;
-  final FirebaseAuth _auth;
+part 'admin_management_service.g.dart';
 
-  // Private constructor for dependency injection
-  UnifiedAdminService({FirebaseFirestore? firestore, FirebaseAuth? auth})
-      : _firestore = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+/// Unified admin service that handles all admin-related operations.
+@riverpod
+class UnifiedAdminService extends _$UnifiedAdminService {
+  late final FirebaseFirestore _firestore;
+  late final FirebaseAuth _auth;
+
+  @override
+  UnifiedAdminService build() {
+    _firestore = ref.watch(firebaseFirestoreProvider);
+    _auth = FirebaseAuth.instance;
+    return this;
+  }
 
   // Check if current user is admin with optimized caching
   Future<bool> isCurrentUserAdmin() async {
@@ -208,33 +213,16 @@ class UnifiedAdminService {
       return null;
     }
   }
-
-  // Clear admin cache on logout
-  void clearAdminStatus() {
-    // Method to be called on logout to clear caches
-  }
 }
 
-// Optimized providers with proper caching and dependency management
-final unifiedAdminServiceProvider = Provider<UnifiedAdminService>((ref) {
-  // Get Firestore instance from central Firebase provider
-  final firestore = ref.watch(firebaseFirestoreProvider);
-  return UnifiedAdminService(firestore: firestore);
-});
-
-// Stream provider with error handling
-final adminsStreamProvider = StreamProvider<List<AdminUser>>((ref) {
-  final adminService = ref.watch(unifiedAdminServiceProvider);
-  return adminService.getAdmins();
-});
-
-// Admin status provider with proper caching
-final isAdminProvider = FutureProvider<bool>((ref) async {
+// Admin status provider with proper caching and generated syntax
+@riverpod
+Future<bool> isAdmin(Ref ref) async {
   // Listen to auth state changes for cache invalidation
   ref.listen(authStateChangesProvider, (_, next) {
     debugPrint('🔄 Auth state changed, invalidating admin status cache');
-    // Clear cache when auth state changes
-    ref.read(cachedAdminStatusProvider.notifier).state = false;
+    // Clear cache when auth state changes by invalidating the state provider
+    ref.invalidate(cachedAdminStatusProvider);
     // Invalidate this provider to re-check admin status
     ref.invalidateSelf();
   });
@@ -246,7 +234,7 @@ final isAdminProvider = FutureProvider<bool>((ref) async {
   // If user is not authenticated, they can't be admin
   if (authState.value == null) {
     debugPrint('❌ User not authenticated, setting admin status to false');
-    ref.read(cachedAdminStatusProvider.notifier).state = false;
+    ref.read(cachedAdminStatusProvider.notifier).updateStatus(false);
     return false;
   }
 
@@ -259,44 +247,40 @@ final isAdminProvider = FutureProvider<bool>((ref) async {
 
   // If not cached, check from service
   debugPrint('🔍 No cached admin status, checking from service...');
-  final adminService = ref.watch(unifiedAdminServiceProvider);
+  final adminService = ref.watch(unifiedAdminServiceProvider.notifier);
   final isAdmin = await adminService.isCurrentUserAdmin();
 
   // Update cache with the result
-  ref.read(cachedAdminStatusProvider.notifier).state = isAdmin;
+  ref.read(cachedAdminStatusProvider.notifier).updateStatus(isAdmin);
   debugPrint('📝 Cached admin status updated: $isAdmin');
 
   return isAdmin;
-});
+}
 
-// Single, centralized cache provider
-final cachedAdminStatusProvider = StateProvider<bool>((ref) {
-  // Listen to auth state changes to clear cache
-  ref.listen(authStateChangesProvider, (_, next) {
-    // Clear admin status when auth state changes
-    if (next.value == null) {
-      // User logged out, clear admin status
-      // Note: We can't modify state in this callback, it will be handled
-      // by the isAdminProvider instead
-    }
-  });
+// Single, centralized cache provider using generated syntax
+@riverpod
+class CachedAdminStatus extends _$CachedAdminStatus {
+  @override
+  bool build() => false;
 
-  return false;
-});
+  void updateStatus(bool value) => state = value;
+}
 
 // Provider to manually refresh admin status
-final refreshAdminStatusProvider = Provider<Future<void>>((ref) async {
+@riverpod
+Future<void> refreshAdminStatus(Ref ref) async {
   debugPrint('🔄 Manual admin status refresh triggered');
   // Invalidate the admin provider to force a fresh check
   ref.invalidate(isAdminProvider);
   // Clear cached status
-  ref.read(cachedAdminStatusProvider.notifier).state = false;
+  ref.invalidate(cachedAdminStatusProvider);
   // Wait for the new admin status to be determined
   await ref.read(isAdminProvider.future);
-});
+}
 
 // Provider that automatically checks admin status when user logs in
-final autoCheckAdminStatusProvider = Provider<void>((ref) {
+@riverpod
+void autoCheckAdminStatus(Ref ref) {
   ref.listen(authStateChangesProvider, (previous, next) async {
     debugPrint('🔄 Auth state change detected in autoCheckAdminStatusProvider');
     debugPrint('  Previous: ${previous?.value?.uid ?? 'null'}');
@@ -317,7 +301,13 @@ final autoCheckAdminStatusProvider = Provider<void>((ref) {
     // When user logs out (from authenticated to null)
     if (previous?.value != null && next.value == null) {
       debugPrint('🔒 User logged out, clearing admin status');
-      ref.read(cachedAdminStatusProvider.notifier).state = false;
+      ref.invalidate(cachedAdminStatusProvider);
     }
   });
-});
+}
+
+@riverpod
+Stream<List<AdminUser>> adminsStream(Ref ref) {
+  final adminService = ref.watch(unifiedAdminServiceProvider.notifier);
+  return adminService.getAdmins();
+}

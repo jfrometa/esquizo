@@ -151,7 +151,7 @@ final currentBusinessSlugProvider = AutoDisposeProvider<String?>.internal(
 // ignore: unused_element
 typedef CurrentBusinessSlugRef = AutoDisposeProviderRef<String?>;
 String _$urlAwareBusinessIdHash() =>
-    r'5c52f3def1911dfea937684bd98d69225632d599';
+    r'61376ee6f244179f78ce90d929f1c18aa3554ccf';
 
 /// Provider for URL-aware business ID
 /// This provider combines URL-based business slug with fallback to local storage

@@ -43,15 +43,15 @@ Future<void> appStartup(Ref ref) async {
     // Update the cached admin status
     if (isAdmin) {
       debugPrint('🔐 User is an admin, updating cached status');
-      ref.read(cachedAdminStatusProvider.notifier).state = true;
+      ref.read(cachedAdminStatusProvider.notifier).updateStatus(true);
     } else {
       debugPrint('👤 User is not an admin');
-      ref.read(cachedAdminStatusProvider.notifier).state = false;
+      ref.read(cachedAdminStatusProvider.notifier).updateStatus(false);
     }
   } else {
     debugPrint('👤 No user logged in');
     // Ensure admin status is false when no user is logged in
-    ref.read(cachedAdminStatusProvider.notifier).state = false;
+    ref.read(cachedAdminStatusProvider.notifier).updateStatus(false);
   }
 
   // Check if admin and if example data should be initialized
@@ -80,7 +80,7 @@ Future<bool> eagerAdminStatus(Ref ref) async {
 
   // Update the cache with the result
   if (isAdmin) {
-    ref.read(cachedAdminStatusProvider.notifier).state = true;
+    ref.read(cachedAdminStatusProvider.notifier).updateStatus(true);
   }
 
   return isAdmin;

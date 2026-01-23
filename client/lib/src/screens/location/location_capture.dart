@@ -13,7 +13,7 @@ import 'location_web_bridge_stub.dart'
     if (dart.library.js_interop) 'location_web_bridge_web.dart';
 
 // Use this ID for consistent view registration
-const String MAP_ELEMENT_ID = 'google-map-view';
+const String mapElementId = 'google-map-view';
 
 class LocationCaptureBottomSheet extends ConsumerStatefulWidget {
   final Function(String latitude, String longitude, String address)
@@ -105,7 +105,7 @@ class LocationCaptureBottomSheetState
   Future<void> _registerWebViewFactory() async {
     if (!kIsWeb) return;
     if (!_hasRegisteredFactory) {
-      await _web.registerViewFactory(MAP_ELEMENT_ID);
+      await _web.registerViewFactory(mapElementId);
       _hasRegisteredFactory = true;
     }
     _isViewRegistered = true;
@@ -115,9 +115,8 @@ class LocationCaptureBottomSheetState
     if (!kIsWeb) return;
     try {
       _web.setupMapMovedListener(_updatePositionFromWeb);
-      print('Web map listener set up successfully');
     } catch (e) {
-      print('Error setting up web map listener: $e');
+      // Failed to set up web map listener
     }
   }
 
@@ -161,22 +160,15 @@ class LocationCaptureBottomSheetState
 
       if (mapsLoaded) {
         _mapsInitialized.complete(true);
-        print('Web maps initialized successfully');
       } else {
         _mapsInitialized.completeError('Failed to initialize maps');
       }
     } catch (e) {
-      print('Error initializing Google Maps for web: $e');
       _mapsInitialized.completeError(e);
       setState(() {
         _isMapInitialized = false;
       });
     }
-  }
-
-  Future<void> _ensureMapScriptsLoaded() async {
-    if (!kIsWeb) return;
-    await _web.ensureMapScriptsLoaded();
   }
 
   void _loadSavedLocation() {
@@ -249,7 +241,6 @@ class LocationCaptureBottomSheetState
         await _initializeWebMapWithPosition();
       }
     } catch (e) {
-      print('Error getting location: $e');
       _showSnackBar('Error al obtener ubicación: $e', isError: true);
       setState(() {
         _isLoading = false;
@@ -261,30 +252,21 @@ class LocationCaptureBottomSheetState
     if (!kIsWeb || !_isViewRegistered || _currentPosition == null) return;
 
     try {
-      // Make sure the element exists before initializing the map
-      final exists = _web.elementExists(MAP_ELEMENT_ID);
-      if (!exists) {
-        print('Map element not found in DOM: $MAP_ELEMENT_ID');
-        return;
-      }
-
-      print('Initializing map with element ID: $MAP_ELEMENT_ID');
-
       // Initialize the map using our JavaScript function
       final bool success = await _web.initializeAdvancedMap(
-        MAP_ELEMENT_ID,
+        mapElementId,
         _latitude,
         _longitude,
         _address ?? 'Su ubicación',
       );
 
       if (success) {
-        print('Web map initialized successfully with position');
+        // Map success
       } else {
-        print('Failed to initialize web map with position');
+        // Map failure
       }
     } catch (e) {
-      print('Error initializing web map with position: $e');
+      // Map error
     }
   }
 
@@ -313,8 +295,6 @@ class LocationCaptureBottomSheetState
       // Fetch human-readable address
       await _getHumanReadableAddress(_latitude!, _longitude!);
     } catch (e) {
-      print('Web geolocation error: $e');
-
       // Fall back to IP-based geolocation if permission is denied
       if (e.toString().contains('permission') ||
           e.toString().contains('denied')) {
@@ -351,7 +331,7 @@ class LocationCaptureBottomSheetState
         }
       }
     } catch (e) {
-      print('Fallback geolocation error: $e');
+      // Fallback error
     }
   }
 
@@ -396,7 +376,6 @@ class LocationCaptureBottomSheetState
     Position position = await Geolocator.getCurrentPosition(
       locationSettings: locationSettings,
     );
-
     setState(() {
       _latitude = position.latitude.toString();
       _longitude = position.longitude.toString();
@@ -472,7 +451,7 @@ class LocationCaptureBottomSheetState
       try {
         _web.setMapDragging(_isDraggingMap);
       } catch (e) {
-        print('Error setting map dragging mode: $e');
+        // Error setting dragging
       }
     }
   }
@@ -522,13 +501,15 @@ class LocationCaptureBottomSheetState
           _longitude = pos.longitude.toString();
         }
       } catch (e) {
-        print('Error getting marker position: $e');
+        // Position fetch error
       }
     }
 
     // Otherwise use map location
     widget.onLocationCaptured(_latitude!, _longitude!, _address!);
-    Navigator.of(context).pop();
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
@@ -537,13 +518,12 @@ class LocationCaptureBottomSheetState
     final colorScheme = theme.colorScheme;
     final size = MediaQuery.sizeOf(context);
     final isDesktop = size.width > 1024;
-    final isTablet = size.width > 600 && size.width <= 1024;
 
     // Wrapping in WillPopScope to prevent dismissal by back button.
     // Also note: when showing this bottom sheet, set isDismissible: false and
     // enableDrag: false in showModalBottomSheet().
-    return WillPopScope(
-      onWillPop: () async => false,
+    return PopScope(
+      canPop: false,
       child: Container(
         // Occupy the full screen height
         height: size.height,
@@ -560,7 +540,7 @@ class LocationCaptureBottomSheetState
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),
@@ -786,7 +766,7 @@ class LocationCaptureBottomSheetState
       }
 
       // Return HtmlElementView for web - using the static ID
-      return HtmlElementView(viewType: MAP_ELEMENT_ID);
+      return HtmlElementView(viewType: mapElementId);
     }
 
     // Native platforms - use GoogleMap widget
@@ -816,7 +796,7 @@ class LocationCaptureBottomSheetState
             : {},
       );
     } catch (e) {
-      print('Map initialization error: $e');
+      // Map initialization error - show fallback
       // Fallback widget
       return Container(
         color: Colors.grey[200],
@@ -907,7 +887,7 @@ class LocationCaptureBottomSheetState
         labelText: required ? '$label *' : label,
         prefixIcon: Icon(icon, color: colorScheme.primary),
         filled: true,
-        fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,

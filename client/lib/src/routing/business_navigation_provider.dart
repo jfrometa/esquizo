@@ -2,7 +2,6 @@
 // Manages business navigation state and prevents unnecessary rebuilds
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/unified_business_context_provider.dart';

@@ -1121,7 +1121,7 @@ class _CateringOrderDetailsScreenState
                         SizedBox(
                           width: double.maxFinite,
                           child: DropdownButtonFormField<CateringOrderStatus>(
-                            value: selectedStatus,
+                            initialValue: selectedStatus,
                             isExpanded: true,
                             decoration: const InputDecoration(
                               border: OutlineInputBorder(),
@@ -1255,7 +1255,7 @@ class _CateringOrderDetailsScreenState
                       SizedBox(
                         width: double.maxFinite,
                         child: DropdownButtonFormField<String>(
-                          value: selectedStatus,
+                          initialValue: selectedStatus,
                           isExpanded: true,
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),

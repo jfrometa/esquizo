@@ -24,7 +24,8 @@ class TableOrderScreen extends ConsumerStatefulWidget {
   ConsumerState<TableOrderScreen> createState() => _TableOrderScreenState();
 }
 
-class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with SingleTickerProviderStateMixin {
+class _TableOrderScreenState extends ConsumerState<TableOrderScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late Order _currentOrder;
   late List<OrderItem> _orderItems;
@@ -32,7 +33,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
   String? _errorMessage;
   final TextEditingController _notesController = TextEditingController();
   final FocusNode _notesFocusNode = FocusNode();
-  
+
   // Customer info
   final TextEditingController _customerNameController = TextEditingController();
   int _customerCount = 1;
@@ -43,7 +44,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    
+
     // Initialize order
     if (widget.existingOrder != null) {
       _currentOrder = widget.existingOrder!;
@@ -80,7 +81,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
       );
       _orderItems = [];
     }
-    
+
     // If there's a waiter note in the existing order, set it
     _notesController.text = _currentOrder.waiterNotes ?? '';
   }
@@ -99,11 +100,11 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
     final theme = Theme.of(context);
     final categories = ref.watch(menuCategoriesProvider);
     final products = ref.watch(menuProductsProvider);
-    
+
     return Scaffold(
       appBar: AppBar(
-        title: widget.existingOrder != null 
-            ? Text('Editar Pedido - Mesa ${widget.table.number}') 
+        title: widget.existingOrder != null
+            ? Text('Editar Pedido - Mesa ${widget.table.number}')
             : Text('Nuevo Pedido - Mesa ${widget.table.number}'),
         actions: [
           IconButton(
@@ -129,15 +130,15 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
             children: [
               // Menu Tab
               _buildMenuTab(categories, products),
-              
+
               // Current Order Tab
               _buildCurrentOrderTab(theme),
-              
+
               // Order Information Tab
               _buildOrderInfoTab(theme),
             ],
           ),
-          
+
           // Loading overlay
           if (_isLoading)
             Container(
@@ -152,7 +153,8 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
     );
   }
 
-  Widget _buildMenuTab(AsyncValue<List<MenuCategory>> categories, AsyncValue<List<MenuItem>> products) {
+  Widget _buildMenuTab(AsyncValue<List<MenuCategory>> categories,
+      AsyncValue<List<MenuItem>> products) {
     return categories.when(
       data: (categoryList) {
         return products.when(
@@ -162,17 +164,19 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
                 child: Text('No hay categorías disponibles'),
               );
             }
-            
+
             return Column(
               children: [
                 // Category filter chips
                 Container(
                   height: 56,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: categoryList.length + 1, // +1 for "All" option
-                    separatorBuilder: (context, index) => const SizedBox(width: 8),
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(width: 8),
                     itemBuilder: (context, index) {
                       if (index == 0) {
                         // "All" filter option
@@ -188,7 +192,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
                           },
                         );
                       }
-                      
+
                       final category = categoryList[index - 1];
                       return FilterChip(
                         label: Text(category.name),
@@ -202,16 +206,18 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
                     },
                   ),
                 ),
-                
+
                 // Search bar
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: TextField(
                     decoration: const InputDecoration(
                       hintText: 'Buscar productos...',
                       prefixIcon: Icon(Icons.search),
                       border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                      contentPadding:
+                          EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                     ),
                     onChanged: (value) {
                       setState(() {
@@ -220,7 +226,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
                     },
                   ),
                 ),
-                
+
                 // Product grid
                 Expanded(
                   child: _buildProductGrid(productList, categoryList),
@@ -244,23 +250,25 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
   String? _selectedCategoryId;
   String _searchQuery = '';
 
-  Widget _buildProductGrid(List<MenuItem> allProducts, List<MenuCategory> categories) {
+  Widget _buildProductGrid(
+      List<MenuItem> allProducts, List<MenuCategory> categories) {
     // Filter products based on selected category and search query
     final filteredProducts = allProducts.where((product) {
-      final matchesCategory = _selectedCategoryId == null || product.categoryId == _selectedCategoryId;
-      final matchesSearch = _searchQuery.isEmpty || 
-                           product.name.toLowerCase().contains(_searchQuery) ||
-                           product.description.toLowerCase().contains(_searchQuery);
-      
+      final matchesCategory = _selectedCategoryId == null ||
+          product.categoryId == _selectedCategoryId;
+      final matchesSearch = _searchQuery.isEmpty ||
+          product.name.toLowerCase().contains(_searchQuery) ||
+          product.description.toLowerCase().contains(_searchQuery);
+
       return matchesCategory && matchesSearch && product.isAvailable;
     }).toList();
-    
+
     if (filteredProducts.isEmpty) {
       return const Center(
         child: Text('No hay productos que coincidan con tu búsqueda'),
       );
     }
-    
+
     return GridView.builder(
       padding: const EdgeInsets.all(16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -274,9 +282,10 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
         final product = filteredProducts[index];
         final category = categories.firstWhere(
           (cat) => cat.id == product.categoryId,
-          orElse: () => MenuCategory(id: 'unknown', name: 'Sin categoría', sortOrder: 999),
+          orElse: () => MenuCategory(
+              id: 'unknown', name: 'Sin categoría', sortOrder: 999),
         );
-        
+
         return _buildProductCard(product, category);
       },
     );
@@ -284,7 +293,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
 
   Widget _buildProductCard(MenuItem product, MenuCategory category) {
     final theme = Theme.of(context);
-    
+
     // Check if item is in current order
     final inOrderItem = _orderItems.firstWhere(
       (item) => item.productId == product.id,
@@ -295,10 +304,10 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
         quantity: 0,
       ),
     );
-    
+
     final isInOrder = inOrderItem.productId.isNotEmpty;
     final orderQuantity = isInOrder ? inOrderItem.quantity : 0;
-    
+
     return Card(
       clipBehavior: Clip.antiAlias,
       elevation: 2,
@@ -334,12 +343,13 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
                 ],
               ),
             ),
-            
+
             // Product image (placeholder)
             Expanded(
               child: Container(
                 width: double.infinity,
-                color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                color:
+                    theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
                 child: product.imageUrl != null && product.imageUrl!.isNotEmpty
                     ? Image.network(
                         product.imageUrl!,
@@ -350,22 +360,23 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
                           color: theme.colorScheme.primary.withOpacity(0.5),
                         ),
                       )
-                    :  Image.asset(
-                 'assets/appIcon.png', 
-                  height: 40,
-                  width: 40,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const Icon(Icons.business),
-                ),
-                    
-                    // Icon(
-                    //     Icons.restaurant,
-                    //     size: 48,
-                    //     color: theme.colorScheme.primary.withOpacity(0.5),
-                    //   ),
+                    : Image.asset(
+                        'assets/appIcon.png',
+                        height: 40,
+                        width: 40,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) =>
+                            const Icon(Icons.business),
+                      ),
+
+                // Icon(
+                //     Icons.restaurant,
+                //     size: 48,
+                //     color: theme.colorScheme.primary.withOpacity(0.5),
+                //   ),
               ),
             ),
-            
+
             // Product info
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -400,7 +411,8 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
                       ),
                       if (isInOrder)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
                             color: theme.colorScheme.primaryContainer,
                             borderRadius: BorderRadius.circular(12),
@@ -418,7 +430,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
                 ],
               ),
             ),
-            
+
             // Quick add controls
             Container(
               decoration: BoxDecoration(
@@ -435,8 +447,9 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
                 children: [
                   IconButton(
                     icon: const Icon(Icons.remove),
-                    onPressed: isInOrder 
-                        ? () => _updateOrderItemQuantity(product, orderQuantity - 1) 
+                    onPressed: isInOrder
+                        ? () =>
+                            _updateOrderItemQuantity(product, orderQuantity - 1)
                         : null,
                     visualDensity: VisualDensity.compact,
                   ),
@@ -448,7 +461,8 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
                   ),
                   IconButton(
                     icon: const Icon(Icons.add),
-                    onPressed: () => _updateOrderItemQuantity(product, orderQuantity + 1),
+                    onPressed: () =>
+                        _updateOrderItemQuantity(product, orderQuantity + 1),
                     visualDensity: VisualDensity.compact,
                   ),
                 ],
@@ -474,7 +488,8 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
                 style: theme.textTheme.titleLarge,
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: _getStatusColor(_currentOrder.status).withOpacity(0.2),
                   borderRadius: BorderRadius.circular(16),
@@ -490,44 +505,44 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
             ],
           ),
         ),
-        
+
         // Order items list
         Expanded(
           child: _orderItems.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.shopping_cart_outlined,
-                    size: 64,
-                    color: theme.colorScheme.onSurface.withOpacity(0.3),
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.shopping_cart_outlined,
+                        size: 64,
+                        color: theme.colorScheme.onSurface.withOpacity(0.3),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No hay productos en este pedido',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.add),
+                        label: const Text('Agregar Productos'),
+                        onPressed: () => _tabController.animateTo(0),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No hay productos en este pedido',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.7),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.add),
-                    label: const Text('Agregar Productos'),
-                    onPressed: () => _tabController.animateTo(0),
-                  ),
-                ],
-              ),
-            )
-          : ListView.builder(
-              itemCount: _orderItems.length,
-              itemBuilder: (context, index) {
-                final item = _orderItems[index];
-                return _buildOrderItemTile(item, theme);
-              },
-            ),
+                )
+              : ListView.builder(
+                  itemCount: _orderItems.length,
+                  itemBuilder: (context, index) {
+                    final item = _orderItems[index];
+                    return _buildOrderItemTile(item, theme);
+                  },
+                ),
         ),
-        
+
         // Totals and actions
         Container(
           padding: const EdgeInsets.all(16.0),
@@ -588,16 +603,15 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
                   ),
                 ],
               ),
-              
               const SizedBox(height: 16),
-              
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   OutlinedButton.icon(
                     icon: const Icon(Icons.print_outlined),
                     label: const Text('Imprimir'),
-                    onPressed: _orderItems.isNotEmpty ? _printOrderPreview : null,
+                    onPressed:
+                        _orderItems.isNotEmpty ? _printOrderPreview : null,
                   ),
                   ElevatedButton.icon(
                     icon: const Icon(Icons.save),
@@ -663,15 +677,14 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
                           quantity: item.quantity,
                           notes: _notesController.text,
                         );
-                        
-                        final index = _orderItems.indexWhere(
-                          (i) => i.productId == item.productId
-                        );
-                        
+
+                        final index = _orderItems
+                            .indexWhere((i) => i.productId == item.productId);
+
                         if (index != -1) {
                           _orderItems[index] = updatedItem;
                         }
-                        
+
                         _isEditingNote = false;
                         _selectedItemIdForNote = null;
                       });
@@ -767,20 +780,24 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
                   ),
                   const Divider(),
                   if (widget.existingOrder != null) ...[
-                    _buildInfoRow('ID del Pedido', '#${widget.existingOrder!.id.substring(0, 8)}'),
-                    _buildInfoRow('Creado', _formatDateTime(widget.existingOrder!.createdAt)),
+                    _buildInfoRow('ID del Pedido',
+                        '#${widget.existingOrder!.id.substring(0, 8)}'),
+                    _buildInfoRow('Creado',
+                        _formatDateTime(widget.existingOrder!.createdAt)),
                     if (widget.existingOrder!.lastUpdated != null)
-                      _buildInfoRow('Actualizado', _formatDateTime(widget.existingOrder!.lastUpdated!)),
+                      _buildInfoRow('Actualizado',
+                          _formatDateTime(widget.existingOrder!.lastUpdated!)),
                   ] else
                     const Text('Este pedido aún no ha sido guardado'),
                   _buildInfoRow('Estado', _getStatusText(_currentOrder.status)),
                   _buildInfoRow('Mesa', widget.table.number.toString()),
-                  _buildInfoRow('Capacidad', '${widget.table.capacity} personas'),
+                  _buildInfoRow(
+                      'Capacidad', '${widget.table.capacity} personas'),
                 ],
               ),
             ),
           ),
-          
+
           // Customer information
           Card(
             margin: const EdgeInsets.only(bottom: 16),
@@ -809,8 +826,8 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
                       const SizedBox(width: 16),
                       IconButton(
                         icon: const Icon(Icons.remove),
-                        onPressed: _customerCount > 1 
-                            ? () => setState(() => _customerCount--) 
+                        onPressed: _customerCount > 1
+                            ? () => setState(() => _customerCount--)
                             : null,
                       ),
                       Text(
@@ -827,7 +844,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
               ),
             ),
           ),
-          
+
           // Waiter notes
           Card(
             margin: const EdgeInsets.only(bottom: 16),
@@ -853,7 +870,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
               ),
             ),
           ),
-          
+
           // Order actions
           Card(
             child: Padding(
@@ -885,7 +902,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
                       trailing: const Icon(Icons.chevron_right),
                       onTap: _printOrderPreview,
                     ),
-                    if (_currentOrder.status != OrderStatus.cancelled && 
+                    if (_currentOrder.status != OrderStatus.cancelled &&
                         _currentOrder.status != OrderStatus.completed)
                       ListTile(
                         leading: Icon(
@@ -897,7 +914,8 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
                         onTap: _confirmCancelOrder,
                       ),
                   ] else
-                    const Text('Las acciones estarán disponibles después de guardar el pedido'),
+                    const Text(
+                        'Las acciones estarán disponibles después de guardar el pedido'),
                 ],
               ),
             ),
@@ -927,8 +945,9 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
 
   Widget _buildBottomBar(ThemeData theme) {
     final total = _calculateTotal();
-    final itemCount = _orderItems.fold<int>(0, (sum, item) => sum + item.quantity);
-    
+    final itemCount =
+        _orderItems.fold<int>(0, (sum, item) => sum + item.quantity);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       color: theme.colorScheme.primaryContainer,
@@ -970,10 +989,9 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
 
   // Helper methods
   void _addItemToOrder(MenuItem product) {
-    final existingItemIndex = _orderItems.indexWhere(
-      (item) => item.productId == product.id
-    );
-    
+    final existingItemIndex =
+        _orderItems.indexWhere((item) => item.productId == product.id);
+
     setState(() {
       if (existingItemIndex >= 0) {
         // Update existing item
@@ -995,7 +1013,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
         ));
       }
     });
-    
+
     // Show snackbar confirmation
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -1014,11 +1032,10 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
       _removeItemFromOrder(product.id);
       return;
     }
-    
-    final existingItemIndex = _orderItems.indexWhere(
-      (item) => item.productId == product.id
-    );
-    
+
+    final existingItemIndex =
+        _orderItems.indexWhere((item) => item.productId == product.id);
+
     setState(() {
       if (existingItemIndex >= 0) {
         // Update existing item
@@ -1054,7 +1071,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
       _isEditingNote = true;
       _selectedItemIdForNote = item.productId;
     });
-    
+
     // Focus the text field after the state is updated
     Future.delayed(const Duration(milliseconds: 100), () {
       _notesFocusNode.requestFocus();
@@ -1063,9 +1080,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
 
   double _calculateSubtotal() {
     return _orderItems.fold<double>(
-      0, 
-      (sum, item) => sum + (item.price * item.quantity)
-    );
+        0, (sum, item) => sum + (item.price * item.quantity));
   }
 
   double _calculateTax() {
@@ -1193,7 +1208,6 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
     );
   }
 
-
   void _updateOrderStatus(OrderStatus newStatus) {
     setState(() {
       _currentOrder = _currentOrder.copyWith(
@@ -1203,9 +1217,12 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
         totalAmount: _calculateTotal(),
         subtotal: _calculateSubtotal(),
         taxAmount: _calculateTax(),
-        customerName: _customerNameController.text.isEmpty ? null : _customerNameController.text,
+        customerName: _customerNameController.text.isEmpty
+            ? null
+            : _customerNameController.text,
         customerCount: _customerCount,
-        waiterNotes: _notesController.text.isEmpty ? null : _notesController.text,
+        waiterNotes:
+            _notesController.text.isEmpty ? null : _notesController.text,
       );
     });
     if (widget.existingOrder != null) {
@@ -1218,7 +1235,8 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Cancelar Pedido'),
-        content: const Text('¿Estás seguro de que deseas cancelar este pedido? Esta acción no se puede deshacer.'),
+        content: const Text(
+            '¿Estás seguro de que deseas cancelar este pedido? Esta acción no se puede deshacer.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1244,11 +1262,11 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Enviando pedido a la impresora...')),
     );
-    
+
     final printService = ref.read(printServiceProvider);
-    
+
     try {
-          final orderForPrint = Order(
+      final orderForPrint = Order(
         id: _currentOrder.id,
         tableNumber: _currentOrder.tableNumber,
         tableId: _currentOrder.tableId,
@@ -1259,16 +1277,20 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
         totalAmount: _calculateTotal(),
         subtotal: _calculateSubtotal(),
         taxAmount: _calculateTax(),
-        customerName: _customerNameController.text.isEmpty ? null : _customerNameController.text,
+        customerName: _customerNameController.text.isEmpty
+            ? null
+            : _customerNameController.text,
         customerCount: _customerCount,
-        waiterNotes: _notesController.text.isEmpty ? null : _notesController.text,
+        waiterNotes:
+            _notesController.text.isEmpty ? null : _notesController.text,
         isPaid: _currentOrder.isPaid ?? false,
         paidAt: _currentOrder.paidAt,
         paymentMethod: _currentOrder.paymentMethod ?? '',
         tipAmount: _currentOrder.tipAmount ?? 0.0,
         cashierId: _currentOrder.cashierId,
         cashierName: _currentOrder.cashierName,
-        orderNumber: _currentOrder.orderNumber ?? 'ORD-${DateTime.now().millisecondsSinceEpoch}',
+        orderNumber: _currentOrder.orderNumber ??
+            'ORD-${DateTime.now().millisecondsSinceEpoch}',
         email: _currentOrder.email ?? '',
         userId: _currentOrder.userId ?? '',
         orderType: _currentOrder.orderType ?? 'dine_in',
@@ -1283,7 +1305,8 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
       printService.printOrder(orderForPrint).then((_) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Pedido enviado a impresión correctamente')),
+            const SnackBar(
+                content: Text('Pedido enviado a impresión correctamente')),
           );
         }
       }).catchError((error) {
@@ -1307,18 +1330,19 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
       );
       return;
     }
-    
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
-    
+
     try {
       final orderService = ref.read(orderServiceProvider);
       final tableService = ref.read(tableServiceProvider);
-      
-           final orderToSave = Order(
-        id: widget.existingOrder?.id ?? 'order_${DateTime.now().millisecondsSinceEpoch}',
+
+      final orderToSave = Order(
+        id: widget.existingOrder?.id ??
+            'order_${DateTime.now().millisecondsSinceEpoch}',
         tableNumber: widget.table.number,
         tableId: widget.table.id,
         createdAt: widget.existingOrder?.createdAt ?? DateTime.now(),
@@ -1328,9 +1352,12 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
         totalAmount: _calculateTotal(),
         subtotal: _calculateSubtotal(),
         taxAmount: _calculateTax(),
-        customerName: _customerNameController.text.isEmpty ? null : _customerNameController.text,
+        customerName: _customerNameController.text.isEmpty
+            ? null
+            : _customerNameController.text,
         customerCount: _customerCount,
-        waiterNotes: _notesController.text.isEmpty ? null : _notesController.text,
+        waiterNotes:
+            _notesController.text.isEmpty ? null : _notesController.text,
         isPaid: widget.existingOrder?.isPaid ?? false,
         paidAt: widget.existingOrder?.paidAt,
         paymentMethod: widget.existingOrder?.paymentMethod ?? '',
@@ -1338,7 +1365,8 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
         cashierId: widget.existingOrder?.cashierId,
         cashierName: widget.existingOrder?.cashierName,
         // Add missing required parameters
-        orderNumber: widget.existingOrder?.orderNumber ?? 'ORD-${DateTime.now().millisecondsSinceEpoch}',
+        orderNumber: widget.existingOrder?.orderNumber ??
+            'ORD-${DateTime.now().millisecondsSinceEpoch}',
         email: widget.existingOrder?.email ?? '',
         userId: widget.existingOrder?.userId ?? '',
         orderType: widget.existingOrder?.orderType ?? 'dine_in',
@@ -1355,17 +1383,17 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
         await orderService.updateOrder(orderToSave);
       } else {
         await orderService.createOrder(orderToSave);
-        
+
         // If this is a new order, update the table status
         if (widget.table.status != TableStatusEnum.occupied) {
           await tableService.updateTableStatus(
-            widget.table.id, 
-            TableStatusEnum.occupied, 
+            widget.table.id,
+            TableStatusEnum.occupied,
             orderToSave.id,
           );
         }
       }
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -1373,7 +1401,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
             backgroundColor: Colors.green,
           ),
         );
-        
+
         // Return to previous screen with the updated order
         Navigator.pop(context, orderToSave);
       }
@@ -1381,7 +1409,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen> with Single
       setState(() {
         _errorMessage = e.toString();
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1405,29 +1433,31 @@ class MenuManagementScreen extends ConsumerStatefulWidget {
   const MenuManagementScreen({super.key, required int initialTab});
 
   @override
-  ConsumerState<MenuManagementScreen> createState() => _MenuManagementScreenState();
+  ConsumerState<MenuManagementScreen> createState() =>
+      _MenuManagementScreenState();
 }
 
-class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> with SingleTickerProviderStateMixin {
+class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final bool _isLoading = false;
-  
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
   }
-  
+
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gestión del Menú'),
@@ -1468,11 +1498,11 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
       ),
     );
   }
-  
+
   Widget _buildProductsTab(ThemeData theme) {
     final products = ref.watch(menuProductsProvider);
     final categories = ref.watch(menuCategoriesProvider);
-    
+
     return products.when(
       data: (productList) {
         return categories.when(
@@ -1482,7 +1512,7 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
                 child: Text('No hay productos en el menú'),
               );
             }
-            
+
             return Column(
               children: [
                 // Search and filter bar
@@ -1502,7 +1532,7 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
                     },
                   ),
                 ),
-                
+
                 // Products list
                 Expanded(
                   child: ListView.builder(
@@ -1512,14 +1542,18 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
                       final product = productList[index];
                       final category = categoryList.firstWhere(
                         (cat) => cat.id == product.categoryId,
-                        orElse: () => MenuCategory(id: 'unknown', name: 'Sin categoría', sortOrder: 999),
+                        orElse: () => MenuCategory(
+                            id: 'unknown',
+                            name: 'Sin categoría',
+                            sortOrder: 999),
                       );
-                      
+
                       return Card(
                         margin: const EdgeInsets.only(bottom: 12),
                         clipBehavior: Clip.antiAlias,
                         child: InkWell(
-                          onTap: () => _showEditProductDialog(product, categoryList),
+                          onTap: () =>
+                              _showEditProductDialog(product, categoryList),
                           child: Padding(
                             padding: const EdgeInsets.all(12.0),
                             child: Row(
@@ -1529,39 +1563,47 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
                                   width: 80,
                                   height: 80,
                                   decoration: BoxDecoration(
-                                    color: theme.colorScheme.surfaceContainerHighest,
+                                    color: theme
+                                        .colorScheme.surfaceContainerHighest,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: product.imageUrl != null && product.imageUrl!.isNotEmpty
+                                  child: product.imageUrl != null &&
+                                          product.imageUrl!.isNotEmpty
                                       ? Image.network(
                                           product.imageUrl!,
                                           fit: BoxFit.cover,
-                                          errorBuilder: (context, error, stackTrace) => Icon(
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  Icon(
                                             Icons.restaurant,
                                             size: 36,
-                                            color: theme.colorScheme.primary.withOpacity(0.5),
+                                            color: theme.colorScheme.primary
+                                                .withOpacity(0.5),
                                           ),
                                         )
                                       : Icon(
                                           Icons.restaurant,
                                           size: 36,
-                                          color: theme.colorScheme.primary.withOpacity(0.5),
+                                          color: theme.colorScheme.primary
+                                              .withOpacity(0.5),
                                         ),
                                 ),
-                                
+
                                 const SizedBox(width: 16),
-                                
+
                                 // Product info
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
                                         children: [
                                           Expanded(
                                             child: Text(
                                               product.name,
-                                              style: theme.textTheme.titleMedium?.copyWith(
+                                              style: theme.textTheme.titleMedium
+                                                  ?.copyWith(
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
@@ -1577,7 +1619,8 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
                                       const SizedBox(height: 4),
                                       Text(
                                         category.name,
-                                        style: theme.textTheme.bodySmall?.copyWith(
+                                        style:
+                                            theme.textTheme.bodySmall?.copyWith(
                                           color: theme.colorScheme.primary,
                                         ),
                                       ),
@@ -1590,18 +1633,22 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
                                       ),
                                       const SizedBox(height: 8),
                                       Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
                                             '\$${product.price.toStringAsFixed(2)}',
-                                            style: theme.textTheme.titleMedium?.copyWith(
+                                            style: theme.textTheme.titleMedium
+                                                ?.copyWith(
                                               color: theme.colorScheme.primary,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                           Switch(
                                             value: product.isAvailable,
-                                            onChanged: (value) => _toggleProductAvailability(product),
+                                            onChanged: (value) =>
+                                                _toggleProductAvailability(
+                                                    product),
                                           ),
                                         ],
                                       ),
@@ -1631,10 +1678,10 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
       ),
     );
   }
-  
+
   Widget _buildCategoriesTab(ThemeData theme) {
     final categories = ref.watch(menuCategoriesProvider);
-    
+
     return categories.when(
       data: (categoryList) {
         if (categoryList.isEmpty) {
@@ -1642,11 +1689,11 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
             child: Text('No hay categorías definidas'),
           );
         }
-        
+
         // Sort categories by sort order
         final sortedCategories = List<MenuCategory>.from(categoryList)
           ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
-        
+
         return ReorderableListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: sortedCategories.length,
@@ -1655,11 +1702,11 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
             if (oldIndex < newIndex) {
               newIndex -= 1;
             }
-            
+
             setState(() {
               final item = sortedCategories.removeAt(oldIndex);
               sortedCategories.insert(newIndex, item);
-              
+
               // Update sort orders
               for (int i = 0; i < sortedCategories.length; i++) {
                 final category = sortedCategories[i];
@@ -1671,7 +1718,7 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
           },
           itemBuilder: (context, index) {
             final category = sortedCategories[index];
-            
+
             return Dismissible(
               key: Key(category.id),
               direction: DismissDirection.endToStart,
@@ -1689,7 +1736,8 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
                   context: context,
                   builder: (context) => AlertDialog(
                     title: const Text('Eliminar Categoría'),
-                    content: Text('¿Estás seguro de que deseas eliminar la categoría "${category.name}"? Esta acción puede afectar a los productos asignados a esta categoría.'),
+                    content: Text(
+                        '¿Estás seguro de que deseas eliminar la categoría "${category.name}"? Esta acción puede afectar a los productos asignados a esta categoría.'),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context, false),
@@ -1738,33 +1786,37 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
       ),
     );
   }
-  
+
   // Dialog methods
   void _showAddProductDialog() {
     final categories = ref.read(menuCategoriesProvider);
-    
+
     categories.when(
       data: (categoryList) {
         if (categoryList.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Debes crear al menos una categoría primero')),
+            const SnackBar(
+                content: Text('Debes crear al menos una categoría primero')),
           );
           return;
         }
-        
+
         showDialog(
           context: context,
           builder: (context) => AddEditProductDialog(
-            categories: categoryList.map((category) => MenuCategory(
-              id: category.id,
-              name: category.name,
-              sortOrder: category.sortOrder,
-            )).toList(),
+            categories: categoryList
+                .map((category) => MenuCategory(
+                      id: category.id,
+                      name: category.name,
+                      sortOrder: category.sortOrder,
+                    ))
+                .toList(),
             onSave: (product) {
               ref.read(productServiceProvider).createProduct(product).then((_) {
                 ref.refresh(menuProductsProvider);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Producto agregado correctamente')),
+                  const SnackBar(
+                      content: Text('Producto agregado correctamente')),
                 );
               }).catchError((error) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -1783,7 +1835,7 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
       ),
     );
   }
-  
+
   void _showEditProductDialog(MenuItem product, List<MenuCategory> categories) {
     showDialog(
       context: context,
@@ -1791,10 +1843,14 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
         product: product,
         categories: categories,
         onSave: (updatedProduct) {
-          ref.read(productServiceProvider).updateProduct(updatedProduct).then((_) {
+          ref
+              .read(productServiceProvider)
+              .updateProduct(updatedProduct)
+              .then((_) {
             ref.refresh(menuProductsProvider);
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Producto actualizado correctamente')),
+              const SnackBar(
+                  content: Text('Producto actualizado correctamente')),
             );
           }).catchError((error) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -1805,7 +1861,7 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
       ),
     );
   }
-  
+
   void _toggleProductAvailability(MenuItem product) {
     final updatedProduct = MenuItem(
       id: product.id,
@@ -1817,7 +1873,7 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
       isAvailable: !product.isAvailable,
       isSpecial: product.isSpecial,
     );
-    
+
     ref.read(productServiceProvider).updateProduct(updatedProduct).then((_) {
       ref.refresh(menuProductsProvider);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1835,7 +1891,7 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
       );
     });
   }
-  
+
   void _showAddCategoryDialog() {
     showDialog(
       context: context,
@@ -1855,17 +1911,21 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
       ),
     );
   }
-  
+
   void _showEditCategoryDialog(MenuCategory category) {
     showDialog(
       context: context,
       builder: (context) => AddEditCategoryDialog(
         category: category,
         onSave: (updatedCategory) {
-          ref.read(productServiceProvider).updateCategory(updatedCategory).then((_) {
+          ref
+              .read(productServiceProvider)
+              .updateCategory(updatedCategory)
+              .then((_) {
             ref.invalidate(menuCategoriesProvider);
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Categoría actualizada correctamente')),
+              const SnackBar(
+                  content: Text('Categoría actualizada correctamente')),
             );
           }).catchError((error) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -1876,10 +1936,10 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
       ),
     );
   }
-  
+
   void _updateCategorySortOrder(String categoryId, int newSortOrder) {
     final categoryService = ref.read(productServiceProvider);
-    
+
     categoryService.updateCategorySortOrder(categoryId, newSortOrder).then((_) {
       // No need to refresh the provider since we're already updating the UI
     }).catchError((error) {
@@ -1888,10 +1948,10 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> wit
       );
     });
   }
-  
+
   void _deleteCategory(String categoryId) {
     final categoryService = ref.read(productServiceProvider);
-    
+
     categoryService.deleteCategory(categoryId).then((_) {
       ref.refresh(menuCategoriesProvider);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1928,15 +1988,15 @@ class _AddEditProductDialogState extends State<AddEditProductDialog> {
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
   final _imageUrlController = TextEditingController();
-  
+
   String? _selectedCategoryId;
   bool _isAvailable = true;
   bool _isSpecial = false;
-  
+
   @override
   void initState() {
     super.initState();
-    
+
     if (widget.product != null) {
       _nameController.text = widget.product!.name;
       _descriptionController.text = widget.product!.description;
@@ -1949,7 +2009,7 @@ class _AddEditProductDialogState extends State<AddEditProductDialog> {
       _selectedCategoryId = widget.categories.first.id;
     }
   }
-  
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -1958,13 +2018,15 @@ class _AddEditProductDialogState extends State<AddEditProductDialog> {
     _imageUrlController.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return AlertDialog(
-      title: Text(widget.product != null ? 'Editar Producto' : 'Agregar Nuevo Producto'),
+      title: Text(widget.product != null
+          ? 'Editar Producto'
+          : 'Agregar Nuevo Producto'),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -1990,7 +2052,7 @@ class _AddEditProductDialogState extends State<AddEditProductDialog> {
                   labelText: 'Categoría',
                   border: OutlineInputBorder(),
                 ),
-                value: _selectedCategoryId,
+                initialValue: _selectedCategoryId,
                 items: widget.categories.map((category) {
                   return DropdownMenuItem<String>(
                     value: category.id,
@@ -2037,12 +2099,12 @@ class _AddEditProductDialogState extends State<AddEditProductDialog> {
                   if (value == null || value.isEmpty) {
                     return 'Por favor ingresa un precio';
                   }
-                  
+
                   final price = double.tryParse(value);
                   if (price == null || price <= 0) {
                     return 'Por favor ingresa un precio válido';
                   }
-                  
+
                   return null;
                 },
               ),
@@ -2089,20 +2151,22 @@ class _AddEditProductDialogState extends State<AddEditProductDialog> {
       ],
     );
   }
-  
+
   void _saveProduct() {
     if (_formKey.currentState!.validate() && _selectedCategoryId != null) {
       final product = MenuItem(
-        id: widget.product?.id ?? 'product_${DateTime.now().millisecondsSinceEpoch}',
+        id: widget.product?.id ??
+            'product_${DateTime.now().millisecondsSinceEpoch}',
         name: _nameController.text,
         description: _descriptionController.text,
         price: double.parse(_priceController.text),
         categoryId: _selectedCategoryId!,
-        imageUrl: _imageUrlController.text.isEmpty ? null : _imageUrlController.text,
+        imageUrl:
+            _imageUrlController.text.isEmpty ? null : _imageUrlController.text,
         isAvailable: _isAvailable,
         isSpecial: _isSpecial,
       );
-      
+
       widget.onSave(product);
       Navigator.pop(context);
     }
@@ -2128,27 +2192,29 @@ class _AddEditCategoryDialogState extends State<AddEditCategoryDialog> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   int _sortOrder = 0;
-  
+
   @override
   void initState() {
     super.initState();
-    
+
     if (widget.category != null) {
       _nameController.text = widget.category!.name;
       _sortOrder = widget.category!.sortOrder;
     }
   }
-  
+
   @override
   void dispose() {
     _nameController.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.category != null ? 'Editar Categoría' : 'Agregar Nueva Categoría'),
+      title: Text(widget.category != null
+          ? 'Editar Categoría'
+          : 'Agregar Nueva Categoría'),
       content: Form(
         key: _formKey,
         child: Column(
@@ -2182,18 +2248,18 @@ class _AddEditCategoryDialogState extends State<AddEditCategoryDialog> {
       ],
     );
   }
-  
+
   void _saveCategory() {
     if (_formKey.currentState!.validate()) {
       final category = MenuCategory(
-        id: widget.category?.id ?? 'category_${DateTime.now().millisecondsSinceEpoch}',
+        id: widget.category?.id ??
+            'category_${DateTime.now().millisecondsSinceEpoch}',
         name: _nameController.text,
         sortOrder: widget.category?.sortOrder ?? _sortOrder,
       );
-      
+
       widget.onSave(category);
       Navigator.pop(context);
     }
   }
 }
-

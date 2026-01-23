@@ -60,7 +60,7 @@ class _AuthenticatedProfileScreenState
 
     try {
       // Reset admin status in cache before signing out
-      ref.read(cachedAdminStatusProvider.notifier).state = false;
+      ref.read(cachedAdminStatusProvider.notifier).updateStatus(false);
 
       // Force refresh the admin provider
       ref.invalidate(isAdminProvider);

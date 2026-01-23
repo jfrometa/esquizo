@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/payment/payment_models.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/payment/payment_providers.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/payment/payment_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/order/unified_order_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import 'package:go_router/go_router.dart';
 
 class OrderPaymentDetailsScreen extends ConsumerStatefulWidget {
@@ -17,24 +15,28 @@ class OrderPaymentDetailsScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<OrderPaymentDetailsScreen> createState() => _OrderPaymentDetailsScreenState();
+  ConsumerState<OrderPaymentDetailsScreen> createState() =>
+      _OrderPaymentDetailsScreenState();
 }
 
-class _OrderPaymentDetailsScreenState extends ConsumerState<OrderPaymentDetailsScreen> {
-  final currencyFormatter = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+class _OrderPaymentDetailsScreenState
+    extends ConsumerState<OrderPaymentDetailsScreen> {
+  final currencyFormatter =
+      NumberFormat.currency(symbol: '\$', decimalDigits: 2);
   bool _isProcessingRefund = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     final paymentAsync = ref.watch(paymentByOrderIdProvider(widget.orderId));
     final orderService = ref.watch(orderServiceProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Payment Details - Order #${widget.orderId.substring(0, 8)}'),
+        title:
+            Text('Payment Details - Order #${widget.orderId.substring(0, 8)}'),
         actions: [
           IconButton(
             onPressed: () {
@@ -63,7 +65,7 @@ class _OrderPaymentDetailsScreenState extends ConsumerState<OrderPaymentDetailsS
               ),
             );
           }
-          
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -72,27 +74,27 @@ class _OrderPaymentDetailsScreenState extends ConsumerState<OrderPaymentDetailsS
                 // Payment Status Card
                 _buildPaymentStatusCard(payment, colorScheme),
                 const SizedBox(height: 16),
-                
+
                 // Payment Details Card
                 _buildPaymentDetailsCard(payment, colorScheme),
                 const SizedBox(height: 16),
-                
+
                 // Amount Breakdown Card
                 _buildAmountBreakdownCard(payment, colorScheme),
                 const SizedBox(height: 16),
-                
+
                 // Service & Tips Card
                 if (payment.serviceType != null || payment.tipAmount > 0)
                   _buildServiceAndTipsCard(payment, colorScheme),
-                
+
                 // Discounts Card
                 if (payment.appliedDiscounts.isNotEmpty)
                   _buildDiscountsCard(payment, colorScheme),
-                
+
                 // Refunds Card
                 if (payment.refundedAmount > 0)
                   _buildRefundsCard(payment, colorScheme),
-                
+
                 // Actions Card
                 _buildActionsCard(payment, colorScheme),
               ],
@@ -129,21 +131,26 @@ class _OrderPaymentDetailsScreenState extends ConsumerState<OrderPaymentDetailsS
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Transaction ID', style: TextStyle(color: Colors.grey[600])),
+                    Text('Transaction ID',
+                        style: TextStyle(color: Colors.grey[600])),
                     const SizedBox(height: 4),
-                    Text(payment.transactionId ?? 'N/A', style: const TextStyle(fontWeight: FontWeight.w500)),
+                    Text(payment.transactionId ?? 'N/A',
+                        style: const TextStyle(fontWeight: FontWeight.w500)),
                   ],
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text('Payment Method', style: TextStyle(color: Colors.grey[600])),
+                    Text('Payment Method',
+                        style: TextStyle(color: Colors.grey[600])),
                     const SizedBox(height: 4),
                     Row(
                       children: [
                         Icon(_getMethodIcon(payment.method), size: 20),
                         const SizedBox(width: 4),
-                        Text(_formatMethod(payment.method), style: const TextStyle(fontWeight: FontWeight.w500)),
+                        Text(_formatMethod(payment.method),
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w500)),
                       ],
                     ),
                   ],
@@ -177,7 +184,8 @@ class _OrderPaymentDetailsScreenState extends ConsumerState<OrderPaymentDetailsS
             _buildDetailRow('Created', _formatDateTime(payment.createdAt)),
             if (payment.completedAt != null) ...[
               const SizedBox(height: 8),
-              _buildDetailRow('Completed', _formatDateTime(payment.completedAt!)),
+              _buildDetailRow(
+                  'Completed', _formatDateTime(payment.completedAt!)),
             ],
           ],
         ),
@@ -205,7 +213,8 @@ class _OrderPaymentDetailsScreenState extends ConsumerState<OrderPaymentDetailsS
             if (payment.tipAmount > 0)
               _buildAmountRow('Tip', payment.tipAmount, color: Colors.green),
             if (payment.discountAmount > 0)
-              _buildAmountRow('Discount', -payment.discountAmount, color: Colors.red),
+              _buildAmountRow('Discount', -payment.discountAmount,
+                  color: Colors.red),
             const Divider(),
             _buildAmountRow(
               'Total',
@@ -245,7 +254,8 @@ class _OrderPaymentDetailsScreenState extends ConsumerState<OrderPaymentDetailsS
             ),
             const SizedBox(height: 16),
             if (payment.serviceType != null) ...[
-              _buildDetailRow('Service Type', _formatServiceType(payment.serviceType!)),
+              _buildDetailRow(
+                  'Service Type', _formatServiceType(payment.serviceType!)),
               const SizedBox(height: 8),
             ],
             if (payment.tableNumber != null) ...[
@@ -298,34 +308,35 @@ class _OrderPaymentDetailsScreenState extends ConsumerState<OrderPaymentDetailsS
             ),
             const SizedBox(height: 16),
             ...payment.appliedDiscounts.map((discount) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        discount.code,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            discount.code,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          if (discount.description != null)
+                            Text(
+                              discount.description!,
+                              style: TextStyle(
+                                  fontSize: 12, color: Colors.grey[600]),
+                            ),
+                        ],
                       ),
-                      if (discount.description != null)
-                        Text(
-                          discount.description!,
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      Text(
+                        '-${currencyFormatter.format(discount.amountApplied)}',
+                        style: TextStyle(
+                          color: Colors.red[700],
+                          fontWeight: FontWeight.bold,
                         ),
+                      ),
                     ],
                   ),
-                  Text(
-                    '-${currencyFormatter.format(discount.amountApplied)}',
-                    style: TextStyle(
-                      color: Colors.red[700],
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            )),
+                )),
           ],
         ),
       ),
@@ -392,17 +403,22 @@ class _OrderPaymentDetailsScreenState extends ConsumerState<OrderPaymentDetailsS
                     icon: const Icon(Icons.check),
                     label: const Text('Confirm Payment'),
                   ),
-                if (payment.status == PaymentStatus.completed && payment.isRefundable)
+                if (payment.status == PaymentStatus.completed &&
+                    payment.isRefundable)
                   OutlinedButton.icon(
-                    onPressed: _isProcessingRefund ? null : () => _processRefund(payment),
-                    icon: _isProcessingRefund 
+                    onPressed: _isProcessingRefund
+                        ? null
+                        : () => _processRefund(payment),
+                    icon: _isProcessingRefund
                         ? const SizedBox(
                             width: 16,
                             height: 16,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.money_off),
-                    label: Text(_isProcessingRefund ? 'Processing...' : 'Process Refund'),
+                    label: Text(_isProcessingRefund
+                        ? 'Processing...'
+                        : 'Process Refund'),
                   ),
                 OutlinedButton.icon(
                   onPressed: () => _viewOrderDetails(payment.orderId),
@@ -432,7 +448,8 @@ class _OrderPaymentDetailsScreenState extends ConsumerState<OrderPaymentDetailsS
     );
   }
 
-  Widget _buildAmountRow(String label, double amount, {Color? color, bool isTotal = false}) {
+  Widget _buildAmountRow(String label, double amount,
+      {Color? color, bool isTotal = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -461,7 +478,7 @@ class _OrderPaymentDetailsScreenState extends ConsumerState<OrderPaymentDetailsS
   Widget _buildStatusChip(PaymentStatus status, ColorScheme colorScheme) {
     Color backgroundColor;
     Color textColor;
-    
+
     switch (status) {
       case PaymentStatus.completed:
         backgroundColor = Colors.green.withOpacity(0.2);
@@ -484,7 +501,7 @@ class _OrderPaymentDetailsScreenState extends ConsumerState<OrderPaymentDetailsS
         backgroundColor = Colors.grey.withOpacity(0.2);
         textColor = Colors.grey.shade700;
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -507,7 +524,8 @@ class _OrderPaymentDetailsScreenState extends ConsumerState<OrderPaymentDetailsS
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Distribute Tips'),
-        content: Text('Distribute ${currencyFormatter.format(payment.tipAmount)} in tips?'),
+        content: Text(
+            'Distribute ${currencyFormatter.format(payment.tipAmount)} in tips?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -532,9 +550,9 @@ class _OrderPaymentDetailsScreenState extends ConsumerState<OrderPaymentDetailsS
     try {
       final paymentService = ref.read(paymentServiceProvider);
       await paymentService.completePayment(payment.id);
-      
+
       ref.invalidate(paymentByOrderIdProvider(widget.orderId));
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Payment confirmed successfully')),
@@ -551,11 +569,11 @@ class _OrderPaymentDetailsScreenState extends ConsumerState<OrderPaymentDetailsS
 
   Future<void> _processRefund(Payment payment) async {
     setState(() => _isProcessingRefund = true);
-    
+
     try {
       // TODO: Implement refund processing
       await Future.delayed(const Duration(seconds: 2));
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Refund functionality coming soon')),
@@ -651,4 +669,3 @@ class _OrderPaymentDetailsScreenState extends ConsumerState<OrderPaymentDetailsS
     return DateFormat('MMM d, y h:mm a').format(dateTime);
   }
 }
-

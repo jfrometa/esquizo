@@ -1,0 +1,29 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "start-android-emulator",
+      "type": "shell",
+      "command": "flutter emulators --launch Medium_Phone_API_36.1",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "runOptions": {
+        "runOn": "default"
+      }
+    },
+    {
+      "label": "start-ios-simulator",
+      "type": "shell",
+      "command": "flutter emulators --launch apple_ios_simulator",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "runOptions": {
+        "runOn": "default"
+      }
+    }
+  ]
+}

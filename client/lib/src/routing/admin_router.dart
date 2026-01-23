@@ -278,8 +278,7 @@ class AdminRoutes {
     }
 
     // Check Dashboard (exact match or base path or dashboard subroutes)
-    if (fullRoute == dashboardPath ||
-        fullRoute.startsWith(dashboardPath + '/')) {
+    if (fullRoute == dashboardPath || fullRoute.startsWith('$dashboardPath/')) {
       debugPrint('✅ Route matches dashboard section, index: 0');
       return 0; // Index for Dashboard
     }

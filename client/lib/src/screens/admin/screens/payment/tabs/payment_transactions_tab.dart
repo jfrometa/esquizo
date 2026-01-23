@@ -19,13 +19,16 @@ class PaymentTransactionsTab extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<PaymentTransactionsTab> createState() => _PaymentTransactionsTabState();
+  ConsumerState<PaymentTransactionsTab> createState() =>
+      _PaymentTransactionsTabState();
 }
 
-class _PaymentTransactionsTabState extends ConsumerState<PaymentTransactionsTab> {
+class _PaymentTransactionsTabState
+    extends ConsumerState<PaymentTransactionsTab> {
   PaymentStatus? _filterStatus;
   PaymentMethod? _filterMethod;
-  final currencyFormatter = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+  final currencyFormatter =
+      NumberFormat.currency(symbol: '\$', decimalDigits: 2);
 
   Future<List<Payment>> _loadPayments(PaymentService paymentService) async {
     // Simple implementation - get all payments in date range
@@ -34,15 +37,18 @@ class _PaymentTransactionsTabState extends ConsumerState<PaymentTransactionsTab>
           .where('createdAt', isGreaterThanOrEqualTo: widget.startDate)
           .where('createdAt', isLessThanOrEqualTo: widget.endDate)
           .get();
-      
+
       return payments.docs
           .map((doc) => Payment.fromJson(doc.data() as Map<String, dynamic>))
           .where((payment) {
-            if (_filterStatus != null && payment.status != _filterStatus) return false;
-            if (_filterMethod != null && payment.method != _filterMethod) return false;
-            return true;
-          })
-          .toList();
+        if (_filterStatus != null && payment.status != _filterStatus) {
+          return false;
+        }
+        if (_filterMethod != null && payment.method != _filterMethod) {
+          return false;
+        }
+        return true;
+      }).toList();
     } catch (e) {
       return [];
     }
@@ -52,7 +58,7 @@ class _PaymentTransactionsTabState extends ConsumerState<PaymentTransactionsTab>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     final paymentService = ref.watch(paymentServiceProvider);
 
     return Column(
@@ -64,18 +70,20 @@ class _PaymentTransactionsTabState extends ConsumerState<PaymentTransactionsTab>
             children: [
               Expanded(
                 child: DropdownButtonFormField<PaymentStatus?>(
-                  value: _filterStatus,
+                  initialValue: _filterStatus,
                   decoration: const InputDecoration(
                     labelText: 'Status',
                     border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
                   items: [
-                    const DropdownMenuItem(value: null, child: Text('All Status')),
+                    const DropdownMenuItem(
+                        value: null, child: Text('All Status')),
                     ...PaymentStatus.values.map((status) => DropdownMenuItem(
-                      value: status,
-                      child: Text(_formatStatus(status)),
-                    )),
+                          value: status,
+                          child: Text(_formatStatus(status)),
+                        )),
                   ],
                   onChanged: (value) => setState(() => _filterStatus = value),
                 ),
@@ -83,18 +91,20 @@ class _PaymentTransactionsTabState extends ConsumerState<PaymentTransactionsTab>
               const SizedBox(width: 16),
               Expanded(
                 child: DropdownButtonFormField<PaymentMethod?>(
-                  value: _filterMethod,
+                  initialValue: _filterMethod,
                   decoration: const InputDecoration(
                     labelText: 'Payment Method',
                     border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
                   items: [
-                    const DropdownMenuItem(value: null, child: Text('All Methods')),
+                    const DropdownMenuItem(
+                        value: null, child: Text('All Methods')),
                     ...PaymentMethod.values.map((method) => DropdownMenuItem(
-                      value: method,
-                      child: Text(_formatMethod(method)),
-                    )),
+                          value: method,
+                          child: Text(_formatMethod(method)),
+                        )),
                   ],
                   onChanged: (value) => setState(() => _filterMethod = value),
                 ),
@@ -102,7 +112,7 @@ class _PaymentTransactionsTabState extends ConsumerState<PaymentTransactionsTab>
             ],
           ),
         ),
-        
+
         // Transactions List
         Expanded(
           child: FutureBuilder<List<Payment>>(
@@ -111,23 +121,35 @@ class _PaymentTransactionsTabState extends ConsumerState<PaymentTransactionsTab>
               if (snapshot.hasError) {
                 return Center(child: Text('Error: ${snapshot.error}'));
               }
-              
+
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
               }
-              
+
               var payments = snapshot.data!;
-              
+
               // Apply search filter
               if (widget.searchQuery.isNotEmpty) {
-                payments = payments.where((payment) => 
-                  payment.orderId.toLowerCase().contains(widget.searchQuery) ||
-                  payment.customerName?.toLowerCase().contains(widget.searchQuery) == true ||
-                  payment.customerEmail?.toLowerCase().contains(widget.searchQuery) == true ||
-                  payment.transactionId?.toLowerCase().contains(widget.searchQuery) == true
-                ).toList();
+                payments = payments
+                    .where((payment) =>
+                        payment.orderId
+                            .toLowerCase()
+                            .contains(widget.searchQuery) ||
+                        payment.customerName
+                                ?.toLowerCase()
+                                .contains(widget.searchQuery) ==
+                            true ||
+                        payment.customerEmail
+                                ?.toLowerCase()
+                                .contains(widget.searchQuery) ==
+                            true ||
+                        payment.transactionId
+                                ?.toLowerCase()
+                                .contains(widget.searchQuery) ==
+                            true)
+                    .toList();
               }
-              
+
               if (payments.isEmpty) {
                 return const Center(
                   child: Column(
@@ -140,11 +162,12 @@ class _PaymentTransactionsTabState extends ConsumerState<PaymentTransactionsTab>
                   ),
                 );
               }
-              
+
               return ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: payments.length,
-                itemBuilder: (context, index) => _buildTransactionCard(payments[index], colorScheme),
+                itemBuilder: (context, index) =>
+                    _buildTransactionCard(payments[index], colorScheme),
               );
             },
           ),
@@ -179,7 +202,8 @@ class _PaymentTransactionsTabState extends ConsumerState<PaymentTransactionsTab>
                       if (payment.transactionId != null)
                         Text(
                           'Transaction: ${payment.transactionId}',
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          style:
+                              TextStyle(fontSize: 12, color: Colors.grey[600]),
                         ),
                     ],
                   ),
@@ -263,7 +287,7 @@ class _PaymentTransactionsTabState extends ConsumerState<PaymentTransactionsTab>
   Widget _buildStatusChip(PaymentStatus status, ColorScheme colorScheme) {
     Color backgroundColor;
     Color textColor;
-    
+
     switch (status) {
       case PaymentStatus.completed:
         backgroundColor = Colors.green.withOpacity(0.2);
@@ -286,7 +310,7 @@ class _PaymentTransactionsTabState extends ConsumerState<PaymentTransactionsTab>
         backgroundColor = Colors.grey.withOpacity(0.2);
         textColor = Colors.grey.shade700;
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(

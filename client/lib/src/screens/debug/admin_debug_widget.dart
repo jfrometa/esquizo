@@ -68,7 +68,7 @@ class AdminDebugWidget extends ConsumerWidget {
                     ElevatedButton(
                       onPressed: () async {
                         try {
-                          await ref.read(refreshAdminStatusProvider);
+                          ref.read(refreshAdminStatusProvider);
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(

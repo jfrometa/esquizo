@@ -23,7 +23,7 @@ class CartScreen extends ConsumerStatefulWidget {
 }
 
 class _CartScreenState extends ConsumerState<CartScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   TabController? _tabController;
   bool _isLoading = false;
   String? _errorMessage;
@@ -48,17 +48,24 @@ class _CartScreenState extends ConsumerState<CartScreen>
       _availableTabs = ['Platos']; // Default tab if nothing is available
     }
 
-    // Dispose of old controller if it exists
-    _tabController?.dispose();
+    // Dispose of old controller safely and replace
+    final oldController = _tabController;
 
     // Create new controller with current tab count
     _tabController = TabController(length: _availableTabs.length, vsync: this);
 
-    // Add listener only if controller is initialized
+    // Dispose old controller in the next frame to avoid "used during build" errors
+    if (oldController != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        oldController.dispose();
+      });
+    }
+
+    // Add listener to sync with UI if needed
     _tabController?.addListener(() {
-      // This ensures we rebuild when the tab changes
-      if (_tabController?.indexIsChanging == true) {
-        setState(() {});
+      if (_tabController?.indexIsChanging == false) {
+        // Only trigger rebuild when tab selection is finished
+        if (mounted) setState(() {});
       }
     });
   }
@@ -117,12 +124,12 @@ class _CartScreenState extends ConsumerState<CartScreen>
     );
 
     // Check if we need to reinitialize the tab controller due to tab count change
-    bool shouldReinitialize = false;
     if (_availableTabs.length != newAvailableTabs.length ||
         !_availableTabs
             .every((element) => newAvailableTabs.contains(element))) {
-      shouldReinitialize = true;
       _availableTabs = newAvailableTabs;
+      // Initialize immediately but ensure we don't cause infinite rebuilds
+      _initializeTabController();
     }
 
     // If we have no items at all, show empty state
@@ -133,17 +140,6 @@ class _CartScreenState extends ConsumerState<CartScreen>
             quoteItems.isEmpty &&
             mealSubscriptions.isEmpty)) {
       return _buildEmptyCartScreen(context);
-    }
-
-    // Reinitialize tab controller if needed
-    if (shouldReinitialize) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {
-            _initializeTabController();
-          });
-        }
-      });
     }
 
     // Show loading screen only if controller is actually null
@@ -203,18 +199,14 @@ class _CartScreenState extends ConsumerState<CartScreen>
     if (tabContent.length != _availableTabs.length) {
       debugPrint(
           'ERROR: TabContent length (${tabContent.length}) does not match availableTabs length (${_availableTabs.length})');
-      // Force reinitialize to fix the mismatch
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {
-            _initializeTabController();
-          });
-        }
-      });
+      // Fix mismatch immediately
+      _availableTabs = newAvailableTabs;
+      _initializeTabController();
       return _buildLoadingScreen();
     }
 
     return Scaffold(
+      key: ValueKey('cart_scaffold_${_availableTabs.length}'),
       appBar: AppBar(
         title: const Text('Carrito'),
         surfaceTintColor: Colors.transparent,
@@ -230,6 +222,7 @@ class _CartScreenState extends ConsumerState<CartScreen>
         bottom: _tabController == null || _availableTabs.isEmpty
             ? null
             : TabBar(
+                key: ValueKey('cart_tab_bar_${_availableTabs.length}'),
                 controller: _tabController,
                 isScrollable: true,
                 tabAlignment: TabAlignment.start,
@@ -268,6 +261,7 @@ class _CartScreenState extends ConsumerState<CartScreen>
           : _isLoading || _tabController == null || tabContent.isEmpty
               ? _buildLoadingState()
               : TabBarView(
+                  key: ValueKey('cart_tab_view_${_availableTabs.length}'),
                   controller: _tabController,
                   children: tabContent,
                 ),
@@ -553,22 +547,27 @@ class _CartScreenState extends ConsumerState<CartScreen>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Subtotal',
-                style: theme.textTheme.titleMedium,
-              ),
-              const SizedBox(height: 2),
-              Text(
-                'Sin impuestos ni envío',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Subtotal',
+                  style: theme.textTheme.titleMedium,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            ],
+                const SizedBox(height: 2),
+                Text(
+                  'Sin impuestos ni envío',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
+          const SizedBox(width: 12),
           Text(
             NumberFormat.currency(symbol: 'S/ ', decimalDigits: 2)
                 .format(totalPrice),

@@ -182,8 +182,9 @@ bool _isValidBusinessSlug(String slug) {
   // - Only contain lowercase letters, numbers, and hyphens
   // - Not start or end with hyphens
   if (slug.length < 2 || slug.length > 50) return false;
-  if (slug.contains(' ') || slug.contains('?') || slug.contains('#'))
+  if (slug.contains(' ') || slug.contains('?') || slug.contains('#')) {
     return false;
+  }
   if (slug.startsWith('-') || slug.endsWith('-')) return false;
   if (slug.contains('--')) return false; // No consecutive hyphens
 
@@ -214,7 +215,7 @@ class UrlAwareBusinessId extends _$UrlAwareBusinessId {
 
     if (slugChanged) {
       debugPrint(
-          '🔄 Business slug changed: ${_lastProcessedSlug} -> $urlBusinessSlug');
+          '🔄 Business slug changed: $_lastProcessedSlug -> $urlBusinessSlug');
       _lastProcessedSlug = urlBusinessSlug;
     }
 

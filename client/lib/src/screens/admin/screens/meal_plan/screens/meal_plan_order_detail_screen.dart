@@ -21,7 +21,7 @@ final mealPlanOrderProvider =
     return null;
   } catch (e) {
     debugPrint('Error fetching meal plan order: $e');
-    throw e;
+    rethrow;
   }
 });
 
@@ -73,8 +73,7 @@ class MealPlanOrderDetailScreen extends ConsumerWidget {
                   const SizedBox(height: 8),
                   Text('Customer: ${order.customerName ?? 'Guest'}',
                       style: textTheme.titleMedium),
-                  if (order.email != null)
-                    Text('Email: ${order.email}', style: textTheme.bodyMedium),
+                  Text('Email: ${order.email}', style: textTheme.bodyMedium),
                   const SizedBox(height: 8),
                   Text('Created: ${_formatDateTime(order.createdAt)}',
                       style: textTheme.bodyMedium),

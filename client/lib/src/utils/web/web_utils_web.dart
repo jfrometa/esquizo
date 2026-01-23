@@ -1,7 +1,6 @@
 // Library directive must come first
 library;
 
-import 'dart:async';
 
 // Conditional import for web-specific functionality
 import 'package:web/web.dart' as web;
@@ -35,7 +34,7 @@ class _WebImpl {
       debugPrint('🌐 WebUtils full URL: "$fullUrl"');
 
       // Additional checks to ensure we're getting the right path
-      if (pathname == null || pathname.isEmpty) {
+      if (pathname.isEmpty) {
         debugPrint('⚠️ WebUtils: pathname is null or empty, defaulting to "/"');
         return '/';
       }

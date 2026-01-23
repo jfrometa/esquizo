@@ -1,8 +1,7 @@
 /// Quick test to verify the navigation functionality is working
 /// This demonstrates the fix for the GoRouter context issue
+library;
 
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 void main() {
   print('🎯 Navigation Fix Summary:');

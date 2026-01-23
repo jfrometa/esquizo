@@ -4,22 +4,23 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/payment/tabs/payment_transactions_tab.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/payment/tabs/payment_tips_tab.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/payment/tabs/payment_taxes_tab.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/payment/tabs/payment_service_tracking_tab.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/responsive_layout.dart';
 
 class PaymentManagementScreen extends ConsumerStatefulWidget {
   final int initialTab;
-  
+
   const PaymentManagementScreen({
     super.key,
     this.initialTab = 0,
   });
 
   @override
-  ConsumerState<PaymentManagementScreen> createState() => _PaymentManagementScreenState();
+  ConsumerState<PaymentManagementScreen> createState() =>
+      _PaymentManagementScreenState();
 }
 
-class _PaymentManagementScreenState extends ConsumerState<PaymentManagementScreen> 
+class _PaymentManagementScreenState
+    extends ConsumerState<PaymentManagementScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
@@ -59,7 +60,7 @@ class _PaymentManagementScreenState extends ConsumerState<PaymentManagementScree
       lastDate: DateTime.now(),
       initialDateRange: DateTimeRange(start: _startDate, end: _endDate),
     );
-    
+
     if (picked != null) {
       setState(() {
         _startDate = picked.start;
@@ -100,12 +101,14 @@ class _PaymentManagementScreenState extends ConsumerState<PaymentManagementScree
                         child: TextField(
                           controller: _searchController,
                           decoration: InputDecoration(
-                            hintText: 'Search payments, orders, or customers...',
+                            hintText:
+                                'Search payments, orders, or customers...',
                             prefixIcon: const Icon(Icons.search),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                            contentPadding:
+                                const EdgeInsets.symmetric(vertical: 8),
                           ),
                         ),
                       ),
@@ -146,7 +149,7 @@ class _PaymentManagementScreenState extends ConsumerState<PaymentManagementScree
               ],
             ),
           ),
-          
+
           // Tabs
           Container(
             color: colorScheme.surface,
@@ -165,7 +168,7 @@ class _PaymentManagementScreenState extends ConsumerState<PaymentManagementScree
               unselectedLabelColor: colorScheme.onSurface.withOpacity(0.6),
             ),
           ),
-          
+
           // Tab content
           Expanded(
             child: TabBarView(
@@ -194,7 +197,8 @@ class _PaymentManagementScreenState extends ConsumerState<PaymentManagementScree
                 Container(
                   padding: const EdgeInsets.all(16),
                   child: const Center(
-                    child: Text('Service Tracking Tab - Implementation pending'),
+                    child:
+                        Text('Service Tracking Tab - Implementation pending'),
                   ),
                 ),
               ],

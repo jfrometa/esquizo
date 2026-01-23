@@ -1,10 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_slug_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/business_routing_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 
 /// Test to verify "kako" business navigation flow after creation
 void main() {

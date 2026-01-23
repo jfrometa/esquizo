@@ -2,20 +2,30 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "client (canvaskit renderer)",
-      "program": "lib/main.dart",
-      "cwd": "client",
+      "name": "Run (web)",
       "request": "launch",
       "type": "dart",
-      "args": ["-d", "chrome"]
+      "program": "lib/main.dart",
+      "cwd": "client",
+      "args": ["-d", "chrome", "--wasm", "-v"]
     },
     {
-      "name": "client (html renderer)",
-      "program": "lib/main.dart",
-      "cwd": "client",
+      "name": "Run (Android)",
       "request": "launch",
       "type": "dart",
-      "args": ["-d", "chrome"]
+      "program": "lib/main.dart",
+      "cwd": "client",
+      "deviceId": "sdk gphone64 arm64 (mobile)",
+      "preLaunchTask": "start-android-emulator"
+    },
+    {
+      "name": "Run iOS Simulator",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "cwd": "client",
+      "args": ["-d", "apple_ios_simulator"],
+      "preLaunchTask": "start-ios-simulator"
     },
     {
       "name": "client (auto renderer)",
