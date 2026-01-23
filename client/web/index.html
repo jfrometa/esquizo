@@ -18,8 +18,7 @@
 
     <meta charset="UTF-8" />
     <meta content="IE=Edge" http-equiv="X-UA-Compatible" />
-    <meta name="description" content="A new Flutter project." />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Esquizo - Comida deliciosa a tu alcance." />
     <!-- Performance optimizations -->
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#000000" />
@@ -129,25 +128,34 @@
       });
 
       // Modern Flutter web initialization approach
-      _flutter = {};
-
-      // Wait for Flutter engine to be available
-      window.addEventListener('load', async function () {
-        const engineInitializer = await window.flutterEngineInitializer;
-        // Initialize engine with performance-optimized configuration
-        const appRunner = await engineInitializer.initializeEngine({
-          renderer: 'html', // Use HTML renderer for better performance on web
-          hostElement: document.body,
-          // Canvas Kit configuration (if needed)
-          canvasKitBaseUrl: 'https://www.gstatic.com/flutter-canvaskit/',
-        });
-
-        // Run the app after engine is initialized
-        await appRunner.runApp();
+      // Using the more robust loader API to handle initialization correctly
+      window.addEventListener('load', function(ev) {
+        if (window._flutter && window._flutter.loader) {
+          _flutter.loader.loadEntrypoint({
+            serviceWorker: {
+              timeoutMillis: 10000,
+            },
+            onEntrypointLoaded: async function(engineInitializer) {
+              const appRunner = await engineInitializer.initializeEngine({
+                renderer: 'html', // Use HTML renderer for better performance on web
+                hostElement: document.body,
+              });
+              await appRunner.runApp();
+            }
+          });
+        } else {
+          // Fallback for older or different bootstrap versions
+          console.warn('Flutter loader not found, falling back to basic initialization');
+          if (window.flutterEngineInitializer) {
+            window.flutterEngineInitializer.initializeEngine().then(function(appRunner) {
+              appRunner.runApp();
+            });
+          }
+        }
       });
     </script>
 
     <script src="flutter_bootstrap.js" defer></script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAlk83WpDsAWqaa4RqI4mxa5IYPiuZldek&libraries=places,marker&v=beta"></script>
+    <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAlk83WpDsAWqaa4RqI4mxa5IYPiuZldek&libraries=places,marker&v=beta&loading=async"></script>
   </body>
 </html>

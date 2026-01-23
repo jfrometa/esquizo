@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
 /// Enhanced Footer Section with links and information
 class EnhancedFooterSection extends StatelessWidget {
   const EnhancedFooterSection({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final size = MediaQuery.sizeOf(context);
     final isMobile = size.width < 600;
-    
+
     return Container(
       color: colorScheme.surface,
       padding: EdgeInsets.symmetric(
@@ -23,15 +24,11 @@ class EnhancedFooterSection extends StatelessWidget {
             _buildMobileFooterContent(context)
           else
             _buildDesktopFooterContent(context),
-          
           const SizedBox(height: 40),
-          
           Divider(
             color: colorScheme.outline.withOpacity(0.2),
           ),
-          
           const SizedBox(height: 20),
-          
           Wrap(
             alignment: WrapAlignment.spaceBetween,
             runSpacing: 10,
@@ -47,7 +44,14 @@ class EnhancedFooterSection extends StatelessWidget {
                   spacing: 16,
                   children: [
                     InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        // TODO: Implement Terms and Conditions page
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content:
+                                  Text('Términos y Condiciones próximamente')),
+                        );
+                      },
                       child: Text(
                         'Términos y Condiciones',
                         style: theme.textTheme.bodyMedium?.copyWith(
@@ -56,7 +60,14 @@ class EnhancedFooterSection extends StatelessWidget {
                       ),
                     ),
                     InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        // TODO: Implement Privacy Policy page
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content:
+                                  Text('Política de Privacidad próximamente')),
+                        );
+                      },
                       child: Text(
                         'Política de Privacidad',
                         style: theme.textTheme.bodyMedium?.copyWith(
@@ -68,14 +79,19 @@ class EnhancedFooterSection extends StatelessWidget {
                 ),
             ],
           ),
-          
           if (isMobile) ...[
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    // TODO: Implement Terms and Conditions page
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Términos y Condiciones próximamente')),
+                    );
+                  },
                   child: Text(
                     'Términos y Condiciones',
                     style: theme.textTheme.bodyMedium?.copyWith(
@@ -85,7 +101,13 @@ class EnhancedFooterSection extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    // TODO: Implement Privacy Policy page
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Política de Privacidad próximamente')),
+                    );
+                  },
                   child: Text(
                     'Política de Privacidad',
                     style: theme.textTheme.bodyMedium?.copyWith(
@@ -100,11 +122,11 @@ class EnhancedFooterSection extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildMobileFooterContent(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -132,7 +154,7 @@ class EnhancedFooterSection extends StatelessWidget {
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
+                  errorBuilder: (context, error, stackTrace) {
                     debugPrint('Error loading image: $error');
                     return const Icon(Icons.image_not_supported, size: 80);
                   },
@@ -158,9 +180,9 @@ class EnhancedFooterSection extends StatelessWidget {
             ),
           ],
         ),
-        
+
         const SizedBox(height: 32),
-        
+
         // Quick links
         Text(
           'Enlaces Rápidos',
@@ -175,9 +197,9 @@ class EnhancedFooterSection extends StatelessWidget {
         _buildFooterLink(context, 'Planes de Comida', Icons.food_bank),
         _buildFooterLink(context, 'Catering', Icons.celebration),
         _buildFooterLink(context, 'Contacto', Icons.mail),
-        
+
         const SizedBox(height: 32),
-        
+
         // Newsletter
         Text(
           'Suscríbete a nuestro boletín',
@@ -199,7 +221,8 @@ class EnhancedFooterSection extends StatelessWidget {
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Ingresa tu email',
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -208,7 +231,12 @@ class EnhancedFooterSection extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                // TODO: Implement Newsletter subscription
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Gracias por suscribirte')),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: colorScheme.primary,
                 foregroundColor: colorScheme.onPrimary,
@@ -224,11 +252,11 @@ class EnhancedFooterSection extends StatelessWidget {
       ],
     );
   }
-  
+
   Widget _buildDesktopFooterContent(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -261,8 +289,9 @@ class EnhancedFooterSection extends StatelessWidget {
                         height: 80,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
-                        debugPrint('Error loading image: $error');
-                        return const Icon(Icons.image_not_supported, size: 80);
+                          debugPrint('Error loading image: $error');
+                          return const Icon(Icons.image_not_supported,
+                              size: 80);
                         },
                       ),
                     ),
@@ -294,9 +323,9 @@ class EnhancedFooterSection extends StatelessWidget {
             ],
           ),
         ),
-        
+
         const SizedBox(width: 64),
-        
+
         // Quick links
         Expanded(
           flex: 1,
@@ -319,9 +348,9 @@ class EnhancedFooterSection extends StatelessWidget {
             ],
           ),
         ),
-        
+
         const SizedBox(width: 64),
-        
+
         // Newsletter
         Expanded(
           flex: 2,
@@ -348,7 +377,8 @@ class EnhancedFooterSection extends StatelessWidget {
                     child: TextField(
                       decoration: InputDecoration(
                         hintText: 'Ingresa tu email',
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 0),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -357,7 +387,13 @@ class EnhancedFooterSection extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      // TODO: Implement Newsletter subscription
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Gracias por suscribirte')),
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: colorScheme.primary,
                       foregroundColor: colorScheme.onPrimary,
@@ -382,11 +418,11 @@ class EnhancedFooterSection extends StatelessWidget {
                 children: [
                   _buildSocialIconButton(context, Icons.facebook),
                   const SizedBox(width: 12),
-                  _buildSocialIconButton(context, Icons.facebook),
+                  _buildSocialIconButton(context, Icons.camera_alt),
                   const SizedBox(width: 12),
-                  _buildSocialIconButton(context, Icons.social_distance),
+                  _buildSocialIconButton(context, Icons.alternate_email),
                   const SizedBox(width: 12),
-                  _buildSocialIconButton(context, Icons.social_distance),
+                  _buildSocialIconButton(context, Icons.video_collection),
                 ],
               ),
             ],
@@ -395,15 +431,29 @@ class EnhancedFooterSection extends StatelessWidget {
       ],
     );
   }
-  
+
   Widget _buildFooterLink(BuildContext context, String title, IconData icon) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: InkWell(
-        onTap: () {},
+        onTap: () {
+          if (title == 'Inicio') {
+            // Already here, scroll to top
+          } else if (title == 'Menú') {
+            context.goToBusinessHome();
+          } else if (title == 'Reservaciones') {
+            // TODO: Trigger reservation sheet
+          } else if (title == 'Planes de Comida') {
+            context.goNamedSafe(AppRoute.mealPlans.name);
+          } else if (title == 'Catering') {
+            context.goNamedSafe(AppRoute.catering.name);
+          } else if (title == 'Contacto') {
+            // TODO: Scroll to contact
+          }
+        },
         child: Row(
           children: [
             Icon(
@@ -423,20 +473,29 @@ class EnhancedFooterSection extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildSocialIconButton(BuildContext context, IconData icon) {
     final colorScheme = Theme.of(context).colorScheme;
-    
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: colorScheme.primaryContainer.withOpacity(0.3),
-        shape: BoxShape.circle,
-      ),
-      child: Icon(
-        icon,
-        size: 20,
-        color: colorScheme.primary,
+
+    return InkWell(
+      onTap: () {
+        // TODO: Open Social Media link
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Redes sociales próximamente')),
+        );
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: colorScheme.primaryContainer.withOpacity(0.3),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          icon,
+          size: 20,
+          color: colorScheme.primary,
+        ),
       ),
     );
   }

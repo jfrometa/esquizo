@@ -1224,67 +1224,6 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     );
   }
 
-  String _generateSubscriptionOrderDetails(
-      List<CartItem> items, Map<String, String>? contactInfo) {
-    final generator = OrderDetailsGenerator(
-      taxRate: _taxRate,
-      deliveryFee: _deliveryFee,
-      paymentMethods: _paymentMethods,
-      selectedPaymentMethod: _selectedPaymentMethod,
-    );
-
-    return generator.generateSubscriptionOrder(
-      items: items,
-      contactInfo: contactInfo,
-      address: mealSubscriptionAddress ?? 'No proporcionada',
-      latitude: _mealSubscriptionLatitude ?? '',
-      longitude: _mealSubscriptionLongitude ?? '',
-      date: _mealSubscriptionDateController.text,
-      time: _mealSubscriptionTimeController.text,
-    );
-  }
-
-  String _generateCateringOrderDetails(
-      CateringOrderItem order, Map<String, String>? contactInfo) {
-    final generator = OrderDetailsGenerator(
-      taxRate: _taxRate,
-      deliveryFee: _deliveryFee,
-      paymentMethods: _paymentMethods,
-      selectedPaymentMethod: _selectedPaymentMethod,
-    );
-
-    return generator.generateCateringOrder(
-      order: order,
-      contactInfo: contactInfo,
-      address: cateringAddress ?? 'No proporcionada',
-      latitude: _cateringLatitude ?? '',
-      longitude: _cateringLongitude ?? '',
-      date: _cateringDateController.text,
-      time: _cateringTimeController.text,
-    );
-  }
-
-  String _generateCateringQuoteOrderDetails(
-      CateringOrderItem quote, Map<String, String>? contactInfo) {
-    final generator = OrderDetailsGenerator(
-      taxRate: _taxRate,
-      deliveryFee: _deliveryFee,
-      paymentMethods: _paymentMethods,
-      selectedPaymentMethod: _selectedPaymentMethod,
-    );
-
-    return generator.generateCateringOrder(
-      order: quote,
-      contactInfo: contactInfo,
-      address: cateringAddress ?? 'No proporcionada',
-      latitude: _cateringLatitude ?? '',
-      longitude: _cateringLongitude ?? '',
-      date: _cateringDateController.text,
-      time: _cateringTimeController.text,
-      isQuote: true,
-    );
-  }
-
   bool _validateDeliveryStep() {
     bool isValid = true;
 
@@ -1368,7 +1307,6 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   bool _validateFields() {
     bool isValid = true;
     double scrollOffset = 0;
-    final colorScheme = Theme.of(context).colorScheme;
 
     switch (widget.displayType) {
       case 'platos':

@@ -57,6 +57,7 @@ void showCateringFormSheet({
                 Expanded(
                   child: CateringForm(
                     title: title,
+                    controller: scrollController,
                     initialData: isQuote
                         ? ref.read(manualQuoteProvider)
                         : ref.read(cateringOrderProvider),
@@ -112,12 +113,16 @@ void showCateringFormSheet({
                           colorScheme: colorScheme,
                         );
 
-                        if (formData.cateringFlow == 'menu') {
+                        if (isQuote) {
+                          // Navigate to quote editor
+                          GoRouter.of(context)
+                              .pushNamed(AppRoute.cateringQuote.name);
+                        } else if (formData.cateringFlow == 'menu') {
                           // Navigate to menu selection
                           GoRouter.of(context)
                               .pushNamed(AppRoute.cateringMenu.name);
                         } else {
-                          // Navigate to cart
+                          // Navigate to cart for custom flow or stay if needed
                           GoRouter.of(context).pushNamed(AppRoute.homecart.name,
                               extra: 'catering');
                         }

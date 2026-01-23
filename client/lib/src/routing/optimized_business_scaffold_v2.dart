@@ -162,6 +162,9 @@ class _OptimizedBusinessScaffoldState
 
   int _getCurrentIndex(String route) {
     // Map routes to navigation indices
+    // Must match the order in _getBusinessNavigationDestinations
+    final isAdmin = ref.watch(isAdminComputedProvider);
+
     switch (route) {
       case '/':
         return 0;
@@ -169,20 +172,36 @@ class _OptimizedBusinessScaffoldState
         return 1;
       case '/carrito':
         return 2;
-      case '/cuenta':
-        return 3;
       case '/ordenes':
-        return 4;
+        return 3;
       case '/admin':
-        return 5;
+        return isAdmin ? 4 : 0; // Admin is index 4 if present
+      case '/cuenta':
+        return isAdmin ? 5 : 4; // Cuenta is last
       default:
         return 0;
     }
   }
 
   void _handleNavigation(BuildContext context, WidgetRef ref, int index) {
-    final routes = ['/', '/menu', '/carrito', '/cuenta', '/ordenes', '/admin'];
-    final targetRoute = routes[index];
+    final isAdmin = ref.watch(isAdminComputedProvider);
+
+    // Determine the target route based on index and admin status
+    String targetRoute;
+    if (isAdmin) {
+      final routes = [
+        '/',
+        '/menu',
+        '/carrito',
+        '/ordenes',
+        '/admin',
+        '/cuenta'
+      ];
+      targetRoute = routes[index];
+    } else {
+      final routes = ['/', '/menu', '/carrito', '/ordenes', '/cuenta'];
+      targetRoute = routes[index];
+    }
     final targetPath = targetRoute == '/'
         ? '/${widget.businessSlug}'
         : '/${widget.businessSlug}$targetRoute';
@@ -270,7 +289,7 @@ class _OptimizedBusinessScaffoldState
       const NavigationDestination(
         icon: Icon(Icons.receipt_long_outlined),
         selectedIcon: Icon(Icons.receipt_long),
-        label: 'Orders', // Fixed: was incorrectly labeled as "Admin"
+        label: 'Ordenes',
       ),
       const NavigationDestination(
         icon: Icon(Icons.person_outline),

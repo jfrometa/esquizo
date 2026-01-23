@@ -31,6 +31,8 @@ import 'package:starter_architecture_flutter_firebase/src/screens/all_dishes_men
 import 'package:starter_architecture_flutter_firebase/src/screens/checkout/checkout_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/QR/models/qr_code_data.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/business_routing_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/catering/screens/catering_menu/catering_menu_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/catering_entry/catering_entry_screen.dart';
 import 'package:go_router/go_router.dart';
 
 part 'app_router.g.dart';
@@ -743,6 +745,30 @@ GoRouter goRouter(Ref ref) {
                 child: AllDishesMenuHomeScreen(),
               );
             },
+          ),
+          // Catering entry route (e.g., /kako/catering)
+          GoRoute(
+            path: 'catering',
+            name: AppRoute.catering.name,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: CateringEntryScreen(),
+            ),
+          ),
+          // Catering menu route (e.g., /kako/catering-menu)
+          GoRoute(
+            path: 'catering-menu',
+            name: AppRoute.cateringMenu.name,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: CateringMenuScreen(),
+            ),
+          ),
+          // Catering quote route (e.g., /kako/catering-quote)
+          GoRoute(
+            path: 'catering-quote',
+            name: AppRoute.cateringQuote.name,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: QuoteScreen(),
+            ),
           ),
           // Checkout route (e.g., /kako/checkout)
           GoRoute(

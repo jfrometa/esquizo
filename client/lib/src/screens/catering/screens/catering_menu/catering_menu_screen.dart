@@ -63,41 +63,53 @@ class _CateringMenuScreenState extends ConsumerState<CateringMenuScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.viewInsetsOf(context).bottom,
-            left: 20.0,
-            right: 20.0,
-            top: 20.0,
-          ),
-          child: CateringForm(
-            title: 'Detalles del ${package['title']}',
-            initialData: ref.read(cateringOrderProvider),
-            onSubmit: (formData) {
-              final currentOrder = ref.read(cateringOrderProvider);
-              ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(
-                    title: package['title'],
-                    img: '',
-                    description: package['description'],
-                    hasChef: formData.hasChef,
-                    alergias: formData.allergies.join(','),
-                    eventType: formData.eventType,
-                    preferencia: currentOrder?.preferencia ?? 'salado',
-                    adicionales: formData.additionalNotes,
-                    cantidadPersonas: formData.peopleCount,
-                  );
+        return DraggableScrollableSheet(
+          initialChildSize: 0.9,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          expand: false,
+          builder: (context, scrollController) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.viewInsetsOf(context).bottom,
+                left: 20.0,
+                right: 20.0,
+                top: 20.0,
+              ),
+              child: CateringForm(
+                title: 'Detalles del ${package['title']}',
+                controller: scrollController,
+                initialData: ref.read(cateringOrderProvider),
+                onSubmit: (formData) {
+                  final currentOrder = ref.read(cateringOrderProvider);
+                  ref
+                      .read(cateringOrderProvider.notifier)
+                      .finalizeCateringOrder(
+                        title: package['title'],
+                        img: '',
+                        description: package['description'],
+                        hasChef: formData.hasChef,
+                        alergias: formData.allergies.join(','),
+                        eventType: formData.eventType,
+                        preferencia: currentOrder?.preferencia ?? 'salado',
+                        adicionales: formData.additionalNotes,
+                        cantidadPersonas: formData.peopleCount,
+                      );
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Paquete ${package['title']} añadido'),
-                  backgroundColor: colorScheme.primaryContainer,
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-              Navigator.pop(context);
-              context.pushNamedSafe(AppRoute.homecart.name, extra: 'catering');
-            },
-          ),
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Paquete ${package['title']} añadido'),
+                      backgroundColor: colorScheme.primaryContainer,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                  Navigator.pop(context);
+                  context.pushNamedSafe(AppRoute.homecart.name,
+                      extra: 'catering');
+                },
+              ),
+            );
+          },
         );
       },
     );
@@ -335,41 +347,50 @@ class _QuoteScreenState extends ConsumerState<QuoteScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.viewInsetsOf(context).bottom,
-            left: 20,
-            right: 20,
-            top: 20,
-          ),
-          child: CateringForm(
-            title: 'Detalles de la Cotización',
-            initialData: ref.read(manualQuoteProvider),
-            onSubmit: (formData) {
-              final currentQuote = ref.read(manualQuoteProvider);
-              ref.read(manualQuoteProvider.notifier).finalizeManualQuote(
-                    title: currentQuote?.title ?? 'Cotización',
-                    img: currentQuote?.img ?? '',
-                    description: currentQuote?.description ?? '',
-                    hasChef: formData.hasChef,
-                    alergias: formData.allergies.join(','),
-                    eventType: formData.eventType,
-                    preferencia: currentQuote?.preferencia ?? '',
-                    adicionales: formData.additionalNotes,
-                    cantidadPersonas: formData.peopleCount,
-                  );
+        return DraggableScrollableSheet(
+          initialChildSize: 0.9,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          expand: false,
+          builder: (context, scrollController) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.viewInsetsOf(context).bottom,
+                left: 20,
+                right: 20,
+                top: 20,
+              ),
+              child: CateringForm(
+                title: 'Detalles de la Cotización',
+                controller: scrollController,
+                initialData: ref.read(manualQuoteProvider),
+                onSubmit: (formData) {
+                  final currentQuote = ref.read(manualQuoteProvider);
+                  ref.read(manualQuoteProvider.notifier).finalizeManualQuote(
+                        title: currentQuote?.title ?? 'Cotización',
+                        img: currentQuote?.img ?? '',
+                        description: currentQuote?.description ?? '',
+                        hasChef: formData.hasChef,
+                        alergias: formData.allergies.join(','),
+                        eventType: formData.eventType,
+                        preferencia: currentQuote?.preferencia ?? '',
+                        adicionales: formData.additionalNotes,
+                        cantidadPersonas: formData.peopleCount,
+                      );
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('Se actualizó la Cotización'),
-                  backgroundColor: colorScheme.primaryContainer,
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-              Navigator.pop(context);
-              setState(() {});
-            },
-          ),
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Se actualizó la Cotización'),
+                      backgroundColor: colorScheme.primaryContainer,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                  Navigator.pop(context);
+                  setState(() {});
+                },
+              ),
+            );
+          },
         );
       },
     );

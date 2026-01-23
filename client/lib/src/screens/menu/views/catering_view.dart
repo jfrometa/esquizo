@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/widgets/catering_packages_view.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/menu/views/catering/_show_catering_form_sheet.dart';
+
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/views/catering/_show_catering_quote_dialog.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/views/catering/catering_orders_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/views/catering/custom_quote_view.dart';
@@ -73,9 +73,6 @@ class _CateringViewState extends ConsumerState<CateringView>
             heroTag: 'add_catering_item',
             onPressed: () {
               // Navigate to catering selection screen
-
-              _showCateringForm(context, ref);
-
               GoRouter.of(context).pushNamed(AppRoute.cateringMenu.name);
             },
             backgroundColor: colorScheme.primaryContainer,
@@ -210,18 +207,6 @@ class _CateringViewState extends ConsumerState<CateringView>
         ],
       ),
       floatingActionButton: _getFAB(context, colorScheme),
-    );
-  }
-
-  void _showCateringForm(
-    BuildContext context,
-    WidgetRef ref,
-  ) {
-    showCateringFormSheet(
-      context: context,
-      ref: ref,
-      title: 'Detalles de la Orden',
-      onSuccess: (updatedPackage) {},
     );
   }
 }

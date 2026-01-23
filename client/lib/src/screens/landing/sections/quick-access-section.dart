@@ -56,7 +56,7 @@ class QuickAccessSection extends StatelessWidget {
                 title: 'Catering',
                 icon: Icons.celebration,
                 description: 'Servicios de catering para eventos especiales',
-                onTap: () => context.goNamed(AppRoute.cateringMenuE.name),
+                onTap: () => context.goNamed(AppRoute.catering.name),
                 color: colorScheme.tertiaryContainer,
               ),
               _buildQuickAccessCard(

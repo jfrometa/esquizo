@@ -46,7 +46,11 @@ class MenuTabBarState extends ConsumerState<MenuTabBar> {
 
     // If the tab controller has changed, swap listeners
     if (oldWidget.tabController != widget.tabController) {
-      oldWidget.tabController.removeListener(_handleTabChange);
+      try {
+        oldWidget.tabController.removeListener(_handleTabChange);
+      } catch (_) {
+        // Ignore if already disposed by parent
+      }
       widget.tabController.addListener(_handleTabChange);
 
       // Update current index if the new controller has a different index
