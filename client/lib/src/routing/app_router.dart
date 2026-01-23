@@ -30,6 +30,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/dishes/dish_ca
 import 'package:starter_architecture_flutter_firebase/src/screens/all_dishes_menu_home/all_dishes_menu_home_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/checkout/checkout_creen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/QR/models/qr_code_data.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/business_routing_provider.dart';
 import 'package:go_router/go_router.dart';
 
 part 'app_router.g.dart';
@@ -126,11 +127,25 @@ extension BusinessNavigationExtension on BuildContext {
     if (route != null &&
         route.requiresBusinessContext &&
         !finalPathParameters.containsKey('businessSlug')) {
-      final currentSlug =
-          GoRouterState.of(this).pathParameters['businessSlug'] ??
-              BusinessConstants.defaultSlug;
-      finalPathParameters['businessSlug'] = currentSlug;
-      debugPrint('[Navigation] Injected missing businessSlug: $currentSlug');
+      // 1. Try from current GoRouter state
+      String? currentSlug =
+          GoRouterState.of(this).pathParameters['businessSlug'];
+
+      // 2. Try from our business navigation provider
+      if (currentSlug == null || currentSlug.isEmpty) {
+        try {
+          final container = ProviderScope.containerOf(this, listen: false);
+          currentSlug = container.read(currentBusinessSlugProvider);
+        } catch (e) {
+          debugPrint('[Navigation] Error reading provider: $e');
+        }
+      }
+
+      // 3. Fallback to default
+      final slug = currentSlug ?? BusinessConstants.defaultSlug;
+      finalPathParameters['businessSlug'] = slug;
+      debugPrint(
+          '[Navigation] Injected missing businessSlug: $slug for route: $name');
     }
 
     GoRouter.of(this).goNamed(
@@ -156,12 +171,25 @@ extension BusinessNavigationExtension on BuildContext {
     if (route != null &&
         route.requiresBusinessContext &&
         !finalPathParameters.containsKey('businessSlug')) {
-      final currentSlug =
-          GoRouterState.of(this).pathParameters['businessSlug'] ??
-              BusinessConstants.defaultSlug;
-      finalPathParameters['businessSlug'] = currentSlug;
+      // 1. Try from current GoRouter state
+      String? currentSlug =
+          GoRouterState.of(this).pathParameters['businessSlug'];
+
+      // 2. Try from our business navigation provider
+      if (currentSlug == null || currentSlug.isEmpty) {
+        try {
+          final container = ProviderScope.containerOf(this, listen: false);
+          currentSlug = container.read(currentBusinessSlugProvider);
+        } catch (e) {
+          debugPrint('[Navigation] Error reading provider: $e');
+        }
+      }
+
+      // 3. Fallback to default
+      final slug = currentSlug ?? BusinessConstants.defaultSlug;
+      finalPathParameters['businessSlug'] = slug;
       debugPrint(
-          '[Navigation] Injected missing businessSlug (push): $currentSlug');
+          '[Navigation] Injected missing businessSlug (push): $slug for route: $name');
     }
 
     return GoRouter.of(this).pushNamed<T>(
@@ -280,16 +308,6 @@ extension AppRouteExtension on AppRoute {
   /// Get the base path template for this route
   String get basePath {
     switch (this) {
-      case AppRoute.landing:
-        return RoutePaths.root;
-      case AppRoute.signIn:
-        return RoutePaths.signin;
-      case AppRoute.onboarding:
-        return RoutePaths.onboarding;
-      case AppRoute.adminSetup:
-        return RoutePaths.adminSetup;
-      case AppRoute.businessSetup:
-        return RoutePaths.businessSetup;
       case AppRoute.home:
         return '/:businessSlug';
       case AppRoute.menu:
@@ -300,7 +318,42 @@ extension AppRouteExtension on AppRoute {
         return '/:businessSlug/${RoutePaths.profile}';
       case AppRoute.inProgressOrders:
         return '/:businessSlug/${RoutePaths.orders}';
+      case AppRoute.checkout:
+        return '/:businessSlug/checkout';
+      case AppRoute.catering:
+        return '/:businessSlug/catering';
+      case AppRoute.mealPlans:
+        return '/:businessSlug/meal-plans';
+      case AppRoute.details:
+        return '/:businessSlug/details/:dishId';
+      case AppRoute.addDishToOrder:
+        return '/:businessSlug/add-dish/:dishId';
+      case AppRoute.landing:
+        return RoutePaths.root;
+      case AppRoute.signIn:
+        return RoutePaths.signin;
+      case AppRoute.onboarding:
+        return RoutePaths.onboarding;
+      case AppRoute.adminSetup:
+        return RoutePaths.adminSetup;
+      case AppRoute.businessSetup:
+        return RoutePaths.businessSetup;
       default:
+        // Use a heuristic: if the route name is likely a business-context route,
+        // return a path that includes :businessSlug even if not explicitly mapped
+        final businessContextRoutes = [
+          'checkout',
+          'cart',
+          'menu',
+          'details',
+          'catering',
+          'meal',
+          'order'
+        ];
+        if (businessContextRoutes
+            .any((kw) => name.toLowerCase().contains(kw))) {
+          return '/:businessSlug/$name';
+        }
         return '/$name';
     }
   }

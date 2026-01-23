@@ -8,6 +8,7 @@ class CateringFormData {
   final List<String> allergies;
   final bool hasChef;
   final String additionalNotes;
+  final String cateringFlow;
 
   CateringFormData({
     required this.eventType,
@@ -15,6 +16,7 @@ class CateringFormData {
     required this.allergies,
     required this.hasChef,
     required this.additionalNotes,
+    required this.cateringFlow,
   });
 }
 
@@ -43,6 +45,7 @@ class _CateringFormState extends ConsumerState<CateringForm> {
   List<String> alergiasList = [];
   bool hasChef = false;
   int? cantidadPersonas;
+  String cateringFlow = 'menu'; // 'menu' or 'custom'
 
   final peopleQuantity = [
     10,
@@ -119,6 +122,7 @@ class _CateringFormState extends ConsumerState<CateringForm> {
         allergies: alergiasList,
         hasChef: hasChef,
         additionalNotes: adicionalesController.text,
+        cateringFlow: cateringFlow,
       ));
     }
   }
@@ -270,6 +274,39 @@ class _CateringFormState extends ConsumerState<CateringForm> {
                 ],
               ),
             ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Catering Flow Section
+          _buildSectionTitle(
+              'Modalidad de Catering', Icons.restaurant_menu, colorScheme),
+          const SizedBox(height: 12),
+
+          Row(
+            children: [
+              Expanded(
+                child: _buildFlowOption(
+                  title: 'Elegir del Menú',
+                  subtitle: 'Selecciona platos de nuestra carta',
+                  icon: Icons.menu_book,
+                  isSelected: cateringFlow == 'menu',
+                  onTap: () => setState(() => cateringFlow = 'menu'),
+                  colorScheme: colorScheme,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildFlowOption(
+                  title: 'Pedido Especial',
+                  subtitle: 'Describe lo que necesitas',
+                  icon: Icons.edit_attributes,
+                  isSelected: cateringFlow == 'custom',
+                  onTap: () => setState(() => cateringFlow = 'custom'),
+                  colorScheme: colorScheme,
+                ),
+              ),
+            ],
           ),
 
           const SizedBox(height: 24),
@@ -484,6 +521,67 @@ class _CateringFormState extends ConsumerState<CateringForm> {
 
           const SizedBox(height: 16),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFlowOption({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+    required ColorScheme colorScheme,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color:
+              isSelected ? colorScheme.primaryContainer : colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected
+                ? colorScheme.primary
+                : colorScheme.outline.withValues(alpha: 0.2),
+            width: 2,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: isSelected
+                  ? colorScheme.primary
+                  : colorScheme.onSurfaceVariant,
+              size: 32,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: isSelected
+                    ? colorScheme.onPrimaryContainer
+                    : colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 10,
+                color: isSelected
+                    ? colorScheme.onPrimaryContainer.withValues(alpha: 0.8)
+                    : colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

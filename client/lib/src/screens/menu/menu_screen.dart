@@ -436,84 +436,87 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       _tabController.animateTo(activeTabIndex);
     }
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      body: SafeArea(
-        top: false,
-        child: Stack(
-          children: [
-            // Extracted header widget that watches scroll position independently
-            _MenuHeader(
-              threshold: _headerThreshold,
-              parallaxFactor: _parallaxFactor,
-            ),
+    return DefaultTabController(
+      length: _enabledTabIndices.length,
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        body: SafeArea(
+          top: false,
+          child: Stack(
+            children: [
+              // Extracted header widget that watches scroll position independently
+              _MenuHeader(
+                threshold: _headerThreshold,
+                parallaxFactor: _parallaxFactor,
+              ),
 
-            Column(
-              children: [
-                // Extracted app bar widget that watches scroll position independently
-                _MenuAppBar(
-                  threshold: _headerThreshold,
-                  onSearchPressed: _showSearchInterface,
-                ),
-
-                // Tab bar - doesn't need to rebuild on scroll
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 4.0),
-                  child: MenuTabBar(
-                    tabController: _tabController,
-                    onTabChanged: (index) {
-                      ref.read(menuActiveTabProvider.notifier).state = index;
-                    },
-                    showMealPlans: _showMealPlans,
-                    showCatering: _showCatering,
+              Column(
+                children: [
+                  // Extracted app bar widget that watches scroll position independently
+                  _MenuAppBar(
+                    threshold: _headerThreshold,
+                    onSearchPressed: _showSearchInterface,
                   ),
-                ),
 
-                // Tab content area - optimize with RepaintBoundary
-                Expanded(
-                  child: RepaintBoundary(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: colorScheme.surface,
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(28),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: colorScheme.shadow.withValues(alpha: 0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, -2),
+                  // Tab bar - doesn't need to rebuild on scroll
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 4.0),
+                    child: MenuTabBar(
+                      tabController: _tabController,
+                      onTabChanged: (index) {
+                        ref.read(menuActiveTabProvider.notifier).state = index;
+                      },
+                      showMealPlans: _showMealPlans,
+                      showCatering: _showCatering,
+                    ),
+                  ),
+
+                  // Tab content area - optimize with RepaintBoundary
+                  Expanded(
+                    child: RepaintBoundary(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: colorScheme.surface,
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(28),
                           ),
-                        ],
-                      ),
-                      padding: const EdgeInsets.only(top: 4),
-                      child: ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(28),
+                          boxShadow: [
+                            BoxShadow(
+                              color: colorScheme.shadow.withValues(alpha: 0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, -2),
+                            ),
+                          ],
                         ),
-                        child: NotificationListener<ScrollNotification>(
-                          onNotification: (notification) {
-                            if (notification is ScrollUpdateNotification) {
-                              ref
-                                  .read(menuScrollOffsetProvider.notifier)
-                                  .state = notification.metrics.pixels;
-                            }
-                            return false;
-                          },
-                          child: TabBarView(
-                            controller: _tabController,
-                            physics: const BouncingScrollPhysics(),
-                            children: List.generate(
-                                4, (index) => _buildTabView(index)),
+                        padding: const EdgeInsets.only(top: 4),
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(28),
+                          ),
+                          child: NotificationListener<ScrollNotification>(
+                            onNotification: (notification) {
+                              if (notification is ScrollUpdateNotification) {
+                                ref
+                                    .read(menuScrollOffsetProvider.notifier)
+                                    .state = notification.metrics.pixels;
+                              }
+                              return false;
+                            },
+                            child: TabBarView(
+                              controller: _tabController,
+                              physics: const BouncingScrollPhysics(),
+                              children: List.generate(
+                                  4, (index) => _buildTabView(index)),
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
