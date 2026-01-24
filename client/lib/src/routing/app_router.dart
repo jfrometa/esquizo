@@ -32,6 +32,8 @@ import 'package:starter_architecture_flutter_firebase/src/screens/checkout/check
 import 'package:starter_architecture_flutter_firebase/src/screens/QR/models/qr_code_data.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/business_routing_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering/screens/catering_menu/catering_menu_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/catering/catering_selection_screen.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/catering_quote/manual_quote_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering_entry/catering_entry_screen.dart';
 import 'package:go_router/go_router.dart';
 
@@ -282,7 +284,6 @@ enum AppRoute {
   adminPanel,
   adminSetup,
   inProgressOrders,
-  manualQuote,
   // Business setup routes
   businessSetup,
   businessSetupComplete,
@@ -304,7 +305,9 @@ enum AppRoute {
   mealPlanScanner,
   mealPlanPos,
   customerMealPlan,
-  mealPlanDetails
+  mealPlanDetails,
+  cateringSelection,
+  manualQuote,
 }
 
 // =============================================================================
@@ -346,6 +349,10 @@ extension AppRouteExtension on AppRoute {
         return RoutePaths.adminSetup;
       case AppRoute.businessSetup:
         return RoutePaths.businessSetup;
+      case AppRoute.cateringSelection:
+        return '/:businessSlug/catering-selection';
+      case AppRoute.manualQuote:
+        return '/:businessSlug/manual-quote';
       default:
         // Use a heuristic: if the route name is likely a business-context route,
         // return a path that includes :businessSlug even if not explicitly mapped
@@ -782,6 +789,22 @@ GoRouter goRouter(Ref ref) {
             name: AppRoute.cateringQuote.name,
             pageBuilder: (context, state) => const NoTransitionPage(
               child: QuoteScreen(),
+            ),
+          ),
+          // Catering selection route (e.g., /kako/catering-selection)
+          GoRoute(
+            path: 'catering-selection',
+            name: AppRoute.cateringSelection.name,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: CateringSelectionScreen(),
+            ),
+          ),
+          // Manual quote route (e.g., /kako/manual-quote)
+          GoRoute(
+            path: 'manual-quote',
+            name: AppRoute.manualQuote.name,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: ManualQuoteScreen(),
             ),
           ),
           // Checkout route (e.g., /kako/checkout)

@@ -14,6 +14,7 @@ void showCateringFormSheet({
   Map<String, dynamic>? package,
   Function(Map<String, dynamic>)? onSuccess,
   bool isQuote = false,
+  String? initialFlow,
 }) {
   final theme = Theme.of(context);
   final colorScheme = theme.colorScheme;
@@ -58,6 +59,7 @@ void showCateringFormSheet({
                   child: CateringForm(
                     title: title,
                     controller: scrollController,
+                    initialFlow: initialFlow,
                     initialData: isQuote
                         ? ref.read(manualQuoteProvider)
                         : ref.read(cateringOrderNotifierProvider),
@@ -113,23 +115,19 @@ void showCateringFormSheet({
                               'Paquete ${package?['title'] ?? 'de catering'} añadido',
                           colorScheme: colorScheme,
                         );
-
-                        if (isQuote) {
-                          // Navigate to quote editor
-                          GoRouter.of(context)
-                              .pushNamed(AppRoute.cateringQuote.name);
-                        } else if (formData.cateringFlow == 'menu') {
-                          // Navigate to menu selection
-                          GoRouter.of(context)
-                              .pushNamed(AppRoute.cateringMenu.name);
-                        } else {
-                          // Navigate to cart for custom flow or stay if needed
-                          GoRouter.of(context).pushNamed(AppRoute.homecart.name,
-                              extra: 'catering');
-                        }
                       }
 
                       Navigator.pop(context);
+
+                      if (formData.cateringFlow == 'menu') {
+                        // Navigate to menu selection
+                        GoRouter.of(context)
+                            .pushNamed(AppRoute.cateringSelection.name);
+                      } else {
+                        // Navigate to manual quote
+                        GoRouter.of(context)
+                            .pushNamed(AppRoute.manualQuote.name);
+                      }
                     },
                   ),
                 ),

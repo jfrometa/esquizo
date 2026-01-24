@@ -24,6 +24,7 @@ class CateringForm extends ConsumerStatefulWidget {
   final String? title;
   final CateringOrderItem? initialData;
   final ScrollController? controller;
+  final String? initialFlow;
   final void Function(CateringFormData formData) onSubmit;
 
   const CateringForm({
@@ -31,6 +32,7 @@ class CateringForm extends ConsumerStatefulWidget {
     this.title,
     this.initialData,
     this.controller,
+    this.initialFlow,
     required this.onSubmit,
   });
 
@@ -91,6 +93,7 @@ class _CateringFormState extends ConsumerState<CateringForm> {
     alergiasList =
         initialData?.alergias.split(',').where((e) => e.isNotEmpty).toList() ??
             [];
+    cateringFlow = widget.initialFlow ?? 'menu';
 
     if (cantidadPersonas != null &&
         !peopleQuantity.contains(cantidadPersonas)) {

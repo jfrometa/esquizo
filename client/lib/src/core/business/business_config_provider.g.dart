@@ -725,7 +725,7 @@ final businessThemeColorsProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef BusinessThemeColorsRef = AutoDisposeProviderRef<Map<String, Color>>;
-String _$currentBusinessIdHash() => r'28eec32c55c1a5d52bf3106465b4c96615793921';
+String _$currentBusinessIdHash() => r'ebb6a621a2c01d4790dec627307ed4ea93fc74af';
 
 /// See also [CurrentBusinessId].
 @ProviderFor(CurrentBusinessId)

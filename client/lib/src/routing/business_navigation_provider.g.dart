@@ -219,7 +219,7 @@ class _ShouldOptimizeNavigationProviderElement
 }
 
 String _$businessNavigationControllerHash() =>
-    r'9f4f8d5fa324c761614b61175b99c27b4ece2c35';
+    r'e64f3b9bde8856485e5cfc4b545d06c2eef95d46';
 
 /// Provider for optimized business navigation state
 ///

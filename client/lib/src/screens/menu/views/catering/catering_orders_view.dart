@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/menu/views/catering/_show_catering_form_sheet.dart';
 
 /// A view displaying active catering orders
 class CateringOrdersView extends ConsumerWidget {
@@ -290,15 +291,24 @@ class CateringOrdersView extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 16),
-              FilledButton.icon(
-                onPressed: onAddItems,
-                icon: const Icon(Icons.add),
-                label: const Text('Select Items'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: colorScheme.primary,
-                  foregroundColor: colorScheme.onPrimary,
-                ),
-              ),
+              Consumer(builder: (context, ref, _) {
+                return FilledButton.icon(
+                  onPressed: () {
+                    showCateringFormSheet(
+                      context: context,
+                      ref: ref,
+                      title: 'Detalles de la Orden',
+                      initialFlow: 'menu',
+                    );
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Select Items'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
+                  ),
+                );
+              }),
             ],
           ),
         ],
