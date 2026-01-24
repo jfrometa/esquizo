@@ -494,14 +494,27 @@ class LocationCaptureBottomSheetState
   }
 
   Future<void> _confirmLocation() async {
-    if (_latitude == null || _longitude == null || _address == null) {
-      _showSnackBar('No se pudo determinar la ubicación.', isError: true);
+    // If in manual entry mode, submit form directly
+    if (!_isMapView) {
+      _submitForm();
       return;
     }
 
-    // If in manual entry mode, submit form
-    if (!_isMapView) {
-      _submitForm();
+    // For map view, check if we have enough data (either from map or manually typed)
+    final manualAddress = _addressController.text.trim();
+
+    if (_latitude == null ||
+        _longitude == null ||
+        (_address == null && manualAddress.isEmpty)) {
+      if (manualAddress.isNotEmpty) {
+        // We have a manual address but no coordinates, switch to manual mode to complete
+        setState(() => _isMapView = false);
+        _showSnackBar('Por favor complete los detalles de la dirección');
+      } else {
+        _showSnackBar(
+            'No se pudo determinar la ubicación. Intente ingresar los datos manualmente.',
+            isError: true);
+      }
       return;
     }
 
@@ -833,6 +846,12 @@ class LocationCaptureBottomSheetState
                 },
                 icon: const Icon(Icons.refresh),
                 label: const Text('Reintentar'),
+              ),
+              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed: () => setState(() => _isMapView = false),
+                icon: const Icon(Icons.edit_note),
+                label: const Text('Ingresar manualmente'),
               ),
             ],
           ),
