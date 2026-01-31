@@ -110,7 +110,9 @@ Future<void> appStartup(Ref ref) async {
     final shouldShowSetup = isAdmin && businessConfig == null;
 
     // Store the result so other providers can react to it
-    ref.read(appStartupResultProvider.notifier).setResult(AppStartupResult(
+    ref
+        .read(appStartupResultStatusProvider.notifier)
+        .setResult(AppStartupResult(
           isAdmin: isAdmin,
           showSetupScreen: shouldShowSetup,
           businessConfig: businessConfig,
@@ -130,15 +132,13 @@ Future<void> appStartup(Ref ref) async {
 // Convenience method to check if setup is complete
 @riverpod
 bool isSetupComplete(Ref ref) {
-  final result = ref.watch(appStartupResultProvider);
+  final result = ref.watch(appStartupResultStatusProvider);
   return result != null && result.businessConfig != null;
 }
 
 // Add a new provider that can be used in the UI to determine if setup screen should be shown
 @riverpod
 bool shouldShowSetupScreen(Ref ref) {
-  final result = ref.watch(appStartupResultProvider);
+  final result = ref.watch(appStartupResultStatusProvider);
   return result != null && result.showSetupScreen;
 }
-
-final appStartupResultProvider = appStartupResultStatusProvider;

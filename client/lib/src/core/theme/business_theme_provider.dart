@@ -361,14 +361,14 @@ final themeModeProvider = Provider<ThemeMode>((ref) {
 /// Merged theme mode provider - gives priority to user preferences
 final currentThemeModeProvider = Provider<ThemeMode>((ref) {
   // Get user preference from user_preference_provider
-  final userTheme = ref.watch(themeProvider);
+  final themeMode = ref.watch(appThemeModeProvider);
 
   // Get business theme mode
   final businessThemeMode = ref.watch(themeModeProvider);
 
   // User theme takes precedence if it's not set to system
-  if (userTheme != ThemeMode.system) {
-    return userTheme;
+  if (themeMode != ThemeMode.system) {
+    return themeMode;
   }
 
   // Otherwise, use business theme mode

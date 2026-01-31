@@ -249,7 +249,7 @@ class SidebarMenu extends ConsumerWidget {
           icon,
           color: isSelected
               ? theme.colorScheme.primary
-              : theme.colorScheme.onSurface.withOpacity(0.7),
+              : theme.colorScheme.onSurface.withValues(alpha: 0.7),
         ),
         title: isExpanded
             ? Text(

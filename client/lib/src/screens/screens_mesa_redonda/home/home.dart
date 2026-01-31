@@ -11,11 +11,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/widgets_mesa_r
 import 'package:starter_architecture_flutter_firebase/src/screens/widgets_mesa_redonda/home_dishes_section.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/widgets_mesa_redonda/home_search_results.dart';
 
-// Create a provider for recent searches
-final recentSearchesProvider =
-    StateNotifierProvider<RecentSearchesNotifier, List<String>>((ref) {
-  return RecentSearchesNotifier();
-});
+// Recent searches provider is now generated from recent_search_notifier.dart
 
 /// The Home screen for the app.
 class MenuHome extends ConsumerStatefulWidget {
@@ -62,7 +58,7 @@ class HomeState extends ConsumerState<MenuHome> {
   void _handleSearchSubmitted(String query) {
     if (query.isNotEmpty) {
       // Save to recent searches
-      ref.read(recentSearchesProvider.notifier).addSearch(query);
+      ref.read(recentSearchesNotifierProvider.notifier).addSearch(query);
       // Update search state
       setState(() {
         _searchQuery = query;
@@ -93,7 +89,7 @@ class HomeState extends ConsumerState<MenuHome> {
   Widget build(BuildContext context) {
     // Replace dishProvider with catalogItemsProvider
     final dishesAsync = ref.watch(catalogItemsProvider('menu'));
-    final recentSearches = ref.watch(recentSearchesProvider);
+    final recentSearches = ref.watch(recentSearchesNotifierProvider);
 
     return GestureDetector(
       onTap: () {

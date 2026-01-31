@@ -174,7 +174,7 @@ class _CateringOrderDetailsScreenState
               children: [
                 CircleAvatar(
                   radius: 24,
-                  backgroundColor: statusColor.withOpacity(0.2),
+                  backgroundColor: statusColor.withValues(alpha: 0.2),
                   child: Icon(
                     order.status.icon,
                     color: statusColor,
@@ -197,7 +197,7 @@ class _CateringOrderDetailsScreenState
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: statusColor.withOpacity(0.2),
+                          color: statusColor.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Text(
@@ -340,7 +340,7 @@ class _CateringOrderDetailsScreenState
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                  color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(order.specialInstructions),
@@ -871,7 +871,7 @@ class _CateringOrderDetailsScreenState
                 decoration: BoxDecoration(
                   color:
                       _getPaymentStatusColor(order.paymentStatus, colorScheme)
-                          .withOpacity(0.2),
+                          .withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
@@ -1003,7 +1003,7 @@ class _CateringOrderDetailsScreenState
                     Icon(
                       Icons.person_add_alt,
                       size: 48,
-                      color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+                      color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                     ),
                     const SizedBox(height: 16),
                     const Text('No staff assigned yet'),

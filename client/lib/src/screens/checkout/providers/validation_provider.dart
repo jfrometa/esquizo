@@ -1,18 +1,15 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final validationProvider =
-    StateNotifierProvider.family<ValidationNotifier, Map<String, bool>, String>(
-        (ref, type) {
-  return ValidationNotifier();
-});
+part 'validation_provider.g.dart';
 
-class ValidationNotifier extends StateNotifier<Map<String, bool>> {
-  ValidationNotifier()
-      : super({
-          'location': false,
-          'date': false,
-          'time': false,
-        });
+@riverpod
+class Validation extends _$Validation {
+  @override
+  Map<String, bool> build(String type) => {
+        'location': false,
+        'date': false,
+        'time': false,
+      };
 
   void setValid(String field, bool isValid) {
     state = {...state, field: isValid};

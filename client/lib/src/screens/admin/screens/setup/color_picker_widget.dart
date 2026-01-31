@@ -42,8 +42,6 @@ class _ColorPickerState extends State<ColorPicker> {
         return _buildHueWheelPicker();
       case PickerType.custom:
         return _buildCustomPicker();
-      default:
-        return _buildMaterialPicker();
     }
   }
 

@@ -9,7 +9,7 @@ class LinkAccountScreen extends ConsumerStatefulWidget {
   const LinkAccountScreen({super.key, required this.email});
 
   @override
-  _LinkAccountScreenState createState() => _LinkAccountScreenState();
+  ConsumerState<LinkAccountScreen> createState() => _LinkAccountScreenState();
 }
 
 class _LinkAccountScreenState extends ConsumerState<LinkAccountScreen> {

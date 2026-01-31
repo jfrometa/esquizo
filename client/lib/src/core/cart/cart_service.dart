@@ -42,11 +42,11 @@ class Cart {
   // ===== GETTERS =====
 
   /// Total number of items in the cart
-  int get itemCount => items.fold(0, (sum, item) => sum + item.quantity);
+  int get itemCount => items.fold(0, (total, item) => total + item.quantity);
 
   /// Subtotal of all items before taxes and fees
-  double get subtotal =>
-      items.fold(0.0, (sum, item) => sum + (item.numericPrice * item.quantity));
+  double get subtotal => items.fold(
+      0.0, (total, item) => total + (item.numericPrice * item.quantity));
 
   /// Tax amount based on the tax rate
   double get tax => subtotal * taxRate;
@@ -437,7 +437,7 @@ class Cart {
 
     // Calculate total dishes to consume
     int totalDishes =
-        dishesToConsume.fold(0, (sum, item) => sum + item.quantity);
+        dishesToConsume.fold(0, (total, item) => total + item.quantity);
 
     // Check if enough meals remaining
     if (items[mealPlanIndex].remainingMeals < totalDishes) {

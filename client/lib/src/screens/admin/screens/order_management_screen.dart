@@ -7,6 +7,7 @@ import 'package:starter_architecture_flutter_firebase/src/routing/admin_router.d
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/create_order.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/order_details_widget.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
+import '../models/order_status_enum.dart';
 import '../widgets/responsive_layout.dart';
 
 class OrderManagementScreen extends ConsumerStatefulWidget {
@@ -350,9 +351,7 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          order.isDelivery
-                              ? 'Delivery'
-                              : 'Table ${order.id ?? 'N/A'}',
+                          order.isDelivery ? 'Delivery' : 'Table ${order.id}',
                         ),
                       ],
                     ),
@@ -419,8 +418,8 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
                   const SizedBox(width: 8),
 
                   // Status update button
-                  if (order.status != 'completed' &&
-                      order.status != 'cancelled')
+                  if (order.status != OrderStatus.completed &&
+                      order.status != OrderStatus.cancelled)
                     ElevatedButton.icon(
                       icon: const Icon(Icons.update, size: 16),
                       label: Text(_getNextStatusLabel(order.status.name)),

@@ -7,7 +7,7 @@ part of 'business_routing_provider.dart';
 // **************************************************************************
 
 String _$currentRouteLocationHash() =>
-    r'62b54eb9ecfe238c45aa8343eb229a19794b41cf';
+    r'b4d019826a6bd208e2ec5ba55bdb639412c6bac7';
 
 /// Provider that gets the current route location
 /// SIMPLIFIED: Direct WebUtils access - reactivity handled at app level
@@ -89,7 +89,7 @@ final businessSlugFromUrlProvider = AutoDisposeProvider<String?>.internal(
 // ignore: unused_element
 typedef BusinessSlugFromUrlRef = AutoDisposeProviderRef<String?>;
 String _$isBusinessUrlAccessHash() =>
-    r'3389707112a8149cf8ac3838f0fadfece049b583';
+    r'f5288fcff98800281c0efb7d81a778890a095ff9';
 
 /// Provider to check if current access is via business-specific URL
 ///
@@ -109,7 +109,7 @@ final isBusinessUrlAccessProvider = AutoDisposeProvider<bool>.internal(
 // ignore: unused_element
 typedef IsBusinessUrlAccessRef = AutoDisposeProviderRef<bool>;
 String _$businessRoutePrefixHash() =>
-    r'cef868800657cbc8174f28eccf2034883825ecd6';
+    r'769de63205aac9da84b115247f71ba23e4166b31';
 
 /// Provider to get the current business route prefix (slug)
 /// Returns the business slug if accessing via business URL, null otherwise

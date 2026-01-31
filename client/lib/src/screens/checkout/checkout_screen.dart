@@ -9,6 +9,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/checkout/providers/validation_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/checkout/providers/checkout_state_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/checkout/screens/order_success_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/checkout/services/order_details_generator.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/checkout/services/order_processor.dart';
@@ -55,33 +56,12 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   final double _taxRate = 0.067;
 
   // State variables
-  int _currentStep = 0;
-  int _selectedPaymentMethod = 0;
+  // local variables replaced by checkoutProvider
   final List<String> _paymentMethods = [
     'Transferencias',
     'Pagos por WhatsApp',
     'Cardnet'
   ];
-
-  // Location data
-  String? cateringAddress;
-  String? regularAddress;
-  String? mealSubscriptionAddress;
-
-  String? _cateringLatitude;
-  String? _cateringLongitude;
-  String? _mealSubscriptionLatitude;
-  String? _mealSubscriptionLongitude;
-  String? _regularDishesLatitude;
-  String? _regularDishesLongitude;
-
-  // User data
-  String? name, phone, email;
-  bool showSignInScreen = false;
-  bool? dialogResult;
-
-  // Process state
-  bool _isProcessingOrder = false;
 
   // Animation
 
@@ -282,6 +262,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   Widget _buildProgressIndicator(int totalSteps, ColorScheme colorScheme) {
+    final checkoutState = ref.watch(checkoutProvider);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(
@@ -291,7 +272,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           width: 24,
           height: 4,
           decoration: BoxDecoration(
-            color: _currentStep >= index
+            color: checkoutState.currentStep >= index
                 ? colorScheme.primary
                 : colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(2),
@@ -302,8 +283,9 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   Widget _buildStepTitle(ColorScheme colorScheme) {
+    final checkoutState = ref.watch(checkoutProvider);
     String title;
-    switch (_currentStep) {
+    switch (checkoutState.currentStep) {
       case 0:
         title = 'Detalles de Entrega';
         break;
@@ -330,7 +312,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   Widget _buildCurrentStepContent(int totalSteps, ColorScheme colorScheme) {
-    switch (_currentStep) {
+    final checkoutState = ref.watch(checkoutProvider);
+    switch (checkoutState.currentStep) {
       case 0:
         return _buildDeliveryStep(colorScheme);
       case 1:
@@ -392,13 +375,13 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   Widget _buildPaymentOption(int index, ColorScheme colorScheme) {
-    final bool isSelected = _selectedPaymentMethod == index;
+    final checkoutState = ref.watch(checkoutProvider);
+    final checkoutNotifier = ref.read(checkoutProvider.notifier);
+    final bool isSelected = checkoutState.selectedPaymentMethod == index;
 
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _selectedPaymentMethod = index;
-        });
+        checkoutNotifier.setPaymentMethod(index);
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
@@ -684,6 +667,9 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     int totalSteps,
     ColorScheme colorScheme,
   ) {
+    final checkoutState = ref.watch(checkoutProvider);
+    final checkoutNotifier = ref.read(checkoutProvider.notifier);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -699,14 +685,12 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       ),
       child: Row(
         children: [
-          if (_currentStep > 0)
+          if (checkoutState.currentStep > 0)
             Expanded(
               flex: 1,
               child: OutlinedButton(
                 onPressed: () {
-                  setState(() {
-                    _currentStep--;
-                  });
+                  checkoutNotifier.previousStep();
                 },
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -724,35 +708,30 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 ),
               ),
             ),
-          if (_currentStep > 0) const SizedBox(width: 12),
+          if (checkoutState.currentStep > 0) const SizedBox(width: 12),
           Expanded(
             flex: 2,
             child: ElevatedButton(
-              onPressed: _isProcessingOrder
+              onPressed: checkoutState.isProcessingOrder
                   ? null
                   : () async {
-                      if (_currentStep < totalSteps - 1) {
+                      if (checkoutState.currentStep < totalSteps - 1) {
                         // Validate current step
-                        if (_currentStep == 0 && !_validateDeliveryStep()) {
+                        if (checkoutState.currentStep == 0 &&
+                            !_validateDeliveryStep()) {
                           return;
                         }
 
-                        setState(() {
-                          _currentStep++;
-                        });
+                        checkoutNotifier.nextStep();
                       } else {
                         // Final step - process order
-                        setState(() {
-                          _isProcessingOrder = true;
-                        });
+                        checkoutNotifier.setProcessing(true);
                         await _processOrder(
                           itemsToDisplay,
                           cateringOrder,
                           cateringQuote,
                         );
-                        setState(() {
-                          _isProcessingOrder = false;
-                        });
+                        checkoutNotifier.setProcessing(false);
                       }
                     },
               style: ElevatedButton.styleFrom(
@@ -764,7 +743,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: _isProcessingOrder
+              child: checkoutState.isProcessingOrder
                   ? SizedBox(
                       width: 24,
                       height: 24,
@@ -774,7 +753,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       ),
                     )
                   : Text(
-                      _currentStep < totalSteps - 1
+                      checkoutState.currentStep < totalSteps - 1
                           ? 'Continuar'
                           : widget.displayType == 'quote'
                               ? 'Enviar Cotización'
@@ -798,6 +777,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     int totalSteps,
     ColorScheme colorScheme,
   ) {
+    final checkoutState = ref.watch(checkoutProvider);
+    final checkoutNotifier = ref.read(checkoutProvider.notifier);
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -808,12 +789,10 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_currentStep > 0)
+            if (checkoutState.currentStep > 0)
               OutlinedButton(
                 onPressed: () {
-                  setState(() {
-                    _currentStep--;
-                  });
+                  checkoutNotifier.previousStep();
                 },
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -832,31 +811,26 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               ),
             const SizedBox(height: 12),
             ElevatedButton(
-              onPressed: _isProcessingOrder
+              onPressed: checkoutState.isProcessingOrder
                   ? null
                   : () async {
-                      if (_currentStep < totalSteps - 1) {
+                      if (checkoutState.currentStep < totalSteps - 1) {
                         // Validate current step
-                        if (_currentStep == 0 && !_validateDeliveryStep()) {
+                        if (checkoutState.currentStep == 0 &&
+                            !_validateDeliveryStep()) {
                           return;
                         }
 
-                        setState(() {
-                          _currentStep++;
-                        });
+                        checkoutNotifier.nextStep();
                       } else {
                         // Final step - process order
-                        setState(() {
-                          _isProcessingOrder = true;
-                        });
+                        checkoutNotifier.setProcessing(true);
                         await _processOrder(
                           itemsToDisplay,
                           cateringOrder,
                           cateringQuote,
                         );
-                        setState(() {
-                          _isProcessingOrder = false;
-                        });
+                        checkoutNotifier.setProcessing(false);
                       }
                     },
               style: ElevatedButton.styleFrom(
@@ -868,7 +842,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: _isProcessingOrder
+              child: checkoutState.isProcessingOrder
                   ? SizedBox(
                       width: 24,
                       height: 24,
@@ -878,7 +852,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       ),
                     )
                   : Text(
-                      _currentStep < totalSteps - 1
+                      checkoutState.currentStep < totalSteps - 1
                           ? 'Continuar'
                           : widget.displayType == 'quote'
                               ? 'Enviar Cotización'
@@ -996,6 +970,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       List<CartItem> items,
       CateringOrderItem? cateringOrder,
       CateringOrderItem? cateringQuote) async {
+    final checkoutState = ref.read(checkoutProvider);
     // Store context related objects before async operations
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
@@ -1009,7 +984,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       if (!mounted) return;
 
       final processor = OrderProcessor(ref, context);
-      final paymentMethod = _paymentMethods[_selectedPaymentMethod];
+      final paymentMethod =
+          _paymentMethods[checkoutState.selectedPaymentMethod];
 
       // Save order to database
       try {
@@ -1040,13 +1016,13 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             orderType: 'regular',
             items: orderItems,
             paymentMethod: paymentMethod,
-            address: regularAddress ?? '',
-            latitude: _regularDishesLatitude ?? '',
-            longitude: _regularDishesLongitude ?? '',
+            address: checkoutState.regularAddress ?? '',
+            latitude: checkoutState.regularDishesLatitude ?? '',
+            longitude: checkoutState.regularDishesLongitude ?? '',
             location: {
-              'address': regularAddress ?? '',
-              'latitude': _regularDishesLatitude ?? '',
-              'longitude': _regularDishesLongitude ?? '',
+              'address': checkoutState.regularAddress ?? '',
+              'latitude': checkoutState.regularDishesLatitude ?? '',
+              'longitude': checkoutState.regularDishesLongitude ?? '',
             },
             deliveryDate: _mealSubscriptionDateController.text,
             deliveryTime: _mealSubscriptionTimeController.text,
@@ -1065,13 +1041,13 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             orderType: 'subscription',
             items: orderItems,
             paymentMethod: paymentMethod,
-            address: mealSubscriptionAddress ?? '',
-            latitude: _mealSubscriptionLatitude ?? '',
-            longitude: _mealSubscriptionLongitude ?? '',
+            address: checkoutState.mealSubscriptionAddress ?? '',
+            latitude: checkoutState.mealSubscriptionLatitude ?? '',
+            longitude: checkoutState.mealSubscriptionLongitude ?? '',
             location: {
-              'address': mealSubscriptionAddress ?? '',
-              'latitude': _mealSubscriptionLatitude ?? '',
-              'longitude': _mealSubscriptionLongitude ?? '',
+              'address': checkoutState.mealSubscriptionAddress ?? '',
+              'latitude': checkoutState.mealSubscriptionLatitude ?? '',
+              'longitude': checkoutState.mealSubscriptionLongitude ?? '',
             },
             deliveryDate: _mealSubscriptionDateController.text,
             deliveryTime: _mealSubscriptionTimeController.text,
@@ -1090,13 +1066,13 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             orderType: 'catering',
             items: orderItems,
             paymentMethod: paymentMethod,
-            address: cateringAddress ?? '',
-            latitude: _cateringLatitude ?? '',
-            longitude: _cateringLongitude ?? '',
+            address: checkoutState.cateringAddress ?? '',
+            latitude: checkoutState.cateringLatitude ?? '',
+            longitude: checkoutState.cateringLongitude ?? '',
             location: {
-              'address': cateringAddress ?? '',
-              'latitude': _cateringLatitude ?? '',
-              'longitude': _cateringLongitude ?? '',
+              'address': checkoutState.cateringAddress ?? '',
+              'latitude': checkoutState.cateringLatitude ?? '',
+              'longitude': checkoutState.cateringLongitude ?? '',
             },
             deliveryDate: _cateringDateController.text,
             deliveryTime: _cateringTimeController.text,
@@ -1117,13 +1093,13 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             orderType: 'quote',
             items: orderItems,
             paymentMethod: paymentMethod,
-            address: cateringAddress ?? '',
-            latitude: _cateringLatitude ?? '',
-            longitude: _cateringLongitude ?? '',
+            address: checkoutState.cateringAddress ?? '',
+            latitude: checkoutState.cateringLatitude ?? '',
+            longitude: checkoutState.cateringLongitude ?? '',
             location: {
-              'address': cateringAddress ?? '',
-              'latitude': _cateringLatitude ?? '',
-              'longitude': _cateringLongitude ?? '',
+              'address': checkoutState.cateringAddress ?? '',
+              'latitude': checkoutState.cateringLatitude ?? '',
+              'longitude': checkoutState.cateringLongitude ?? '',
             },
             deliveryDate: _cateringDateController.text,
             deliveryTime: _cateringTimeController.text,
@@ -1166,9 +1142,9 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             contactInfo,
             paymentMethod,
             {
-              'address': regularAddress ?? '',
-              'latitude': _regularDishesLatitude ?? '',
-              'longitude': _regularDishesLongitude ?? '',
+              'address': checkoutState.regularAddress ?? '',
+              'latitude': checkoutState.regularDishesLatitude ?? '',
+              'longitude': checkoutState.regularDishesLongitude ?? '',
             },
             {
               'date': _mealSubscriptionDateController.text,
@@ -1208,19 +1184,20 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   String _generateOrderDetails(
       List<CartItem> items, Map<String, String>? contactInfo) {
+    final checkoutState = ref.read(checkoutProvider);
     final generator = OrderDetailsGenerator(
       taxRate: _taxRate,
       deliveryFee: _deliveryFee,
       paymentMethods: _paymentMethods,
-      selectedPaymentMethod: _selectedPaymentMethod,
+      selectedPaymentMethod: checkoutState.selectedPaymentMethod,
     );
 
     return generator.generateRegularOrder(
       items: items,
       contactInfo: contactInfo,
-      address: regularAddress ?? 'No proporcionada',
-      latitude: _regularDishesLatitude ?? '',
-      longitude: _regularDishesLongitude ?? '',
+      address: checkoutState.regularAddress ?? 'No proporcionada',
+      latitude: checkoutState.regularDishesLatitude ?? '',
+      longitude: checkoutState.regularDishesLongitude ?? '',
       date: _mealSubscriptionDateController.text,
       time: _mealSubscriptionTimeController.text,
     );
@@ -1511,25 +1488,34 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   controller.text = address;
                   switch (orderType.toLowerCase()) {
                     case 'catering':
-                      cateringAddress = address;
-                      _cateringLatitude = latitude;
-                      _cateringLongitude = longitude;
+                      ref.read(checkoutProvider.notifier).updateLocation(
+                            type: 'catering',
+                            address: address,
+                            latitude: latitude,
+                            longitude: longitude,
+                          );
                       ref
                           .read(validationProvider('catering').notifier)
                           .setValid('location', true);
                       break;
                     case 'regular':
-                      regularAddress = address;
-                      _regularDishesLatitude = latitude;
-                      _regularDishesLongitude = longitude;
+                      ref.read(checkoutProvider.notifier).updateLocation(
+                            type: 'regular',
+                            address: address,
+                            latitude: latitude,
+                            longitude: longitude,
+                          );
                       ref
                           .read(validationProvider('regular').notifier)
                           .setValid('location', true);
                       break;
                     case 'mealsubscription':
-                      mealSubscriptionAddress = address;
-                      _mealSubscriptionLatitude = latitude;
-                      _mealSubscriptionLongitude = longitude;
+                      ref.read(checkoutProvider.notifier).updateLocation(
+                            type: 'mealsubscription',
+                            address: address,
+                            latitude: latitude,
+                            longitude: longitude,
+                          );
                       ref
                           .read(validationProvider('mealSubscription').notifier)
                           .setValid('location', true);

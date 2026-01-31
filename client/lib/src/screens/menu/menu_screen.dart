@@ -20,8 +20,11 @@ import 'views/meal_plans_view.dart';
 import 'views/search_results_view.dart';
 import 'views/special_offers_view.dart';
 
+// Providers re-exported from menu_providers.dart are available via imports
+
 // Provider to share scroll position across the entire menu
-final menuScrollOffsetProvider = StateProvider<double>((ref) => 0.0);
+// Re-use ScrollState from menu_providers.dart instead of local StateProvider
+final menuScrollOffsetProvider = scrollStateProvider;
 
 class MenuScreen extends ConsumerStatefulWidget {
   const MenuScreen({super.key});
@@ -84,8 +87,9 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       // Add a listener to update the shared scroll position provider
       _tabScrollControllers[i]!.addListener(() {
         if (_tabScrollControllers[i]!.hasClients) {
-          ref.read(menuScrollOffsetProvider.notifier).state =
-              _tabScrollControllers[i]!.offset;
+          ref
+              .read(menuScrollOffsetProvider.notifier)
+              .set(_tabScrollControllers[i]!.offset);
         }
       });
     }
@@ -93,8 +97,9 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
     // Main scroll controller
     _mainScrollController.addListener(() {
       if (_mainScrollController.hasClients) {
-        ref.read(menuScrollOffsetProvider.notifier).state =
-            _mainScrollController.offset;
+        ref
+            .read(menuScrollOffsetProvider.notifier)
+            .set(_mainScrollController.offset);
       }
     });
 
@@ -203,8 +208,9 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
           _tabScrollControllers[i] = ScrollController();
           _tabScrollControllers[i]!.addListener(() {
             if (_tabScrollControllers[i]!.hasClients) {
-              ref.read(menuScrollOffsetProvider.notifier).state =
-                  _tabScrollControllers[i]!.offset;
+              ref
+                  .read(menuScrollOffsetProvider.notifier)
+                  .set(_tabScrollControllers[i]!.offset);
             }
           });
         }
@@ -268,12 +274,12 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
 
   void _handleTabChange() {
     if (_tabController != null && !_tabController!.indexIsChanging) {
-      ref.read(menuActiveTabProvider.notifier).state = _tabController!.index;
+      ref.read(menuActiveTabProvider.notifier).set(_tabController!.index);
     }
   }
 
   void _handleFocusChanges() {
-    ref.read(searchFocusProvider.notifier).state = _searchFocusNode.hasFocus;
+    ref.read(searchFocusProvider.notifier).set(_searchFocusNode.hasFocus);
   }
 
   void _handleSearchChanges() {
@@ -284,7 +290,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       setState(() {
         _isSearching = isNowSearching;
       });
-      ref.read(searchQueryProvider.notifier).state = newText;
+      ref.read(searchQueryProvider.notifier).set(newText);
     }
   }
 
@@ -330,7 +336,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
         _isSearching = true;
       });
 
-      ref.read(searchQueryProvider.notifier).state = query;
+      ref.read(searchQueryProvider.notifier).set(query);
       FocusScope.of(context).unfocus();
       await HapticFeedback.selectionClick();
     } catch (e) {
@@ -350,7 +356,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
     setState(() {
       _isSearching = false;
     });
-    ref.read(searchQueryProvider.notifier).state = '';
+    ref.read(searchQueryProvider.notifier).set('');
   }
 
   Future<void> _handleFilterTap() async {
@@ -372,7 +378,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
     if (!mounted) return;
 
     // Enable tabs when search interface is dismissed
-    ref.read(tabsEnabledProvider.notifier).state = false;
+    ref.read(tabsEnabledProvider.notifier).set(false);
 
     // Calculate proper position
     final appBarHeight =
@@ -410,7 +416,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       ),
     ).then((_) {
       // Re-enable tabs when search is dismissed
-      ref.read(tabsEnabledProvider.notifier).state = true;
+      ref.read(tabsEnabledProvider.notifier).set(true);
     });
   }
 
@@ -471,7 +477,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                           'menu_tab_bar_${_enabledTabIndices.length}_${_tabController?.index}'),
                       tabController: _tabController!,
                       onTabChanged: (index) {
-                        ref.read(menuActiveTabProvider.notifier).state = index;
+                        ref.read(menuActiveTabProvider.notifier).set(index);
                       },
                       showMealPlans: _showMealPlans,
                       showCatering: _showCatering,
@@ -505,7 +511,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                               if (notification is ScrollUpdateNotification) {
                                 ref
                                     .read(menuScrollOffsetProvider.notifier)
-                                    .state = notification.metrics.pixels;
+                                    .set(notification.metrics.pixels);
                               }
                               return false;
                             },

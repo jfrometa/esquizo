@@ -37,7 +37,7 @@ class _StaffOrderEntryScreenState extends ConsumerState<StaffOrderEntryScreen> {
       final tables = await tableService.getAllTables();
 
       _table = tables.firstWhere(
-        (table) => table.number == tableNumber,
+        (table) => table.number == int.tryParse(tableNumber),
         orElse: () => throw Exception('Table not found'),
       );
 

@@ -1,9 +1,14 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class RecentSearchesNotifier extends StateNotifier<List<String>> {
-  RecentSearchesNotifier() : super([]) {
+part 'recent_search_notifier.g.dart';
+
+@riverpod
+class RecentSearchesNotifier extends _$RecentSearchesNotifier {
+  @override
+  List<String> build() {
     _loadSearches();
+    return [];
   }
 
   static const String _key = 'recent_searches';

@@ -659,15 +659,15 @@ extension ThemeHelpers on BuildContext {
 
 // Theme provider that integrates with UserPreferencesRepository
 final appThemeProvider = Provider<ThemeData>((ref) {
-  final themeMode = ref.watch(themeProvider);
+  final themeMode = ref.watch(appThemeModeProvider);
 
   switch (themeMode) {
     case ThemeMode.light:
       return AppTheme.lightTheme;
     case ThemeMode.dark:
       return AppTheme.darkTheme;
-    case ThemeMode.system:
-      // For system mode, let's determine based on platform brightness
+    default:
+      // For system mode or default, let's determine based on platform brightness
       final platformBrightness =
           WidgetsBinding.instance.platformDispatcher.platformBrightness;
       return platformBrightness == Brightness.dark

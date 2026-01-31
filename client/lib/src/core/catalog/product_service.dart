@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../screens/admin/models/product_model.dart';
 import '../business/business_config_provider.dart';
+
+part 'product_service.g.dart';
 
 class ProductService {
   final FirebaseFirestore _firestore;
@@ -135,28 +138,31 @@ class ProductService {
 }
 
 // Provider for product service
-final productServiceProvider = Provider<ProductService>((ref) {
+@riverpod
+ProductService productService(Ref ref) {
   final businessId = ref.watch(currentBusinessIdProvider);
   return ProductService(businessId: businessId);
-});
+}
 
 // Provider for categories stream
-final menuCategoriesProvider = StreamProvider<List<MenuCategory>>((ref) {
+@riverpod
+Stream<List<MenuCategory>> menuCategories(Ref ref) {
   final productService = ref.watch(productServiceProvider);
   return productService.getCategories();
-});
+}
 
 // Provider for products stream
-final menuProductsProvider = StreamProvider<List<MenuItem>>((ref) {
+@riverpod
+Stream<List<MenuItem>> menuProducts(Ref ref) {
   debugPrint('🍽️ Fetching menu products for business: '
       '\u001b[32m${ref.watch(currentBusinessIdProvider)}\u001b[0m');
   final productService = ref.watch(productServiceProvider);
   return productService.getProducts();
-});
+}
 
 // Provider for products by category
-final categoryProductsProvider =
-    StreamProvider.family<List<MenuItem>, String>((ref, categoryId) {
+@riverpod
+Stream<List<MenuItem>> categoryProducts(Ref ref, String categoryId) {
   final productService = ref.watch(productServiceProvider);
   return productService.getProductsByCategory(categoryId);
-});
+}

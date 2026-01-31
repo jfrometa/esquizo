@@ -14,8 +14,6 @@ class CateringCategoryScreen extends ConsumerStatefulWidget {
 
 class _CateringCategoryScreenState
     extends ConsumerState<CateringCategoryScreen> {
-  final bool _isLoading = false;
-
   void _showCategoryForm({CateringCategory? category}) {
     showModalBottomSheet(
       context: context,
@@ -71,7 +69,7 @@ class _CateringCategoryScreenState
             Icon(
               Icons.category_outlined,
               size: 80,
-              color: colorScheme.primary.withOpacity(0.5),
+              color: colorScheme.primary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -316,9 +314,9 @@ class _CateringCategoryScreenState
       '0xe57f': Icons.local_bar,
       '0xe544': Icons.icecream,
       '0xe532': Icons.cake,
-      '0xe532': Icons.breakfast_dining,
+      '0xe5d0': Icons.breakfast_dining,
       '0xe574': Icons.lunch_dining,
-      '0xe574': Icons.dinner_dining,
+      '0xe571': Icons.dinner_dining,
       '0xe3f8': Icons.category_outlined,
       // Add more mappings as needed
     };

@@ -61,7 +61,7 @@
 //                 // Overlay
 //                 Container(
 //                   decoration: BoxDecoration(
-//                     color: Colors.black.withOpacity(0.5),
+//                     color: Colors.black.withValues(alpha: 0.5),
 //                   ),
 //                   child: Center(
 //                     child: Container(
@@ -93,7 +93,7 @@
 //                     child: Container(
 //                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
 //                       decoration: BoxDecoration(
-//                         color: Colors.black.withOpacity(0.7),
+//                         color: Colors.black.withValues(alpha: 0.7),
 //                         borderRadius: BorderRadius.circular(30),
 //                       ),
 //                       child: Text(
@@ -117,7 +117,7 @@
 //                       child: Container(
 //                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
 //                         decoration: BoxDecoration(
-//                           color: theme.colorScheme.error.withOpacity(0.9),
+//                           color: theme.colorScheme.error.withValues(alpha: 0.9),
 //                           borderRadius: BorderRadius.circular(30),
 //                         ),
 //                         child: Text(

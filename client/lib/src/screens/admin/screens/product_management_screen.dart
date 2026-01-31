@@ -602,8 +602,8 @@ class _ProductManagementScreenState
   void _confirmDeleteCategory(CatalogCategory category) {
     // Check if there are products in this category first
     final catalogType = ref.read(currentCatalogTypeProvider);
-    final productsAsync = ref.read(catalogItemsByCategoryProvider(
-        (catalogType: catalogType, categoryId: category.id)).future);
+    final productsAsync = ref
+        .read(catalogItemsByCategoryProvider(catalogType, category.id).future);
 
     productsAsync.then((products) {
       if (!mounted) return;

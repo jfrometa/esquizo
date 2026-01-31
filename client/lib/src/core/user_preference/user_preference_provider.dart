@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/local_storange/local_storage_service.dart';
-// JSON encoding/decoding imports
 import 'dart:convert';
+
+part 'user_preference_provider.g.dart';
 
 /// Optimized user preferences system with local caching and
 /// efficient Firebase operations.
@@ -517,22 +519,22 @@ class OptimizedUserPreferencesRepository {
 }
 
 // Optimized providers
-final userPreferencesRepositoryProvider =
-    Provider<OptimizedUserPreferencesRepository>((ref) {
+@riverpod
+OptimizedUserPreferencesRepository userPreferencesRepository(Ref ref) {
   final firestore = ref.watch(firebaseFirestoreProvider);
   final localStorage = ref.watch(localStorageServiceProvider);
   return OptimizedUserPreferencesRepository(
     firestore: firestore,
     localStorage: localStorage,
   );
-});
+}
 
 // User preferences provider with proper caching
-final userPreferencesProvider =
-    StreamProvider.family<UserPreferences, String>((ref, userId) {
+@riverpod
+Stream<UserPreferences> userPreferences(Ref ref, String userId) {
   final repository = ref.watch(userPreferencesRepositoryProvider);
   return repository.watchUserPreferences(userId);
-});
+}
 
 // // Optimized theme provider with local caching
 // final themeProvider =
@@ -620,42 +622,29 @@ final userPreferencesProvider =
 //   }
 // }
 
-final themeProvider = StateNotifierProvider<ThemeNotifier, ThemeMode>((ref) {
-  final user = ref.watch(firebaseAuthProvider).currentUser;
-  final userPreferencesRepo = ref.watch(userPreferencesRepositoryProvider);
-
-  return ThemeNotifier(
-    ref: ref,
-    repository: userPreferencesRepo,
-    userId: user?.uid,
-  );
-});
-
-// Theme notifier to handle theme changes
-class ThemeNotifier extends StateNotifier<ThemeMode> {
-  final Ref ref;
-  final OptimizedUserPreferencesRepository repository;
-  final String? userId;
-
-  ThemeNotifier({
-    required this.ref,
-    required this.repository,
-    this.userId,
-  }) : super(ThemeMode.light) {
-    _init();
+@riverpod
+class AppThemeMode extends _$AppThemeMode {
+  @override
+  ThemeMode build() {
+    final user = ref.watch(firebaseAuthProvider).currentUser;
+    if (user != null) {
+      _init(user.uid);
+    }
+    return ThemeMode.system;
   }
 
-  Future<void> _init() async {
-    if (userId != null) {
-      final prefs = await repository.getUserPreferences(userId!);
-      state = prefs.themeMode;
-    }
+  Future<void> _init(String userId) async {
+    final repository = ref.read(userPreferencesRepositoryProvider);
+    final prefs = await repository.getUserPreferences(userId);
+    state = prefs.themeMode;
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
-    if (userId == null) return;
+    final user = ref.read(firebaseAuthProvider).currentUser;
+    if (user == null) return;
 
     state = mode;
-    await repository.updateThemeMode(userId!, mode);
+    final repository = ref.read(userPreferencesRepositoryProvider);
+    await repository.updateThemeMode(user.uid, mode);
   }
 }

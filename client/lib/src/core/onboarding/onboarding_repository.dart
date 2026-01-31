@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -18,7 +19,6 @@ class OnboardingRepository {
 }
 
 @Riverpod(keepAlive: true)
-Future<OnboardingRepository> onboardingRepository(
-    OnboardingRepositoryRef ref) async {
+Future<OnboardingRepository> onboardingRepository(Ref ref) async {
   return OnboardingRepository(await SharedPreferences.getInstance());
 }

@@ -1,23 +1,52 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/screens_mesa_redonda/home/provider/recent_search_notifier.dart';
 
-/// Provider for recent searches
-final menuRecentSearchesProvider =
-    StateNotifierProvider<RecentSearchesNotifier, List<String>>((ref) {
-  return RecentSearchesNotifier();
-});
+part 'menu_providers.g.dart';
 
 /// Provider for active tab index
-final menuActiveTabProvider = StateProvider<int>((ref) => 0);
+@riverpod
+class MenuActiveTab extends _$MenuActiveTab {
+  @override
+  int build() => 0;
+
+  void set(int value) => state = value;
+}
 
 /// Provider for current search query
-final searchQueryProvider = StateProvider<String>((ref) => '');
+@riverpod
+class SearchQuery extends _$SearchQuery {
+  @override
+  String build() => '';
+
+  void set(String value) => state = value;
+}
 
 /// Provider for search focus state
-final searchFocusProvider = StateProvider<bool>((ref) => false);
+@riverpod
+class SearchFocus extends _$SearchFocus {
+  @override
+  bool build() => false;
+
+  void set(bool value) => state = value;
+}
 
 /// Provider for scroll state
-final scrollStateProvider = StateProvider<double>((ref) => 0.0);
+@riverpod
+class ScrollState extends _$ScrollState {
+  @override
+  double build() => 0.0;
+
+  void set(double value) => state = value;
+}
 
 /// Provider to enable/disable tabs
-final tabsEnabledProvider = StateProvider<bool>((ref) => true);
+@riverpod
+class TabsEnabled extends _$TabsEnabled {
+  @override
+  bool build() => true;
+
+  void set(bool value) => state = value;
+}
+
+// Re-export the recent searches provider
+final menuRecentSearchesProvider = recentSearchesNotifierProvider;

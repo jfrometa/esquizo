@@ -1,12 +1,18 @@
 import 'package:db/db.dart';
 import 'package:orm/orm.dart'; // Ensure you have the ORM package imported
 
+/// A service for managing user data using the [PrismaClient].
 class UserService {
-
+  /// Creates a new [UserService] instance.
   UserService(this.prisma);
+
+  /// The [PrismaClient] instance used for database operations.
   final PrismaClient prisma;
 
-  // Create a new user
+  /// Creates a new user with the provided [email] and [name].
+  ///
+  /// The [useUncheckedInput] flag determines whether to use [UserCreateInput]
+  /// or [UserUncheckedCreateInput].
   Future<User?> createUser({
     required String email,
     required String name,
@@ -50,7 +56,7 @@ class UserService {
     }
   }
 
-  // Retrieve a user by ID
+  /// Retrieves a user from the database by their unique [id].
   Future<User?> getUserById(String id) async {
     try {
       final user = await prisma.user.findUnique(
@@ -63,7 +69,7 @@ class UserService {
     }
   }
 
-  // Update a user by ID
+  /// Updates an existing user's [email] and/or [name] by their [id].
   Future<User?> updateUser(String id, {String? email, String? name}) async {
     try {
       final userData = UserUpdateInput(
@@ -88,7 +94,7 @@ class UserService {
     }
   }
 
-  // Delete a user by ID
+  /// Deletes a user from the database by their [id].
   Future<void> deleteUser(String id) async {
     try {
       await prisma.user.delete(
@@ -104,7 +110,7 @@ class UserService {
     }
   }
 
-  // Get all users
+  /// Retrieves all users from the database.
   Future<List<User>> getAllUsers() async {
     try {
       final users = await prisma.user.findMany();

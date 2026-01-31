@@ -19,7 +19,8 @@ class InProgressOrdersScreen extends ConsumerStatefulWidget {
   const InProgressOrdersScreen({super.key});
 
   @override
-  _InProgressOrdersScreenState createState() => _InProgressOrdersScreenState();
+  ConsumerState<InProgressOrdersScreen> createState() =>
+      _InProgressOrdersScreenState();
 }
 
 class _InProgressOrdersScreenState extends ConsumerState<InProgressOrdersScreen>

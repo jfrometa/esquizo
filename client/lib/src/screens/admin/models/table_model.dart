@@ -1,6 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/resource/resource_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/table_management/table_management_scren_new.dart';
 
 // Table status enum
 enum TableStatusEnum {
@@ -11,51 +10,74 @@ enum TableStatusEnum {
   cleaning // Table is under maintenance/cleaning
 }
 
+// Table status enum extensions
+extension TableStatusExtension on TableStatusEnum {
+  String get name {
+    switch (this) {
+      case TableStatusEnum.available:
+        return 'available';
+      case TableStatusEnum.occupied:
+        return 'occupied';
+      case TableStatusEnum.reserved:
+        return 'reserved';
+      case TableStatusEnum.maintenance:
+        return 'maintenance';
+      case TableStatusEnum.cleaning:
+        return 'cleaning';
+    }
+  }
+
+  static TableStatusEnum fromString(String? status) {
+    if (status == null) return TableStatusEnum.available;
+    switch (status) {
+      case 'occupied':
+        return TableStatusEnum.occupied;
+      case 'reserved':
+        return TableStatusEnum.reserved;
+      case 'maintenance':
+        return TableStatusEnum.maintenance;
+      case 'cleaning':
+        return TableStatusEnum.cleaning;
+      case 'available':
+      default:
+        return TableStatusEnum.available;
+    }
+  }
+}
+
 // Table shapes for visual representation
 enum TableShape { rectangle, round, oval }
 
 // Restaurant table model
 class RestaurantTable extends Resource {
-  @override
-  final String id;
-  @override
-  final String businessId;
   final int number;
   final int capacity;
-  @override
-  final TableStatusEnum status;
   final String? currentOrderId;
   final String? area; // Section of restaurant (e.g., "Terrace", "Indoor")
-  @override
-  final String? description; // Additional description
-  @override
-  final bool isActive; // Whether this table is in active use
   final TableShape? shape; // Visual shape representation
   final DateTime? updatedAt;
   final DateTime? createdAt;
-  @override
-  final String name;
   final bool isAvailable;
   final Map<String, double> position; // Position on floor plan {x, y}
 
   RestaurantTable({
     super.type = 'table',
-    required this.id,
-    required this.businessId,
+    required super.id,
+    required super.businessId,
     required this.number,
     required this.capacity,
-    this.status = TableStatusEnum.available,
+    super.status = TableStatusEnum.available,
     this.currentOrderId,
     this.area,
-    this.description,
-    this.isActive = true,
+    super.description,
+    super.isActive = true,
     this.shape = TableShape.rectangle,
     this.updatedAt,
     this.createdAt,
-    this.name = '',
+    super.name = '',
     this.isAvailable = true,
     this.position = const {'x': 50.0, 'y': 50.0}, // Default to center
-  }) : super(id: id, businessId: businessId, name: name);
+  });
 
   static TableShape _parseTableShape(dynamic shape) {
     if (shape == null) return TableShape.rectangle;

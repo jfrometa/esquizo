@@ -295,16 +295,16 @@ Future<void> _initializeAppCheckWithFallback() async {
       // For mobile platforms - try with appropriate debug provider first
       if (kDebugMode) {
         await FirebaseAppCheck.instance.activate(
-          androidProvider: AndroidProvider.debug,
-          appleProvider: AppleProvider.debug,
+          providerAndroid: const AndroidDebugProvider(),
+          providerApple: const AppleDebugProvider(),
         );
         debugPrint(
             '✅ Firebase AppCheck initialized with debug providers for mobile');
       } else {
         // For production mobile
         await FirebaseAppCheck.instance.activate(
-          androidProvider: AndroidProvider.playIntegrity,
-          appleProvider: AppleProvider.deviceCheck,
+          providerAndroid: const AndroidPlayIntegrityProvider(),
+          providerApple: const AppleDeviceCheckProvider(),
         );
         debugPrint(
             '✅ Firebase AppCheck initialized with production providers for mobile');

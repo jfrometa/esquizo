@@ -95,7 +95,7 @@ class _ActiveHoursChartState extends State<ActiveHoursChart> {
                           value.toInt().toString(),
                           style: TextStyle(
                             fontSize: 10,
-                            color: theme.colorScheme.onSurface.withOpacity(0.6),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
                       );
@@ -116,14 +116,14 @@ class _ActiveHoursChartState extends State<ActiveHoursChart> {
                 show: true,
                 getDrawingHorizontalLine: (value) {
                   return FlLine(
-                    color: theme.colorScheme.outline.withOpacity(0.2),
+                    color: theme.colorScheme.outline.withValues(alpha: 0.2),
                     strokeWidth: 1,
                     dashArray: [5, 5],
                   );
                 },
                 getDrawingVerticalLine: (value) {
                   return FlLine(
-                    color: theme.colorScheme.outline.withOpacity(0.1),
+                    color: theme.colorScheme.outline.withValues(alpha: 0.1),
                     strokeWidth: 1,
                     dashArray: [5, 5],
                   );
@@ -154,7 +154,7 @@ class _ActiveHoursChartState extends State<ActiveHoursChart> {
                   'Peak Hours',
                   style: TextStyle(
                     fontSize: 12,
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -168,7 +168,7 @@ class _ActiveHoursChartState extends State<ActiveHoursChart> {
     return widget.hourlyData.asMap().map((index, data) {
       final barColor = peakHours.contains(data.hour)
           ? theme.colorScheme.primary
-          : theme.colorScheme.primary.withOpacity(0.5);
+          : theme.colorScheme.primary.withValues(alpha: 0.5);
       
       return MapEntry(
         index,

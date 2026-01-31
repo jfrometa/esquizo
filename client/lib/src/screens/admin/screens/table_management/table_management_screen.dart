@@ -836,7 +836,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
       arguments: table,
     )
         .then((_) {
-      ref.refresh(tablesStatusProvider);
+      ref.invalidate(tablesStatusProvider);
     });
   }
 
@@ -868,7 +868,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
           arguments: order,
         )
             .then((_) {
-          ref.refresh(tablesStatusProvider);
+          ref.invalidate(tablesStatusProvider);
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -936,7 +936,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
         _isLoading = false;
       });
 
-      ref.refresh(tablesStatusProvider);
+      ref.invalidate(tablesStatusProvider);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

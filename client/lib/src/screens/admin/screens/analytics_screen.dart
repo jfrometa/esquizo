@@ -480,7 +480,7 @@ class _AnalyticsDashboardState extends ConsumerState<AnalyticsDashboard> {
         return Card(
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: (insight['color'] as Color).withOpacity(0.2),
+              backgroundColor: (insight['color'] as Color).withValues(alpha: 0.2),
               child: Icon(
                 insight['icon'] as IconData,
                 color: insight['color'] as Color,
@@ -518,7 +518,7 @@ class _AnalyticsDashboardState extends ConsumerState<AnalyticsDashboard> {
               children: [
                 CircleAvatar(
                   radius: 16,
-                  backgroundColor: color.withOpacity(0.2),
+                  backgroundColor: color.withValues(alpha: 0.2),
                   child: Icon(
                     icon,
                     size: 16,

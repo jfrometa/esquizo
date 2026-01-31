@@ -534,7 +534,7 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                     Icon(
                       Icons.category_outlined,
                       size: 48,
-                      color: colorScheme.primary.withOpacity(0.5),
+                      color: colorScheme.primary.withValues(alpha: 0.5),
                     ),
                     const SizedBox(height: 16),
                     const Text('No categories available'),
@@ -656,7 +656,7 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                   Icon(
                     Icons.restaurant_menu,
                     size: 48,
-                    color: colorScheme.primary.withOpacity(0.5),
+                    color: colorScheme.primary.withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: 16),
                   const Text('No ingredients added yet'),
@@ -756,7 +756,7 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                     color: Theme.of(context)
                         .colorScheme
                         .onSurfaceVariant
-                        .withOpacity(0.4),
+                        .withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -808,7 +808,7 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                                 : Theme.of(context)
                                     .colorScheme
                                     .surfaceContainerHighest
-                                    .withOpacity(0.3),
+                                    .withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(12),
                             border: isSelected
                                 ? Border.all(

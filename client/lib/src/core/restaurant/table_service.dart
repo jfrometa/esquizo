@@ -10,8 +10,6 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/
 /// A unified service for managing restaurant tables
 /// Consolidates functionality from multiple table-related services
 class TableService {
-  final FirebaseFirestore _firestore;
-  final String _businessId;
   final CollectionReference _tablesCollection;
 
   /// Constructor with optional FirebaseFirestore instance for testing
@@ -19,9 +17,7 @@ class TableService {
     FirebaseFirestore? firestore,
     required String businessId,
     required String restaurantId,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _businessId = businessId,
-        _tablesCollection = (firestore ?? FirebaseFirestore.instance)
+  }) : _tablesCollection = (firestore ?? FirebaseFirestore.instance)
             .collection('businesses')
             .doc(businessId)
             .collection('resources') as CollectionReference<Object?>;
@@ -255,8 +251,8 @@ class TableService {
           capacity: 0,
           status: TableStatusEnum.available,
           isActive: false,
-          businessId: ((doc.data() as Map<String, dynamic>)['businessId'] ??
-              '') as String,
+          businessId: ((doc.data() as Map<String, dynamic>)['businessId'] ?? '')
+              as String,
         );
       }
     }).toList();

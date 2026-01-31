@@ -61,7 +61,7 @@ final businessConfigInitProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef BusinessConfigInitRef = AutoDisposeFutureProviderRef<BusinessConfig?>;
-String _$appStartupHash() => r'bc6e9a9405675c025783ae62c17238ea49a5925c';
+String _$appStartupHash() => r'1d0897b4e8c6e18d8317dfb8a8150e86b1d4dae6';
 
 /// See also [appStartup].
 @ProviderFor(appStartup)
@@ -77,7 +77,7 @@ final appStartupProvider = FutureProvider<void>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AppStartupRef = FutureProviderRef<void>;
-String _$isSetupCompleteHash() => r'abb9f5f047ca76647aa9ff55047fc17add282bb1';
+String _$isSetupCompleteHash() => r'a40a6ada016b0c2fd4edf085f88f615f998c7472';
 
 /// See also [isSetupComplete].
 @ProviderFor(isSetupComplete)
@@ -95,7 +95,7 @@ final isSetupCompleteProvider = AutoDisposeProvider<bool>.internal(
 // ignore: unused_element
 typedef IsSetupCompleteRef = AutoDisposeProviderRef<bool>;
 String _$shouldShowSetupScreenHash() =>
-    r'2baf169adbdd7a422969126ea2c4cafda59efe19';
+    r'ac0c8ea20a330424703f8c7033c6505e021ead44';
 
 /// See also [shouldShowSetupScreen].
 @ProviderFor(shouldShowSetupScreen)

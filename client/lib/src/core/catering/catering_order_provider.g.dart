@@ -532,7 +532,7 @@ final cateringDashboardSummaryProvider =
 typedef CateringDashboardSummaryRef
     = AutoDisposeFutureProviderRef<Map<String, dynamic>>;
 String _$cateringOrderNotifierHash() =>
-    r'5c43bfcdf86c9a48bcb500ae87d49b5fc16044ed';
+    r'79757a46c7b4087c07dcb76b31cbe0644ae1ead3';
 
 /// See also [CateringOrderNotifier].
 @ProviderFor(CateringOrderNotifier)

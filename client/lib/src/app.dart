@@ -93,7 +93,7 @@ class _KakoAppState extends ConsumerState<KakoApp> with WidgetsBindingObserver {
     final goRouter = ref.watch(goRouterProvider);
 
     // Get theme mode - combine user preferences with business theme
-    final userThemeMode = ref.watch(themeProvider);
+    final themeMode = ref.watch(appThemeModeProvider);
 
     // Watch for router errors
     ref.listen<String?>(routerErrorNotifierProvider, (previous, current) {
@@ -109,7 +109,7 @@ class _KakoAppState extends ConsumerState<KakoApp> with WidgetsBindingObserver {
               action: SnackBarAction(
                 label: 'Dismiss',
                 onPressed: () {
-                  ref.read(routerErrorNotifierProvider.notifier).state = null;
+                  ref.read(routerErrorNotifierProvider.notifier).setError(null);
                 },
               ),
             ),
@@ -127,7 +127,7 @@ class _KakoAppState extends ConsumerState<KakoApp> with WidgetsBindingObserver {
       setupScreen: MaterialApp(
         theme: lightTheme,
         darkTheme: darkTheme,
-        themeMode: userThemeMode,
+        themeMode: themeMode,
         debugShowCheckedModeBanner: false,
         title: 'Business Setup',
         home: const BusinessSetupScreen(),
@@ -137,7 +137,7 @@ class _KakoAppState extends ConsumerState<KakoApp> with WidgetsBindingObserver {
         routerConfig: goRouter,
         theme: lightTheme,
         darkTheme: darkTheme,
-        themeMode: userThemeMode,
+        themeMode: themeMode,
         debugShowCheckedModeBanner: false,
         title: 'KakoApp',
         restorationScopeId: 'app',

@@ -8,6 +8,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/catalog/catalog_s
 import 'package:starter_architecture_flutter_firebase/src/core/order/unified_order_service.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';
 import 'package:uuid/uuid.dart';
@@ -354,10 +355,8 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
     final catalogType = ref.watch(currentCatalogTypeProvider);
     final itemsAsync = _selectedCategoryId.isEmpty
         ? ref.watch(catalogItemsProvider(catalogType))
-        : ref.watch(catalogItemsByCategoryProvider((
-            catalogType: catalogType,
-            categoryId: _selectedCategoryId,
-          )));
+        : ref.watch(
+            catalogItemsByCategoryProvider(catalogType, _selectedCategoryId));
 
     // Container with fixed size constraints to avoid layout issues
     return Container(
@@ -508,7 +507,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.1),
+                          color: Colors.red.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: const Text(
@@ -532,7 +531,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                 const SizedBox(height: 4),
                 Expanded(
                   child: Text(
-                    item.description ?? '',
+                    item.description,
                     style: theme.textTheme.bodySmall,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -607,7 +606,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.1),
+                          color: Colors.red.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: const Text(
@@ -631,7 +630,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                 const SizedBox(height: 4),
                 Expanded(
                   child: Text(
-                    item.description ?? '',
+                    item.description,
                     style: theme.textTheme.bodySmall,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -709,7 +708,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                     // Filter to available tables
                     final availableTables = resources
                         .where((res) =>
-                            res.status == 'available' ||
+                            res.status == TableStatusEnum.available ||
                             res.id == _selectedTableId)
                         .toList();
 
@@ -1140,7 +1139,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                     style: TextStyle(
                       fontSize: 12,
                       fontStyle: FontStyle.italic,
-                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                   ),
                 ),
@@ -1283,7 +1282,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
 
     final cartItem = CartItem(
       img: item.imageUrl,
-      description: item.description ?? '',
+      description: item.description,
       ingredients: [], // Default empty ingredients list
       isSpicy: false, // Default not spicy
       foodType: 'regular', // Default food type
@@ -1568,7 +1567,7 @@ class _ItemOptionsDialogState extends State<ItemOptionsDialog> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            widget.item.description ?? '',
+                            widget.item.description,
                             style: theme.textTheme.bodyMedium,
                           ),
                         ],

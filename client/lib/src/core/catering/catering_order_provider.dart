@@ -409,26 +409,27 @@ class CateringOrderNotifier extends _$CateringOrderNotifier {
                 true)
         .length;
 
-    final totalRevenue = orders.fold(0.0, (sum, order) => sum + order.total);
+    final totalRevenue =
+        orders.fold(0.0, (total, order) => total + order.total);
     final todayRevenue = orders
         .where((order) =>
             order.eventDate.isAfter(today) == true &&
             order.eventDate.isBefore(today.add(const Duration(days: 1))) ==
                 true)
-        .fold(0.0, (sum, order) => sum + order.total);
+        .fold(0.0, (total, order) => total + order.total);
     final thisWeekRevenue = orders
         .where((order) =>
             order.eventDate.isAfter(startOfWeek) == true &&
             order.eventDate
                     .isBefore(startOfWeek.add(const Duration(days: 7))) ==
                 true)
-        .fold(0.0, (sum, order) => sum + order.total);
+        .fold(0.0, (total, order) => total + order.total);
     final thisMonthRevenue = orders
         .where((order) =>
             order.eventDate.isAfter(startOfMonth) == true &&
             order.eventDate.isBefore(DateTime(now.year, now.month + 1, 1)) ==
                 true)
-        .fold(0.0, (sum, order) => sum + order.total);
+        .fold(0.0, (total, order) => total + order.total);
 
     final Map<String, int> statusCounts = {};
     for (final status in model.CateringOrderStatus.values) {

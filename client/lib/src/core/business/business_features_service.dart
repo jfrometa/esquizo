@@ -1,7 +1,10 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
+
+part 'business_features_service.g.dart';
 
 /// Business features configuration model
 class BusinessFeatures {
@@ -253,22 +256,22 @@ class BusinessFeaturesService {
 }
 
 /// Provider for BusinessFeaturesService
-final businessFeaturesServiceProvider =
-    Provider<BusinessFeaturesService>((ref) {
+@Riverpod(keepAlive: true)
+BusinessFeaturesService businessFeaturesService(Ref ref) {
   final database = ref.watch(firebaseDatabaseProvider);
   return BusinessFeaturesService(database: database);
-});
+}
 
 /// Stream provider for business features
-final businessFeaturesProvider =
-    StreamProvider.family<BusinessFeatures, String>((ref, businessId) {
+@riverpod
+Stream<BusinessFeatures> businessFeatures(Ref ref, String businessId) {
   final service = ref.watch(businessFeaturesServiceProvider);
   return service.getBusinessFeatures(businessId);
-});
+}
 
 /// Stream provider for business UI configuration
-final businessUIProvider =
-    StreamProvider.family<BusinessUI, String>((ref, businessId) {
+@riverpod
+Stream<BusinessUI> businessUI(Ref ref, String businessId) {
   final service = ref.watch(businessFeaturesServiceProvider);
   return service.getBusinessUI(businessId);
-});
+}

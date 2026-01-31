@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/business_navigation_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/optimized_business_scaffold_v2.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/landing/landing-page-home.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/landing/landing_page_home.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/menu_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/cart_screen.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/custom_profile_screen.dart';

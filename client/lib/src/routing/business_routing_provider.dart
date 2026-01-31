@@ -13,7 +13,7 @@ part 'business_routing_provider.g.dart';
 /// Provider that gets the current route location
 /// SIMPLIFIED: Direct WebUtils access - reactivity handled at app level
 @riverpod
-String currentRouteLocation(CurrentRouteLocationRef ref) {
+String currentRouteLocation(Ref ref) {
   if (!kIsWeb) return '/';
 
   // Use WebUtils.getCurrentPath() - simple and reliable
@@ -289,7 +289,7 @@ void _logRootAccess() {
 
 /// Provider to check if current access is via business-specific URL
 @riverpod
-bool isBusinessUrlAccess(IsBusinessUrlAccessRef ref) {
+bool isBusinessUrlAccess(Ref ref) {
   final urlBusinessSlug = ref.watch(businessSlugFromUrlProvider);
   return urlBusinessSlug != null && urlBusinessSlug.isNotEmpty;
 }
@@ -297,7 +297,7 @@ bool isBusinessUrlAccess(IsBusinessUrlAccessRef ref) {
 /// Provider to get the current business route prefix (slug)
 /// Returns the business slug if accessing via business URL, null otherwise
 @riverpod
-String? businessRoutePrefix(BusinessRoutePrefixRef ref) {
+String? businessRoutePrefix(Ref ref) {
   final isBusinessUrl = ref.watch(isBusinessUrlAccessProvider);
   if (!isBusinessUrl) return null;
 

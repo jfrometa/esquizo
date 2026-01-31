@@ -340,7 +340,7 @@ class _CateringCategoryFormState extends ConsumerState<CateringCategoryForm> {
               width: 32,
               height: 4,
               decoration: BoxDecoration(
-                color: colorScheme.onSurfaceVariant.withOpacity(0.4),
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
@@ -391,7 +391,7 @@ class _CateringCategoryFormState extends ConsumerState<CateringCategoryForm> {
                     color: Theme.of(context)
                         .colorScheme
                         .onSurfaceVariant
-                        .withOpacity(0.4),
+                        .withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -443,7 +443,7 @@ class _CateringCategoryFormState extends ConsumerState<CateringCategoryForm> {
                                 : Theme.of(context)
                                     .colorScheme
                                     .surfaceContainerHighest
-                                    .withOpacity(0.3),
+                                    .withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(12),
                             border: isSelected
                                 ? Border.all(

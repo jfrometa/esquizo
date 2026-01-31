@@ -3,7 +3,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../firebase/firebase_providers.dart';
+
+part 'business_slug_service.g.dart';
 
 /// Service to handle business slug to ID mapping and resolution
 class BusinessSlugService {
@@ -152,28 +155,29 @@ class BusinessSlugService {
 }
 
 // Provider for BusinessSlugService
-final businessSlugServiceProvider = Provider<BusinessSlugService>((ref) {
+@Riverpod(keepAlive: true)
+BusinessSlugService businessSlugService(Ref ref) {
   final firestore = ref.watch(firebaseFirestoreProvider);
   return BusinessSlugService(firestore: firestore);
-});
+}
 
 // Provider to get business ID from slug
-final businessIdFromSlugProvider =
-    FutureProvider.family<String?, String>((ref, slug) async {
+@riverpod
+Future<String?> businessIdFromSlug(Ref ref, String slug) async {
   final slugService = ref.watch(businessSlugServiceProvider);
   return await slugService.getBusinessIdFromSlug(slug);
-});
+}
 
 // Provider to get slug from business ID
-final slugFromBusinessIdProvider =
-    FutureProvider.family<String?, String>((ref, businessId) async {
+@riverpod
+Future<String?> slugFromBusinessId(Ref ref, String businessId) async {
   final slugService = ref.watch(businessSlugServiceProvider);
   return await slugService.getSlugFromBusinessId(businessId);
-});
+}
 
 // Provider to check slug availability
-final slugAvailabilityProvider =
-    FutureProvider.family<bool, String>((ref, slug) async {
+@riverpod
+Future<bool> slugAvailability(Ref ref, String slug) async {
   final slugService = ref.watch(businessSlugServiceProvider);
   return await slugService.isSlugAvailable(slug);
-});
+}

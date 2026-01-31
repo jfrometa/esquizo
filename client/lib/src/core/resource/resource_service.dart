@@ -12,7 +12,7 @@ class Resource {
   final Map<String, dynamic> attributes;
   final TableStatusEnum status;
   final bool isActive;
-  
+
   Resource({
     required this.id,
     required this.businessId,
@@ -23,7 +23,7 @@ class Resource {
     this.status = TableStatusEnum.available,
     this.isActive = true,
   });
-  
+
   factory Resource.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return Resource(
@@ -33,11 +33,11 @@ class Resource {
       name: data['name'] ?? '',
       description: data['description'] ?? '',
       attributes: data['attributes'] ?? {},
-      status: data['status'] ?? 'available',
+      status: TableStatusExtension.fromString(data['status']?.toString()),
       isActive: data['isActive'] ?? true,
     );
   }
-  
+
   Map<String, dynamic> toFirestore() {
     return {
       'businessId': businessId,
@@ -56,7 +56,7 @@ class Resource {
 class ResourceStats {
   final int totalResources;
   final Map<String, int> statusCounts;
-  
+
   ResourceStats({
     required this.totalResources,
     required this.statusCounts,
@@ -67,31 +67,31 @@ class ResourceService {
   final FirebaseFirestore _firestore;
   final String _businessId;
   final String _resourceType;
-  
+
   ResourceService({
     FirebaseFirestore? firestore,
     required String businessId,
     required String resourceType,
-  }) : 
-    _firestore = firestore ?? FirebaseFirestore.instance,
-    _businessId = businessId,
-    _resourceType = resourceType;
-  
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _businessId = businessId,
+        _resourceType = resourceType;
+
   // Collection reference
-  CollectionReference get _resourcesCollection => 
-      _firestore.collection('businesses').doc(_businessId).collection('resources');
-  
+  CollectionReference get _resourcesCollection => _firestore
+      .collection('businesses')
+      .doc(_businessId)
+      .collection('resources');
+
   // Get all resources of a specific type
   Stream<List<Resource>> getResourcesStream() {
     return _resourcesCollection
         .where('type', isEqualTo: _resourceType)
         .orderBy('name')
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => Resource.fromFirestore(doc))
-            .toList());
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => Resource.fromFirestore(doc)).toList());
   }
-  
+
   // Get active resources of a specific type
   Stream<List<Resource>> getActiveResourcesStream() {
     return _resourcesCollection
@@ -99,11 +99,10 @@ class ResourceService {
         .where('isActive', isEqualTo: true)
         .orderBy('name')
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => Resource.fromFirestore(doc))
-            .toList());
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => Resource.fromFirestore(doc)).toList());
   }
-  
+
   // Get resources by status
   Stream<List<Resource>> getResourcesByStatusStream(String status) {
     return _resourcesCollection
@@ -111,11 +110,10 @@ class ResourceService {
         .where('status', isEqualTo: status)
         .orderBy('name')
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => Resource.fromFirestore(doc))
-            .toList());
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => Resource.fromFirestore(doc)).toList());
   }
-  
+
   // Get resource by ID
   Future<Resource?> getResourceById(String resourceId) async {
     try {
@@ -129,7 +127,7 @@ class ResourceService {
       return null;
     }
   }
-  
+
   // Update resource status
   Future<void> updateResourceStatus(String resourceId, String status) async {
     await _resourcesCollection.doc(resourceId).update({
@@ -137,26 +135,26 @@ class ResourceService {
       'updatedAt': FieldValue.serverTimestamp(),
     });
   }
-  
+
   // Get resource statistics
   Future<ResourceStats> getResourceStats() async {
     try {
       final snapshot = await _resourcesCollection
           .where('type', isEqualTo: _resourceType)
           .get();
-      
-      final resources = snapshot.docs
-          .map((doc) => Resource.fromFirestore(doc))
-          .toList();
-      
+
+      final resources =
+          snapshot.docs.map((doc) => Resource.fromFirestore(doc)).toList();
+
       final totalResources = resources.where((r) => r.isActive).length;
-      
+
       // Count resources by status
       final statusCounts = <String, int>{};
       for (final resource in resources.where((r) => r.isActive)) {
-        statusCounts[resource.status.name] = (statusCounts[resource.status.name] ?? 0) + 1;
+        statusCounts[resource.status.name] =
+            (statusCounts[resource.status.name] ?? 0) + 1;
       }
-      
+
       return ResourceStats(
         totalResources: totalResources,
         statusCounts: statusCounts,

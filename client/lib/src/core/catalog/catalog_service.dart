@@ -1,12 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart' as cloud_firestore;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:convert';
 
 import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
+
+part 'catalog_service.g.dart';
 
 /// Generic catalog item model that represents products, dishes, or any sellable item
 class CatalogItem {
@@ -244,7 +247,6 @@ class CatalogService {
   final cloud_firestore.FirebaseFirestore _firestore;
   final String _businessId;
   final Map<String, String> _collectionPaths = {};
-  final String _catalogType;
 
   /// Constructor with dependency injection for testing
   CatalogService({
@@ -252,7 +254,6 @@ class CatalogService {
     required String catalogType,
     required String businessId,
   })  : _firestore = firestore,
-        _catalogType = catalogType,
         _businessId = businessId {
     // Initialize collection paths for different catalog types
     _initializeCollectionPaths();
@@ -1028,11 +1029,17 @@ class CatalogService {
 // });
 
 // /// Provider for the current catalog type
-final currentCatalogTypeProvider = StateProvider<String>((ref) => 'menu');
+@riverpod
+class CurrentCatalogType extends _$CurrentCatalogType {
+  @override
+  String build() => 'menu';
+
+  void setType(String type) => state = type;
+}
 
 // Provider for catalog service
-final catalogServiceProvider =
-    Provider.family<CatalogService, String>((ref, catalogType) {
+@riverpod
+CatalogService catalogService(Ref ref, String catalogType) {
   final firestore = ref.watch(firebaseFirestoreProvider);
   final businessId = ref.watch(currentBusinessIdProvider);
 
@@ -1041,91 +1048,92 @@ final catalogServiceProvider =
     businessId: businessId,
     catalogType: catalogType,
   );
-});
+}
 
 // ============= CATEGORY PROVIDERS =============
 
 /// Provider for categories in a specific catalog type
-final catalogCategoriesProvider =
-    StreamProvider.family<List<CatalogCategory>, String>((ref, catalogType) {
+@riverpod
+Stream<List<CatalogCategory>> catalogCategories(Ref ref, String catalogType) {
   final catalogService = ref.watch(catalogServiceProvider(catalogType));
   return catalogService.getCategories(catalogType);
-});
+}
 
 /// Provider for active categories only
-final activeCatalogCategoriesProvider =
-    StreamProvider.family<List<CatalogCategory>, String>((ref, catalogType) {
+@riverpod
+Stream<List<CatalogCategory>> activeCatalogCategories(
+    Ref ref, String catalogType) {
   final catalogService = ref.watch(catalogServiceProvider(catalogType));
   return catalogService.getActiveCategories(catalogType);
-});
+}
 
 /// Provider for a single category
-final catalogCategoryProvider = FutureProvider.family<CatalogCategory?,
-    ({String catalogType, String categoryId})>((ref, params) {
-  final catalogService = ref.watch(catalogServiceProvider(params.catalogType));
-  return catalogService.getCategoryById(params.catalogType, params.categoryId);
-});
+@riverpod
+Future<CatalogCategory?> catalogCategory(
+    Ref ref, String catalogType, String categoryId) {
+  final catalogService = ref.watch(catalogServiceProvider(catalogType));
+  return catalogService.getCategoryById(catalogType, categoryId);
+}
 
 // ============= ITEM PROVIDERS =============
 
 /// Provider for all items in a catalog type
-final catalogItemsProvider =
-    StreamProvider.family<List<CatalogItem>, String>((ref, catalogType) {
+@riverpod
+Stream<List<CatalogItem>> catalogItems(Ref ref, String catalogType) {
   debugPrint('📦 Fetching catalog items for business: '
-      '[32m${ref.watch(currentBusinessIdProvider)}[0m, type: $catalogType');
+      '\x1B[32m${ref.watch(currentBusinessIdProvider)}\x1B[0m, type: $catalogType');
   final catalogService = ref.watch(catalogServiceProvider(catalogType));
   return catalogService.getItems(catalogType);
-});
+}
 
 /// Provider for items by category
-final catalogItemsByCategoryProvider = StreamProvider.family<List<CatalogItem>,
-    ({String catalogType, String categoryId})>((ref, params) {
-  final catalogService = ref.watch(catalogServiceProvider(params.catalogType));
-  return catalogService.getItemsByCategory(
-      params.catalogType, params.categoryId);
-});
+@riverpod
+Stream<List<CatalogItem>> catalogItemsByCategory(
+    Ref ref, String catalogType, String categoryId) {
+  final catalogService = ref.watch(catalogServiceProvider(catalogType));
+  return catalogService.getItemsByCategory(catalogType, categoryId);
+}
 
 /// Provider for a single item
-final catalogItemProvider =
-    FutureProvider.family<CatalogItem?, ({String catalogType, String itemId})>(
-        (ref, params) {
-  final catalogService = ref.watch(catalogServiceProvider(params.catalogType));
-  return catalogService.getItemById(params.catalogType, params.itemId);
-});
+@riverpod
+Future<CatalogItem?> catalogItem(Ref ref, String catalogType, String itemId) {
+  final catalogService = ref.watch(catalogServiceProvider(catalogType));
+  return catalogService.getItemById(catalogType, itemId);
+}
 
 /// Provider for featured items
-final featuredItemsProvider =
-    FutureProvider.family<List<CatalogItem>, String>((ref, catalogType) {
+@riverpod
+Future<List<CatalogItem>> featuredItems(Ref ref, String catalogType) {
   final catalogService = ref.watch(catalogServiceProvider(catalogType));
   return catalogService.getFeaturedItems(catalogType);
-});
+}
 
 /// Provider for searching items
-final searchItemsProvider = FutureProvider.family<List<CatalogItem>,
-    ({String catalogType, String query})>((ref, params) {
-  final catalogService = ref.watch(catalogServiceProvider(params.catalogType));
-  return catalogService.searchItems(params.catalogType, params.query);
-});
+@riverpod
+Future<List<CatalogItem>> searchItems(
+    Ref ref, String catalogType, String query) {
+  final catalogService = ref.watch(catalogServiceProvider(catalogType));
+  return catalogService.searchItems(catalogType, query);
+}
 
 /// Provider for items with low inventory
-final lowInventoryItemsProvider = FutureProvider.family<List<CatalogItem>,
-    ({String catalogType, int threshold})>((ref, params) {
-  final catalogService = ref.watch(catalogServiceProvider(params.catalogType));
-  return catalogService.getLowInventoryItems(
-      params.catalogType, params.threshold);
-});
+@riverpod
+Future<List<CatalogItem>> lowInventoryItems(
+    Ref ref, String catalogType, int threshold) {
+  final catalogService = ref.watch(catalogServiceProvider(catalogType));
+  return catalogService.getLowInventoryItems(catalogType, threshold);
+}
 
 /// Provider for most popular items
-final popularItemsProvider =
-    FutureProvider.family<List<CatalogItem>, String>((ref, catalogType) {
+@riverpod
+Future<List<CatalogItem>> popularItems(Ref ref, String catalogType) {
   final catalogService = ref.watch(catalogServiceProvider(catalogType));
   return catalogService.getMostPopularItems(catalogType);
-});
+}
 
 /// Provider for seasonal menus
-final seasonalMenusProvider =
-    FutureProvider.family<List<Map<String, dynamic>>, String>(
-        (ref, catalogType) {
+@riverpod
+Future<List<Map<String, dynamic>>> seasonalMenus(Ref ref, String catalogType) {
   final catalogService = ref.watch(catalogServiceProvider(catalogType));
   return catalogService.getActiveSeasonalMenus();
-});
+}

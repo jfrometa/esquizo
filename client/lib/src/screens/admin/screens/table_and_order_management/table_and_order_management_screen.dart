@@ -338,8 +338,8 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen>
             Expanded(
               child: Container(
                 width: double.infinity,
-                color:
-                    theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                color: theme.colorScheme.surfaceContainerHighest
+                    .withValues(alpha: 0.3),
                 child: product.imageUrl != null && product.imageUrl!.isNotEmpty
                     ? Image.network(
                         product.imageUrl!,
@@ -347,7 +347,8 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen>
                         errorBuilder: (context, error, stackTrace) => Icon(
                           Icons.restaurant,
                           size: 48,
-                          color: theme.colorScheme.primary.withOpacity(0.5),
+                          color:
+                              theme.colorScheme.primary.withValues(alpha: 0.5),
                         ),
                       )
                     : Image.asset(
@@ -362,7 +363,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen>
                 // Icon(
                 //     Icons.restaurant,
                 //     size: 48,
-                //     color: theme.colorScheme.primary.withOpacity(0.5),
+                //     color: theme.colorScheme.primary.withValues(alpha: 0.5),
                 //   ),
               ),
             ),
@@ -481,7 +482,8 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen>
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: _getStatusColor(_currentOrder.status).withOpacity(0.2),
+                  color: _getStatusColor(_currentOrder.status)
+                      .withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
@@ -506,13 +508,15 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen>
                       Icon(
                         Icons.shopping_cart_outlined,
                         size: 64,
-                        color: theme.colorScheme.onSurface.withOpacity(0.3),
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.3),
                       ),
                       const SizedBox(height: 16),
                       Text(
                         'No hay productos en este pedido',
                         style: theme.textTheme.titleMedium?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          color: theme.colorScheme.onSurface
+                              .withValues(alpha: 0.7),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -540,7 +544,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen>
             color: theme.colorScheme.surface,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 5,
                 offset: const Offset(0, -2),
               ),
@@ -958,7 +962,8 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen>
               Text(
                 '$itemCount ${itemCount == 1 ? 'producto' : 'productos'}',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onPrimaryContainer.withOpacity(0.8),
+                  color: theme.colorScheme.onPrimaryContainer
+                      .withValues(alpha: 0.8),
                 ),
               ),
             ],
@@ -1273,24 +1278,23 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen>
         customerCount: _customerCount,
         waiterNotes:
             _notesController.text.isEmpty ? null : _notesController.text,
-        isPaid: _currentOrder.isPaid ?? false,
+        isPaid: _currentOrder.isPaid,
         paidAt: _currentOrder.paidAt,
-        paymentMethod: _currentOrder.paymentMethod ?? '',
+        paymentMethod: _currentOrder.paymentMethod,
         tipAmount: _currentOrder.tipAmount ?? 0.0,
         cashierId: _currentOrder.cashierId,
         cashierName: _currentOrder.cashierName,
-        orderNumber: _currentOrder.orderNumber ??
-            'ORD-${DateTime.now().millisecondsSinceEpoch}',
-        email: _currentOrder.email ?? '',
-        userId: _currentOrder.userId ?? '',
-        orderType: _currentOrder.orderType ?? 'dine_in',
-        address: _currentOrder.address ?? '',
-        latitude: _currentOrder.latitude ?? '0.0',
-        longitude: _currentOrder.longitude ?? '0.0',
-        paymentStatus: _currentOrder.paymentStatus ?? 'pending',
+        orderNumber: _currentOrder.orderNumber,
+        email: _currentOrder.email,
+        userId: _currentOrder.userId,
+        orderType: _currentOrder.orderType,
+        address: _currentOrder.address,
+        latitude: _currentOrder.latitude,
+        longitude: _currentOrder.longitude,
+        paymentStatus: _currentOrder.paymentStatus,
         // timestamp: _currentOrder.timestamp ?? CloudFireStore.Timestamp.now(),
-        orderDate: _currentOrder.orderDate ?? DateTime.now(),
-        location: _currentOrder.location ?? <String, dynamic>{},
+        orderDate: _currentOrder.orderDate,
+        location: _currentOrder.location,
       );
       printService.printOrder(orderForPrint).then((_) {
         if (mounted) {
@@ -1552,14 +1556,14 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen>
                                             Icons.restaurant,
                                             size: 36,
                                             color: theme.colorScheme.primary
-                                                .withOpacity(0.5),
+                                                .withValues(alpha: 0.5),
                                           ),
                                         )
                                       : Icon(
                                           Icons.restaurant,
                                           size: 36,
                                           color: theme.colorScheme.primary
-                                              .withOpacity(0.5),
+                                              .withValues(alpha: 0.5),
                                         ),
                                 ),
 

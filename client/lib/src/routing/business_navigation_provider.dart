@@ -245,8 +245,7 @@ class CachedBusinessContext extends _$CachedBusinessContext {
 /// Provider for current business navigation info
 /// FIXED: Use ref.read for urlBusinessSlug to avoid circular dependency
 @riverpod
-BusinessNavigationInfo? currentBusinessNavigation(
-    CurrentBusinessNavigationRef ref) {
+BusinessNavigationInfo? currentBusinessNavigation(Ref ref) {
   final navigationState = ref.watch(businessNavigationControllerProvider);
 
   // FIXED: Use ref.read instead of ref.watch to break circular dependency
@@ -280,8 +279,8 @@ class BusinessNavigationInfo {
 /// Provider to check if navigation should be optimized (same business)
 /// FIXED: Use ref.read to avoid circular dependency with currentBusinessNavigationProvider
 @riverpod
-bool shouldOptimizeNavigation(ShouldOptimizeNavigationRef ref,
-    String targetBusinessSlug, String targetRoute) {
+bool shouldOptimizeNavigation(
+    Ref ref, String targetBusinessSlug, String targetRoute) {
   // Use ref.read instead of ref.watch to avoid circular rebuilds
   // This breaks the cycle: shouldOptimizeNavigation -> currentBusinessNavigation -> businessNavigationController
   final currentNavigation = ref.read(currentBusinessNavigationProvider);

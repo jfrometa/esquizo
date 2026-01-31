@@ -7,7 +7,7 @@ part of 'business_navigation_provider.dart';
 // **************************************************************************
 
 String _$currentBusinessNavigationHash() =>
-    r'7a0d78a2eb6ca611bbeca5569057246b1b5d5f2c';
+    r'bdb5436f3b4279b0389548613e5cf03accaee47c';
 
 /// Provider for current business navigation info
 /// FIXED: Use ref.read for urlBusinessSlug to avoid circular dependency
@@ -30,7 +30,7 @@ final currentBusinessNavigationProvider =
 typedef CurrentBusinessNavigationRef
     = AutoDisposeProviderRef<BusinessNavigationInfo?>;
 String _$shouldOptimizeNavigationHash() =>
-    r'3f4c7bfbac7b6094171baac3c67bccb2d342dcd1';
+    r'ae5b10e686831b581915115b60eec5b640be5565';
 
 /// Copied from Dart SDK
 class _SystemHash {

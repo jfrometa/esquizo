@@ -1,10 +1,12 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import 'package:flutter/foundation.dart';
-
+import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart'
     as auth_models;
+
+part 'subscription_repository.g.dart';
 
 // Common pagination state class
 class PaginationState<T> {
@@ -41,13 +43,12 @@ class PaginationState<T> {
 
 // Base repository for pagination
 abstract class BasePaginatedRepository<T> {
-  final FirebaseFirestore _firestore;
   final int pageSize;
 
   BasePaginatedRepository({
     FirebaseFirestore? firestore,
     this.pageSize = 10,
-  }) : _firestore = firestore ?? FirebaseFirestore.instance;
+  });
 
   CollectionReference get collection;
   T fromFirestore(DocumentSnapshot doc);
@@ -137,26 +138,28 @@ class OrdersRepository extends BasePaginatedRepository<auth_models.Order> {
 }
 
 // Providers
-final subscriptionsRepositoryProvider =
-    Provider<SubscriptionsRepository>((ref) {
+@riverpod
+SubscriptionsRepository subscriptionsRepository(Ref ref) {
   return SubscriptionsRepository();
-});
+}
 
-final ordersRepositoryProvider = Provider<OrdersRepository>((ref) {
+@riverpod
+OrdersRepository ordersRepository(Ref ref) {
   return OrdersRepository();
-});
+}
 
-// Pagination Controllers
-class PaginationController<T> extends StateNotifier<PaginationState<T>> {
-  final BasePaginatedRepository<T> repository;
-  final String userId;
+// Redundant PaginationController removed in favor of @riverpod Notifier classes below
 
-  PaginationController({
-    required this.repository,
-    required this.userId,
-  }) : super(PaginationState<T>(items: []));
+// Providers for pagination controllers
+@riverpod
+class SubscriptionsPagination extends _$SubscriptionsPagination {
+  @override
+  PaginationState<Subscription> build(String userId) {
+    return const PaginationState(items: []);
+  }
 
   Future<void> loadNextPage() async {
+    final repository = ref.read(subscriptionsRepositoryProvider);
     if (state.isLoading || !state.hasMore) return;
 
     state = state.copyWith(isLoading: true, error: null);
@@ -182,30 +185,46 @@ class PaginationController<T> extends StateNotifier<PaginationState<T>> {
   }
 
   Future<void> refresh() async {
-    state = PaginationState(items: []);
+    state = const PaginationState(items: []);
     await loadNextPage();
   }
 }
 
-// Providers for pagination controllers
-final subscriptionsPaginationProvider = StateNotifierProvider.family<
-    PaginationController<Subscription>,
-    PaginationState<Subscription>,
-    String>((ref, userId) {
-  final repository = ref.watch(subscriptionsRepositoryProvider);
-  return PaginationController<Subscription>(
-    repository: repository,
-    userId: userId,
-  );
-});
+@riverpod
+class OrdersPagination extends _$OrdersPagination {
+  @override
+  PaginationState<auth_models.Order> build(String userId) {
+    return const PaginationState(items: []);
+  }
 
-final ordersPaginationProvider = StateNotifierProvider.family<
-    PaginationController<auth_models.Order>,
-    PaginationState<auth_models.Order>,
-    String>((ref, userId) {
-  final repository = ref.watch(ordersRepositoryProvider);
-  return PaginationController<auth_models.Order>(
-    repository: repository,
-    userId: userId,
-  );
-});
+  Future<void> loadNextPage() async {
+    final repository = ref.read(ordersRepositoryProvider);
+    if (state.isLoading || !state.hasMore) return;
+
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      final newState = await repository.fetchPage(
+        userId: userId,
+        lastDocument: state.lastDocument,
+      );
+
+      state = state.copyWith(
+        items: [...state.items, ...newState.items],
+        isLoading: false,
+        hasMore: newState.hasMore,
+        lastDocument: newState.lastDocument,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString(),
+      );
+    }
+  }
+
+  Future<void> refresh() async {
+    state = const PaginationState(items: []);
+    await loadNextPage();
+  }
+}

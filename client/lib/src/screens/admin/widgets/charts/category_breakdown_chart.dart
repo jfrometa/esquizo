@@ -186,7 +186,7 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart> {
             child: Container(
               decoration: BoxDecoration(
                 color: isTouched
-                    ? data.color.withOpacity(0.2)
+                    ? data.color.withValues(alpha: 0.2)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(4),
               ),

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:convert';
 
 // CartItem Model
@@ -225,7 +226,7 @@ List<CartItem> deserializeCart(String jsonString) {
     List<dynamic> jsonData = jsonDecode(jsonString);
     return jsonData.map((item) => CartItem.fromJson(item)).toList();
   } catch (e) {
-    print('Error decoding cart JSON: $e');
+    debugPrint('Error decoding cart JSON: $e');
     return [];
   }
 }

@@ -125,20 +125,20 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
         }
 
         // Update Riverpod state (do this less frequently)
-        ref.read(scrollStateProvider.notifier).state = newOffset;
+        ref.read(scrollStateProvider.notifier).set(newOffset);
       }
     }
   }
 
   void _handleFocusChanges() {
     final hasFocus = _searchFocusNode.hasFocus;
-    ref.read(searchFocusProvider.notifier).state = hasFocus;
+    ref.read(searchFocusProvider.notifier).set(hasFocus);
   }
 
   void _handleTabChange() {
     if (!_tabController.indexIsChanging) {
       // Update provider state when tab changes
-      ref.read(menuActiveTabProvider.notifier).state = _tabController.index;
+      ref.read(menuActiveTabProvider.notifier).set(_tabController.index);
     }
   }
 
@@ -216,7 +216,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       setState(() {
         _isSearching = isNowSearching;
       });
-      ref.read(searchQueryProvider.notifier).state = newText;
+      ref.read(searchQueryProvider.notifier).set(newText);
     }
   }
 
@@ -231,7 +231,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
         _isSearching = true;
       });
 
-      ref.read(searchQueryProvider.notifier).state = query;
+      ref.read(searchQueryProvider.notifier).set(query);
       FocusScope.of(context).unfocus();
       await HapticFeedback.selectionClick(); // lighter than mediumImpact
     } catch (e) {
@@ -253,7 +253,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
     setState(() {
       _isSearching = false;
     });
-    ref.read(searchQueryProvider.notifier).state = '';
+    ref.read(searchQueryProvider.notifier).set('');
   }
 
   Future<void> _handleFilterTap() async {
@@ -298,7 +298,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
     if (!mounted) return;
 
     // Enable tabs when search interface is dismissed
-    ref.read(tabsEnabledProvider.notifier).state = true;
+    ref.read(tabsEnabledProvider.notifier).set(true);
 
     // Position the bottom sheet below the app bar
     final appBarHeight =
@@ -318,7 +318,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
           builder: (context, scrollController) {
             // Disable tabs while search is active
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              ref.read(tabsEnabledProvider.notifier).state = false;
+              ref.read(tabsEnabledProvider.notifier).set(false);
             });
 
             return MenuSearchInterface(
@@ -341,7 +341,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       ),
     ).then((_) {
       // Re-enable tabs when search is dismissed
-      ref.read(tabsEnabledProvider.notifier).state = true;
+      ref.read(tabsEnabledProvider.notifier).set(true);
     });
   }
 
@@ -519,8 +519,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                           key: _tabBarKey,
                           tabController: _tabController,
                           onTabChanged: (index) {
-                            ref.read(menuActiveTabProvider.notifier).state =
-                                index;
+                            ref.read(menuActiveTabProvider.notifier).set(index);
                           },
                         ),
                       ),

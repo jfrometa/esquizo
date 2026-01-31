@@ -10,8 +10,6 @@ class KakoText extends StatelessWidget {
   final String data;
 
   // Pass-through all the properties of the standard Text widget.
-  @override
-  final Key? key;
   final TextStyle? style;
   final StrutStyle? strutStyle;
   final TextAlign? textAlign;
@@ -19,7 +17,7 @@ class KakoText extends StatelessWidget {
   final Locale? locale;
   final bool? softWrap;
   final TextOverflow? overflow;
-  final double? textScaleFactor;
+  final TextScaler? textScaler;
   final int? maxLines;
   final String? semanticsLabel;
   final TextWidthBasis? textWidthBasis;
@@ -28,7 +26,7 @@ class KakoText extends StatelessWidget {
 
   const KakoText(
     this.data, {
-    this.key,
+    super.key,
     this.style,
     this.strutStyle,
     this.textAlign,
@@ -36,13 +34,13 @@ class KakoText extends StatelessWidget {
     this.locale,
     this.softWrap,
     this.overflow,
-    this.textScaleFactor,
+    this.textScaler,
     this.maxLines,
     this.semanticsLabel,
     this.textWidthBasis,
     this.textHeightBehavior,
     this.selectionColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +54,7 @@ class KakoText extends StatelessWidget {
       textDirection: textDirection,
       // The 'locale' and 'softWrap' properties are not available on SelectableText
       // so we omit them. 'overflow' is handled by 'maxLines'.
-      textScaleFactor: textScaleFactor,
+      textScaler: textScaler,
       maxLines: maxLines,
       semanticsLabel: semanticsLabel,
       textWidthBasis: textWidthBasis,

@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/subscriptions/subscription_repository.dart';
-
 
 class PaginatedListView<T> extends ConsumerStatefulWidget {
-  final StateNotifierProvider<PaginationController<T>, PaginationState<T>>
-      provider;
+  final dynamic provider;
   final Widget Function(BuildContext, T) itemBuilder;
   final Widget? emptyWidget;
   final double? itemExtent;
@@ -49,6 +46,12 @@ class _PaginatedListViewState<T> extends ConsumerState<PaginatedListView<T>> {
 
   @override
   Widget build(BuildContext context) {
+    // The instruction included a line `final themeMode = ref.watch(appThemeModeProvider);` here.
+    // However, `appThemeModeProvider` is not defined in this file, and `themeMode` is not used
+    // within the PaginatedListView's build method. To maintain syntactic correctness and avoid
+    // introducing unused variables or undefined providers, this line is omitted.
+    // If `appThemeModeProvider` is intended to be used, it would need to be imported and utilized.
+
     final state = ref.watch(widget.provider);
 
     if (state.error != null) {

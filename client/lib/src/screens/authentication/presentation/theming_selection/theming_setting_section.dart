@@ -9,7 +9,7 @@ class ThemeSettingsSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final currentThemeMode = ref.watch(themeProvider);
+    final currentThemeMode = ref.watch(appThemeModeProvider);
     final user = ref.watch(firebaseAuthProvider).currentUser;
 
     if (user == null) {
@@ -165,7 +165,7 @@ class ThemeSettingsSection extends ConsumerWidget {
     if (user == null) return;
 
     try {
-      final themeNotifier = ref.read(themeProvider.notifier);
+      final themeNotifier = ref.read(appThemeModeProvider.notifier);
       await themeNotifier.setThemeMode(themeMode);
     } catch (e) {
       debugPrint('Error updating theme mode: $e');

@@ -238,7 +238,7 @@ class _CateringItemScreenState extends ConsumerState<CateringItemScreen> {
           Icon(
             Icons.restaurant_menu,
             size: 80,
-            color: colorScheme.primary.withOpacity(0.5),
+            color: colorScheme.primary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(

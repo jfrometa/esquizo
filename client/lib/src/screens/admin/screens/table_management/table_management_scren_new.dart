@@ -9,39 +9,6 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/forms/table_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/responsive_layout.dart';
 
-// Extension for string conversion
-extension TableStatusExtension on TableStatusEnum {
-  String get name {
-    switch (this) {
-      case TableStatusEnum.available:
-        return 'available';
-      case TableStatusEnum.occupied:
-        return 'occupied';
-      case TableStatusEnum.reserved:
-        return 'reserved';
-      case TableStatusEnum.maintenance:
-        return 'maintenance';
-      case TableStatusEnum.cleaning:
-        return 'cleaning';
-    }
-  }
-
-  static TableStatusEnum fromString(String status) {
-    switch (status) {
-      case 'available':
-        return TableStatusEnum.available;
-      case 'occupied':
-        return TableStatusEnum.occupied;
-      case 'reserved':
-        return TableStatusEnum.reserved;
-      case 'maintenance':
-        return TableStatusEnum.maintenance;
-      default:
-        return TableStatusEnum.available;
-    }
-  }
-}
-
 class TableManagementScreen extends ConsumerStatefulWidget {
   const TableManagementScreen({super.key});
 

@@ -16,7 +16,6 @@ class CateringManagementScreen extends ConsumerStatefulWidget {
 
 class _CateringManagementScreenState
     extends ConsumerState<CateringManagementScreen> {
-  int _selectedIndex = 0;
   final PageController _pageController = PageController();
 
   final List<_NavigationItem> _navigationItems = [

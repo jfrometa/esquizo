@@ -1,12 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart' as CloudFireStore;
+import 'package:cloud_firestore/cloud_firestore.dart' as cloud_firestore;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 
 // Staff Service Implementation with business relationship filtering
 class StaffService {
-  final CloudFireStore.FirebaseFirestore _firestore;
+  final cloud_firestore.FirebaseFirestore _firestore;
   final String _businessId;
 
   StaffService(this._firestore, this._businessId);
@@ -125,7 +126,7 @@ class StaffService {
 
       return staffMembers;
     } catch (e) {
-      print('Error fetching staff by role: $e');
+      debugPrint('Error fetching staff by role: $e');
       return [];
     }
   }
@@ -155,11 +156,11 @@ class StaffService {
         'businessId': _businessId,
         'userId': userId,
         'role': role.toString().split('.').last,
-        'createdAt': CloudFireStore.FieldValue.serverTimestamp(),
+        'createdAt': cloud_firestore.FieldValue.serverTimestamp(),
         'isActive': true,
       });
     } catch (e) {
-      print('Error adding staff to business: $e');
+      debugPrint('Error adding staff to business: $e');
       rethrow;
     }
   }
@@ -177,7 +178,7 @@ class StaffService {
         await doc.reference.delete();
       }
     } catch (e) {
-      print('Error removing staff from business: $e');
+      debugPrint('Error removing staff from business: $e');
       rethrow;
     }
   }
@@ -194,11 +195,11 @@ class StaffService {
       for (final doc in relationshipSnapshot.docs) {
         await doc.reference.update({
           'role': newRole.toString().split('.').last,
-          'updatedAt': CloudFireStore.FieldValue.serverTimestamp(),
+          'updatedAt': cloud_firestore.FieldValue.serverTimestamp(),
         });
       }
     } catch (e) {
-      print('Error updating staff role: $e');
+      debugPrint('Error updating staff role: $e');
       rethrow;
     }
   }

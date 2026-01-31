@@ -10,7 +10,6 @@ import 'package:starter_architecture_flutter_firebase/src/screens/authentication
 /// This consolidates functionality from multiple services to ensure consistency.
 class OrderService {
   final cloud_firestore.FirebaseFirestore _firestore;
-  final String _businessId;
   final cloud_firestore.CollectionReference _ordersCollection;
 
   /// Constructor with optional FirebaseFirestore instance for testing
@@ -18,7 +17,6 @@ class OrderService {
     cloud_firestore.FirebaseFirestore? firestore,
     required String businessId,
   })  : _firestore = firestore ?? cloud_firestore.FirebaseFirestore.instance,
-        _businessId = businessId,
         _ordersCollection =
             (firestore ?? cloud_firestore.FirebaseFirestore.instance)
                 .collection('businesses')

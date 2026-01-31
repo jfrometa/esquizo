@@ -8,15 +8,15 @@ import 'package:starter_architecture_flutter_firebase/src/core/catering/catering
 import 'package:starter_architecture_flutter_firebase/src/core/catalog/featured_dishes_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/catering-details-content.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/contact-section.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/content-sections.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/features-section.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/footer-section.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/hero-section.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/quick-access-section.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/reservation-section.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/restaurant-info-section.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/catering_details_content.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/contact_section.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/content_sections.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/features_section.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/footer_section.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/hero_section.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/quick_access_section.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/reservation_section.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/restaurant_info_section.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/widgets_mesa_redonda/list_items/size_aware_widget.dart';
 
 class ResponsiveLandingPage extends ConsumerStatefulWidget {

@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart' as CloudFireStore;
+import 'package:cloud_firestore/cloud_firestore.dart' as cloud_firestore;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catalog/catalog_service.dart';
@@ -12,13 +12,13 @@ import 'package:starter_architecture_flutter_firebase/src/screens/authentication
 
 /// Service for initializing example data for different business types
 class ExampleDataService {
-  final CloudFireStore.FirebaseFirestore _firestore;
+  final cloud_firestore.FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
 
   ExampleDataService({
-    CloudFireStore.FirebaseFirestore? firestore,
+    cloud_firestore.FirebaseFirestore? firestore,
     FirebaseAuth? auth,
-  })  : _firestore = firestore ?? CloudFireStore.FirebaseFirestore.instance,
+  })  : _firestore = firestore ?? cloud_firestore.FirebaseFirestore.instance,
         _auth = auth ?? FirebaseAuth.instance;
 
   /// Check if example data is already initialized for a business
@@ -142,7 +142,7 @@ class ExampleDataService {
       'userId': adminUser.uid,
       'role': 'owner',
       'email': adminUser.email,
-      'createdAt': CloudFireStore.FieldValue.serverTimestamp()
+      'createdAt': cloud_firestore.FieldValue.serverTimestamp()
     });
   }
 
@@ -339,8 +339,8 @@ class ExampleDataService {
         'imageUrl': item['imageUrl'],
         'isAvailable': item['isAvailable'],
         'metadata': item['metadata'],
-        'createdAt': CloudFireStore.FieldValue.serverTimestamp(),
-        'updatedAt': CloudFireStore.FieldValue.serverTimestamp(),
+        'createdAt': cloud_firestore.FieldValue.serverTimestamp(),
+        'updatedAt': cloud_firestore.FieldValue.serverTimestamp(),
       });
     }
   }
@@ -546,8 +546,8 @@ class ExampleDataService {
         'imageUrl': item['imageUrl'],
         'isAvailable': item['isAvailable'],
         'metadata': item['metadata'],
-        'createdAt': CloudFireStore.FieldValue.serverTimestamp(),
-        'updatedAt': CloudFireStore.FieldValue.serverTimestamp(),
+        'createdAt': cloud_firestore.FieldValue.serverTimestamp(),
+        'updatedAt': cloud_firestore.FieldValue.serverTimestamp(),
       });
     }
 
@@ -693,8 +693,8 @@ class ExampleDataService {
         'imageUrl': item['imageUrl'],
         'isAvailable': item['isAvailable'],
         'metadata': item['metadata'],
-        'createdAt': CloudFireStore.FieldValue.serverTimestamp(),
-        'updatedAt': CloudFireStore.FieldValue.serverTimestamp(),
+        'createdAt': cloud_firestore.FieldValue.serverTimestamp(),
+        'updatedAt': cloud_firestore.FieldValue.serverTimestamp(),
       });
     }
   }
@@ -981,7 +981,7 @@ class ExampleDataService {
           .doc(bookingId)
           .set({
         ...reservation.toFirestore(),
-        'checkOutDate': CloudFireStore.Timestamp.fromDate(checkOutDate),
+        'checkOutDate': cloud_firestore.Timestamp.fromDate(checkOutDate),
         'orderId': orderId,
         'numberOfNights': checkOutDate.difference(checkInDate).inDays,
       });

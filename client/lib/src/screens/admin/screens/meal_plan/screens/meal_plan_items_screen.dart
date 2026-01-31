@@ -565,56 +565,56 @@ class _MealPlanItemsScreenState extends ConsumerState<MealPlanItemsScreen> {
     );
   }
 
-  void _showHelpDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Meal Plan Items Help'),
-        content: const SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'About Meal Plan Items',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Meal plan items are the dishes or products that can be consumed as part of a meal plan. When creating a meal plan, you can specify which items are available for that plan.',
-              ),
-              SizedBox(height: 16),
-              Text(
-                'Managing Items',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              SizedBox(height: 8),
-              Text(
-                '• Create new items with the + button\n'
-                '• Edit items by clicking the edit icon\n'
-                '• Toggle availability to make items available or unavailable\n'
-                '• Filter items by category or search for specific items',
-              ),
-              SizedBox(height: 16),
-              Text(
-                'Usage in Meal Plans',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              SizedBox(height: 8),
-              Text(
-                  'When a customer uses a meal plan, they can only redeem items that are allowed in their specific plan. Make sure to add the relevant items to each meal plan.'),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Got it'),
-          ),
-        ],
-      ),
-    );
-  }
+  // void _showHelpDialog() {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => AlertDialog(
+  //       title: const Text('Meal Plan Items Help'),
+  //       content: const SingleChildScrollView(
+  //         child: Column(
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           mainAxisSize: MainAxisSize.min,
+  //           children: [
+  //             Text(
+  //               'About Meal Plan Items',
+  //               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+  //             ),
+  //             SizedBox(height: 8),
+  //             Text(
+  //               'Meal plan items are the dishes or products that can be consumed as part of a meal plan. When creating a meal plan, you can specify which items are available for that plan.',
+  //             ),
+  //             SizedBox(height: 16),
+  //             Text(
+  //               'Managing Items',
+  //               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+  //             ),
+  //             SizedBox(height: 8),
+  //             Text(
+  //               '• Create new items with the + button\n'
+  //               '• Edit items by clicking the edit icon\n'
+  //               '• Toggle availability to make items available or unavailable\n'
+  //               '• Filter items by category or search for specific items',
+  //             ),
+  //             SizedBox(height: 16),
+  //             Text(
+  //               'Usage in Meal Plans',
+  //               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+  //             ),
+  //             SizedBox(height: 8),
+  //             Text(
+  //                 'When a customer uses a meal plan, they can only redeem items that are allowed in their specific plan. Make sure to add the relevant items to each meal plan.'),
+  //           ],
+  //         ),
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.pop(context),
+  //           child: const Text('Got it'),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   // CRUD Operations
   Future<void> _createItem(MealPlanItem item) async {

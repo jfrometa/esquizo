@@ -215,7 +215,7 @@ class MealPlanOrderDetailScreen extends ConsumerWidget {
                           ),
                         ),
                       Text(
-                        'Qty: ${item.quantity ?? 1}',
+                        'Qty: ${item.quantity}',
                         style: textTheme.bodyMedium,
                       ),
                     ],

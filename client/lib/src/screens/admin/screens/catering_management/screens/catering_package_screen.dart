@@ -123,7 +123,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                     ...categories.map(
                       (category) => DropdownMenuItem<String?>(
                         value: category.id,
-                        child: Text(category.name ?? 'Unnamed Category'),
+                        child: Text(category.name),
                       ),
                     ),
                   ],
@@ -161,7 +161,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
           Icon(
             Icons.restaurant_menu,
             size: 80,
-            color: colorScheme.primary.withOpacity(0.5),
+            color: colorScheme.primary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -261,13 +261,13 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      package.name ?? 'Unnamed Package',
+                                      package.name,
                                       style: const TextStyle(
                                           fontWeight: FontWeight.bold),
                                     ),
-                                    if ((package.description ?? '').isNotEmpty)
+                                    if (package.description.isNotEmpty)
                                       Text(
-                                        package.description ?? '',
+                                        package.description,
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodySmall,
@@ -293,7 +293,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                               children: categories.map((category) {
                                 return Chip(
                                   label: Text(
-                                    category.name ?? 'Unnamed Category',
+                                    category.name,
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: colorScheme.onPrimaryContainer,
@@ -315,8 +315,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                                     .read(
                                         unifiedCateringPackageRepositoryProvider
                                             .notifier)
-                                    .togglePackageStatus(
-                                        package.id ?? '', value);
+                                    .togglePackageStatus(package.id, value);
                               },
                             ),
                           ),
@@ -404,7 +403,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                         ),
                       Expanded(
                         child: Text(
-                          package.name ?? 'Unnamed Package',
+                          package.name,
                           style:
                               Theme.of(context).textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
@@ -417,7 +416,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                           ref
                               .read(unifiedCateringPackageRepositoryProvider
                                   .notifier)
-                              .togglePackageStatus(package.id ?? '', value);
+                              .togglePackageStatus(package.id, value);
                         },
                       ),
                     ],
@@ -468,7 +467,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          package.description ?? '',
+                          package.description,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.bodySmall,
@@ -480,7 +479,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                           children: categories.map((category) {
                             return Chip(
                               label: Text(
-                                category.name ?? 'Unnamed Category',
+                                category.name,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: colorScheme.onPrimaryContainer,
@@ -595,7 +594,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    package.name ?? 'Unnamed Package',
+                                    package.name,
                                     style: Theme.of(context)
                                         .textTheme
                                         .titleMedium
@@ -616,7 +615,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              package.description ?? '',
+                              package.description,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: Theme.of(context).textTheme.bodyMedium,
@@ -656,7 +655,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
-                                    category.name ?? 'Unnamed Category',
+                                    category.name,
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: colorScheme.onPrimaryContainer,
@@ -691,7 +690,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
                               ref
                                   .read(unifiedCateringPackageRepositoryProvider
                                       .notifier)
-                                  .togglePackageStatus(package.id ?? '', value);
+                                  .togglePackageStatus(package.id, value);
                             },
                           ),
                           Text(
@@ -730,8 +729,7 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Package'),
-        content: Text(
-            'Are you sure you want to delete "${package.name ?? 'Unnamed Package'}"?'),
+        content: Text('Are you sure you want to delete "${package.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -745,12 +743,10 @@ class _CateringPackageScreenState extends ConsumerState<CateringPackageScreen> {
             onPressed: () {
               ref
                   .read(unifiedCateringPackageRepositoryProvider.notifier)
-                  .deletePackage(package.id ?? '');
+                  .deletePackage(package.id);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: Text(
-                        '${package.name ?? 'Unnamed Package'} has been deleted')),
+                SnackBar(content: Text('${package.name} has been deleted')),
               );
             },
             child: const Text('Delete'),

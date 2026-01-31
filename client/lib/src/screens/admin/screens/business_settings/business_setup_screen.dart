@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_setup_manager.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_features_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/local_storange/local_storage_service.dart';
 import 'dart:io';
@@ -64,7 +63,6 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
 
   // Business ID for updating
   String? _existingBusinessId;
-  BusinessConfig? _existingConfig;
 
   // Business features settings
   BusinessFeatures? _businessFeatures;
@@ -112,7 +110,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
         await businessConfigAsync.when(
           data: (config) {
             if (config != null) {
-              _existingConfig = config;
+              _existingBusinessId = config.id;
 
               // Set form fields from existing data
               setState(() {
@@ -1573,7 +1571,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
   }
 
   String _colorToHex(Color color) {
-    return '#${color.value.toRadixString(16).padLeft(8, '0').substring(2)}';
+    return '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}';
   }
 
   Widget _buildReviewItem({

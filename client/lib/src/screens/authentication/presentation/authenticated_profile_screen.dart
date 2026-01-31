@@ -17,7 +17,7 @@ class AuthenticatedProfileScreen extends ConsumerStatefulWidget {
   const AuthenticatedProfileScreen({super.key, required this.user});
 
   @override
-  _AuthenticatedProfileScreenState createState() =>
+  ConsumerState<AuthenticatedProfileScreen> createState() =>
       _AuthenticatedProfileScreenState();
 }
 

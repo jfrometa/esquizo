@@ -148,7 +148,7 @@
 //                                   style: theme.textTheme.bodySmall?.copyWith(
 //                                     color: isSelected
 //                                         ? theme.colorScheme.onPrimary.withValues(alpha: 0.8)
-//                                         : theme.colorScheme.onSurfaceVariant.withOpacity(0.8),
+//                                         : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
 //                                   ),
 //                                 ),
 //                               ],

@@ -38,7 +38,7 @@ class OrderStorageService {
       final orderData = {
         'email': email,
         'userId': _userId,
-        'orderType': item.foodType ?? 'Unknown',
+        'orderType': item.foodType,
         'status': 'pending',
         'orderDate': orderDate.toIso8601String(),
         'location': location,
@@ -134,7 +134,7 @@ class OrderStorageService {
       'deliveryTime': delivery['time'],
       'items': order.dishes.map((dish) => dish.toJson()).toList(),
       'paymentMethod': paymentMethod,
-      'totalAmount': order.totalPrice ?? 0.0,
+      'totalAmount': order.totalPrice,
       'businessId': _businessId, // Add business ID
       'timestamp': FieldValue.serverTimestamp(),
     };
@@ -166,7 +166,7 @@ class OrderStorageService {
       'eventTime': delivery['time'],
       'items': quote.dishes.map((dish) => dish.toJson()).toList(),
       'paymentMethod': paymentMethod,
-      'estimatedAmount': quote.totalPrice ?? 0.0,
+      'estimatedAmount': quote.totalPrice,
       'hasChef': quote.hasChef,
       'peopleCount': quote.peopleCount,
       'eventType': quote.eventType,

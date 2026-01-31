@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catalog/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/catering-section.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/events-section.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/meal-plans-section.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/menu-section.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/catering_section.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/events_section.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/meal_plans_section.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/landing/sections/menu_section.dart';
 
 class ContentSections extends StatelessWidget {
   final TabController tabController;
