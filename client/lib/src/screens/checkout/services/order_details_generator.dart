@@ -135,15 +135,15 @@ $itemsBuffer
     String itemsBuffer = '';
     double total = 0.0;
 
-    buffer.writeln(isQuote 
-      ? '*Detalles de la Cotización de Catering*:'
-      : '*Detalles de la Orden de Catering*:');
+    buffer.writeln(isQuote
+        ? '*Detalles de la Cotización de Catering*:'
+        : '*Detalles de la Orden de Catering*:');
     buffer.writeln(_generateContactInfo(contactInfo));
 
     for (var dish in order.dishes) {
-      final title = dish.title ?? 'Unknown Dish';
-      final quantity = dish.quantity ?? 0;
-      final price = dish.pricing ?? 0.0;
+      final title = dish.title;
+      final quantity = dish.quantity;
+      final price = dish.pricing;
       total += price * quantity;
       itemsBuffer += '$quantity x $title @ RD \$$price each\n';
     }

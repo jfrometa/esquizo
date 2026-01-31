@@ -468,14 +468,14 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen>
           .doc(uid)
           .set(userDoc);
 
+      if (!mounted) return;
+
       // Close the dialog
       Navigator.pop(context);
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User added successfully')),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('User added successfully')),
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -502,14 +502,14 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen>
           .doc(user.uid)
           .update(userDoc);
 
+      if (!mounted) return;
+
       // Close the dialog
       Navigator.pop(context);
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User updated successfully')),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('User updated successfully')),
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

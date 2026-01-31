@@ -147,6 +147,7 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
           );
         }
       } catch (e) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: $e'),

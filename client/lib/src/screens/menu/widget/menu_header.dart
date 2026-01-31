@@ -24,14 +24,15 @@ class MenuHeader extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final mediaQuery = MediaQuery.sizeOf(context);
     final isDarkMode = theme.brightness == Brightness.dark;
-    
+
     // Pre-calculate values outside layout calculations
     final headerParallaxOffset = scrollOffset * parallaxFactor;
     final headerScaleValue = 1.0 - (scrollOffset * 0.0005).clamp(0.0, 0.15);
     final headerBlurValue = (scrollOffset * 0.05).clamp(0.0, 10.0);
     final clampedParallaxOffset = headerParallaxOffset.clamp(0.0, 150.0);
     final alignmentValue = (0.5 - headerParallaxOffset / 500).clamp(-1.0, 1.0);
-    final progressWidth = mediaQuery.width * (scrollOffset / 1000).clamp(0.0, 1.0);
+    final progressWidth =
+        mediaQuery.width * (scrollOffset / 1000).clamp(0.0, 1.0);
 
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 100),
@@ -68,14 +69,15 @@ class MenuHeader extends StatelessWidget {
                     end: Alignment.bottomCenter,
                     colors: [
                       colorScheme.primary,
-                      colorScheme.primary.withOpacity(0.8),
+                      colorScheme.primary.withValues(alpha: 0.8),
                     ],
                   ),
                   image: DecorationImage(
-                    image: const AssetImage('assets/images/food_background.jpg'),
+                    image:
+                        const AssetImage('assets/images/food_background.jpg'),
                     fit: BoxFit.cover,
                     colorFilter: ColorFilter.mode(
-                      colorScheme.shadow.withOpacity(0.35),
+                      colorScheme.shadow.withValues(alpha: 0.35),
                       BlendMode.darken,
                     ),
                     alignment: Alignment(0, alignmentValue),
@@ -96,7 +98,7 @@ class MenuHeader extends StatelessWidget {
                 ),
                 child: const ColoredBox(color: Colors.transparent),
               ),
-            
+
             // Scroll progress indicator - wrap with RepaintBoundary
             Positioned(
               bottom: 0,
@@ -135,7 +137,7 @@ class MenuHeader extends StatelessWidget {
                       borderRadius: BorderRadius.circular(30),
                       boxShadow: [
                         BoxShadow(
-                          color: colorScheme.shadow.withOpacity(0.2),
+                          color: colorScheme.shadow.withValues(alpha: 0.2),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),

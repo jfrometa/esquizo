@@ -77,8 +77,7 @@ class HomeDishesSection extends ConsumerWidget {
                         'title': dish.name,
                         'description': dish.description,
                         'pricing': 'S/ ${dish.price.toStringAsFixed(2)}',
-                        'img': dish.imageUrl ??
-                            'assets/images/placeholder_food.png',
+                        'img': dish.imageUrl,
                         'offertPricing':
                             dish.metadata['offertPricing']?.toString(),
                         'ingredients': dish.metadata['ingredients'] ??
@@ -138,7 +137,7 @@ class HomeDishesSection extends ConsumerWidget {
                         'title': dish.name,
                         'description': dish.description,
                         'pricing': 'S/ ${dish.price.toStringAsFixed(2)}',
-                        'img': dish.imageUrl ?? 'assets/appIcon.png',
+                        'img': dish.imageUrl,
                         'offertPricing':
                             dish.metadata['offertPricing']?.toString(),
                         'ingredients': dish.metadata['ingredients'] ??

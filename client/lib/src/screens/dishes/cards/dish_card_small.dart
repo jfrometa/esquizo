@@ -62,7 +62,8 @@ class DishCardSmall extends StatelessWidget {
                         child: Icon(
                           Icons.restaurant,
                           size: 48,
-                          color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+                          color: colorScheme.onSurfaceVariant
+                              .withValues(alpha: 0.5),
                         ),
                       ),
                       if (bestSeller)
@@ -92,7 +93,8 @@ class DishCardSmall extends StatelessWidget {
                         child: Text(
                           description,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.7),
+                            color: theme.colorScheme.onSurface
+                                .withValues(alpha: 0.7),
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -162,7 +164,7 @@ class DishCardSmall extends StatelessWidget {
                 'S/ $price',
                 style: theme.textTheme.bodySmall?.copyWith(
                   decoration: TextDecoration.lineThrough,
-                  color: colorScheme.onSurface.withOpacity(0.6),
+                  color: colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
             Text(

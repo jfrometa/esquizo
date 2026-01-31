@@ -91,7 +91,8 @@ class ServiceFactory {
   // Create a table service for restaurant table management
   TableService createTableService() {
     // Use the base resource service with 'table' as the resource type
-    final resourceService = createResourceService('table');
+    // Use the base resource service with 'table' as the resource type
+    createResourceService('table');
     return TableService(restaurantId: businessId, businessId: businessId);
   }
 }

@@ -25,10 +25,10 @@ class PlanDetailsScreen extends ConsumerWidget {
     final colorScheme = theme.colorScheme;
     final screenSize = MediaQuery.of(context).size;
     final isTabletOrLarger = screenSize.width >= 600;
-    
+
     // Watch the meal plans stream
     final mealPlansAsync = ref.watch(mealPlansProvider);
-    
+
     // Use AsyncValue pattern to handle loading, error, and data states
     return mealPlansAsync.when(
       loading: () => Scaffold(
@@ -55,7 +55,8 @@ class PlanDetailsScreen extends ConsumerWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                      const Icon(Icons.error_outline,
+                          size: 48, color: Colors.red),
                       const SizedBox(height: 16),
                       Text(
                         'Failed to load meal plan',
@@ -123,7 +124,7 @@ class PlanDetailsScreen extends ConsumerWidget {
                     builder: (context, ref, _) {
                       final cartItems = ref.watch(mealOrderProvider);
                       if (cartItems.isEmpty) return const SizedBox.shrink();
-                      
+
                       return Positioned(
                         top: 8,
                         right: 8,
@@ -158,65 +159,69 @@ class PlanDetailsScreen extends ConsumerWidget {
           body: SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                return isTabletOrLarger 
-                    ? _buildTabletLayout(ref, context, mealPlan, planIcon, theme, colorScheme)
-                    : _buildMobileLayout(ref, context, mealPlan, planIcon, theme, colorScheme);
+                return isTabletOrLarger
+                    ? _buildTabletLayout(
+                        ref, context, mealPlan, planIcon, theme, colorScheme)
+                    : _buildMobileLayout(
+                        ref, context, mealPlan, planIcon, theme, colorScheme);
               },
             ),
           ),
-          bottomNavigationBar: !isTabletOrLarger ? SafeArea(
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 5,
-                    offset: const Offset(0, -1),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+          bottomNavigationBar: !isTabletOrLarger
+              ? SafeArea(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 5,
+                          offset: const Offset(0, -1),
+                        ),
+                      ],
+                    ),
+                    child: Row(
                       children: [
-                        Text(
-                          mealPlan.price,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.primary,
+                        Expanded(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                mealPlan.price,
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.primary,
+                                ),
+                              ),
+                              Text(
+                                '${mealPlan.totalMeals} meals included',
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                            ],
                           ),
                         ),
-                        Text(
-                          '${mealPlan.totalMeals} meals included',
-                          style: theme.textTheme.bodyMedium,
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: () => _addToCart(context, ref, mealPlan),
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: const Text(
+                              'Agregar al carrito',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: () => _addToCart(context, ref, mealPlan),
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: const Text(
-                        'Agregar al carrito',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ) : null,
+                )
+              : null,
         );
       },
     );
@@ -262,8 +267,8 @@ class PlanDetailsScreen extends ConsumerWidget {
 
   Widget _buildMobileLayout(
     WidgetRef ref,
-    BuildContext context, 
-    MealPlan mealPlan, 
+    BuildContext context,
+    MealPlan mealPlan,
     IconData planIcon,
     ThemeData theme,
     ColorScheme colorScheme,
@@ -292,7 +297,7 @@ class PlanDetailsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 24),
-          
+
           // Title and promo badge
           Row(
             children: [
@@ -309,7 +314,7 @@ class PlanDetailsScreen extends ConsumerWidget {
                   color: colorScheme.secondaryContainer,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 12.0, 
+                      horizontal: 12.0,
                       vertical: 6.0,
                     ),
                     child: Text(
@@ -324,22 +329,22 @@ class PlanDetailsScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 8),
-          
+
           // Short description
           Text(
             mealPlan.description,
             style: theme.textTheme.bodyLarge,
           ),
           const SizedBox(height: 24),
-          
+
           // Meal count indicator
           _buildMealCountIndicator(mealPlan, theme, colorScheme),
           const SizedBox(height: 24),
-          
+
           // Long description section
           Card(
             elevation: 0,
-            color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -364,11 +369,11 @@ class PlanDetailsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // How it works section
           Card(
             elevation: 0,
-            color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -393,11 +398,11 @@ class PlanDetailsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Features section
           Card(
             elevation: 0,
-            color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -414,30 +419,30 @@ class PlanDetailsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 12),
                   ...mealPlan.features.map((feature) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.check_circle_rounded,
-                          color: colorScheme.primary,
-                          size: 24,
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.check_circle_rounded,
+                              color: colorScheme.primary,
+                              size: 24,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                feature,
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            feature,
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )),
+                      )),
                 ],
               ),
             ),
           ),
-          
+
           // Bottom padding to clear the sticky button
           const SizedBox(height: 80),
         ],
@@ -447,8 +452,8 @@ class PlanDetailsScreen extends ConsumerWidget {
 
   Widget _buildTabletLayout(
     WidgetRef ref,
-    BuildContext context, 
-    MealPlan mealPlan, 
+    BuildContext context,
+    MealPlan mealPlan,
     IconData planIcon,
     ThemeData theme,
     ColorScheme colorScheme,
@@ -503,8 +508,10 @@ class PlanDetailsScreen extends ConsumerWidget {
                                           ),
                                           child: Text(
                                             'Mejor valor',
-                                            style: theme.textTheme.labelMedium?.copyWith(
-                                              color: colorScheme.onSecondaryContainer,
+                                            style: theme.textTheme.labelMedium
+                                                ?.copyWith(
+                                              color: colorScheme
+                                                  .onSecondaryContainer,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
@@ -513,7 +520,8 @@ class PlanDetailsScreen extends ConsumerWidget {
                                     const SizedBox(height: 8),
                                     Text(
                                       mealPlan.title,
-                                      style: theme.textTheme.headlineMedium?.copyWith(
+                                      style: theme.textTheme.headlineMedium
+                                          ?.copyWith(
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -523,7 +531,8 @@ class PlanDetailsScreen extends ConsumerWidget {
                                       style: theme.textTheme.bodyLarge,
                                     ),
                                     const SizedBox(height: 16),
-                                    _buildMealCountIndicator(mealPlan, theme, colorScheme),
+                                    _buildMealCountIndicator(
+                                        mealPlan, theme, colorScheme),
                                   ],
                                 ),
                               ),
@@ -537,9 +546,9 @@ class PlanDetailsScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
-                    
+
                     const SizedBox(width: 32),
-                    
+
                     // Right column with info box
                     Expanded(
                       flex: 2,
@@ -574,32 +583,38 @@ class PlanDetailsScreen extends ConsumerWidget {
                               const SizedBox(height: 24),
                               const Divider(),
                               const SizedBox(height: 24),
-                              
+
                               // Features quick summary
-                              ...mealPlan.features.take(4).map((feature) => Padding(
-                                padding: const EdgeInsets.only(bottom: 12.0),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Icon(
-                                      Icons.check_circle_rounded,
-                                      color: colorScheme.primary,
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text(
-                                        feature,
-                                        style: theme.textTheme.bodyMedium,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )),
-                              
+                              ...mealPlan.features
+                                  .take(4)
+                                  .map((feature) => Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 12.0),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Icon(
+                                              Icons.check_circle_rounded,
+                                              color: colorScheme.primary,
+                                              size: 20,
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Text(
+                                                feature,
+                                                style:
+                                                    theme.textTheme.bodyMedium,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      )),
+
                               if (mealPlan.features.length > 4)
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
                                   child: Text(
                                     '+ ${mealPlan.features.length - 4} more features',
                                     style: theme.textTheme.bodyMedium?.copyWith(
@@ -607,14 +622,16 @@ class PlanDetailsScreen extends ConsumerWidget {
                                     ),
                                   ),
                                 ),
-                                
+
                               const SizedBox(height: 32),
                               SizedBox(
                                 width: double.infinity,
                                 child: FilledButton(
-                                  onPressed: () => _addToCart(context, ref, mealPlan),
+                                  onPressed: () =>
+                                      _addToCart(context, ref, mealPlan),
                                   style: FilledButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 16),
                                   ),
                                   child: const Text(
                                     'Agregar al carrito',
@@ -633,9 +650,9 @@ class PlanDetailsScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Bottom sections
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -644,7 +661,8 @@ class PlanDetailsScreen extends ConsumerWidget {
                   Expanded(
                     child: Card(
                       elevation: 0,
-                      color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                      color: colorScheme.surfaceContainerHighest
+                          .withValues(alpha: 0.5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -669,14 +687,15 @@ class PlanDetailsScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(width: 24),
-                  
+
                   // Features section
                   Expanded(
                     child: Card(
                       elevation: 0,
-                      color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                      color: colorScheme.surfaceContainerHighest
+                          .withValues(alpha: 0.5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -693,25 +712,26 @@ class PlanDetailsScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: 16),
                             ...mealPlan.features.map((feature) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12.0),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Icon(
-                                    Icons.check_circle_rounded,
-                                    color: colorScheme.primary,
-                                    size: 20,
+                                  padding: const EdgeInsets.only(bottom: 12.0),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Icon(
+                                        Icons.check_circle_rounded,
+                                        color: colorScheme.primary,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          feature,
+                                          style: theme.textTheme.bodyMedium,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      feature,
-                                      style: theme.textTheme.bodyMedium,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )),
+                                )),
                           ],
                         ),
                       ),
@@ -726,13 +746,14 @@ class PlanDetailsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMealCountIndicator(MealPlan mealPlan, ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildMealCountIndicator(
+      MealPlan mealPlan, ThemeData theme, ColorScheme colorScheme) {
     // Calculate percentage of meals remaining
     final remainingPercentage = mealPlan.mealsRemaining / mealPlan.totalMeals;
-    
+
     return Card(
       elevation: 0,
-      color: colorScheme.primaryContainer.withOpacity(0.3),
+      color: colorScheme.primaryContainer.withValues(alpha: 0.3),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),

@@ -4,16 +4,16 @@ import 'package:url_launcher/url_launcher.dart';
 /// Enhanced Contact Section for the restaurant app
 class EnhancedContactSection extends StatelessWidget {
   const EnhancedContactSection({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final size = MediaQuery.sizeOf(context);
     final isMobile = size.width < 600;
-    
+
     return Container(
-      color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
       padding: EdgeInsets.symmetric(
         vertical: 60,
         horizontal: isMobile ? 16 : 32,
@@ -37,14 +37,14 @@ class EnhancedContactSection extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 40),
-          
+
           if (isMobile)
             _buildMobileContactLayout(context)
           else
             _buildDesktopContactLayout(context),
-          
+
           const SizedBox(height: 40),
-          
+
           // Social media
           Wrap(
             alignment: WrapAlignment.center,
@@ -72,11 +72,11 @@ class EnhancedContactSection extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildMobileContactLayout(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Column(
       children: [
         // Contact info cards
@@ -87,7 +87,7 @@ class EnhancedContactSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -101,7 +101,8 @@ class EnhancedContactSection extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer.withOpacity(0.3),
+                      color:
+                          colorScheme.primaryContainer.withValues(alpha: 0.3),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -134,14 +135,15 @@ class EnhancedContactSection extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 24),
-              
+
               // Email
               Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer.withOpacity(0.3),
+                      color:
+                          colorScheme.primaryContainer.withValues(alpha: 0.3),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -174,14 +176,15 @@ class EnhancedContactSection extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 24),
-              
+
               // Address
               Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer.withOpacity(0.3),
+                      color:
+                          colorScheme.primaryContainer.withValues(alpha: 0.3),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -218,9 +221,9 @@ class EnhancedContactSection extends StatelessWidget {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 32),
-        
+
         // Contact form
         Container(
           padding: const EdgeInsets.all(24),
@@ -229,7 +232,7 @@ class EnhancedContactSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -245,7 +248,7 @@ class EnhancedContactSection extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               // Name field
               TextField(
                 decoration: InputDecoration(
@@ -257,7 +260,7 @@ class EnhancedContactSection extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Email field
               TextField(
                 decoration: InputDecoration(
@@ -269,7 +272,7 @@ class EnhancedContactSection extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Subject field
               TextField(
                 decoration: InputDecoration(
@@ -281,7 +284,7 @@ class EnhancedContactSection extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Message field
               TextField(
                 decoration: InputDecoration(
@@ -295,7 +298,7 @@ class EnhancedContactSection extends StatelessWidget {
                 maxLines: 5,
               ),
               const SizedBox(height: 24),
-              
+
               // Submit button
               SizedBox(
                 width: double.infinity,
@@ -316,11 +319,11 @@ class EnhancedContactSection extends StatelessWidget {
       ],
     );
   }
-  
+
   Widget _buildDesktopContactLayout(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -334,7 +337,7 @@ class EnhancedContactSection extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -351,14 +354,15 @@ class EnhancedContactSection extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Phone
                 Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: colorScheme.primaryContainer.withOpacity(0.3),
+                        color:
+                            colorScheme.primaryContainer.withValues(alpha: 0.3),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -391,14 +395,15 @@ class EnhancedContactSection extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Email
                 Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: colorScheme.primaryContainer.withOpacity(0.3),
+                        color:
+                            colorScheme.primaryContainer.withValues(alpha: 0.3),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -431,14 +436,15 @@ class EnhancedContactSection extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Address
                 Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: colorScheme.primaryContainer.withOpacity(0.3),
+                        color:
+                            colorScheme.primaryContainer.withValues(alpha: 0.3),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -473,12 +479,13 @@ class EnhancedContactSection extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Business hours
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                    color: colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -501,11 +508,14 @@ class EnhancedContactSection extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      _buildBusinessHourRow(context, 'Lunes - Viernes', '11:00 AM - 10:00 PM'),
+                      _buildBusinessHourRow(
+                          context, 'Lunes - Viernes', '11:00 AM - 10:00 PM'),
                       const SizedBox(height: 8),
-                      _buildBusinessHourRow(context, 'Sábado', '10:00 AM - 11:00 PM'),
+                      _buildBusinessHourRow(
+                          context, 'Sábado', '10:00 AM - 11:00 PM'),
                       const SizedBox(height: 8),
-                      _buildBusinessHourRow(context, 'Domingo', '10:00 AM - 9:00 PM'),
+                      _buildBusinessHourRow(
+                          context, 'Domingo', '10:00 AM - 9:00 PM'),
                     ],
                   ),
                 ),
@@ -513,9 +523,9 @@ class EnhancedContactSection extends StatelessWidget {
             ),
           ),
         ),
-        
+
         const SizedBox(width: 24),
-        
+
         // Contact form
         Expanded(
           flex: 1,
@@ -526,7 +536,7 @@ class EnhancedContactSection extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -542,7 +552,7 @@ class EnhancedContactSection extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Name field
                 TextField(
                   decoration: InputDecoration(
@@ -554,7 +564,7 @@ class EnhancedContactSection extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Email field
                 TextField(
                   decoration: InputDecoration(
@@ -566,7 +576,7 @@ class EnhancedContactSection extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Subject field
                 TextField(
                   decoration: InputDecoration(
@@ -578,7 +588,7 @@ class EnhancedContactSection extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Message field
                 TextField(
                   decoration: InputDecoration(
@@ -592,7 +602,7 @@ class EnhancedContactSection extends StatelessWidget {
                   maxLines: 5,
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Submit button
                 SizedBox(
                   width: double.infinity,
@@ -622,8 +632,8 @@ class EnhancedContactSection extends StatelessWidget {
         Text(
           day,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         Text(
           hours,
@@ -632,7 +642,7 @@ class EnhancedContactSection extends StatelessWidget {
       ],
     );
   }
-  
+
   Widget _buildSocialButton(
     BuildContext context, {
     required IconData icon,
@@ -640,7 +650,7 @@ class EnhancedContactSection extends StatelessWidget {
   }) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return ElevatedButton.icon(
       onPressed: () {},
       icon: Icon(icon),
@@ -652,10 +662,11 @@ class EnhancedContactSection extends StatelessWidget {
       ),
     );
   }
-  
+
   void _launchUrl(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
     }
   }
 }

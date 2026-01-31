@@ -1,7 +1,6 @@
 // COMPONENT 3: EnhancedCateringItemCard
 import 'package:flutter/material.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_item_model.dart';  
-
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_item_model.dart';
 
 // COMPONENT 3: EnhancedCateringItemCard
 class EnhancedCateringItemCard extends StatefulWidget {
@@ -21,17 +20,18 @@ class EnhancedCateringItemCard extends StatefulWidget {
   });
 
   @override
-  State<EnhancedCateringItemCard> createState() => _EnhancedCateringItemCardState();
+  State<EnhancedCateringItemCard> createState() =>
+      _EnhancedCateringItemCardState();
 }
 
 class _EnhancedCateringItemCardState extends State<EnhancedCateringItemCard> {
   bool _expanded = false;
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Card(
       elevation: widget.isSelected ? 3 : 1,
       clipBehavior: Clip.antiAlias,
@@ -71,7 +71,7 @@ class _EnhancedCateringItemCardState extends State<EnhancedCateringItemCard> {
                           ),
                           if (widget.isSelected)
                             Container(
-                              color: colorScheme.primary.withOpacity(0.3),
+                              color: colorScheme.primary.withValues(alpha: 0.3),
                               child: Center(
                                 child: CircleAvatar(
                                   backgroundColor: colorScheme.primary,
@@ -90,7 +90,7 @@ class _EnhancedCateringItemCardState extends State<EnhancedCateringItemCard> {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  
+
                   // Content
                   Expanded(
                     child: Column(
@@ -116,7 +116,7 @@ class _EnhancedCateringItemCardState extends State<EnhancedCateringItemCard> {
                           ],
                         ),
                         const SizedBox(height: 8),
-                        
+
                         // Description
                         Text(
                           widget.item.description,
@@ -127,7 +127,7 @@ class _EnhancedCateringItemCardState extends State<EnhancedCateringItemCard> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 8),
-                        
+
                         // Tags row
                         Wrap(
                           spacing: 8,
@@ -139,7 +139,7 @@ class _EnhancedCateringItemCardState extends State<EnhancedCateringItemCard> {
                               colorScheme.secondary,
                               colorScheme.onSecondary,
                             ),
-                            
+
                             // Portions tag
                             _buildTag(
                               '${widget.item.peopleCount} porciones',
@@ -156,15 +156,17 @@ class _EnhancedCateringItemCardState extends State<EnhancedCateringItemCard> {
               ),
             ),
           ),
-          
+
           // Expandable section (details and quantity selector)
           AnimatedCrossFade(
             firstChild: const SizedBox(height: 0),
             secondChild: _buildExpandedSection(colorScheme, theme),
-            crossFadeState: _expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            crossFadeState: _expanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
             duration: const Duration(milliseconds: 300),
           ),
-          
+
           // Controls area (always visible)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -184,14 +186,18 @@ class _EnhancedCateringItemCardState extends State<EnhancedCateringItemCard> {
                     });
                   },
                 ),
-                
+
                 // Quantity controls
                 Row(
                   children: [
                     IconButton(
                       icon: Icon(
-                        widget.isSelected ? Icons.remove_circle : Icons.add_circle_outline,
-                        color: widget.isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                        widget.isSelected
+                            ? Icons.remove_circle
+                            : Icons.add_circle_outline,
+                        color: widget.isSelected
+                            ? colorScheme.primary
+                            : colorScheme.onSurfaceVariant,
                       ),
                       onPressed: () {
                         if (widget.isSelected) {
@@ -201,7 +207,6 @@ class _EnhancedCateringItemCardState extends State<EnhancedCateringItemCard> {
                         }
                       },
                     ),
-                    
                     if (widget.isSelected)
                       Row(
                         children: [
@@ -217,7 +222,8 @@ class _EnhancedCateringItemCardState extends State<EnhancedCateringItemCard> {
                               color: colorScheme.primary,
                             ),
                             onPressed: () {
-                              widget.onQuantityChanged(widget.currentQuantity + 1);
+                              widget.onQuantityChanged(
+                                  widget.currentQuantity + 1);
                             },
                           ),
                         ],
@@ -231,22 +237,22 @@ class _EnhancedCateringItemCardState extends State<EnhancedCateringItemCard> {
       ),
     );
   }
-  
+
   Widget _buildExpandedSection(ColorScheme colorScheme, ThemeData theme) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         border: Border(
-          top: BorderSide(color: colorScheme.outline.withOpacity(0.2)),
-          bottom: BorderSide(color: colorScheme.outline.withOpacity(0.2)),
+          top: BorderSide(color: colorScheme.outline.withValues(alpha: 0.2)),
+          bottom: BorderSide(color: colorScheme.outline.withValues(alpha: 0.2)),
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 12),
-          
+
           // Ingredients
           if (widget.item.ingredients.isNotEmpty) ...[
             Text(
@@ -264,7 +270,7 @@ class _EnhancedCateringItemCardState extends State<EnhancedCateringItemCard> {
             ),
             const SizedBox(height: 16),
           ],
-          
+
           // Special requests
           Text(
             'Solicitudes especiales:',
@@ -273,7 +279,7 @@ class _EnhancedCateringItemCardState extends State<EnhancedCateringItemCard> {
             ),
           ),
           const SizedBox(height: 8),
-          
+
           TextField(
             controller: widget.sideRequestController,
             decoration: InputDecoration(
@@ -291,13 +297,13 @@ class _EnhancedCateringItemCardState extends State<EnhancedCateringItemCard> {
             maxLines: 2,
             style: theme.textTheme.bodyMedium,
           ),
-          
+
           const SizedBox(height: 12),
         ],
       ),
     );
   }
-  
+
   Widget _buildTag(
     String text,
     IconData icon,
@@ -307,7 +313,7 @@ class _EnhancedCateringItemCardState extends State<EnhancedCateringItemCard> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: backgroundColor.withOpacity(0.2),
+        color: backgroundColor.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(

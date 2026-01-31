@@ -37,9 +37,6 @@ void main() {
     });
 
     test('Cached business context should optimize repeated requests', () {
-      final cachedProvider =
-          container.read(cachedBusinessContextProvider('kako').notifier);
-
       // Should be null initially
       expect(container.read(cachedBusinessContextProvider('kako')), isNull);
 

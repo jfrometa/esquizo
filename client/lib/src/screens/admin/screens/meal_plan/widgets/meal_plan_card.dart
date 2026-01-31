@@ -4,13 +4,12 @@ import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/subscriptions/meal_plan_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/plans/plans.dart';
 
-
 class AdminMealPlanCard extends ConsumerWidget {
   final MealPlan mealPlan;
   final VoidCallback onTap;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
-  
+
   const AdminMealPlanCard({
     super.key,
     required this.mealPlan,
@@ -18,11 +17,11 @@ class AdminMealPlanCard extends ConsumerWidget {
     required this.onEdit,
     required this.onDelete,
   });
-  
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    
+
     return Card(
       clipBehavior: Clip.antiAlias,
       elevation: 2,
@@ -35,7 +34,7 @@ class AdminMealPlanCard extends ConsumerWidget {
             // Header with status indicator
             Container(
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withOpacity(0.1),
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
                 borderRadius: const BorderRadius.vertical(
                   bottom: Radius.circular(8),
                 ),
@@ -57,7 +56,7 @@ class AdminMealPlanCard extends ConsumerWidget {
                 ],
               ),
             ),
-            
+
             // Image
             if (mealPlan.img.isNotEmpty)
               AspectRatio(
@@ -87,7 +86,7 @@ class AdminMealPlanCard extends ConsumerWidget {
                   ),
                 ),
               ),
-            
+
             // Content
             Padding(
               padding: const EdgeInsets.all(16),
@@ -112,7 +111,8 @@ class AdminMealPlanCard extends ConsumerWidget {
                             '\$${mealPlan.originalPrice.toStringAsFixed(2)}',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               decoration: TextDecoration.lineThrough,
-                              color: theme.colorScheme.onSurface.withOpacity(0.6),
+                              color: theme.colorScheme.onSurface
+                                  .withValues(alpha: 0.6),
                             ),
                           ),
                         ),
@@ -137,9 +137,9 @@ class AdminMealPlanCard extends ConsumerWidget {
                         ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Description
                   Text(
                     mealPlan.description,
@@ -147,9 +147,9 @@ class AdminMealPlanCard extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodyMedium,
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Meal count
                   Row(
                     children: [
@@ -165,9 +165,9 @@ class AdminMealPlanCard extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Category
                   if (mealPlan.categoryName.isNotEmpty)
                     Row(
@@ -184,9 +184,9 @@ class AdminMealPlanCard extends ConsumerWidget {
                         ),
                       ],
                     ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Owner info if available
                   if (mealPlan.ownerName.isNotEmpty)
                     Row(
@@ -203,9 +203,9 @@ class AdminMealPlanCard extends ConsumerWidget {
                         ),
                       ],
                     ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Expiry date if set
                   if (mealPlan.expiryDate != null)
                     Row(
@@ -213,27 +213,29 @@ class AdminMealPlanCard extends ConsumerWidget {
                         Icon(
                           Icons.calendar_today,
                           size: 16,
-                          color: mealPlan.isExpired 
-                              ? theme.colorScheme.error 
+                          color: mealPlan.isExpired
+                              ? theme.colorScheme.error
                               : theme.colorScheme.primary,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           'Expires: ${DateFormat.yMMMd().format(mealPlan.expiryDate!)}',
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: mealPlan.isExpired ? theme.colorScheme.error : null,
+                            color: mealPlan.isExpired
+                                ? theme.colorScheme.error
+                                : null,
                           ),
                         ),
                       ],
                     ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Progress bar for meals used
                   _buildMealProgressBar(context),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Action buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -241,21 +243,26 @@ class AdminMealPlanCard extends ConsumerWidget {
                       // Toggle availability button
                       IconButton(
                         icon: Icon(
-                          mealPlan.isAvailable ? Icons.visibility : Icons.visibility_off,
-                          color: mealPlan.isAvailable 
-                              ? theme.colorScheme.primary 
-                              : theme.colorScheme.onSurface.withOpacity(0.5),
+                          mealPlan.isAvailable
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: mealPlan.isAvailable
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurface
+                                  .withValues(alpha: 0.5),
                         ),
                         onPressed: () => _toggleAvailability(context, ref),
-                        tooltip: mealPlan.isAvailable ? 'Mark as unavailable' : 'Mark as available',
+                        tooltip: mealPlan.isAvailable
+                            ? 'Mark as unavailable'
+                            : 'Mark as available',
                       ),
-                      
+
                       IconButton(
                         icon: const Icon(Icons.edit),
                         onPressed: onEdit,
                         tooltip: 'Edit',
                       ),
-                      
+
                       IconButton(
                         icon: Icon(
                           Icons.delete,
@@ -274,12 +281,12 @@ class AdminMealPlanCard extends ConsumerWidget {
       ),
     );
   }
-  
+
   Widget _buildStatusIndicator(BuildContext context) {
     final theme = Theme.of(context);
     final String statusText;
     final Color statusColor;
-    
+
     if (!mealPlan.isAvailable) {
       statusText = 'Unavailable';
       statusColor = Colors.grey;
@@ -302,11 +309,11 @@ class AdminMealPlanCard extends ConsumerWidget {
           break;
       }
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: statusColor.withOpacity(0.1),
+        color: statusColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: statusColor),
       ),
@@ -330,13 +337,13 @@ class AdminMealPlanCard extends ConsumerWidget {
       ),
     );
   }
-  
+
   Widget _buildMealProgressBar(BuildContext context) {
     final theme = Theme.of(context);
     final totalMeals = mealPlan.totalMeals;
     final usedMeals = mealPlan.totalMeals - mealPlan.mealsRemaining;
     final progress = totalMeals > 0 ? usedMeals / totalMeals : 0.0;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -362,19 +369,20 @@ class AdminMealPlanCard extends ConsumerWidget {
       ],
     );
   }
-  
+
   Future<void> _toggleAvailability(BuildContext context, WidgetRef ref) async {
     try {
       final service = ref.read(mealPlanServiceProvider);
-      await service.toggleMealPlanAvailability(mealPlan.id, !mealPlan.isAvailable);
-      
+      await service.toggleMealPlanAvailability(
+          mealPlan.id, !mealPlan.isAvailable);
+
+      if (!context.mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            mealPlan.isAvailable
-                ? 'Meal plan marked as unavailable'
-                : 'Meal plan marked as available'
-          ),
+          content: Text(mealPlan.isAvailable
+              ? 'Meal plan marked as unavailable'
+              : 'Meal plan marked as available'),
         ),
       );
     } catch (e) {

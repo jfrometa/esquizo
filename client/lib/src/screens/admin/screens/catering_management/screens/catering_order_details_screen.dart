@@ -22,8 +22,6 @@ class CateringOrderDetailsScreen extends ConsumerStatefulWidget {
 
 class _CateringOrderDetailsScreenState
     extends ConsumerState<CateringOrderDetailsScreen> {
-  bool _isLoading = false;
-
   @override
   Widget build(BuildContext context) {
     final orderAsync = ref.watch(cateringOrderStreamProvider(widget.orderId));
@@ -1103,7 +1101,7 @@ class _CateringOrderDetailsScreenState
               final allowedStatuses = order.status.allowedTransitions;
               model.CateringOrderStatus? selectedStatus;
 
-              return StatefulBuilder(builder: (context, setState) {
+              return StatefulBuilder(builder: (context, dialogSetState) {
                 return AlertDialog(
                   title: const Text('Update Order Status'),
                   content: Column(
@@ -1146,7 +1144,7 @@ class _CateringOrderDetailsScreenState
                                 )
                                 .toList(),
                             onChanged: (value) {
-                              setState(() {
+                              dialogSetState(() {
                                 selectedStatus = value;
                               });
                             },
@@ -1165,10 +1163,6 @@ class _CateringOrderDetailsScreenState
                           : () async {
                               Navigator.pop(context);
 
-                              setState(() {
-                                _isLoading = true;
-                              });
-
                               try {
                                 await ref
                                     .read(
@@ -1177,7 +1171,8 @@ class _CateringOrderDetailsScreenState
                                         widget.orderId, selectedStatus!);
 
                                 if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
+                                  ScaffoldMessenger.of(this.context)
+                                      .showSnackBar(
                                     SnackBar(
                                       content: Text(
                                           'Status updated to ${selectedStatus!.displayName}'),
@@ -1187,19 +1182,14 @@ class _CateringOrderDetailsScreenState
                                 }
                               } catch (e) {
                                 if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
+                                  ScaffoldMessenger.of(this.context)
+                                      .showSnackBar(
                                     SnackBar(
                                       content: Text('Error: $e'),
                                       backgroundColor: Colors.red,
                                       behavior: SnackBarBehavior.floating,
                                     ),
                                   );
-                                }
-                              } finally {
-                                if (mounted) {
-                                  setState(() {
-                                    _isLoading = false;
-                                  });
                                 }
                               }
                             },
@@ -1245,7 +1235,7 @@ class _CateringOrderDetailsScreenState
               final paymentIdController =
                   TextEditingController(text: order.paymentId);
 
-              return StatefulBuilder(builder: (context, setState) {
+              return StatefulBuilder(builder: (context, dialogSetState) {
                 return AlertDialog(
                   title: const Text('Update Payment Status'),
                   content: Column(
@@ -1280,7 +1270,7 @@ class _CateringOrderDetailsScreenState
                               )
                               .toList(),
                           onChanged: (value) {
-                            setState(() {
+                            dialogSetState(() {
                               selectedStatus = value!;
                             });
                           },
@@ -1305,10 +1295,6 @@ class _CateringOrderDetailsScreenState
                       onPressed: () async {
                         Navigator.pop(context);
 
-                        setState(() {
-                          _isLoading = true;
-                        });
-
                         try {
                           await ref
                               .read(cateringOrderNotifierProvider.notifier)
@@ -1319,7 +1305,7 @@ class _CateringOrderDetailsScreenState
                               );
 
                           if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            ScaffoldMessenger.of(this.context).showSnackBar(
                               SnackBar(
                                 content: Text(
                                     'Payment status updated to ${_formatPaymentStatus(selectedStatus)}'),
@@ -1329,19 +1315,13 @@ class _CateringOrderDetailsScreenState
                           }
                         } catch (e) {
                           if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            ScaffoldMessenger.of(this.context).showSnackBar(
                               SnackBar(
                                 content: Text('Error: $e'),
                                 backgroundColor: Colors.red,
                                 behavior: SnackBarBehavior.floating,
                               ),
                             );
-                          }
-                        } finally {
-                          if (mounted) {
-                            setState(() {
-                              _isLoading = false;
-                            });
                           }
                         }
                       },

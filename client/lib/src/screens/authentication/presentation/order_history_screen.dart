@@ -26,7 +26,7 @@ class OrderHistoryList extends ConsumerWidget {
           children: [
             // Container(
             //   width: double.infinity,
-            //   color: ColorsPaletteRedonda.primary.withOpacity(0.1),
+            //   color: ColorsPaletteRedonda.primary.withValues(alpha: 0.1),
             //   padding: const EdgeInsets.all(16.0),
             //   child: Text(
             //     'Tus órdenes previas',

@@ -16,7 +16,7 @@ class ScaltonRoundedContainer extends StatelessWidget {
       height: height,
       width: width,
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.08),
+        color: Colors.black.withValues(alpha: 0.08),
         borderRadius: BorderRadius.all(Radius.circular(radious)),
       ),
     );

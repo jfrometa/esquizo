@@ -104,7 +104,7 @@ class _ColorPickerState extends State<ColorPicker> {
       ),
       child: Center(
         child: Text(
-          '#${_currentColor.value.toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}',
+          '#${_currentColor.toARGB32().toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}',
           style: TextStyle(
             color: _currentColor.computeLuminance() > 0.5
                 ? Colors.black
@@ -383,7 +383,7 @@ class _ColorPickerState extends State<ColorPicker> {
           final colorFamily = index ~/ 10;
           final shade = index % 10;
           final color = materialColors[colorFamily][shade];
-          
+
           return GestureDetector(
             onTap: () {
               setState(() {
@@ -452,7 +452,7 @@ class _ColorPickerState extends State<ColorPicker> {
               border: Border.all(color: Colors.white, width: 3),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
+                  color: Colors.black.withValues(alpha: 0.3),
                   blurRadius: 8,
                   spreadRadius: 1,
                 ),
@@ -502,17 +502,17 @@ class _ColorPickerState extends State<ColorPicker> {
       children: [
         const Text('Red'),
         Slider(
-          value: _currentColor.red.toDouble(),
+          value: _currentColor.r * 255,
           min: 0,
           max: 255,
           activeColor: Colors.red,
           onChanged: (value) {
             setState(() {
               _currentColor = Color.fromARGB(
-                _currentColor.alpha,
+                (_currentColor.a * 255).round(),
                 value.toInt(),
-                _currentColor.green,
-                _currentColor.blue,
+                (_currentColor.g * 255).round(),
+                (_currentColor.b * 255).round(),
               );
               _currentHsvColor = HSVColor.fromColor(_currentColor);
               widget.onColorChanged(_currentColor);
@@ -521,17 +521,17 @@ class _ColorPickerState extends State<ColorPicker> {
         ),
         const Text('Green'),
         Slider(
-          value: _currentColor.green.toDouble(),
+          value: _currentColor.g * 255,
           min: 0,
           max: 255,
           activeColor: Colors.green,
           onChanged: (value) {
             setState(() {
               _currentColor = Color.fromARGB(
-                _currentColor.alpha,
-                _currentColor.red,
+                (_currentColor.a * 255).round(),
+                (_currentColor.r * 255).round(),
                 value.toInt(),
-                _currentColor.blue,
+                (_currentColor.b * 255).round(),
               );
               _currentHsvColor = HSVColor.fromColor(_currentColor);
               widget.onColorChanged(_currentColor);
@@ -540,16 +540,16 @@ class _ColorPickerState extends State<ColorPicker> {
         ),
         const Text('Blue'),
         Slider(
-          value: _currentColor.blue.toDouble(),
+          value: _currentColor.b * 255,
           min: 0,
           max: 255,
           activeColor: Colors.blue,
           onChanged: (value) {
             setState(() {
               _currentColor = Color.fromARGB(
-                _currentColor.alpha,
-                _currentColor.red,
-                _currentColor.green,
+                (_currentColor.a * 255).round(),
+                (_currentColor.r * 255).round(),
+                (_currentColor.g * 255).round(),
                 value.toInt(),
               );
               _currentHsvColor = HSVColor.fromColor(_currentColor);
@@ -575,19 +575,19 @@ class HueWheelPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
-    
+
     // Draw hue wheel
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = radius;
-    
+
     for (int i = 0; i < 360; i++) {
       final color = HSVColor.fromAHSV(1.0, i.toDouble(), 1.0, 1.0).toColor();
       paint.color = color;
-      
+
       final startAngle = (i - 0.5) * pi / 180;
       final endAngle = (i + 0.5) * pi / 180;
-      
+
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius / 2),
         startAngle,
@@ -596,32 +596,32 @@ class HueWheelPainter extends CustomPainter {
         paint,
       );
     }
-    
+
     // Draw thumb
     final thumbAngle = hue * pi / 180;
     final thumbX = center.dx + cos(thumbAngle) * (radius / 2);
     final thumbY = center.dy + sin(thumbAngle) * (radius / 2);
     final thumbCenter = Offset(thumbX, thumbY);
-    
+
     final thumbPaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.fill;
-    
+
     canvas.drawCircle(thumbCenter, 5, thumbPaint);
-    
+
     final thumbBorderPaint = Paint()
       ..color = Colors.black
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
-    
+
     canvas.drawCircle(thumbCenter, 5, thumbBorderPaint);
   }
-  
+
   @override
   bool shouldRepaint(HueWheelPainter oldDelegate) {
     return oldDelegate.hue != hue;
   }
-  
+
   @override
   bool hitTest(Offset position) {
     return true;

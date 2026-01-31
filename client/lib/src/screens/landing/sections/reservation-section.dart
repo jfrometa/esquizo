@@ -135,7 +135,7 @@ class _ReservationSectionState extends State<ReservationSection> {
           Text(
             'Llena el formulario para reservar tu mesa en Kako',
             style: theme.textTheme.bodyLarge?.copyWith(
-              color: colorScheme.onSurface.withOpacity(0.7),
+              color: colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
           const SizedBox(height: 32),
@@ -151,7 +151,7 @@ class _ReservationSectionState extends State<ReservationSection> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: colorScheme.secondaryContainer.withOpacity(0.3),
+              color: colorScheme.secondaryContainer.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: colorScheme.secondaryContainer,

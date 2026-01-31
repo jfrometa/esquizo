@@ -147,7 +147,7 @@ class _CateringViewState extends ConsumerState<CateringView>
           labelColor: colorScheme.primary,
           unselectedLabelColor: colorScheme.onSurfaceVariant,
           indicatorColor: colorScheme.primary,
-          dividerColor: colorScheme.outline.withOpacity(0.2),
+          dividerColor: colorScheme.outline.withValues(alpha: 0.2),
           labelStyle: theme.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.bold,
           ),

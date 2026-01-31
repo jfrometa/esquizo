@@ -581,7 +581,7 @@ class AppTheme {
     return ChipThemeData(
       backgroundColor: colorScheme.surfaceContainerHighest,
       deleteIconColor: colorScheme.onSurfaceVariant,
-      disabledColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+      disabledColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
       selectedColor: colorScheme.primaryContainer,
       secondarySelectedColor: colorScheme.secondaryContainer,
       padding: const EdgeInsets.all(8),

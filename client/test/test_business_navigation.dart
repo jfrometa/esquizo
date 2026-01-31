@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 // Test script to verify business navigation behavior
 // Run with: dart run test_business_navigation.dart
 

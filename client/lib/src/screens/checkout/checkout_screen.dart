@@ -411,7 +411,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             width: isSelected ? 2 : 1,
           ),
           color: isSelected
-              ? colorScheme.primaryContainer.withOpacity(0.3)
+              ? colorScheme.primaryContainer.withValues(alpha: 0.3)
               : colorScheme.surface,
         ),
         child: Row(
@@ -690,7 +690,7 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         color: colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.1),
+            color: colorScheme.shadow.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 10,
             offset: const Offset(0, -3),
@@ -746,7 +746,6 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           _isProcessingOrder = true;
                         });
                         await _processOrder(
-                          context,
                           itemsToDisplay,
                           cateringOrder,
                           cateringQuote,
@@ -851,7 +850,6 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           _isProcessingOrder = true;
                         });
                         await _processOrder(
-                          context,
                           itemsToDisplay,
                           cateringOrder,
                           cateringQuote,
@@ -995,7 +993,6 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   Future<void> _processOrder(
-      BuildContext context,
       List<CartItem> items,
       CateringOrderItem? cateringOrder,
       CateringOrderItem? cateringQuote) async {
@@ -1008,6 +1005,8 @@ class CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     if (_validateFields()) {
       final contactInfo = await ContactInfoDialog.show(context);
       if (contactInfo == null || contactInfo.isEmpty) return;
+
+      if (!mounted) return;
 
       final processor = OrderProcessor(ref, context);
       final paymentMethod = _paymentMethods[_selectedPaymentMethod];

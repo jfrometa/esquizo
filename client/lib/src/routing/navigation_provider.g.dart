@@ -6,7 +6,7 @@ part of 'navigation_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$isAdminComputedHash() => r'5befb0c62c6f538d210dbe03d50ad56f1b4ce6a8';
+String _$isAdminComputedHash() => r'7f0b11512b4b097c8475f18df3f50e9f40fb6806';
 
 /// Computed provider that returns a simple boolean for admin status
 /// This prevents unnecessary rebuilds when watching AsyncValue
@@ -27,7 +27,7 @@ final isAdminComputedProvider = AutoDisposeProvider<bool>.internal(
 // ignore: unused_element
 typedef IsAdminComputedRef = AutoDisposeProviderRef<bool>;
 String _$allNavigationDestinationsHash() =>
-    r'5c2a1fb7fa7e521e5268b26bf459b0d95f932f23';
+    r'0550421dd5d4e22339d45f36ce529e1f5f13096f';
 
 /// Provider for all possible navigation destinations (including admin)
 ///
@@ -49,7 +49,7 @@ final allNavigationDestinationsProvider =
 typedef AllNavigationDestinationsRef
     = AutoDisposeProviderRef<List<NavigationDestinationItem>>;
 String _$navigationDestinationsHash() =>
-    r'67a940d92f0ecdcedd2fb08b8298b61c7d30380d';
+    r'cd294c4d91286c1ac40236566de6e8558d78f473';
 
 /// Provider for visible navigation destinations (optimized)
 ///
@@ -71,7 +71,7 @@ final navigationDestinationsProvider =
 typedef NavigationDestinationsRef
     = AutoDisposeProviderRef<List<NavigationDestinationItem>>;
 String _$findTabIndexFromPathHash() =>
-    r'd02f8656844c7dbe4261aad65441f7a138ab5058';
+    r'fd6a45796d1ffc11c5ff3dfdba74abc87c76e821';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -234,7 +234,7 @@ class _FindTabIndexFromPathProviderElement
   String get path => (origin as FindTabIndexFromPathProvider).path;
 }
 
-String _$selectedTabPathHash() => r'5b318f1dbb4ba23970dd7c8d0dc679fc82b3351e';
+String _$selectedTabPathHash() => r'4f1012b5f12b351a8655f9f7b1d1e38856b07825';
 
 /// Provider for the current selected tab path
 ///
@@ -253,7 +253,7 @@ final selectedTabPathProvider = AutoDisposeProvider<String>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SelectedTabPathRef = AutoDisposeProviderRef<String>;
-String _$isAdminPathHash() => r'9db287a7bc1856dd06a8b9bf974d8c734f9f2bda';
+String _$isAdminPathHash() => r'6e4416640f1eb113cd09dacb962f15038b47b9b8';
 
 /// Check if the current path is an admin path
 ///

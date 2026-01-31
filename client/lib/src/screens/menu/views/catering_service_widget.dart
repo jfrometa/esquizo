@@ -118,7 +118,8 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                     height: 4,
                     margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
-                      color: colorScheme.onSurfaceVariant.withOpacity(0.4),
+                      color:
+                          colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -217,7 +218,8 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                     height: 4,
                     margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
-                      color: colorScheme.onSurfaceVariant.withOpacity(0.4),
+                      color:
+                          colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -299,8 +301,8 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                   labelText: 'Nombre del Item',
                   border: const OutlineInputBorder(),
                   filled: true,
-                  fillColor:
-                      colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                  fillColor: colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.3),
                 ),
               ),
               const SizedBox(height: 16),
@@ -310,8 +312,8 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                   labelText: 'Descripción (Opcional)',
                   border: const OutlineInputBorder(),
                   filled: true,
-                  fillColor:
-                      colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                  fillColor: colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.3),
                 ),
                 maxLines: 2,
               ),
@@ -322,8 +324,8 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                   labelText: 'Cantidad (Opcional)',
                   border: const OutlineInputBorder(),
                   filled: true,
-                  fillColor:
-                      colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                  fillColor: colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.3),
                   prefixIcon: const Icon(Icons.numbers),
                 ),
                 keyboardType: TextInputType.number,
@@ -461,7 +463,6 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
 
     // Get the appropriate quote object based on the tab
     final manualQuote = ref.watch(manualQuoteProvider);
-    final cateringOrder = ref.watch(cateringOrderNotifierProvider);
 
     final hasActiveQuote = manualQuote != null &&
         ((manualQuote.dishes.isNotEmpty) ||
@@ -545,7 +546,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: colorScheme.secondaryContainer.withOpacity(0.3),
+        color: colorScheme.secondaryContainer.withValues(alpha: 0.3),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(32),
           bottomRight: Radius.circular(32),
@@ -605,7 +606,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: colorScheme.shadow.withOpacity(0.05),
+                          color: colorScheme.shadow.withValues(alpha: 0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -814,7 +815,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                                   Icons.restaurant_menu,
                                   size: 32,
                                   color: colorScheme.onSurfaceVariant
-                                      .withOpacity(0.5),
+                                      .withValues(alpha: 0.5),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
@@ -982,7 +983,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
       CateringDish dish, ThemeData theme, int index, ColorScheme colorScheme) {
     return Card(
       elevation: 0,
-      color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
       margin: const EdgeInsets.only(bottom: 8),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -1031,7 +1032,8 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
               icon: const Icon(Icons.delete_outline, size: 20),
               tooltip: 'Remove item',
               style: IconButton.styleFrom(
-                backgroundColor: colorScheme.errorContainer.withOpacity(0.1),
+                backgroundColor:
+                    colorScheme.errorContainer.withValues(alpha: 0.1),
                 foregroundColor: colorScheme.error,
               ),
             ),
@@ -1063,7 +1065,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
               side: BorderSide(
-                color: colorScheme.outline.withOpacity(0.2),
+                color: colorScheme.outline.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -1078,7 +1080,8 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                       width: 72,
                       height: 72,
                       decoration: BoxDecoration(
-                        color: colorScheme.primaryContainer.withOpacity(0.7),
+                        color:
+                            colorScheme.primaryContainer.withValues(alpha: 0.7),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -1151,7 +1154,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
             side: BorderSide(
-              color: colorScheme.outline.withOpacity(0.2),
+              color: colorScheme.outline.withValues(alpha: 0.2),
               width: 1,
             ),
           ),
@@ -1165,7 +1168,8 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                     width: 56,
                     height: 56,
                     decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer.withOpacity(0.7),
+                      color:
+                          colorScheme.primaryContainer.withValues(alpha: 0.7),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(

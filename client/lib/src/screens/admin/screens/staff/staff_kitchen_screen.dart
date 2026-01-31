@@ -173,13 +173,13 @@ class _StaffKitchenScreenState extends ConsumerState<StaffKitchenScreen>
           Icon(
             icon,
             size: 64,
-            color: theme.colorScheme.onSurface.withOpacity(0.3),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
           ),
           const SizedBox(height: 16),
           Text(
             message,
             style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.7),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -252,7 +252,7 @@ class _StaffKitchenScreenState extends ConsumerState<StaffKitchenScreen>
                               ),
                               decoration: BoxDecoration(
                                 color: _getStatusColor(order.status.name)
-                                    .withOpacity(0.1),
+                                    .withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
@@ -271,8 +271,8 @@ class _StaffKitchenScreenState extends ConsumerState<StaffKitchenScreen>
                             Icon(
                               Icons.table_restaurant,
                               size: 16,
-                              color:
-                                  theme.colorScheme.onSurface.withOpacity(0.7),
+                              color: theme.colorScheme.onSurface
+                                  .withValues(alpha: 0.7),
                             ),
                             const SizedBox(width: 4),
                             Text(
@@ -283,8 +283,8 @@ class _StaffKitchenScreenState extends ConsumerState<StaffKitchenScreen>
                             Icon(
                               Icons.access_time,
                               size: 16,
-                              color:
-                                  theme.colorScheme.onSurface.withOpacity(0.7),
+                              color: theme.colorScheme.onSurface
+                                  .withValues(alpha: 0.7),
                             ),
                             const SizedBox(width: 4),
                             Text(
@@ -344,7 +344,8 @@ class _StaffKitchenScreenState extends ConsumerState<StaffKitchenScreen>
                     child: Text(
                       '... and ${order.items.length - 3} more',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
                     ),
                   ),

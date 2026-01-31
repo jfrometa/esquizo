@@ -190,7 +190,7 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
                   decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
-                        color: colorScheme.outline.withOpacity(0.2),
+                        color: colorScheme.outline.withValues(alpha: 0.2),
                         width: 1.0,
                       ),
                     ),
@@ -267,30 +267,6 @@ class CateringScreenState extends ConsumerState<CateringSelectionScreen>
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-    );
-  }
-
-  void _finalizeAndAddToCart(
-      WidgetRef ref,
-      bool hasChef,
-      String alergias,
-      String eventType,
-      String preferencia,
-      String adicionales,
-      int cantidadPersonas) {
-    final cateringOrderNotifier =
-        ref.read(cateringOrderNotifierProvider.notifier);
-
-    cateringOrderNotifier.finalizeCateringOrder(
-      title: 'Orden de Catering',
-      img: 'assets/image.png',
-      description: 'Buffet personalizado • $eventType • $preferencia',
-      hasChef: hasChef,
-      alergias: alergias,
-      eventType: eventType,
-      preferencia: preferencia,
-      adicionales: adicionales,
-      cantidadPersonas: cantidadPersonas,
     );
   }
 

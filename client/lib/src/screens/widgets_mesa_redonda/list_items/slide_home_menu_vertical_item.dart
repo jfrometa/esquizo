@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
 /// -----------------------------------------
 /// MENU DISH CARD (VERTICAL)
@@ -40,7 +40,7 @@ class MenuDishCard extends StatelessWidget {
     // Enforce a minimum size for the card so it renders properly on all screens.
     return ConstrainedBox(
       constraints: const BoxConstraints(
-        minWidth: 300,  // Adjust as needed.
+        minWidth: 300, // Adjust as needed.
         minHeight: 250, // Adjust as needed.
       ),
       child: Card(
@@ -99,7 +99,8 @@ class MenuDishCard extends StatelessWidget {
                       if (isMealPlan)
                         Padding(
                           padding: const EdgeInsets.only(left: 6.0),
-                          child: _buildLabel(Icons.fastfood, 'Meal Plan', Colors.blue),
+                          child: _buildLabel(
+                              Icons.fastfood, 'Meal Plan', Colors.blue),
                         ),
                       if (foodType.isNotEmpty)
                         Padding(
@@ -109,7 +110,9 @@ class MenuDishCard extends StatelessWidget {
                                 ? Icons.eco
                                 : Icons.restaurant,
                             foodType,
-                            foodType.toLowerCase() == 'vegan' ? Colors.green : Colors.brown,
+                            foodType.toLowerCase() == 'vegan'
+                                ? Colors.green
+                                : Colors.brown,
                           ),
                         ),
                     ],
@@ -143,7 +146,7 @@ class MenuDishCard extends StatelessWidget {
                       actionButton ??
                           IconButton(
                             icon: Icon(
-                              Icons.add_circle, 
+                              Icons.add_circle,
                             ),
                             onPressed: () {
                               // Default navigation: navigate to AddToOrder screen.
@@ -169,7 +172,7 @@ class MenuDishCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 6.0),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.8),
+        color: color.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(4.0),
       ),
       child: Row(

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
@@ -124,7 +125,7 @@ class SelectedPackage extends _$SelectedPackage {
 
 /// Provider for active packages only
 @riverpod
-Stream<List<CateringPackage>> activePackages(ActivePackagesRef ref) {
+Stream<List<CateringPackage>> activePackages(Ref ref) {
   final businessId = ref.watch(currentBusinessIdProvider);
   return FirebaseFirestore.instance
       .collection('businesses')
@@ -143,7 +144,7 @@ Stream<List<CateringPackage>> activePackages(ActivePackagesRef ref) {
 
 /// Provider for promoted packages only
 @riverpod
-Stream<List<CateringPackage>> promotedPackages(PromotedPackagesRef ref) {
+Stream<List<CateringPackage>> promotedPackages(Ref ref) {
   final businessId = ref.watch(currentBusinessIdProvider);
   return FirebaseFirestore.instance
       .collection('businesses')
@@ -164,7 +165,7 @@ Stream<List<CateringPackage>> promotedPackages(PromotedPackagesRef ref) {
 /// Provider for packages by category
 @riverpod
 Stream<List<CateringPackage>> packagesByCategory(
-  PackagesByCategoryRef ref,
+  Ref ref,
   String categoryId,
 ) {
   final businessId = ref.watch(currentBusinessIdProvider);
@@ -187,7 +188,7 @@ Stream<List<CateringPackage>> packagesByCategory(
 /// Provider for searching packages by name or description
 @riverpod
 Stream<List<CateringPackage>> searchPackages(
-  SearchPackagesRef ref,
+  Ref ref,
   String searchTerm,
 ) {
   final businessId = ref.watch(currentBusinessIdProvider);

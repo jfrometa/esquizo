@@ -183,7 +183,7 @@ class MealPlanOrderDetailScreen extends ConsumerWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: Colors.blue.withOpacity(0.1),
+                            color: Colors.blue.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                             border: Border.all(color: Colors.blue),
                           ),
@@ -296,25 +296,25 @@ class MealPlanOrderDetailScreen extends ConsumerWidget {
 
     switch (status.toLowerCase()) {
       case 'pending':
-        backgroundColor = Colors.orange.withOpacity(0.2);
+        backgroundColor = Colors.orange.withValues(alpha: 0.2);
         textColor = Colors.orange.shade700;
         break;
       case 'confirmed':
       case 'ready':
-        backgroundColor = Colors.green.withOpacity(0.2);
+        backgroundColor = Colors.green.withValues(alpha: 0.2);
         textColor = Colors.green.shade700;
         break;
       case 'delivered':
       case 'completed':
-        backgroundColor = Colors.blue.withOpacity(0.2);
+        backgroundColor = Colors.blue.withValues(alpha: 0.2);
         textColor = Colors.blue.shade700;
         break;
       case 'cancelled':
-        backgroundColor = Colors.red.withOpacity(0.2);
+        backgroundColor = Colors.red.withValues(alpha: 0.2);
         textColor = Colors.red.shade700;
         break;
       default:
-        backgroundColor = Colors.grey.withOpacity(0.2);
+        backgroundColor = Colors.grey.withValues(alpha: 0.2);
         textColor = Colors.grey.shade700;
     }
 

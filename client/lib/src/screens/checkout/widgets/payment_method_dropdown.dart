@@ -36,7 +36,7 @@ class PaymentMethodDropdown extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: colorScheme.outline),
-              color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -44,7 +44,8 @@ class PaymentMethodDropdown extends StatelessWidget {
                 child: DropdownButton<int>(
                   isExpanded: true,
                   value: selectedMethod,
-                  icon: Icon(Icons.keyboard_arrow_down, color: colorScheme.primary),
+                  icon: Icon(Icons.keyboard_arrow_down,
+                      color: colorScheme.primary),
                   borderRadius: BorderRadius.circular(12),
                   dropdownColor: colorScheme.surface,
                   elevation: 3,
@@ -65,7 +66,9 @@ class PaymentMethodDropdown extends StatelessWidget {
                           Text(
                             paymentMethods[index],
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: index == selectedMethod ? FontWeight.bold : FontWeight.normal,
+                              fontWeight: index == selectedMethod
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
                             ),
                           ),
                         ],
@@ -109,7 +112,9 @@ class PaymentMethodDropdown extends StatelessWidget {
 
   IconData _getPaymentIcon(String method) {
     final methodLower = method.toLowerCase();
-    if (methodLower.contains('tarjeta') || methodLower.contains('crédito') || methodLower.contains('débito')) {
+    if (methodLower.contains('tarjeta') ||
+        methodLower.contains('crédito') ||
+        methodLower.contains('débito')) {
       return Icons.credit_card;
     } else if (methodLower.contains('efectivo')) {
       return Icons.payments_outlined;

@@ -7,7 +7,7 @@ class QuoteItem {
   final String title;
   final String description;
   final int quantity;
-  
+
   QuoteItem({
     required this.title,
     this.description = '',
@@ -23,11 +23,11 @@ void showAddQuoteItemDialog({
 }) {
   final theme = Theme.of(context);
   final colorScheme = theme.colorScheme;
-  
+
   final itemNameController = TextEditingController();
   final itemDescriptionController = TextEditingController();
   final quantityController = TextEditingController(text: '1');
-  
+
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
@@ -45,7 +45,8 @@ void showAddQuoteItemDialog({
                 labelText: 'Nombre del Item',
                 border: const OutlineInputBorder(),
                 filled: true,
-                fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                fillColor:
+                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               ),
             ),
             const SizedBox(height: 16),
@@ -55,7 +56,8 @@ void showAddQuoteItemDialog({
                 labelText: 'Descripción (Opcional)',
                 border: const OutlineInputBorder(),
                 filled: true,
-                fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                fillColor:
+                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               ),
               maxLines: 2,
             ),
@@ -66,7 +68,8 @@ void showAddQuoteItemDialog({
                 labelText: 'Cantidad',
                 border: const OutlineInputBorder(),
                 filled: true,
-                fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                fillColor:
+                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                 prefixIcon: const Icon(Icons.numbers),
               ),
               keyboardType: TextInputType.number,
@@ -91,38 +94,40 @@ void showAddQuoteItemDialog({
               );
               return;
             }
-            
+
             final quoteOrder = ref.read(manualQuoteProvider);
             if (quoteOrder == null) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Primero debes completar los detalles de la cotización'),
+                  content: Text(
+                      'Primero debes completar los detalles de la cotización'),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
               return;
             }
-            
+
             // Create and return the new item
             final item = QuoteItem(
               title: itemNameController.text.trim(),
               description: itemDescriptionController.text.trim(),
               quantity: int.tryParse(quantityController.text) ?? 1,
             );
-            
+
             onItemAdded(item);
-            
+
             // Show success message
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: const Text('Item agregado correctamente'),
                 behavior: SnackBarBehavior.floating,
                 backgroundColor: theme.colorScheme.secondaryContainer,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
                 margin: const EdgeInsets.all(16),
               ),
             );
-            
+
             Navigator.pop(context);
           },
           icon: const Icon(Icons.add),

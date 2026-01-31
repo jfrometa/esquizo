@@ -27,7 +27,6 @@ class QuoteCheckout extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-  
     return Column(
       children: [
         Padding(
@@ -43,16 +42,16 @@ class QuoteCheckout extends ConsumerWidget {
         CateringCartItemView(
           order: quote,
           onRemoveFromCart: () =>
-              ref.read(manualQuoteProvider.notifier).state = null,
+              ref.read(manualQuoteProvider.notifier).clearManualQuote(),
         ),
       ],
     );
   }
-  
+
   Widget _buildLocationField(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextField(
@@ -61,9 +60,10 @@ class QuoteCheckout extends ConsumerWidget {
         onTap: () => onLocationTap(context, locationController, 'quote'),
         decoration: InputDecoration(
           labelText: 'Ubicación del evento',
-          prefixIcon: Icon(Icons.location_on_outlined, color: colorScheme.primary),
+          prefixIcon:
+              Icon(Icons.location_on_outlined, color: colorScheme.primary),
           filled: true,
-          fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+          fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12.0),
             borderSide: BorderSide(
@@ -93,7 +93,7 @@ class QuoteCheckout extends ConsumerWidget {
   Widget _buildDateTimePicker(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -102,12 +102,15 @@ class QuoteCheckout extends ConsumerWidget {
             child: TextField(
               controller: dateController,
               readOnly: true,
-              onTap: () => onDateTimeTap(context, dateController, timeController),
+              onTap: () =>
+                  onDateTimeTap(context, dateController, timeController),
               decoration: InputDecoration(
                 labelText: 'Fecha del evento',
-                prefixIcon: Icon(Icons.calendar_today, color: colorScheme.primary),
+                prefixIcon:
+                    Icon(Icons.calendar_today, color: colorScheme.primary),
                 filled: true,
-                fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                fillColor:
+                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
                   borderSide: BorderSide(
@@ -141,7 +144,8 @@ class QuoteCheckout extends ConsumerWidget {
                 labelText: 'Hora del evento',
                 prefixIcon: Icon(Icons.access_time, color: colorScheme.primary),
                 filled: true,
-                fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                fillColor:
+                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
                   borderSide: BorderSide(

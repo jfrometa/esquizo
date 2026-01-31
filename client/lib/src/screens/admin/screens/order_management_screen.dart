@@ -100,7 +100,7 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
         color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 2,
             offset: const Offset(0, 2),
           ),
@@ -169,7 +169,8 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
                         });
                       },
                       backgroundColor: Theme.of(context).colorScheme.surface,
-                      selectedColor: _getStatusColor(status).withOpacity(0.2),
+                      selectedColor:
+                          _getStatusColor(status).withValues(alpha: 0.2),
                       labelStyle: TextStyle(
                         color: _selectedStatus == status
                             ? _getStatusColor(status)
@@ -307,8 +308,8 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color:
-                          _getStatusColor(order.status.name).withOpacity(0.1),
+                      color: _getStatusColor(order.status.name)
+                          .withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -344,7 +345,8 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
                               ? Icons.delivery_dining
                               : Icons.table_restaurant,
                           size: 16,
-                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          color: theme.colorScheme.onSurface
+                              .withValues(alpha: 0.7),
                         ),
                         const SizedBox(width: 4),
                         Text(

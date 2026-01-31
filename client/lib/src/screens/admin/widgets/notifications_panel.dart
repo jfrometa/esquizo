@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 /// Panel that displays notifications in the admin interface
 class NotificationsPanel extends StatelessWidget {
   final ScrollController scrollController;
-  
+
   const NotificationsPanel({
     super.key,
     required this.scrollController,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     // Use ConstrainedBox to set a maximum height
@@ -28,7 +28,7 @@ class NotificationsPanel extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
           ),
-          
+
           // Header
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -56,9 +56,9 @@ class NotificationsPanel extends StatelessWidget {
               ],
             ),
           ),
-          
+
           const Divider(),
-          
+
           // Notification list - now inside Expanded with a parent that has a defined size constraint
           Expanded(
             child: ListView(
@@ -114,7 +114,7 @@ class NotificationItem extends StatelessWidget {
   final IconData icon;
   final Color color;
   final bool isUnread;
-  
+
   const NotificationItem({
     super.key,
     required this.title,
@@ -124,20 +124,20 @@ class NotificationItem extends StatelessWidget {
     required this.color,
     this.isUnread = false,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: isUnread ? color.withOpacity(0.1) : null,
+        color: isUnread ? color.withValues(alpha: 0.1) : null,
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: color.withOpacity(0.2),
+          backgroundColor: color.withValues(alpha: 0.2),
           child: Icon(
             icon,
             color: color,

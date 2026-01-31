@@ -5,7 +5,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/QR/models/qr_c
 // Order Screen
 class OrderScreen extends StatelessWidget {
   final QRCodeData tableData;
-  
+
   const OrderScreen({
     super.key,
     required this.tableData,
@@ -14,19 +14,19 @@ class OrderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     // Mock order data
     final orderItems = [
       {'dish': 'Caesar Salad', 'price': 12.99, 'quantity': 1},
       {'dish': 'Grilled Salmon', 'price': 24.99, 'quantity': 2},
     ];
-    
+
     // Calculate total
     double total = 0;
     for (var item in orderItems) {
       total += (item['price'] as double) * (item['quantity'] as int);
     }
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Order - ${tableData.tableName}'),
@@ -46,7 +46,7 @@ class OrderScreen extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Order items
           Expanded(
             child: ListView.separated(
@@ -57,8 +57,9 @@ class OrderScreen extends StatelessWidget {
               ),
               itemBuilder: (context, index) {
                 final item = orderItems[index];
-                final itemTotal = (item['price'] as double) * (item['quantity'] as int);
-                
+                final itemTotal =
+                    (item['price'] as double) * (item['quantity'] as int);
+
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   child: Row(
@@ -98,7 +99,7 @@ class OrderScreen extends StatelessWidget {
               },
             ),
           ),
-          
+
           // Total and checkout
           Container(
             padding: const EdgeInsets.all(20),
@@ -110,7 +111,7 @@ class OrderScreen extends StatelessWidget {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, -5),
                 ),
@@ -133,9 +134,9 @@ class OrderScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Service charge
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -150,11 +151,11 @@ class OrderScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 16),
                   const Divider(),
                   const SizedBox(height: 16),
-                  
+
                   // Total
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -174,9 +175,9 @@ class OrderScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Checkout button
                   ElevatedButton.icon(
                     onPressed: () {
@@ -200,10 +201,10 @@ class OrderScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   void _showOrderConfirmation(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

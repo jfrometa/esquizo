@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
@@ -28,7 +29,7 @@ void main() {
     });
 
     test('should create kako business and verify navigation flow', () async {
-      print('🧪 Testing "kako" business creation and navigation...');
+      debugPrint('🧪 Testing "kako" business creation and navigation...');
 
       // 1. Create the "kako" business in fake Firestore
       const businessId = 'kako-business-001';
@@ -84,66 +85,66 @@ void main() {
         'updatedAt': DateTime.now().toIso8601String(),
       });
 
-      print('✅ Created "kako" business in fake Firestore');
+      debugPrint('✅ Created "kako" business in fake Firestore');
 
       // 2. Test slug-to-business-ID resolution
       final resolvedBusinessId =
           await slugService.getBusinessIdFromSlug('kako');
       expect(resolvedBusinessId, equals(businessId));
-      print('✅ Slug resolution: "kako" -> "$businessId"');
+      debugPrint('✅ Slug resolution: "kako" -> "$businessId"');
 
       // 3. Test reverse lookup (business-ID-to-slug)
       final resolvedSlug = await slugService.getSlugFromBusinessId(businessId);
       expect(resolvedSlug, equals('kako'));
-      print('✅ Reverse lookup: "$businessId" -> "kako"');
+      debugPrint('✅ Reverse lookup: "$businessId" -> "kako"');
 
       // 4. Test slug availability
       final isAvailable = await slugService.isSlugAvailable('kako');
       expect(isAvailable, isFalse); // Should not be available since it's taken
-      print('✅ Slug availability: "kako" is correctly marked as taken');
+      debugPrint('✅ Slug availability: "kako" is correctly marked as taken');
 
       // 5. Test URL path extraction
       final extractedSlug1 = extractBusinessSlugFromPath('/kako');
       expect(extractedSlug1, equals('kako'));
-      print('✅ URL extraction: "/kako" -> "kako"');
+      debugPrint('✅ URL extraction: "/kako" -> "kako"');
 
       final extractedSlug2 = extractBusinessSlugFromPath('/kako/menu');
       expect(extractedSlug2, equals('kako'));
-      print('✅ URL extraction: "/kako/menu" -> "kako"');
+      debugPrint('✅ URL extraction: "/kako/menu" -> "kako"');
 
       final extractedSlug3 = extractBusinessSlugFromPath('/kako/cart');
       expect(extractedSlug3, equals('kako'));
-      print('✅ URL extraction: "/kako/cart" -> "kako"');
+      debugPrint('✅ URL extraction: "/kako/cart" -> "kako"');
 
       // 6. Test that system routes are still ignored
       final systemRoute = extractBusinessSlugFromPath('/admin');
       expect(systemRoute, isNull);
-      print('✅ System route handling: "/admin" correctly returns null');
+      debugPrint('✅ System route handling: "/admin" correctly returns null');
 
       // 7. Test business context provider (simulate URL access)
       // Note: This would require mocking the WebUtils.getCurrentPath() method
       // For now, we'll test the core logic
 
-      print('');
-      print('🎉 All "kako" business navigation tests passed!');
-      print('');
-      print('📋 Test Results Summary:');
-      print('   ✅ Business creation in database');
-      print('   ✅ Slug-to-business-ID resolution');
-      print('   ✅ Business-ID-to-slug reverse lookup');
-      print('   ✅ Slug availability checking');
-      print('   ✅ URL path extraction for all routes');
-      print('   ✅ System route protection');
-      print('');
-      print('🔗 Verified URL Patterns:');
-      print('   /kako -> Resolves to Kako Restaurant');
-      print('   /kako/menu -> Resolves to Kako Restaurant');
-      print('   /kako/cart -> Resolves to Kako Restaurant');
-      print('   /admin -> Correctly ignored (system route)');
+      debugPrint('');
+      debugPrint('🎉 All "kako" business navigation tests passed!');
+      debugPrint('');
+      debugPrint('📋 Test Results Summary:');
+      debugPrint('   ✅ Business creation in database');
+      debugPrint('   ✅ Slug-to-business-ID resolution');
+      debugPrint('   ✅ Business-ID-to-slug reverse lookup');
+      debugPrint('   ✅ Slug availability checking');
+      debugPrint('   ✅ URL path extraction for all routes');
+      debugPrint('   ✅ System route protection');
+      debugPrint('');
+      debugPrint('🔗 Verified URL Patterns:');
+      debugPrint('   /kako -> Resolves to Kako Restaurant');
+      debugPrint('   /kako/menu -> Resolves to Kako Restaurant');
+      debugPrint('   /kako/cart -> Resolves to Kako Restaurant');
+      debugPrint('   /admin -> Correctly ignored (system route)');
     });
 
     test('should handle multiple business slugs correctly', () async {
-      print('🧪 Testing multiple business slug handling...');
+      debugPrint('🧪 Testing multiple business slug handling...');
 
       // Create multiple businesses
       final businesses = [
@@ -174,19 +175,19 @@ void main() {
         });
       }
 
-      print('✅ Created multiple businesses in fake Firestore');
+      debugPrint('✅ Created multiple businesses in fake Firestore');
 
       // Test each business slug resolution
       for (final business in businesses) {
         final resolvedId =
             await slugService.getBusinessIdFromSlug(business['slug']!);
         expect(resolvedId, equals(business['id']));
-        print('✅ ${business['slug']} -> ${business['id']}');
+        debugPrint('✅ ${business['slug']} -> ${business['id']}');
 
         final resolvedSlug =
             await slugService.getSlugFromBusinessId(business['id']!);
         expect(resolvedSlug, equals(business['slug']));
-        print('✅ ${business['id']} -> ${business['slug']}');
+        debugPrint('✅ ${business['id']} -> ${business['slug']}');
       }
 
       // Test URL extraction for different patterns
@@ -203,15 +204,15 @@ void main() {
         final extractedSlug = extractBusinessSlugFromPath(path);
         final expectedSlug = path.split('/')[1];
         expect(extractedSlug, equals(expectedSlug));
-        print('✅ Path "$path" -> slug "$expectedSlug"');
+        debugPrint('✅ Path "$path" -> slug "$expectedSlug"');
       }
 
-      print('');
-      print('🎉 Multiple business slug handling test passed!');
+      debugPrint('');
+      debugPrint('🎉 Multiple business slug handling test passed!');
     });
 
     test('should handle inactive businesses correctly', () async {
-      print('🧪 Testing inactive business handling...');
+      debugPrint('🧪 Testing inactive business handling...');
 
       // Create an inactive "kako" business
       await fakeFirestore.collection('businesses').doc('inactive-kako').set({
@@ -233,12 +234,12 @@ void main() {
       // Should not resolve inactive business
       final resolvedId = await slugService.getBusinessIdFromSlug('kako');
       expect(resolvedId, isNull);
-      print('✅ Inactive business correctly ignored');
+      debugPrint('✅ Inactive business correctly ignored');
 
       // Slug should be available for reuse
       final isAvailable = await slugService.isSlugAvailable('kako');
       expect(isAvailable, isTrue);
-      print('✅ Slug available for reuse after inactive business');
+      debugPrint('✅ Slug available for reuse after inactive business');
 
       // Now create an active business with the same slug
       await fakeFirestore.collection('businesses').doc('active-kako').set({
@@ -260,15 +261,15 @@ void main() {
       // Should now resolve to the active business
       final activeResolvedId = await slugService.getBusinessIdFromSlug('kako');
       expect(activeResolvedId, equals('active-kako'));
-      print('✅ Active business correctly resolved');
+      debugPrint('✅ Active business correctly resolved');
 
       // Slug should no longer be available
       final noLongerAvailable = await slugService.isSlugAvailable('kako');
       expect(noLongerAvailable, isFalse);
-      print('✅ Slug correctly marked as taken by active business');
+      debugPrint('✅ Slug correctly marked as taken by active business');
 
-      print('');
-      print('🎉 Inactive business handling test passed!');
+      debugPrint('');
+      debugPrint('🎉 Inactive business handling test passed!');
     });
   });
 }
@@ -276,11 +277,11 @@ void main() {
 /// Helper function to simulate business navigation flow
 Future<void> simulateNavigationFlow(
     ProviderContainer container, String urlPath) async {
-  print('🔄 Simulating navigation to: $urlPath');
+  debugPrint('🔄 Simulating navigation to: $urlPath');
 
   // Extract slug from path
   final slug = extractBusinessSlugFromPath(urlPath);
-  print('   Extracted slug: $slug');
+  debugPrint('   Extracted slug: $slug');
 
   if (slug != null) {
     // This would normally be handled by the urlAwareBusinessIdProvider
@@ -288,12 +289,12 @@ Future<void> simulateNavigationFlow(
     final businessId = await slugService.getBusinessIdFromSlug(slug);
 
     if (businessId != null) {
-      print('   ✅ Resolved to business ID: $businessId');
-      print('   ✅ Business context established');
+      debugPrint('   ✅ Resolved to business ID: $businessId');
+      debugPrint('   ✅ Business context established');
     } else {
-      print('   ❌ Business not found, falling back to default');
+      debugPrint('   ❌ Business not found, falling back to default');
     }
   } else {
-    print('   ℹ️ No business slug in path, using default context');
+    debugPrint('   ℹ️ No business slug in path, using default context');
   }
 }

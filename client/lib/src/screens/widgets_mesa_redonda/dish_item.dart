@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
 class DishItem extends StatelessWidget {
-  @override
-  final Key? key;
   final int index;
   final String img;
   final String title;
@@ -18,7 +16,7 @@ class DishItem extends StatelessWidget {
   final bool useHorizontalLayout;
 
   const DishItem({
-    required this.key,
+    super.key,
     required this.index,
     required this.img,
     required this.title,
@@ -32,143 +30,142 @@ class DishItem extends StatelessWidget {
     this.showDetailsButton = false,
     this.showAddButton = false,
     this.useHorizontalLayout = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     // Define the card content - using LayoutBuilder to get constraints
-    Widget cardContent = LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Image
-              AspectRatio(
-                aspectRatio: 16 / 9,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    img,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      color: colorScheme.primaryContainer.withOpacity(0.3),
-                      child: Icon(
-                        Icons.image_not_supported,
-                        size: 40,
-                        color: colorScheme.primary.withOpacity(0.5),
-                      ),
+    Widget cardContent = LayoutBuilder(builder: (context, constraints) {
+      return SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  img,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: colorScheme.primaryContainer.withValues(alpha: 0.3),
+                    child: Icon(
+                      Icons.image_not_supported,
+                      size: 40,
+                      color: colorScheme.primary.withValues(alpha: 0.5),
                     ),
                   ),
                 ),
               ),
-              
-              const SizedBox(height: 12),
-              
-              // Title and price
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Text(
-                    pricing,
-                    style: theme.textTheme.titleSmall?.copyWith(
+            ),
+
+            const SizedBox(height: 12),
+
+            // Title and price
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: colorScheme.primary,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
+                ),
+                Text(
+                  pricing,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 8),
+
+            // Description
+            Text(
+              description,
+              style: theme.textTheme.bodyMedium,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+
+            // Ingredients if not hidden
+            if (!hideIngredients) ...[
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 4,
+                runSpacing: 4,
+                children: ingredients.map((ingredient) {
+                  return Chip(
+                    label: Text(
+                      ingredient,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontSize: 10,
+                      ),
+                    ),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    padding: EdgeInsets.zero,
+                    labelPadding: const EdgeInsets.symmetric(horizontal: 8),
+                    visualDensity: VisualDensity.compact,
+                    backgroundColor:
+                        colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  );
+                }).toList(),
+              ),
+            ],
+
+            // Buttons - no Spacer in scrollable column
+            SizedBox(height: 12),
+
+            // Buttons
+            if (showDetailsButton || showAddButton) ...[
+              Row(
+                children: [
+                  if (showDetailsButton)
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {},
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        child: const Text('Detalles'),
+                      ),
+                    ),
+                  if (showDetailsButton && showAddButton)
+                    const SizedBox(width: 8),
+                  if (showAddButton)
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () {},
+                        icon: Icon(Icons.add_shopping_cart, size: 16),
+                        label: const Text('Pedir'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          visualDensity: VisualDensity.compact,
+                          backgroundColor: colorScheme.primary,
+                          foregroundColor: colorScheme.onPrimary,
+                        ),
+                      ),
+                    ),
                 ],
               ),
-              
-              const SizedBox(height: 8),
-              
-              // Description
-              Text(
-                description,
-                style: theme.textTheme.bodyMedium,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              
-              // Ingredients if not hidden
-              if (!hideIngredients) ...[
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 4,
-                  runSpacing: 4,
-                  children: ingredients.map((ingredient) {
-                    return Chip(
-                      label: Text(
-                        ingredient,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontSize: 10,
-                        ),
-                      ),
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      padding: EdgeInsets.zero,
-                      labelPadding: const EdgeInsets.symmetric(horizontal: 8),
-                      visualDensity: VisualDensity.compact,
-                      backgroundColor: colorScheme.primaryContainer.withOpacity(0.3),
-                    );
-                  }).toList(),
-                ),
-              ],
-              
-              // Buttons - no Spacer in scrollable column
-              SizedBox(height: 12),
-              
-              // Buttons
-              if (showDetailsButton || showAddButton) ...[
-                Row(
-                  children: [
-                    if (showDetailsButton)
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {},
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            visualDensity: VisualDensity.compact,
-                          ),
-                          child: const Text('Detalles'),
-                        ),
-                      ),
-                    if (showDetailsButton && showAddButton)
-                      const SizedBox(width: 8),
-                    if (showAddButton)
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {},
-                          icon: Icon(Icons.add_shopping_cart, size: 16),
-                          label: const Text('Pedir'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            visualDensity: VisualDensity.compact,
-                            backgroundColor: colorScheme.primary,
-                            foregroundColor: colorScheme.onPrimary,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ],
             ],
-          ),
-        );
-      }
-    );
-    
+          ],
+        ),
+      );
+    });
+
     // Use a different layout for horizontal mode
     if (useHorizontalLayout) {
       return Card(
@@ -193,24 +190,26 @@ class DishItem extends StatelessWidget {
                       img,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Container(
-                        color: colorScheme.primaryContainer.withOpacity(0.3),
+                        color:
+                            colorScheme.primaryContainer.withValues(alpha: 0.3),
                         child: Icon(
                           Icons.image_not_supported,
                           size: 24,
-                          color: colorScheme.primary.withOpacity(0.5),
+                          color: colorScheme.primary.withValues(alpha: 0.5),
                         ),
                       ),
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(width: 12),
-                
+
                 // Content on the right
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min, // Important to prevent expansion
+                    mainAxisSize:
+                        MainAxisSize.min, // Important to prevent expansion
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -234,19 +233,21 @@ class DishItem extends StatelessWidget {
                           ),
                         ],
                       ),
-                      
+
                       const SizedBox(height: 4),
-                      
+
                       Text(
                         description,
                         style: theme.textTheme.bodySmall,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      
+
                       // const Spacer(),
-                      const SizedBox(height: 12,),
-                      
+                      const SizedBox(
+                        height: 12,
+                      ),
+
                       // Action buttons
                       if (showAddButton)
                         SizedBox(
@@ -273,7 +274,7 @@ class DishItem extends StatelessWidget {
         ),
       );
     }
-    
+
     // Regular card layout for vertical layout
     return Card(
       elevation: 2,

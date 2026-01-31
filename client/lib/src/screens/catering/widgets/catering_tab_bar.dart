@@ -17,7 +17,7 @@ class CateringTabBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return TabBar(
       controller: controller,
       dividerColor: Colors.transparent,
@@ -27,19 +27,21 @@ class CateringTabBar extends StatelessWidget {
       ),
       unselectedLabelStyle: theme.textTheme.titleSmall,
       labelColor: colorScheme.onPrimary,
-      unselectedLabelColor: colorScheme.onSurface.withOpacity(0.7),
+      unselectedLabelColor: colorScheme.onSurface.withValues(alpha: 0.7),
       indicatorSize: TabBarIndicatorSize.tab,
       indicator: TabIndicator(
         color: colorScheme.primary,
         radius: 16.0,
       ),
-      tabs: categories.map(
-        (category) => Container(
-          width: maxTabWidth,
-          alignment: Alignment.center,
-          child: Tab(text: category),
-        ),
-      ).toList(),
+      tabs: categories
+          .map(
+            (category) => Container(
+              width: maxTabWidth,
+              alignment: Alignment.center,
+              child: Tab(text: category),
+            ),
+          )
+          .toList(),
     );
   }
 }

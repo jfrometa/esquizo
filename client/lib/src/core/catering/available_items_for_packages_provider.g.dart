@@ -7,7 +7,7 @@ part of 'available_items_for_packages_provider.dart';
 // **************************************************************************
 
 String _$availableItemsByCategoryHash() =>
-    r'0fcfc9c7699313198267a6eb4fe9d9b578d025d8';
+    r'8568f1e38588db2ff844f113b77621852ff9b715';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -177,7 +177,7 @@ class _AvailableItemsByCategoryProviderElement
 }
 
 String _$availableItemsForPackageHash() =>
-    r'80b0bb7a68b5a3c8f6cca788ed15938b9b0825e1';
+    r'518134cab5ab4656d9be105039b6d92c5d782fb7';
 
 /// Provider for items in a specific package
 ///
@@ -327,7 +327,7 @@ class _AvailableItemsForPackageProviderElement
 }
 
 String _$searchAvailableItemsHash() =>
-    r'de771c2af9b4a7e58800328ce5701e0cca9a2a45';
+    r'be6c444b3ab67acadf7c13cbb475e77b9558ef87';
 
 /// Provider for searching dishes
 ///
@@ -475,7 +475,7 @@ class _SearchAvailableItemsProviderElement
 }
 
 String _$dietaryFilteredItemsHash() =>
-    r'da240df092a0f722a3510ec9aebebe153ad15ca4';
+    r'10a2efa0c99ab7b3487e5d4f308ca4f7cec660d4';
 
 /// Provider for dietary restriction filtering
 ///
@@ -625,7 +625,7 @@ class _DietaryFilteredItemsProviderElement
 }
 
 String _$availableItemsStreamHash() =>
-    r'156fbad4443693dbae9e3d8be4ad0e9a5c3545ed';
+    r'572aac1beca5afb271612b0acdfc622460692c01';
 
 /// Stream provider for real-time updates of all available dishes
 ///
@@ -646,7 +646,7 @@ final availableItemsStreamProvider =
 // ignore: unused_element
 typedef AvailableItemsStreamRef
     = AutoDisposeStreamProviderRef<List<CateringDish>>;
-String _$featuredItemsHash() => r'15406fa1eb5aa4ecb50de24a554b8282bfb43d3a';
+String _$featuredItemsHash() => r'6d1fbf28f9c320339f3d3fb3e79763400cebf3dd';
 
 /// Simplified provider to get featured dishes
 ///
@@ -666,7 +666,7 @@ final featuredItemsProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef FeaturedItemsRef = AutoDisposeFutureProviderRef<List<CateringDish>>;
-String _$popularItemsHash() => r'75b4d49c4985581f88991e3f0c2d13ebcfd81b01';
+String _$popularItemsHash() => r'06a8ce1c167c16a76d8e52dde59153d9ef594067';
 
 /// Provider for getting popular dishes (based on order count)
 ///
@@ -685,7 +685,7 @@ final popularItemsProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef PopularItemsRef = AutoDisposeFutureProviderRef<List<CateringDish>>;
-String _$cateringPackagesHash() => r'1cb207aaaae14a4a7965f6d3097b6522cece919b';
+String _$cateringPackagesHash() => r'7be0dd7598262d4b8ba3ff91dbf0a0a691af17bd';
 
 /// Provider for getting all catering packages
 ///
@@ -706,7 +706,7 @@ final cateringPackagesProvider =
 // ignore: unused_element
 typedef CateringPackagesRef
     = AutoDisposeStreamProviderRef<List<CateringPackage>>;
-String _$packageWithItemsHash() => r'f5caaf477829482867c4d9ebd537ac01ee325ca1';
+String _$packageWithItemsHash() => r'468738f135fd21991669ff801d1ccaf9ecf49dca';
 
 /// Provider for getting the details of a specific package with its dishes
 ///

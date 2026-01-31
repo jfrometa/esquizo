@@ -22,7 +22,8 @@ class AnimatedSearchBar extends StatefulWidget {
   State<AnimatedSearchBar> createState() => _AnimatedSearchBarState();
 }
 
-class _AnimatedSearchBarState extends State<AnimatedSearchBar> with SingleTickerProviderStateMixin {
+class _AnimatedSearchBarState extends State<AnimatedSearchBar>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
@@ -34,21 +35,21 @@ class _AnimatedSearchBarState extends State<AnimatedSearchBar> with SingleTicker
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    
+
     _scaleAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: Curves.easeOutCubic,
       ),
     );
-    
+
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: Curves.easeOut,
       ),
     );
-    
+
     // Start animation
     _animationController.forward();
   }
@@ -63,7 +64,7 @@ class _AnimatedSearchBarState extends State<AnimatedSearchBar> with SingleTicker
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return FadeTransition(
       opacity: _fadeAnimation,
       child: ScaleTransition(
@@ -74,7 +75,7 @@ class _AnimatedSearchBarState extends State<AnimatedSearchBar> with SingleTicker
             borderRadius: BorderRadius.circular(30),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 15,
                 spreadRadius: 2,
                 offset: const Offset(0, 5),
@@ -92,7 +93,7 @@ class _AnimatedSearchBarState extends State<AnimatedSearchBar> with SingleTicker
                   size: 24,
                 ),
               ),
-              
+
               // Search Field
               Expanded(
                 child: TextField(
@@ -103,7 +104,7 @@ class _AnimatedSearchBarState extends State<AnimatedSearchBar> with SingleTicker
                   decoration: InputDecoration(
                     hintText: 'Search the menu...',
                     hintStyle: TextStyle(
-                      color: colorScheme.onSurface.withOpacity(0.5),
+                      color: colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(
@@ -115,14 +116,14 @@ class _AnimatedSearchBarState extends State<AnimatedSearchBar> with SingleTicker
                   textInputAction: TextInputAction.search,
                 ),
               ),
-              
+
               // Clear or Filter button
               if (widget.isSearching)
                 IconButton(
                   icon: const Icon(Icons.close),
                   tooltip: 'Clear search',
                   onPressed: widget.onClear,
-                  color: colorScheme.onSurface.withOpacity(0.7),
+                  color: colorScheme.onSurface.withValues(alpha: 0.7),
                   iconSize: 20,
                 )
               else
@@ -152,5 +153,3 @@ class _AnimatedSearchBarState extends State<AnimatedSearchBar> with SingleTicker
     );
   }
 }
-
-

@@ -43,7 +43,7 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
               color: theme.colorScheme.surface,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 5,
                   offset: const Offset(0, 2),
                 ),
@@ -114,7 +114,7 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
                   Text(
                     'Nota: El nuevo administrador debe tener una cuenta activa en el sistema.',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                 ],
@@ -142,7 +142,8 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
                         data: (adminList) => Text(
                           '${adminList.length} administradores',
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.7),
+                            color: theme.colorScheme.onSurface
+                                .withValues(alpha: 0.7),
                           ),
                         ),
                         loading: () => const SizedBox(),
@@ -172,7 +173,7 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
                                   'No hay administradores aún',
                                   style: theme.textTheme.titleMedium?.copyWith(
                                     color: theme.colorScheme.onSurface
-                                        .withOpacity(0.7),
+                                        .withValues(alpha: 0.7),
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -180,7 +181,7 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
                                   'Agrega administradores usando el formulario superior',
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     color: theme.colorScheme.onSurface
-                                        .withOpacity(0.5),
+                                        .withValues(alpha: 0.5),
                                   ),
                                 ),
                               ],

@@ -22,13 +22,14 @@ class PaymentOverviewTab extends ConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isDesktop = ResponsiveLayout.isDesktop(context);
-    final currencyFormatter = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
-    
+    final currencyFormatter =
+        NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+
     final statsAsync = ref.watch(paymentStatisticsProvider((
       startDate: startDate,
       endDate: endDate,
     )));
-    
+
     final serviceStatsAsync = ref.watch(serviceStatisticsProvider((
       startDate: startDate,
       endDate: endDate,
@@ -42,11 +43,11 @@ class PaymentOverviewTab extends ConsumerWidget {
       child: statsAsync.when(
         data: (stats) => serviceStatsAsync.when(
           data: (serviceStats) => _buildOverview(
-            context, 
-            stats, 
-            serviceStats, 
-            currencyFormatter, 
-            colorScheme, 
+            context,
+            stats,
+            serviceStats,
+            currencyFormatter,
+            colorScheme,
             isDesktop,
           ),
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -129,25 +130,28 @@ class PaymentOverviewTab extends ConsumerWidget {
             itemCount: cards.length,
             itemBuilder: (context, index) => cards[index],
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           // Revenue by Service Type
-          Text('Revenue by Service Type', style: Theme.of(context).textTheme.headlineSmall),
+          Text('Revenue by Service Type',
+              style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 16),
           _buildServiceTypeRevenue(serviceStats, formatter, colorScheme),
-          
+
           const SizedBox(height: 32),
-          
+
           // Payment Methods Chart
-          Text('Payment Methods', style: Theme.of(context).textTheme.headlineSmall),
+          Text('Payment Methods',
+              style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 16),
           _buildPaymentMethodsChart(stats, formatter, colorScheme),
-          
+
           const SizedBox(height: 32),
-          
+
           // Staff Performance
-          Text('Top Performing Servers', style: Theme.of(context).textTheme.headlineSmall),
+          Text('Top Performing Servers',
+              style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 16),
           _buildTopServersTable(serviceStats, formatter, colorScheme),
         ],
@@ -175,7 +179,7 @@ class PaymentOverviewTab extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(icon, color: color, size: 24),
@@ -220,9 +224,11 @@ class PaymentOverviewTab extends ConsumerWidget {
     NumberFormat formatter,
     ColorScheme colorScheme,
   ) {
-    final revenue = serviceStats['serviceTypeRevenue'] as Map<String, dynamic>? ?? {};
-    final counts = serviceStats['serviceTypeCounts'] as Map<String, dynamic>? ?? {};
-    
+    final revenue =
+        serviceStats['serviceTypeRevenue'] as Map<String, dynamic>? ?? {};
+    final counts =
+        serviceStats['serviceTypeCounts'] as Map<String, dynamic>? ?? {};
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -230,10 +236,12 @@ class PaymentOverviewTab extends ConsumerWidget {
           children: ServiceType.values.map((type) {
             final typeRevenue = revenue[type.name] ?? 0.0;
             final typeCount = counts[type.name] ?? 0;
-            final percentage = revenue.isNotEmpty 
-                ? (typeRevenue / revenue.values.fold(0.0, (a, b) => a + b) * 100)
+            final percentage = revenue.isNotEmpty
+                ? (typeRevenue /
+                    revenue.values.fold(0.0, (a, b) => a + b) *
+                    100)
                 : 0.0;
-            
+
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Row(
@@ -285,8 +293,9 @@ class PaymentOverviewTab extends ConsumerWidget {
     NumberFormat formatter,
     ColorScheme colorScheme,
   ) {
-    final revenueByMethod = stats['revenueByMethod'] as Map<String, dynamic>? ?? {};
-    
+    final revenueByMethod =
+        stats['revenueByMethod'] as Map<String, dynamic>? ?? {};
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -295,9 +304,11 @@ class PaymentOverviewTab extends ConsumerWidget {
             final method = entry.key;
             final revenue = entry.value as double;
             final percentage = revenueByMethod.isNotEmpty
-                ? (revenue / revenueByMethod.values.fold(0.0, (a, b) => a + b) * 100)
+                ? (revenue /
+                    revenueByMethod.values.fold(0.0, (a, b) => a + b) *
+                    100)
                 : 0.0;
-            
+
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Column(
@@ -338,13 +349,14 @@ class PaymentOverviewTab extends ConsumerWidget {
     NumberFormat formatter,
     ColorScheme colorScheme,
   ) {
-    final serverStats = serviceStats['serverStatistics'] as Map<String, dynamic>? ?? {};
+    final serverStats =
+        serviceStats['serverStatistics'] as Map<String, dynamic>? ?? {};
     final revenue = serverStats['revenue'] as Map<String, dynamic>? ?? {};
     final orderCount = serverStats['orderCount'] as Map<String, dynamic>? ?? {};
-    
+
     final sortedServers = revenue.entries.toList()
       ..sort((a, b) => (b.value as num).compareTo(a.value as num));
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -352,10 +364,19 @@ class PaymentOverviewTab extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Expanded(flex: 2, child: Text('Server', style: TextStyle(fontWeight: FontWeight.bold))),
-                Expanded(child: Text('Orders', style: TextStyle(fontWeight: FontWeight.bold))),
-                Expanded(child: Text('Revenue', style: TextStyle(fontWeight: FontWeight.bold))),
-                Expanded(child: Text('Avg Order', style: TextStyle(fontWeight: FontWeight.bold))),
+                Expanded(
+                    flex: 2,
+                    child: Text('Server',
+                        style: TextStyle(fontWeight: FontWeight.bold))),
+                Expanded(
+                    child: Text('Orders',
+                        style: TextStyle(fontWeight: FontWeight.bold))),
+                Expanded(
+                    child: Text('Revenue',
+                        style: TextStyle(fontWeight: FontWeight.bold))),
+                Expanded(
+                    child: Text('Avg Order',
+                        style: TextStyle(fontWeight: FontWeight.bold))),
               ],
             ),
             const Divider(),
@@ -363,13 +384,16 @@ class PaymentOverviewTab extends ConsumerWidget {
               final serverId = entry.key;
               final serverRevenue = entry.value as double;
               final serverOrders = orderCount[serverId] ?? 0;
-              final avgOrder = serverOrders > 0 ? serverRevenue / serverOrders : 0.0;
-              
+              final avgOrder =
+                  serverOrders > 0 ? serverRevenue / serverOrders : 0.0;
+
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Row(
                   children: [
-                    Expanded(flex: 2, child: Text(serverId)), // Should be server name
+                    Expanded(
+                        flex: 2,
+                        child: Text(serverId)), // Should be server name
                     Expanded(child: Text(serverOrders.toString())),
                     Expanded(child: Text(formatter.format(serverRevenue))),
                     Expanded(child: Text(formatter.format(avgOrder))),
@@ -410,8 +434,12 @@ class PaymentOverviewTab extends ConsumerWidget {
   }
 
   String _formatPaymentMethod(String method) {
-    return method.replaceAll('_', ' ').split(' ')
-        .map((word) => word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : '')
+    return method
+        .replaceAll('_', ' ')
+        .split(' ')
+        .map((word) => word.isNotEmpty
+            ? '${word[0].toUpperCase()}${word.substring(1)}'
+            : '')
         .join(' ');
   }
 

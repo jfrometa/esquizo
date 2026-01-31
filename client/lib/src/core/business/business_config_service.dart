@@ -354,7 +354,7 @@ class BusinessConfig {
 
   // Helper method to convert Color to hex string
   String _colorToHex(Color color) {
-    return '#${color.value.toRadixString(16).padLeft(8, '0').substring(2)}';
+    return '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}';
   }
 }
 
@@ -548,6 +548,6 @@ class BusinessConfigService {
 
   // Helper method to convert Color to hex string
   String _colorToHex(Color color) {
-    return '#${color.value.toRadixString(16).padLeft(8, '0').substring(2)}';
+    return '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}';
   }
 }

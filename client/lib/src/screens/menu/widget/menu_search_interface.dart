@@ -7,7 +7,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/search/materia
 // Extract placeholder to a separate const widget for better performance
 class _EmptySearchPlaceholder extends StatelessWidget {
   const _EmptySearchPlaceholder();
-  
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -17,7 +17,7 @@ class _EmptySearchPlaceholder extends StatelessWidget {
           Icon(
             Icons.search,
             size: 64,
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           const Text(
@@ -34,7 +34,7 @@ class _EmptySearchPlaceholder extends StatelessWidget {
 }
 
 // Extracted drag handle as a const widget
-const _DragHandle = Padding(
+const _dragHandle = Padding(
   padding: EdgeInsets.symmetric(vertical: 12),
   child: Center(
     child: SizedBox(
@@ -75,13 +75,12 @@ class MenuSearchInterface extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final mediaQuery = MediaQuery.sizeOf(context);
-    
+
     // Only watch recent searches when needed
     final bool hasFocus = focusNode.hasFocus;
-    final List<String> recentSearches = hasFocus && !isSearching 
-        ? ref.watch(menuRecentSearchesProvider)
-        : [];
-    
+    final List<String> recentSearches =
+        hasFocus && !isSearching ? ref.watch(menuRecentSearchesProvider) : [];
+
     // Use memoization for the title row to avoid rebuilds
     final titleRow = Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -99,7 +98,7 @@ class MenuSearchInterface extends ConsumerWidget {
         ),
       ],
     );
-    
+
     return Container(
       constraints: BoxConstraints(
         maxHeight: mediaQuery.height * 0.9,
@@ -109,7 +108,7 @@ class MenuSearchInterface extends ConsumerWidget {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             spreadRadius: 0,
             offset: const Offset(0, -2),
@@ -120,14 +119,14 @@ class MenuSearchInterface extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           // Drag handle - extracted to a const widget
-          _DragHandle,
-          
+          _dragHandle,
+
           // Title and close button - pre-built above
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: titleRow,
           ),
-          
+
           // Search bar
           Padding(
             padding: const EdgeInsets.all(20),
@@ -142,11 +141,11 @@ class MenuSearchInterface extends ConsumerWidget {
               // autofocus: true,
             ),
           ),
-          
+
           // Recent searches - conditionally rendered
           if (recentSearches.isNotEmpty)
             _buildRecentSearches(context, theme, recentSearches, ref),
-          
+
           // Content area - reuse existing child when possible
           if (searchResults != null)
             Expanded(child: searchResults!)
@@ -158,8 +157,9 @@ class MenuSearchInterface extends ConsumerWidget {
       ),
     );
   }
-  
-  Widget _buildRecentSearches(BuildContext context, ThemeData theme, List<String> recentSearches, WidgetRef ref) {
+
+  Widget _buildRecentSearches(BuildContext context, ThemeData theme,
+      List<String> recentSearches, WidgetRef ref) {
     // Pre-calculate button style to avoid recalculation during layout
     final buttonStyle = TextButton.styleFrom(
       visualDensity: VisualDensity.compact,
@@ -167,13 +167,13 @@ class MenuSearchInterface extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       minimumSize: const Size(40, 24),
     );
-    
+
     // Pre-calculate text style
     final titleStyle = theme.textTheme.labelLarge?.copyWith(
       color: theme.colorScheme.onSurfaceVariant,
       fontWeight: FontWeight.w500,
     );
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -200,13 +200,13 @@ class MenuSearchInterface extends ConsumerWidget {
       ),
     );
   }
-  
+
   // Extracted method to build search chips for better organization
   Widget _buildSearchChips(ThemeData theme, List<String> recentSearches) {
     // Pre-calculate chip appearance for consistency
-    final chipShadowColor = theme.colorScheme.shadow.withOpacity(0.2);
+    final chipShadowColor = theme.colorScheme.shadow.withValues(alpha: 0.2);
     final chipSurfaceTint = theme.colorScheme.surfaceTint;
-    
+
     return Wrap(
       spacing: 8,
       runSpacing: 8,

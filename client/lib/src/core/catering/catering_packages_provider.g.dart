@@ -6,7 +6,7 @@ part of 'catering_packages_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$activePackagesHash() => r'334a5e15972efc55c370123e654a36be9ec882ba';
+String _$activePackagesHash() => r'98f28ab66987dec52dc0fbf9f632797d6daf5b8b';
 
 /// Provider for active packages only
 ///
@@ -26,7 +26,7 @@ final activePackagesProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ActivePackagesRef = AutoDisposeStreamProviderRef<List<CateringPackage>>;
-String _$promotedPackagesHash() => r'c35c5e13441ca4f92e4e6ee301aa12ff53632635';
+String _$promotedPackagesHash() => r'4c4fa2621dfca14858254f874350704967559e40';
 
 /// Provider for promoted packages only
 ///
@@ -48,7 +48,7 @@ final promotedPackagesProvider =
 typedef PromotedPackagesRef
     = AutoDisposeStreamProviderRef<List<CateringPackage>>;
 String _$packagesByCategoryHash() =>
-    r'64011302a6f5918dd03b9651fd3c882f387faa0e';
+    r'd19b73aca0685c48c1ed45bfb6ba9efb7ca3ace5';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -217,7 +217,7 @@ class _PackagesByCategoryProviderElement
   String get categoryId => (origin as PackagesByCategoryProvider).categoryId;
 }
 
-String _$searchPackagesHash() => r'b6797557b23672bc5e75da05f68df1ce22b91049';
+String _$searchPackagesHash() => r'7e35f053ec4e01d88d6f0165f9768052d444eece';
 
 /// Provider for searching packages by name or description
 ///

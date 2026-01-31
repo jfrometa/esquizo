@@ -6,7 +6,7 @@ part of 'catering_item_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$selectedItemHash() => r'58e7f855e888e0b3d7faae3d8a683485b0b257e2';
+String _$selectedItemHash() => r'4e1794a2d67c8c03e17b9a053d4d214172d9385b';
 
 /// See also [selectedItem].
 @ProviderFor(selectedItem)
@@ -22,7 +22,7 @@ final selectedItemProvider = AutoDisposeProvider<CateringItem>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SelectedItemRef = AutoDisposeProviderRef<CateringItem>;
-String _$itemsByCategoryHash() => r'420b13da66bc3cf6456c03f98885943b1cf43f48';
+String _$itemsByCategoryHash() => r'5b7b06d936a2794acd357dc5976a405bc4d28571';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -175,7 +175,7 @@ class _ItemsByCategoryProviderElement
   String get categoryId => (origin as ItemsByCategoryProvider).categoryId;
 }
 
-String _$highlightedItemsHash() => r'0bcaca16408738df8055b23941cd86ac17643315';
+String _$highlightedItemsHash() => r'498a655b79c761f994d1922c9bc336fe1cbc8970';
 
 /// See also [highlightedItems].
 @ProviderFor(highlightedItems)
@@ -193,7 +193,7 @@ final highlightedItemsProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef HighlightedItemsRef = AutoDisposeStreamProviderRef<List<CateringItem>>;
-String _$itemCategoriesHash() => r'bcc68897e1d0cee156cd03846b66cf98ce14bf81';
+String _$itemCategoriesHash() => r'8a234eb9dae61246b1f298722ddbbe2f680b346e';
 
 /// See also [itemCategories].
 @ProviderFor(itemCategories)

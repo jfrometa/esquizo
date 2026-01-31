@@ -32,8 +32,6 @@ class _MealPlanAdminSectionState extends ConsumerState<MealPlanAdminSection>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Meal Plan Management'),

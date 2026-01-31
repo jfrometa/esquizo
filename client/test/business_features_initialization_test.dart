@@ -22,14 +22,6 @@ class MockFirebaseDatabase extends Mock implements FirebaseDatabase {
 
 void main() {
   group('BusinessFeaturesService initialization tests', () {
-    late MockFirebaseDatabase mockDatabase;
-    late BusinessFeaturesService service;
-
-    setUp(() {
-      mockDatabase = MockFirebaseDatabase();
-      service = BusinessFeaturesService(database: mockDatabase);
-    });
-
     test('Default features are correctly initialized', () {
       // Default features should all be true
       final defaultFeatures = const BusinessFeatures();

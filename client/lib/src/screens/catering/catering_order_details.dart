@@ -196,7 +196,7 @@ class CateringOrderDetailsScreenState
           Icon(
             Icons.no_food,
             size: 64,
-            color: colorScheme.error.withOpacity(0.7),
+            color: colorScheme.error.withValues(alpha: 0.7),
           ),
           const SizedBox(height: 16),
           Text(
@@ -236,7 +236,8 @@ class CateringOrderDetailsScreenState
                 // Order title card
                 Card(
                   elevation: 0,
-                  color: colorScheme.surfaceContainerHighest.withOpacity(0.7),
+                  color: colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.7),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -537,7 +538,8 @@ class CateringOrderDetailsScreenState
                         value.isEmpty ? placeholder : value,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: value.isEmpty
-                              ? colorScheme.onSurfaceVariant.withOpacity(0.7)
+                              ? colorScheme.onSurfaceVariant
+                                  .withValues(alpha: 0.7)
                               : colorScheme.onSurface,
                         ),
                       ),
@@ -591,7 +593,7 @@ class CateringOrderDetailsScreenState
               activeThumbColor: colorScheme.primary,
               inactiveTrackColor: isEditing
                   ? colorScheme.surfaceContainerHighest
-                  : colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                  : colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             ),
           ],
         ),

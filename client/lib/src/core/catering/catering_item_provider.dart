@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_category_provider.dart';
@@ -82,13 +83,13 @@ class CateringItemRepository extends _$CateringItemRepository {
 }
 
 @riverpod
-CateringItem selectedItem(SelectedItemRef ref) {
+CateringItem selectedItem(Ref ref) {
   return CateringItem.empty();
 }
 
 @riverpod
 Stream<List<CateringItem>> itemsByCategory(
-  ItemsByCategoryRef ref,
+  Ref ref,
   String categoryId,
 ) {
   final businessId = ref.watch(currentBusinessIdProvider);
@@ -109,7 +110,7 @@ Stream<List<CateringItem>> itemsByCategory(
 }
 
 @riverpod
-Stream<List<CateringItem>> highlightedItems(HighlightedItemsRef ref) {
+Stream<List<CateringItem>> highlightedItems(Ref ref) {
   final businessId = ref.watch(currentBusinessIdProvider);
   return FirebaseFirestore.instance
       .collection('businesses')
@@ -129,7 +130,7 @@ Stream<List<CateringItem>> highlightedItems(HighlightedItemsRef ref) {
 
 @riverpod
 List<CateringCategory> itemCategories(
-  ItemCategoriesRef ref,
+  Ref ref,
   CateringItem item,
 ) {
   final allCategories =

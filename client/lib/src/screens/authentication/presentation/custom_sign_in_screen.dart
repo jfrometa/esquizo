@@ -57,7 +57,7 @@ class _CustomSignInScreenState extends ConsumerState<CustomSignInScreen> {
               authRepo.forceRefreshAuthState();
 
               // Check admin status and refresh the provider
-              await ref.refresh(isAdminProvider.future);
+              final _ = await ref.refresh(isAdminProvider.future);
               final isAdmin = await ref.read(isAdminProvider.future);
 
               if (isAdmin) {
@@ -72,6 +72,8 @@ class _CustomSignInScreenState extends ConsumerState<CustomSignInScreen> {
                 }
                 return;
               }
+
+              if (!context.mounted) return;
 
               // Handle non-admin user navigation
               final RouteMatch lastMatch =

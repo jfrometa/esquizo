@@ -442,7 +442,7 @@ class CateringDashboardScreen extends ConsumerWidget {
 
     return Card(
       elevation: 0,
-      color: color.withOpacity(0.1),
+      color: color.withValues(alpha: 0.1),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -451,7 +451,7 @@ class CateringDashboardScreen extends ConsumerWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
+                color: color.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -469,7 +469,7 @@ class CateringDashboardScreen extends ConsumerWidget {
                   Text(
                     title,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                   ),
                   Text(
@@ -482,7 +482,7 @@ class CateringDashboardScreen extends ConsumerWidget {
                   Text(
                     subtitle,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                 ],
@@ -535,7 +535,7 @@ class CateringDashboardScreen extends ConsumerWidget {
         Text(
           subtitle,
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withOpacity(0.7),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
       ],
@@ -561,7 +561,7 @@ class CateringDashboardScreen extends ConsumerWidget {
                 Icon(
                   Icons.event_available,
                   size: 48,
-                  color: colorScheme.onSurface.withOpacity(0.2),
+                  color: colorScheme.onSurface.withValues(alpha: 0.2),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -637,7 +637,7 @@ class CateringDashboardScreen extends ConsumerWidget {
                 Icon(
                   Icons.event_busy,
                   size: 48,
-                  color: colorScheme.onSurface.withOpacity(0.2),
+                  color: colorScheme.onSurface.withValues(alpha: 0.2),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -768,7 +768,7 @@ class CateringDashboardScreen extends ConsumerWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: order.status.color.withOpacity(0.2),
+                            color: order.status.color.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -1002,7 +1002,7 @@ class CateringDashboardScreen extends ConsumerWidget {
                 Icon(
                   Icons.bar_chart,
                   size: 48,
-                  color: colorScheme.onSurface.withOpacity(0.2),
+                  color: colorScheme.onSurface.withValues(alpha: 0.2),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -1089,7 +1089,7 @@ class CateringDashboardScreen extends ConsumerWidget {
                 Icon(
                   Icons.receipt_long,
                   size: 48,
-                  color: colorScheme.onSurface.withOpacity(0.2),
+                  color: colorScheme.onSurface.withValues(alpha: 0.2),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -1120,7 +1120,7 @@ class CateringDashboardScreen extends ConsumerWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: order.status.color.withOpacity(0.2),
+                color: order.status.color.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Icon(
@@ -1159,7 +1159,7 @@ class CateringDashboardScreen extends ConsumerWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: order.status.color.withOpacity(0.2),
+                    color: order.status.color.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(

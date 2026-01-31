@@ -1,6 +1,7 @@
 // Simple test to verify navigation fixes compilation
 // This tests individual components without web dependencies
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/business_routing_provider.dart';
@@ -34,13 +35,13 @@ void main() {
       businessIdAsync.when(
         data: (businessId) {
           expect(businessId, isA<String>());
-          print('✅ Business ID resolved: $businessId');
+          debugPrint('✅ Business ID resolved: $businessId');
         },
         loading: () {
-          print('⏳ Business ID loading...');
+          debugPrint('⏳ Business ID loading...');
         },
         error: (error, stack) {
-          print('❌ Business ID error: $error');
+          debugPrint('❌ Business ID error: $error');
         },
       );
     });
@@ -53,7 +54,7 @@ void main() {
       expect(extractBusinessSlugFromPath('/signin'), isNull);
       expect(extractBusinessSlugFromPath('/menu'), isNull); // Default route
 
-      print('✅ Business slug extraction tests passed');
+      debugPrint('✅ Business slug extraction tests passed');
     });
   });
 }

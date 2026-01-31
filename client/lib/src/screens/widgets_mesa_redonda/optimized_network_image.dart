@@ -29,12 +29,16 @@ class OptimizedNetworkImage extends StatelessWidget {
     final defaultPlaceholder = Container(
       width: width,
       height: height,
-      color: backgroundColor ?? Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+      color: backgroundColor ??
+          Theme.of(context)
+              .colorScheme
+              .surfaceContainerHighest
+              .withValues(alpha: 0.3),
       child: Center(
         child: Icon(
           Icons.image,
           size: 24,
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
         ),
       ),
     );
@@ -42,12 +46,16 @@ class OptimizedNetworkImage extends StatelessWidget {
     final defaultError = Container(
       width: width,
       height: height,
-      color: backgroundColor ?? Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.2),
+      color: backgroundColor ??
+          Theme.of(context)
+              .colorScheme
+              .surfaceContainerHighest
+              .withValues(alpha: 0.2),
       child: Center(
         child: Icon(
           Icons.broken_image,
           size: 24,
-          color: Theme.of(context).colorScheme.error.withOpacity(0.5),
+          color: Theme.of(context).colorScheme.error.withValues(alpha: 0.5),
         ),
       ),
     );
@@ -63,9 +71,7 @@ class OptimizedNetworkImage extends StatelessWidget {
         }
         return AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
-          child: frame != null
-              ? child
-              : placeholder ?? defaultPlaceholder,
+          child: frame != null ? child : placeholder ?? defaultPlaceholder,
         );
       },
       errorBuilder: (context, error, stackTrace) {
@@ -96,7 +102,8 @@ class OptimizedNetworkImage extends StatelessWidget {
   int? _calculateCacheWidth(double? width) {
     if (width == null) return null;
     // Limit cache size for better memory usage
-    return (width * 2).round(); // Account for high-density displays with 2x factor
+    return (width * 2)
+        .round(); // Account for high-density displays with 2x factor
   }
 
   int? _calculateCacheHeight(double? height) {

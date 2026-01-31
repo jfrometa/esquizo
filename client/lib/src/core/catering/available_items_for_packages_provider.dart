@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_package_model.dart';
@@ -143,7 +144,7 @@ class AvailableItemsRepository extends _$AvailableItemsRepository {
 /// Provider for available items by category
 @riverpod
 Future<List<CateringDish>> availableItemsByCategory(
-  AvailableItemsByCategoryRef ref,
+  Ref ref,
   String category,
 ) async {
   final repository = ref.watch(availableItemsRepositoryProvider.notifier);
@@ -153,7 +154,7 @@ Future<List<CateringDish>> availableItemsByCategory(
 /// Provider for items in a specific package
 @riverpod
 Future<List<CateringDish>> availableItemsForPackage(
-  AvailableItemsForPackageRef ref,
+  Ref ref,
   String packageId,
 ) async {
   final repository = ref.watch(availableItemsRepositoryProvider.notifier);
@@ -163,7 +164,7 @@ Future<List<CateringDish>> availableItemsForPackage(
 /// Provider for searching dishes
 @riverpod
 Future<List<CateringDish>> searchAvailableItems(
-  SearchAvailableItemsRef ref,
+  Ref ref,
   String query,
 ) async {
   final repository = ref.watch(availableItemsRepositoryProvider.notifier);
@@ -173,7 +174,7 @@ Future<List<CateringDish>> searchAvailableItems(
 /// Provider for dietary restriction filtering
 @riverpod
 Future<List<CateringDish>> dietaryFilteredItems(
-  DietaryFilteredItemsRef ref,
+  Ref ref,
   List<String> restrictions,
 ) async {
   final repository = ref.watch(availableItemsRepositoryProvider.notifier);
@@ -182,7 +183,7 @@ Future<List<CateringDish>> dietaryFilteredItems(
 
 /// Stream provider for real-time updates of all available dishes
 @riverpod
-Stream<List<CateringDish>> availableItemsStream(AvailableItemsStreamRef ref) {
+Stream<List<CateringDish>> availableItemsStream(Ref ref) {
   return FirebaseFirestore.instance
       .collection('cateringDishes')
       .snapshots()
@@ -195,7 +196,7 @@ Stream<List<CateringDish>> availableItemsStream(AvailableItemsStreamRef ref) {
 
 /// Simplified provider to get featured dishes
 @riverpod
-Future<List<CateringDish>> featuredItems(FeaturedItemsRef ref) async {
+Future<List<CateringDish>> featuredItems(Ref ref) async {
   return FirebaseFirestore.instance
       .collection('cateringDishes')
       .where('featured', isEqualTo: true)
@@ -210,7 +211,7 @@ Future<List<CateringDish>> featuredItems(FeaturedItemsRef ref) async {
 
 /// Provider for getting popular dishes (based on order count)
 @riverpod
-Future<List<CateringDish>> popularItems(PopularItemsRef ref) async {
+Future<List<CateringDish>> popularItems(Ref ref) async {
   return FirebaseFirestore.instance
       .collection('cateringDishes')
       .orderBy('orderCount', descending: true)
@@ -225,7 +226,7 @@ Future<List<CateringDish>> popularItems(PopularItemsRef ref) async {
 
 /// Provider for getting all catering packages
 @riverpod
-Stream<List<CateringPackage>> cateringPackages(CateringPackagesRef ref) {
+Stream<List<CateringPackage>> cateringPackages(Ref ref) {
   return FirebaseFirestore.instance
       .collection('cateringPackages')
       .snapshots()
@@ -250,7 +251,7 @@ Stream<List<CateringPackage>> cateringPackages(CateringPackagesRef ref) {
 /// Provider for getting the details of a specific package with its dishes
 @riverpod
 Future<Map<String, dynamic>> packageWithItems(
-  PackageWithItemsRef ref,
+  Ref ref,
   String packageId,
 ) async {
   final packageDoc = await FirebaseFirestore.instance

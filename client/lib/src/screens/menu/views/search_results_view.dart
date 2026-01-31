@@ -20,17 +20,20 @@ class SearchResultsView extends ConsumerWidget {
     final theme = Theme.of(context);
     // Replace dishProvider with catalogItemsProvider
     final dishesAsync = ref.watch(catalogItemsProvider('menu'));
-    
+
     return dishesAsync.when(
       data: (dishes) {
         // Filter dishes based on search query
         final filteredDishes = dishes.where((dish) {
           final title = dish.name.toLowerCase();
           final description = dish.description.toLowerCase();
-          final category = dish.metadata['foodType']?.toString().toLowerCase() ?? '';
-          
+          final category =
+              dish.metadata['foodType']?.toString().toLowerCase() ?? '';
+
           final query = searchQuery.toLowerCase();
-          return title.contains(query) || description.contains(query) || category.contains(query);
+          return title.contains(query) ||
+              description.contains(query) ||
+              category.contains(query);
         }).toList();
 
         // If no results found
@@ -50,7 +53,8 @@ class SearchResultsView extends ConsumerWidget {
                 ElevatedButton(
                   onPressed: onClearSearch,
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
                     backgroundColor: theme.colorScheme.primary,
                     foregroundColor: theme.colorScheme.onPrimary,
                   ),
@@ -91,11 +95,15 @@ class SearchResultsView extends ConsumerWidget {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final screenWidth = constraints.maxWidth;
-                  
+
                   return GridView.builder(
                     padding: const EdgeInsets.all(16),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: screenWidth > 800 ? 4 : screenWidth > 600 ? 3 : 2,
+                      crossAxisCount: screenWidth > 800
+                          ? 4
+                          : screenWidth > 600
+                              ? 3
+                              : 2,
                       childAspectRatio: 0.75,
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
@@ -109,18 +117,18 @@ class SearchResultsView extends ConsumerWidget {
                         'title': dish.name,
                         'description': dish.description,
                         'pricing': dish.price,
-                        'img': dish.imageUrl ?? 'assets/images/placeholder_food.png',
+                        'img': dish.imageUrl,
                         'foodType': dish.metadata['foodType'] ?? 'Main Course',
                         'isSpicy': dish.metadata['isSpicy'] ?? false,
                       };
-                      
+
                       return DishCardSmall(
                         dish: dishMap,
                         onAddToCart: () {
                           ref.read(cartProvider.notifier).addToCart(
-                            dishMap,
-                            1,
-                          );
+                                dishMap,
+                                1,
+                              );
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('${dish.name} added to cart'),
@@ -156,7 +164,8 @@ class SearchResultsView extends ConsumerWidget {
             ElevatedButton(
               onPressed: () => ref.refresh(catalogItemsProvider('menu')),
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 backgroundColor: theme.colorScheme.primary,
                 foregroundColor: theme.colorScheme.onPrimary,
               ),

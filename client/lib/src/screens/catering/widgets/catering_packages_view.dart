@@ -45,7 +45,7 @@ class CateringPackagesView extends ConsumerWidget {
         Text(
           'Perfect for events, parties, and corporate meetings',
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withOpacity(0.7),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
         const SizedBox(height: 24),
@@ -132,8 +132,8 @@ class CateringPackagesView extends ConsumerWidget {
                 Text(
                   'Tell us about your event and we\'ll create the perfect menu',
                   style: TextStyle(
-                    color:
-                        theme.colorScheme.onPrimaryContainer.withOpacity(0.8),
+                    color: theme.colorScheme.onPrimaryContainer
+                        .withValues(alpha: 0.8),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -181,7 +181,7 @@ class CateringPackagesView extends ConsumerWidget {
           Icon(
             Icons.restaurant_menu,
             size: 64,
-            color: theme.colorScheme.primary.withOpacity(0.5),
+            color: theme.colorScheme.primary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -192,7 +192,7 @@ class CateringPackagesView extends ConsumerWidget {
           Text(
             'Please check back later or request a custom quote',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.7),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
             textAlign: TextAlign.center,
           ),
@@ -223,7 +223,7 @@ class CateringPackagesView extends ConsumerWidget {
           Text(
             'Please try again later or contact support',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.7),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
             textAlign: TextAlign.center,
           ),

@@ -129,7 +129,7 @@ class _SearchCardState extends State<SearchCard> {
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16.0),
             borderSide: BorderSide(
-              color: theme.dividerColor.withOpacity(0.3),
+              color: theme.dividerColor.withValues(alpha: 0.3),
               width: 0.5,
             ),
           ),

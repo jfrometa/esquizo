@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; 
-import 'package:starter_architecture_flutter_firebase/src/core/cart/cart_service.dart';// Add this import
-import 'package:starter_architecture_flutter_firebase/src/core/catalog/catalog_service.dart'; 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/cart/cart_service.dart'; // Add this import
+import 'package:starter_architecture_flutter_firebase/src/core/catalog/catalog_service.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 /// Enhanced Dish Details Screen with system theming support
@@ -39,7 +39,8 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
   String _calculateTotal() {
     try {
       if (selectedItem == null) return '\$0.00';
-      final double itemPrice = double.tryParse(selectedItem!['pricing'].toString()) ?? 0.0;
+      final double itemPrice =
+          double.tryParse(selectedItem!['pricing'].toString()) ?? 0.0;
       return '\$${(itemPrice * quantity).toStringAsFixed(2)}';
     } catch (e) {
       return '\$0.00';
@@ -56,7 +57,8 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
       'img': item.imageUrl.isEmpty ? 'assets/appIcon.png' : item.imageUrl,
       'foodType': item.metadata['foodType'] ?? 'Main Course',
       'isSpicy': item.metadata['isSpicy'] ?? false,
-      'ingredients': item.metadata['ingredients'] ?? ['Ingredient 1', 'Ingredient 2'],
+      'ingredients':
+          item.metadata['ingredients'] ?? ['Ingredient 1', 'Ingredient 2'],
       'nutritionalInfo': item.metadata['nutritionalInfo'],
     };
   }
@@ -66,34 +68,32 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
     // Access theme for colors
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     // Use catalogItemsProvider instead of dishProvider
     final dishesAsync = ref.watch(catalogItemsProvider('menu'));
-    
+
     // Check for active subscriptions in the cart
     final cartItems = ref.watch(cartProvider);
-    bool hasActiveSubscription = cartItems.items.any((item) => 
-        item.isMealSubscription && item.remainingMeals > 0);
+    bool hasActiveSubscription = cartItems.items
+        .any((item) => item.isMealSubscription && item.remainingMeals > 0);
 
     return Scaffold(
       body: dishesAsync.when(
         data: (dishes) {
           if (dishes.isEmpty) {
-            return _buildErrorState(theme, 'Dish not found. Please try again later.');
+            return _buildErrorState(
+                theme, 'Dish not found. Please try again later.');
           }
-          
+
           // Set the selected item
           selectedItem = _catalogItemToMap(
-            dishes.firstWhere((dish) => dish.id == widget.id)
-          );
-          
+              dishes.firstWhere((dish) => dish.id == widget.id));
+
           return _buildDetailContent(hasActiveSubscription, theme);
         },
         loading: () => _buildLoadingState(colorScheme),
-        error: (error, stackTrace) => _buildErrorState(
-          theme, 
-          'Error loading dish details: $error'
-        ),
+        error: (error, stackTrace) =>
+            _buildErrorState(theme, 'Error loading dish details: $error'),
       ),
       bottomSheet: dishesAsync.maybeWhen(
         data: (dishes) {
@@ -146,7 +146,8 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.colorScheme.primary,
                 foregroundColor: theme.colorScheme.onPrimary,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
             ),
           ],
@@ -160,12 +161,12 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
     if (selectedItem == null) {
       return _buildErrorState(theme, 'Dish information not available');
     }
-    
+
     return CustomScrollView(
       slivers: [
         // App bar with image
         _buildSliverAppBar(theme),
-        
+
         // Details content
         SliverToBoxAdapter(
           child: Padding(
@@ -175,23 +176,23 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
               children: [
                 // Title and price section
                 _buildTitlePriceSection(theme),
-                
+
                 // Description
                 _buildDescriptionSection(theme),
-                
+
                 // Food type and spicy info
                 _buildFoodTypeSection(theme),
-                
+
                 // Ingredients
                 _buildIngredientsSection(theme),
-                
+
                 // Nutritional info (if available)
                 if (selectedItem?.containsKey('nutritionalInfo') ?? false)
                   _buildNutritionalInfoSection(theme),
-                
+
                 // Serving suggestion
                 _buildServingSuggestion(theme),
-                
+
                 // Reviews section
                 _buildReviewsSection(theme),
               ],
@@ -222,7 +223,8 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
                     color: theme.colorScheme.surfaceContainerHighest,
                     child: Icon(
                       Icons.image_not_supported_outlined,
-                      color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                      color: theme.colorScheme.onSurfaceVariant
+                          .withValues(alpha: 0.5),
                       size: 50,
                     ),
                   );
@@ -237,7 +239,7 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        Colors.black.withOpacity(0.7),
+                        Colors.black.withValues(alpha: 0.7),
                       ],
                       stops: const [0.7, 1.0],
                     ),
@@ -249,13 +251,14 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
                 bottom: 20,
                 right: 20,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.primary,
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: theme.shadowColor.withOpacity(0.2),
+                        color: theme.shadowColor.withValues(alpha: 0.2),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -346,7 +349,7 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
               side: BorderSide(
-                color: theme.colorScheme.outline.withOpacity(0.1),
+                color: theme.colorScheme.outline.withValues(alpha: 0.1),
               ),
             ),
             child: Padding(
@@ -415,9 +418,9 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
         ],
       ),
     )
-    .animate()
-    .fadeIn(duration: 600.ms, delay: 200.ms)
-    .moveY(begin: 20, end: 0, delay: 200.ms, duration: 400.ms);
+        .animate()
+        .fadeIn(duration: 600.ms, delay: 200.ms)
+        .moveY(begin: 20, end: 0, delay: 200.ms, duration: 400.ms);
   }
 
   // Food type section
@@ -479,15 +482,15 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
         ],
       ),
     )
-    .animate()
-    .fadeIn(duration: 600.ms, delay: 300.ms)
-    .moveY(begin: 20, end: 0, delay: 300.ms, duration: 400.ms);
+        .animate()
+        .fadeIn(duration: 600.ms, delay: 300.ms)
+        .moveY(begin: 20, end: 0, delay: 300.ms, duration: 400.ms);
   }
 
   // Ingredients section
   Widget _buildIngredientsSection(ThemeData theme) {
     final ingredients = selectedItem?['ingredients'] as List<dynamic>? ?? [];
-    
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: Column(
@@ -525,9 +528,9 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
         ],
       ),
     )
-    .animate()
-    .fadeIn(duration: 600.ms, delay: 400.ms)
-    .moveY(begin: 20, end: 0, delay: 400.ms, duration: 400.ms);
+        .animate()
+        .fadeIn(duration: 600.ms, delay: 400.ms)
+        .moveY(begin: 20, end: 0, delay: 400.ms, duration: 400.ms);
   }
 
   // Ingredient chip
@@ -550,14 +553,14 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: theme.colorScheme.outline.withOpacity(0.2),
+          color: theme.colorScheme.outline.withValues(alpha: 0.2),
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 6),
-    )
-    .animate()
-    .fadeIn(delay: (50 * index).ms + 400.ms, duration: 400.ms)
-    .scale(delay: (50 * index).ms + 400.ms, duration: 400.ms, begin: const Offset(0.8, 0.8));
+    ).animate().fadeIn(delay: (50 * index).ms + 400.ms, duration: 400.ms).scale(
+        delay: (50 * index).ms + 400.ms,
+        duration: 400.ms,
+        begin: const Offset(0.8, 0.8));
   }
 
   // Nutritional info section (if available)
@@ -597,9 +600,9 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
         ],
       ),
     )
-    .animate()
-    .fadeIn(duration: 600.ms, delay: 500.ms)
-    .moveY(begin: 20, end: 0, delay: 500.ms, duration: 400.ms);
+        .animate()
+        .fadeIn(duration: 600.ms, delay: 500.ms)
+        .moveY(begin: 20, end: 0, delay: 500.ms, duration: 400.ms);
   }
 
   // Nutrition info item
@@ -667,9 +670,9 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
         ),
       ),
     )
-    .animate()
-    .fadeIn(duration: 600.ms, delay: 600.ms)
-    .moveY(begin: 20, end: 0, delay: 600.ms, duration: 400.ms);
+        .animate()
+        .fadeIn(duration: 600.ms, delay: 600.ms)
+        .moveY(begin: 20, end: 0, delay: 600.ms, duration: 400.ms);
   }
 
   // Reviews section
@@ -712,24 +715,26 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
           _buildReviewItem(
             name: "María G.",
             rating: 5,
-            comment: "Excelente plato, los ingredientes frescos y la presentación impecable. Lo recomiendo ampliamente.",
+            comment:
+                "Excelente plato, los ingredientes frescos y la presentación impecable. Lo recomiendo ampliamente.",
             date: "Hace 2 días",
             theme: theme,
           ),
-          Divider(color: theme.colorScheme.outline.withOpacity(0.2)),
+          Divider(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
           _buildReviewItem(
             name: "Carlos R.",
             rating: 4,
-            comment: "Muy bueno, aunque podría tener un poco más de sabor. La porción es generosa.",
+            comment:
+                "Muy bueno, aunque podría tener un poco más de sabor. La porción es generosa.",
             date: "Hace 1 semana",
             theme: theme,
           ),
         ],
       ),
     )
-    .animate()
-    .fadeIn(duration: 600.ms, delay: 700.ms)
-    .moveY(begin: 20, end: 0, delay: 700.ms, duration: 400.ms);
+        .animate()
+        .fadeIn(duration: 600.ms, delay: 700.ms)
+        .moveY(begin: 20, end: 0, delay: 700.ms, duration: 400.ms);
   }
 
   // Review item
@@ -805,7 +810,7 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
         color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: theme.shadowColor.withOpacity(0.1),
+            color: theme.shadowColor.withValues(alpha: 0.1),
             blurRadius: 5,
             offset: const Offset(0, -2),
           ),
@@ -843,12 +848,16 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
                 onPressed: () {
                   if (hasActiveSubscription) {
                     // Consume from subscription
-                    ref.read(cartProvider.notifier).consumeMeal(selectedItem?['title'] ?? 'Unknown Item');
+                    ref
+                        .read(cartProvider.notifier)
+                        .consumeMeal(selectedItem?['title'] ?? 'Unknown Item');
                   } else {
                     // Add to cart
-                    ref.read(cartProvider.notifier).addToCart(selectedItem!, quantity);
+                    ref
+                        .read(cartProvider.notifier)
+                        .addToCart(selectedItem!, quantity);
                   }
-                  
+
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
@@ -864,7 +873,7 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
                       margin: const EdgeInsets.all(16),
                     ),
                   );
-                  
+
                   Navigator.pop(context);
                 },
                 style: FilledButton.styleFrom(
@@ -875,7 +884,9 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
                   ),
                 ),
                 child: Text(
-                  hasActiveSubscription ? 'Consumir del plan' : 'Agregar al carrito',
+                  hasActiveSubscription
+                      ? 'Consumir del plan'
+                      : 'Agregar al carrito',
                   style: theme.textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.onPrimary,
@@ -887,8 +898,8 @@ class _DishDetailsScreenState extends ConsumerState<DishDetailsScreen> {
         ),
       ),
     )
-    .animate()
-    .fadeIn(duration: 500.ms, delay: 200.ms)
-    .moveY(begin: 50, end: 0, delay: 200.ms, duration: 500.ms);
+        .animate()
+        .fadeIn(duration: 500.ms, delay: 200.ms)
+        .moveY(begin: 50, end: 0, delay: 200.ms, duration: 500.ms);
   }
 }

@@ -273,7 +273,7 @@ class _MealPlanExportScreenState extends ConsumerState<MealPlanExportScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.error.withOpacity(0.1),
+                  color: theme.colorScheme.error.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: theme.colorScheme.error,
@@ -353,7 +353,8 @@ class _MealPlanExportScreenState extends ConsumerState<MealPlanExportScreen> {
           return ListTile(
             title: Text(plan.title),
             subtitle: Text(
-                'Owner: ${plan.ownerName.isNotEmpty ? plan.ownerName : "N/A"} • ' 'Meals: ${plan.mealsRemaining}/${plan.totalMeals}'),
+                'Owner: ${plan.ownerName.isNotEmpty ? plan.ownerName : "N/A"} • '
+                'Meals: ${plan.mealsRemaining}/${plan.totalMeals}'),
             trailing: Text('\$${plan.price}'),
           );
         },
@@ -390,7 +391,8 @@ class _MealPlanExportScreenState extends ConsumerState<MealPlanExportScreen> {
 
           return ListTile(
             title: Text(customer['customerName'] ?? 'Unknown'),
-            subtitle: Text('Plans: ${customer['totalPlans']} • ' 'Meals: ${customer['usedMeals']}/${customer['totalMeals']}'),
+            subtitle: Text('Plans: ${customer['totalPlans']} • '
+                'Meals: ${customer['usedMeals']}/${customer['totalMeals']}'),
             trailing: Text('\$${customer['totalValue'].toStringAsFixed(2)}'),
           );
         },
@@ -439,6 +441,7 @@ class _MealPlanExportScreenState extends ConsumerState<MealPlanExportScreen> {
 
       // In a real implementation, this would actually create and download the exports
       // For now, we'll just show a success message
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -447,24 +450,16 @@ class _MealPlanExportScreenState extends ConsumerState<MealPlanExportScreen> {
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _exportError = e.toString();
       });
     } finally {
-      setState(() {
-        _isExporting = false;
-      });
-    }
-  }
-
-  String _getReportTitle() {
-    switch (_selectedReportType) {
-      case ReportType.mealPlans:
-        return 'Meal Plans Report';
-      case ReportType.mealUsage:
-        return 'Meal Usage Report';
-      case ReportType.customerUsage:
-        return 'Customer Usage Report';
+      if (mounted) {
+        setState(() {
+          _isExporting = false;
+        });
+      }
     }
   }
 }

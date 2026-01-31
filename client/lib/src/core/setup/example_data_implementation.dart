@@ -209,7 +209,7 @@ class ExampleDataService {
         isActive: true,
       );
 
-      final docRef = await _firestore
+      await _firestore
           .collection('businesses')
           .doc(businessId)
           .collection('menu_categories')

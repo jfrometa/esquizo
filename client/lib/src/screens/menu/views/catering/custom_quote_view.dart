@@ -55,7 +55,7 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
         Text(
           'Manage your custom catering quote details',
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withOpacity(0.7),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
         const SizedBox(height: 16),
@@ -74,7 +74,7 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: colorScheme.secondaryContainer.withOpacity(0.7),
+                  color: colorScheme.secondaryContainer.withValues(alpha: 0.7),
                 ),
                 child: Row(
                   children: [
@@ -96,7 +96,7 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
                             'Event Type: ${quote.eventType.isNotEmpty ? quote.eventType : "Not specified"}',
                             style: TextStyle(
                               color: colorScheme.onSecondaryContainer
-                                  .withOpacity(0.8),
+                                  .withValues(alpha: 0.8),
                             ),
                           ),
                           if (quote.peopleCount != null &&
@@ -105,7 +105,7 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
                               'People: ${quote.peopleCount}',
                               style: TextStyle(
                                 color: colorScheme.onSecondaryContainer
-                                    .withOpacity(0.8),
+                                    .withValues(alpha: 0.8),
                               ),
                             ),
                         ],
@@ -233,7 +233,7 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
         // Chef service option
         Card(
           elevation: 1,
-          color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -273,7 +273,7 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
         // Suggestions section
         Card(
           elevation: 1,
-          color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -319,7 +319,7 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
           Icon(
             Icons.request_quote_outlined,
             size: 80,
-            color: colorScheme.secondary.withOpacity(0.5),
+            color: colorScheme.secondary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 24),
           Text(

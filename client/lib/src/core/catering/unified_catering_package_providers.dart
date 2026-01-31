@@ -302,7 +302,7 @@ class SelectedCateringPackageNotifier extends StateNotifier<CateringPackage?> {
 /// Get categories for a specific package
 @riverpod
 List<CateringCategory> packageCategories(
-  PackageCategoriesRef ref,
+  Ref ref,
   CateringPackage package,
 ) {
   final allCategories =
@@ -314,7 +314,7 @@ List<CateringCategory> packageCategories(
 
 /// Get all available items for package selection
 @riverpod
-List<CateringItem> availableItemsForPackage(AvailableItemsForPackageRef ref) {
+List<CateringItem> availableItemsForPackage(Ref ref) {
   // Most likely the cateringItemRepositoryProvider already gives us access to the items
   return ref.watch(cateringItemRepositoryProvider).valueOrNull ?? [];
 }
@@ -387,14 +387,8 @@ final packagesForOrderProvider =
       .getPackagesForOrder(packageIds);
 });
 
-// Correct way to access the repository in modern Riverpod
-extension UnifiedCateringPackageRepositoryX
-    on AutoDisposeStreamNotifierProviderImpl<UnifiedCateringPackageRepository,
-        List<CateringPackage>> {
-  /// Provider that gives access to the repository instance
-  Provider<UnifiedCateringPackageRepository> get repositoryProvider =>
-      Provider<UnifiedCateringPackageRepository>((ref) => ref.watch(notifier));
-}
+// Note: Removed extension on internal AutoDisposeStreamNotifierProviderImpl
+// Use unifiedCateringPackageProvider or ref.read(unifiedCateringPackageRepositoryProvider.notifier) instead
 
 /// Legacy provider that wraps unifiedCateringPackageRepositoryProvider
 /// Ensures backward compatibility with code using cateringPackageRepositoryProvider
@@ -411,16 +405,16 @@ final selectedPackageProvider =
     StateNotifierProvider<SelectedCateringPackageNotifier, CateringPackage?>(
         (ref) {
   // Create a new StateNotifier instance that syncs with the new provider
-  final notifier = SelectedCateringPackageNotifier();
+  final stateNotifier = SelectedCateringPackageNotifier();
 
   // Sync changes from the riverpod provider to the StateNotifier
   ref.listen(selectedCateringPackageProvider, (previous, next) {
-    if (next != notifier.value) {
-      notifier.setSelectedPackage(next);
+    if (next != stateNotifier.value) {
+      stateNotifier.setSelectedPackage(next);
     }
   });
 
-  return notifier;
+  return stateNotifier;
 });
 
 /// Legacy provider that wraps selectedCateringPackageProvider

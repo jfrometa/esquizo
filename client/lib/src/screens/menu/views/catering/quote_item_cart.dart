@@ -7,13 +7,13 @@ import 'package:starter_architecture_flutter_firebase/src/core/catering/manual_q
 class QuoteItemCard extends ConsumerWidget {
   /// The dish to display
   final CateringDish dish;
-  
+
   /// Index of the dish in the list
   final int index;
-  
+
   /// Callback to edit this item
   final Function(CateringDish, int)? onEdit;
-  
+
   /// Callback to remove this item
   final Function(int)? onRemove;
 
@@ -29,10 +29,10 @@ class QuoteItemCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Card(
       elevation: 0,
-      color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
       margin: const EdgeInsets.only(bottom: 8),
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
@@ -63,7 +63,7 @@ class QuoteItemCard extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              
+
               // Item details
               Expanded(
                 child: Column(
@@ -83,7 +83,7 @@ class QuoteItemCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              
+
               // Delete button
               if (onRemove != null)
                 IconButton(
@@ -91,7 +91,8 @@ class QuoteItemCard extends ConsumerWidget {
                   icon: const Icon(Icons.delete_outline, size: 20),
                   tooltip: 'Remove item',
                   style: IconButton.styleFrom(
-                    backgroundColor: colorScheme.errorContainer.withOpacity(0.1),
+                    backgroundColor:
+                        colorScheme.errorContainer.withValues(alpha: 0.1),
                     foregroundColor: colorScheme.error,
                   ),
                 ),
@@ -101,20 +102,20 @@ class QuoteItemCard extends ConsumerWidget {
       ),
     );
   }
-  
+
   /// Dialog to edit a dish's quantity
   static void showEditDialog(
-    BuildContext context, 
+    BuildContext context,
     WidgetRef ref,
-    CateringDish dish, 
+    CateringDish dish,
     int index,
   ) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    String updatedValue = dish.hasUnitSelection 
+    String updatedValue = dish.hasUnitSelection
         ? dish.pricePerUnit.toString()
         : dish.quantity.toString();
-        
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -139,17 +140,18 @@ class QuoteItemCard extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancelar', style: TextStyle(color: colorScheme.primary)),
+            child:
+                Text('Cancelar', style: TextStyle(color: colorScheme.primary)),
           ),
           FilledButton(
             onPressed: () {
               // Update the dish quantity
               final parsedValue = int.tryParse(updatedValue) ?? 1;
               final updatedDish = dish.copyWith(quantity: parsedValue);
-              
+
               // Update the dish in the provider
-              ref.read(manualQuoteProvider.notifier).addManualItem( updatedDish);
-              
+              ref.read(manualQuoteProvider.notifier).addManualItem(updatedDish);
+
               Navigator.pop(context);
             },
             child: const Text('Guardar'),

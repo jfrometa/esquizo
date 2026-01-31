@@ -41,7 +41,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Actualizar',
-            onPressed: () => ref.refresh(tablesStatusProvider),
+            onPressed: () => ref.invalidate(tablesStatusProvider),
           ),
         ],
       ),
@@ -61,15 +61,15 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
                             Icon(
                               Icons.table_restaurant,
                               size: 64,
-                              color:
-                                  theme.colorScheme.onSurface.withOpacity(0.3),
+                              color: theme.colorScheme.onSurface
+                                  .withValues(alpha: 0.3),
                             ),
                             const SizedBox(height: 16),
                             Text(
                               'No hay mesas configuradas',
                               style: theme.textTheme.titleMedium?.copyWith(
                                 color: theme.colorScheme.onSurface
-                                    .withOpacity(0.7),
+                                    .withValues(alpha: 0.7),
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -100,7 +100,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
           ),
           if (_isLoading)
             Container(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               child: const Center(
                 child: CircularProgressIndicator(),
               ),
@@ -195,7 +195,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
           image: const AssetImage('assets/kako-logo.png'),
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
-            Colors.white.withOpacity(0.1),
+            Colors.white.withValues(alpha: 0.1),
             BlendMode.dstATop,
           ),
         ),
@@ -278,7 +278,8 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
             margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: _getStatusColor(table.status).withOpacity(0.2),
+                backgroundColor:
+                    _getStatusColor(table.status).withValues(alpha: 0.2),
                 child: Text(
                   '${table.number}',
                   style: TextStyle(
@@ -320,7 +321,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: _getStatusColor(table.status).withOpacity(0.5),
+          color: _getStatusColor(table.status).withValues(alpha: 0.5),
           width: 2,
         ),
       ),
@@ -336,7 +337,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(table.status).withOpacity(0.2),
+                    color: _getStatusColor(table.status).withValues(alpha: 0.2),
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(14),
                     ),
@@ -376,7 +377,8 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
                           Icon(
                             Icons.people,
                             size: 16,
-                            color: theme.colorScheme.onSurface.withOpacity(0.7),
+                            color: theme.colorScheme.onSurface
+                                .withValues(alpha: 0.7),
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -392,7 +394,8 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: _getStatusColor(table.status).withOpacity(0.1),
+                          color: _getStatusColor(table.status)
+                              .withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -436,7 +439,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
       case TableShape.rectangle:
         return Container(
           decoration: BoxDecoration(
-            color: color.withOpacity(0.2),
+            color: color.withValues(alpha: 0.2),
             border: Border.all(color: color, width: 2),
             borderRadius: BorderRadius.circular(8),
           ),
@@ -453,7 +456,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
       case TableShape.round:
         return Container(
           decoration: BoxDecoration(
-            color: color.withOpacity(0.2),
+            color: color.withValues(alpha: 0.2),
             border: Border.all(color: color, width: 2),
             shape: BoxShape.circle,
           ),
@@ -470,7 +473,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
       case TableShape.oval:
         return Container(
           decoration: BoxDecoration(
-            color: color.withOpacity(0.2),
+            color: color.withValues(alpha: 0.2),
             border: Border.all(color: color, width: 2),
             borderRadius: BorderRadius.circular(40),
           ),
@@ -562,7 +565,8 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
                       width: 60,
                       height: 60,
                       decoration: BoxDecoration(
-                        color: _getStatusColor(table.status).withOpacity(0.2),
+                        color: _getStatusColor(table.status)
+                            .withValues(alpha: 0.2),
                         border: Border.all(
                           color: _getStatusColor(table.status),
                           width: 2,
@@ -596,7 +600,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
                                 horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
                               color: _getStatusColor(table.status)
-                                  .withOpacity(0.1),
+                                  .withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
@@ -763,7 +767,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
       builder: (context) => const AddEditTableDialog(),
     ).then((result) {
       if (result == true) {
-        ref.refresh(tablesStatusProvider);
+        ref.invalidate(tablesStatusProvider);
       }
     });
   }
@@ -774,7 +778,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
       builder: (context) => AddEditTableDialog(table: table),
     ).then((result) {
       if (result == true) {
-        ref.refresh(tablesStatusProvider);
+        ref.invalidate(tablesStatusProvider);
       }
     });
   }
@@ -851,6 +855,8 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
     final orderService = ref.read(orderServiceProvider);
 
     orderService.getOrderById(table.currentOrderId!).then((order) {
+      if (!mounted) return;
+
       setState(() {
         _isLoading = false;
       });
@@ -870,6 +876,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
         );
       }
     }).catchError((error) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
@@ -923,6 +930,8 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
     final tableService = ref.read(tableServiceProvider);
 
     tableService.updateTableStatus(table.id, newStatus).then((_) {
+      if (!mounted) return;
+
       setState(() {
         _isLoading = false;
       });
@@ -935,6 +944,8 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
                 'Mesa ${table.number} actualizada a ${_getStatusText(newStatus)}')),
       );
     }).catchError((error) {
+      if (!mounted) return;
+
       setState(() {
         _isLoading = false;
       });
@@ -953,6 +964,8 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
     final tableService = ref.read(tableServiceProvider);
 
     tableService.deleteTable(tableId).then((_) {
+      if (!mounted) return;
+
       setState(() {
         _isLoading = false;
       });
@@ -963,6 +976,8 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen> {
         const SnackBar(content: Text('Mesa eliminada correctamente')),
       );
     }).catchError((error) {
+      if (!mounted) return;
+
       setState(() {
         _isLoading = false;
       });
@@ -1049,8 +1064,6 @@ class _AddEditTableDialogState extends ConsumerState<AddEditTableDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return AlertDialog(
       title: Text(widget.table != null ? 'Editar Mesa' : 'Agregar Nueva Mesa'),
       content: Stack(
@@ -1216,7 +1229,7 @@ class _AddEditTableDialogState extends ConsumerState<AddEditTableDialog> {
           height: 30,
           decoration: BoxDecoration(
             color: isSelected
-                ? theme.colorScheme.primary.withOpacity(0.2)
+                ? theme.colorScheme.primary.withValues(alpha: 0.2)
                 : Colors.transparent,
             border: Border.all(
               color: isSelected
@@ -1235,7 +1248,7 @@ class _AddEditTableDialogState extends ConsumerState<AddEditTableDialog> {
           height: 30,
           decoration: BoxDecoration(
             color: isSelected
-                ? theme.colorScheme.primary.withOpacity(0.2)
+                ? theme.colorScheme.primary.withValues(alpha: 0.2)
                 : Colors.transparent,
             border: Border.all(
               color: isSelected
@@ -1254,7 +1267,7 @@ class _AddEditTableDialogState extends ConsumerState<AddEditTableDialog> {
           height: 30,
           decoration: BoxDecoration(
             color: isSelected
-                ? theme.colorScheme.primary.withOpacity(0.2)
+                ? theme.colorScheme.primary.withValues(alpha: 0.2)
                 : Colors.transparent,
             border: Border.all(
               color: isSelected
@@ -1328,8 +1341,10 @@ class _AddEditTableDialogState extends ConsumerState<AddEditTableDialog> {
     }
 
     operation.then((_) {
+      if (!mounted) return;
       Navigator.pop(context, true);
     }).catchError((error) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });

@@ -26,7 +26,7 @@ class EnhancedFooterSection extends StatelessWidget {
             _buildDesktopFooterContent(context),
           const SizedBox(height: 40),
           Divider(
-            color: colorScheme.outline.withOpacity(0.2),
+            color: colorScheme.outline.withValues(alpha: 0.2),
           ),
           const SizedBox(height: 20),
           Wrap(
@@ -36,7 +36,7 @@ class EnhancedFooterSection extends StatelessWidget {
               Text(
                 '© 2025 Kako. Todos los derechos reservados.',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.7),
+                  color: colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
               ),
               if (!isMobile)
@@ -142,7 +142,7 @@ class EnhancedFooterSection extends StatelessWidget {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 10,
                     spreadRadius: 2,
                   ),
@@ -174,7 +174,7 @@ class EnhancedFooterSection extends StatelessWidget {
             Text(
               'Disfruta de comidas exquisitas, saludables y con presentación impecable, entregadas directamente a tu puerta o servidas en nuestro elegante restaurante.',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface.withOpacity(0.7),
+                color: colorScheme.onSurface.withValues(alpha: 0.7),
               ),
               textAlign: TextAlign.center,
             ),
@@ -211,7 +211,7 @@ class EnhancedFooterSection extends StatelessWidget {
         Text(
           'Recibe nuestras últimas noticias, eventos y ofertas especiales directamente en tu bandeja de entrada.',
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurface.withOpacity(0.7),
+            color: colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
         const SizedBox(height: 16),
@@ -276,7 +276,7 @@ class EnhancedFooterSection extends StatelessWidget {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 10,
                           spreadRadius: 2,
                         ),
@@ -310,7 +310,7 @@ class EnhancedFooterSection extends StatelessWidget {
               Text(
                 'Disfruta de comidas exquisitas, saludables y con presentación impecable, entregadas directamente a tu puerta o servidas en nuestro elegante restaurante.',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.7),
+                  color: colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
               ),
               const SizedBox(height: 24),
@@ -367,7 +367,7 @@ class EnhancedFooterSection extends StatelessWidget {
               Text(
                 'Recibe nuestras últimas noticias, eventos y ofertas especiales directamente en tu bandeja de entrada.',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.7),
+                  color: colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
               ),
               const SizedBox(height: 16),
@@ -488,7 +488,7 @@ class EnhancedFooterSection extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: colorScheme.primaryContainer.withOpacity(0.3),
+          color: colorScheme.primaryContainer.withValues(alpha: 0.3),
           shape: BoxShape.circle,
         ),
         child: Icon(

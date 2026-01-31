@@ -18,7 +18,8 @@ class MealSubscriptionItemView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final isExpiringSoon = item.expirationDate.difference(DateTime.now()).inDays <= 7;
+    final isExpiringSoon =
+        item.expirationDate.difference(DateTime.now()).inDays <= 7;
 
     return Card(
       margin: const EdgeInsets.all(8.0),
@@ -57,7 +58,8 @@ class MealSubscriptionItemView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                color:
+                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -74,7 +76,8 @@ class MealSubscriptionItemView extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer.withOpacity(0.3),
+                      color:
+                          colorScheme.primaryContainer.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -109,8 +112,9 @@ class MealSubscriptionItemView extends StatelessWidget {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: isExpiringSoon
-                          ? colorScheme.errorContainer.withOpacity(0.3)
-                          : colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                          ? colorScheme.errorContainer.withValues(alpha: 0.3)
+                          : colorScheme.surfaceContainerHighest
+                              .withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -125,7 +129,8 @@ class MealSubscriptionItemView extends StatelessWidget {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            DateFormat('dd MMM yyyy').format(item.expirationDate),
+                            DateFormat('dd MMM yyyy')
+                                .format(item.expirationDate),
                             style: theme.textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w500,
                               color: isExpiringSoon
@@ -144,7 +149,8 @@ class MealSubscriptionItemView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                color:
+                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(

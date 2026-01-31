@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/subscriptions/meal_plan_service.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/widgets/responsive_layout.dart';
+
 import 'package:starter_architecture_flutter_firebase/src/screens/plans/plans.dart';
 
 class MealPlanItemsScreen extends ConsumerStatefulWidget {
@@ -39,8 +39,6 @@ class _MealPlanItemsScreenState extends ConsumerState<MealPlanItemsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = ResponsiveLayout.isDesktop(context);
-
     return Scaffold(
       // appBar: AppBar(
       //   title: const Text('Meal Plan Items'),
@@ -165,7 +163,7 @@ class _MealPlanItemsScreenState extends ConsumerState<MealPlanItemsScreen> {
                         backgroundColor: Theme.of(context)
                             .colorScheme
                             .primary
-                            .withOpacity(0.2),
+                            .withValues(alpha: 0.2),
                         child: Icon(
                           Icons.restaurant_menu,
                           color: Theme.of(context).colorScheme.primary,

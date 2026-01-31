@@ -290,24 +290,24 @@ class _PaymentTransactionsTabState
 
     switch (status) {
       case PaymentStatus.completed:
-        backgroundColor = Colors.green.withOpacity(0.2);
+        backgroundColor = Colors.green.withValues(alpha: 0.2);
         textColor = Colors.green.shade700;
         break;
       case PaymentStatus.processing:
-        backgroundColor = Colors.blue.withOpacity(0.2);
+        backgroundColor = Colors.blue.withValues(alpha: 0.2);
         textColor = Colors.blue.shade700;
         break;
       case PaymentStatus.failed:
-        backgroundColor = Colors.red.withOpacity(0.2);
+        backgroundColor = Colors.red.withValues(alpha: 0.2);
         textColor = Colors.red.shade700;
         break;
       case PaymentStatus.refunded:
       case PaymentStatus.partiallyRefunded:
-        backgroundColor = Colors.orange.withOpacity(0.2);
+        backgroundColor = Colors.orange.withValues(alpha: 0.2);
         textColor = Colors.orange.shade700;
         break;
       default:
-        backgroundColor = Colors.grey.withOpacity(0.2);
+        backgroundColor = Colors.grey.withValues(alpha: 0.2);
         textColor = Colors.grey.shade700;
     }
 

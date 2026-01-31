@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_management_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
@@ -48,7 +49,7 @@ class NavigationDestinationItem {
 /// Computed provider that returns a simple boolean for admin status
 /// This prevents unnecessary rebuilds when watching AsyncValue
 @riverpod
-bool isAdminComputed(IsAdminComputedRef ref) {
+bool isAdminComputed(Ref ref) {
   final authState = ref.watch(authStateChangesProvider);
   final isAuthenticated = authState.value != null;
 
@@ -79,8 +80,7 @@ bool isAdminComputed(IsAdminComputedRef ref) {
 
 /// Provider for all possible navigation destinations (including admin)
 @riverpod
-List<NavigationDestinationItem> allNavigationDestinations(
-    AllNavigationDestinationsRef ref) {
+List<NavigationDestinationItem> allNavigationDestinations(Ref ref) {
   // Define all possible destinations including admin
   return [
     const NavigationDestinationItem(
@@ -126,8 +126,7 @@ List<NavigationDestinationItem> allNavigationDestinations(
 
 /// Provider for visible navigation destinations (optimized)
 @riverpod
-List<NavigationDestinationItem> navigationDestinations(
-    NavigationDestinationsRef ref) {
+List<NavigationDestinationItem> navigationDestinations(Ref ref) {
   // Watch the auto-check provider to ensure admin status is checked on login
   ref.watch(autoCheckAdminStatusProvider);
 
@@ -193,7 +192,7 @@ List<NavigationDestinationItem> navigationDestinations(
 
 /// Provider to determine the current tab index based on a path
 @riverpod
-int findTabIndexFromPath(FindTabIndexFromPathRef ref, String path) {
+int findTabIndexFromPath(Ref ref, String path) {
   final destinations = ref.watch(navigationDestinationsProvider);
 
   // Find the index of the destination whose path is a prefix of the given path
@@ -250,7 +249,7 @@ class SelectedTabIndex extends _$SelectedTabIndex {
 
 /// Provider for the current selected tab path
 @riverpod
-String selectedTabPath(SelectedTabPathRef ref) {
+String selectedTabPath(Ref ref) {
   final tabIndex = ref.watch(selectedTabIndexProvider);
   final destinations = ref.watch(navigationDestinationsProvider);
 
@@ -263,6 +262,6 @@ String selectedTabPath(SelectedTabPathRef ref) {
 
 /// Check if the current path is an admin path
 @riverpod
-bool isAdminPath(IsAdminPathRef ref, String path) {
+bool isAdminPath(Ref ref, String path) {
   return path.startsWith('/admin');
 }

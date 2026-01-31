@@ -11,7 +11,7 @@ import '../../dishes/dish_caterogy/category_dishes_screen.dart';
 // Table Menu Screen (after scanning)
 class TableMenuScreen extends ConsumerWidget {
   final QRCodeData tableData;
-  
+
   const TableMenuScreen({
     super.key,
     required this.tableData,
@@ -20,7 +20,7 @@ class TableMenuScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Menu - ${tableData.tableName}'),
@@ -49,13 +49,14 @@ class TableMenuScreen extends ConsumerWidget {
                 Text(
                   'Browse our menu and place your order',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onPrimaryContainer.withOpacity(0.8),
+                    color: theme.colorScheme.onPrimaryContainer
+                        .withValues(alpha: 0.8),
                   ),
                 ),
               ],
             ),
           ),
-          
+
           // Categories
           Padding(
             padding: const EdgeInsets.all(16),
@@ -66,14 +67,15 @@ class TableMenuScreen extends ConsumerWidget {
               ),
             ),
           ),
-          
+
           // Categories list
           SizedBox(
             height: 120,
             child: Consumer(
               builder: (context, ref, child) {
-                final categoriesAsync = ref.watch(catalogCategoriesProvider('menu'));
-                
+                final categoriesAsync =
+                    ref.watch(catalogCategoriesProvider('menu'));
+
                 return categoriesAsync.when(
                   data: (categories) {
                     return ListView.builder(
@@ -93,7 +95,7 @@ class TableMenuScreen extends ConsumerWidget {
                                     categoryId: category.id,
                                     categoryName: category.name,
                                     tableData: tableData,
-                                     sortIndex: category.sortOrder,
+                                    sortIndex: category.sortOrder,
                                   ),
                                 ),
                               );
@@ -105,7 +107,8 @@ class TableMenuScreen extends ConsumerWidget {
                                   width: 80,
                                   height: 80,
                                   decoration: BoxDecoration(
-                                    color: theme.colorScheme.surfaceContainerHighest,
+                                    color: theme
+                                        .colorScheme.surfaceContainerHighest,
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Icon(
@@ -138,7 +141,7 @@ class TableMenuScreen extends ConsumerWidget {
               },
             ),
           ),
-          
+
           // Popular dishes
           Padding(
             padding: const EdgeInsets.all(16),
@@ -149,19 +152,22 @@ class TableMenuScreen extends ConsumerWidget {
               ),
             ),
           ),
-          
+
           // Popular dishes list
           Expanded(
             child: Consumer(
               builder: (context, ref, child) {
                 final dishesAsync = ref.watch(catalogItemsProvider('menu'));
-                
+
                 return dishesAsync.when(
                   data: (dishes) {
                     // Sort dishes by rating
                     // TODO: Implement sorting logic
-                   final popularDishes = dishes.where((dish) => dish.isAvailable).take(5).toList();
-                    
+                    final popularDishes = dishes
+                        .where((dish) => dish.isAvailable)
+                        .take(5)
+                        .toList();
+
                     return ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       itemCount: popularDishes.length,
@@ -173,8 +179,8 @@ class TableMenuScreen extends ConsumerWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => DishDetailsScreen(id: dish.id)
-                              ),
+                                  builder: (context) =>
+                                      DishDetailsScreen(id: dish.id)),
                             );
                           },
                         );
@@ -208,7 +214,7 @@ class TableMenuScreen extends ConsumerWidget {
       ),
     );
   }
-  
+
   IconData _getCategoryIcon(int categoryId) {
     switch (categoryId) {
       case 1:

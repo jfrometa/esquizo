@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/analytics_screen.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/analytics_screen.dart';
 
 class SalesChart extends StatefulWidget {
   final List<SalesDataPoint> salesData;
@@ -25,7 +25,7 @@ class _SalesChartState extends State<SalesChart> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -62,7 +62,7 @@ class _SalesChartState extends State<SalesChart> {
                     ),
                   ],
                 ),
-                
+
                 // Chart type toggle - could expand this to switch between line and bar
                 IconButton(
                   icon: const Icon(Icons.auto_graph),
@@ -73,9 +73,9 @@ class _SalesChartState extends State<SalesChart> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 8),
-            
+
             // Chart
             Expanded(
               child: _buildChart(theme),
@@ -85,7 +85,7 @@ class _SalesChartState extends State<SalesChart> {
       ),
     );
   }
-  
+
   Widget _buildLegendItem({
     required Color color,
     required String label,
@@ -101,7 +101,7 @@ class _SalesChartState extends State<SalesChart> {
             width: 16,
             height: 16,
             decoration: BoxDecoration(
-              color: isActive ? color : color.withOpacity(0.3),
+              color: isActive ? color : color.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -117,36 +117,36 @@ class _SalesChartState extends State<SalesChart> {
       ),
     );
   }
-  
+
   Widget _buildChart(ThemeData theme) {
     if (widget.salesData.isEmpty) {
       return const Center(
         child: Text('No data available'),
       );
     }
-    
+
     return LineChart(
       LineChartData(
         lineTouchData: LineTouchData(
-          touchTooltipData: LineTouchTooltipData( 
+          touchTooltipData: LineTouchTooltipData(
             getTooltipItems: (touchedSpots) {
               return touchedSpots.map((spot) {
                 final dataIndex = spot.x.toInt();
                 if (dataIndex >= 0 && dataIndex < widget.salesData.length) {
                   final data = widget.salesData[dataIndex];
-                  
+
                   String text;
                   if (spot.barIndex == 0) {
                     text = '\$${data.sales.toStringAsFixed(2)}';
                   } else {
                     text = '${data.orders} orders';
                   }
-                  
+
                   return LineTooltipItem(
                     text,
                     TextStyle(
-                      color: spot.barIndex == 0 
-                          ? theme.colorScheme.primary 
+                      color: spot.barIndex == 0
+                          ? theme.colorScheme.primary
                           : theme.colorScheme.tertiary,
                       fontWeight: FontWeight.bold,
                     ),
@@ -162,7 +162,7 @@ class _SalesChartState extends State<SalesChart> {
                 setState(() {
                   _touchedIndex = -1;
                 });
-              } else if (touchResponse.lineBarSpots != null && 
+              } else if (touchResponse.lineBarSpots != null &&
                   touchResponse.lineBarSpots!.isNotEmpty) {
                 setState(() {
                   _touchedIndex = touchResponse.lineBarSpots![0].x.toInt();
@@ -176,14 +176,14 @@ class _SalesChartState extends State<SalesChart> {
           drawVerticalLine: true,
           getDrawingHorizontalLine: (value) {
             return FlLine(
-              color: theme.colorScheme.outline.withOpacity(0.2),
+              color: theme.colorScheme.outline.withValues(alpha: 0.2),
               strokeWidth: 1,
               dashArray: [5, 5],
             );
           },
           getDrawingVerticalLine: (value) {
             return FlLine(
-              color: theme.colorScheme.outline.withOpacity(0.2),
+              color: theme.colorScheme.outline.withValues(alpha: 0.2),
               strokeWidth: 1,
               dashArray: [5, 5],
             );
@@ -199,18 +199,18 @@ class _SalesChartState extends State<SalesChart> {
                 if (value < 0 || value >= widget.salesData.length) {
                   return const SizedBox.shrink();
                 }
-                
+
                 final dataPoint = widget.salesData[value.toInt()];
                 final date = widget.dateFormat.format(dataPoint.date);
-                
-                return SideTitleWidget( 
+
+                return SideTitleWidget(
                   meta: meta,
                   child: Text(
                     date,
                     style: TextStyle(
                       fontSize: 10,
-                      fontWeight: _touchedIndex == value.toInt() 
-                          ? FontWeight.bold 
+                      fontWeight: _touchedIndex == value.toInt()
+                          ? FontWeight.bold
                           : FontWeight.normal,
                     ),
                   ),
@@ -223,7 +223,7 @@ class _SalesChartState extends State<SalesChart> {
               showTitles: true,
               reservedSize: 50,
               getTitlesWidget: (value, meta) {
-                return SideTitleWidget( 
+                return SideTitleWidget(
                   meta: meta,
                   child: Text(
                     '\$${value.toInt()}',
@@ -262,19 +262,19 @@ class _SalesChartState extends State<SalesChart> {
           show: true,
           border: Border(
             bottom: BorderSide(
-              color: theme.colorScheme.outline.withOpacity(0.4),
+              color: theme.colorScheme.outline.withValues(alpha: 0.4),
               width: 1,
             ),
             left: BorderSide(
-              color: theme.colorScheme.outline.withOpacity(0.4),
+              color: theme.colorScheme.outline.withValues(alpha: 0.4),
               width: 1,
             ),
             right: BorderSide(
-              color: theme.colorScheme.outline.withOpacity(0.4),
+              color: theme.colorScheme.outline.withValues(alpha: 0.4),
               width: 1,
             ),
             top: BorderSide(
-              color: theme.colorScheme.outline.withOpacity(0.4),
+              color: theme.colorScheme.outline.withValues(alpha: 0.4),
               width: 1,
             ),
           ),
@@ -301,10 +301,10 @@ class _SalesChartState extends State<SalesChart> {
               ),
               belowBarData: BarAreaData(
                 show: true,
-                color: theme.colorScheme.primary.withOpacity(0.1),
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
               ),
             ),
-          
+
           // Orders line
           if (_showOrders)
             LineChartBarData(
@@ -326,7 +326,7 @@ class _SalesChartState extends State<SalesChart> {
               ),
               belowBarData: BarAreaData(
                 show: true,
-                color: theme.colorScheme.tertiary.withOpacity(0.1),
+                color: theme.colorScheme.tertiary.withValues(alpha: 0.1),
               ),
             ),
         ],
@@ -338,24 +338,24 @@ class _SalesChartState extends State<SalesChart> {
       // swapAnimationDuration: const Duration(milliseconds: 300),
     );
   }
-  
+
   List<FlSpot> _getSalesSpots() {
-    final maxSales = widget.salesData.map((e) => e.sales).reduce((a, b) => a > b ? a : b);
-    
     return widget.salesData.asMap().entries.map((entry) {
       final index = entry.key.toDouble();
       final dataPoint = entry.value;
       return FlSpot(index, dataPoint.sales);
     }).toList();
   }
-  
+
   List<FlSpot> _getOrdersSpots() {
-    final maxSales = widget.salesData.map((e) => e.sales).reduce((a, b) => a > b ? a : b);
-    final maxOrders = widget.salesData.map((e) => e.orders).reduce((a, b) => a > b ? a : b);
-    
+    final maxSales =
+        widget.salesData.map((e) => e.sales).reduce((a, b) => a > b ? a : b);
+    final maxOrders =
+        widget.salesData.map((e) => e.orders).reduce((a, b) => a > b ? a : b);
+
     // Scale orders to fit on the same chart as sales
     final scaleFactor = maxSales / maxOrders;
-    
+
     return widget.salesData.asMap().entries.map((entry) {
       final index = entry.key.toDouble();
       final dataPoint = entry.value;
@@ -363,18 +363,19 @@ class _SalesChartState extends State<SalesChart> {
       return FlSpot(index, dataPoint.orders.toDouble() * scaleFactor);
     }).toList();
   }
-  
+
   double _calculateMaxY() {
     if (widget.salesData.isEmpty) return 1000;
-    
-    final maxSales = widget.salesData.map((e) => e.sales).reduce((a, b) => a > b ? a : b);
+
+    final maxSales =
+        widget.salesData.map((e) => e.sales).reduce((a, b) => a > b ? a : b);
     // Add a 10% buffer
     return maxSales * 1.1;
   }
-  
+
   double _calculateXAxisInterval() {
     final length = widget.salesData.length;
-    
+
     if (length <= 7) {
       return 1; // Show every day for a week or less
     } else if (length <= 14) {

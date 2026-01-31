@@ -85,7 +85,7 @@ class _CustomerMealPlanScreenState
                                     color: Theme.of(context)
                                         .colorScheme
                                         .onSurface
-                                        .withOpacity(0.5),
+                                        .withValues(alpha: 0.5),
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
@@ -97,7 +97,7 @@ class _CustomerMealPlanScreenState
                                           color: Theme.of(context)
                                               .colorScheme
                                               .onSurface
-                                              .withOpacity(0.5),
+                                              .withValues(alpha: 0.5),
                                         ),
                                   ),
                                 ],
@@ -200,7 +200,8 @@ class _CustomerMealPlanScreenState
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: _getStatusColor(plan).withOpacity(0.1),
+                                color: _getStatusColor(plan)
+                                    .withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(16),
                                 border:
                                     Border.all(color: _getStatusColor(plan)),
@@ -513,7 +514,7 @@ class _CustomerMealPlanScreenState
                                         backgroundColor: Theme.of(context)
                                             .colorScheme
                                             .primary
-                                            .withOpacity(0.1),
+                                            .withValues(alpha: 0.1),
                                         child: Icon(
                                           Icons.restaurant,
                                           color: Theme.of(context)
@@ -589,6 +590,8 @@ class _CustomerMealPlanScreenState
     final itemsAsync = ref.read(mealPlanItemsProvider.future);
 
     itemsAsync.then((items) {
+      if (!mounted) return;
+
       // Filter to only allowed items that are available
       final allowedItems = items
           .where((item) =>
@@ -783,10 +786,13 @@ class _CustomerMealPlanScreenState
       final service = ref.read(mealPlanServiceProvider);
       await service.addConsumedItem(item);
 
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Successfully used ${item.itemName}')),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
       );

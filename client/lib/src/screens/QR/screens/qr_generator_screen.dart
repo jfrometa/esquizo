@@ -35,7 +35,7 @@
 //             // Instructions
 //             Card(
 //               elevation: 0,
-//               color: theme.colorScheme.primaryContainer.withOpacity(0.5),
+//               color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
 //               shape: RoundedRectangleBorder(
 //                 borderRadius: BorderRadius.circular(16),
 //               ),
@@ -119,7 +119,7 @@
 //                               border: Border.all(
 //                                 color: isSelected
 //                                     ? theme.colorScheme.primary
-//                                     : theme.colorScheme.outline.withOpacity(0.5),
+//                                     : theme.colorScheme.outline.withValues(alpha: 0.5),
 //                                 width: isSelected ? 2 : 1,
 //                               ),
 //                             ),
@@ -147,7 +147,7 @@
 //                                   '${table.capacity} seats',
 //                                   style: theme.textTheme.bodySmall?.copyWith(
 //                                     color: isSelected
-//                                         ? theme.colorScheme.onPrimary.withOpacity(0.8)
+//                                         ? theme.colorScheme.onPrimary.withValues(alpha: 0.8)
 //                                         : theme.colorScheme.onSurfaceVariant.withOpacity(0.8),
 //                                   ),
 //                                 ),

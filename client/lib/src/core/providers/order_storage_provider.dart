@@ -87,7 +87,7 @@ class OrderStorageService {
         'businessId': _businessId, // Add business ID
         'timestamp': FieldValue.serverTimestamp(),
       };
-      final orderRef = await _firestore
+      await _firestore
           .collection('businesses')
           .doc(_businessId)
           .collection('orders')
@@ -106,7 +106,8 @@ class OrderStorageService {
         'remainingMeals': quantity,
         'timestamp': FieldValue.serverTimestamp(),
       };
-      final subscriptionRef = await _firestore.collection('subscriptions').add(subscriptionData);
+      final subscriptionRef =
+          await _firestore.collection('subscriptions').add(subscriptionData);
 
       await _createMeals(quantity, item.title, orderDate, subscriptionRef.id);
     }

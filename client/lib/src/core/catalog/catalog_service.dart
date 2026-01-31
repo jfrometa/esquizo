@@ -931,12 +931,12 @@ class CatalogService {
     }
   }
 
-  /// Load categories from cache
-  Future<List<CatalogCategory>?> _loadCategoriesFromCache(
+  /// Load featured items from cache
+  Future<List<CatalogItem>?> _loadFeaturedItemsFromCache(
       String catalogType) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final cacheKey = 'catalog_categories_$_businessId$catalogType';
+      final cacheKey = 'catalog_featured_$_businessId$catalogType';
 
       final cachedData = prefs.getString(cacheKey);
       if (cachedData == null) return null;
@@ -946,18 +946,19 @@ class CatalogService {
 
       final List<dynamic> data = cache.data;
       return data
-          .map((item) => CatalogCategory(
+          .map((item) => CatalogItem(
                 id: item['id'],
                 name: item['name'] ?? '',
+                description: item['description'] ?? '',
+                price: (item['price'] ?? 0).toDouble(),
                 imageUrl: item['imageUrl'] ?? '',
-                sortOrder: item['sortOrder'] ?? 0,
-                isActive: item['isActive'] ?? true,
-                description: item['description'],
-                tags: List<String>.from(item['tags'] ?? []),
+                categoryId: item['categoryId'] ?? '',
+                isAvailable: item['isAvailable'] ?? true,
+                metadata: item['metadata'] ?? {},
               ))
           .toList();
     } catch (e) {
-      debugPrint('Error loading categories cache: $e');
+      debugPrint('Error loading featured items cache: $e');
       return null;
     }
   }
@@ -988,69 +989,6 @@ class CatalogService {
       await prefs.setString(cacheKey, jsonEncode(cacheData.toJson()));
     } catch (e) {
       debugPrint('Error caching items: $e');
-    }
-  }
-
-  /// Load items from cache
-  Future<List<CatalogItem>?> _loadItemsFromCache(String catalogType) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final cacheKey = 'catalog_items_$_businessId$catalogType';
-
-      final cachedData = prefs.getString(cacheKey);
-      if (cachedData == null) return null;
-
-      final cache = CatalogCache.fromJson(jsonDecode(cachedData));
-      if (!cache.isValid) return null;
-
-      final List<dynamic> data = cache.data;
-      return data
-          .map((item) => CatalogItem(
-                id: item['id'],
-                name: item['name'] ?? '',
-                description: item['description'] ?? '',
-                price: (item['price'] ?? 0).toDouble(),
-                imageUrl: item['imageUrl'] ?? '',
-                categoryId: item['categoryId'] ?? '',
-                isAvailable: item['isAvailable'] ?? true,
-                metadata: item['metadata'] ?? {},
-              ))
-          .toList();
-    } catch (e) {
-      debugPrint('Error loading items cache: $e');
-      return null;
-    }
-  }
-
-  /// Load featured items from cache
-  Future<List<CatalogItem>?> _loadFeaturedItemsFromCache(
-      String catalogType) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final cacheKey = 'catalog_featured_$_businessId$catalogType';
-
-      final cachedData = prefs.getString(cacheKey);
-      if (cachedData == null) return null;
-
-      final cache = CatalogCache.fromJson(jsonDecode(cachedData));
-      if (!cache.isValid) return null;
-
-      final List<dynamic> data = cache.data;
-      return data
-          .map((item) => CatalogItem(
-                id: item['id'],
-                name: item['name'] ?? '',
-                description: item['description'] ?? '',
-                price: (item['price'] ?? 0).toDouble(),
-                imageUrl: item['imageUrl'] ?? '',
-                categoryId: item['categoryId'] ?? '',
-                isAvailable: item['isAvailable'] ?? true,
-                metadata: item['metadata'] ?? {},
-              ))
-          .toList();
-    } catch (e) {
-      debugPrint('Error loading featured items cache: $e');
-      return null;
     }
   }
 

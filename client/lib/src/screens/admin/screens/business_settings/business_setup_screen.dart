@@ -684,7 +684,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                         Text(
                           'ID: $_existingBusinessId',
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: Colors.white.withOpacity(0.8),
+                            color: Colors.white.withValues(alpha: 0.8),
                           ),
                         ),
                     ],
@@ -1172,7 +1172,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                   color: color,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: theme.colorScheme.outline.withOpacity(0.5),
+                    color: theme.colorScheme.outline.withValues(alpha: 0.5),
                   ),
                 ),
               ),
@@ -1217,7 +1217,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
             color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: theme.colorScheme.outline.withOpacity(0.5),
+              color: theme.colorScheme.outline.withValues(alpha: 0.5),
             ),
           ),
           child: Column(
@@ -1258,7 +1258,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: colors['primary']!.withOpacity(0.1),
+                  color: colors['primary']!.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
@@ -1624,7 +1624,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 5,
             offset: const Offset(0, -3),
           ),

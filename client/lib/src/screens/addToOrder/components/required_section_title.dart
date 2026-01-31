@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/constants.dart';
- 
 
 class RequiredSectionTitle extends StatelessWidget {
   const RequiredSectionTitle({
@@ -26,7 +25,7 @@ class RequiredSectionTitle extends StatelessWidget {
             vertical: defaultPadding / 4,
           ),
           decoration: BoxDecoration(
-              color: accentColor.withOpacity(0.2),
+              color: accentColor.withValues(alpha: 0.2),
               borderRadius: const BorderRadius.all(Radius.circular(4))),
           child: Text(
             "Required".toUpperCase(),

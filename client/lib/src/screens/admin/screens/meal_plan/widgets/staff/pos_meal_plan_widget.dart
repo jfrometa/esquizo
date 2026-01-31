@@ -116,7 +116,8 @@ class _POSMealPlanWidgetState extends ConsumerState<POSMealPlanWidget> {
             // Bottom action section
             if (_selectedPlan != null) ...[
               Card(
-                color: theme.colorScheme.primaryContainer.withOpacity(0.2),
+                color:
+                    theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -250,7 +251,7 @@ class _POSMealPlanWidgetState extends ConsumerState<POSMealPlanWidget> {
                                     color: Theme.of(context)
                                         .colorScheme
                                         .onSurface
-                                        .withOpacity(0.7),
+                                        .withValues(alpha: 0.7),
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
@@ -323,6 +324,8 @@ class _POSMealPlanWidgetState extends ConsumerState<POSMealPlanWidget> {
     final itemsAsync = ref.read(mealPlanItemsProvider.future);
 
     itemsAsync.then((items) {
+      if (!mounted) return;
+
       // Filter to only allowed items that are available
       final allowedItems = items
           .where((item) =>
@@ -437,6 +440,8 @@ class _POSMealPlanWidgetState extends ConsumerState<POSMealPlanWidget> {
       final service = ref.read(mealPlanServiceProvider);
       final itemId = await service.addConsumedItem(item);
 
+      if (!mounted) return;
+
       // Pass the consumed item to the parent widget
       item = ConsumedItem(
         id: itemId,
@@ -467,6 +472,7 @@ class _POSMealPlanWidgetState extends ConsumerState<POSMealPlanWidget> {
       // Refresh the search to update plans
       _searchCustomer();
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error processing meal plan: $e'),

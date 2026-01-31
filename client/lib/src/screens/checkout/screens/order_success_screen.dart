@@ -14,7 +14,8 @@ class OrderSuccessScreen extends StatefulWidget {
   State<OrderSuccessScreen> createState() => _OrderSuccessScreenState();
 }
 
-class _OrderSuccessScreenState extends State<OrderSuccessScreen> with SingleTickerProviderStateMixin {
+class _OrderSuccessScreenState extends State<OrderSuccessScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeInAnimation;
   late Animation<Offset> _slideAnimation;
@@ -116,7 +117,7 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> with SingleTick
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Scaffold(
       body: SafeArea(
         child: Container(
@@ -125,7 +126,7 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> with SingleTick
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                colorScheme.primary.withOpacity(0.1),
+                colorScheme.primary.withValues(alpha: 0.1),
                 colorScheme.surface,
               ],
             ),
@@ -184,7 +185,7 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> with SingleTick
       width: 160,
       height: 160,
       decoration: BoxDecoration(
-        color: colorScheme.primary.withOpacity(0.1),
+        color: colorScheme.primary.withValues(alpha: 0.1),
         shape: BoxShape.circle,
       ),
       child: Center(
@@ -199,13 +200,13 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> with SingleTick
                   width: 140 + (20 * value),
                   height: 140 + (20 * value),
                   decoration: BoxDecoration(
-                    color: colorScheme.primary.withOpacity(0.1 * (1 - value)),
+                    color: colorScheme.primary
+                        .withValues(alpha: 0.1 * (1 - value)),
                     shape: BoxShape.circle,
                   ),
                 );
               },
             ),
-            
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
@@ -216,7 +217,7 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> with SingleTick
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: colorScheme.primary.withOpacity(0.2),
+                    color: colorScheme.primary.withValues(alpha: 0.2),
                     blurRadius: 15,
                     spreadRadius: 5,
                   ),
@@ -242,7 +243,6 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> with SingleTick
                 ),
               ),
             ),
-            
             if (_showSecondaryContent)
               Positioned(
                 right: 15,
@@ -256,7 +256,7 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> with SingleTick
                     border: Border.all(color: colorScheme.surface, width: 2),
                     boxShadow: [
                       BoxShadow(
-                        color: colorScheme.shadow.withOpacity(0.2),
+                        color: colorScheme.shadow.withValues(alpha: 0.2),
                         blurRadius: 5,
                         spreadRadius: 1,
                       ),

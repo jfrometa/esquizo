@@ -44,7 +44,7 @@ class EventsSection extends ConsumerWidget {
                 Text(
                   'Participe en nuestros eventos exclusivos donde la gastronomía, el arte y la cultura se encuentran',
                   style: theme.textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.onSurface.withOpacity(0.7),
+                    color: colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -119,7 +119,7 @@ class EventsSection extends ConsumerWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: colorScheme.secondaryContainer.withOpacity(0.3),
+              color: colorScheme.secondaryContainer.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(16),
               image: DecorationImage(
                 image: NetworkImage(
@@ -127,7 +127,7 @@ class EventsSection extends ConsumerWidget {
                 ),
                 fit: BoxFit.cover,
                 colorFilter: ColorFilter.mode(
-                  Colors.black.withOpacity(0.6),
+                  Colors.black.withValues(alpha: 0.6),
                   BlendMode.darken,
                 ),
               ),
@@ -146,7 +146,7 @@ class EventsSection extends ConsumerWidget {
                 Text(
                   'Ofrecemos espacios elegantes y versátiles para sus eventos privados o corporativos. Nuestro equipo de expertos se encargará de todos los detalles para que su evento sea un éxito.',
                   style: theme.textTheme.bodyLarge?.copyWith(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -207,7 +207,7 @@ class EventsSection extends ConsumerWidget {
         vertical: 12,
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(30),
       ),
       child: Row(
@@ -255,11 +255,11 @@ class EventsSection extends ConsumerWidget {
                     event['image'] as String,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => Container(
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
                       child: Icon(
                         Icons.image_not_supported,
                         size: 48,
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
@@ -386,11 +386,11 @@ class EventsSection extends ConsumerWidget {
                       event['image'] as String,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Container(
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
                         child: Icon(
                           Icons.image_not_supported,
                           size: 48,
-                          color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
                         ),
                       ),
                     ),
@@ -509,11 +509,11 @@ class EventsSection extends ConsumerWidget {
                     event['image'] as String,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => Container(
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
                       child: Icon(
                         Icons.image_not_supported,
                         size: 48,
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
                       ),
                     ),
                   ),

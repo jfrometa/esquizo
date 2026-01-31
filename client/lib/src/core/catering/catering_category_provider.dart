@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_category_model.dart';
@@ -138,7 +139,7 @@ class SelectedCategory extends _$SelectedCategory {
 
 /// Provider for active categories only
 @riverpod
-Stream<List<CateringCategory>> activeCategories(ActiveCategoriesRef ref) {
+Stream<List<CateringCategory>> activeCategories(Ref ref) {
   final businessId = ref.watch(currentBusinessIdProvider);
   return FirebaseFirestore.instance
       .collection('businesses')
@@ -157,8 +158,7 @@ Stream<List<CateringCategory>> activeCategories(ActiveCategoriesRef ref) {
 
 /// Provider for searching categories by name
 @riverpod
-Stream<List<CateringCategory>> searchCategories(
-    SearchCategoriesRef ref, String searchTerm) {
+Stream<List<CateringCategory>> searchCategories(Ref ref, String searchTerm) {
   final businessId = ref.watch(currentBusinessIdProvider);
   final firestoreQuery = searchTerm.isEmpty
       ? FirebaseFirestore.instance

@@ -239,7 +239,8 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen>
                     child: Icon(
                       Icons.table_restaurant,
                       size: 48,
-                      color: _getStatusColor(table.status).withOpacity(0.5),
+                      color:
+                          _getStatusColor(table.status).withValues(alpha: 0.5),
                     ),
                   ),
 
@@ -371,7 +372,7 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(table.status).withOpacity(0.1),
+                    color: _getStatusColor(table.status).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -477,7 +478,10 @@ class _TableManagementScreenState extends ConsumerState<TableManagementScreen>
               label,
               style: TextStyle(
                 fontSize: 12,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.7),
               ),
             ),
             Text(value),

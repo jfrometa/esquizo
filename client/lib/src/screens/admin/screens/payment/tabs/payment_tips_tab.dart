@@ -24,7 +24,6 @@ class _PaymentTipsTabState extends ConsumerState<PaymentTipsTab> {
   final currencyFormatter =
       NumberFormat.currency(symbol: '\$', decimalDigits: 2);
   String? _selectedStaffId;
-  final bool _showDistributionDialog = false;
 
   @override
   Widget build(BuildContext context) {

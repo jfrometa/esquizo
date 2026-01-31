@@ -21,9 +21,10 @@ class OrderSummary extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     final double tax = totalPrice * taxRate;
-    final double orderTotal = totalPrice + (orderType == 'quote' ? 0 : deliveryFee) + tax;
+    final double orderTotal =
+        totalPrice + (orderType == 'quote' ? 0 : deliveryFee) + tax;
 
     return Card(
       elevation: 0,
@@ -63,16 +64,13 @@ class OrderSummary extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             Divider(color: colorScheme.outlineVariant),
-            
             if (orderType == 'catering' || orderType == 'quote')
               ..._buildCateringDetails(context, ref),
-            
             _buildOrderSummaryRow(
               context,
               _getItemsLabel(),
               'RD \$${totalPrice.toStringAsFixed(2)}',
             ),
-            
             if (orderType != 'quote')
               _buildOrderSummaryRow(
                 context,
@@ -80,19 +78,16 @@ class OrderSummary extends ConsumerWidget {
                 'RD \$${deliveryFee.toStringAsFixed(2)}',
                 icon: Icons.local_shipping_outlined,
               ),
-              
             _buildOrderSummaryRow(
               context,
               'Impuestos',
               'RD \$${tax.toStringAsFixed(2)}',
               icon: Icons.receipt_outlined,
             ),
-            
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12.0),
               child: Divider(color: colorScheme.outlineVariant),
             ),
-            
             _buildOrderSummaryRow(
               context,
               _getTotalLabel(),
@@ -100,9 +95,7 @@ class OrderSummary extends ConsumerWidget {
               isBold: true,
               fontSize: 18,
             ),
-            
-            if (orderType != 'quote')
-              _buildTimeEstimate(context),
+            if (orderType != 'quote') _buildTimeEstimate(context),
           ],
         ),
       ),
@@ -160,7 +153,7 @@ class OrderSummary extends ConsumerWidget {
   List<Widget> _buildCateringDetails(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     if (additionalInfo == null) return [];
 
     return [
@@ -202,7 +195,7 @@ class OrderSummary extends ConsumerWidget {
   }) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -211,7 +204,7 @@ class OrderSummary extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: colorScheme.secondaryContainer.withOpacity(0.5),
+                color: colorScheme.secondaryContainer.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
@@ -225,7 +218,10 @@ class OrderSummary extends ConsumerWidget {
           Expanded(
             child: Text(
               label,
-              style: (isBold ? theme.textTheme.titleMedium : theme.textTheme.bodyMedium)?.copyWith(
+              style: (isBold
+                      ? theme.textTheme.titleMedium
+                      : theme.textTheme.bodyMedium)
+                  ?.copyWith(
                 fontSize: fontSize,
                 color: colorScheme.onSurface,
               ),
@@ -233,7 +229,10 @@ class OrderSummary extends ConsumerWidget {
           ),
           Text(
             value,
-            style: (isBold ? theme.textTheme.titleMedium : theme.textTheme.bodyMedium)?.copyWith(
+            style: (isBold
+                    ? theme.textTheme.titleMedium
+                    : theme.textTheme.bodyMedium)
+                ?.copyWith(
               fontSize: fontSize,
               color: isBold ? colorScheme.primary : colorScheme.onSurface,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
@@ -247,10 +246,10 @@ class OrderSummary extends ConsumerWidget {
   Widget _buildTimeEstimate(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     String estimatedTime;
     IconData icon;
-    
+
     switch (orderType) {
       case 'catering':
         estimatedTime = 'Confirmación dentro de 4 horas';
@@ -265,7 +264,7 @@ class OrderSummary extends ConsumerWidget {
         icon = Icons.access_time;
         break;
     }
-    
+
     return Container(
       margin: const EdgeInsets.only(top: 16),
       padding: const EdgeInsets.all(16),

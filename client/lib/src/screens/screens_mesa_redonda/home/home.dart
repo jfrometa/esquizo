@@ -134,8 +134,12 @@ class HomeState extends ConsumerState<MenuHome> {
                       ? dishes
                       : dishes.where((dish) {
                           final dishTitle = dish.name.toLowerCase();
-                          final dishDescription = dish.description.toLowerCase();
-                          final dishCategory = dish.metadata['foodType']?.toString().toLowerCase() ?? '';
+                          final dishDescription =
+                              dish.description.toLowerCase();
+                          final dishCategory = dish.metadata['foodType']
+                                  ?.toString()
+                                  .toLowerCase() ??
+                              '';
 
                           final query = _searchQuery.toLowerCase();
                           return dishTitle.contains(query) ||
@@ -144,16 +148,19 @@ class HomeState extends ConsumerState<MenuHome> {
                         }).toList();
 
                   // Convert CatalogItems to Maps for HomeSearchResults
-                  final filteredDishMaps = filteredDishes.map((dish) => {
-                        'id': dish.id,
-                        'title': dish.name,
-                        'description': dish.description,
-                        'pricing': dish.price,
-                        'img': dish.imageUrl ?? 'assets/images/placeholder_food.png',
-                        'foodType': dish.metadata['foodType'] ?? 'Main Course',
-                        'isSpicy': dish.metadata['isSpicy'] ?? false,
-                        'category': dish.metadata['foodType'] ?? '',
-                      }).toList();
+                  final filteredDishMaps = filteredDishes
+                      .map((dish) => {
+                            'id': dish.id,
+                            'title': dish.name,
+                            'description': dish.description,
+                            'pricing': dish.price,
+                            'img': dish.imageUrl,
+                            'foodType':
+                                dish.metadata['foodType'] ?? 'Main Course',
+                            'isSpicy': dish.metadata['isSpicy'] ?? false,
+                            'category': dish.metadata['foodType'] ?? '',
+                          })
+                      .toList();
 
                   return _isSearching
                       ? HomeSearchResults(
@@ -189,9 +196,11 @@ class HomeState extends ConsumerState<MenuHome> {
                       ),
                       const SizedBox(height: 24),
                       ElevatedButton(
-                        onPressed: () => ref.refresh(catalogItemsProvider('menu')),
+                        onPressed: () =>
+                            ref.refresh(catalogItemsProvider('menu')),
                         style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
                         ),
                         child: const Text('Retry'),
                       ),
@@ -218,7 +227,7 @@ class _MainHomeView extends ConsumerWidget {
       child: RefreshIndicator(
         onRefresh: () async {
           // Update refresh to use catalogItemsProvider
-          ref.refresh(catalogItemsProvider('menu'));
+          return ref.refresh(catalogItemsProvider('menu').future);
           HapticFeedback.mediumImpact();
         },
         child: SingleChildScrollView(
@@ -241,9 +250,8 @@ class _MainHomeView extends ConsumerWidget {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     TextButton(
-                      
                       onPressed: () {
-                         context.goNamed(AppRoute.allDishes.name);
+                        context.goNamed(AppRoute.allDishes.name);
                         HapticFeedback.selectionClick();
                       },
                       child: const Text('Ver todos'),
@@ -284,7 +292,7 @@ class _MainHomeView extends ConsumerWidget {
                   itemBuilder: (context, index) {
                     final theme = Theme.of(context);
                     final colorScheme = theme.colorScheme;
-                    
+
                     return Padding(
                       padding: const EdgeInsets.only(right: 16.0),
                       child: Container(
@@ -294,7 +302,7 @@ class _MainHomeView extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: colorScheme.shadow.withOpacity(0.05),
+                              color: colorScheme.shadow.withValues(alpha: 0.05),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
@@ -339,7 +347,8 @@ class _MainHomeView extends ConsumerWidget {
                                       ),
                                       Text(
                                         '• Categoría',
-                                        style: theme.textTheme.bodySmall?.copyWith(
+                                        style:
+                                            theme.textTheme.bodySmall?.copyWith(
                                           color: colorScheme.onSurfaceVariant,
                                         ),
                                       ),
@@ -390,7 +399,6 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),

@@ -115,7 +115,6 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
   void _showCateringForm(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final order = ref.read(cateringOrderNotifierProvider);
 
     // Create a new order if none exists
     // if (order == null) {
@@ -368,8 +367,6 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
 
   /// Builds the complete catering order form view.
   Widget _buildCateringOrderForm() {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final cateringOrder = ref.watch(cateringOrderNotifierProvider);
 
     if (cateringOrder == null) {
@@ -408,15 +405,6 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
     );
   }
 
-  // Calculate total from items
-  String _calculateTotal(List<CateringDish> items) {
-    double total = 0;
-    for (var item in items) {
-      total += (item.pricing.toDouble() ?? 0);
-    }
-    return total.toStringAsFixed(2);
-  }
-
 // In your screen/widget:
   void _showNewItemDialog() {
     NewItemDialog.show(
@@ -428,8 +416,6 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
 // UPDATED _buildQuoteOrderForm method for CateringEntryScreen
   /// Builds the quote order form view.
   Widget _buildQuoteOrderForm() {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final quote = ref.watch(manualQuoteProvider);
 
     if (quote == null) {
@@ -594,7 +580,7 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
           labelColor: colorScheme.primary,
           unselectedLabelColor: colorScheme.onSurfaceVariant,
           indicatorColor: colorScheme.primary,
-          dividerColor: colorScheme.outline.withOpacity(0.2),
+          dividerColor: colorScheme.outline.withValues(alpha: 0.2),
           labelStyle: theme.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.bold,
           ),

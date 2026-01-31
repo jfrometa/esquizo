@@ -250,7 +250,7 @@ Future<void> _initializeAppCheckWithFallback() async {
       // Try using enterprise provider first
       try {
         await FirebaseAppCheck.instance.activate(
-          webProvider: ReCaptchaEnterpriseProvider(
+          providerWeb: ReCaptchaEnterpriseProvider(
               '6LeGBv4qAAAAACKUiHAJEFBsUDmbTyMPZwb-T8N6'),
         );
         debugPrint(
@@ -264,7 +264,7 @@ Future<void> _initializeAppCheckWithFallback() async {
       // Try V3 provider if enterprise failed
       try {
         await FirebaseAppCheck.instance.activate(
-          webProvider:
+          providerWeb:
               ReCaptchaV3Provider('6LeGBv4qAAAAACKUiHAJEFBsUDmbTyMPZwb-T8N6'),
         );
         debugPrint('✅ Firebase AppCheck initialized with ReCaptchaV3Provider');
@@ -280,7 +280,7 @@ Future<void> _initializeAppCheckWithFallback() async {
           // For web in debug mode, try with debug provider as last resort
           await FirebaseAppCheck.instance.activate(
             // Use debug provider for web - requires debug token
-            webProvider:
+            providerWeb:
                 ReCaptchaV3Provider('6LeGBv4qAAAAACKUiHAJEFBsUDmbTyMPZwb-T8N6'),
           );
           debugPrint(

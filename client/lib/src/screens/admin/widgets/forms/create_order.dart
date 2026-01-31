@@ -130,7 +130,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                       ),
                       Text(
                         // Fix: Ensure cart is not null
-                        '\$${(_cartService.cart.total ?? 0.0).toStringAsFixed(2)}',
+                        '\$${_cartService.cart.total.toStringAsFixed(2)}',
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
@@ -143,8 +143,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                   icon: const Icon(Icons.shopping_cart_checkout),
                   label: const Text('Create Order'),
                   // Fix: Safe access to cart items with null check
-                  onPressed: (_cartService.cart.items.isEmpty ?? true) ||
-                          _isCreatingOrder
+                  onPressed: _cartService.cart.items.isEmpty || _isCreatingOrder
                       ? null
                       : _createOrder,
                   style: ElevatedButton.styleFrom(
@@ -374,7 +373,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
             if (_searchQuery.isEmpty) return true;
 
             return item.name.toLowerCase().contains(_searchQuery) ||
-                (item.description.toLowerCase() ?? '').contains(_searchQuery);
+                item.description.toLowerCase().contains(_searchQuery);
           }).toList();
 
           if (filteredItems.isEmpty) {
@@ -1283,7 +1282,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
     }
 
     final cartItem = CartItem(
-      img: item.imageUrl ?? '',
+      img: item.imageUrl,
       description: item.description ?? '',
       ingredients: [], // Default empty ingredients list
       isSpicy: false, // Default not spicy
@@ -1356,7 +1355,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
     }
 
     // Fix: Safer access to cart items
-    if (_cartService.cart.items.isEmpty ?? true) {
+    if (_cartService.cart.items.isEmpty) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -1378,7 +1377,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
       final userAsync = ref.watch(currentUserProvider.future);
       final orderService = ref.read(orderServiceProvider);
       // Fix: Add default for businessId
-      final businessId = ref.read(currentBusinessIdProvider) ?? 'default';
+      final businessId = ref.read(currentBusinessIdProvider);
 
       // Set resourceId based on table or delivery address
       final resourceId = _isDelivery ? null : _selectedTableId;
@@ -1618,7 +1617,7 @@ class _ItemOptionsDialogState extends State<ItemOptionsDialog> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  widget.item.description ?? '',
+                                  widget.item.description,
                                   style: theme.textTheme.bodyMedium,
                                   maxLines: 3,
                                   overflow: TextOverflow.ellipsis,
@@ -1674,7 +1673,7 @@ class _ItemOptionsDialogState extends State<ItemOptionsDialog> {
 
               // Options
               // Fix: Add null check for item.metadata
-              if ((widget.item.metadata.containsKey('options') ?? false) ||
+              if (widget.item.metadata.containsKey('options') ||
                   _availableOptions.isNotEmpty) ...[
                 const Text(
                   'Options',

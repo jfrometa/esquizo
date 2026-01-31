@@ -1,6 +1,7 @@
 // Test script to verify the business routing fixes
 // This script tests the key routing scenarios that were problematic
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -9,7 +10,7 @@ void main() {
       // This test verifies that /g3 routes correctly to business home
       // and shows business context instead of redirecting to /
 
-      print('🧪 Testing /g3 business route...');
+      debugPrint('🧪 Testing /g3 business route...');
 
       // Test that business slug detection works
       final testCases = [
@@ -34,7 +35,7 @@ void main() {
       ];
 
       for (final testCase in testCases) {
-        print('  Testing ${testCase['description']}: ${testCase['path']}');
+        debugPrint('  Testing ${testCase['description']}: ${testCase['path']}');
 
         // Verify slug extraction works
         final businessSlug =
@@ -43,13 +44,13 @@ void main() {
             reason:
                 'Business slug should be extracted correctly from ${testCase['path']}');
 
-        print('    ✅ Business slug extracted: $businessSlug');
+        debugPrint('    ✅ Business slug extracted: $businessSlug');
       }
     });
 
     testWidgets('Test route parameter fixes in optimized wrappers',
         (tester) async {
-      print('🧪 Testing optimized wrapper route parameters...');
+      debugPrint('🧪 Testing optimized wrapper route parameters...');
 
       // Test that OptimizedBusinessWrapper now receives correct route parameters
       // Previously: route was '/', '/menu', etc.
@@ -64,16 +65,17 @@ void main() {
         'OptimizedAdminScreenWrapper': '/g3/admin', // was '/admin'
       };
 
-      print('  Expected route parameters for business slug "g3":');
+      debugPrint('  Expected route parameters for business slug "g3":');
       expectedRoutes.forEach((wrapper, route) {
-        print('    $wrapper -> $route');
+        debugPrint('    $wrapper -> $route');
       });
 
-      print('    ✅ Route parameters should now include business slug prefix');
+      debugPrint(
+          '    ✅ Route parameters should now include business slug prefix');
     });
 
     testWidgets('Test WebUtils path detection', (tester) async {
-      print('🧪 Testing WebUtils path detection improvements...');
+      debugPrint('🧪 Testing WebUtils path detection improvements...');
 
       // Test that WebUtils.getCurrentPath() correctly handles different scenarios
       final testPaths = [
@@ -85,24 +87,26 @@ void main() {
       ];
 
       for (final path in testPaths) {
-        print('  Testing path: $path');
+        debugPrint('  Testing path: $path');
         // The WebUtils should now provide better logging and path cleaning
-        print('    Expected: Correctly detect and clean path "$path"');
+        debugPrint('    Expected: Correctly detect and clean path "$path"');
       }
 
-      print('    ✅ WebUtils should provide enhanced logging and path cleaning');
+      debugPrint(
+          '    ✅ WebUtils should provide enhanced logging and path cleaning');
     });
 
     testWidgets('Test auth state refresh optimization', (tester) async {
-      print('🧪 Testing auth state refresh optimization...');
+      debugPrint('🧪 Testing auth state refresh optimization...');
 
-      print('  GoRouterRefreshStream improvements:');
-      print(
+      debugPrint('  GoRouterRefreshStream improvements:');
+      debugPrint(
           '    - Added .distinct() to prevent duplicate auth state notifications');
-      print('    - Removed complex debounce logic that might cause issues');
-      print('    - Added better debug logging for auth state changes');
+      debugPrint(
+          '    - Removed complex debounce logic that might cause issues');
+      debugPrint('    - Added better debug logging for auth state changes');
 
-      print(
+      debugPrint(
           '    ✅ Auth state refreshes should be less frequent and more stable');
     });
   });

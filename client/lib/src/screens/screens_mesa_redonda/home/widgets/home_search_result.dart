@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
+import 'package:flutter/services.dart';
 
 import '../../../dishes/cards/dish_card.dart';
 
@@ -19,17 +19,15 @@ class HomeSearchResults extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     if (filteredDishes.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.search_off, 
-              size: 64, 
-              color: colorScheme.onSurfaceVariant.withOpacity(0.6)
-            ),
+            Icon(Icons.search_off,
+                size: 64,
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6)),
             const SizedBox(height: 16),
             Text(
               'No se encontraron resultados para "$searchQuery"',
@@ -45,7 +43,8 @@ class HomeSearchResults extends StatelessWidget {
                 }
               },
               style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
               child: const Text('Limpiar búsqueda'),
             ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/constants.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/screens/constants.dart';
 
 import '../dot_indicators.dart';
 
@@ -14,7 +14,7 @@ class BigCardImageSlideScalton extends StatelessWidget {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             borderRadius: const BorderRadius.all(Radius.circular(12)),
           ),
         ),

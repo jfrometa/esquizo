@@ -47,7 +47,7 @@ class CateringOrdersView extends ConsumerWidget {
         Text(
           'Manage your catering items and details',
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withOpacity(0.7),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
         const SizedBox(height: 16),
@@ -66,7 +66,7 @@ class CateringOrdersView extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer.withOpacity(0.7),
+                  color: colorScheme.primaryContainer.withValues(alpha: 0.7),
                 ),
                 child: Row(
                   children: [
@@ -86,7 +86,7 @@ class CateringOrdersView extends ConsumerWidget {
                             'Event Type: ${cateringOrder.eventType.isNotEmpty ? cateringOrder.eventType : "Not specified"}',
                             style: TextStyle(
                               color: colorScheme.onPrimaryContainer
-                                  .withOpacity(0.8),
+                                  .withValues(alpha: 0.8),
                             ),
                           ),
                           if (cateringOrder.peopleCount != null &&
@@ -95,7 +95,7 @@ class CateringOrdersView extends ConsumerWidget {
                               'People: ${cateringOrder.peopleCount}',
                               style: TextStyle(
                                 color: colorScheme.onPrimaryContainer
-                                    .withOpacity(0.8),
+                                    .withValues(alpha: 0.8),
                               ),
                             ),
                         ],
@@ -209,7 +209,7 @@ class CateringOrdersView extends ConsumerWidget {
         // Suggestions section
         Card(
           elevation: 1,
-          color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -253,7 +253,7 @@ class CateringOrdersView extends ConsumerWidget {
           Icon(
             Icons.food_bank_outlined,
             size: 80,
-            color: colorScheme.primary.withOpacity(0.5),
+            color: colorScheme.primary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 24),
           Text(

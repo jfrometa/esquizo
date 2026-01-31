@@ -4,25 +4,25 @@ import 'package:flutter/material.dart';
 class MaterialSearchBar extends StatelessWidget {
   /// Text controller for the search field
   final TextEditingController controller;
-  
+
   /// Focus node to manage the search field's focus state
   final FocusNode focusNode;
-  
+
   /// Callback when search is submitted
   final Function(String) onSubmitted;
-  
+
   /// Callback when filter button is tapped
   final VoidCallback onFilterPressed;
-  
+
   /// Callback when clear button is tapped
   final VoidCallback onClear;
-  
+
   /// Whether the user is currently searching (has input)
   final bool isSearching;
-  
+
   /// Whether to show the filter button
   final bool showFilterButton;
-  
+
   /// Optional hint text for the search field
   final String? hintText;
 
@@ -42,16 +42,16 @@ class MaterialSearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Material(
       elevation: 1,
       shadowColor: Colors.black12,
       surfaceTintColor: colorScheme.surfaceTint,
       borderRadius: BorderRadius.circular(isSearching ? 16 : 28),
       clipBehavior: Clip.antiAlias,
-      color: isSearching 
-          ? colorScheme.surface 
-          : colorScheme.surfaceContainerHighest.withOpacity(0.9),
+      color: isSearching
+          ? colorScheme.surface
+          : colorScheme.surfaceContainerHighest.withValues(alpha: 0.9),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         height: 56,
@@ -68,22 +68,22 @@ class MaterialSearchBar extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: isSearching 
-                    ? Colors.transparent 
-                    : colorScheme.primary.withOpacity(0.1),
+                color: isSearching
+                    ? Colors.transparent
+                    : colorScheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Center(
                 child: Icon(
                   Icons.search,
-                  color: isSearching 
+                  color: isSearching
                       ? colorScheme.onSurfaceVariant
                       : colorScheme.primary,
                   size: 22,
                 ),
               ),
             ),
-            
+
             // Search field
             Expanded(
               child: Padding(
@@ -97,7 +97,8 @@ class MaterialSearchBar extends StatelessWidget {
                   decoration: InputDecoration(
                     hintText: hintText ?? 'Search for dishes, categories...',
                     hintStyle: theme.textTheme.bodyLarge?.copyWith(
-                      color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+                      color:
+                          colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                     ),
                     border: InputBorder.none,
                     isDense: true,
@@ -111,7 +112,7 @@ class MaterialSearchBar extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             // Trailing icon (clear or filter)
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
@@ -134,7 +135,8 @@ class MaterialSearchBar extends StatelessWidget {
                       tooltip: 'Clear search',
                       style: IconButton.styleFrom(
                         foregroundColor: colorScheme.onSurfaceVariant,
-                        backgroundColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                        backgroundColor: colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.5),
                         minimumSize: const Size(40, 40),
                         maximumSize: const Size(40, 40),
                       ),
@@ -150,7 +152,8 @@ class MaterialSearchBar extends StatelessWidget {
                           tooltip: 'Filter',
                           style: IconButton.styleFrom(
                             foregroundColor: colorScheme.onSurfaceVariant,
-                            backgroundColor: colorScheme.surfaceContainerHighest,
+                            backgroundColor:
+                                colorScheme.surfaceContainerHighest,
                             minimumSize: const Size(40, 40),
                             maximumSize: const Size(40, 40),
                           ),

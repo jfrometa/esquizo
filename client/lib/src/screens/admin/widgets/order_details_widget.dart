@@ -41,7 +41,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
                   icon: const Icon(Icons.refresh),
                   label: const Text('Refresh'),
                   onPressed: () {
-                    ref.refresh(orderByIdProvider(widget.orderId));
+                    ref.invalidate(orderByIdProvider(widget.orderId));
                   },
                 ),
               ],
@@ -61,7 +61,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
               icon: const Icon(Icons.refresh),
               label: const Text('Retry'),
               onPressed: () {
-                ref.refresh(orderByIdProvider(widget.orderId));
+                ref.invalidate(orderByIdProvider(widget.orderId));
               },
             ),
           ],
@@ -304,9 +304,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
             // Resource (table/delivery)
             _buildInfoRow(
               label: order.isDelivery ? 'Delivery to' : 'Table',
-              value: order.isDelivery
-                  ? 'Address: ${order.address ?? 'N/A'}'
-                  : order.id ?? 'N/A',
+              value: order.isDelivery ? 'Address: ${order.address}' : order.id,
             ),
             const SizedBox(height: 8),
 
@@ -357,7 +355,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
             // Customer email
             _buildInfoRow(
               label: 'Email',
-              value: order.email ?? 'N/A',
+              value: order.email,
               icon: Icons.email,
             ),
 
@@ -433,7 +431,8 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
   // Modified _buildOrderTotalsCard
   Widget _buildOrderTotalsCard(Order order) {
     final theme = Theme.of(context);
-    final bool isPaid = order.isPaid; // Assuming 'isPaid' field exists in Order model
+    final bool isPaid =
+        order.isPaid; // Assuming 'isPaid' field exists in Order model
 
     return Card(
       child: Padding(
@@ -472,7 +471,9 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
             ],
 
             // Delivery fee (if applicable)
-            if (order.isDelivery && order.deliveryFee != null && order.deliveryFee! > 0) ...[
+            if (order.isDelivery &&
+                order.deliveryFee != null &&
+                order.deliveryFee! > 0) ...[
               _buildSummaryRow(
                 label: 'Delivery Fee',
                 value: '\$${order.deliveryFee!.toStringAsFixed(2)}',
@@ -524,7 +525,9 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
                 // Mark as Paid Button
                 _isUpdatingPayment
                     ? const SizedBox(
-                        width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2))
                     : ElevatedButton.icon(
                         icon: Icon(isPaid ? Icons.undo : Icons.check, size: 16),
                         label: Text(isPaid ? 'Mark Unpaid' : 'Mark Paid'),
@@ -543,7 +546,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
             // Payment method (if available)
             _buildInfoRow(
               label: 'Payment Method',
-              value: _capitalizeFirst(order.paymentMethod ?? 'N/A'),
+              value: _capitalizeFirst(order.paymentMethod),
               icon: Icons.payment,
             ),
           ],
@@ -566,7 +569,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
           Icon(
             icon,
             size: 16,
-            color: theme.colorScheme.onSurface.withOpacity(0.6),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
           ),
           const SizedBox(width: 8),
         ],
@@ -575,7 +578,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
           child: Text(
             label,
             style: TextStyle(
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
         ),
@@ -639,7 +642,8 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
                       style: TextStyle(
                         fontSize: 12,
                         fontStyle: FontStyle.italic,
-                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
                     ),
                   ),
@@ -748,8 +752,7 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                Text('Order marked as ${isPaid ? 'Paid' : 'Unpaid'}'),
+            content: Text('Order marked as ${isPaid ? 'Paid' : 'Unpaid'}'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -861,9 +864,16 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
       case OrderStatus.preparing:
         return [OrderStatus.ready, OrderStatus.cancelled];
       case OrderStatus.ready:
-        return [OrderStatus.delivering, OrderStatus.completed, OrderStatus.cancelled];
+        return [
+          OrderStatus.delivering,
+          OrderStatus.completed,
+          OrderStatus.cancelled
+        ];
       case OrderStatus.delivering:
-        return [OrderStatus.completed, OrderStatus.cancelled]; // Added cancel option
+        return [
+          OrderStatus.completed,
+          OrderStatus.cancelled
+        ]; // Added cancel option
       case OrderStatus.completed:
         return [];
       case OrderStatus.cancelled:
@@ -883,8 +893,8 @@ class _OrderDetailViewState extends ConsumerState<OrderDetailView> {
         return 'Start Delivery';
       case OrderStatus.completed:
         return 'Mark as Completed';
-       case OrderStatus.cancelled:
-         return 'Cancel Order';
+      case OrderStatus.cancelled:
+        return 'Cancel Order';
       default:
         return _capitalizeFirst(status.name);
     }

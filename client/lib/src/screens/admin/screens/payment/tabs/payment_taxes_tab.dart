@@ -110,8 +110,8 @@ class _PaymentTaxesTabState extends ConsumerState<PaymentTaxesTab> {
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: config.isActive
-                ? Colors.green.withOpacity(0.1)
-                : Colors.grey.withOpacity(0.1),
+                ? Colors.green.withValues(alpha: 0.1)
+                : Colors.grey.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(

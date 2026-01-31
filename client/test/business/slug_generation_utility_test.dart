@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart'; // Added for debugPrint
 import 'package:flutter_test/flutter_test.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_service.dart';
 
@@ -65,13 +66,13 @@ void main() {
         final expectedSlug = testCase['expected'];
         final description = testCase['description'] as String;
 
-        print('\n--- Testing: $description ---');
-        print('Input: "$businessName"');
+        debugPrint('\n--- Testing: $description ---');
+        debugPrint('Input: "$businessName"');
 
         final generatedSlug = BusinessConfig.generateSlug(businessName);
-        print('Generated slug: "$generatedSlug"');
-        print('Length: ${generatedSlug.length}');
-        print('Is valid: ${BusinessConfig.isValidSlug(generatedSlug)}');
+        debugPrint('Generated slug: "$generatedSlug"');
+        debugPrint('Length: ${generatedSlug.length}');
+        debugPrint('Is valid: ${BusinessConfig.isValidSlug(generatedSlug)}');
 
         // Validate constraints
         expect(generatedSlug.length, lessThanOrEqualTo(50),
@@ -121,11 +122,11 @@ void main() {
         final businessName = testCase['name'] as String;
         final description = testCase['description'] as String;
 
-        print('\n--- Testing Unicode: $description ---');
-        print('Input: "$businessName"');
+        debugPrint('\n--- Testing Unicode: $description ---');
+        debugPrint('Input: "$businessName"');
 
         final generatedSlug = BusinessConfig.generateSlug(businessName);
-        print('Generated slug: "$generatedSlug"');
+        debugPrint('Generated slug: "$generatedSlug"');
 
         // Should produce a valid slug or fallback
         if (generatedSlug.isNotEmpty) {
@@ -148,10 +149,10 @@ void main() {
       ];
 
       for (final word in reservedWords) {
-        print('\n--- Testing reserved word: $word ---');
+        debugPrint('\n--- Testing reserved word: $word ---');
         final slug = BusinessConfig.generateSlug(word);
-        print('Generated slug: "$slug"');
-        print('Is valid: ${BusinessConfig.isValidSlug(slug)}');
+        debugPrint('Generated slug: "$slug"');
+        debugPrint('Is valid: ${BusinessConfig.isValidSlug(slug)}');
 
         // Reserved words should not be valid slugs
         expect(BusinessConfig.isValidSlug(slug), isFalse,
@@ -169,9 +170,9 @@ void main() {
       ];
 
       for (final input in testInputs) {
-        print('\n--- Testing sanitization: "$input" ---');
+        debugPrint('\n--- Testing sanitization: "$input" ---');
         final sanitized = BusinessConfig.sanitizeSlug(input);
-        print('Sanitized: "$sanitized"');
+        debugPrint('Sanitized: "$sanitized"');
 
         if (sanitized.isNotEmpty) {
           expect(RegExp(r'^[a-z0-9-]+$').hasMatch(sanitized), isTrue,

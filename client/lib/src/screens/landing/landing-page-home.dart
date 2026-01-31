@@ -152,7 +152,8 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+                  color:
+                      theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
@@ -229,7 +230,7 @@ class _EnhancedLandingPageState extends ConsumerState<ResponsiveLandingPage>
 
     // Setup app bar styling
     final appBarBgColor = _isScrolling
-        ? colorScheme.surface.withOpacity(0.97)
+        ? colorScheme.surface.withValues(alpha: 0.97)
         : Colors.transparent;
     final appBarFgColor =
         _isScrolling ? colorScheme.onSurface : colorScheme.onPrimary;

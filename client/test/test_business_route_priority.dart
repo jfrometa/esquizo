@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // Simple test to verify business route priority fix
@@ -36,7 +37,7 @@ void main() {
 
     // Verify that /g3 matches the business route pattern, not default routes
     expect(matchedRoute, equals('/:businessSlug'));
-    print('✅ /g3 correctly matches business route pattern: $matchedRoute');
+    debugPrint('✅ /g3 correctly matches business route pattern: $matchedRoute');
   });
 }
 

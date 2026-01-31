@@ -6,7 +6,7 @@ part of 'unified_catering_package_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$packageCategoriesHash() => r'f9a75f9c0464606a73b60a4e48defb05b8845dcf';
+String _$packageCategoriesHash() => r'985d3d30d0d42ecf3aea67260cd9dcc1e5f820a0';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -184,7 +184,7 @@ class _PackageCategoriesProviderElement
 }
 
 String _$availableItemsForPackageHash() =>
-    r'e32e012967d1e075c21ad49a84e07e4d10cf8968';
+    r'0b3b68dd1840b374260656327a6f25eb8742e317';
 
 /// Get all available items for package selection
 ///

@@ -51,7 +51,7 @@ class _AuthenticatedProfileScreenState
     }
   }
 
-  Future<void> _signOut(BuildContext context, WidgetRef ref) async {
+  Future<void> _signOut() async {
     // Prevent multiple sign-out attempts
     if (_isSigningOut) return;
 
@@ -179,8 +179,8 @@ class _AuthenticatedProfileScreenState
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            colorScheme.primaryContainer.withOpacity(0.8),
-            colorScheme.secondaryContainer.withOpacity(0.5),
+            colorScheme.primaryContainer.withValues(alpha: 0.8),
+            colorScheme.secondaryContainer.withValues(alpha: 0.5),
             colorScheme.surface,
           ],
         ),
@@ -193,7 +193,7 @@ class _AuthenticatedProfileScreenState
             top: -20,
             child: CircleAvatar(
               radius: 100,
-              backgroundColor: colorScheme.primary.withOpacity(0.08),
+              backgroundColor: colorScheme.primary.withValues(alpha: 0.08),
             ),
           ),
           Positioned(
@@ -201,7 +201,7 @@ class _AuthenticatedProfileScreenState
             bottom: 40,
             child: CircleAvatar(
               radius: 60,
-              backgroundColor: colorScheme.secondary.withOpacity(0.05),
+              backgroundColor: colorScheme.secondary.withValues(alpha: 0.05),
             ),
           ),
 
@@ -227,7 +227,8 @@ class _AuthenticatedProfileScreenState
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                    color: colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -278,16 +279,15 @@ class _AuthenticatedProfileScreenState
                   color: Theme.of(context)
                       .colorScheme
                       .errorContainer
-                      .withOpacity(0.7),
+                      .withValues(alpha: 0.7),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.logout,
-                  color: Theme.of(context).colorScheme.onErrorContainer,
                   size: 20,
                 ),
               ),
-              onPressed: () => _signOut(context, ref),
+              onPressed: _signOut,
               tooltip: 'Cerrar Sesión',
             ),
     );
@@ -306,7 +306,7 @@ class _AuthenticatedProfileScreenState
         ),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.1),
+            color: colorScheme.shadow.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),

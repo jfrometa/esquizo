@@ -1,10 +1,11 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catalog/catalog_service.dart';
- 
+
 part 'featured_dishes_provider.g.dart';
 
 @riverpod
-Future<List<CatalogItem>> featuredDishes(FeaturedDishesRef ref) async {
+Future<List<CatalogItem>> featuredDishes(Ref ref) async {
   final catalogType = 'menu';
   final catalogService = ref.watch(catalogServiceProvider(catalogType));
   final itemsStream = catalogService.getItems(catalogType);

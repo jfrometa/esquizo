@@ -606,6 +606,7 @@ class _ProductManagementScreenState
         (catalogType: catalogType, categoryId: category.id)).future);
 
     productsAsync.then((products) {
+      if (!mounted) return;
       if (products.isNotEmpty) {
         showDialog(
           context: context,

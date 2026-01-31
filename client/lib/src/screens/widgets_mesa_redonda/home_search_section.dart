@@ -27,7 +27,6 @@ class _HomeSearchSectionState extends State<HomeSearchSection>
   final FocusNode _focusNode = FocusNode();
   late AnimationController _animationController;
   late Animation<double> _animation;
-  bool _isSearchFocused = false;
 
   @override
   void initState() {
@@ -42,9 +41,6 @@ class _HomeSearchSectionState extends State<HomeSearchSection>
     );
 
     _focusNode.addListener(() {
-      setState(() {
-        _isSearchFocused = _focusNode.hasFocus;
-      });
       if (_focusNode.hasFocus) {
         _animationController.forward();
       } else {
@@ -155,7 +151,8 @@ class _HomeSearchSectionState extends State<HomeSearchSection>
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: colorScheme.surfaceContainerHighest.withOpacity(0.7),
+                            color: colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.7),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+
 import 'package:starter_architecture_flutter_firebase/src/core/cart/cart_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';
@@ -8,7 +8,7 @@ import 'package:starter_architecture_flutter_firebase/src/core/catering/catering
 import 'package:starter_architecture_flutter_firebase/src/core/catering/manual_quote_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/order_storage_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_cart.dart';
-import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
+
 import 'package:url_launcher/url_launcher.dart';
 
 class OrderProcessor {
@@ -155,16 +155,5 @@ class OrderProcessor {
 
   void _clearCateringQuoteCart() {
     ref.read(manualQuoteProvider.notifier).clearManualQuote();
-  }
-
-  void _pop() {
-    // Check if the current route can be popped (i.e., there's a previous screen in the stack)
-    if (GoRouter.of(context).canPop()) {
-      GoRouter.of(context)
-          .pop(); // Pop the checkout screen to return to the previous screen
-    } else {
-      // If there's no previous screen, directly navigate to the home screen
-      GoRouter.of(context).go(RoutePaths.forBusiness('kako'));
-    }
   }
 }

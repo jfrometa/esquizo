@@ -1,4 +1,6 @@
 // Test the business slug validation for 'g3'
+import 'package:flutter/foundation.dart';
+
 bool isValidBusinessSlug(String slug) {
   if (slug.length < 2 || slug.length > 50) return false;
   if (slug.contains(' ') || slug.contains('?') || slug.contains('#')) {
@@ -66,17 +68,17 @@ bool isValidBusinessSlug(String slug) {
 }
 
 void main() {
-  print('Testing g3 slug validation:');
-  print('g3 is valid: ${isValidBusinessSlug('g3')}');
-  print('Length: ${'g3'.length}');
-  print('Pattern match: ${RegExp(r'^[a-z0-9-]+$').hasMatch('g3')}');
-  print('Reserved check: ${!{'admin', 'menu', 'carrito'}.contains('g3')}');
+  debugPrint('Testing g3 slug validation:');
+  debugPrint('g3 is valid: ${isValidBusinessSlug('g3')}');
+  debugPrint('Length: ${'g3'.length}');
+  debugPrint('Pattern match: ${RegExp(r'^[a-z0-9-]+$').hasMatch('g3')}');
+  debugPrint('Reserved check: ${!{'admin', 'menu', 'carrito'}.contains('g3')}');
 
   // Test other potential issues
-  print('\nAdditional tests:');
-  print('Empty string: ${isValidBusinessSlug('')}');
-  print('Single char: ${isValidBusinessSlug('a')}');
-  print('menu (reserved): ${isValidBusinessSlug('menu')}');
-  print('admin (reserved): ${isValidBusinessSlug('admin')}');
-  print('kako: ${isValidBusinessSlug('kako')}');
+  debugPrint('\nAdditional tests:');
+  debugPrint('Empty string: ${isValidBusinessSlug('')}');
+  debugPrint('Single char: ${isValidBusinessSlug('a')}');
+  debugPrint('menu (reserved): ${isValidBusinessSlug('menu')}');
+  debugPrint('admin (reserved): ${isValidBusinessSlug('admin')}');
+  debugPrint('kako: ${isValidBusinessSlug('kako')}');
 }

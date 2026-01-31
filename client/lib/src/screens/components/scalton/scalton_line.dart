@@ -14,7 +14,7 @@ class ScaltonLine extends StatelessWidget {
     return Container(
       height: height,
       width: width,
-      color: Colors.black.withOpacity(0.08),
+      color: Colors.black.withValues(alpha: 0.08),
     );
   }
 }

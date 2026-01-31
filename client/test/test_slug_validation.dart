@@ -1,4 +1,6 @@
 // Copy the _isValidBusinessSlug function from app_router.dart
+import 'package:flutter/foundation.dart';
+
 bool _isValidBusinessSlug(String slug) {
   // Business slugs should:
   // - Be at least 2 characters long
@@ -73,7 +75,7 @@ bool _isValidBusinessSlug(String slug) {
 }
 
 void main() {
-  print('Testing business slug validation:');
+  debugPrint('Testing business slug validation:');
 
   final testSlugs = [
     'g3',
@@ -88,6 +90,6 @@ void main() {
 
   for (final slug in testSlugs) {
     final isValid = _isValidBusinessSlug(slug);
-    print('  $slug: ${isValid ? 'VALID' : 'INVALID'}');
+    debugPrint('  $slug: ${isValid ? 'VALID' : 'INVALID'}');
   }
 }

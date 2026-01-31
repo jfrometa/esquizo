@@ -333,7 +333,7 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor:
-              _getOrderStatusColor(order.status.name).withOpacity(0.2),
+              _getOrderStatusColor(order.status.name).withValues(alpha: 0.2),
           child: Icon(
             Icons.receipt,
             color: _getOrderStatusColor(order.status.name),
@@ -346,7 +346,8 @@ class _AdminDashboardHomeState extends ConsumerState<AdminDashboardHome> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: _getOrderStatusColor(order.status.name).withOpacity(0.1),
+                color: _getOrderStatusColor(order.status.name)
+                    .withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(

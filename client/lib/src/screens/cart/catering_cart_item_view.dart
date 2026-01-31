@@ -4,27 +4,47 @@ import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/widgets/catering_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_order_provider.dart';
 
-class CateringCartItemView extends ConsumerWidget {
+class CateringCartItemView extends ConsumerStatefulWidget {
   final CateringOrderItem order;
   final VoidCallback onRemoveFromCart;
-  final FocusNode customPersonasFocusNode = FocusNode();
-  final FocusNode customUnitsFocusNode =
-      FocusNode(); // New focus node for units
-  bool isCustomSelected = false;
-  bool isCustomUnitsSelected = false; // New flag for units
 
-  CateringCartItemView({
+  const CateringCartItemView({
     super.key,
     required this.order,
     required this.onRemoveFromCart,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CateringCartItemView> createState() =>
+      _CateringCartItemViewState();
+}
+
+class _CateringCartItemViewState extends ConsumerState<CateringCartItemView> {
+  late FocusNode customPersonasFocusNode;
+  late FocusNode customUnitsFocusNode;
+  bool isCustomSelected = false;
+  bool isCustomUnitsSelected = false;
+
+  @override
+  void initState() {
+    super.initState();
+    customPersonasFocusNode = FocusNode();
+    customUnitsFocusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    customPersonasFocusNode.dispose();
+    customUnitsFocusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isPersonasSelected =
-        order.peopleCount != null && order.peopleCount! > 0;
+        widget.order.peopleCount != null && widget.order.peopleCount! > 0;
 
     return Card(
       margin: const EdgeInsets.all(8.0),
@@ -43,7 +63,9 @@ class CateringCartItemView extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    order.title.isEmpty ? 'Catering' : order.title,
+                    widget.order.title.isEmpty
+                        ? 'Catering'
+                        : widget.order.title,
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: colorScheme.primary,
@@ -56,7 +78,7 @@ class CateringCartItemView extends ConsumerWidget {
                     size: 24,
                     color: colorScheme.error,
                   ),
-                  onPressed: onRemoveFromCart,
+                  onPressed: widget.onRemoveFromCart,
                   tooltip: 'Eliminar orden',
                 ),
               ],
@@ -68,7 +90,8 @@ class CateringCartItemView extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                color:
+                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: colorScheme.outlineVariant),
               ),
@@ -78,22 +101,22 @@ class CateringCartItemView extends ConsumerWidget {
                   _buildInfoRow(
                     context,
                     'Personas',
-                    '${order.peopleCount ?? "No especificado"}',
+                    '${widget.order.peopleCount ?? "No especificado"}',
                     Icons.people_outline,
                   ),
                   const SizedBox(height: 8),
                   _buildInfoRow(
                     context,
                     'Chef en sitio',
-                    (order.hasChef ?? false) ? 'Sí' : 'No',
+                    (widget.order.hasChef ?? false) ? 'Sí' : 'No',
                     Icons.restaurant,
                   ),
                   const SizedBox(height: 8),
                   _buildInfoRow(
                     context,
                     'Alergias',
-                    order.alergias.trim().isNotEmpty
-                        ? order.alergias
+                    widget.order.alergias.trim().isNotEmpty
+                        ? widget.order.alergias
                         : "Ninguna",
                     Icons.health_and_safety_outlined,
                   ),
@@ -101,17 +124,17 @@ class CateringCartItemView extends ConsumerWidget {
                   _buildInfoRow(
                     context,
                     'Tipo de evento',
-                    order.eventType.isEmpty
+                    widget.order.eventType.isEmpty
                         ? 'Solicitud de Catering'
-                        : order.eventType,
+                        : widget.order.eventType,
                     Icons.event_outlined,
                   ),
-                  if (order.adicionales.isNotEmpty) ...[
+                  if (widget.order.adicionales.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     _buildInfoRow(
                       context,
                       'Adicionales',
-                      order.adicionales,
+                      widget.order.adicionales,
                       Icons.note_outlined,
                     ),
                   ],
@@ -140,14 +163,14 @@ class CateringCartItemView extends ConsumerWidget {
               child: ListView.separated(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: order.dishes.length,
+                itemCount: widget.order.dishes.length,
                 separatorBuilder: (context, index) => Divider(
                   height: 1,
                   thickness: 1,
                   color: colorScheme.outlineVariant,
                 ),
                 itemBuilder: (context, index) {
-                  final dish = order.dishes[index];
+                  final dish = widget.order.dishes[index];
                   return Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: Row(
@@ -190,7 +213,7 @@ class CateringCartItemView extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               decoration: BoxDecoration(
-                color: colorScheme.primaryContainer.withOpacity(0.3),
+                color: colorScheme.primaryContainer.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -203,7 +226,7 @@ class CateringCartItemView extends ConsumerWidget {
                     ),
                   ),
                   Text(
-                    '\$${_calculateTotal(order).toStringAsFixed(2)}',
+                    '\$${_calculateTotal(widget.order).toStringAsFixed(2)}',
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: colorScheme.primary,
@@ -336,19 +359,19 @@ class CateringCartItemView extends ConsumerWidget {
                       child: SingleChildScrollView(
                         controller: scrollController,
                         child: CateringForm(
-                          initialData: order,
+                          initialData: widget.order,
                           onSubmit: (formData) {
                             try {
                               ref
                                   .read(cateringOrderNotifierProvider.notifier)
                                   .finalizeCateringOrder(
-                                    title: order.title,
-                                    img: order.img,
-                                    description: order.description,
+                                    title: widget.order.title,
+                                    img: widget.order.img,
+                                    description: widget.order.description,
                                     hasChef: formData.hasChef,
                                     alergias: formData.allergies.join(','),
                                     eventType: formData.eventType,
-                                    preferencia: order.preferencia,
+                                    preferencia: widget.order.preferencia,
                                     adicionales: formData.additionalNotes,
                                     cantidadPersonas: formData.peopleCount,
                                   );
@@ -388,34 +411,6 @@ class CateringCartItemView extends ConsumerWidget {
       );
     } catch (e) {
       debugPrint('Error showing catering form: $e');
-    }
-  }
-
-  void _finalizeAndAddToCart(
-    WidgetRef ref,
-    bool hasChef,
-    String alergias,
-    String eventType,
-    String preferencia,
-    String adicionales,
-    int cantidadPersonas,
-  ) {
-    try {
-      final cateringOrderNotifier =
-          ref.read(cateringOrderNotifierProvider.notifier);
-      cateringOrderNotifier.finalizeCateringOrder(
-        title: 'Orden de Catering',
-        img: 'assets/image.png',
-        description: 'Catering',
-        hasChef: hasChef,
-        alergias: alergias,
-        eventType: eventType,
-        preferencia: preferencia,
-        adicionales: adicionales,
-        cantidadPersonas: cantidadPersonas,
-      );
-    } catch (e) {
-      debugPrint('Error finalizing catering order: $e');
     }
   }
 }

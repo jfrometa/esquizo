@@ -41,7 +41,7 @@ class _MealPlanScannerState extends ConsumerState<MealPlanScanner> {
           // Scanning overlay
           Container(
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withValues(alpha: 0.5),
             ),
             child: Stack(
               children: [
@@ -74,8 +74,8 @@ class _MealPlanScannerState extends ConsumerState<MealPlanScanner> {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: _errorMessage != null
-                            ? theme.colorScheme.error.withOpacity(0.8)
-                            : theme.colorScheme.surface.withOpacity(0.8),
+                            ? theme.colorScheme.error.withValues(alpha: 0.8)
+                            : theme.colorScheme.surface.withValues(alpha: 0.8),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: _isLoading
@@ -119,7 +119,7 @@ class _MealPlanScannerState extends ConsumerState<MealPlanScanner> {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surface.withOpacity(0.8),
+                      color: theme.colorScheme.surface.withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text(

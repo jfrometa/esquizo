@@ -11,7 +11,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/plans/plans.da
 
 class MealPlanQRCode extends ConsumerWidget {
   final String mealPlanId;
-  
+
   const MealPlanQRCode({
     super.key,
     required this.mealPlanId,
@@ -21,7 +21,7 @@ class MealPlanQRCode extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final mealPlanAsync = ref.watch(mealPlanProvider(mealPlanId));
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Meal Plan QR Code'),
@@ -33,7 +33,7 @@ class MealPlanQRCode extends ConsumerWidget {
               child: Text('Meal plan not found'),
             );
           }
-          
+
           return Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
@@ -66,7 +66,7 @@ class MealPlanQRCode extends ConsumerWidget {
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 24),
-                          
+
                           // QR Code using pure Dart implementation
                           Container(
                             padding: const EdgeInsets.all(12),
@@ -74,7 +74,8 @@ class MealPlanQRCode extends ConsumerWidget {
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: theme.colorScheme.primary.withOpacity(0.5),
+                                color: theme.colorScheme.primary
+                                    .withValues(alpha: 0.5),
                                 width: 2,
                               ),
                             ),
@@ -83,17 +84,17 @@ class MealPlanQRCode extends ConsumerWidget {
                               size: 200,
                             ),
                           ),
-                          
+
                           const SizedBox(height: 24),
-                          
+
                           Text(
                             'Show this QR code to the staff to use your meal plan.',
                             style: theme.textTheme.bodyMedium,
                             textAlign: TextAlign.center,
                           ),
-                          
+
                           const SizedBox(height: 8),
-                          
+
                           Text(
                             'Valid until: ${mealPlan.expiryDate != null ? "${mealPlan.expiryDate!.day}/${mealPlan.expiryDate!.month}/${mealPlan.expiryDate!.year}" : "No expiration date"}',
                             style: theme.textTheme.bodyMedium?.copyWith(
@@ -101,7 +102,7 @@ class MealPlanQRCode extends ConsumerWidget {
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          
+
                           if (mealPlan.ownerName.isNotEmpty) ...[
                             const SizedBox(height: 16),
                             Container(
@@ -130,9 +131,9 @@ class MealPlanQRCode extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   // Additional actions
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -166,7 +167,7 @@ class MealPlanQRCode extends ConsumerWidget {
       ),
     );
   }
-  
+
   Widget _buildActionButton(
     BuildContext context, {
     required IconData icon,
@@ -185,7 +186,7 @@ class MealPlanQRCode extends ConsumerWidget {
       ),
     );
   }
-  
+
   String _generateQRData(MealPlan mealPlan) {
     // Create a JSON object with necessary details
     final qrData = {
@@ -196,14 +197,14 @@ class MealPlanQRCode extends ConsumerWidget {
       'remaining': mealPlan.mealsRemaining,
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     };
-    
+
     // Return as JSON string
     return jsonEncode(qrData);
   }
-  
+
   void _showShareOptions(BuildContext context, MealPlan mealPlan) {
     final theme = Theme.of(context);
-    
+
     showModalBottomSheet(
       context: context,
       builder: (context) => Padding(
@@ -216,7 +217,7 @@ class MealPlanQRCode extends ConsumerWidget {
               style: theme.textTheme.titleLarge,
             ),
             const SizedBox(height: 24),
-            
+
             // Share options
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -229,7 +230,8 @@ class MealPlanQRCode extends ConsumerWidget {
                     Clipboard.setData(ClipboardData(text: mealPlan.id));
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Meal Plan ID copied to clipboard')),
+                      const SnackBar(
+                          content: Text('Meal Plan ID copied to clipboard')),
                     );
                   },
                 ),
@@ -262,9 +264,9 @@ class MealPlanQRCode extends ConsumerWidget {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: const Text('Cancel'),
@@ -274,7 +276,7 @@ class MealPlanQRCode extends ConsumerWidget {
       ),
     );
   }
-  
+
   Widget _buildShareOption(
     BuildContext context, {
     required IconData icon,
@@ -282,7 +284,7 @@ class MealPlanQRCode extends ConsumerWidget {
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
-    
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
@@ -312,48 +314,32 @@ class MealPlanQRCode extends ConsumerWidget {
       ),
     );
   }
-  
+
   void _saveMealPlanQR(BuildContext context, MealPlan mealPlan) {
     // In a real app, implement QR code saving functionality
     // This would likely use a platform-agnostic approach for web compatibility
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('QR Code saving not implemented in this demo')),
+      const SnackBar(
+          content: Text('QR Code saving not implemented in this demo')),
     );
   }
-  
+
   void _shareViaEmail(BuildContext context, MealPlan mealPlan) {
     // Use a web-compatible approach for sharing
-    final subject = 'My ${mealPlan.title} Meal Plan';
-    final body = '''
-Hello,
 
-Here's my meal plan information:
-
-Plan: ${mealPlan.title}
-Meals Remaining: ${mealPlan.mealsRemaining}
-ID: ${mealPlan.id}
-
-Please present this ID to the staff when using the meal plan.
-
-Thank you!
-''';
-    
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Email sharing not implemented in this demo')),
+      const SnackBar(
+          content: Text('Email sharing not implemented in this demo')),
     );
   }
-  
+
   void _shareViaMessage(BuildContext context, MealPlan mealPlan) {
     // Use a web-compatible approach for sharing
-    final message = '''
-My Meal Plan: ${mealPlan.title}
-Meals Remaining: ${mealPlan.mealsRemaining}
-ID: ${mealPlan.id}
-''';
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Message sharing not implemented in this demo')),
+      const SnackBar(
+          content: Text('Message sharing not implemented in this demo')),
     );
   }
 }
@@ -364,7 +350,7 @@ class QrCodeWidget extends StatelessWidget {
   final double size;
   final Color backgroundColor;
   final Color foregroundColor;
-  
+
   const QrCodeWidget({
     super.key,
     required this.data,
@@ -372,7 +358,7 @@ class QrCodeWidget extends StatelessWidget {
     this.backgroundColor = Colors.white,
     this.foregroundColor = Colors.black,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     // Generate QR code data using the 'qr' library
@@ -380,7 +366,7 @@ class QrCodeWidget extends StatelessWidget {
       data: data,
       errorCorrectLevel: QrErrorCorrectLevel.M,
     );
-    
+
     // Create QR code image
     return CustomPaint(
       size: Size(size, size),
@@ -398,30 +384,26 @@ class QrPainter extends CustomPainter {
   final QrCode qrCode;
   final Color backgroundColor;
   final Color foregroundColor;
-  
+
   QrPainter({
     required this.qrCode,
     required this.backgroundColor,
     required this.foregroundColor,
   });
-  
+
   @override
   void paint(Canvas canvas, Size size) {
     if (qrCode.moduleCount == 0) return;
-    
-    final paint = Paint()
-      ..style = PaintingStyle.fill;
-    
-    // Calculate the size of each module
-    final moduleSize = size.width / qrCode.moduleCount;
-    
+
+    final paint = Paint()..style = PaintingStyle.fill;
+
     // Draw background
     paint.color = backgroundColor;
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
-    
+
     // Draw modules
     paint.color = foregroundColor;
-    
+
     // for (int row = 0; row < qrCode.moduleCount; row++) {
     //   for (int col = 0; col < qrCode.moduleCount; col++) {
     //     if (qrCode.isDark(row, col)) {
@@ -435,7 +417,7 @@ class QrPainter extends CustomPainter {
     //   }
     // }
   }
-  
+
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return true;

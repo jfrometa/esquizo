@@ -115,7 +115,6 @@ class ThemeSettingsSection extends ConsumerWidget {
             'Utiliza el tema oscuro independientemente de la configuración del sistema.';
         break;
       case ThemeMode.system:
-      default:
         icon = Icons.smartphone;
         title = 'Tema del Sistema';
         description =
@@ -126,7 +125,7 @@ class ThemeSettingsSection extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(

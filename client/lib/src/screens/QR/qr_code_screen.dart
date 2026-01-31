@@ -9,7 +9,7 @@ class QRCodeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -47,13 +47,14 @@ class QRCodeScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 40),
-                
+
                 // Welcome section
                 Card(
                   elevation: 0,
-                  color: theme.colorScheme.primaryContainer.withOpacity(0.7),
+                  color:
+                      theme.colorScheme.primaryContainer.withValues(alpha: 0.7),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -80,9 +81,9 @@ class QRCodeScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 40),
-                
+
                 // Main options
                 Text(
                   'What would you like to do?',
@@ -90,9 +91,9 @@ class QRCodeScreen extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Options Grid
                 GridView.count(
                   shrinkWrap: true,
@@ -114,7 +115,7 @@ class QRCodeScreen extends StatelessWidget {
                     //     ),
                     //   ),
                     // ),
-                    
+
                     // View Menu option
                     _buildOptionCard(
                       context: context,
@@ -128,7 +129,7 @@ class QRCodeScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    
+
                     // Table Reservation option
                     _buildOptionCard(
                       context: context,
@@ -142,7 +143,7 @@ class QRCodeScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    
+
                     // Restaurant Info option
                     _buildOptionCard(
                       context: context,
@@ -158,9 +159,9 @@ class QRCodeScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 40),
-                
+
                 // Admin Section (would be shown only to staff in a real app)
                 // Text(
                 //   'Restaurant Staff',
@@ -168,9 +169,9 @@ class QRCodeScreen extends StatelessWidget {
                 //     fontWeight: FontWeight.w600,
                 //   ),
                 // ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // // Generate QR Option
                 // _buildAdminCard(
                 //   context: context,
@@ -184,7 +185,6 @@ class QRCodeScreen extends StatelessWidget {
                 //     ),
                 //   ),
                 // ),
-              
               ],
             ),
           ),
@@ -192,7 +192,7 @@ class QRCodeScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildOptionCard({
     required BuildContext context,
     required IconData icon,
@@ -201,13 +201,13 @@ class QRCodeScreen extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
-    
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: theme.colorScheme.outline.withOpacity(0.2),
+          color: theme.colorScheme.outline.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -237,67 +237,6 @@ class QRCodeScreen extends StatelessWidget {
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-  
-  Widget _buildAdminCard({
-    required BuildContext context,
-    required IconData icon,
-    required String title,
-    required String description,
-    required VoidCallback onTap,
-  }) {
-    final theme = Theme.of(context);
-    
-    return Card(
-      elevation: 0,
-      color: theme.colorScheme.secondaryContainer.withOpacity(0.7),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: 32,
-                color: theme.colorScheme.onSecondaryContainer,
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSecondaryContainer,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSecondaryContainer.withOpacity(0.8),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: theme.colorScheme.onSecondaryContainer.withOpacity(0.8),
               ),
             ],
           ),

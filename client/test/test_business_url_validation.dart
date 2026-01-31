@@ -70,7 +70,7 @@ class _BusinessValidationScreenState
         logs.removeAt(0);
       }
     });
-    print(message);
+    debugPrint(message);
   }
 
   @override

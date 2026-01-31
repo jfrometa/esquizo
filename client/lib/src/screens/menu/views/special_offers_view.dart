@@ -8,7 +8,7 @@ class SpecialOffersView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return ListView(
       controller: scrollController,
       padding: const EdgeInsets.all(20),
@@ -25,11 +25,11 @@ class SpecialOffersView extends StatelessWidget {
         Text(
           'Limited time promotions and special deals',
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withOpacity(0.7),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
         const SizedBox(height: 24),
-        
+
         // Featured promotion
         Card(
           elevation: 4,
@@ -72,7 +72,8 @@ class SpecialOffersView extends StatelessWidget {
                 Text(
                   'Complete meal for 4-6 people with appetizers, main courses, and desserts',
                   style: TextStyle(
-                    color: theme.colorScheme.onSecondaryContainer.withOpacity(0.8),
+                    color: theme.colorScheme.onSecondaryContainer
+                        .withValues(alpha: 0.8),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -90,7 +91,8 @@ class SpecialOffersView extends StatelessWidget {
                       'S/ 399.90',
                       style: TextStyle(
                         decoration: TextDecoration.lineThrough,
-                        color: theme.colorScheme.onSecondaryContainer.withOpacity(0.6),
+                        color: theme.colorScheme.onSecondaryContainer
+                            .withValues(alpha: 0.6),
                       ),
                     ),
                     const Spacer(),
@@ -110,9 +112,9 @@ class SpecialOffersView extends StatelessWidget {
             ),
           ),
         ),
-        
+
         const SizedBox(height: 30),
-        
+
         // Weekly specials
         Text(
           'Weekly Specials',
@@ -121,7 +123,7 @@ class SpecialOffersView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        
+
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -137,7 +139,7 @@ class SpecialOffersView extends StatelessWidget {
               'Free kid\'s meal with purchase of adult entrée',
               'Complete brunch with mimosa or juice'
             ];
-            
+
             return Card(
               elevation: 2,
               margin: const EdgeInsets.only(bottom: 16),
@@ -156,7 +158,11 @@ class SpecialOffersView extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
-                        index == 0 ? Icons.restaurant : index == 1 ? Icons.child_care : Icons.brunch_dining,
+                        index == 0
+                            ? Icons.restaurant
+                            : index == 1
+                                ? Icons.child_care
+                                : Icons.brunch_dining,
                         color: theme.colorScheme.primary,
                         size: 32,
                       ),

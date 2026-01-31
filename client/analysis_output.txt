@@ -92,7 +92,6 @@ warning • The value of the field '_firestore' isn't used • lib/src/core/subs
    info • 'CurrentRouteLocationRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/src/routing/business_routing_provider.dart:16:29 • deprecated_member_use_from_same_package
    info • 'IsBusinessUrlAccessRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/src/routing/business_routing_provider.dart:292:26 • deprecated_member_use_from_same_package
    info • 'BusinessRoutePrefixRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/src/routing/business_routing_provider.dart:300:29 • deprecated_member_use_from_same_package
-warning • The declaration '_buildAdminCard' isn't referenced • lib/src/screens/QR/qr_code_screen.dart:248:10 • unused_element
    info • Field overrides a field inherited from 'Resource' • lib/src/screens/admin/models/table_model.dart:20:16 • overridden_fields
    info • Field overrides a field inherited from 'Resource' • lib/src/screens/admin/models/table_model.dart:22:16 • overridden_fields
    info • Field overrides a field inherited from 'Resource' • lib/src/screens/admin/models/table_model.dart:26:25 • overridden_fields
@@ -105,32 +104,23 @@ warning • The value of the field '_existingConfig' isn't used • lib/src/scre
    info • 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion • lib/src/screens/admin/screens/business_settings/business_setup_screen.dart:1576:22 • deprecated_member_use
 warning • The value of the field '_selectedIndex' isn't used • lib/src/screens/admin/screens/catering_management/catering_management_screen.dart:19:7 • unused_field
 warning • The declaration '_onItemTapped' isn't referenced • lib/src/screens/admin/screens/catering_management/catering_management_screen.dart:61:8 • unused_element
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/catering_management/form/catering_category_form.dart:114:30 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/catering_management/form/catering_category_form.dart:117:39 • use_build_context_synchronously
-   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/form/catering_category_form.dart:342:53 • deprecated_member_use
-   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/form/catering_category_form.dart:393:26 • deprecated_member_use
-   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/form/catering_category_form.dart:445:38 • deprecated_member_use
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/catering_management/form/catering_item_form.dart:150:30 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/catering_management/form/catering_item_form.dart:153:39 • use_build_context_synchronously
-   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/form/catering_item_form.dart:536:50 • deprecated_member_use
-   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/form/catering_item_form.dart:658:48 • deprecated_member_use
-   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/form/catering_item_form.dart:758:26 • deprecated_member_use
-   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/form/catering_item_form.dart:810:38 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/form/catering_category_form.dart:343:53 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/form/catering_category_form.dart:394:26 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/form/catering_category_form.dart:446:38 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/form/catering_item_form.dart:537:50 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/form/catering_item_form.dart:659:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/form/catering_item_form.dart:759:26 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/form/catering_item_form.dart:811:38 • deprecated_member_use
 warning • The value of the field '_isLoading' isn't used • lib/src/screens/admin/screens/catering_management/screens/catering_category_screen.dart:17:14 • unused_field
    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/screens/catering_category_screen.dart:74:42 • deprecated_member_use
 warning • Two keys in a map literal shouldn't be equal • lib/src/screens/admin/screens/catering_management/screens/catering_category_screen.dart:319:7 • equal_keys_in_map
 warning • Two keys in a map literal shouldn't be equal • lib/src/screens/admin/screens/catering_management/screens/catering_category_screen.dart:321:7 • equal_keys_in_map
    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/screens/catering_item_screen.dart:241:40 • deprecated_member_use
-warning • The value of the field '_isLoading' isn't used • lib/src/screens/admin/screens/catering_management/screens/catering_order_details_screen.dart:25:8 • unused_field
-   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/screens/catering_order_details_screen.dart:179:48 • deprecated_member_use
-   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/screens/catering_order_details_screen.dart:202:46 • deprecated_member_use
-   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/screens/catering_order_details_screen.dart:345:62 • deprecated_member_use
-   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/screens/catering_order_details_screen.dart:876:28 • deprecated_member_use
-   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/screens/catering_order_details_screen.dart:1008:59 • deprecated_member_use
-   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/src/screens/admin/screens/catering_management/screens/catering_order_details_screen.dart:1180:56 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/src/screens/admin/screens/catering_management/screens/catering_order_details_screen.dart:1190:56 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/src/screens/admin/screens/catering_management/screens/catering_order_details_screen.dart:1322:50 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/src/screens/admin/screens/catering_management/screens/catering_order_details_screen.dart:1332:50 • use_build_context_synchronously
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/screens/catering_order_details_screen.dart:177:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/screens/catering_order_details_screen.dart:200:46 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/screens/catering_order_details_screen.dart:343:62 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/screens/catering_order_details_screen.dart:874:28 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/screens/catering_order_details_screen.dart:1006:59 • deprecated_member_use
    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/screens/catering_order_screen.dart:306:42 • deprecated_member_use
    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/screens/catering_order_screen.dart:376:34 • deprecated_member_use
    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/catering_management/screens/catering_order_screen.dart:407:48 • deprecated_member_use
@@ -158,10 +148,6 @@ warning • The left operand can't be null, so the right operand is never execut
 warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/catering_management/screens/catering_package_screen.dart:748:48 • dead_null_aware_expression
 warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/catering_management/screens/catering_package_screen.dart:753:44 • dead_null_aware_expression
    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/meal_plan/meal_plan_management_screen.dart:331:61 • deprecated_member_use
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/screens/customer_meal_plan_screen.dart:600:30 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/screens/customer_meal_plan_screen.dart:611:9 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/screens/customer_meal_plan_screen.dart:787:28 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/screens/customer_meal_plan_screen.dart:791:28 • use_build_context_synchronously
 warning • The value of the local variable 'theme' isn't used • lib/src/screens/admin/screens/meal_plan/screens/meal_plan_analytics_screen.dart:344:11 • unused_local_variable
    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/meal_plan/screens/meal_plan_analytics_screen.dart:606:48 • deprecated_member_use
    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/meal_plan/screens/meal_plan_analytics_screen.dart:771:60 • deprecated_member_use
@@ -174,90 +160,51 @@ warning • The value of the local variable 'message' isn't used • lib/src/scr
 warning • The value of the local variable 'moduleSize' isn't used • lib/src/screens/admin/screens/meal_plan/screens/meal_plan_qr_code.dart:420:11 • unused_local_variable
 warning • The value of the local variable 'theme' isn't used • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_admin_section.dart:35:11 • unused_local_variable
    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_admin_section.dart:114:43 • deprecated_member_use
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_card.dart:379:28 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_card.dart:387:28 • use_build_context_synchronously
 warning • The value of the local variable 'theme' isn't used • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_detail_view.dart:40:11 • unused_local_variable
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_detail_view.dart:650:32 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_detail_view.dart:663:11 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_detail_view.dart:748:32 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_detail_view.dart:761:11 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_detail_view.dart:848:28 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_detail_view.dart:852:28 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_detail_view.dart:864:28 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_detail_view.dart:872:28 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_detail_view.dart:883:28 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_detail_view.dart:887:28 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_detail_view.dart:898:28 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_detail_view.dart:902:28 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_detail_view.dart:926:28 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_detail_view.dart:930:28 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_detail_view.dart:949:28 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_detail_view.dart:953:28 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_detail_view.dart:965:28 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_detail_view.dart:973:28 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_export.dart:444:28 • use_build_context_synchronously
-warning • The declaration '_getReportTitle' isn't referenced • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_export.dart:462:10 • unused_element
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/staff/pos_meal_plan_widget.dart:335:30 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/staff/pos_meal_plan_widget.dart:346:9 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/staff/pos_meal_plan_widget.dart:455:28 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/meal_plan/widgets/staff/pos_meal_plan_widget.dart:471:28 • use_build_context_synchronously
+warning • The declaration '_getReportTitle' isn't referenced • lib/src/screens/admin/screens/meal_plan/widgets/meal_plan_export.dart:466:10 • unused_element
 warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/order_management_screen.dart:355:54 • dead_null_aware_expression
    info • The type of the right operand ('String') isn't a subtype or a supertype of the left operand ('OrderStatus') • lib/src/screens/admin/screens/order_management_screen.dart:422:36 • unrelated_type_equality_checks
    info • The type of the right operand ('String') isn't a subtype or a supertype of the left operand ('OrderStatus') • lib/src/screens/admin/screens/order_management_screen.dart:423:36 • unrelated_type_equality_checks
 warning • The value of the local variable 'orderService' isn't used • lib/src/screens/admin/screens/payment/order_payment_details_screen.dart:34:11 • unused_local_variable
-warning • The value of the field '_showDistributionDialog' isn't used • lib/src/screens/admin/screens/payment/tabs/payment_tips_tab.dart:27:14 • unused_field
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/product_management_screen.dart:611:11 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/product_management_screen.dart:630:9 • use_build_context_synchronously
 warning • This default clause is covered by the previous cases • lib/src/screens/admin/screens/setup/color_picker_widget.dart:45:7 • unreachable_switch_default
    info • The type of the right operand ('String') isn't a subtype or a supertype of the left operand ('int') • lib/src/screens/admin/screens/staff/staff_order_entry_screen.dart:40:33 • unrelated_type_equality_checks
-warning • The value of the field '_errorMessage' isn't used • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:33:11 • unused_field
-   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:145:35 • deprecated_member_use
-   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:352:63 • deprecated_member_use
-   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:360:60 • deprecated_member_use
-   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:494:64 • deprecated_member_use
-   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:519:60 • deprecated_member_use
-   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:525:62 • deprecated_member_use
-   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:553:37 • deprecated_member_use
-   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:971:63 • deprecated_member_use
-warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1286:41 • dead_null_aware_expression
-warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1288:55 • dead_null_aware_expression
-warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1293:13 • dead_null_aware_expression
-warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1294:39 • dead_null_aware_expression
-warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1295:41 • dead_null_aware_expression
-warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1296:47 • dead_null_aware_expression
-warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1297:43 • dead_null_aware_expression
-warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1298:45 • dead_null_aware_expression
-warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1299:47 • dead_null_aware_expression
-warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1300:55 • dead_null_aware_expression
-warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1302:47 • dead_null_aware_expression
-warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1303:45 • dead_null_aware_expression
-warning • The value of the field '_isLoading' isn't used • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1443:14 • unused_field
-warning • The value of 'refresh' should be used • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1476:19 • unused_result
-warning • The value of 'refresh' should be used • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1477:19 • unused_result
-   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1581:50 • deprecated_member_use
-   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1588:48 • deprecated_member_use
-warning • The value of 'refresh' should be used • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1817:21 • unused_result
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1818:38 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1824:38 • use_build_context_synchronously
-warning • The value of 'refresh' should be used • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1853:17 • unused_result
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1854:34 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1860:34 • use_build_context_synchronously
-warning • The value of 'refresh' should be used • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1883:11 • unused_result
-warning • The value of 'refresh' should be used • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1908:17 • unused_result
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1909:34 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1914:34 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1935:34 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1941:34 • use_build_context_synchronously
-warning • The value of 'refresh' should be used • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1968:11 • unused_result
-warning • The value of the local variable 'theme' isn't used • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:2037:11 • unused_local_variable
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:342:63 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:350:60 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:484:64 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:509:60 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:515:62 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:543:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:961:63 • deprecated_member_use
+warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1276:41 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1278:55 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1283:13 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1284:39 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1285:41 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1286:47 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1287:43 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1288:45 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1289:47 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1290:55 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1292:47 • dead_null_aware_expression
+warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1293:45 • dead_null_aware_expression
+  error • Expected to find '}' • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1407:3 • expected_token
+warning • The value of the field '_isLoading' isn't used • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1422:14 • unused_field
+warning • The value of 'refresh' should be used • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1455:19 • unused_result
+warning • The value of 'refresh' should be used • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1456:19 • unused_result
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1560:50 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1567:48 • deprecated_member_use
+warning • The value of 'refresh' should be used • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1796:21 • unused_result
+warning • The value of 'refresh' should be used • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1832:17 • unused_result
+warning • The value of 'refresh' should be used • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1862:11 • unused_result
+warning • The value of 'refresh' should be used • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1887:17 • unused_result
+warning • The value of 'refresh' should be used • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:1947:11 • unused_result
+warning • The value of the local variable 'theme' isn't used • lib/src/screens/admin/screens/table_and_order_management/table_and_order_management_screen.dart:2016:11 • unused_local_variable
 warning • The value of 'refresh' should be used • lib/src/screens/admin/screens/table_management/table_management_screen.dart:770:13 • unused_result
 warning • The value of 'refresh' should be used • lib/src/screens/admin/screens/table_management/table_management_screen.dart:781:13 • unused_result
 warning • The value of 'refresh' should be used • lib/src/screens/admin/screens/table_management/table_management_screen.dart:839:11 • unused_result
 warning • The value of 'refresh' should be used • lib/src/screens/admin/screens/table_management/table_management_screen.dart:871:15 • unused_result
 warning • The value of 'refresh' should be used • lib/src/screens/admin/screens/table_management/table_management_screen.dart:939:11 • unused_result
 warning • The value of the local variable 'theme' isn't used • lib/src/screens/admin/screens/table_management/table_management_screen.dart:1067:11 • unused_local_variable
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/user_management/user_management_screen.dart:472:21 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/admin/screens/user_management/user_management_screen.dart:506:21 • use_build_context_synchronously
    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/widgets/admin_side_menu.dart:252:45 • deprecated_member_use
    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/widgets/charts/active_hours_chart.dart:98:64 • deprecated_member_use
    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/widgets/charts/active_hours_chart.dart:119:54 • deprecated_member_use
@@ -312,35 +259,17 @@ warning • The left operand can't be null, so the right operand is never execut
    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/admin/widgets/sales_chart.dart:273:48 • deprecated_member_use
 warning • The value of the local variable 'maxSales' isn't used • lib/src/screens/admin/widgets/sales_chart.dart:343:11 • unused_local_variable
    info • Invalid use of a private type in a public API • lib/src/screens/authentication/presentation/authenticated_profile_screen.dart:20:3 • library_private_types_in_public_api
-   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/src/screens/authentication/presentation/authenticated_profile_screen.dart:72:22 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/src/screens/authentication/presentation/authenticated_profile_screen.dart:77:30 • use_build_context_synchronously
 warning • The value of 'refresh' should be used • lib/src/screens/authentication/presentation/custom_sign_in_screen.dart:60:25 • unused_result
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/authentication/presentation/custom_sign_in_screen.dart:78:31 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/authentication/presentation/custom_sign_in_screen.dart:81:33 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/authentication/presentation/custom_sign_in_screen.dart:86:31 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/authentication/presentation/custom_sign_in_screen.dart:91:33 • use_build_context_synchronously
    info • Invalid use of a private type in a public API • lib/src/screens/authentication/presentation/link_account_screen.dart:12:3 • library_private_types_in_public_api
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/authentication/presentation/link_account_screen.dart:37:22 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/authentication/presentation/link_account_screen.dart:59:30 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/authentication/presentation/link_account_screen.dart:66:30 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/authentication/presentation/sign_in_anonimously_footer.dart:30:28 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/authentication/presentation/sign_in_anonimously_footer.dart:33:36 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/authentication/presentation/sign_in_anonymously_footer.dart:29:28 • use_build_context_synchronously
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/authentication/presentation/sign_in_anonymously_footer.dart:32:36 • use_build_context_synchronously
 warning • This default clause is covered by the previous cases • lib/src/screens/authentication/presentation/theming_selection/theming_setting_section.dart:118:7 • unreachable_switch_default
 warning • This class (or a class that this class inherits from) is marked as '@immutable', but one or more of its instance fields aren't final: CateringCartItemView.isCustomSelected, CateringCartItemView.isCustomUnitsSelected • lib/src/screens/cart/catering_cart_item_view.dart:7:7 • must_be_immutable
-warning • The declaration '_finalizeAndAddToCart' isn't referenced • lib/src/screens/cart/catering_cart_item_view.dart:395:8 • unused_element
    info • Don't invoke 'print' in production code • lib/src/screens/cart/model/cart_item.dart:228:5 • avoid_print
 warning • The declaration '_finalizeAndAddToCart' isn't referenced • lib/src/screens/catering/catering_selection_screen.dart:273:8 • unused_element
 warning • The value of the local variable 'order' isn't used • lib/src/screens/catering_entry/catering_entry_screen.dart:118:11 • unused_local_variable
 warning • The value of the local variable 'colorScheme' isn't used • lib/src/screens/catering_entry/catering_entry_screen.dart:372:11 • unused_local_variable
-warning • The declaration '_calculateTotal' isn't referenced • lib/src/screens/catering_entry/catering_entry_screen.dart:412:10 • unused_element
-warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/catering_entry/catering_entry_screen.dart:415:44 • dead_null_aware_expression
-warning • The value of the local variable 'colorScheme' isn't used • lib/src/screens/catering_entry/catering_entry_screen.dart:432:11 • unused_local_variable
+warning • The value of the local variable 'colorScheme' isn't used • lib/src/screens/catering_entry/catering_entry_screen.dart:423:11 • unused_local_variable
 warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/catering_entry/components/catering_order/catering_order_form_view.dart:288:44 • dead_null_aware_expression
 warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/catering_entry/components/catering_quote/quote_order_form_view.dart:183:65 • dead_null_aware_expression
-warning • The value of the field '_eventDetailsCollapsed' isn't used • lib/src/screens/catering_quote/manual_quote_screen.dart:44:8 • unused_field
-   info • Don't use 'BuildContext's across async gaps • lib/src/screens/checkout/checkout_screen.dart:1012:45 • use_build_context_synchronously
 warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/checkout/services/order_details_generator.dart:144:35 • dead_null_aware_expression
 warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/checkout/services/order_details_generator.dart:145:41 • dead_null_aware_expression
 warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/checkout/services/order_details_generator.dart:146:37 • dead_null_aware_expression
@@ -444,7 +373,6 @@ warning • The value of the local variable 'cateringOrder' isn't used • lib/s
 warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/menu/views/search_results_view.dart:112:49 • dead_null_aware_expression
    info • The constant name '_DragHandle' isn't a lowerCamelCase identifier • lib/src/screens/menu/widget/menu_search_interface.dart:37:7 • constant_identifier_names
    info • Invalid use of a private type in a public API • lib/src/screens/onboarding/presentation/onboarding_screen.dart:12:3 • library_private_types_in_public_api
-   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/src/screens/onboarding/presentation/onboarding_screen.dart:170:7 • use_build_context_synchronously
    info • Invalid use of a private type in a public API • lib/src/screens/orders/in_progress_orders_screen.dart:22:3 • library_private_types_in_public_api
 warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/screens_mesa_redonda/home/home.dart:152:49 • dead_null_aware_expression
 warning • The value of 'refresh' should be used • lib/src/screens/screens_mesa_redonda/home/home.dart:221:15 • unused_result
@@ -454,8 +382,6 @@ warning • The value of the local variable 'colorScheme' isn't used • lib/src
    info • Field overrides a field inherited from 'Widget' • lib/src/screens/widgets_mesa_redonda/dish_item.dart:5:14 • overridden_fields
 warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/widgets_mesa_redonda/home_dishes_section.dart:81:29 • dead_null_aware_expression
 warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/widgets_mesa_redonda/home_dishes_section.dart:141:49 • dead_null_aware_expression
-warning • The value of the field '_isSearchFocused' isn't used • lib/src/screens/widgets_mesa_redonda/home_search_section.dart:30:8 • unused_field
-warning • The declaration '_buildMenuItemsGrid' isn't referenced • lib/src/screens/widgets_mesa_redonda/list_items/size_aware_widget.dart:167:8 • unused_element
 warning • The declaration '_WebImpl' isn't referenced • lib/src/utils/web/web_utils_stub.dart:7:7 • unused_element
 warning • The declaration 'reloadPage' isn't referenced • lib/src/utils/web/web_utils_stub.dart:8:15 • unused_element
 warning • The declaration 'goToHomePage' isn't referenced • lib/src/utils/web/web_utils_stub.dart:13:15 • unused_element

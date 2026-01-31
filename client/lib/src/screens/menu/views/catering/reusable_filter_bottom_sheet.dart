@@ -25,7 +25,8 @@ class FilterOptions {
     return FilterOptions(
       priceRange: priceRange ?? this.priceRange,
       selectedCategories: selectedCategories ?? this.selectedCategories,
-      selectedDietaryOptions: selectedDietaryOptions ?? this.selectedDietaryOptions,
+      selectedDietaryOptions:
+          selectedDietaryOptions ?? this.selectedDietaryOptions,
       onlySpecialOffers: onlySpecialOffers ?? this.onlySpecialOffers,
     );
   }
@@ -35,13 +36,13 @@ class FilterOptions {
 class FilterBottomSheet extends StatefulWidget {
   /// Initial filter options
   final FilterOptions initialOptions;
-  
+
   /// Available cuisine types to filter
   final List<String> cuisineTypes;
-  
+
   /// Available dietary options to filter
   final List<String> dietaryOptions;
-  
+
   /// Callback when filters are applied
   final Function(FilterOptions) onApplyFilters;
 
@@ -52,7 +53,7 @@ class FilterBottomSheet extends StatefulWidget {
     required this.dietaryOptions,
     required this.onApplyFilters,
   });
-  
+
   /// Show the filter bottom sheet
   static Future<void> show({
     required BuildContext context,
@@ -91,7 +92,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     // Initialize with the provided initial options
     _priceRange = widget.initialOptions.priceRange;
     _selectedCategories = List.from(widget.initialOptions.selectedCategories);
-    _selectedDietaryOptions = List.from(widget.initialOptions.selectedDietaryOptions);
+    _selectedDietaryOptions =
+        List.from(widget.initialOptions.selectedDietaryOptions);
     _onlySpecialOffers = widget.initialOptions.onlySpecialOffers;
   }
 
@@ -100,7 +102,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     final theme = Theme.of(context);
     final mediaQuery = MediaQuery.sizeOf(context);
     final mediaQueryInset = MediaQuery.viewInsetsOf(context);
-    
+
     return Container(
       constraints: BoxConstraints(
         maxHeight: mediaQuery.height * 0.85,
@@ -117,7 +119,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
@@ -145,7 +147,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       ),
     );
   }
-  
+
   Widget _buildHeader(ThemeData theme) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -164,7 +166,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       ],
     );
   }
-  
+
   Widget _buildPriceRangeSection(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,7 +201,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       ],
     );
   }
-  
+
   Widget _buildCuisineTypeSection(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,7 +237,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       ],
     );
   }
-  
+
   Widget _buildDietaryRestrictionsSection(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -271,7 +273,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       ],
     );
   }
-  
+
   Widget _buildSpecialOffersSwitch(ThemeData theme) {
     return SwitchListTile(
       title: const Text('Special Offers Only'),
@@ -285,10 +287,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       contentPadding: EdgeInsets.zero,
     );
   }
-  
+
   Widget _buildActionButtons(ThemeData theme) {
     final colorScheme = theme.colorScheme;
-    
+
     return Row(
       children: [
         Expanded(

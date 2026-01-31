@@ -9,7 +9,7 @@ class ReservationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Table Reservation'),
@@ -24,7 +24,7 @@ class ReservationScreen extends StatelessWidget {
             // Banner
             Card(
               elevation: 0,
-              color: theme.colorScheme.primaryContainer.withOpacity(0.7),
+              color: theme.colorScheme.primaryContainer.withValues(alpha: 0.7),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -51,9 +51,9 @@ class ReservationScreen extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Date selection
             Text(
               'Select Date',
@@ -62,13 +62,13 @@ class ReservationScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Date picker placeholder
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: theme.colorScheme.outline.withOpacity(0.5),
+                  color: theme.colorScheme.outline.withValues(alpha: 0.5),
                 ),
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -91,9 +91,9 @@ class ReservationScreen extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Time selection
             Text(
               'Select Time',
@@ -102,7 +102,7 @@ class ReservationScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Time slots
             Wrap(
               spacing: 12,
@@ -118,9 +118,9 @@ class ReservationScreen extends StatelessWidget {
                 _buildTimeSlot(context, '9:30 PM', true),
               ],
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Party size
             Text(
               'Number of Guests',
@@ -129,13 +129,13 @@ class ReservationScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Guest counter
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: theme.colorScheme.outline.withOpacity(0.5),
+                  color: theme.colorScheme.outline.withValues(alpha: 0.5),
                 ),
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -161,7 +161,8 @@ class ReservationScreen extends StatelessWidget {
                     child: Center(
                       child: Text(
                         '4',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                     ),
                   ),
@@ -173,9 +174,9 @@ class ReservationScreen extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Special requests
             Text(
               'Special Requests (Optional)',
@@ -184,7 +185,7 @@ class ReservationScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Text field
             TextField(
               maxLines: 3,
@@ -193,13 +194,13 @@ class ReservationScreen extends StatelessWidget {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: theme.colorScheme.outline.withOpacity(0.5),
+                    color: theme.colorScheme.outline.withValues(alpha: 0.5),
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: theme.colorScheme.outline.withOpacity(0.5),
+                    color: theme.colorScheme.outline.withValues(alpha: 0.5),
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
@@ -210,9 +211,9 @@ class ReservationScreen extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Reserve button
             ElevatedButton.icon(
               onPressed: () {
@@ -232,10 +233,10 @@ class ReservationScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildTimeSlot(BuildContext context, String time, bool isAvailable) {
     final theme = Theme.of(context);
-    
+
     return ChoiceChip(
       label: Text(time),
       selected: time == '7:30 PM',
@@ -246,20 +247,21 @@ class ReservationScreen extends StatelessWidget {
           : null,
       backgroundColor: theme.colorScheme.surfaceContainerHighest,
       selectedColor: theme.colorScheme.primaryContainer,
-      disabledColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+      disabledColor:
+          theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
       labelStyle: TextStyle(
         color: isAvailable
             ? time == '7:30 PM'
                 ? theme.colorScheme.onPrimaryContainer
                 : theme.colorScheme.onSurfaceVariant
-            : theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+            : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
       ),
     );
   }
-  
+
   void _showReservationConfirmation(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

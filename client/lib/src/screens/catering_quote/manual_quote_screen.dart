@@ -41,7 +41,6 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
 
   // Controls whether the event details are collapsed.
   // When required fields are filled, the header shows a summary.
-  bool _eventDetailsCollapsed = false;
 
   @override
   void initState() {
@@ -259,11 +258,7 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
           child: _buildEventDetails(),
         ),
       ],
-      onExpansionChanged: (expanded) {
-        setState(() {
-          _eventDetailsCollapsed = !expanded;
-        });
-      },
+      onExpansionChanged: (expanded) {},
     );
   }
 

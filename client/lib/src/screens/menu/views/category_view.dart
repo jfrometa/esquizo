@@ -278,7 +278,7 @@ class CategoryView extends ConsumerWidget {
                           'description': dish.description,
                           'pricing': dish.price.toString(),
                           'price': dish.price,
-                          'img': dish.imageUrl ?? 'assets/appIcon.png',
+                          'img': dish.imageUrl,
                           'foodType':
                               dish.metadata['foodType'] ?? 'Main Course',
                           'isSpicy': dish.metadata['isSpicy'] ?? false,

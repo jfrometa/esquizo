@@ -17,8 +17,6 @@ import 'package:starter_architecture_flutter_firebase/src/screens/menu/widget/me
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/widget/menu_tab_bar.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/menu/menu_providers.dart';
 
- 
-
 class MenuScreen extends ConsumerStatefulWidget {
   const MenuScreen({super.key});
 
@@ -60,10 +58,10 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
   @override
   void initState() {
     super.initState();
-    
+
     // Initialize QR data immediately to avoid null checks
     _initializeTableData();
-    
+
     // Lightweight listeners
     _searchController.addListener(_handleSearchChanges);
     _searchFocusNode.addListener(_handleFocusChanges);
@@ -91,36 +89,41 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
 
   void _setupScrollListeners() {
     // Add a more efficient single listener to each controller
-    _categoryScrollController.addListener(() => _handleScroll(_categoryScrollController));
-    _mealPlansScrollController.addListener(() => _handleScroll(_mealPlansScrollController));
-    _cateringScrollController.addListener(() => _handleScroll(_cateringScrollController));
-    _specialOffersScrollController.addListener(() => _handleScroll(_specialOffersScrollController));
+    _categoryScrollController
+        .addListener(() => _handleScroll(_categoryScrollController));
+    _mealPlansScrollController
+        .addListener(() => _handleScroll(_mealPlansScrollController));
+    _cateringScrollController
+        .addListener(() => _handleScroll(_cateringScrollController));
+    _specialOffersScrollController
+        .addListener(() => _handleScroll(_specialOffersScrollController));
   }
 
   void _handleScroll(ScrollController controller) {
     if (!controller.hasClients) return;
-    
+
     final newOffset = controller.offset;
-    
+
     // Only update state if there's a meaningful change
     if ((newOffset - _scrollOffset).abs() > 0.5) {
       final wasScrolling = _isScrolling;
       final isNowScrolling = newOffset > 0;
-      
+
       // Only setState if the scrolling state changed or significant movement
-      if (wasScrolling != isNowScrolling || (newOffset - _scrollOffset).abs() > 5) {
+      if (wasScrolling != isNowScrolling ||
+          (newOffset - _scrollOffset).abs() > 5) {
         setState(() {
           _scrollOffset = newOffset;
           _isScrolling = isNowScrolling;
         });
-        
+
         // Update animation state based on scroll position
         if (isNowScrolling && !_headerAnimationController.isAnimating) {
           _headerAnimationController.forward();
         } else if (!isNowScrolling && !_headerAnimationController.isAnimating) {
           _headerAnimationController.reverse();
         }
-        
+
         // Update Riverpod state (do this less frequently)
         ref.read(scrollStateProvider.notifier).state = newOffset;
       }
@@ -175,7 +178,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
           );
         }
       });
-      
+
       // Initialize with default data to avoid null issues
       _tableData = QRCodeData(
         tableId: 'default',
@@ -207,7 +210,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
     final newText = _searchController.text;
     final wasSearching = _isSearching;
     final isNowSearching = newText.isNotEmpty;
-    
+
     // Only update if there's a change
     if (wasSearching != isNowSearching) {
       setState(() {
@@ -219,15 +222,15 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
 
   Future<void> _handleSearchSubmitted(String query) async {
     if (query.isEmpty) return;
-    
+
     try {
       // Add to recent searches
       ref.read(menuRecentSearchesProvider.notifier).addSearch(query);
-      
+
       setState(() {
         _isSearching = true;
       });
-      
+
       ref.read(searchQueryProvider.notifier).state = query;
       FocusScope.of(context).unfocus();
       await HapticFeedback.selectionClick(); // lighter than mediumImpact
@@ -257,7 +260,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
     try {
       await HapticFeedback.selectionClick(); // lighter than lightImpact
       if (!mounted) return;
-      
+
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
@@ -293,19 +296,21 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
 
   void _showSearchInterface() {
     if (!mounted) return;
-    
+
     // Enable tabs when search interface is dismissed
     ref.read(tabsEnabledProvider.notifier).state = true;
-    
+
     // Position the bottom sheet below the app bar
-    final appBarHeight = AppBar().preferredSize.height + MediaQuery.of(context).padding.top;
+    final appBarHeight =
+        AppBar().preferredSize.height + MediaQuery.of(context).padding.top;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Padding(
-        padding: EdgeInsets.only(top: appBarHeight), // Prevent overlapping the app bar
+        padding: EdgeInsets.only(
+            top: appBarHeight), // Prevent overlapping the app bar
         child: DraggableScrollableSheet(
           initialChildSize: 0.85,
           minChildSize: 0.5,
@@ -315,7 +320,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
             WidgetsBinding.instance.addPostFrameCallback((_) {
               ref.read(tabsEnabledProvider.notifier).state = false;
             });
-            
+
             return MenuSearchInterface(
               controller: _searchController,
               focusNode: _searchFocusNode,
@@ -346,7 +351,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
     final colorScheme = theme.colorScheme;
     final activeTabIndex = ref.watch(menuActiveTabProvider);
     final cartItemCount = ref.watch(cartProvider).items.length;
-    
+
     // Update TabController when activeTabIndex changes (without rebuilding)
     if (_tabController.index != activeTabIndex) {
       _tabController.animateTo(activeTabIndex);
@@ -397,7 +402,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                       scrolledUnderElevation: 2,
                       expandedHeight: 120,
                       backgroundColor: _isScrolling
-                          ? colorScheme.surface.withOpacity(0.97)
+                          ? colorScheme.surface.withValues(alpha: 0.97)
                           : Colors.transparent,
                       foregroundColor: _isScrolling
                           ? colorScheme.onSurface
@@ -406,9 +411,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                         opacity: _isScrolling ? 1.0 : 0.0,
                         duration: const Duration(milliseconds: 200),
                         child: AnimatedSlide(
-                          offset: _isScrolling 
-                              ? Offset.zero 
-                              : const Offset(0, 0.5),
+                          offset:
+                              _isScrolling ? Offset.zero : const Offset(0, 0.5),
                           duration: const Duration(milliseconds: 200),
                           child: Text(
                             'Menu',
@@ -471,7 +475,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                       flexibleSpace: FlexibleSpaceBar(
                         background: SafeArea(
                           child: AnimatedAlign(
-                            alignment: _isScrolling 
+                            alignment: _isScrolling
                                 ? const Alignment(0.0, 0.2)
                                 : Alignment.bottomCenter,
                             duration: const Duration(milliseconds: 200),
@@ -486,7 +490,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(_isScrolling ? 0.1 : 0.2),
+                                    color: Colors.black.withValues(
+                                        alpha: _isScrolling ? 0.1 : 0.2),
                                     blurRadius: _isScrolling ? 4 : 8,
                                     spreadRadius: _isScrolling ? 0 : 1,
                                   ),
@@ -514,7 +519,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                           key: _tabBarKey,
                           tabController: _tabController,
                           onTabChanged: (index) {
-                            ref.read(menuActiveTabProvider.notifier).state = index;
+                            ref.read(menuActiveTabProvider.notifier).state =
+                                index;
                           },
                         ),
                       ),
@@ -534,7 +540,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: colorScheme.shadow.withOpacity(0.1),
+                                color:
+                                    colorScheme.shadow.withValues(alpha: 0.1),
                                 blurRadius: 8,
                                 offset: const Offset(0, -2),
                               ),
@@ -563,7 +570,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                               ),
                               RepaintBoundary(
                                 child: SpecialOffersView(
-                                  scrollController: _specialOffersScrollController,
+                                  scrollController:
+                                      _specialOffersScrollController,
                                 ),
                               ),
                             ],

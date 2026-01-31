@@ -29,8 +29,7 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen>
   late TabController _tabController;
   late Order _currentOrder;
   late List<OrderItem> _orderItems;
-  bool _isLoading = false;
-  String? _errorMessage;
+
   final TextEditingController _notesController = TextEditingController();
   final FocusNode _notesFocusNode = FocusNode();
 
@@ -138,15 +137,6 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen>
               _buildOrderInfoTab(theme),
             ],
           ),
-
-          // Loading overlay
-          if (_isLoading)
-            Container(
-              color: Colors.black.withOpacity(0.3),
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
         ],
       ),
       bottomNavigationBar: _buildBottomBar(theme),
@@ -1331,11 +1321,6 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen>
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
     try {
       final orderService = ref.read(orderServiceProvider);
       final tableService = ref.read(tableServiceProvider);
@@ -1406,10 +1391,6 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen>
         Navigator.pop(context, orderToSave);
       }
     } catch (e) {
-      setState(() {
-        _errorMessage = e.toString();
-      });
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1417,12 +1398,6 @@ class _TableOrderScreenState extends ConsumerState<TableOrderScreen>
             backgroundColor: Colors.red,
           ),
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
       }
     }
   }
@@ -1440,7 +1415,6 @@ class MenuManagementScreen extends ConsumerStatefulWidget {
 class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final bool _isLoading = false;
 
   @override
   void initState() {
@@ -1473,8 +1447,8 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen>
             icon: const Icon(Icons.refresh),
             tooltip: 'Actualizar',
             onPressed: () {
-              ref.refresh(menuProductsProvider);
-              ref.refresh(menuCategoriesProvider);
+              ref.invalidate(menuProductsProvider);
+              ref.invalidate(menuCategoriesProvider);
             },
           ),
         ],
@@ -1803,7 +1777,7 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen>
 
         showDialog(
           context: context,
-          builder: (context) => AddEditProductDialog(
+          builder: (_) => AddEditProductDialog(
             categories: categoryList
                 .map((category) => MenuCategory(
                       id: category.id,
@@ -1813,12 +1787,14 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen>
                 .toList(),
             onSave: (product) {
               ref.read(productServiceProvider).createProduct(product).then((_) {
-                ref.refresh(menuProductsProvider);
+                if (!mounted) return;
+                ref.invalidate(menuProductsProvider);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                       content: Text('Producto agregado correctamente')),
                 );
               }).catchError((error) {
+                if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Error: $error')),
                 );
@@ -1839,7 +1815,7 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen>
   void _showEditProductDialog(MenuItem product, List<MenuCategory> categories) {
     showDialog(
       context: context,
-      builder: (context) => AddEditProductDialog(
+      builder: (_) => AddEditProductDialog(
         product: product,
         categories: categories,
         onSave: (updatedProduct) {
@@ -1847,12 +1823,14 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen>
               .read(productServiceProvider)
               .updateProduct(updatedProduct)
               .then((_) {
-            ref.refresh(menuProductsProvider);
+            if (!mounted) return;
+            ref.invalidate(menuProductsProvider);
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                   content: Text('Producto actualizado correctamente')),
             );
           }).catchError((error) {
+            if (!mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Error: $error')),
             );
@@ -1875,7 +1853,8 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen>
     );
 
     ref.read(productServiceProvider).updateProduct(updatedProduct).then((_) {
-      ref.refresh(menuProductsProvider);
+      if (!mounted) return;
+      ref.invalidate(menuProductsProvider);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -1886,6 +1865,7 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen>
         ),
       );
     }).catchError((error) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $error')),
       );
@@ -1895,14 +1875,16 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen>
   void _showAddCategoryDialog() {
     showDialog(
       context: context,
-      builder: (context) => AddEditCategoryDialog(
+      builder: (_) => AddEditCategoryDialog(
         onSave: (category) {
           ref.read(productServiceProvider).createCategory(category).then((_) {
-            ref.refresh(menuCategoriesProvider);
+            if (!mounted) return;
+            ref.invalidate(menuCategoriesProvider);
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Categoría agregada correctamente')),
             );
           }).catchError((error) {
+            if (!mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Error: $error')),
             );
@@ -1915,19 +1897,21 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen>
   void _showEditCategoryDialog(MenuCategory category) {
     showDialog(
       context: context,
-      builder: (context) => AddEditCategoryDialog(
+      builder: (_) => AddEditCategoryDialog(
         category: category,
         onSave: (updatedCategory) {
           ref
               .read(productServiceProvider)
               .updateCategory(updatedCategory)
               .then((_) {
+            if (!mounted) return;
             ref.invalidate(menuCategoriesProvider);
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                   content: Text('Categoría actualizada correctamente')),
             );
           }).catchError((error) {
+            if (!mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Error: $error')),
             );
@@ -1943,6 +1927,7 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen>
     categoryService.updateCategorySortOrder(categoryId, newSortOrder).then((_) {
       // No need to refresh the provider since we're already updating the UI
     }).catchError((error) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al actualizar el orden: $error')),
       );
@@ -1953,11 +1938,13 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen>
     final categoryService = ref.read(productServiceProvider);
 
     categoryService.deleteCategory(categoryId).then((_) {
-      ref.refresh(menuCategoriesProvider);
+      if (!mounted) return;
+      ref.invalidate(menuCategoriesProvider);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Categoría eliminada correctamente')),
       );
     }).catchError((error) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al eliminar: $error')),
       );
@@ -2021,8 +2008,6 @@ class _AddEditProductDialogState extends State<AddEditProductDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return AlertDialog(
       title: Text(widget.product != null
           ? 'Editar Producto'

@@ -63,7 +63,7 @@ class CateringOrderForm extends ConsumerWidget {
         // Order details card
         Card(
           elevation: 0,
-          color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -121,7 +121,7 @@ class CateringOrderForm extends ConsumerWidget {
         if (items.isNotEmpty)
           Card(
             elevation: 0,
-            color: colorScheme.secondaryContainer.withOpacity(0.3),
+            color: colorScheme.secondaryContainer.withValues(alpha: 0.3),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -164,7 +164,7 @@ class CateringOrderForm extends ConsumerWidget {
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              color: colorScheme.primary.withOpacity(0.1),
+                              color: colorScheme.primary.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Center(
@@ -204,7 +204,7 @@ class CateringOrderForm extends ConsumerWidget {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: colorScheme.primary.withOpacity(0.1),
+                              color: colorScheme.primary.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
@@ -285,7 +285,7 @@ class CateringOrderForm extends ConsumerWidget {
   String _calculateTotal(List<CateringDish> items) {
     double total = 0;
     for (var item in items) {
-      total += (item.pricing.toDouble() ?? 0);
+      total += item.pricing.toDouble();
     }
     return total.toStringAsFixed(2);
   }

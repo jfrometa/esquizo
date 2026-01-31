@@ -3,19 +3,19 @@ import 'package:flutter/material.dart';
 /// Restaurant information section
 class RestaurantInfoSection extends StatelessWidget {
   final ScrollController scrollController;
-  
+
   const RestaurantInfoSection({
     super.key,
     required this.scrollController,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final size = MediaQuery.sizeOf(context);
     final isMobile = size.width < 600;
-    
+
     return ListView(
       controller: scrollController,
       children: [
@@ -36,7 +36,7 @@ class RestaurantInfoSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 24),
-        
+
         // Restaurant image
         ClipRRect(
           borderRadius: BorderRadius.circular(16),
@@ -58,7 +58,7 @@ class RestaurantInfoSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 24),
-        
+
         // Restaurant story
         Text(
           'Nuestra Historia',
@@ -73,15 +73,15 @@ class RestaurantInfoSection extends StatelessWidget {
           style: theme.textTheme.bodyLarge,
         ),
         const SizedBox(height: 24),
-        
+
         // Business hours and location
         if (isMobile)
           _buildMobileInfoSection(context)
         else
           _buildDesktopInfoSection(context),
-        
+
         const SizedBox(height: 24),
-        
+
         // Meet the team
         Text(
           'Nuestro Equipo',
@@ -91,7 +91,7 @@ class RestaurantInfoSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        
+
         // Team members
         Wrap(
           spacing: 16,
@@ -101,30 +101,33 @@ class RestaurantInfoSection extends StatelessWidget {
               context,
               name: 'Carlos Mendoza',
               position: 'Chef Ejecutivo',
-              image: 'https://images.unsplash.com/photo-1583394838336-acd977736f90',
+              image:
+                  'https://images.unsplash.com/photo-1583394838336-acd977736f90',
             ),
             _buildTeamMemberCard(
               context,
               name: 'María López',
               position: 'Chef de Pastelería',
-              image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
+              image:
+                  'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
             ),
             _buildTeamMemberCard(
               context,
               name: 'Juan Pérez',
               position: 'Jefe de Sala',
-              image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a',
+              image:
+                  'https://images.unsplash.com/photo-1560250097-0b93528c311a',
             ),
           ],
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Awards and recognitions
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
@@ -138,21 +141,25 @@ class RestaurantInfoSection extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              _buildAwardItem(context, '2023', 'Mejor Restaurante de Fusión - Lima Food Awards'),
-              _buildAwardItem(context, '2022', 'Chef del Año - Revista Gastronomía & Sabor'),
-              _buildAwardItem(context, '2021', 'Excelencia en Servicio - TripAdvisor'),
-              _buildAwardItem(context, '2020', 'Innovación Culinaria - Premios Mesa Perú'),
+              _buildAwardItem(context, '2023',
+                  'Mejor Restaurante de Fusión - Lima Food Awards'),
+              _buildAwardItem(context, '2022',
+                  'Chef del Año - Revista Gastronomía & Sabor'),
+              _buildAwardItem(
+                  context, '2021', 'Excelencia en Servicio - TripAdvisor'),
+              _buildAwardItem(
+                  context, '2020', 'Innovación Culinaria - Premios Mesa Perú'),
             ],
           ),
         ),
       ],
     );
   }
-  
+
   Widget _buildMobileInfoSection(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -160,7 +167,7 @@ class RestaurantInfoSection extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
@@ -191,14 +198,14 @@ class RestaurantInfoSection extends StatelessWidget {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Location
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
@@ -231,7 +238,7 @@ class RestaurantInfoSection extends StatelessWidget {
                 child: Container(
                   height: 200,
                   width: double.infinity,
-                  color: colorScheme.primaryContainer.withOpacity(0.3),
+                  color: colorScheme.primaryContainer.withValues(alpha: 0.3),
                   child: const Center(
                     child: Text('Mapa de ubicación'),
                   ),
@@ -249,14 +256,14 @@ class RestaurantInfoSection extends StatelessWidget {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Contact information
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
@@ -279,18 +286,21 @@ class RestaurantInfoSection extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              _buildContactItem(context, Icons.phone, 'Teléfono', '+51 123 456 789'),
+              _buildContactItem(
+                  context, Icons.phone, 'Teléfono', '+51 123 456 789'),
               const SizedBox(height: 8),
-              _buildContactItem(context, Icons.email, 'Email', 'info@upgrade.do'),
+              _buildContactItem(
+                  context, Icons.email, 'Email', 'info@upgrade.do'),
               const SizedBox(height: 8),
-              _buildContactItem(context, Icons.language, 'Web', 'www.upgrade.do'),
+              _buildContactItem(
+                  context, Icons.language, 'Web', 'www.upgrade.do'),
             ],
           ),
         ),
       ],
     );
   }
-  
+
   Widget _buildDesktopInfoSection(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -303,7 +313,10 @@ class RestaurantInfoSection extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surfaceContainerHighest
+                      .withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: _buildBusinessHoursSection(context),
@@ -313,7 +326,10 @@ class RestaurantInfoSection extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surfaceContainerHighest
+                      .withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: _buildContactSection(context),
@@ -321,15 +337,18 @@ class RestaurantInfoSection extends StatelessWidget {
             ],
           ),
         ),
-        
+
         const SizedBox(width: 16),
-        
+
         // Right column - Location map
         Expanded(
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+              color: Theme.of(context)
+                  .colorScheme
+                  .surfaceContainerHighest
+                  .withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(12),
             ),
             child: _buildLocationSection(context),
@@ -338,7 +357,7 @@ class RestaurantInfoSection extends StatelessWidget {
       ],
     );
   }
-  
+
   Widget _buildBusinessHoursSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -354,8 +373,8 @@ class RestaurantInfoSection extends StatelessWidget {
             Text(
               'Horario de Atención',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ],
         ),
@@ -368,7 +387,7 @@ class RestaurantInfoSection extends StatelessWidget {
       ],
     );
   }
-  
+
   Widget _buildContactSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -384,8 +403,8 @@ class RestaurantInfoSection extends StatelessWidget {
             Text(
               'Contacto',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ],
         ),
@@ -398,7 +417,7 @@ class RestaurantInfoSection extends StatelessWidget {
       ],
     );
   }
-  
+
   Widget _buildLocationSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -414,8 +433,8 @@ class RestaurantInfoSection extends StatelessWidget {
             Text(
               'Ubicación',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ],
         ),
@@ -430,7 +449,10 @@ class RestaurantInfoSection extends StatelessWidget {
           child: Container(
             height: 200,
             width: double.infinity,
-            color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+            color: Theme.of(context)
+                .colorScheme
+                .primaryContainer
+                .withValues(alpha: 0.3),
             child: const Center(
               child: Text('Mapa de ubicación'),
             ),
@@ -448,7 +470,7 @@ class RestaurantInfoSection extends StatelessWidget {
       ],
     );
   }
-  
+
   Widget _buildHourRow(BuildContext context, String day, String hours) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -456,8 +478,8 @@ class RestaurantInfoSection extends StatelessWidget {
         Text(
           day,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         Text(
           hours,
@@ -466,8 +488,9 @@ class RestaurantInfoSection extends StatelessWidget {
       ],
     );
   }
-  
-  Widget _buildContactItem(BuildContext context, IconData icon, String label, String value) {
+
+  Widget _buildContactItem(
+      BuildContext context, IconData icon, String label, String value) {
     return Row(
       children: [
         Icon(
@@ -486,15 +509,15 @@ class RestaurantInfoSection extends StatelessWidget {
             Text(
               value,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ],
         ),
       ],
     );
   }
-  
+
   Widget _buildTeamMemberCard(
     BuildContext context, {
     required String name,
@@ -504,7 +527,7 @@ class RestaurantInfoSection extends StatelessWidget {
     final size = MediaQuery.sizeOf(context);
     final isMobile = size.width < 600;
     final cardWidth = isMobile ? double.infinity : 200.0;
-    
+
     return Container(
       width: cardWidth,
       padding: const EdgeInsets.all(12),
@@ -513,7 +536,7 @@ class RestaurantInfoSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -531,23 +554,23 @@ class RestaurantInfoSection extends StatelessWidget {
           Text(
             name,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
           Text(
             position,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-            ),
+                  color: Theme.of(context).colorScheme.primary,
+                ),
             textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
-  
+
   Widget _buildAwardItem(BuildContext context, String year, String award) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -563,9 +586,9 @@ class RestaurantInfoSection extends StatelessWidget {
             child: Text(
               year,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onPrimary,
-                fontWeight: FontWeight.bold,
-              ),
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ),
           const SizedBox(width: 8),

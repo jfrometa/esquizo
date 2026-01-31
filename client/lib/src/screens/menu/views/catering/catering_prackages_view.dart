@@ -51,7 +51,8 @@ class CateringPackageCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         side: isSelected
             ? BorderSide(color: colorScheme.primary, width: 2)
-            : BorderSide(color: colorScheme.outline.withOpacity(0.2), width: 1),
+            : BorderSide(
+                color: colorScheme.outline.withValues(alpha: 0.2), width: 1),
       ),
       child: InkWell(
         onTap: onTap != null ? () => onTap!(package) : null,
@@ -88,7 +89,7 @@ class CateringPackageCard extends StatelessWidget {
                           'Starting at',
                           style: TextStyle(
                             fontSize: 10,
-                            color: colorScheme.onSurface.withOpacity(0.7),
+                            color: colorScheme.onSurface.withValues(alpha: 0.7),
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -112,7 +113,7 @@ class CateringPackageCard extends StatelessWidget {
                 height: 130,
                 width: 1,
                 margin: const EdgeInsets.symmetric(horizontal: 12),
-                color: colorScheme.outline.withOpacity(0.2),
+                color: colorScheme.outline.withValues(alpha: 0.2),
               ),
 
               // Right side: Content
@@ -258,7 +259,7 @@ class CateringPackageCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: isMore
-            ? colorScheme.surfaceContainerHighest.withOpacity(0.7)
+            ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.7)
             : colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
       ),
@@ -350,7 +351,7 @@ class CateringPackageDetailScreen extends StatelessWidget {
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: colorScheme.primary.withOpacity(0.2),
+                      color: colorScheme.primary.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -374,7 +375,8 @@ class CateringPackageDetailScreen extends StatelessWidget {
                   Text(
                     package.description,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onPrimaryContainer.withOpacity(0.8),
+                      color:
+                          colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
                     ),
                     textAlign: TextAlign.center,
                   ),

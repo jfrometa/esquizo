@@ -37,7 +37,6 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final mealPlanAsync = ref.watch(mealPlanProvider(widget.mealPlanId));
 
     return Scaffold(
@@ -161,7 +160,8 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView>
                       '\$${mealPlan.originalPrice.toStringAsFixed(2)}',
                       style: theme.textTheme.titleMedium?.copyWith(
                         decoration: TextDecoration.lineThrough,
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                 ],
@@ -455,8 +455,10 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView>
               margin: const EdgeInsets.only(bottom: 8),
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor:
-                      Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                  backgroundColor: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.2),
                   child: Icon(
                     Icons.restaurant,
                     color: Theme.of(context).colorScheme.primary,
@@ -519,7 +521,7 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView>
                         backgroundColor: Theme.of(context)
                             .colorScheme
                             .primary
-                            .withOpacity(0.2),
+                            .withValues(alpha: 0.2),
                         child: Icon(
                           Icons.restaurant_menu,
                           color: Theme.of(context).colorScheme.primary,
@@ -637,6 +639,8 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView>
       final allItemsAsync = ref.read(mealPlanItemsProvider.future);
 
       allItemsAsync.then((allItems) {
+        if (!mounted) return;
+
         // Filter to only show allowed items that are available
         final allowedItems = allItems
             .where((item) =>
@@ -736,6 +740,8 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView>
       final allItemsAsync = ref.read(mealPlanItemsProvider.future);
 
       allItemsAsync.then((allItems) {
+        if (!mounted) return;
+
         // Filter out items that are already allowed
         final availableItems = allItems
             .where((item) => !mealPlan.allowedItemIds.contains(item.id))
@@ -842,10 +848,12 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView>
       final service = ref.read(mealPlanServiceProvider);
       await service.updateMealPlan(mealPlan);
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Meal plan updated successfully')),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error updating meal plan: $e')),
       );
@@ -858,6 +866,7 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView>
       await service.toggleMealPlanAvailability(
           mealPlan.id, !mealPlan.isAvailable);
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(mealPlan.isAvailable
@@ -866,6 +875,7 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView>
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error updating meal plan: $e')),
       );
@@ -877,10 +887,12 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView>
       final service = ref.read(mealPlanServiceProvider);
       await service.addConsumedItem(item);
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Consumed item recorded successfully')),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error recording consumed item: $e')),
       );
@@ -892,10 +904,12 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView>
       final service = ref.read(mealPlanServiceProvider);
       await service.deleteConsumedItem(item.id, item.mealPlanId);
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Consumed item deleted successfully')),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error deleting consumed item: $e')),
       );
@@ -920,10 +934,12 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView>
 
       await service.updateMealPlan(updatedMealPlan);
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('${items.length} items added to allowed items')),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error adding allowed items: $e')),
       );
@@ -943,10 +959,12 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView>
 
       await service.updateMealPlan(updatedMealPlan);
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('${item.name} removed from allowed items')),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error removing allowed item: $e')),
       );
@@ -959,6 +977,7 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView>
       final service = ref.read(mealPlanServiceProvider);
       await service.toggleMealPlanItemAvailability(item.id, isAvailable);
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(isAvailable
@@ -967,6 +986,7 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView>
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error updating item: $e')),
       );

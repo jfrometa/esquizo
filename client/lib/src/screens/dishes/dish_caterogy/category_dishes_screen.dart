@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catalog/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/cards/dish_card.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/dishes/dish_details/dish_details_screen.dart';
 import '../../QR/models/qr_code_data.dart';
 
 // Create a provider that filters catalog items by category
-final filteredCatalogItemsProvider = Provider.family<AsyncValue<List<CatalogItem>>, String>(
+final filteredCatalogItemsProvider =
+    Provider.family<AsyncValue<List<CatalogItem>>, String>(
   (ref, categoryId) {
     final catalogItemsAsyncValue = ref.watch(catalogItemsProvider('menu'));
     return catalogItemsAsyncValue.when(
       data: (items) {
         final filtered = items.where((item) {
           // Log item IDs for debugging
-          debugPrint('Filtering - Item ID: ${item.id}, Category ID: $categoryId, Match: ${item.id == categoryId}');
+          debugPrint(
+              'Filtering - Item ID: ${item.id}, Category ID: $categoryId, Match: ${item.id == categoryId}');
           return item.categoryId == categoryId;
         }).toList();
         return AsyncValue.data(filtered);
@@ -30,8 +32,8 @@ class CategoryDishesScreen extends ConsumerWidget {
   final int sortIndex;
   final String categoryName;
   final QRCodeData tableData;
-  
-  const CategoryDishesScreen( {
+
+  const CategoryDishesScreen({
     super.key,
     required this.categoryId,
     required this.categoryName,
@@ -43,8 +45,9 @@ class CategoryDishesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     // Use the new filteredCatalogItemsProvider instead of filteredDishesProvider
-    final filteredDishesAsync = ref.watch(filteredCatalogItemsProvider(categoryId));
-    
+    final filteredDishesAsync =
+        ref.watch(filteredCatalogItemsProvider(categoryId));
+
     return Scaffold(
       appBar: AppBar(
         title: Text(categoryName),
@@ -72,7 +75,7 @@ class CategoryDishesScreen extends ConsumerWidget {
               ),
             );
           }
-          
+
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: dishes.length,
@@ -84,21 +87,23 @@ class CategoryDishesScreen extends ConsumerWidget {
                 'title': dish.name,
                 'description': dish.description,
                 'pricing': dish.price,
-                'img': dish.imageUrl ?? 'assets/images/placeholder_food.png',
+                'img': dish.imageUrl,
                 'foodType': dish.metadata['foodType'] ?? 'Main Course',
                 'isSpicy': dish.metadata['isSpicy'] ?? false,
-                'ingredients': dish.metadata['ingredients'] ?? ['Ingredient 1', 'Ingredient 2'],
+                'ingredients': dish.metadata['ingredients'] ??
+                    ['Ingredient 1', 'Ingredient 2'],
                 'nutritionalInfo': dish.metadata['nutritionalInfo'],
               };
-              
+
               return Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: DishCard(
                   dish: dishMap,
                   onTap: () {
                     // Find the index of this dish in the full catalog
-                    ref.read(catalogItemsProvider('menu')).whenData((allDishes) {
-                      
+                    ref
+                        .read(catalogItemsProvider('menu'))
+                        .whenData((allDishes) {
                       Navigator.push(
                         context,
                         MaterialPageRoute(

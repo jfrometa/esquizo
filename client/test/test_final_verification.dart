@@ -1,14 +1,15 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  print('=== Updated Business Slug Strategy Verification ===');
+  debugPrint('=== Updated Business Slug Strategy Verification ===');
 
   // Test with mock paths
   final container = ProviderContainer();
 
   try {
     // Test slug extraction
-    print('\n1. Testing updated slug extraction logic...');
+    debugPrint('\n1. Testing updated slug extraction logic...');
 
     // Test cases for slug extraction
     final testPaths = [
@@ -22,39 +23,39 @@ void main() {
 
     for (final path in testPaths) {
       final extractedSlug = extractSlugFromPath(path);
-      print('Path: "$path" → Slug: "$extractedSlug"');
+      debugPrint('Path: "$path" → Slug: "$extractedSlug"');
     }
 
-    print('\n2. Testing updated provider functionality...');
+    debugPrint('\n2. Testing updated provider functionality...');
 
     // Test early URL detection
-    print('✓ Early URL detection provider available');
-    print('✓ Early business slug provider available');
-    print('✓ Updated URL-aware business ID provider with early detection');
-    print('✓ Improved business config provider with early context');
+    debugPrint('✓ Early URL detection provider available');
+    debugPrint('✓ Early business slug provider available');
+    debugPrint('✓ Updated URL-aware business ID provider with early detection');
+    debugPrint('✓ Improved business config provider with early context');
 
-    print('\n3. Testing startup integration...');
-    print('✓ App startup now includes early business detection');
-    print('✓ Business context established before routing');
-    print('✓ Improved fallback strategies');
+    debugPrint('\n3. Testing startup integration...');
+    debugPrint('✓ App startup now includes early business detection');
+    debugPrint('✓ Business context established before routing');
+    debugPrint('✓ Improved fallback strategies');
 
-    print('\n=== Strategy Update Complete ===');
-    print('✅ Early URL detection implemented');
-    print('✅ Business detection integrated with app startup');
-    print('✅ Improved "get business from start" strategy');
-    print('✅ Better error handling and fallbacks');
-    print('✅ All imports are resolved');
-    print('✅ No critical errors detected');
+    debugPrint('\n=== Strategy Update Complete ===');
+    debugPrint('✅ Early URL detection implemented');
+    debugPrint('✅ Business detection integrated with app startup');
+    debugPrint('✅ Improved "get business from start" strategy');
+    debugPrint('✅ Better error handling and fallbacks');
+    debugPrint('✅ All imports are resolved');
+    debugPrint('✅ No critical errors detected');
 
-    print('\n=== Key Improvements ===');
-    print('🚀 Early business slug detection during app startup');
-    print('⚡ Immediate URL path analysis before routing');
-    print('🔄 Better integration with app initialization sequence');
-    print('💾 Improved business ID resolution and storage');
-    print('🎯 More reliable business context establishment');
+    debugPrint('\n=== Key Improvements ===');
+    debugPrint('🚀 Early business slug detection during app startup');
+    debugPrint('⚡ Immediate URL path analysis before routing');
+    debugPrint('🔄 Better integration with app initialization sequence');
+    debugPrint('💾 Improved business ID resolution and storage');
+    debugPrint('🎯 More reliable business context establishment');
   } catch (e, stackTrace) {
-    print('❌ Error during verification: $e');
-    print('Stack trace: $stackTrace');
+    debugPrint('❌ Error during verification: $e');
+    debugPrint('Stack trace: $stackTrace');
   } finally {
     container.dispose();
   }

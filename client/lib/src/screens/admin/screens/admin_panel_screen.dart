@@ -1068,7 +1068,8 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                   const SizedBox(height: 4),
                   Text('Management Dashboard',
                       style: TextStyle(
-                          color: theme.colorScheme.onPrimary.withOpacity(0.8),
+                          color: theme.colorScheme.onPrimary
+                              .withValues(alpha: 0.8),
                           fontSize: 14)),
                 ],
               ),
@@ -1196,7 +1197,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                   Text(item.title,
                       style: TextStyle(
                           fontSize: 13,
-                          color: colorScheme.onSurface.withOpacity(0.7))),
+                          color: colorScheme.onSurface.withValues(alpha: 0.7))),
                   const SizedBox(width: 8),
                   const Icon(Icons.arrow_right, size: 16),
                   const SizedBox(width: 8),
@@ -1279,7 +1280,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
         type: BottomNavigationBarType.fixed,
         backgroundColor: theme.colorScheme.surface,
         selectedItemColor: theme.colorScheme.primary,
-        unselectedItemColor: theme.colorScheme.onSurface.withOpacity(0.6),
+        unselectedItemColor: theme.colorScheme.onSurface.withValues(alpha: 0.6),
         selectedFontSize: 12,
         unselectedFontSize: 12,
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
@@ -1433,8 +1434,8 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                     title: Text(mealPlansItem.title),
                     selected: _isCurrentRoutePathForItem(
                         currentRoutePath, mealPlansItem.route),
-                    selectedTileColor:
-                        theme.colorScheme.primaryContainer.withOpacity(0.2),
+                    selectedTileColor: theme.colorScheme.primaryContainer
+                        .withValues(alpha: 0.2),
                     onTap: () {
                       Navigator.pop(context);
                       _onItemSelected(_mealPlansIndex);
@@ -1454,8 +1455,8 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                     title: Text(staffItem.title),
                     selected: _isCurrentRoutePathForItem(
                         currentRoutePath, staffItem.route),
-                    selectedTileColor:
-                        theme.colorScheme.primaryContainer.withOpacity(0.2),
+                    selectedTileColor: theme.colorScheme.primaryContainer
+                        .withValues(alpha: 0.2),
                     onTap: () {
                       Navigator.pop(context);
                       _onItemSelected(_staffIndex);
@@ -1475,8 +1476,8 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                     title: Text(cateringItem.title),
                     selected: _isCurrentRoutePathForItem(
                         currentRoutePath, cateringItem.route),
-                    selectedTileColor:
-                        theme.colorScheme.primaryContainer.withOpacity(0.2),
+                    selectedTileColor: theme.colorScheme.primaryContainer
+                        .withValues(alpha: 0.2),
                     onTap: () {
                       Navigator.pop(context);
                       _onItemSelected(_cateringIndex);
@@ -1496,8 +1497,8 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                     title: Text(settingsItem.title),
                     selected: _isCurrentRoutePathForItem(
                         currentRoutePath, settingsItem.route),
-                    selectedTileColor:
-                        theme.colorScheme.primaryContainer.withOpacity(0.2),
+                    selectedTileColor: theme.colorScheme.primaryContainer
+                        .withValues(alpha: 0.2),
                     onTap: () {
                       Navigator.pop(context);
                       _onItemSelected(_settingsIndex);
@@ -1531,7 +1532,7 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(2)))),
           const SizedBox(height: 12),
           Text(title,
@@ -1588,7 +1589,8 @@ class AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
                 color: isSelected ? theme.colorScheme.primary : null,
                 fontWeight: isSelected ? FontWeight.bold : null)),
         selected: isSelected,
-        selectedTileColor: theme.colorScheme.primaryContainer.withOpacity(0.2),
+        selectedTileColor:
+            theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
         // Apply indentation for 'More' modal subroutes
         contentPadding: indent ? const EdgeInsets.only(left: 48) : null,
         dense: indent, // Make indented items denser

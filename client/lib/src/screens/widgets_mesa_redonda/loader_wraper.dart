@@ -5,7 +5,7 @@ class LoadingStateWrapper extends StatefulWidget {
   final Duration loadingDelay;
 
   const LoadingStateWrapper({
-    super.key, 
+    super.key,
     required this.child,
     this.loadingDelay = const Duration(milliseconds: 300),
   });
@@ -35,16 +35,14 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
-      child: _isLoading
-          ? _buildLoadingPlaceholder(context)
-          : widget.child,
+      child: _isLoading ? _buildLoadingPlaceholder(context) : widget.child,
     );
   }
 
   Widget _buildLoadingPlaceholder(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return SingleChildScrollView(
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
@@ -59,7 +57,8 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
                   width: 180,
                   height: 28,
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                    color: colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -68,7 +67,8 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
                   width: 260,
                   height: 16,
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                    color: colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -76,18 +76,19 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
             ),
           ),
           const SizedBox(height: 40),
-          
+
           // Content placeholders
           _buildGridPlaceholder(context),
-          
+
           const SizedBox(height: 40),
-          
+
           Center(
             child: Container(
               width: 160,
               height: 40,
               decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                color:
+                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(20),
               ),
             ),
@@ -96,17 +97,21 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
       ),
     );
   }
-  
+
   Widget _buildGridPlaceholder(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final size = MediaQuery.of(context).size;
     final isMobile = size.width < 600;
     final isTablet = size.width >= 600 && size.width < 1024;
-    
+
     // Determine grid appearance based on screen size
-    int columns = isMobile ? 1 : isTablet ? 2 : 3;
+    int columns = isMobile
+        ? 1
+        : isTablet
+            ? 2
+            : 3;
     int items = isMobile ? 3 : 6;
-    
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -120,7 +125,7 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
       itemBuilder: (context, index) {
         return Container(
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(16),
           ),
           child: isMobile
@@ -130,10 +135,10 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
       },
     );
   }
-  
+
   Widget _buildCardPlaceholder(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -143,7 +148,7 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest.withOpacity(0.6),
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
               shape: BoxShape.circle,
             ),
           ),
@@ -152,7 +157,7 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
             width: 110,
             height: 20,
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest.withOpacity(0.6),
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -161,7 +166,7 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
             width: double.infinity,
             height: 12,
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest.withOpacity(0.4),
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -170,7 +175,7 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
             width: 140,
             height: 12,
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest.withOpacity(0.4),
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -179,7 +184,7 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
             width: 90,
             height: 30,
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest.withOpacity(0.6),
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(15),
             ),
           ),
@@ -187,10 +192,10 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
       ),
     );
   }
-  
+
   Widget _buildHorizontalPlaceholder(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Row(
@@ -199,7 +204,7 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
             width: 70,
             height: 70,
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest.withOpacity(0.6),
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(8),
             ),
           ),
@@ -213,7 +218,8 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
                   width: 100,
                   height: 18,
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withOpacity(0.6),
+                    color: colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.6),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -222,7 +228,8 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
                   width: 140,
                   height: 12,
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withOpacity(0.4),
+                    color: colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -233,7 +240,7 @@ class _LoadingStateWrapperState extends State<LoadingStateWrapper> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
               shape: BoxShape.circle,
             ),
           ),

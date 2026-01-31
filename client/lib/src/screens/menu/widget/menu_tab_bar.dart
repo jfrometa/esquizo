@@ -144,9 +144,9 @@ class MenuTabBarState extends ConsumerState<MenuTabBar> {
     // Pre-calculate values to reduce calculations in build
     final labelColor = enabled
         ? colorScheme.onPrimary
-        : colorScheme.onSurfaceVariant.withOpacity(0.5);
+        : colorScheme.onSurfaceVariant.withValues(alpha: 0.5);
     final unselectedLabelColor =
-        colorScheme.onSurfaceVariant.withOpacity(enabled ? 1.0 : 0.5);
+        colorScheme.onSurfaceVariant.withValues(alpha: enabled ? 1.0 : 0.5);
     final indicatorColor =
         enabled ? colorScheme.primary : colorScheme.surfaceContainerHighest;
 
@@ -154,7 +154,7 @@ class MenuTabBarState extends ConsumerState<MenuTabBar> {
     final boxShadow = enabled
         ? [
             BoxShadow(
-              color: colorScheme.shadow.withOpacity(0.1),
+              color: colorScheme.shadow.withValues(alpha: 0.1),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -164,11 +164,11 @@ class MenuTabBarState extends ConsumerState<MenuTabBar> {
     return RepaintBoundary(
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(100),
           boxShadow: [
             BoxShadow(
-              color: theme.shadowColor.withOpacity(0.05),
+              color: theme.shadowColor.withValues(alpha: 0.05),
               blurRadius: 4,
               offset: const Offset(0, 1),
             ),
@@ -209,10 +209,10 @@ class MenuTabBarState extends ConsumerState<MenuTabBar> {
               (states) {
                 if (!enabled) return Colors.transparent;
                 if (states.contains(WidgetState.hovered)) {
-                  return colorScheme.primary.withOpacity(0.1);
+                  return colorScheme.primary.withValues(alpha: 0.1);
                 }
                 if (states.contains(WidgetState.pressed)) {
-                  return colorScheme.primary.withOpacity(0.2);
+                  return colorScheme.primary.withValues(alpha: 0.2);
                 }
                 return null;
               },

@@ -6,7 +6,6 @@ import 'package:starter_architecture_flutter_firebase/src/screens/cart/meal_subs
 import 'package:starter_architecture_flutter_firebase/src/screens/meal_plan/meal_plan_cart.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/models/scheduled_meal.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/providers/meal_schedule_provider.dart';
- 
 
 class MealPlanCheckout extends ConsumerWidget {
   final List<CartItem> items;
@@ -33,7 +32,7 @@ class MealPlanCheckout extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     // Watch the scheduled meals
     final scheduledMeals = ref.watch(mealScheduleProvider);
 
@@ -60,7 +59,7 @@ class MealPlanCheckout extends ConsumerWidget {
             ],
           ),
         ),
-        
+
         // Schedule configuration section
         Padding(
           padding: const EdgeInsets.all(16.0),
@@ -89,13 +88,14 @@ class MealPlanCheckout extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              
+
               // Scheduled meals list
               if (scheduledMeals.isEmpty)
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                    color: colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: colorScheme.outlineVariant),
                   ),
@@ -132,11 +132,11 @@ class MealPlanCheckout extends ConsumerWidget {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 16),
         paymentMethodDropdown,
         const SizedBox(height: 16),
-        
+
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Text(
@@ -164,10 +164,11 @@ class MealPlanCheckout extends ConsumerWidget {
     );
   }
 
-  Widget _buildScheduledMealTile(BuildContext context, WidgetRef ref, ScheduledMeal meal) {
+  Widget _buildScheduledMealTile(
+      BuildContext context, WidgetRef ref, ScheduledMeal meal) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Row(
       children: [
         Container(
@@ -233,7 +234,7 @@ class MealPlanCheckout extends ConsumerWidget {
     final dateController = TextEditingController();
     final timeController = TextEditingController();
     final notesController = TextEditingController();
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -243,7 +244,7 @@ class MealPlanCheckout extends ConsumerWidget {
       builder: (context) {
         final theme = Theme.of(context);
         final colorScheme = theme.colorScheme;
-        
+
         return Padding(
           padding: EdgeInsets.only(
             bottom: MediaQuery.viewInsetsOf(context).bottom,
@@ -281,16 +282,18 @@ class MealPlanCheckout extends ConsumerWidget {
                       );
                     },
                   );
-                  
+
                   if (date != null) {
                     dateController.text = DateFormat('yyyy-MM-dd').format(date);
                   }
                 },
                 decoration: InputDecoration(
                   labelText: 'Fecha',
-                  prefixIcon: Icon(Icons.calendar_today, color: colorScheme.primary),
+                  prefixIcon:
+                      Icon(Icons.calendar_today, color: colorScheme.primary),
                   filled: true,
-                  fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                  fillColor: colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.5),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
                     borderSide: BorderSide(color: colorScheme.outline),
@@ -314,16 +317,19 @@ class MealPlanCheckout extends ConsumerWidget {
                       );
                     },
                   );
-                  
+
                   if (time != null) {
-                    timeController.text = '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
+                    timeController.text =
+                        '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
                   }
                 },
                 decoration: InputDecoration(
                   labelText: 'Hora',
-                  prefixIcon: Icon(Icons.access_time, color: colorScheme.primary),
+                  prefixIcon:
+                      Icon(Icons.access_time, color: colorScheme.primary),
                   filled: true,
-                  fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                  fillColor: colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.5),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
                     borderSide: BorderSide(color: colorScheme.outline),
@@ -338,7 +344,8 @@ class MealPlanCheckout extends ConsumerWidget {
                   labelText: 'Notas (opcional)',
                   prefixIcon: Icon(Icons.note, color: colorScheme.primary),
                   filled: true,
-                  fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                  fillColor: colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.5),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
                     borderSide: BorderSide(color: colorScheme.outline),
@@ -356,34 +363,40 @@ class MealPlanCheckout extends ConsumerWidget {
                   const SizedBox(width: 8),
                   FilledButton(
                     onPressed: () {
-                      if (dateController.text.isEmpty || timeController.text.isEmpty) {
+                      if (dateController.text.isEmpty ||
+                          timeController.text.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: const Text('Por favor selecciona fecha y hora'),
+                            content:
+                                const Text('Por favor selecciona fecha y hora'),
                             backgroundColor: colorScheme.error,
                           ),
                         );
                         return;
                       }
-                      
+
                       try {
-                        final date = DateFormat('yyyy-MM-dd').parse(dateController.text);
+                        final date =
+                            DateFormat('yyyy-MM-dd').parse(dateController.text);
                         final timeParts = timeController.text.split(':');
                         final hour = int.parse(timeParts[0]);
                         final minute = int.parse(timeParts[1]);
-                        
+
                         final deliveryDate = DateTime(
-                          date.year, date.month, date.day, hour, minute
-                        );
-                        
-                        ref.read(mealScheduleProvider.notifier).addScheduledMeal(
-                          ScheduledMeal(
-                            id: DateTime.now().millisecondsSinceEpoch.toString(),
-                            deliveryDate: deliveryDate,
-                            notes: notesController.text,
-                          ),
-                        );
-                        
+                            date.year, date.month, date.day, hour, minute);
+
+                        ref
+                            .read(mealScheduleProvider.notifier)
+                            .addScheduledMeal(
+                              ScheduledMeal(
+                                id: DateTime.now()
+                                    .millisecondsSinceEpoch
+                                    .toString(),
+                                deliveryDate: deliveryDate,
+                                notes: notesController.text,
+                              ),
+                            );
+
                         Navigator.pop(context);
                       } catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -406,7 +419,8 @@ class MealPlanCheckout extends ConsumerWidget {
     );
   }
 
-  void _editScheduledMeal(BuildContext context, WidgetRef ref, ScheduledMeal meal) {
+  void _editScheduledMeal(
+      BuildContext context, WidgetRef ref, ScheduledMeal meal) {
     final dateController = TextEditingController(
       text: DateFormat('yyyy-MM-dd').format(meal.deliveryDate),
     );
@@ -414,7 +428,7 @@ class MealPlanCheckout extends ConsumerWidget {
       text: DateFormat('HH:mm').format(meal.deliveryDate),
     );
     final notesController = TextEditingController(text: meal.notes);
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -424,7 +438,7 @@ class MealPlanCheckout extends ConsumerWidget {
       builder: (context) {
         final theme = Theme.of(context);
         final colorScheme = theme.colorScheme;
-        
+
         return Padding(
           padding: EdgeInsets.only(
             bottom: MediaQuery.viewInsetsOf(context).bottom,
@@ -493,12 +507,15 @@ class MealPlanCheckout extends ConsumerWidget {
             child: TextField(
               controller: dateController,
               readOnly: true,
-              onTap: () => onDateTimeTap(context, dateController, timeController),
+              onTap: () =>
+                  onDateTimeTap(context, dateController, timeController),
               decoration: InputDecoration(
                 labelText: 'Fecha de entrega',
-                prefixIcon: Icon(Icons.calendar_today, color: colorScheme.primary),
+                prefixIcon:
+                    Icon(Icons.calendar_today, color: colorScheme.primary),
                 filled: true,
-                fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                fillColor:
+                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
                   borderSide: BorderSide(
@@ -532,7 +549,8 @@ class MealPlanCheckout extends ConsumerWidget {
                 labelText: 'Hora de entrega',
                 prefixIcon: Icon(Icons.access_time, color: colorScheme.primary),
                 filled: true,
-                fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                fillColor:
+                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
                   borderSide: BorderSide(
@@ -561,7 +579,6 @@ class MealPlanCheckout extends ConsumerWidget {
       ),
     );
   }
-
 
   Widget _buildDateTimeFields(
     BuildContext context,
@@ -593,7 +610,7 @@ class MealPlanCheckout extends ConsumerWidget {
                 );
               },
             );
-            
+
             if (date != null) {
               dateController.text = DateFormat('yyyy-MM-dd').format(date);
             }
@@ -602,7 +619,8 @@ class MealPlanCheckout extends ConsumerWidget {
             labelText: 'Fecha',
             prefixIcon: Icon(Icons.calendar_today, color: colorScheme.primary),
             filled: true,
-            fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            fillColor:
+                colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.0),
               borderSide: BorderSide(color: colorScheme.outline),
@@ -635,7 +653,7 @@ class MealPlanCheckout extends ConsumerWidget {
             } else {
               initialTime = TimeOfDay.now();
             }
-            
+
             final time = await showTimePicker(
               context: context,
               initialTime: initialTime,
@@ -648,16 +666,18 @@ class MealPlanCheckout extends ConsumerWidget {
                 );
               },
             );
-            
+
             if (time != null) {
-              timeController.text = '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
+              timeController.text =
+                  '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
             }
           },
           decoration: InputDecoration(
             labelText: 'Hora',
             prefixIcon: Icon(Icons.access_time, color: colorScheme.primary),
             filled: true,
-            fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            fillColor:
+                colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.0),
               borderSide: BorderSide(color: colorScheme.outline),
@@ -684,7 +704,8 @@ class MealPlanCheckout extends ConsumerWidget {
             hintText: 'Instrucciones especiales para esta entrega',
             prefixIcon: Icon(Icons.note, color: colorScheme.primary),
             filled: true,
-            fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            fillColor:
+                colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.0),
               borderSide: BorderSide(color: colorScheme.outline),
@@ -716,9 +737,10 @@ class MealPlanCheckout extends ConsumerWidget {
       onTap: () => onLocationTap(context, locationController, 'catering'),
       decoration: InputDecoration(
         labelText: 'Ubicación de entrega',
-        prefixIcon: Icon(Icons.location_on_outlined, color: colorScheme.primary),
+        prefixIcon:
+            Icon(Icons.location_on_outlined, color: colorScheme.primary),
         filled: true,
-        fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.0),
           borderSide: BorderSide(
@@ -743,7 +765,6 @@ class MealPlanCheckout extends ConsumerWidget {
       ),
     );
   }
-
 
   void _updateScheduledMeal(
     BuildContext context,
@@ -791,15 +812,17 @@ class MealPlanCheckout extends ConsumerWidget {
     }
   }
 
-  void _deleteScheduledMeal(BuildContext context, WidgetRef ref, ScheduledMeal meal) {
+  void _deleteScheduledMeal(
+      BuildContext context, WidgetRef ref, ScheduledMeal meal) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Eliminar entrega programada'),
-        content: const Text('¿Estás seguro de que deseas eliminar esta entrega programada?'),
+        content: const Text(
+            '¿Estás seguro de que deseas eliminar esta entrega programada?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -807,7 +830,9 @@ class MealPlanCheckout extends ConsumerWidget {
           ),
           FilledButton(
             onPressed: () {
-              ref.read(mealScheduleProvider.notifier).removeScheduledMeal(meal.id);
+              ref
+                  .read(mealScheduleProvider.notifier)
+                  .removeScheduledMeal(meal.id);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(

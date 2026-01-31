@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/subscriptions/subscription_repository.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/pagination/paginated_list_widget.dart';
- 
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/domain/models.dart';
@@ -126,7 +126,7 @@ class _SubscriptionCard extends StatelessWidget {
         Text(
           'Order Date: ${subscription.orderDate}',
           style: theme.textTheme.bodySmall?.copyWith(
-            color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
           ),
           textAlign: TextAlign.center,
         ),
@@ -161,8 +161,9 @@ class _SubscriptionCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(30.0),
         ),
         disabledBackgroundColor:
-            colorScheme.surfaceContainerHighest.withOpacity(0.5),
-        disabledForegroundColor: colorScheme.onSurfaceVariant.withOpacity(0.5),
+            colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        disabledForegroundColor:
+            colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
       ),
       child: Text(
         canConsume ? 'Consume a Meal' : 'Inactive',
@@ -344,7 +345,8 @@ class SubscriptionShimmer extends StatelessWidget {
                       height: index == 0 ? 80 : 20,
                       width: index == 0 ? 80 : double.infinity,
                       decoration: BoxDecoration(
-                        color: colorScheme.onSurfaceVariant.withOpacity(0.1),
+                        color:
+                            colorScheme.onSurfaceVariant.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),

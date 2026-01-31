@@ -33,6 +33,8 @@ class _LinkAccountScreenState extends ConsumerState<LinkAccountScreen> {
 
         await user.linkWithCredential(credential);
 
+        if (!mounted) return;
+
         // Success: Navigate back to the main screen
         Navigator.of(context).popUntil((route) => route.isFirst);
       } on FirebaseAuthException catch (e) {
@@ -56,6 +58,8 @@ class _LinkAccountScreenState extends ConsumerState<LinkAccountScreen> {
             break;
         }
 
+        if (!mounted) return;
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
@@ -63,6 +67,7 @@ class _LinkAccountScreenState extends ConsumerState<LinkAccountScreen> {
           ),
         );
       } catch (e) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('An unexpected error occurred.'),
           backgroundColor: Colors.brown[200], // Light brown background color

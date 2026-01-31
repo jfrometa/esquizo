@@ -23,7 +23,7 @@ class ItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     TextStyle textStyle = Theme.of(context).textTheme.labelLarge!.copyWith(
-          color: titleColor.withOpacity(0.64),
+          color: titleColor.withValues(alpha: 0.64),
           fontWeight: FontWeight.normal,
         );
     return InkWell(

@@ -416,8 +416,6 @@ class Cart {
   /// Confirm meal plan consumption with multiple dishes
   Cart confirmMealPlanConsumption(
       String mealPlanId, List<String> dishIds, String address) {
-    final currentDateTime = DateTime.now();
-
     // Find the meal plan
     final mealPlanIndex = items.indexWhere(
       (item) => item.id == mealPlanId && item.isMealSubscription,
@@ -1030,4 +1028,5 @@ List<CartItem> cartMealPlanDishes(Ref ref) {
   final cart = ref.watch(cartProvider);
   return cart.mealPlanDishes;
 }
+
 final cartProvider = cartNotifierProvider;

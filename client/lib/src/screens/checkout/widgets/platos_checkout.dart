@@ -62,9 +62,10 @@ class PlatosCheckout extends ConsumerWidget {
         onTap: () => onLocationTap(context, locationController, 'catering'),
         decoration: InputDecoration(
           labelText: 'Ubicación de entrega',
-          prefixIcon: Icon(Icons.location_on_outlined, color: colorScheme.primary),
+          prefixIcon:
+              Icon(Icons.location_on_outlined, color: colorScheme.primary),
           filled: true,
-          fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+          fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12.0),
             borderSide: BorderSide(
@@ -90,6 +91,4 @@ class PlatosCheckout extends ConsumerWidget {
       ),
     );
   }
-
-
 }

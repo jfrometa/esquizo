@@ -66,7 +66,7 @@ class FeaturesSectionMobile extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: colorScheme.primaryContainer.withOpacity(0.4),
+                          color: colorScheme.primaryContainer.withValues(alpha: 0.4),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
@@ -90,7 +90,7 @@ class FeaturesSectionMobile extends StatelessWidget {
                             Text(
                               feature['description'] as String,
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.onSurface.withOpacity(0.7),
+                                color: colorScheme.onSurface.withValues(alpha: 0.7),
                               ),
                             ),
                           ],
@@ -179,7 +179,7 @@ class FeaturesSectionTablet extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: colorScheme.primaryContainer.withOpacity(0.4),
+                          color: colorScheme.primaryContainer.withValues(alpha: 0.4),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
@@ -200,7 +200,7 @@ class FeaturesSectionTablet extends StatelessWidget {
                       Text(
                         feature['description'] as String,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurface.withOpacity(0.7),
+                          color: colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -265,7 +265,7 @@ class FeaturesSectionDesktop extends StatelessWidget {
           Text(
             'Nos esforzamos por ofrecer experiencias gastronómicas excepcionales',
             style: theme.textTheme.titleLarge?.copyWith(
-              color: colorScheme.onSurface.withOpacity(0.7),
+              color: colorScheme.onSurface.withValues(alpha: 0.7),
             ),
             textAlign: TextAlign.center,
           ),
@@ -282,7 +282,7 @@ class FeaturesSectionDesktop extends StatelessWidget {
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(
-                          color: colorScheme.primaryContainer.withOpacity(0.4),
+                          color: colorScheme.primaryContainer.withValues(alpha: 0.4),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -303,7 +303,7 @@ class FeaturesSectionDesktop extends StatelessWidget {
                       Text(
                         feature['description'] as String,
                         style: theme.textTheme.bodyLarge?.copyWith(
-                          color: colorScheme.onSurface.withOpacity(0.7),
+                          color: colorScheme.onSurface.withValues(alpha: 0.7),
                           height: 1.5,
                         ),
                         textAlign: TextAlign.center,

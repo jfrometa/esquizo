@@ -8,9 +8,9 @@ class QuoteOrderFormView extends ConsumerWidget {
   final CateringOrderItem quote;
   final VoidCallback? onEdit;
   final VoidCallback? onConfirm;
-  
+
   const QuoteOrderFormView({
-    super.key, 
+    super.key,
     required this.quote,
     this.onEdit,
     this.onConfirm,
@@ -57,7 +57,7 @@ class QuoteOrderFormView extends ConsumerWidget {
         // Quote details card
         Card(
           elevation: 0,
-          color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -75,17 +75,17 @@ class QuoteOrderFormView extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _buildQuoteDetailItem('Personas', '${quote.peopleCount ?? 0}', theme),
-                    _buildQuoteDetailItem('Tipo de Evento', quote.eventType, theme),
                     _buildQuoteDetailItem(
-                      'Chef Incluido',
-                      quote.hasChef ?? false ? 'Sí' : 'No', 
-                      theme
-                    ),
+                        'Personas', '${quote.peopleCount ?? 0}', theme),
+                    _buildQuoteDetailItem(
+                        'Tipo de Evento', quote.eventType, theme),
+                    _buildQuoteDetailItem('Chef Incluido',
+                        quote.hasChef ?? false ? 'Sí' : 'No', theme),
                     if (quote.alergias.isNotEmpty)
                       _buildQuoteDetailItem('Alergias', quote.alergias, theme),
                     if (quote.preferencia.isNotEmpty)
-                      _buildQuoteDetailItem('Preferencia', quote.preferencia, theme),
+                      _buildQuoteDetailItem(
+                          'Preferencia', quote.preferencia, theme),
                     if (quote.adicionales.isNotEmpty)
                       _buildQuoteDetailItem('Notas', quote.adicionales, theme),
                   ],
@@ -106,14 +106,14 @@ class QuoteOrderFormView extends ConsumerWidget {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Quote items summary
         if (quote.dishes.isNotEmpty)
           Card(
             elevation: 0,
-            color: colorScheme.tertiaryContainer.withOpacity(0.3),
+            color: colorScheme.tertiaryContainer.withValues(alpha: 0.3),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -139,11 +139,11 @@ class QuoteOrderFormView extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   const Divider(),
-                  
+
                   // Item list
                   ...quote.dishes.asMap().entries.map((entry) {
                     final index = entry.key;
@@ -156,7 +156,8 @@ class QuoteOrderFormView extends ConsumerWidget {
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              color: colorScheme.tertiary.withOpacity(0.1),
+                              color:
+                                  colorScheme.tertiary.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Center(
@@ -179,7 +180,7 @@ class QuoteOrderFormView extends ConsumerWidget {
                                   ),
                                 ),
                                 Text(
-                                  'Cantidad: ${item.quantity ?? 1}',
+                                  'Cantidad: ${item.quantity}',
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: colorScheme.onSurfaceVariant,
                                   ),
@@ -193,7 +194,9 @@ class QuoteOrderFormView extends ConsumerWidget {
                               color: colorScheme.error,
                             ),
                             onPressed: () {
-                              ref.read(manualQuoteProvider.notifier).removeFromCart(index);
+                              ref
+                                  .read(manualQuoteProvider.notifier)
+                                  .removeFromCart(index);
                             },
                           ),
                         ],
@@ -204,9 +207,9 @@ class QuoteOrderFormView extends ConsumerWidget {
               ),
             ),
           ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Desktop complete quote button
         if (isDesktop && quote.dishes.isNotEmpty && onConfirm != null)
           SizedBox(
@@ -224,4 +227,3 @@ class QuoteOrderFormView extends ConsumerWidget {
     );
   }
 }
-

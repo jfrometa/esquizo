@@ -166,7 +166,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   void _completeOnboarding(WidgetRef ref) async {
     await ref.read(onboardingControllerProvider.notifier).completeOnboarding();
-    if (context.mounted) {
+    if (mounted) {
       context.goNamedSafe(AppRoute.signIn.name);
     }
   }

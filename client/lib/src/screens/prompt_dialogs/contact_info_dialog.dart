@@ -253,10 +253,10 @@ class _ContactInfoDialogContentState
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: colorScheme.primaryContainer.withOpacity(0.3),
+        color: colorScheme.primaryContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: colorScheme.primary.withOpacity(0.3),
+          color: colorScheme.primary.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -463,7 +463,7 @@ class _ContactInfoDialogContentState
       padding: const EdgeInsets.all(8),
       margin: const EdgeInsets.only(bottom: 16, top: 8),
       decoration: BoxDecoration(
-        color: colorScheme.error.withOpacity(0.1),
+        color: colorScheme.error.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -837,7 +837,7 @@ class _ContactInfoDialogContentState
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: TextStyle(
-              color: colorScheme.onSurfaceVariant.withOpacity(0.6),
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
               fontSize: 14,
             ),
             prefixIcon: Icon(
@@ -876,7 +876,8 @@ class _ContactInfoDialogContentState
               fontSize: 12,
             ),
             filled: true,
-            fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            fillColor:
+                colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
             enabled: !readOnly,
           ),
         ),
@@ -1059,6 +1060,7 @@ class _ContactInfoDialogContentState
                             await FirebaseAuth.instance.sendPasswordResetEmail(
                               email: emailController.text,
                             );
+                            if (!context.mounted) return;
                             Navigator.of(context).pop();
 
                             // Show success message
@@ -1255,7 +1257,7 @@ class _ContactInfoDialogContentState
       await authRepo.forceRefreshAuthState();
 
       // Return user data
-      if (mounted) {
+      if (mounted && widget.dialogContext.mounted) {
         Navigator.of(widget.dialogContext).pop({
           'name': _nameController.text,
           'phone': _phoneController.text,
@@ -1294,7 +1296,7 @@ class _ContactInfoDialogContentState
       await authRepo.forceRefreshAuthState();
 
       // Return updated info
-      if (mounted) {
+      if (mounted && widget.dialogContext.mounted) {
         Navigator.of(widget.dialogContext).pop({
           'name': _nameController.text,
           'phone': _phoneController.text,
@@ -1343,7 +1345,7 @@ class _ContactInfoDialogContentState
       await authRepo.forceRefreshAuthState();
 
       // Return user data
-      if (mounted) {
+      if (mounted && widget.dialogContext.mounted) {
         Navigator.of(widget.dialogContext).pop({
           'name': _nameController.text,
           'phone': _phoneController.text,

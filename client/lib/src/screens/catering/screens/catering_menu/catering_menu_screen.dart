@@ -141,7 +141,7 @@ class _CateringMenuScreenState extends ConsumerState<CateringMenuScreen> {
           Text(
             'Perfect for events, parties, and corporate meetings',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.7),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
           const SizedBox(height: 24),
@@ -257,8 +257,8 @@ class _CateringMenuScreenState extends ConsumerState<CateringMenuScreen> {
                   Text(
                     'Tell us about your event and we\'ll create the perfect menu',
                     style: TextStyle(
-                      color:
-                          theme.colorScheme.onPrimaryContainer.withOpacity(0.8),
+                      color: theme.colorScheme.onPrimaryContainer
+                          .withValues(alpha: 0.8),
                     ),
                   ),
                   const SizedBox(height: 16),
