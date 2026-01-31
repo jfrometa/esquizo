@@ -14,12 +14,12 @@
 //     if (hex == null || hex.isEmpty) {
 //       return Colors.deepPurple;
 //     }
-    
+
 //     hex = hex.replaceAll('#', '');
 //     if (hex.length == 6) {
 //       hex = 'FF$hex';
 //     }
-    
+
 //     try {
 //       return Color(int.parse(hex, radix: 16));
 //     } catch (e) {
@@ -27,17 +27,17 @@
 //       return Colors.deepPurple; // Fallback color
 //     }
 //   }
-  
+
 //   /// Get color scheme from business settings
 //   static ColorScheme _getColorScheme(
-//     Map<String, dynamic> settings, 
+//     Map<String, dynamic> settings,
 //     Brightness brightness,
 //   ) {
 //     final primaryColor = _hexToColor(settings['primaryColor'] as String?);
 //     final secondaryColor = _hexToColor(settings['secondaryColor'] as String?);
 //     final tertiaryColor = _hexToColor(settings['tertiaryColor'] as String?);
 //     final accentColor = _hexToColor(settings['accentColor'] as String?);
-    
+
 //     return ColorScheme.fromSeed(
 //       seedColor: primaryColor,
 //       brightness: brightness,
@@ -47,10 +47,10 @@
 //       error: accentColor,
 //     );
 //   }
-  
+
 //   /// Get theme data from business config
 //   static ThemeData getThemeData(
-//     BusinessConfig? config, 
+//     BusinessConfig? config,
 //     Brightness brightness,
 //   ) {
 //     if (config == null) {
@@ -63,9 +63,9 @@
 //         useMaterial3: true,
 //       );
 //     }
-    
+
 //     final colorScheme = _getColorScheme(config.settings, brightness);
-    
+
 //     return ThemeData(
 //       colorScheme: colorScheme,
 //       useMaterial3: true,
@@ -133,7 +133,7 @@
 // final useDarkModeProvider = StateProvider<bool>((ref) {
 //   final businessConfig = ref.watch(businessConfigProvider).valueOrNull;
 //   final settings = businessConfig?.settings ?? {};
-  
+
 //   // Check if we have a dark mode setting, or use system default
 //   final useSystemTheme = settings['useSystemTheme'] as bool? ?? true;
 //   if (useSystemTheme) {
@@ -149,8 +149,8 @@
 // /// Provider for current theme based on dark mode preference
 // final currentThemeProvider = Provider<ThemeData>((ref) {
 //   final useDarkMode = ref.watch(useDarkModeProvider);
-//   return useDarkMode 
-//       ? ref.watch(darkThemeProvider) 
+//   return useDarkMode
+//       ? ref.watch(darkThemeProvider)
 //       : ref.watch(lightThemeProvider);
 // });
 
@@ -190,7 +190,7 @@ class BusinessThemeManager {
         foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -252,7 +252,7 @@ class BusinessThemeManager {
         foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -296,11 +296,11 @@ final lightThemeProvider = Provider<ThemeData>((ref) {
   final secondaryColor = ref.watch(secondaryColorProvider);
   final tertiaryColor = ref.watch(tertiaryColorProvider);
   final accentColor = ref.watch(accentColorProvider);
-  
+
   // Check if we have a business configuration
-  final hasBusinessConfig = ref.watch(businessConfigProvider).hasValue && 
-                            ref.watch(businessConfigProvider).valueOrNull != null;
-  
+  final hasBusinessConfig = ref.watch(businessConfigProvider).hasValue &&
+      ref.watch(businessConfigProvider).valueOrNull != null;
+
   // If we have a business config, use it to create the theme
   if (hasBusinessConfig) {
     return BusinessThemeManager.createLightTheme(
@@ -310,7 +310,7 @@ final lightThemeProvider = Provider<ThemeData>((ref) {
       accentColor: accentColor,
     );
   }
-  
+
   // Otherwise use the default app theme
   return AppTheme.lightTheme;
 });
@@ -322,11 +322,11 @@ final darkThemeProvider = Provider<ThemeData>((ref) {
   final secondaryColor = ref.watch(secondaryColorProvider);
   final tertiaryColor = ref.watch(tertiaryColorProvider);
   final accentColor = ref.watch(accentColorProvider);
-  
+
   // Check if we have a business configuration
-  final hasBusinessConfig = ref.watch(businessConfigProvider).hasValue && 
-                            ref.watch(businessConfigProvider).valueOrNull != null;
-  
+  final hasBusinessConfig = ref.watch(businessConfigProvider).hasValue &&
+      ref.watch(businessConfigProvider).valueOrNull != null;
+
   // If we have a business config, use it to create the theme
   if (hasBusinessConfig) {
     return BusinessThemeManager.createDarkTheme(
@@ -336,7 +336,7 @@ final darkThemeProvider = Provider<ThemeData>((ref) {
       accentColor: accentColor,
     );
   }
-  
+
   // Otherwise use the default app theme
   return AppTheme.darkTheme;
 });
@@ -345,15 +345,15 @@ final darkThemeProvider = Provider<ThemeData>((ref) {
 final themeModeProvider = Provider<ThemeMode>((ref) {
   // Check if business settings say to use system theme
   final useSystemTheme = ref.watch(useSystemThemeProvider);
-  
+
   // If using system theme, return system
   if (useSystemTheme) {
     return ThemeMode.system;
   }
-  
+
   // Otherwise, check if business settings specify dark mode
   final isDarkMode = ref.watch(isDarkModeEnabledProvider);
-  
+
   // Return theme mode based on business setting
   return isDarkMode ? ThemeMode.dark : ThemeMode.light;
 });
@@ -362,15 +362,15 @@ final themeModeProvider = Provider<ThemeMode>((ref) {
 final currentThemeModeProvider = Provider<ThemeMode>((ref) {
   // Get user preference from user_preference_provider
   final userTheme = ref.watch(themeProvider);
-  
+
   // Get business theme mode
   final businessThemeMode = ref.watch(themeModeProvider);
-  
+
   // User theme takes precedence if it's not set to system
   if (userTheme != ThemeMode.system) {
     return userTheme;
   }
-  
+
   // Otherwise, use business theme mode
   return businessThemeMode;
 });

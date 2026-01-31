@@ -8,14 +8,12 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/delivery_location_provider.dart';
 
-// For web platform only
-import 'dart:js_util' as js_util;
-import 'dart:html' as html;
-// Import platformViewRegistry from the correct location
-import 'dart:ui_web' as ui;
+// Web bridge (conditionally imports the web implementation only on web)
+import 'location_web_bridge_stub.dart'
+    if (dart.library.js_interop) 'location_web_bridge_web.dart';
 
 // Use this ID for consistent view registration
-const String MAP_ELEMENT_ID = 'google-map-view';
+const String mapElementId = 'google-map-view';
 
 class LocationCaptureBottomSheet extends ConsumerStatefulWidget {
   final Function(String latitude, String longitude, String address)
@@ -48,8 +46,8 @@ class LocationCaptureBottomSheetState
 
   final String _googleGeocodeApiKey = 'AIzaSyAlk83WpDsAWqaa4RqI4mxa5IYPiuZldek';
 
-  // Web elements
-  StreamSubscription<html.MessageEvent>? _webMapMovedSubscription;
+  // Web interop bridge (no-op on non-web)
+  final LocationWebBridge _web = const LocationWebBridge();
 
   // Location settings
   final LocationSettings locationSettings = const LocationSettings(
@@ -82,7 +80,7 @@ class LocationCaptureBottomSheetState
     _floorController.dispose();
     _cityController.dispose();
     _noteController.dispose();
-    _webMapMovedSubscription?.cancel();
+    if (kIsWeb) _web.dispose();
     _mapController?.dispose();
     super.dispose();
   }
@@ -105,68 +103,20 @@ class LocationCaptureBottomSheetState
 
   // Critical step: Register the view factory before we try to use it
   Future<void> _registerWebViewFactory() async {
-    if (kIsWeb && !_hasRegisteredFactory) {
-      // This needs to be registered only once for the entire app
-      // ignore: undefined_prefixed_name
-      ui.platformViewRegistry.registerViewFactory(MAP_ELEMENT_ID, (int viewId) {
-        print('Creating map element with viewId: $viewId');
-        final mapElement = html.DivElement()
-          ..id = MAP_ELEMENT_ID
-          ..style.width = '100%'
-          ..style.height = '100%'
-          ..style.border = 'none';
-
-        return mapElement;
-      });
-
+    if (!kIsWeb) return;
+    if (!_hasRegisteredFactory) {
+      await _web.registerViewFactory(mapElementId);
       _hasRegisteredFactory = true;
-      _isViewRegistered = true;
-      print('Web view factory registered successfully for $MAP_ELEMENT_ID');
-
-      // Wait for the DOM to update
-      await Future.delayed(const Duration(milliseconds: 100));
-    } else if (kIsWeb) {
-      _isViewRegistered = true;
-      print('Using previously registered view factory for $MAP_ELEMENT_ID');
     }
+    _isViewRegistered = true;
   }
 
   void _setupWebMapMovedListener() {
-    if (kIsWeb) {
-      try {
-        // Create a communication channel between JavaScript and Dart
-        // Use a properly wrapped callback with allowInterop
-        final void Function(dynamic) wrappedCallback =
-            js_util.allowInterop((dynamic data) {
-          if (data is Map) {
-            final lat = data['latitude'];
-            final lng = data['longitude'];
-            if (lat != null && lng != null) {
-              _updatePositionFromWeb(lat as double, lng as double);
-            }
-          }
-        });
-
-        // Set up the message listener on the window
-        _webMapMovedSubscription =
-            html.window.onMessage.listen((html.MessageEvent event) {
-          if (event.data is Map && event.data['type'] == 'mapMoved') {
-            final lat = event.data['latitude'];
-            final lng = event.data['longitude'];
-            if (lat != null && lng != null) {
-              _updatePositionFromWeb(lat as double, lng as double);
-            }
-          }
-        });
-
-        // Register the callback for direct JS calls
-        js_util.setProperty(
-            html.window, 'onMapPositionChanged', wrappedCallback);
-
-        print('Web map listener set up successfully');
-      } catch (e) {
-        print('Error setting up web map listener: $e');
-      }
+    if (!kIsWeb) return;
+    try {
+      _web.setupMapMovedListener(_updatePositionFromWeb);
+    } catch (e) {
+      // Failed to set up web map listener
     }
   }
 
@@ -199,11 +149,10 @@ class LocationCaptureBottomSheetState
       if (!kIsWeb) return;
 
       // Ensure map scripts are loaded
-      await _ensureMapScriptsLoaded();
+      await _web.ensureMapScriptsLoaded();
 
-      // Initialize the maps library
-      final bool mapsLoaded = await js_util.promiseToFuture<bool>(
-          js_util.callMethod(html.window, 'initMapsWhenNeeded', []));
+      // Initialize the maps library via JS interop
+      final bool mapsLoaded = await _web.initializeMaps();
 
       setState(() {
         _isMapInitialized = mapsLoaded;
@@ -211,363 +160,14 @@ class LocationCaptureBottomSheetState
 
       if (mapsLoaded) {
         _mapsInitialized.complete(true);
-        print('Web maps initialized successfully');
       } else {
         _mapsInitialized.completeError('Failed to initialize maps');
       }
     } catch (e) {
-      print('Error initializing Google Maps for web: $e');
       _mapsInitialized.completeError(e);
       setState(() {
         _isMapInitialized = false;
       });
-    }
-  }
-
-  Future<void> _ensureMapScriptsLoaded() async {
-    // Check if we need to inject the map scripts code
-    if (kIsWeb) {
-      final String mapScripts = '''
-// Track if maps have been initialized
-let mapsInitialized = false;
-let mapInstance = null;
-let advancedMarker = null;
-let currentPosition = null;
-let isDraggingMap = false;
-
-// Map ID for advanced markers - Replace with your actual map ID when in production
-const MAP_ID = 'DEMO_MAP_ID'; // For testing only, get an actual Map ID for production
-
-// Initialize maps library with required components
-window.initMapsWhenNeeded = async function() {
-  if (mapsInitialized) {
-    return true;
-  }
-  
-  try {
-    // Load the Maps JavaScript API if not already loaded
-    if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
-      console.log("Google Maps API not found, waiting for it to load...");
-      return new Promise((resolve) => {
-        const checkGoogleMaps = setInterval(() => {
-          if (typeof google !== 'undefined' && typeof google.maps !== 'undefined') {
-            clearInterval(checkGoogleMaps);
-            console.log("Google Maps API loaded");
-            mapsInitialized = true;
-            resolve(true);
-          }
-        }, 100);
-        
-        // Timeout after 10 seconds
-        setTimeout(() => {
-          clearInterval(checkGoogleMaps);
-          console.error("Timeout waiting for Google Maps API");
-          resolve(false);
-        }, 10000);
-      });
-    }
-    
-    // Load required libraries
-    try {
-      const { Map } = await google.maps.importLibrary("maps");
-      const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
-      
-      mapsInitialized = true;
-      console.log("Google Maps libraries initialized successfully");
-      return true;
-    } catch (error) {
-      console.error("Error loading Google Maps libraries:", error);
-      return false;
-    }
-  } catch (error) {
-    console.error("Error initializing Google Maps:", error);
-    return false;
-  }
-};
-
-// Initialize Google Maps with Advanced Marker
-window.initializeAdvancedMap = async function(elementId, latitude, longitude, address) {
-  console.log("Initializing advanced map with:", { elementId, latitude, longitude, address });
-  
-  if (!mapsInitialized) {
-    const initialized = await window.initMapsWhenNeeded();
-    if (!initialized) {
-      console.error("Failed to initialize maps");
-      return false;
-    }
-  }
-  
-  try {
-    const mapElement = document.getElementById(elementId);
-    if (!mapElement) {
-      console.error("Map element not found:", elementId);
-      return false;
-    }
-    
-    currentPosition = { 
-      lat: parseFloat(latitude), 
-      lng: parseFloat(longitude) 
-    };
-    
-    // Get map component
-    const { Map } = await google.maps.importLibrary("maps");
-    
-    // Get marker component
-    const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
-    
-    console.log("Creating map in element:", elementId);
-    
-    // Create new map
-    mapInstance = new Map(mapElement, {
-      zoom: 16,
-      center: currentPosition,
-      mapId: MAP_ID,
-      mapTypeControl: false,
-      fullscreenControl: false,
-      streetViewControl: false,
-      zoomControl: true,
-    });
-    
-    // Create a pin element
-    const pinElement = new PinElement({
-      scale: 1.2,
-      background: "#FF5252",
-      glyphColor: "#FFFFFF",
-      borderColor: "#D32F2F",
-    });
-    
-    // Create advanced marker
-    advancedMarker = new AdvancedMarkerElement({
-      map: mapInstance,
-      position: currentPosition,
-      title: address || "Selected Location",
-      content: pinElement.element,
-      gmpClickable: true,
-    });
-    
-    // Set up map move event to reposition the marker
-    mapInstance.addListener('center_changed', () => {
-      if (!mapInstance) return;
-      
-      const center = mapInstance.getCenter();
-      if (advancedMarker && center && isDraggingMap) {
-        advancedMarker.position = center;
-      }
-      
-      // Send message to Dart
-      window.postMessage({
-        type: 'mapMoved',
-        latitude: center.lat(),
-        longitude: center.lng()
-      }, '*');
-      
-      // Also call the function directly if it exists
-      if (typeof window.onMapPositionChanged === 'function') {
-        window.onMapPositionChanged({
-          latitude: center.lat(),
-          longitude: center.lng()
-        });
-      }
-    });
-    
-    console.log("Advanced map initialized successfully");
-    return true;
-  } catch (error) {
-    console.error("Error initializing advanced map:", error);
-    return false;
-  }
-};
-
-// Update marker position
-window.updateMarkerPosition = function(latitude, longitude) {
-  if (!mapInstance || !advancedMarker) {
-    console.error("Map or marker not initialized");
-    return false;
-  }
-  
-  try {
-    const position = { 
-      lat: parseFloat(latitude), 
-      lng: parseFloat(longitude) 
-    };
-    
-    advancedMarker.position = position;
-    mapInstance.panTo(position);
-    
-    return true;
-  } catch (error) {
-    console.error("Error updating marker position:", error);
-    return false;
-  }
-};
-
-// Get current marker position
-window.getMarkerPosition = function() {
-  if (!advancedMarker) {
-    console.error("Marker not initialized");
-    return null;
-  }
-  
-  try {
-    const position = advancedMarker.position;
-    return {
-      latitude: position.lat(),
-      longitude: position.lng()
-    };
-  } catch (error) {
-    console.error("Error getting marker position:", error);
-    return null;
-  }
-};
-
-// Function to recenter the map on the current location
-window.recenterMap = function() {
-  if (!mapInstance || !currentPosition) {
-    console.error("Map not initialized or position unknown");
-    return false;
-  }
-  
-  try {
-    mapInstance.panTo(currentPosition);
-    if (advancedMarker) {
-      advancedMarker.position = currentPosition;
-    }
-    
-    return true;
-  } catch (error) {
-    console.error("Error recentering map:", error);
-    return false;
-  }
-};
-
-// Set map dragging mode
-window.setMapDragging = function(dragging) {
-  if (!mapInstance) {
-    console.error("Map not initialized");
-    return false;
-  }
-  
-  try {
-    isDraggingMap = dragging;
-    
-    // Toggle dragging mode visual changes
-    if (dragging) {
-      // Show a center crosshair or indicator when in dragging mode
-      const mapDiv = mapInstance.getDiv();
-      let centerPin = document.getElementById('map-center-pin');
-      
-      if (!centerPin) {
-        centerPin = document.createElement('div');
-        centerPin.id = 'map-center-pin';
-        centerPin.style.position = 'absolute';
-        centerPin.style.top = '50%';
-        centerPin.style.left = '50%';
-        centerPin.style.transform = 'translate(-50%, -50%)';
-        centerPin.style.width = '20px';
-        centerPin.style.height = '20px';
-        centerPin.style.backgroundImage = 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'24\\' height=\\'24\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'%23D32F2F\\' stroke-width=\\'2\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\'%3e%3cpath d=\\'M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z\\'%3e%3c/path%3e%3ccircle cx=\\'12\\' cy=\\'10\\' r=\\'3\\'%3e%3c/circle%3e%3c/svg%3e")';
-        centerPin.style.backgroundRepeat = 'no-repeat';
-        centerPin.style.backgroundPosition = 'center';
-        centerPin.style.zIndex = '1000';
-        centerPin.style.pointerEvents = 'none'; // Allow clicks to pass through
-        centerPin.style.animation = 'bounce 1s infinite alternate';
-        
-        // Add animation style
-        const style = document.createElement('style');
-        style.textContent = `
-          @keyframes bounce {
-            from { transform: translate(-50%, -50%) scale(1); }
-            to { transform: translate(-50%, -50%) scale(1.2); }
-          }
-        `;
-        document.head.appendChild(style);
-        
-        mapDiv.appendChild(centerPin);
-      } else {
-        centerPin.style.display = 'block';
-      }
-      
-      // Hide the advanced marker
-      if (advancedMarker) {
-        advancedMarker.map = null;
-      }
-    } else {
-      // Hide the center pin
-      const centerPin = document.getElementById('map-center-pin');
-      if (centerPin) {
-        centerPin.style.display = 'none';
-      }
-      
-      // Restore the advanced marker at the current center position
-      if (advancedMarker) {
-        const center = mapInstance.getCenter();
-        advancedMarker.position = center;
-        advancedMarker.map = mapInstance;
-      }
-    }
-    
-    return true;
-  } catch (error) {
-    console.error("Error setting map dragging mode:", error);
-    return false;
-  }
-};
-
-// Geolocation service
-window.getCurrentLocation = function() {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject(new Error('Geolocation is not supported by this browser'));
-      return;
-    }
-    
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        resolve({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          accuracy: position.coords.accuracy
-        });
-      },
-      (error) => {
-        console.error('Geolocation error:', error.message);
-        
-        // Try IP-based fallback
-        fetch('https://ipapi.co/json/')
-          .then(response => response.json())
-          .then(data => {
-            if (data.latitude && data.longitude) {
-              resolve({
-                latitude: data.latitude,
-                longitude: data.longitude,
-                accuracy: 1000 // Assume 1km accuracy for IP geolocation
-              });
-            } else {
-              reject(new Error('Could not determine location'));
-            }
-          })
-          .catch(err => {
-            reject(error);
-          });
-      },
-      { 
-        enableHighAccuracy: true, 
-        timeout: 10000, 
-        maximumAge: 60000 
-      }
-    );
-  });
-};
-      ''';
-
-      final scriptElement = html.ScriptElement()
-        ..type = 'text/javascript'
-        ..innerHtml = mapScripts;
-
-      html.document.head!.append(scriptElement);
-
-      // Wait a moment to ensure script execution
-      await Future.delayed(const Duration(milliseconds: 300));
     }
   }
 
@@ -641,7 +241,6 @@ window.getCurrentLocation = function() {
         await _initializeWebMapWithPosition();
       }
     } catch (e) {
-      print('Error getting location: $e');
       _showSnackBar('Error al obtener ubicación: $e', isError: true);
       setState(() {
         _isLoading = false;
@@ -653,31 +252,21 @@ window.getCurrentLocation = function() {
     if (!kIsWeb || !_isViewRegistered || _currentPosition == null) return;
 
     try {
-      // Make sure the element exists before initializing the map
-      final mapElement = html.document.getElementById(MAP_ELEMENT_ID);
-      if (mapElement == null) {
-        print('Map element not found in DOM: $MAP_ELEMENT_ID');
-        return;
-      }
-
-      print('Initializing map with element ID: $MAP_ELEMENT_ID');
-
       // Initialize the map using our JavaScript function
-      final bool success = await js_util.promiseToFuture<bool>(js_util
-          .callMethod(html.window, 'initializeAdvancedMap', [
-        MAP_ELEMENT_ID,
+      final bool success = await _web.initializeAdvancedMap(
+        mapElementId,
         _latitude,
         _longitude,
-        _address ?? 'Su ubicación'
-      ]));
+        _address ?? 'Su ubicación',
+      );
 
       if (success) {
-        print('Web map initialized successfully with position');
+        // Map success
       } else {
-        print('Failed to initialize web map with position');
+        // Map failure
       }
     } catch (e) {
-      print('Error initializing web map with position: $e');
+      // Map error
     }
   }
 
@@ -686,29 +275,26 @@ window.getCurrentLocation = function() {
     if (!kIsWeb) return;
 
     try {
-      // Use JavaScript bridge for geolocation
-      final locationData = await js_util.promiseToFuture(
-          js_util.callMethod(html.window, 'getCurrentLocation', []));
-
-      final latitude = js_util.getProperty(locationData, 'latitude');
-      final longitude = js_util.getProperty(locationData, 'longitude');
-      final accuracy = js_util.getProperty(locationData, 'accuracy');
+      final loc = await _web.getCurrentLocation();
+      if (loc == null) {
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
 
       setState(() {
-        _latitude = latitude.toString();
-        _longitude = longitude.toString();
-        _currentPosition = LatLng(latitude, longitude);
-        _accuracyInMeters = accuracy.toInt();
-        _isLowAccuracy =
-            accuracy > 100; // Consider low accuracy if > 100 meters
+        _latitude = loc.latitude.toString();
+        _longitude = loc.longitude.toString();
+        _currentPosition = LatLng(loc.latitude, loc.longitude);
+        _accuracyInMeters = loc.accuracyInMeters;
+        _isLowAccuracy = loc.accuracyInMeters > 100; // low accuracy if > 100m
         _isLoading = false;
       });
 
       // Fetch human-readable address
       await _getHumanReadableAddress(_latitude!, _longitude!);
     } catch (e) {
-      print('Web geolocation error: $e');
-
       // Fall back to IP-based geolocation if permission is denied
       if (e.toString().contains('permission') ||
           e.toString().contains('denied')) {
@@ -726,26 +312,31 @@ window.getCurrentLocation = function() {
     try {
       // Use a free geolocation API
       final response = await http.get(Uri.parse('https://ipapi.co/json/'));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final lat = data['latitude'];
-        final lng = data['longitude'];
+      if (response.statusCode == 200 && response.body.isNotEmpty) {
+        try {
+          final data = json.decode(response.body);
+          final lat = data['latitude'];
+          final lng = data['longitude'];
 
-        if (lat != null && lng != null) {
-          setState(() {
-            _latitude = lat.toString();
-            _longitude = lng.toString();
-            _currentPosition = LatLng(lat, lng);
-            _isLowAccuracy = true; // IP geolocation is always low accuracy
-            _accuracyInMeters = 1000; // Assume 1km accuracy for IP geolocation
-          });
+          if (lat != null && lng != null) {
+            setState(() {
+              _latitude = lat.toString();
+              _longitude = lng.toString();
+              _currentPosition = LatLng(lat, lng);
+              _isLowAccuracy = true; // IP geolocation is always low accuracy
+              _accuracyInMeters =
+                  1000; // Assume 1km accuracy for IP geolocation
+            });
 
-          // Fetch address for this location
-          await _getHumanReadableAddress(_latitude!, _longitude!);
+            // Fetch address for this location
+            await _getHumanReadableAddress(_latitude!, _longitude!);
+          }
+        } catch (e) {
+          debugPrint('Error parsing IP location: $e');
         }
       }
     } catch (e) {
-      print('Fallback geolocation error: $e');
+      // Fallback error
     }
   }
 
@@ -790,7 +381,6 @@ window.getCurrentLocation = function() {
     Position position = await Geolocator.getCurrentPosition(
       locationSettings: locationSettings,
     );
-
     setState(() {
       _latitude = position.latitude.toString();
       _longitude = position.longitude.toString();
@@ -818,18 +408,26 @@ window.getCurrentLocation = function() {
 
     try {
       final response = await http.get(Uri.parse(geocodeUrl));
-      if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
-        if (jsonResponse['results'].isNotEmpty) {
-          setState(() {
-            _address = jsonResponse['results'][0]['formatted_address'];
-          });
+      if (response.statusCode == 200 && response.body.isNotEmpty) {
+        try {
+          final jsonResponse = json.decode(response.body);
+          if (jsonResponse['results'] != null &&
+              (jsonResponse['results'] as List).isNotEmpty) {
+            setState(() {
+              _address = jsonResponse['results'][0]['formatted_address'];
+            });
 
-          // Populate the address field for manual editing too
-          _addressController.text = _address ?? '';
-        } else {
+            // Populate the address field for manual editing too
+            _addressController.text = _address ?? '';
+          } else {
+            setState(() {
+              _address = 'Dirección no encontrada';
+            });
+          }
+        } catch (e) {
+          debugPrint('Error decoding geocode response: $e');
           setState(() {
-            _address = 'Dirección no encontrada';
+            _address = 'Error al procesar dirección';
           });
         }
       } else {
@@ -864,9 +462,9 @@ window.getCurrentLocation = function() {
   void _updateWebMapDragging() {
     if (kIsWeb) {
       try {
-        js_util.callMethod(html.window, 'setMapDragging', [_isDraggingMap]);
+        _web.setMapDragging(_isDraggingMap);
       } catch (e) {
-        print('Error setting map dragging mode: $e');
+        // Error setting dragging
       }
     }
   }
@@ -896,36 +494,48 @@ window.getCurrentLocation = function() {
   }
 
   Future<void> _confirmLocation() async {
-    if (_latitude == null || _longitude == null || _address == null) {
-      _showSnackBar('No se pudo determinar la ubicación.', isError: true);
+    // If in manual entry mode, submit form directly
+    if (!_isMapView) {
+      _submitForm();
       return;
     }
 
-    // If in manual entry mode, submit form
-    if (!_isMapView) {
-      _submitForm();
+    // For map view, check if we have enough data (either from map or manually typed)
+    final manualAddress = _addressController.text.trim();
+
+    if (_latitude == null ||
+        _longitude == null ||
+        (_address == null && manualAddress.isEmpty)) {
+      if (manualAddress.isNotEmpty) {
+        // We have a manual address but no coordinates, switch to manual mode to complete
+        setState(() => _isMapView = false);
+        _showSnackBar('Por favor complete los detalles de la dirección');
+      } else {
+        _showSnackBar(
+            'No se pudo determinar la ubicación. Intente ingresar los datos manualmente.',
+            isError: true);
+      }
       return;
     }
 
     // For web platform, get the current position from JavaScript
     if (kIsWeb) {
       try {
-        final positionData =
-            js_util.callMethod(html.window, 'getMarkerPosition', []);
-        if (positionData != null) {
-          final lat = js_util.getProperty(positionData, 'latitude').toString();
-          final lng = js_util.getProperty(positionData, 'longitude').toString();
-          _latitude = lat;
-          _longitude = lng;
-                }
+        final pos = await _web.getMarkerPosition();
+        if (pos != null) {
+          _latitude = pos.latitude.toString();
+          _longitude = pos.longitude.toString();
+        }
       } catch (e) {
-        print('Error getting marker position: $e');
+        // Position fetch error
       }
     }
 
     // Otherwise use map location
     widget.onLocationCaptured(_latitude!, _longitude!, _address!);
-    Navigator.of(context).pop();
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
@@ -934,13 +544,12 @@ window.getCurrentLocation = function() {
     final colorScheme = theme.colorScheme;
     final size = MediaQuery.sizeOf(context);
     final isDesktop = size.width > 1024;
-    final isTablet = size.width > 600 && size.width <= 1024;
 
     // Wrapping in WillPopScope to prevent dismissal by back button.
     // Also note: when showing this bottom sheet, set isDismissible: false and
     // enableDrag: false in showModalBottomSheet().
-    return WillPopScope(
-      onWillPop: () async => false,
+    return PopScope(
+      canPop: false,
       child: Container(
         // Occupy the full screen height
         height: size.height,
@@ -957,7 +566,7 @@ window.getCurrentLocation = function() {
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),
@@ -969,9 +578,11 @@ window.getCurrentLocation = function() {
             _buildHeader(colorScheme, theme),
             const SizedBox(height: 24),
             Expanded(
-              child: _isMapView
-                  ? _buildMapView(colorScheme, theme)
-                  : _buildAddressFormView(colorScheme, theme),
+              child: SingleChildScrollView(
+                child: _isMapView
+                    ? _buildMapView(colorScheme, theme)
+                    : _buildAddressFormView(colorScheme, theme),
+              ),
             ),
             const SizedBox(height: 24),
             _buildActionButtons(colorScheme, theme),
@@ -1024,6 +635,7 @@ window.getCurrentLocation = function() {
   }
 
   Widget _buildMapView(ColorScheme colorScheme, ThemeData theme) {
+    final size = MediaQuery.sizeOf(context);
     if (_isLoading) {
       return Center(
         child: Column(
@@ -1131,7 +743,8 @@ window.getCurrentLocation = function() {
             ),
           ),
         const SizedBox(height: 16),
-        Expanded(
+        SizedBox(
+          height: size.height * 0.5, // 50% of screen height
           child: Stack(
             children: [
               ClipRRect(
@@ -1183,7 +796,7 @@ window.getCurrentLocation = function() {
       }
 
       // Return HtmlElementView for web - using the static ID
-      return HtmlElementView(viewType: MAP_ELEMENT_ID);
+      return HtmlElementView(viewType: mapElementId);
     }
 
     // Native platforms - use GoogleMap widget
@@ -1213,7 +826,7 @@ window.getCurrentLocation = function() {
             : {},
       );
     } catch (e) {
-      print('Map initialization error: $e');
+      // Map initialization error - show fallback
       // Fallback widget
       return Container(
         color: Colors.grey[200],
@@ -1233,6 +846,12 @@ window.getCurrentLocation = function() {
                 },
                 icon: const Icon(Icons.refresh),
                 label: const Text('Reintentar'),
+              ),
+              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed: () => setState(() => _isMapView = false),
+                icon: const Icon(Icons.edit_note),
+                label: const Text('Ingresar manualmente'),
               ),
             ],
           ),
@@ -1304,7 +923,7 @@ window.getCurrentLocation = function() {
         labelText: required ? '$label *' : label,
         prefixIcon: Icon(icon, color: colorScheme.primary),
         filled: true,
-        fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,

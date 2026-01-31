@@ -7,9 +7,10 @@ part of 'business_navigation_provider.dart';
 // **************************************************************************
 
 String _$currentBusinessNavigationHash() =>
-    r'ce2fdb9a49e0833d6773ce7bd5159f9b6bad4564';
+    r'7a0d78a2eb6ca611bbeca5569057246b1b5d5f2c';
 
 /// Provider for current business navigation info
+/// FIXED: Use ref.read for urlBusinessSlug to avoid circular dependency
 ///
 /// Copied from [currentBusinessNavigation].
 @ProviderFor(currentBusinessNavigation)
@@ -29,7 +30,7 @@ final currentBusinessNavigationProvider =
 typedef CurrentBusinessNavigationRef
     = AutoDisposeProviderRef<BusinessNavigationInfo?>;
 String _$shouldOptimizeNavigationHash() =>
-    r'92624d61e3993988874bef2ebabad986cca2ad06';
+    r'3f4c7bfbac7b6094171baac3c67bccb2d342dcd1';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -53,21 +54,25 @@ class _SystemHash {
 }
 
 /// Provider to check if navigation should be optimized (same business)
+/// FIXED: Use ref.read to avoid circular dependency with currentBusinessNavigationProvider
 ///
 /// Copied from [shouldOptimizeNavigation].
 @ProviderFor(shouldOptimizeNavigation)
 const shouldOptimizeNavigationProvider = ShouldOptimizeNavigationFamily();
 
 /// Provider to check if navigation should be optimized (same business)
+/// FIXED: Use ref.read to avoid circular dependency with currentBusinessNavigationProvider
 ///
 /// Copied from [shouldOptimizeNavigation].
 class ShouldOptimizeNavigationFamily extends Family<bool> {
   /// Provider to check if navigation should be optimized (same business)
+  /// FIXED: Use ref.read to avoid circular dependency with currentBusinessNavigationProvider
   ///
   /// Copied from [shouldOptimizeNavigation].
   const ShouldOptimizeNavigationFamily();
 
   /// Provider to check if navigation should be optimized (same business)
+  /// FIXED: Use ref.read to avoid circular dependency with currentBusinessNavigationProvider
   ///
   /// Copied from [shouldOptimizeNavigation].
   ShouldOptimizeNavigationProvider call(
@@ -106,10 +111,12 @@ class ShouldOptimizeNavigationFamily extends Family<bool> {
 }
 
 /// Provider to check if navigation should be optimized (same business)
+/// FIXED: Use ref.read to avoid circular dependency with currentBusinessNavigationProvider
 ///
 /// Copied from [shouldOptimizeNavigation].
 class ShouldOptimizeNavigationProvider extends AutoDisposeProvider<bool> {
   /// Provider to check if navigation should be optimized (same business)
+  /// FIXED: Use ref.read to avoid circular dependency with currentBusinessNavigationProvider
   ///
   /// Copied from [shouldOptimizeNavigation].
   ShouldOptimizeNavigationProvider(
@@ -212,7 +219,7 @@ class _ShouldOptimizeNavigationProviderElement
 }
 
 String _$businessNavigationControllerHash() =>
-    r'4474dfb84c987ed11d3359b3f5e0e07b32387c21';
+    r'e64f3b9bde8856485e5cfc4b545d06c2eef95d46';
 
 /// Provider for optimized business navigation state
 ///
@@ -232,7 +239,7 @@ final businessNavigationControllerProvider = AutoDisposeNotifierProvider<
 typedef _$BusinessNavigationController
     = AutoDisposeNotifier<BusinessNavigationState?>;
 String _$cachedBusinessContextHash() =>
-    r'87d577fa2caaadfb47324ee51e95736d0cf5eb42';
+    r'fbd50a7ab7fc037a60ef20ae6e483518ae03a8f1';
 
 abstract class _$CachedBusinessContext
     extends BuildlessAutoDisposeNotifier<BusinessContext?> {
@@ -244,21 +251,25 @@ abstract class _$CachedBusinessContext
 }
 
 /// Provider for cached business context - prevents re-fetching
+/// Enhanced with TTL-based cache invalidation
 ///
 /// Copied from [CachedBusinessContext].
 @ProviderFor(CachedBusinessContext)
 const cachedBusinessContextProvider = CachedBusinessContextFamily();
 
 /// Provider for cached business context - prevents re-fetching
+/// Enhanced with TTL-based cache invalidation
 ///
 /// Copied from [CachedBusinessContext].
 class CachedBusinessContextFamily extends Family<BusinessContext?> {
   /// Provider for cached business context - prevents re-fetching
+  /// Enhanced with TTL-based cache invalidation
   ///
   /// Copied from [CachedBusinessContext].
   const CachedBusinessContextFamily();
 
   /// Provider for cached business context - prevents re-fetching
+  /// Enhanced with TTL-based cache invalidation
   ///
   /// Copied from [CachedBusinessContext].
   CachedBusinessContextProvider call(
@@ -294,11 +305,13 @@ class CachedBusinessContextFamily extends Family<BusinessContext?> {
 }
 
 /// Provider for cached business context - prevents re-fetching
+/// Enhanced with TTL-based cache invalidation
 ///
 /// Copied from [CachedBusinessContext].
 class CachedBusinessContextProvider extends AutoDisposeNotifierProviderImpl<
     CachedBusinessContext, BusinessContext?> {
   /// Provider for cached business context - prevents re-fetching
+  /// Enhanced with TTL-based cache invalidation
   ///
   /// Copied from [CachedBusinessContext].
   CachedBusinessContextProvider(

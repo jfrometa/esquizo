@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/unified_business_context_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/business_routing_provider.dart';
 
 part 'business_navigation_provider.g.dart';
@@ -55,6 +56,8 @@ class BusinessNavigationState {
 class BusinessNavigationController extends _$BusinessNavigationController {
   String? _currentBusinessSlug;
   String? _currentRoute;
+  String?
+      _activeBusinessContext; // Track active business for context persistence
 
   @override
   BusinessNavigationState? build() {
@@ -65,9 +68,13 @@ class BusinessNavigationController extends _$BusinessNavigationController {
   Future<void> setBusinessNavigation(String businessSlug, String route) async {
     debugPrint('🔄 Setting business navigation: $businessSlug -> $route');
 
+    // Set active business context for persistence
+    _activeBusinessContext = businessSlug;
+
     // Check if we're already on this business/route combination
     if (_currentBusinessSlug == businessSlug && _currentRoute == route) {
-      debugPrint('✅ Already on $businessSlug$route, skipping navigation');
+      final fullPath = route == '/' ? '/$businessSlug' : '/$businessSlug$route';
+      debugPrint('✅ Already on $fullPath, skipping navigation');
       return;
     }
 
@@ -93,6 +100,17 @@ class BusinessNavigationController extends _$BusinessNavigationController {
       final businessContext =
           await ref.read(explicitBusinessContextProvider(businessSlug).future);
 
+      // Update the currentBusinessIdProvider to match the new business context
+      // ONLY if it's different to prevent circular rebuilds of the top-level app
+      final currentId = ref.read(currentBusinessIdProvider);
+      if (currentId != businessContext.businessId) {
+        debugPrint(
+            '🔄 Updating global business ID to: ${businessContext.businessId}');
+        ref
+            .read(currentBusinessIdProvider.notifier)
+            .setBusinessId(businessContext.businessId);
+      }
+
       state = BusinessNavigationState(
         businessSlug: businessSlug,
         currentRoute: route,
@@ -102,7 +120,9 @@ class BusinessNavigationController extends _$BusinessNavigationController {
       _currentBusinessSlug = businessSlug;
       _currentRoute = route;
 
-      debugPrint('✅ Business navigation set: $businessSlug$route');
+      // Construct the proper full path for logging
+      final fullPath = route == '/' ? '/$businessSlug' : '/$businessSlug$route';
+      debugPrint('✅ Business navigation set: $fullPath');
     } catch (error) {
       debugPrint('❌ Error setting business navigation: $error');
       rethrow;
@@ -125,25 +145,53 @@ class BusinessNavigationController extends _$BusinessNavigationController {
     state = null;
     _currentBusinessSlug = null;
     _currentRoute = null;
+    _activeBusinessContext = null; // Clear active context on app reload
   }
+
+  /// Get the currently active business context for persistence
+  String? get activeBusinessContext => _activeBusinessContext;
+
+  /// Check if user is currently in a business context (not default)
+  bool get hasActiveBusinessContext =>
+      _activeBusinessContext != null && _activeBusinessContext != 'default';
 }
 
 /// Provider for cached business context - prevents re-fetching
+/// Enhanced with TTL-based cache invalidation
 @riverpod
 class CachedBusinessContext extends _$CachedBusinessContext {
   final Map<String, BusinessContext> _cache = {};
+  final Map<String, DateTime> _cacheTimestamps = {};
+
+  /// Cache time-to-live duration
+  static const Duration cacheTTL = Duration(minutes: 15);
 
   @override
   BusinessContext? build(String businessSlug) {
     return _cache[businessSlug];
   }
 
-  /// Get business context with caching
-  Future<BusinessContext> getBusinessContext(String businessSlug) async {
-    // Return cached version if available
-    if (_cache.containsKey(businessSlug)) {
+  /// Check if cache entry is stale
+  bool _isStale(String businessSlug) {
+    final timestamp = _cacheTimestamps[businessSlug];
+    if (timestamp == null) return true;
+    return DateTime.now().difference(timestamp) > cacheTTL;
+  }
+
+  /// Get business context with caching and TTL
+  Future<BusinessContext> getBusinessContext(String businessSlug,
+      {bool forceRefresh = false}) async {
+    // Return cached version if available and not stale
+    if (!forceRefresh &&
+        _cache.containsKey(businessSlug) &&
+        !_isStale(businessSlug)) {
       debugPrint('📦 Using cached business context for: $businessSlug');
       return _cache[businessSlug]!;
+    }
+
+    // Check if cache is stale
+    if (_cache.containsKey(businessSlug) && _isStale(businessSlug)) {
+      debugPrint('⏰ Cache stale for $businessSlug, refreshing...');
     }
 
     // Fetch and cache
@@ -152,31 +200,58 @@ class CachedBusinessContext extends _$CachedBusinessContext {
         await ref.read(explicitBusinessContextProvider(businessSlug).future);
 
     _cache[businessSlug] = context;
+    _cacheTimestamps[businessSlug] = DateTime.now();
     state = context;
 
     debugPrint('📦 Cached business context for: $businessSlug');
     return context;
   }
 
+  /// Get cache age for a business slug
+  Duration? getCacheAge(String businessSlug) {
+    final timestamp = _cacheTimestamps[businessSlug];
+    if (timestamp == null) return null;
+    return DateTime.now().difference(timestamp);
+  }
+
   /// Clear cache for a specific business
   void clearCache(String businessSlug) {
     _cache.remove(businessSlug);
+    _cacheTimestamps.remove(businessSlug);
     ref.invalidateSelf();
   }
 
   /// Clear all cached contexts
   void clearAllCache() {
     _cache.clear();
+    _cacheTimestamps.clear();
     ref.invalidateSelf();
+  }
+
+  /// Preload cache for multiple businesses (useful for startup)
+  Future<void> preloadCache(List<String> businessSlugs) async {
+    for (final slug in businessSlugs) {
+      if (!_cache.containsKey(slug) || _isStale(slug)) {
+        try {
+          await getBusinessContext(slug);
+        } catch (e) {
+          debugPrint('⚠️ Failed to preload cache for $slug: $e');
+        }
+      }
+    }
   }
 }
 
 /// Provider for current business navigation info
+/// FIXED: Use ref.read for urlBusinessSlug to avoid circular dependency
 @riverpod
 BusinessNavigationInfo? currentBusinessNavigation(
     CurrentBusinessNavigationRef ref) {
   final navigationState = ref.watch(businessNavigationControllerProvider);
-  final urlBusinessSlug = ref.watch(businessSlugFromUrlProvider);
+
+  // FIXED: Use ref.read instead of ref.watch to break circular dependency
+  // This prevents: currentBusinessNavigation -> businessSlugFromUrl -> currentRouteLocation -> goRouter cycle
+  final urlBusinessSlug = ref.read(businessSlugFromUrlProvider);
 
   if (navigationState != null) {
     return BusinessNavigationInfo(
@@ -203,12 +278,104 @@ class BusinessNavigationInfo {
 }
 
 /// Provider to check if navigation should be optimized (same business)
+/// FIXED: Use ref.read to avoid circular dependency with currentBusinessNavigationProvider
 @riverpod
 bool shouldOptimizeNavigation(ShouldOptimizeNavigationRef ref,
     String targetBusinessSlug, String targetRoute) {
-  final currentNavigation = ref.watch(currentBusinessNavigationProvider);
+  // Use ref.read instead of ref.watch to avoid circular rebuilds
+  // This breaks the cycle: shouldOptimizeNavigation -> currentBusinessNavigation -> businessNavigationController
+  final currentNavigation = ref.read(currentBusinessNavigationProvider);
 
   if (currentNavigation == null) return false;
 
   return currentNavigation.businessSlug == targetBusinessSlug;
+}
+
+/// Helper class for business-aware routing logic
+class BusinessAwareRoutingHelper {
+  static String getBusinessAwarePath(WidgetRef ref, String targetPath) {
+    final navigationController =
+        ref.read(businessNavigationControllerProvider.notifier);
+
+    // Check if user has an active business context
+    if (navigationController.hasActiveBusinessContext) {
+      final activeBusinessSlug = navigationController.activeBusinessContext!;
+
+      // If target path doesn't have a business slug, but user is in business context
+      if (!targetPath.startsWith('/$activeBusinessSlug') &&
+          !_isSystemRoute(targetPath) &&
+          !_hasBusinessSlug(targetPath)) {
+        // Prefix with active business slug for context persistence
+        final businessAwarePath = targetPath == '/'
+            ? '/$activeBusinessSlug'
+            : '/$activeBusinessSlug$targetPath';
+
+        debugPrint(
+            '🎯 Business-aware routing: $targetPath -> $businessAwarePath');
+        return businessAwarePath;
+      }
+    }
+
+    // Special handling for admin routes and all subroutes: always prefix with business slug (even for default)
+    if (targetPath.startsWith('/admin') ||
+        targetPath.startsWith('/admin-setup')) {
+      final businessSlug =
+          navigationController.activeBusinessContext ?? 'default';
+      if (businessSlug == 'default') {
+        return targetPath;
+      }
+      // If already prefixed with /<slug>/admin, do not double-prefix
+      if (targetPath.startsWith('/$businessSlug/admin')) {
+        return targetPath;
+      }
+      return '/$businessSlug$targetPath';
+    }
+
+    // Return original path if no business context or path already has business context
+    return targetPath;
+  }
+
+  /// Check if a path is a system route that shouldn't be business-aware
+  static bool _isSystemRoute(String path) {
+    final systemRoutes = {
+      '/signin',
+      '/signup',
+      '/onboarding',
+      '/error',
+      '/startup',
+      '/business-setup'
+      // '/admin', '/admin-setup' removed to allow business-aware admin routes
+    };
+    return systemRoutes.any((route) => path.startsWith(route));
+  }
+
+  /// Check if a path already has a business slug
+  static bool _hasBusinessSlug(String path) {
+    if (!path.startsWith('/')) return false;
+
+    final segments = path.substring(1).split('/');
+    if (segments.isEmpty) return false;
+
+    final firstSegment = segments.first;
+
+    // Check if first segment looks like a business slug (not a default route)
+    final defaultRoutes = {
+      'menu',
+      'carrito',
+      'cart',
+      'cuenta',
+      'ordenes',
+      'catering-menu',
+      'catering-quote',
+      'subscripciones',
+      'catering',
+      'populares',
+      'categorias',
+      'platos',
+      'completar-orden',
+      'meal-plans'
+    };
+
+    return !defaultRoutes.contains(firstSegment) && firstSegment.length >= 2;
+  }
 }

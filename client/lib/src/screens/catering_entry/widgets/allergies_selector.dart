@@ -4,7 +4,7 @@ import '../../../core/catering/catering_order_provider.dart';
 
 class AllergiesSelector extends ConsumerStatefulWidget {
   final int maxAllergies;
-  
+
   const AllergiesSelector({
     super.key,
     this.maxAllergies = 10,
@@ -20,14 +20,15 @@ class _AllergiesSelectorState extends ConsumerState<AllergiesSelector> {
   @override
   void initState() {
     super.initState();
-    final order = ref.read(cateringOrderProvider);
-    allergiesList = order?.alergias.split(',').where((e) => e.isNotEmpty).toList() ?? [];
+    final order = ref.read(cateringOrderNotifierProvider);
+    allergiesList =
+        order?.alergias.split(',').where((e) => e.isNotEmpty).toList() ?? [];
   }
 
   @override
   Widget build(BuildContext context) {
     final primaryColor = Theme.of(context).colorScheme.primary;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -55,7 +56,7 @@ class _AllergiesSelectorState extends ConsumerState<AllergiesSelector> {
               ActionChip(
                 backgroundColor: Colors.white,
                 avatar: Icon(Icons.add, color: primaryColor),
-                label: Text('Agregar Alergia', 
+                label: Text('Agregar Alergia',
                     style: TextStyle(color: primaryColor)),
                 onPressed: _showAllergyDialog,
               ),
@@ -103,19 +104,18 @@ class _AllergiesSelectorState extends ConsumerState<AllergiesSelector> {
       ),
     );
 
-    if (newAllergy?.isNotEmpty == true && 
-        !allergiesList.contains(newAllergy)) {
+    if (newAllergy?.isNotEmpty == true && !allergiesList.contains(newAllergy)) {
       setState(() => allergiesList.add(newAllergy!));
       _updateOrderAllergies();
     }
   }
 
   void _updateOrderAllergies() {
-    final order = ref.read(cateringOrderProvider);
+    final order = ref.read(cateringOrderNotifierProvider);
     if (order != null) {
-      ref.read(cateringOrderProvider.notifier).updateOrder(
-        order.copyWith(alergias: allergiesList.join(',')),
-      );
+      ref.read(cateringOrderNotifierProvider.notifier).updateOrder(
+            order.copyWith(alergias: allergiesList.join(',')),
+          );
     }
   }
 }

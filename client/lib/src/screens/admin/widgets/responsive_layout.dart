@@ -43,34 +43,38 @@ class ResponsiveGridView extends StatelessWidget {
   final List<Widget> children;
   final double spacing;
   final double runSpacing;
+  final double cardWidth;
+  final double childAspectRatio;
 
   const ResponsiveGridView({
     super.key,
     required this.children,
     this.spacing = 16.0,
     this.runSpacing = 16.0,
+    this.cardWidth = 300.0,
+    this.childAspectRatio = 1.0, // Default aspect ratio
   });
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     // Calculate how many items can fit per row based on screen width
-    // For simplicity, we'll use fixed card widths
-    final cardWidth = 300.0;
-    final horizontalPadding = 32.0; // 16.0 padding on each side
-    final availableWidth = width - horizontalPadding;
-    final crossAxisCount = (availableWidth / (cardWidth + spacing)).floor();
-    
-    return SingleChildScrollView(
-      child: Wrap(
-        spacing: spacing,
-        runSpacing: runSpacing,
-        children: children,
+    final crossAxisCount = (width / (cardWidth + spacing)).floor().clamp(1, 5);
+
+    return GridView.builder(
+      itemCount: children.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: spacing,
+        mainAxisSpacing: runSpacing,
+        childAspectRatio: childAspectRatio,
       ),
+      itemBuilder: (context, index) {
+        return children[index];
+      },
     );
   }
 }
-
 
 // Helper class for responsive wrapping of widgets
 class ResponsiveWrap extends StatelessWidget {

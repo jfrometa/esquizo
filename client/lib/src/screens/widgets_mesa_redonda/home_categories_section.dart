@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
+// import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/util_mesa_redonda/categories.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/widgets_mesa_redonda/category_item.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
@@ -34,10 +34,9 @@ class HomeCategoriesSection extends StatelessWidget {
           TextButton(
             child: const Text(
               "Ver todos",
-           
             ),
             onPressed: () {
-              context.goNamed(AppRoute.category.name);
+              context.goNamedSafe(AppRoute.category.name);
             },
           ),
         ],
@@ -60,16 +59,16 @@ class HomeCategoriesSection extends StatelessWidget {
 
             void navigateToCategory() {
               if (cat['name'] == 'Meal Plans') {
-                context.goNamed(AppRoute.mealPlan.name);
+                context.goNamedSafe(AppRoute.mealPlan.name);
               } else if (cat['name'] == 'Catering') {
-                context.goNamed(AppRoute.caterings.name);
+                context.goNamedSafe(AppRoute.caterings.name);
               } else if (cat['name'] == 'Almuerzos') {
-                context.goNamed(
+                context.goNamedSafe(
                   AppRoute.details.name,
                   extra: cat,
                 );
               } else {
-                context.goNamed(AppRoute.details.name, extra: cat);
+                context.goNamedSafe(AppRoute.details.name, extra: cat);
               }
             }
 

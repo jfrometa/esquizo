@@ -49,6 +49,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1087483483909',
     projectId: 'mesa-redonda-fb72e',
     authDomain: 'mesa-redonda-fb72e.firebaseapp.com',
+    databaseURL: 'https://mesa-redonda-fb72e-default-rtdb.firebaseio.com',
     storageBucket: 'mesa-redonda-fb72e.firebasestorage.app',
     measurementId: 'G-YVBY00F5GE',
   );
@@ -58,6 +59,7 @@ class DefaultFirebaseOptions {
     appId: '1:1087483483909:android:15fd3d76a6a0701141096c',
     messagingSenderId: '1087483483909',
     projectId: 'mesa-redonda-fb72e',
+    databaseURL: 'https://mesa-redonda-fb72e-default-rtdb.firebaseio.com',
     storageBucket: 'mesa-redonda-fb72e.firebasestorage.app',
   );
 
@@ -66,6 +68,7 @@ class DefaultFirebaseOptions {
     appId: '1:1087483483909:ios:ff1d60b319f1a19541096c',
     messagingSenderId: '1087483483909',
     projectId: 'mesa-redonda-fb72e',
+    databaseURL: 'https://mesa-redonda-fb72e-default-rtdb.firebaseio.com',
     storageBucket: 'mesa-redonda-fb72e.firebasestorage.app',
     iosClientId: '1087483483909-almct9101dohm84eatahds8h1hss51ud.apps.googleusercontent.com',
     iosBundleId: 'com.example.starterArchitectureFlutterFirebase1',
@@ -76,6 +79,7 @@ class DefaultFirebaseOptions {
     appId: '1:1087483483909:ios:6a0634bc6d3c012441096c',
     messagingSenderId: '1087483483909',
     projectId: 'mesa-redonda-fb72e',
+    databaseURL: 'https://mesa-redonda-fb72e-default-rtdb.firebaseio.com',
     storageBucket: 'mesa-redonda-fb72e.firebasestorage.app',
     iosClientId: '1087483483909-ici1rplol63k3uul2tdtlc7s7bcfn467.apps.googleusercontent.com',
     iosBundleId: 'com.example.starterArchitectureFlutterFirebase',

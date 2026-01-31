@@ -161,7 +161,7 @@ class _ProductFormState extends ConsumerState<ProductForm> {
                       : null;
 
                   return DropdownButtonFormField<String>(
-                    value: dropdownValue,
+                    initialValue: dropdownValue,
                     decoration: const InputDecoration(
                       labelText: 'Category',
                       border: OutlineInputBorder(),

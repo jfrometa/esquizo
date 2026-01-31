@@ -456,15 +456,15 @@ class UnifiedAuthService {
 
   /// Initialize authentication and handle existing sessions
   Future<User?> initialize() async {
-    if (_auth.currentUser == null) {
-      return await signInAnonymously();
-    } else if (_auth.currentUser!.isAnonymous) {
-      debugPrint('User is signed in anonymously: ${_auth.currentUser!.uid}');
-      return _auth.currentUser;
+    // Stop auto-anonymous login. Return current user (null if not logged in)
+    final user = _auth.currentUser;
+    if (user != null) {
+      debugPrint(
+          'User signed in: ${user.uid} (IsAnonymous: ${user.isAnonymous})');
     } else {
-      debugPrint('User is signed in: ${_auth.currentUser!.uid}');
-      return _auth.currentUser;
+      debugPrint('Guest mode: no user signed in');
     }
+    return user;
   }
 }
 

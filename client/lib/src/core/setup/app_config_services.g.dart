@@ -6,7 +6,7 @@ part of 'app_config_services.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$appStartupHash() => r'56579fd0f5dd8db5f2b8d4d6cc5d1197fec99aa3';
+String _$appStartupHash() => r'8e2fdd525b68b107544c66591b31b7c359ecfe2c';
 
 /// See also [appStartup].
 @ProviderFor(appStartup)
@@ -22,7 +22,7 @@ final appStartupProvider = FutureProvider<void>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AppStartupRef = FutureProviderRef<void>;
-String _$eagerAdminStatusHash() => r'808469ba2ca1af76783a9c68c257e66dbfb17fa0';
+String _$eagerAdminStatusHash() => r'c4db1ce7e894c600c07b010420260277a5beed34';
 
 /// Provider for checking admin status eagerly (helping with UI updates)
 ///

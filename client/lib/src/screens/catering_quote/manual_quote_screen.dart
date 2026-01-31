@@ -13,13 +13,26 @@ class ManualQuoteScreen extends ConsumerStatefulWidget {
 class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
   // Controllers for new item form and event details.
   final TextEditingController _itemNameController = TextEditingController();
-  final TextEditingController _itemDescriptionController = TextEditingController();
+  final TextEditingController _itemDescriptionController =
+      TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
   final TextEditingController _eventTypeController = TextEditingController();
-  final TextEditingController _customPersonasController = TextEditingController();
+  final TextEditingController _customPersonasController =
+      TextEditingController();
   final FocusNode _customPersonasFocusNode = FocusNode();
-  final List<int> peopleQuantity =
-      const [10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000];
+  final List<int> peopleQuantity = const [
+    10,
+    20,
+    30,
+    40,
+    50,
+    100,
+    200,
+    300,
+    400,
+    500,
+    1000
+  ];
 
   // Local UI state.
   bool isCustomSelected = false;
@@ -36,13 +49,13 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
     // Initialize manual quote details.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(manualQuoteProvider.notifier).updateQuoteDetails(
-        hasChef: false,
-        alergias: '',
-        eventType: '',
-        preferencia: '',
-        adicionales: '',
-        peopleCount: 0,
-      );
+            hasChef: false,
+            alergias: '',
+            eventType: '',
+            preferencia: '',
+            adicionales: '',
+            peopleCount: 0,
+          );
     });
   }
 
@@ -72,17 +85,17 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
 
     try {
       ref.read(manualQuoteProvider.notifier).addManualItem(
-        CateringDish(
-          title: _itemNameController.text.trim(),
-          quantity: quantity,
-          hasUnitSelection: manualQuantity != null,
-          peopleCount: quantity != 0 ? quantity : generalQuantity,
-          pricePerUnit: 0,
-          pricePerPerson: 0,
-          ingredients: [],
-          pricing: 0,
-        ),
-      );
+            CateringDish(
+              title: _itemNameController.text.trim(),
+              quantity: quantity,
+              hasUnitSelection: manualQuantity != null,
+              peopleCount: quantity != 0 ? quantity : generalQuantity,
+              pricePerUnit: 0,
+              pricePerPerson: 0,
+              ingredients: [],
+              pricing: 0,
+            ),
+          );
       _itemNameController.clear();
       _itemDescriptionController.clear();
       _quantityController.clear();
@@ -177,9 +190,11 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
                 : null,
             trailing: isEditing
                 ? IconButton(
-                    icon: const Icon(Icons.delete_forever,size: 20, color: Colors.red),
-                    onPressed: () =>
-                        ref.read(manualQuoteProvider.notifier).removeFromCart(index),
+                    icon: const Icon(Icons.delete_forever,
+                        size: 20, color: Colors.red),
+                    onPressed: () => ref
+                        .read(manualQuoteProvider.notifier)
+                        .removeFromCart(index),
                   )
                 : null,
           ),
@@ -264,7 +279,7 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<int>(
-          value: isCustomSelected ||
+          initialValue: isCustomSelected ||
                   quote?.peopleCount == null ||
                   !peopleQuantity.contains(quote?.peopleCount)
               ? null
@@ -293,7 +308,8 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
               setState(() {
                 isCustomSelected = true;
                 _customPersonasController.clear();
-                ref.read(manualQuoteProvider.notifier)
+                ref
+                    .read(manualQuoteProvider.notifier)
                     .updateQuoteDetails(peopleCount: 0);
               });
               Future.delayed(const Duration(milliseconds: 200), () {
@@ -302,7 +318,8 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
             } else {
               setState(() {
                 isCustomSelected = false;
-                ref.read(manualQuoteProvider.notifier)
+                ref
+                    .read(manualQuoteProvider.notifier)
                     .updateQuoteDetails(peopleCount: value);
               });
             }
@@ -327,7 +344,8 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
                 onChanged: (value) {
                   final count = int.tryParse(value);
                   if (count != null) {
-                    ref.read(manualQuoteProvider.notifier)
+                    ref
+                        .read(manualQuoteProvider.notifier)
                         .updateQuoteDetails(peopleCount: count);
                   }
                 },
@@ -375,7 +393,8 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
               ActionChip(
                 backgroundColor: Colors.white,
                 avatar: Icon(Icons.add, color: primaryColor),
-                label: Text('Agregar Alergia', style: TextStyle(color: primaryColor)),
+                label: Text('Agregar Alergia',
+                    style: TextStyle(color: primaryColor)),
                 onPressed: () async {
                   String? allergyInput;
                   final newAllergy = await showDialog<String>(
@@ -425,7 +444,9 @@ class _ManualQuoteScreenState extends ConsumerState<ManualQuoteScreen> {
   Widget _buildAdditionalNotesSection() {
     final quote = ref.watch(manualQuoteProvider);
     return ExpansionTile(
-      title: const Text('Notas Adicionales', ),
+      title: const Text(
+        'Notas Adicionales',
+      ),
       children: [
         Padding(
           padding: const EdgeInsets.all(16.0),

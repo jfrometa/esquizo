@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catalog/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/widgets_mesa_redonda/dish_item.dart';
@@ -80,7 +79,7 @@ class MenuSection extends ConsumerWidget {
           // View all button
           Center(
             child: ElevatedButton.icon(
-              onPressed: () => GoRouter.of(context).goNamed(AppRoute.home.name),
+              onPressed: () => context.goToBusinessHome(),
               icon: const Icon(Icons.restaurant_menu),
               label: const Text('Ver Menú Completo'),
               style: ElevatedButton.styleFrom(

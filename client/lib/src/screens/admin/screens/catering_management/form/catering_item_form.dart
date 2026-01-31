@@ -7,9 +7,9 @@ import 'package:starter_architecture_flutter_firebase/src/utils/icon_mapper.dart
 
 class CateringItemForm extends ConsumerStatefulWidget {
   final CateringItem? item;
-  
+
   const CateringItemForm({
-    super.key, 
+    super.key,
     this.item,
   });
 
@@ -26,7 +26,7 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
   late TextEditingController _allergenInfoController;
   late TextEditingController _imageUrlController;
   late TextEditingController _tagsController;
-  
+
   List<String> _selectedCategoryIds = [];
   List<IngredientItem> _ingredients = [];
   bool _isActive = false;
@@ -64,9 +64,12 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
       text: item.price > 0 ? item.price.toString() : '',
     );
     _prepTimeController = TextEditingController(
-      text: item.preparationTimeMinutes > 0 ? item.preparationTimeMinutes.toString() : '',
+      text: item.preparationTimeMinutes > 0
+          ? item.preparationTimeMinutes.toString()
+          : '',
     );
-    _allergenInfoController = TextEditingController(text: item.allergenInfo ?? '');
+    _allergenInfoController =
+        TextEditingController(text: item.allergenInfo ?? '');
     _imageUrlController = TextEditingController(text: item.imageUrl);
     _tagsController = TextEditingController(text: item.tags.join(', '));
     _selectedCategoryIds = List.from(item.categoryIds);
@@ -123,7 +126,7 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
         );
 
         final repository = ref.read(cateringItemRepositoryProvider.notifier);
-        
+
         if (item.id.isEmpty) {
           await repository.addItem(item);
         } else {
@@ -166,7 +169,7 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
     final isEdit = widget.item != null;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(isEdit ? 'Edit Item' : 'New Item'),
@@ -199,7 +202,7 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                     ),
                     child: Center(
                       child: _iconCodePoint != null
-                          ? Icon( 
+                          ? Icon(
                               IconMapper.getIconData(_iconCodePoint.toString()),
                               size: 40,
                               color: colorScheme.onPrimaryContainer,
@@ -243,9 +246,9 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Tab view for different sections
             DefaultTabController(
               length: 3,
@@ -276,7 +279,7 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              
+
                               // Name field
                               TextFormField(
                                 controller: _nameController,
@@ -295,7 +298,7 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                                 },
                               ),
                               const SizedBox(height: 16),
-                              
+
                               // Description field
                               TextFormField(
                                 controller: _descriptionController,
@@ -307,10 +310,11 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                                   alignLabelWithHint: true,
                                 ),
                                 maxLines: 3,
-                                textCapitalization: TextCapitalization.sentences,
+                                textCapitalization:
+                                    TextCapitalization.sentences,
                               ),
                               const SizedBox(height: 16),
-                              
+
                               // Price field
                               TextFormField(
                                 controller: _priceController,
@@ -332,10 +336,10 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                                 },
                               ),
                               const SizedBox(height: 16),
-                              
+
                               // Unit Type
                               DropdownButtonFormField<ItemUnitType>(
-                                value: _unitType,
+                                initialValue: _unitType,
                                 decoration: const InputDecoration(
                                   labelText: 'Unit Type',
                                   border: OutlineInputBorder(),
@@ -354,7 +358,7 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                                 },
                               ),
                               const SizedBox(height: 16),
-                              
+
                               // Prep Time field
                               TextFormField(
                                 controller: _prepTimeController,
@@ -367,19 +371,21 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                                 keyboardType: TextInputType.number,
                               ),
                               const SizedBox(height: 16),
-                              
+
                               // Allergen Info field
                               TextFormField(
                                 controller: _allergenInfoController,
                                 decoration: const InputDecoration(
                                   labelText: 'Allergen Information',
-                                  hintText: 'E.g., Contains nuts, dairy, gluten',
+                                  hintText:
+                                      'E.g., Contains nuts, dairy, gluten',
                                   border: OutlineInputBorder(),
-                                  prefixIcon: Icon(Icons.warning_amber_outlined),
+                                  prefixIcon:
+                                      Icon(Icons.warning_amber_outlined),
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              
+
                               // Tags field
                               TextFormField(
                                 controller: _tagsController,
@@ -391,7 +397,7 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              
+
                               // Image URL field
                               TextFormField(
                                 controller: _imageUrlController,
@@ -403,26 +409,29 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                                 ),
                               ),
                               const SizedBox(height: 24),
-                              
+
                               // Status toggles
                               Card(
                                 child: Padding(
                                   padding: const EdgeInsets.all(16),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Item Status',
-                                        style: theme.textTheme.titleMedium?.copyWith(
+                                        style: theme.textTheme.titleMedium
+                                            ?.copyWith(
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                       const SizedBox(height: 8),
-                                      
+
                                       // Active switch
                                       SwitchListTile(
                                         title: const Text('Active'),
-                                        subtitle: const Text('Item is available for selection'),
+                                        subtitle: const Text(
+                                            'Item is available for selection'),
                                         value: _isActive,
                                         onChanged: (value) {
                                           setState(() {
@@ -433,14 +442,17 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                                           _isActive
                                               ? Icons.toggle_on_outlined
                                               : Icons.toggle_off_outlined,
-                                          color: _isActive ? colorScheme.primary : null,
+                                          color: _isActive
+                                              ? colorScheme.primary
+                                              : null,
                                         ),
                                       ),
-                                      
+
                                       // Highlighted switch
                                       SwitchListTile(
                                         title: const Text('Highlighted'),
-                                        subtitle: const Text('Feature this item in promotions'),
+                                        subtitle: const Text(
+                                            'Feature this item in promotions'),
                                         value: _isHighlighted,
                                         onChanged: (value) {
                                           setState(() {
@@ -448,8 +460,12 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                                           });
                                         },
                                         secondary: Icon(
-                                          _isHighlighted ? Icons.star : Icons.star_border,
-                                          color: _isHighlighted ? colorScheme.primary : null,
+                                          _isHighlighted
+                                              ? Icons.star
+                                              : Icons.star_border,
+                                          color: _isHighlighted
+                                              ? colorScheme.primary
+                                              : null,
                                         ),
                                       ),
                                     ],
@@ -459,10 +475,10 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                             ],
                           ),
                         ),
-                        
+
                         // Categories Tab
                         _buildCategoriesTab(colorScheme),
-                        
+
                         // Ingredients Tab
                         _buildIngredientsTab(colorScheme),
                       ],
@@ -471,9 +487,9 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Submit button
             SizedBox(
               width: double.infinity,
@@ -504,8 +520,9 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
   Widget _buildCategoriesTab(ColorScheme colorScheme) {
     return Consumer(
       builder: (context, ref, child) {
-        final categoriesAsyncValue = ref.watch(cateringCategoryRepositoryProvider);
-        
+        final categoriesAsyncValue =
+            ref.watch(cateringCategoryRepositoryProvider);
+
         return categoriesAsyncValue.when(
           data: (categories) {
             if (categories.isEmpty) {
@@ -531,7 +548,7 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                 ),
               );
             }
-            
+
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -540,15 +557,15 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                   child: Text(
                     'Select Categories',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ),
                 Text(
                   'Choose which categories this item belongs to',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                 ),
                 const SizedBox(height: 16),
                 Expanded(
@@ -556,8 +573,9 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                     itemCount: categories.length,
                     itemBuilder: (context, index) {
                       final category = categories[index];
-                      final isSelected = _selectedCategoryIds.contains(category.id);
-                      
+                      final isSelected =
+                          _selectedCategoryIds.contains(category.id);
+
                       return CheckboxListTile(
                         title: Text(category.name),
                         subtitle: Text(
@@ -567,8 +585,10 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                         ),
                         secondary: category.iconName != null
                             ? Icon(
-                            IconMapper.getIconData(_iconCodePoint.toString()),
-                            color: isSelected ? colorScheme.onPrimary : null,
+                                IconMapper.getIconData(
+                                    _iconCodePoint.toString()),
+                                color:
+                                    isSelected ? colorScheme.onPrimary : null,
                               )
                             : null,
                         value: isSelected,
@@ -608,8 +628,8 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
               Text(
                 'Ingredients',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               ElevatedButton.icon(
                 onPressed: _showAddIngredientDialog,
@@ -622,8 +642,8 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
         Text(
           'List of ingredients used in this item',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-          ),
+                color: colorScheme.onSurfaceVariant,
+              ),
         ),
         const SizedBox(height: 16),
         if (_ingredients.isEmpty)
@@ -664,7 +684,7 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
               },
               itemBuilder: (context, index) {
                 final ingredient = _ingredients[index];
-                
+
                 return Card(
                   key: ValueKey(ingredient.name),
                   margin: const EdgeInsets.only(bottom: 8),
@@ -673,7 +693,8 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (ingredient.amount.isNotEmpty || ingredient.unit.isNotEmpty)
+                        if (ingredient.amount.isNotEmpty ||
+                            ingredient.unit.isNotEmpty)
                           Text('${ingredient.amount} ${ingredient.unit}'),
                         if (ingredient.isOptional)
                           Text(
@@ -690,7 +711,8 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                       children: [
                         IconButton(
                           icon: const Icon(Icons.edit_outlined),
-                          onPressed: () => _showEditIngredientDialog(ingredient, index),
+                          onPressed: () =>
+                              _showEditIngredientDialog(ingredient, index),
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete_outline),
@@ -730,7 +752,10 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                   width: 32,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurfaceVariant
+                        .withOpacity(0.4),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -752,7 +777,8 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                 Expanded(
                   child: GridView.builder(
                     controller: scrollController,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 4,
                       mainAxisSpacing: 16,
                       crossAxisSpacing: 16,
@@ -764,7 +790,7 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                       final iconData = iconOption['icon'] as IconData;
                       final iconName = iconOption['name'] as String;
                       final isSelected = _iconCodePoint == iconData.codePoint;
-                      
+
                       return InkWell(
                         onTap: () {
                           setState(() {
@@ -778,11 +804,15 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? Theme.of(context).colorScheme.primaryContainer
-                                : Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest
+                                    .withOpacity(0.3),
                             borderRadius: BorderRadius.circular(12),
                             border: isSelected
                                 ? Border.all(
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
                                     width: 2,
                                   )
                                 : null,
@@ -795,16 +825,23 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
                                 size: 32,
                                 color: isSelected
                                     ? Theme.of(context).colorScheme.primary
-                                    : Theme.of(context).colorScheme.onSurfaceVariant,
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 iconName,
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: isSelected
-                                      ? Theme.of(context).colorScheme.primary
-                                      : null,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: isSelected
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                          : null,
+                                    ),
                                 textAlign: TextAlign.center,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -828,95 +865,93 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
     final amountController = TextEditingController();
     final unitController = TextEditingController();
     bool isOptional = false;
-    
+
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: const Text('Add Ingredient'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    controller: nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Ingredient Name',
-                      border: OutlineInputBorder(),
+      builder: (context) => StatefulBuilder(builder: (context, setState) {
+        return AlertDialog(
+          title: const Text('Add Ingredient'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Ingredient Name',
+                    border: OutlineInputBorder(),
+                  ),
+                  textCapitalization: TextCapitalization.words,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: TextFormField(
+                        controller: amountController,
+                        decoration: const InputDecoration(
+                          labelText: 'Amount',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
                     ),
-                    textCapitalization: TextCapitalization.words,
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: TextFormField(
-                          controller: amountController,
-                          decoration: const InputDecoration(
-                            labelText: 'Amount',
-                            border: OutlineInputBorder(),
-                          ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      flex: 1,
+                      child: TextFormField(
+                        controller: unitController,
+                        decoration: const InputDecoration(
+                          labelText: 'Unit',
+                          border: OutlineInputBorder(),
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        flex: 1,
-                        child: TextFormField(
-                          controller: unitController,
-                          decoration: const InputDecoration(
-                            labelText: 'Unit',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  CheckboxListTile(
-                    title: const Text('Optional Ingredient'),
-                    value: isOptional,
-                    onChanged: (value) {
-                      setState(() {
-                        isOptional = value ?? false;
-                      });
-                    },
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                CheckboxListTile(
+                  title: const Text('Optional Ingredient'),
+                  value: isOptional,
+                  onChanged: (value) {
+                    setState(() {
+                      isOptional = value ?? false;
+                    });
+                  },
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: () {
-                  if (nameController.text.trim().isEmpty) {
-                    return;
-                  }
-                  
-                  final newIngredient = IngredientItem(
-                    name: nameController.text.trim(),
-                    amount: amountController.text.trim(),
-                    unit: unitController.text.trim(),
-                    isOptional: isOptional,
-                  );
-                  
-                  setState(() {
-                    _ingredients.add(newIngredient);
-                  });
-                  
-                  Navigator.pop(context);
-                },
-                child: const Text('Add'),
-              ),
-            ],
-          );
-        }
-      ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                if (nameController.text.trim().isEmpty) {
+                  return;
+                }
+
+                final newIngredient = IngredientItem(
+                  name: nameController.text.trim(),
+                  amount: amountController.text.trim(),
+                  unit: unitController.text.trim(),
+                  isOptional: isOptional,
+                );
+
+                setState(() {
+                  _ingredients.add(newIngredient);
+                });
+
+                Navigator.pop(context);
+              },
+              child: const Text('Add'),
+            ),
+          ],
+        );
+      }),
     ).then((_) {
       // Dispose controllers
       nameController.dispose();
@@ -924,101 +959,99 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
       unitController.dispose();
     });
   }
-  
+
   void _showEditIngredientDialog(IngredientItem ingredient, int index) {
     final nameController = TextEditingController(text: ingredient.name);
     final amountController = TextEditingController(text: ingredient.amount);
     final unitController = TextEditingController(text: ingredient.unit);
     bool isOptional = ingredient.isOptional;
-    
+
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: const Text('Edit Ingredient'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    controller: nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Ingredient Name',
-                      border: OutlineInputBorder(),
+      builder: (context) => StatefulBuilder(builder: (context, setState) {
+        return AlertDialog(
+          title: const Text('Edit Ingredient'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Ingredient Name',
+                    border: OutlineInputBorder(),
+                  ),
+                  textCapitalization: TextCapitalization.words,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: TextFormField(
+                        controller: amountController,
+                        decoration: const InputDecoration(
+                          labelText: 'Amount',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
                     ),
-                    textCapitalization: TextCapitalization.words,
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: TextFormField(
-                          controller: amountController,
-                          decoration: const InputDecoration(
-                            labelText: 'Amount',
-                            border: OutlineInputBorder(),
-                          ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      flex: 1,
+                      child: TextFormField(
+                        controller: unitController,
+                        decoration: const InputDecoration(
+                          labelText: 'Unit',
+                          border: OutlineInputBorder(),
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        flex: 1,
-                        child: TextFormField(
-                          controller: unitController,
-                          decoration: const InputDecoration(
-                            labelText: 'Unit',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  CheckboxListTile(
-                    title: const Text('Optional Ingredient'),
-                    value: isOptional,
-                    onChanged: (value) {
-                      setState(() {
-                        isOptional = value ?? false;
-                      });
-                    },
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                CheckboxListTile(
+                  title: const Text('Optional Ingredient'),
+                  value: isOptional,
+                  onChanged: (value) {
+                    setState(() {
+                      isOptional = value ?? false;
+                    });
+                  },
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: () {
-                  if (nameController.text.trim().isEmpty) {
-                    return;
-                  }
-                  
-                  final updatedIngredient = IngredientItem(
-                    name: nameController.text.trim(),
-                    amount: amountController.text.trim(),
-                    unit: unitController.text.trim(),
-                    isOptional: isOptional,
-                  );
-                  
-                  setState(() {
-                    _ingredients[index] = updatedIngredient;
-                  });
-                  
-                  Navigator.pop(context);
-                },
-                child: const Text('Update'),
-              ),
-            ],
-          );
-        }
-      ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                if (nameController.text.trim().isEmpty) {
+                  return;
+                }
+
+                final updatedIngredient = IngredientItem(
+                  name: nameController.text.trim(),
+                  amount: amountController.text.trim(),
+                  unit: unitController.text.trim(),
+                  isOptional: isOptional,
+                );
+
+                setState(() {
+                  _ingredients[index] = updatedIngredient;
+                });
+
+                Navigator.pop(context);
+              },
+              child: const Text('Update'),
+            ),
+          ],
+        );
+      }),
     ).then((_) {
       // Dispose controllers
       nameController.dispose();
@@ -1026,13 +1059,13 @@ class _CateringItemFormState extends ConsumerState<CateringItemForm> {
       unitController.dispose();
     });
   }
-  
+
   void _removeIngredient(int index) {
     setState(() {
       _ingredients.removeAt(index);
     });
   }
-  
+
   String _formatUnitType(ItemUnitType type) {
     switch (type) {
       case ItemUnitType.perPerson:

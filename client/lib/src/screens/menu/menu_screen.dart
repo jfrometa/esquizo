@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+// import 'package:go_router/go_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_features_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/cart/cart_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/business_navigation_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/widget/menu_search_interface.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/menu/widget/menu_tab_bar.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
@@ -40,13 +42,12 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
   final double _parallaxFactor = 0.5;
 
   // Tab and scroll controllers
-  late final TabController _tabController;
+  TabController? _tabController;
   final ScrollController _mainScrollController = ScrollController();
   final Map<int, ScrollController> _tabScrollControllers = {};
 
   // Animation controllers
   late final AnimationController _headerAnimationController;
-  late final Animation<double> _headerOpacityAnimation;
 
   // Table data
   late final QRCodeData _tableData;
@@ -55,6 +56,13 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
   final Map<int, Widget> _cachedTabViews = {};
   bool _areTabViewsInitialized = false;
 
+  // Track which feature tabs are enabled
+  bool _showMealPlans = true;
+  bool _showCatering = true;
+
+  // List of tab indices
+  final List<int> _enabledTabIndices = [];
+
   @override
   void initState() {
     super.initState();
@@ -62,9 +70,12 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
     // Initialize table data
     _initializeTableData();
 
-    // Setup controllers
+    // Default to showing all tabs, will be updated in didChangeDependencies
+    _enabledTabIndices.addAll([0, 1, 2, 3]);
+
+    // Setup controllers - initial length is 4, may be updated later
     _tabController = TabController(length: 4, vsync: this);
-    _tabController.addListener(_handleTabChange);
+    _tabController?.addListener(_handleTabChange);
 
     // Setup scroll controllers for each tab
     for (int i = 0; i < 4; i++) {
@@ -93,13 +104,6 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       vsync: this,
     );
 
-    _headerOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _headerAnimationController,
-        curve: Curves.easeOut,
-      ),
-    );
-
     // Setup listeners
     _searchController.addListener(_handleSearchChanges);
     _searchFocusNode.addListener(_handleFocusChanges);
@@ -108,6 +112,56 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    // Get current business navigation info to identify the business
+    final businessInfo = ref.watch(currentBusinessNavigationProvider);
+    final String? businessSlug = businessInfo?.businessSlug;
+
+    // Update feature flags based on business configuration
+    if (businessSlug != null) {
+      // Get business features from provider
+      final businessFeaturesAsync =
+          ref.watch(businessFeaturesProvider(businessSlug));
+
+      // Update flags based on features
+      businessFeaturesAsync.whenData((features) {
+        if (mounted) {
+          final shouldUpdateTabs = _showMealPlans != features.mealPlans ||
+              _showCatering != features.catering;
+
+          setState(() {
+            _showMealPlans = features.mealPlans;
+            _showCatering = features.catering;
+
+            // Recalculate enabled tabs
+            _enabledTabIndices.clear();
+            _enabledTabIndices.add(0); // Menu tab always enabled
+
+            if (_showMealPlans) _enabledTabIndices.add(1);
+            if (_showCatering) _enabledTabIndices.add(2);
+            _enabledTabIndices
+                .add(_enabledTabIndices.length); // Deals tab is always the last
+
+            // Recreate tab controller if needed
+            if (shouldUpdateTabs) {
+              final oldController = _tabController;
+              _tabController =
+                  TabController(length: _enabledTabIndices.length, vsync: this);
+              _tabController?.addListener(_handleTabChange);
+
+              // Dispose old controller after new one is set to avoid gaps
+              oldController?.removeListener(_handleTabChange);
+              oldController?.dispose();
+
+              _areTabViewsInitialized = false;
+            }
+          });
+
+          debugPrint(
+              '🍽 Menu features updated - Meal Plans: $_showMealPlans, Catering: $_showCatering');
+        }
+      });
+    }
 
     // Initialize tab views after dependencies are available
     if (!_areTabViewsInitialized) {
@@ -118,22 +172,77 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
   void _initCachedTabViews() {
     // Ensure _tableData is initialized
     setState(() {
+      _cachedTabViews.clear();
+
+      // Calculate which tab indices to use
+      final List<int> tabIndices = [];
+      tabIndices.add(0); // Menu tab always enabled at index 0
+
+      // Add other tabs based on feature flags
+      int indexCounter = 1;
+
+      // Add meal plans tab if enabled
+      if (_showMealPlans) {
+        tabIndices.add(indexCounter);
+        indexCounter++;
+      }
+
+      // Add catering tab if enabled
+      if (_showCatering) {
+        tabIndices.add(indexCounter);
+        indexCounter++;
+      }
+
+      // Add deals tab at the end
+      tabIndices.add(indexCounter);
+
       // Create each tab view with a separate scroll controller
+      for (int i = 0; i < tabIndices.length; i++) {
+        // Create appropriate scroll controller if needed
+        if (!_tabScrollControllers.containsKey(i)) {
+          _tabScrollControllers[i] = ScrollController();
+          _tabScrollControllers[i]!.addListener(() {
+            if (_tabScrollControllers[i]!.hasClients) {
+              ref.read(menuScrollOffsetProvider.notifier).state =
+                  _tabScrollControllers[i]!.offset;
+            }
+          });
+        }
+      }
+
+      // Menu tab is always at index 0
       _cachedTabViews[0] = CategoryView(
         scrollController: _tabScrollControllers[0]!,
         tableData: _tableData,
       );
-      _cachedTabViews[1] = MealPlansView(
-        scrollController: _tabScrollControllers[1]!,
-      );
-      _cachedTabViews[2] = CateringView(
-        scrollController: _tabScrollControllers[2]!,
-      );
-      _cachedTabViews[3] = SpecialOffersView(
-        scrollController: _tabScrollControllers[3]!,
+
+      int viewIndex = 1;
+
+      // Add Meal Plans tab if enabled
+      if (_showMealPlans) {
+        _cachedTabViews[viewIndex] = MealPlansView(
+          scrollController: _tabScrollControllers[viewIndex]!,
+        );
+        viewIndex++;
+      }
+
+      // Add Catering tab if enabled
+      if (_showCatering) {
+        _cachedTabViews[viewIndex] = CateringView(
+          scrollController: _tabScrollControllers[viewIndex]!,
+        );
+        viewIndex++;
+      }
+
+      // Special Offers is always the last tab
+      _cachedTabViews[viewIndex] = SpecialOffersView(
+        scrollController: _tabScrollControllers[viewIndex]!,
       );
 
       _areTabViewsInitialized = true;
+
+      debugPrint(
+          '🧩 Menu tabs initialized - Total tabs: ${_cachedTabViews.length}');
     });
   }
 
@@ -144,8 +253,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
     _searchController.dispose();
     _searchFocusNode.removeListener(_handleFocusChanges);
     _searchFocusNode.dispose();
-    _tabController.removeListener(_handleTabChange);
-    _tabController.dispose();
+    _tabController?.removeListener(_handleTabChange);
+    _tabController?.dispose();
     _mainScrollController.dispose();
 
     // Dispose all tab scroll controllers
@@ -158,8 +267,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
   }
 
   void _handleTabChange() {
-    if (!_tabController.indexIsChanging) {
-      ref.read(menuActiveTabProvider.notifier).state = _tabController.index;
+    if (_tabController != null && !_tabController!.indexIsChanging) {
+      ref.read(menuActiveTabProvider.notifier).state = _tabController!.index;
     }
   }
 
@@ -257,18 +366,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
     );
   }
 
-  void _scrollToTop() {
-    final activeIndex = _tabController.index;
-    final controller = _tabScrollControllers[activeIndex];
-
-    if (controller != null && controller.hasClients) {
-      controller.animateTo(
-        0,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
-      );
-    }
-  }
+  // Controller methods are defined above
 
   void _showSearchInterface() {
     if (!mounted) return;
@@ -332,21 +430,126 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
           );
   }
 
-  // Improved header with smooth transitions, using the global scroll provider
-  Widget _buildHeader() {
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final activeTabIndex = ref.watch(menuActiveTabProvider);
 
-    // Get the current scroll offset from the shared provider
+    // Update TabController when activeTabIndex changes
+    if (_tabController != null && _tabController!.index != activeTabIndex) {
+      _tabController!.animateTo(activeTabIndex);
+    }
+
+    return DefaultTabController(
+      length: _enabledTabIndices.length,
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        body: SafeArea(
+          top: false,
+          child: Stack(
+            children: [
+              // Extracted header widget that watches scroll position independently
+              _MenuHeader(
+                threshold: _headerThreshold,
+                parallaxFactor: _parallaxFactor,
+              ),
+
+              Column(
+                children: [
+                  // Extracted app bar widget that watches scroll position independently
+                  _MenuAppBar(
+                    threshold: _headerThreshold,
+                    onSearchPressed: _showSearchInterface,
+                  ),
+
+                  // Tab bar - doesn't need to rebuild on scroll
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 4.0),
+                    child: MenuTabBar(
+                      key: ValueKey(
+                          'menu_tab_bar_${_enabledTabIndices.length}_${_tabController?.index}'),
+                      tabController: _tabController!,
+                      onTabChanged: (index) {
+                        ref.read(menuActiveTabProvider.notifier).state = index;
+                      },
+                      showMealPlans: _showMealPlans,
+                      showCatering: _showCatering,
+                    ),
+                  ),
+
+                  // Tab content area - optimize with RepaintBoundary
+                  Expanded(
+                    child: RepaintBoundary(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: colorScheme.surface,
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(28),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: colorScheme.shadow.withValues(alpha: 0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, -2),
+                            ),
+                          ],
+                        ),
+                        padding: const EdgeInsets.only(top: 4),
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(28),
+                          ),
+                          child: NotificationListener<ScrollNotification>(
+                            onNotification: (notification) {
+                              if (notification is ScrollUpdateNotification) {
+                                ref
+                                    .read(menuScrollOffsetProvider.notifier)
+                                    .state = notification.metrics.pixels;
+                              }
+                              return false;
+                            },
+                            child: TabBarView(
+                              key: ValueKey(
+                                  'menu_tab_view_${_enabledTabIndices.length}'),
+                              controller: _tabController!,
+                              physics: const BouncingScrollPhysics(),
+                              children: List.generate(_enabledTabIndices.length,
+                                  (index) => _buildTabView(index)),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Extracted header widget to isolate scroll-based rebuilds
+class _MenuHeader extends ConsumerWidget {
+  final double threshold;
+  final double parallaxFactor;
+
+  const _MenuHeader({
+    required this.threshold,
+    required this.parallaxFactor,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final scrollOffset = ref.watch(menuScrollOffsetProvider);
 
-    // Calculate opacity based on scroll position
-    // Header starts hiding immediately as scrolling begins
-    final headerOpacity =
-        1.0 - (scrollOffset / _headerThreshold).clamp(0.0, 1.0);
-
-    // Calculate header offset for parallax effect
-    final headerOffset = -scrollOffset * _parallaxFactor;
+    final headerOpacity = 1.0 - (scrollOffset / threshold).clamp(0.0, 1.0);
+    final headerOffset = -scrollOffset * parallaxFactor;
 
     return Opacity(
       opacity: headerOpacity,
@@ -360,13 +563,12 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
               end: Alignment.bottomCenter,
               colors: [
                 colorScheme.primary,
-                colorScheme.primary.withOpacity(0.8),
+                colorScheme.primary.withValues(alpha: 0.8),
               ],
             ),
           ),
           child: Stack(
             children: [
-              // Background design elements
               Positioned(
                 bottom: 0,
                 left: 0,
@@ -379,22 +581,20 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        colorScheme.onPrimary.withOpacity(0.1),
+                        colorScheme.onPrimary.withValues(alpha: 0.1),
                       ],
                     ),
                   ),
                 ),
               ),
-
-              // Progress indicator
               Align(
                 alignment: Alignment.bottomCenter,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 100),
                   height: 2,
-                  color: colorScheme.onPrimary.withOpacity(0.5),
-                  width: MediaQuery.of(context).size.width *
-                      (scrollOffset / (_headerThreshold * 2)).clamp(0.0, 1.0),
+                  color: colorScheme.onPrimary.withValues(alpha: 0.5),
+                  width: MediaQuery.sizeOf(context).width *
+                      (scrollOffset / (threshold * 2)).clamp(0.0, 1.0),
                 ),
               ),
             ],
@@ -403,27 +603,29 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       ),
     );
   }
+}
+
+/// Extracted app bar widget to isolate scroll-based rebuilds
+class _MenuAppBar extends ConsumerWidget {
+  final double threshold;
+  final VoidCallback onSearchPressed;
+
+  const _MenuAppBar({
+    required this.threshold,
+    required this.onSearchPressed,
+  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final activeTabIndex = ref.watch(menuActiveTabProvider);
+    final scrollOffset = ref.watch(menuScrollOffsetProvider);
     final cartItemCount = ref.watch(cartProvider).items.length;
 
-    // Get scroll offset from the shared provider
-    final scrollOffset = ref.watch(menuScrollOffsetProvider);
-
-    // Update TabController when activeTabIndex changes
-    if (_tabController.index != activeTabIndex) {
-      _tabController.animateTo(activeTabIndex);
-    }
-
-    // Calculate app bar properties based on scroll position
-    final scrollProgress = (scrollOffset / _headerThreshold).clamp(0.0, 1.0);
+    final scrollProgress = (scrollOffset / threshold).clamp(0.0, 1.0);
     final appBarBgColor = ColorTween(
       begin: Colors.transparent,
-      end: colorScheme.surface.withOpacity(0.97),
+      end: colorScheme.surface.withValues(alpha: 0.97),
     ).transform(scrollProgress)!;
 
     final appBarFgColor = ColorTween(
@@ -431,230 +633,127 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       end: colorScheme.onSurface,
     ).transform(scrollProgress)!;
 
-    // Define our main scaffold
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      body: SafeArea(
-        // Use SafeArea to prevent UI elements from being blocked by system UI
-        top: false, // Let the content extend behind the status bar
-        child: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: scrollProgress > 0.5
-              ? SystemUiOverlayStyle.dark.copyWith(
-                  statusBarColor: Colors.transparent,
-                  systemNavigationBarColor: colorScheme.surface,
-                )
-              : SystemUiOverlayStyle.light.copyWith(
-                  statusBarColor: Colors.transparent,
-                  systemNavigationBarColor: colorScheme.surface,
-                ),
-          child: Stack(
-            children: [
-              // Header background - placed at bottom of stack
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: _buildHeader(),
-              ),
-
-              // Use a simple Column layout with CustomScrollView
-              Column(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: scrollProgress > 0.5
+          ? SystemUiOverlayStyle.dark.copyWith(
+              statusBarColor: Colors.transparent,
+              systemNavigationBarColor: colorScheme.surface,
+            )
+          : SystemUiOverlayStyle.light.copyWith(
+              statusBarColor: Colors.transparent,
+              systemNavigationBarColor: colorScheme.surface,
+            ),
+      child: Container(
+        height: kToolbarHeight + MediaQuery.paddingOf(context).top,
+        padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
+        decoration: BoxDecoration(
+          color: appBarBgColor,
+          boxShadow: scrollProgress > 0.5
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Row(
                 children: [
-                  // App bar with search and cart buttons
-                  Container(
-                    height: kToolbarHeight + MediaQuery.of(context).padding.top,
-                    padding: EdgeInsets.only(
-                        top: MediaQuery.of(context).padding.top),
+                  const SizedBox(width: 16),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    height: 32 + ((1 - scrollProgress) * 4),
+                    width: 32 + ((1 - scrollProgress) * 4),
                     decoration: BoxDecoration(
-                      color: appBarBgColor,
-                      boxShadow: scrollProgress > 0.5
-                          ? [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ]
-                          : null,
-                    ),
-                    child: Row(
-                      children: [
-                        // Title with icon
-                        Expanded(
-                          child: Row(
-                            children: [
-                              const SizedBox(width: 16),
-                              AnimatedContainer(
-                                duration: const Duration(milliseconds: 300),
-                                height: 32 + ((1 - scrollProgress) * 4),
-                                width: 32 + ((1 - scrollProgress) * 4),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(
-                                          0.1 + ((1 - scrollProgress) * 0.1)),
-                                      blurRadius:
-                                          4 + ((1 - scrollProgress) * 4),
-                                      spreadRadius:
-                                          scrollProgress > 0.5 ? 0 : 1,
-                                    ),
-                                  ],
-                                ),
-                                padding: const EdgeInsets.all(2.0),
-                                child: ClipOval(
-                                  child: Image.asset(
-                                    'assets/appIcon.png',
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return const Icon(Icons.restaurant,
-                                          size: 24);
-                                    },
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Opacity(
-                                opacity: scrollProgress,
-                                child: Text(
-                                  'Menu',
-                                  style: theme.textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: appBarFgColor,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        // Actions
-                        IconButton(
-                          icon: Icon(Icons.search, color: appBarFgColor),
-                          tooltip: 'Search',
-                          onPressed: _showSearchInterface,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              IconButton(
-                                icon: Icon(Icons.shopping_cart_outlined,
-                                    color: appBarFgColor),
-                                tooltip: 'View cart',
-                                onPressed: () {
-                                  context.goNamed(AppRoute.homecart.name);
-                                  HapticFeedback.selectionClick();
-                                },
-                              ),
-                              if (cartItemCount > 0)
-                                Positioned(
-                                  top: 8,
-                                  right: 8,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(2),
-                                    decoration: BoxDecoration(
-                                      color: colorScheme.error,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    constraints: const BoxConstraints(
-                                      minWidth: 16,
-                                      minHeight: 16,
-                                    ),
-                                    child: Text(
-                                      cartItemCount.toString(),
-                                      style: TextStyle(
-                                        color: colorScheme.onError,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(
+                              alpha: 0.1 + ((1 - scrollProgress) * 0.1)),
+                          blurRadius: 4 + ((1 - scrollProgress) * 4),
+                          spreadRadius: scrollProgress > 0.5 ? 0 : 1,
                         ),
                       ],
                     ),
-                  ),
-
-                  // Tab bar
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 4.0),
-                    child: MenuTabBar(
-                      tabController: _tabController,
-                      onTabChanged: (index) {
-                        ref.read(menuActiveTabProvider.notifier).state = index;
-                      },
+                    padding: const EdgeInsets.all(2.0),
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/appIcon.png',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.restaurant, size: 24),
+                      ),
                     ),
                   ),
-
-                  // Tab content area
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: colorScheme.surface,
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(28),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: colorScheme.shadow.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, -2),
-                          ),
-                        ],
-                      ),
-                      // Add padding to top for more content space
-                      padding: const EdgeInsets.only(top: 4),
-                      child: ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(28),
-                        ),
-                        child: NotificationListener<ScrollNotification>(
-                          onNotification: (notification) {
-                            // Update the shared scroll provider from any scroll events inside tabs
-                            if (notification is ScrollUpdateNotification) {
-                              ref
-                                  .read(menuScrollOffsetProvider.notifier)
-                                  .state = notification.metrics.pixels;
-                            }
-                            return false; // Continue propagating the notification
-                          },
-                          child: TabBarView(
-                            controller: _tabController,
-                            physics: const BouncingScrollPhysics(),
-                            children: List.generate(
-                                4, (index) => _buildTabView(index)),
-                          ),
-                        ),
+                  const SizedBox(width: 12),
+                  Opacity(
+                    opacity: scrollProgress,
+                    child: Text(
+                      'Menu',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: appBarFgColor,
                       ),
                     ),
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+            IconButton(
+              icon: Icon(Icons.search, color: appBarFgColor),
+              tooltip: 'Search',
+              onPressed: onSearchPressed,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.shopping_cart_outlined,
+                        color: appBarFgColor),
+                    tooltip: 'View cart',
+                    onPressed: () {
+                      context.goNamedSafe(AppRoute.homecart.name);
+                      HapticFeedback.selectionClick();
+                    },
+                  ),
+                  if (cartItemCount > 0)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: colorScheme.error,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Text(
+                          cartItemCount.toString(),
+                          style: TextStyle(
+                            color: colorScheme.onError,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
-      // Scroll to top button - visible when scrolling down
-      // floatingActionButton: AnimatedSlide(
-      //   duration: const Duration(milliseconds: 200),
-      //   offset: scrollOffset > 100 ? Offset.zero : const Offset(0, 2),
-      //   child: AnimatedOpacity(
-      //     duration: const Duration(milliseconds: 200),
-      //     opacity: scrollOffset > 100 ? 1.0 : 0.0,
-      //     child: FloatingActionButton.small(
-      //       onPressed: _scrollToTop,
-      //       elevation: 4,
-      //       tooltip: 'Scroll to top ',
-      //       child: const Icon(Icons.keyboard_arrow_up),
-      //     ),
-      //   ),
-      // ),
     );
   }
 }

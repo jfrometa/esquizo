@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_features_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/business_settings/business_setup_screen.dart';
+import 'rtdb_features_settings_screen.dart';
 
 class BusinessSettingsScreen extends ConsumerStatefulWidget {
   const BusinessSettingsScreen({super.key});
@@ -32,7 +35,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
 
     // Initialize controllers
     _nameController = TextEditingController();
@@ -98,6 +101,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
                         Tab(text: 'Contact & Location'),
                         Tab(text: 'Hours & Availability'),
                         Tab(text: 'Features & Settings'),
+                        Tab(text: 'Setup Wizard'),
                       ],
                       indicatorSize: TabBarIndicatorSize.label,
                       labelColor: Theme.of(context).colorScheme.primary,
@@ -116,6 +120,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
                         _buildContactLocationTab(config),
                         _buildHoursTab(config),
                         _buildFeaturesSettingsTab(config),
+                        const BusinessSetupScreen(),
                       ],
                     ),
                   ),
@@ -161,7 +166,7 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
 
             // Business type
             DropdownButtonFormField<String>(
-              value: _businessType,
+              initialValue: _businessType,
               decoration: const InputDecoration(
                 labelText: 'Business Type',
                 border: OutlineInputBorder(),
@@ -644,10 +649,194 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
     );
   }
 
+  // Helper method to clean up problematic values in the settings map
+  void _cleanUpSettingsMap(Map<String, dynamic> settings) {
+    debugPrint('🧹 Cleaning up settings map');
+
+    // List of keys that should be strings
+    final stringKeys = [
+      'theme',
+      'currency',
+      'language',
+      'timeFormat',
+      'dateFormat'
+    ];
+
+    // List of keys that should be doubles
+    final doubleKeys = [
+      'taxRate',
+      'serviceCharge',
+      'deliveryFee',
+      'minimumOrder'
+    ];
+
+    // Process string keys
+    for (final key in stringKeys) {
+      if (settings.containsKey(key)) {
+        final value = settings[key];
+        if (value != null && value is! String) {
+          debugPrint(
+              '  ⚙️ Converting non-string "$key" to string: "$value" (${value.runtimeType})');
+          if (value is Map) {
+            // For map values, set a default string value
+            final defaultValue = _getDefaultStringValue(key);
+            settings[key] = defaultValue;
+            debugPrint('    → Set to default: "$defaultValue"');
+          } else {
+            // For other types, convert to string
+            settings[key] = value.toString();
+            debugPrint('    → Converted to: "${value.toString()}"');
+          }
+        }
+      }
+    }
+
+    // Process double keys
+    for (final key in doubleKeys) {
+      if (settings.containsKey(key)) {
+        final value = settings[key];
+        if (value != null && value is! double) {
+          debugPrint(
+              '  ⚙️ Converting non-double "$key" to double: "$value" (${value.runtimeType})');
+          if (value is int) {
+            settings[key] = value.toDouble();
+            debugPrint('    → Converted to: ${value.toDouble()}');
+          } else if (value is String) {
+            final parsedValue = double.tryParse(value);
+            if (parsedValue != null) {
+              settings[key] = parsedValue;
+              debugPrint('    → Parsed to: $parsedValue');
+            } else {
+              settings[key] = 0.0;
+              debugPrint('    → Could not parse, set to default: 0.0');
+            }
+          } else {
+            settings[key] = 0.0;
+            debugPrint('    → Set to default: 0.0');
+          }
+        }
+      }
+    }
+  }
+
+  // Helper method to get default string values for specific settings
+  String _getDefaultStringValue(String key) {
+    switch (key) {
+      case 'theme':
+        return 'system';
+      case 'currency':
+        return 'USD';
+      case 'language':
+        return 'en';
+      case 'timeFormat':
+        return '12h';
+      case 'dateFormat':
+        return 'MM/DD/YYYY';
+      default:
+        return '';
+    }
+  }
+
+  // Helper method to safely extract String values from settings
+  String _extractStringFromSetting(
+      Map<String, dynamic> settings, String key, String defaultValue) {
+    final value = settings[key];
+    debugPrint(
+        '💾 Extracting value for key "$key": ${value?.toString() ?? 'null'} (${value?.runtimeType})');
+
+    if (value == null) {
+      debugPrint('  ⚠️ Key not found, using default: "$defaultValue"');
+      return defaultValue;
+    }
+
+    if (value is String) {
+      debugPrint('  ✅ Value is String: "$value"');
+      return value;
+    }
+
+    // Special case: If the value is a Map, it cannot be used directly in a dropdown
+    // Return the default value instead of trying to convert the map to a string
+    if (value is Map) {
+      debugPrint(
+          '  ❌ Value is Map: $value - Using default value: "$defaultValue"');
+
+      // Clean up the map value by replacing it with the default string
+      settings[key] = defaultValue;
+      return defaultValue;
+    }
+
+    // Try to convert to string if it's another simple type
+    debugPrint(
+        '  ⚠️ Converting ${value.runtimeType} to String: "${value.toString()}"');
+    return value.toString();
+  }
+
+  // Helper method to safely extract double values from settings
+  double _extractDoubleFromSetting(
+      Map<String, dynamic> settings, String key, double defaultValue) {
+    final value = settings[key];
+    debugPrint(
+        '🔢 Extracting double for key "$key": ${value?.toString() ?? 'null'} (${value?.runtimeType})');
+
+    if (value == null) {
+      debugPrint('  ⚠️ Key not found, using default: $defaultValue');
+      return defaultValue;
+    }
+
+    if (value is double) {
+      debugPrint('  ✅ Value is double: $value');
+      return value;
+    }
+
+    if (value is int) {
+      debugPrint('  ✅ Converting int to double: $value → ${value.toDouble()}');
+      return value.toDouble();
+    }
+
+    if (value is String) {
+      final parsed = double.tryParse(value);
+      if (parsed != null) {
+        debugPrint('  ✅ Parsed string to double: "$value" → $parsed');
+        return parsed;
+      } else {
+        debugPrint(
+            '  ❌ Could not parse string to double: "$value" - Using default: $defaultValue');
+        return defaultValue;
+      }
+    }
+
+    if (value is Map) {
+      debugPrint('  ❌ Value is Map: $value - Using default: $defaultValue');
+      // Clean up the map value by replacing it with the default double
+      settings[key] = defaultValue;
+    }
+
+    debugPrint(
+        '  ⚠️ Unsupported type ${value.runtimeType}, using default: $defaultValue');
+    return defaultValue;
+  }
+
   Widget _buildFeaturesSettingsTab(BusinessConfig config) {
     // Create copies for editing
     final features = List<String>.from(_features);
     final settings = Map<String, dynamic>.from(_settings);
+
+    // Debug settings map content
+    debugPrint('🔍 Settings map content:');
+    settings.forEach((key, value) {
+      final valueType = value.runtimeType;
+      debugPrint('  - $key ($valueType): $value');
+    });
+
+    // Clean up problematic settings values
+    _cleanUpSettingsMap(settings);
+
+    // After cleanup, log settings again
+    debugPrint('🧹 Settings map after cleanup:');
+    settings.forEach((key, value) {
+      final valueType = value.runtimeType;
+      debugPrint('  - $key ($valueType): $value');
+    });
 
     // Define available features for your business type
     final availableFeatures = _getAvailableFeatures();
@@ -657,6 +846,52 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Advanced Settings Section
+          Card(
+            margin: const EdgeInsets.only(bottom: 24),
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.admin_panel_settings),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Advanced Settings',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Manage feature flags in the Realtime Database to control which UI elements are visible in the app.',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const RtdbFeaturesSettingsScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.settings),
+                    label: const Text('Manage Realtime Database Features'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
           Text(
             'Features',
             style: Theme.of(context).textTheme.headlineSmall,
@@ -686,10 +921,16 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
                     if (value == true) {
                       if (!features.contains(feature.key)) {
                         features.add(feature.key);
+                        // Update main state variable immediately
+                        _features.add(feature.key);
                       }
                     } else {
                       features.remove(feature.key);
+                      // Update main state variable immediately
+                      _features.remove(feature.key);
                     }
+                    debugPrint(
+                        'Checkbox updated: ${feature.key} is now ${value == true ? 'enabled' : 'disabled'}');
                   });
                 },
               );
@@ -711,7 +952,8 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
 
           // Tax rate setting
           TextFormField(
-            initialValue: (settings['taxRate'] ?? 0.0).toString(),
+            initialValue:
+                _extractDoubleFromSetting(settings, 'taxRate', 0.0).toString(),
             decoration: const InputDecoration(
               labelText: 'Tax Rate (%)',
               hintText: 'Enter tax rate percentage',
@@ -729,7 +971,9 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
 
           // Service charge setting
           TextFormField(
-            initialValue: (settings['serviceCharge'] ?? 0.0).toString(),
+            initialValue:
+                _extractDoubleFromSetting(settings, 'serviceCharge', 0.0)
+                    .toString(),
             decoration: const InputDecoration(
               labelText: 'Service Charge (%)',
               hintText: 'Enter service charge percentage',
@@ -746,47 +990,80 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
           const SizedBox(height: 16),
 
           // Currency setting
-          DropdownButtonFormField<String>(
-            value: settings['currency'] as String? ?? 'USD',
-            decoration: const InputDecoration(
-              labelText: 'Currency',
-              border: OutlineInputBorder(),
-            ),
-            items: const [
-              DropdownMenuItem(value: 'USD', child: Text('USD - US Dollar')),
-              DropdownMenuItem(value: 'EUR', child: Text('EUR - Euro')),
-              DropdownMenuItem(
-                  value: 'GBP', child: Text('GBP - British Pound')),
-              DropdownMenuItem(value: 'MXN', child: Text('MXN - Mexican Peso')),
-              DropdownMenuItem(
-                  value: 'CAD', child: Text('CAD - Canadian Dollar')),
-              DropdownMenuItem(value: 'JPY', child: Text('JPY - Japanese Yen')),
-              // Add more currencies as needed
-            ],
-            onChanged: (value) {
-              if (value != null) {
-                settings['currency'] = value;
-              }
-            },
-          ),
+          Builder(builder: (context) {
+            // Get currency value safely
+            final currencyValue =
+                _extractStringFromSetting(settings, 'currency', 'USD');
+
+            // Debug the currency value
+            debugPrint(
+                'Using currency value: $currencyValue (${currencyValue.runtimeType})');
+
+            return DropdownButtonFormField<String>(
+              initialValue: currencyValue,
+              decoration: const InputDecoration(
+                labelText: 'Currency',
+                border: OutlineInputBorder(),
+              ),
+              items: const [
+                DropdownMenuItem(value: 'USD', child: Text('USD - US Dollar')),
+                DropdownMenuItem(value: 'EUR', child: Text('EUR - Euro')),
+                DropdownMenuItem(
+                    value: 'GBP', child: Text('GBP - British Pound')),
+                DropdownMenuItem(
+                    value: 'MXN', child: Text('MXN - Mexican Peso')),
+                DropdownMenuItem(
+                    value: 'CAD', child: Text('CAD - Canadian Dollar')),
+                DropdownMenuItem(
+                    value: 'JPY', child: Text('JPY - Japanese Yen')),
+                // Add more currencies as needed
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  settings['currency'] = value;
+                }
+              },
+            );
+          }),
           const SizedBox(height: 16),
 
           // Theme settings
-          DropdownButtonFormField<String>(
-            value: settings['theme'] as String? ?? 'system',
-            decoration: const InputDecoration(
-              labelText: 'Default Theme',
-              border: OutlineInputBorder(),
-            ),
-            items: const [
-              DropdownMenuItem(value: 'system', child: Text('System Default')),
-              DropdownMenuItem(value: 'light', child: Text('Light Theme')),
-              DropdownMenuItem(value: 'dark', child: Text('Dark Theme')),
-            ],
-            onChanged: (value) {
-              if (value != null) {
-                settings['theme'] = value;
-              }
+          Builder(
+            builder: (context) {
+              // Get theme value safely
+              final themeValue =
+                  _extractStringFromSetting(settings, 'theme', 'system');
+
+              // Debug the theme value
+              debugPrint(
+                  'Using theme value: $themeValue (${themeValue.runtimeType})');
+
+              return DropdownButtonFormField<String>(
+                initialValue: themeValue,
+                decoration: const InputDecoration(
+                  labelText: 'Default Theme',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(
+                      value: 'system', child: Text('System Default')),
+                  DropdownMenuItem(value: 'light', child: Text('Light Theme')),
+                  DropdownMenuItem(value: 'dark', child: Text('Dark Theme')),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    // Check if the current theme value is a Map and handle it appropriately
+                    if (settings['theme'] is Map) {
+                      debugPrint(
+                          'Converting existing Map theme to String value: $value');
+                      // We need to preserve the theme settings but update the mode
+                      settings['theme'] = value;
+                    } else {
+                      settings['theme'] = value;
+                    }
+                  }
+                },
+              );
             },
           ),
           const SizedBox(height: 24),
@@ -798,8 +1075,8 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
               onPressed: _isLoading
                   ? null
                   : () {
+                      // Only update settings since _features is already updated by the checkboxes
                       setState(() {
-                        _features = features;
                         _settings = settings;
                       });
                       _saveFeaturesSettings(config);
@@ -1071,6 +1348,12 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
     });
 
     try {
+      // Print for debugging - check the state of features list
+      debugPrint('Features to save: $_features (${_features.length} items)');
+      for (var feature in _features) {
+        debugPrint('  - $feature');
+      }
+
       // Create updated business config
       final updatedConfig = BusinessConfig(
         id: config.id,
@@ -1090,7 +1373,24 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
 
       // Update in Firestore
       final businessConfigService = ref.read(businessConfigServiceProvider);
+      debugPrint('Updating business config in Firestore...');
       await businessConfigService.updateBusinessConfig(updatedConfig);
+      debugPrint('✅ Firestore update successful');
+
+      // Manually sync with Realtime Database to make sure UI components update correctly
+      try {
+        final businessFeaturesService =
+            ref.read(businessFeaturesServiceProvider);
+        final businessFeatures =
+            _mapFirestoreFeaturesToBusinessFeatures(_features);
+        debugPrint('Syncing features to RTDB: ${businessFeatures.toMap()}');
+        await businessFeaturesService.updateBusinessFeatures(
+            config.id, businessFeatures);
+        debugPrint('✅ Features synced to RTDB manually');
+      } catch (syncError) {
+        debugPrint('❌ Error syncing features to RTDB: $syncError');
+        // Continue even if RTDB sync fails
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1109,6 +1409,25 @@ class _BusinessSettingsScreenState extends ConsumerState<BusinessSettingsScreen>
         _isLoading = false;
       });
     }
+  }
+
+  // Helper method to map Firestore features to BusinessFeatures object
+  BusinessFeatures _mapFirestoreFeaturesToBusinessFeatures(
+      List<String> firestoreFeatures) {
+    return BusinessFeatures(
+      catering: firestoreFeatures.contains('catering') ||
+          firestoreFeatures.contains('online_catering'),
+      mealPlans: firestoreFeatures.contains('meal_plans') ||
+          firestoreFeatures.contains('meal_subscriptions'),
+      inDine: firestoreFeatures.contains('in_dine') ||
+          firestoreFeatures.contains('table_management'),
+      staff: firestoreFeatures.contains('staff') ||
+          firestoreFeatures.contains('employee_management'),
+      kitchen: firestoreFeatures.contains('kitchen_display') ||
+          firestoreFeatures.contains('kitchen'),
+      reservations: firestoreFeatures.contains('reservations') ||
+          firestoreFeatures.contains('table_reservations'),
+    );
   }
 
   // Helper methods

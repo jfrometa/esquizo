@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+// import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_order_model.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/cart/widgets/catering_form.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/screens/cart/widgets/catering_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/catering_entry/components/catering_quote/quote_order_form_view.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catering/catering_order_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
@@ -19,7 +19,7 @@ class CateringMenuScreen extends ConsumerStatefulWidget {
 
 class _CateringMenuScreenState extends ConsumerState<CateringMenuScreen> {
   final ScrollController _scrollController = ScrollController();
-  
+
   // Catering packages data
   final List<Map<String, dynamic>> _cateringPackages = [
     {
@@ -36,22 +36,25 @@ class _CateringMenuScreenState extends ConsumerState<CateringMenuScreen> {
     },
     {
       'title': 'Wedding Reception',
-      'description': 'Make your special day unforgettable with our gourmet service',
+      'description':
+          'Make your special day unforgettable with our gourmet service',
       'price': 'S/ 1500.00',
       'icon': Icons.celebration,
     },
     {
       'title': 'Custom Package',
-      'description': 'Tell us your requirements for a personalized catering experience',
+      'description':
+          'Tell us your requirements for a personalized catering experience',
       'price': 'Starting at S/ 2000.00',
       'icon': Icons.settings,
     },
   ];
 
-  void _showCateringForm(BuildContext context, WidgetRef ref, Map<String, dynamic> package) {
+  void _showCateringForm(
+      BuildContext context, WidgetRef ref, Map<String, dynamic> package) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -60,41 +63,53 @@ class _CateringMenuScreenState extends ConsumerState<CateringMenuScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.viewInsetsOf(context).bottom,
-            left: 20.0,
-            right: 20.0,
-            top: 20.0,
-          ),
-          child: CateringForm(
-            title: 'Detalles del ${package['title']}',
-            initialData: ref.read(cateringOrderProvider),
-            onSubmit: (formData) {
-              final currentOrder = ref.read(cateringOrderProvider);
-              ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(
-                    title: package['title'],
-                    img: '',
-                    description: package['description'],
-                    hasChef: formData.hasChef,
-                    alergias: formData.allergies.join(','),
-                    eventType: formData.eventType,
-                    preferencia: currentOrder?.preferencia ?? 'salado',
-                    adicionales: formData.additionalNotes,
-                    cantidadPersonas: formData.peopleCount,
-                  );
+        return DraggableScrollableSheet(
+          initialChildSize: 0.9,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          expand: false,
+          builder: (context, scrollController) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.viewInsetsOf(context).bottom,
+                left: 20.0,
+                right: 20.0,
+                top: 20.0,
+              ),
+              child: CateringForm(
+                title: 'Detalles del ${package['title']}',
+                controller: scrollController,
+                initialData: ref.read(cateringOrderNotifierProvider),
+                onSubmit: (formData) {
+                  final currentOrder = ref.read(cateringOrderNotifierProvider);
+                  ref
+                      .read(cateringOrderNotifierProvider.notifier)
+                      .finalizeCateringOrder(
+                        title: package['title'],
+                        img: '',
+                        description: package['description'],
+                        hasChef: formData.hasChef,
+                        alergias: formData.allergies.join(','),
+                        eventType: formData.eventType,
+                        preferencia: currentOrder?.preferencia ?? 'salado',
+                        adicionales: formData.additionalNotes,
+                        cantidadPersonas: formData.peopleCount,
+                      );
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Paquete ${package['title']} añadido'),
-                  backgroundColor: colorScheme.primaryContainer,
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-              Navigator.pop(context);
-              GoRouter.of(context).pushNamed(AppRoute.homecart.name, extra: 'catering');
-            },
-          ),
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Paquete ${package['title']} añadido'),
+                      backgroundColor: colorScheme.primaryContainer,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                  Navigator.pop(context);
+                  context.pushNamedSafe(AppRoute.homecart.name,
+                      extra: 'catering');
+                },
+              ),
+            );
+          },
         );
       },
     );
@@ -104,7 +119,7 @@ class _CateringMenuScreenState extends ConsumerState<CateringMenuScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Catering Services'),
@@ -130,96 +145,95 @@ class _CateringMenuScreenState extends ConsumerState<CateringMenuScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          
+
           // Catering packages grid
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final screenWidth = constraints.maxWidth;
-              return GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: screenWidth > 600 ? 2 : 1,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: screenWidth > 600 ? 0.85 : 1.2,
-                ),
-                itemCount: _cateringPackages.length,
-                itemBuilder: (context, index) {
-                  final package = _cateringPackages[index];
-                  
-                  return Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: InkWell(
-                      onTap: () => _showCateringForm(context, ref, package),
-                      borderRadius: BorderRadius.circular(16),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              package['icon'],
-                              size: 48,
+          LayoutBuilder(builder: (context, constraints) {
+            final screenWidth = constraints.maxWidth;
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: screenWidth > 600 ? 2 : 1,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: screenWidth > 600 ? 0.85 : 1.2,
+              ),
+              itemCount: _cateringPackages.length,
+              itemBuilder: (context, index) {
+                final package = _cateringPackages[index];
+
+                return Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: InkWell(
+                    onTap: () => _showCateringForm(context, ref, package),
+                    borderRadius: BorderRadius.circular(16),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            package['icon'],
+                            size: 48,
+                            color: theme.colorScheme.primary,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            package['title'],
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            package['description'],
+                            style: theme.textTheme.bodyMedium,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Starting from',
+                            style: TextStyle(
+                              fontSize: 12,
+                            ),
+                          ),
+                          Text(
+                            package['price'],
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
                               color: theme.colorScheme.primary,
                             ),
-                            const SizedBox(height: 16),
-                            Text(
-                              package['title'],
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
+                          ),
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () =>
+                                  _showCateringForm(context, ref, package),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: colorScheme.primary,
+                                foregroundColor: colorScheme.onPrimary,
                               ),
-                              textAlign: TextAlign.center,
+                              child: const Text('Order Now'),
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              package['description'],
-                              style: theme.textTheme.bodyMedium,
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Starting from',
-                              style: TextStyle(
-                                fontSize: 12,
-                              ),
-                            ),
-                            Text(
-                              package['price'],
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.primary,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed: () => _showCateringForm(context, ref, package),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: colorScheme.primary,
-                                  foregroundColor: colorScheme.onPrimary,
-                                ),
-                                child: const Text('Order Now'),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
-                  );
-                },
-              );
-            }
-          ),
-          
+                  ),
+                );
+              },
+            );
+          }),
+
           const SizedBox(height: 30),
-          
+
           // Custom catering form teaser
           Card(
             elevation: 4,
@@ -243,13 +257,14 @@ class _CateringMenuScreenState extends ConsumerState<CateringMenuScreen> {
                   Text(
                     'Tell us about your event and we\'ll create the perfect menu',
                     style: TextStyle(
-                      color: theme.colorScheme.onPrimaryContainer.withOpacity(0.8),
+                      color:
+                          theme.colorScheme.onPrimaryContainer.withOpacity(0.8),
                     ),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton.icon(
                     onPressed: () {
-                      GoRouter.of(context).pushNamed(AppRoute.cateringQuote.name);
+                      context.pushNamedSafe(AppRoute.cateringQuote.name);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.colorScheme.primary,
@@ -278,21 +293,23 @@ class QuoteScreen extends ConsumerStatefulWidget {
 
 class _QuoteScreenState extends ConsumerState<QuoteScreen> {
   final TextEditingController _eventTypeController = TextEditingController();
-  final TextEditingController _customPersonasController = TextEditingController();
+  final TextEditingController _customPersonasController =
+      TextEditingController();
   final TextEditingController _adicionalesController = TextEditingController();
   final TextEditingController _itemNameController = TextEditingController();
-  final TextEditingController _itemDescriptionController = TextEditingController();
+  final TextEditingController _itemDescriptionController =
+      TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
-  
+
   final _scrollController = ScrollController();
   bool _showFab = true;
-  
+
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
   }
-  
+
   @override
   void dispose() {
     _scrollController.removeListener(_onScroll);
@@ -305,11 +322,15 @@ class _QuoteScreenState extends ConsumerState<QuoteScreen> {
     _quantityController.dispose();
     super.dispose();
   }
-  
+
   void _onScroll() {
-    if (_scrollController.position.userScrollDirection == ScrollDirection.reverse && _showFab) {
+    if (_scrollController.position.userScrollDirection ==
+            ScrollDirection.reverse &&
+        _showFab) {
       setState(() => _showFab = false);
-    } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward && !_showFab) {
+    } else if (_scrollController.position.userScrollDirection ==
+            ScrollDirection.forward &&
+        !_showFab) {
       setState(() => _showFab = true);
     }
   }
@@ -317,7 +338,7 @@ class _QuoteScreenState extends ConsumerState<QuoteScreen> {
   void _showQuoteForm(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -326,46 +347,55 @@ class _QuoteScreenState extends ConsumerState<QuoteScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.viewInsetsOf(context).bottom,
-            left: 20,
-            right: 20,
-            top: 20,
-          ),
-          child: CateringForm(
-            title: 'Detalles de la Cotización',
-            initialData: ref.read(manualQuoteProvider),
-            onSubmit: (formData) {
-              final currentQuote = ref.read(manualQuoteProvider);
-              ref.read(manualQuoteProvider.notifier).finalizeManualQuote(
-                    title: currentQuote?.title ?? 'Cotización',
-                    img: currentQuote?.img ?? '',
-                    description: currentQuote?.description ?? '',
-                    hasChef: formData.hasChef,
-                    alergias: formData.allergies.join(','),
-                    eventType: formData.eventType,
-                    preferencia: currentQuote?.preferencia ?? '',
-                    adicionales: formData.additionalNotes,
-                    cantidadPersonas: formData.peopleCount,
+        return DraggableScrollableSheet(
+          initialChildSize: 0.9,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          expand: false,
+          builder: (context, scrollController) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.viewInsetsOf(context).bottom,
+                left: 20,
+                right: 20,
+                top: 20,
+              ),
+              child: CateringForm(
+                title: 'Detalles de la Cotización',
+                controller: scrollController,
+                initialData: ref.read(manualQuoteProvider),
+                onSubmit: (formData) {
+                  final currentQuote = ref.read(manualQuoteProvider);
+                  ref.read(manualQuoteProvider.notifier).finalizeManualQuote(
+                        title: currentQuote?.title ?? 'Cotización',
+                        img: currentQuote?.img ?? '',
+                        description: currentQuote?.description ?? '',
+                        hasChef: formData.hasChef,
+                        alergias: formData.allergies.join(','),
+                        eventType: formData.eventType,
+                        preferencia: currentQuote?.preferencia ?? '',
+                        adicionales: formData.additionalNotes,
+                        cantidadPersonas: formData.peopleCount,
+                      );
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Se actualizó la Cotización'),
+                      backgroundColor: colorScheme.primaryContainer,
+                      behavior: SnackBarBehavior.floating,
+                    ),
                   );
-              
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('Se actualizó la Cotización'),
-                  backgroundColor: colorScheme.primaryContainer,
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-              Navigator.pop(context);
-              setState(() {});
-            },
-          ),
+                  Navigator.pop(context);
+                  setState(() {});
+                },
+              ),
+            );
+          },
         );
       },
     );
   }
-  
+
   void _showAddItemDialog() {
     showDialog(
       context: context,
@@ -423,47 +453,48 @@ class _QuoteScreenState extends ConsumerState<QuoteScreen> {
       ),
     );
   }
-  
+
   void _addItem() {
     if (_itemNameController.text.trim().isEmpty) return;
-    
+
     final quantity = int.tryParse(_quantityController.text) ?? 1;
     final quoteOrder = ref.read(manualQuoteProvider);
-    
+
     if (quoteOrder == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Primero debes completar los detalles de la cotización'),
+          content: const Text(
+              'Primero debes completar los detalles de la cotización'),
           behavior: SnackBarBehavior.floating,
         ),
       );
       return;
     }
-    
+
     ref.read(manualQuoteProvider.notifier).addManualItem(
-      CateringDish(
-        title: _itemNameController.text.trim(),
-        quantity: quantity,
-        hasUnitSelection: false,
-        peopleCount: quoteOrder.peopleCount ?? 0,
-        pricePerUnit: 0,
-        pricePerPerson: 0,
-        ingredients: [],
-        pricing: 0,
-      ),
-    );
-    
+          CateringDish(
+            title: _itemNameController.text.trim(),
+            quantity: quantity,
+            hasUnitSelection: false,
+            peopleCount: quoteOrder.peopleCount ?? 0,
+            pricePerUnit: 0,
+            pricePerPerson: 0,
+            ingredients: [],
+            pricing: 0,
+          ),
+        );
+
     // Clear the controllers
     _itemNameController.clear();
     _itemDescriptionController.clear();
     _quantityController.clear();
   }
-  
+
   void _confirmQuoteOrder() {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final quote = ref.read(manualQuoteProvider);
-    
+
     if (quote == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -474,7 +505,7 @@ class _QuoteScreenState extends ConsumerState<QuoteScreen> {
       );
       return;
     }
-    
+
     if ((quote.peopleCount ?? 0) <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -485,7 +516,7 @@ class _QuoteScreenState extends ConsumerState<QuoteScreen> {
       );
       return;
     }
-    
+
     if (quote.eventType.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -496,7 +527,7 @@ class _QuoteScreenState extends ConsumerState<QuoteScreen> {
       );
       return;
     }
-    
+
     if (quote.dishes.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -507,14 +538,14 @@ class _QuoteScreenState extends ConsumerState<QuoteScreen> {
       );
       return;
     }
-    
-    GoRouter.of(context).goNamed(AppRoute.homecart.name, extra: 'quote');
+
+    context.goNamedSafe(AppRoute.homecart.name, extra: 'quote');
   }
-  
+
   Widget _buildEmptyState() {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -572,10 +603,10 @@ class _QuoteScreenState extends ConsumerState<QuoteScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final quote = ref.watch(manualQuoteProvider);
-    final hasItems = quote != null && 
-                     ((quote.dishes.isNotEmpty) || 
-                     ((quote.peopleCount ?? 0) > 0 && quote.eventType.isNotEmpty));
-    
+    final hasItems = quote != null &&
+        ((quote.dishes.isNotEmpty) ||
+            ((quote.peopleCount ?? 0) > 0 && quote.eventType.isNotEmpty));
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Custom Quote Request'),
@@ -606,7 +637,7 @@ class _QuoteScreenState extends ConsumerState<QuoteScreen> {
                 onConfirm: _confirmQuoteOrder,
               ),
             ),
-      floatingActionButton: hasItems 
+      floatingActionButton: hasItems
           ? AnimatedSlide(
               duration: const Duration(milliseconds: 300),
               offset: _showFab ? const Offset(0, 0) : const Offset(0, 2),

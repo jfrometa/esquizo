@@ -35,15 +35,15 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
   final _mealsRemainingController = TextEditingController();
   final _ownerNameController = TextEditingController();
   final _ownerIdController = TextEditingController();
-  
+
   List<TextEditingController> _featureControllers = [];
-  
+
   String _selectedCategoryId = '';
   MealPlanStatus _status = MealPlanStatus.active;
   bool _isAvailable = true;
   bool _isBestValue = false;
   DateTime? _expiryDate;
-  
+
   final bool _isLoading = false;
   bool _isEditMode = false;
 
@@ -62,16 +62,17 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
       _howItWorksController.text = widget.mealPlan!.howItWorks;
       _imageUrlController.text = widget.mealPlan!.img;
       _totalMealsController.text = widget.mealPlan!.totalMeals.toString();
-      _mealsRemainingController.text = widget.mealPlan!.mealsRemaining.toString();
+      _mealsRemainingController.text =
+          widget.mealPlan!.mealsRemaining.toString();
       _ownerNameController.text = widget.mealPlan!.ownerName;
       _ownerIdController.text = widget.mealPlan!.ownerId;
-      
+
       _selectedCategoryId = widget.mealPlan!.categoryId;
       _status = widget.mealPlan!.status;
       _isAvailable = widget.mealPlan!.isAvailable;
       _isBestValue = widget.mealPlan!.isBestValue;
       _expiryDate = widget.mealPlan!.expiryDate;
-      
+
       // Set up feature controllers
       _setupFeatureControllers(widget.mealPlan!.features);
     } else {
@@ -79,7 +80,7 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
       _addFeature();
     }
   }
-  
+
   void _setupFeatureControllers(List<String> features) {
     _featureControllers = [];
     for (final feature in features) {
@@ -90,13 +91,13 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
       _addFeature();
     }
   }
-  
+
   void _addFeature() {
     setState(() {
       _featureControllers.add(TextEditingController());
     });
   }
-  
+
   void _removeFeature(int index) {
     setState(() {
       _featureControllers[index].dispose();
@@ -117,11 +118,11 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
     _mealsRemainingController.dispose();
     _ownerNameController.dispose();
     _ownerIdController.dispose();
-    
+
     for (var controller in _featureControllers) {
       controller.dispose();
     }
-    
+
     super.dispose();
   }
 
@@ -153,11 +154,11 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
                 ),
               ),
               const SizedBox(height: 8),
-              
+
               // Image preview
               _buildImagePreview(),
               const SizedBox(height: 8),
-              
+
               // Image URL field
               TextFormField(
                 controller: _imageUrlController,
@@ -175,7 +176,7 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               // Basic information section
               Text(
                 'Basic Information',
@@ -206,13 +207,14 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
               categoriesAsync.when(
                 data: (categories) {
                   if (categories.isEmpty) {
-                    return const Text('No categories available. Please create a category first.');
+                    return const Text(
+                        'No categories available. Please create a category first.');
                   }
 
                   // Check if the selected category exists in the list
                   final selectedCategoryExists = categories
                       .any((category) => category.id == _selectedCategoryId);
-                  
+
                   // Reset selected category if it doesn't exist or if none is selected
                   if (!selectedCategoryExists && categories.isNotEmpty) {
                     // Use Future.microtask to avoid setState during build
@@ -224,22 +226,23 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
                   }
 
                   final dropdownItems = categories
-                      .where((category) => 
-                        category.isActive || category.id == _selectedCategoryId)
+                      .where((category) =>
+                          category.isActive ||
+                          category.id == _selectedCategoryId)
                       .map((category) => DropdownMenuItem(
                             value: category.id,
-                            child: Text(category.name + 
+                            child: Text(category.name +
                                 (category.isActive ? '' : ' (Inactive)')),
                           ))
                       .toList();
-                  
+
                   final dropdownValue = dropdownItems
-                      .any((item) => item.value == _selectedCategoryId)
+                          .any((item) => item.value == _selectedCategoryId)
                       ? _selectedCategoryId
                       : null;
 
                   return DropdownButtonFormField<String>(
-                    value: dropdownValue,
+                    initialValue: dropdownValue,
                     decoration: const InputDecoration(
                       labelText: 'Category',
                       border: OutlineInputBorder(),
@@ -275,9 +278,11 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
                         border: OutlineInputBorder(),
                         prefixText: '\$ ',
                       ),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d{0,2}')),
                       ],
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -305,16 +310,18 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
                         border: OutlineInputBorder(),
                         prefixText: '\$ ',
                       ),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d{0,2}')),
                       ],
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // Meals count - side by side
               Row(
                 children: [
@@ -368,8 +375,9 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
                           if (meals < 0) {
                             return 'Remaining meals cannot be negative';
                           }
-                          
-                          final totalMeals = int.tryParse(_totalMealsController.text) ?? 0;
+
+                          final totalMeals =
+                              int.tryParse(_totalMealsController.text) ?? 0;
                           if (meals > totalMeals) {
                             return 'Remaining meals cannot exceed total meals';
                           }
@@ -383,7 +391,7 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // Short description
               TextFormField(
                 controller: _descriptionController,
@@ -401,7 +409,7 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
                 },
               ),
               const SizedBox(height: 24),
-              
+
               // Detailed information section
               Text(
                 'Detailed Information',
@@ -410,7 +418,7 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
                 ),
               ),
               const SizedBox(height: 8),
-              
+
               // Long description
               TextFormField(
                 controller: _longDescriptionController,
@@ -428,7 +436,7 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
                 },
               ),
               const SizedBox(height: 16),
-              
+
               // How it works
               TextFormField(
                 controller: _howItWorksController,
@@ -446,7 +454,7 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
                 },
               ),
               const SizedBox(height: 24),
-              
+
               // Features section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -465,11 +473,11 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
                 ],
               ),
               const SizedBox(height: 8),
-              
+
               // Feature list
               ..._buildFeatureFields(),
               const SizedBox(height: 24),
-              
+
               // Additional settings section
               Text(
                 'Additional Settings',
@@ -478,10 +486,10 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
                 ),
               ),
               const SizedBox(height: 8),
-              
+
               // Status dropdown
               DropdownButtonFormField<MealPlanStatus>(
-                value: _status,
+                initialValue: _status,
                 decoration: const InputDecoration(
                   labelText: 'Status',
                   border: OutlineInputBorder(),
@@ -499,7 +507,7 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
                 },
               ),
               const SizedBox(height: 16),
-              
+
               // Expiry date picker
               Row(
                 children: [
@@ -530,7 +538,7 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // Owner information (if assigning to a specific customer)
               Row(
                 children: [
@@ -558,7 +566,7 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // Toggle switches
               Row(
                 children: [
@@ -619,7 +627,7 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
       ),
     );
   }
-  
+
   Widget _buildImagePreview() {
     return Container(
       height: 160,
@@ -644,7 +652,7 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
             ),
     );
   }
-  
+
   List<Widget> _buildFeatureFields() {
     return List.generate(_featureControllers.length, (index) {
       return Padding(
@@ -679,7 +687,7 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
       );
     });
   }
-  
+
   String _getStatusText(MealPlanStatus status) {
     switch (status) {
       case MealPlanStatus.active:
@@ -690,17 +698,19 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
         return 'Discontinued';
     }
   }
-  
+
   Future<void> _selectExpiryDate(BuildContext context) async {
-    final initialDate = _expiryDate ?? DateTime.now().add(const Duration(days: 30));
-    
+    final initialDate =
+        _expiryDate ?? DateTime.now().add(const Duration(days: 30));
+
     final pickedDate = await showDatePicker(
       context: context,
       initialDate: initialDate,
       firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 5)), // 5 years from now
+      lastDate:
+          DateTime.now().add(const Duration(days: 365 * 5)), // 5 years from now
     );
-    
+
     if (pickedDate != null && pickedDate != _expiryDate) {
       setState(() {
         _expiryDate = pickedDate;
@@ -712,17 +722,17 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    
+
     // Get features from controllers, removing empty ones
     final features = _featureControllers
         .map((controller) => controller.text.trim())
         .where((text) => text.isNotEmpty)
         .toList();
-    
+
     final totalMeals = int.tryParse(_totalMealsController.text) ?? 0;
     final mealsRemaining = int.tryParse(_mealsRemainingController.text) ?? 0;
     final originalPrice = double.tryParse(_originalPriceController.text) ?? 0.0;
-    
+
     // Get category name
     String categoryName = '';
     final categoriesAsync = ref.read(mealPlanCategoriesProvider);
@@ -736,7 +746,7 @@ class _MealPlanFormState extends ConsumerState<MealPlanForm> {
       );
       categoryName = category.name;
     });
-    
+
     // Create or update the meal plan
     final mealPlan = MealPlan(
       id: _isEditMode ? widget.mealPlan!.id : null,

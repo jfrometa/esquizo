@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../screens/admin/models/product_model.dart';
 import '../business/business_config_provider.dart';
@@ -147,6 +148,8 @@ final menuCategoriesProvider = StreamProvider<List<MenuCategory>>((ref) {
 
 // Provider for products stream
 final menuProductsProvider = StreamProvider<List<MenuItem>>((ref) {
+  debugPrint('🍽️ Fetching menu products for business: '
+      '\u001b[32m${ref.watch(currentBusinessIdProvider)}\u001b[0m');
   final productService = ref.watch(productServiceProvider);
   return productService.getProducts();
 });

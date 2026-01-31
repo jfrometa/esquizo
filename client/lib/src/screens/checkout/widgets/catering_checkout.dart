@@ -43,8 +43,9 @@ class CateringCheckout extends ConsumerWidget {
         paymentMethodDropdown,
         CateringCartItemView(
           order: order,
-          onRemoveFromCart: () =>
-              ref.read(cateringOrderProvider.notifier).clearCateringOrder(),
+          onRemoveFromCart: () => ref
+              .read(cateringOrderNotifierProvider.notifier)
+              .clearCateringOrder(),
         ),
       ],
     );
@@ -62,7 +63,8 @@ class CateringCheckout extends ConsumerWidget {
         onTap: () => onLocationTap(context, locationController, 'catering'),
         decoration: InputDecoration(
           labelText: 'Ubicación de entrega',
-          prefixIcon: Icon(Icons.location_on_outlined, color: colorScheme.primary),
+          prefixIcon:
+              Icon(Icons.location_on_outlined, color: colorScheme.primary),
           filled: true,
           fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
           border: OutlineInputBorder(
@@ -103,10 +105,12 @@ class CateringCheckout extends ConsumerWidget {
             child: TextField(
               controller: dateController,
               readOnly: true,
-              onTap: () => onDateTimeTap(context, dateController, timeController),
+              onTap: () =>
+                  onDateTimeTap(context, dateController, timeController),
               decoration: InputDecoration(
                 labelText: 'Fecha de entrega',
-                prefixIcon: Icon(Icons.calendar_today, color: colorScheme.primary),
+                prefixIcon:
+                    Icon(Icons.calendar_today, color: colorScheme.primary),
                 filled: true,
                 fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                 border: OutlineInputBorder(
@@ -171,5 +175,4 @@ class CateringCheckout extends ConsumerWidget {
       ),
     );
   }
-
 }

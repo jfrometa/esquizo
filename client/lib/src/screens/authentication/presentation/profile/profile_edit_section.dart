@@ -73,10 +73,11 @@ class _ProfileEditSectionState extends ConsumerState<ProfileEditSection> {
       }
 
       // Update phone in our database (since Firebase Auth requires more verification)
-      if (_phoneController.text.isNotEmpty) {
-        // TODO: Implement phone number update logic
+      if (_phoneController.text.isNotEmpty &&
+          _phoneController.text != widget.user.phoneNumber) {
         final repository = ref.read(userPreferencesRepositoryProvider);
-        // await repository.updatePhoneNumber(widget.user.uid, _phoneController.text);
+        await repository.updatePhoneNumber(
+            widget.user.uid, _phoneController.text);
       }
 
       if (mounted) {

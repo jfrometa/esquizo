@@ -34,9 +34,22 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
 
   // Static list for people quantity drop-down.
   final _peopleQuantity = [
-    10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, 2000, 5000, 10000
+    10,
+    20,
+    30,
+    40,
+    50,
+    100,
+    200,
+    300,
+    400,
+    500,
+    1000,
+    2000,
+    5000,
+    10000
   ];
-  
+
   // Tab controller
   late TabController _tabController;
   bool _showFab = true;
@@ -69,15 +82,17 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
 
   /// Initializes the catering form from the global catering order.
   void _initializeCateringValues() {
-    final cateringOrder = ref.read(cateringOrderProvider);
+    final cateringOrder = ref.read(cateringOrderNotifierProvider);
     tempHasChef = cateringOrder?.hasChef ?? false;
     tempPreferencia = (cateringOrder?.preferencia.isNotEmpty ?? false)
         ? cateringOrder!.preferencia
         : 'salado';
-    tempAlergiasList = cateringOrder?.alergias.split(',')
-        .where((item) => item.isNotEmpty)
-        .toList() ?? [];
-        
+    tempAlergiasList = cateringOrder?.alergias
+            .split(',')
+            .where((item) => item.isNotEmpty)
+            .toList() ??
+        [];
+
     final peopleCount =
         (cateringOrder?.peopleCount != null && cateringOrder!.peopleCount! > 0)
             ? cateringOrder.peopleCount
@@ -100,13 +115,13 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
   void _showCateringForm(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final order = ref.read(cateringOrderProvider);
-    
+    final order = ref.read(cateringOrderNotifierProvider);
+
     // Create a new order if none exists
     // if (order == null) {
-    //   ref.read(cateringOrderProvider.notifier).();
+    //   ref.read(cateringOrderNotifierProvider.notifier).();
     // }
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -124,10 +139,12 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
           ),
           child: CateringForm(
             title: 'Detalles de la Orden',
-            initialData: ref.read(cateringOrderProvider),
+            initialData: ref.read(cateringOrderNotifierProvider),
             onSubmit: (formData) {
-              final currentOrder = ref.read(cateringOrderProvider);
-              ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(
+              final currentOrder = ref.read(cateringOrderNotifierProvider);
+              ref
+                  .read(cateringOrderNotifierProvider.notifier)
+                  .finalizeCateringOrder(
                     title: currentOrder?.title ?? '',
                     img: currentOrder?.img ?? '',
                     description: currentOrder?.title ?? '',
@@ -160,12 +177,12 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final quote = ref.read(manualQuoteProvider);
-    
+
     // Create a new quote if none exists
     if (quote == null) {
       ref.read(manualQuoteProvider.notifier);
     }
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -197,7 +214,7 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
                     adicionales: formData.additionalNotes,
                     cantidadPersonas: formData.peopleCount,
                   );
-              
+
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: const Text('Se actualizó la Cotización'),
@@ -218,7 +235,7 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
   void _handleFabPressed() {
     if (_tabController.index == 0) {
       // Catering tab
-      final order = ref.read(cateringOrderProvider);
+      final order = ref.read(cateringOrderNotifierProvider);
       if (order == null || (order.peopleCount ?? 0) <= 0) {
         _showCateringForm(context, ref);
       } else {
@@ -244,8 +261,8 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
   void _confirmCateringOrder() {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final order = ref.read(cateringOrderProvider);
-    
+    final order = ref.read(cateringOrderNotifierProvider);
+
     if (order == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -256,7 +273,7 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
       );
       return;
     }
-    
+
     if ((order.peopleCount ?? 0) <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -267,7 +284,7 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
       );
       return;
     }
-    
+
     if (order.eventType.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -278,7 +295,7 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
       );
       return;
     }
-    
+
     if (order.dishes.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -289,7 +306,7 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
       );
       return;
     }
-    
+
     GoRouter.of(context).goNamed(AppRoute.homecart.name, extra: 'catering');
   }
 
@@ -297,7 +314,7 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final quote = ref.read(manualQuoteProvider);
-    
+
     if (quote == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -308,7 +325,7 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
       );
       return;
     }
-    
+
     if ((quote.peopleCount ?? 0) <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -319,7 +336,7 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
       );
       return;
     }
-    
+
     if (quote.eventType.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -330,7 +347,7 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
       );
       return;
     }
-    
+
     if (quote.dishes.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -341,7 +358,7 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
       );
       return;
     }
-    
+
     GoRouter.of(context).goNamed(AppRoute.homecart.name, extra: 'quote');
   }
 
@@ -349,43 +366,48 @@ class CateringEntryScreenState extends ConsumerState<CateringEntryScreen>
   /// UI Builders for Each Tab
   /// -----------------------------
 
-  /// Builds the complete catering order form view. 
-Widget _buildCateringOrderForm() {
-  final theme = Theme.of(context);
-  final colorScheme = theme.colorScheme;
-  final cateringOrder = ref.watch(cateringOrderProvider);
-  
-  if (cateringOrder == null) {
-    return _buildEmptyState(
-      icon: Icons.restaurant_menu,
-      title: 'No hay orden iniciada',
-      message: 'Inicia una orden agregando los detalles del evento',
-      onInitialize: () => _handleFabPressed(),
+  /// Builds the complete catering order form view.
+  Widget _buildCateringOrderForm() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final cateringOrder = ref.watch(cateringOrderNotifierProvider);
+
+    if (cateringOrder == null) {
+      return _buildEmptyState(
+        icon: Icons.restaurant_menu,
+        title: 'No hay orden iniciada',
+        message: 'Inicia una orden agregando los detalles del evento',
+        onInitialize: () => _handleFabPressed(),
+      );
+    }
+
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification is ScrollUpdateNotification) {
+          if (notification.scrollDelta != null &&
+              notification.scrollDelta! > 0 &&
+              _showFab) {
+            setState(() => _showFab = false);
+          } else if (notification.scrollDelta != null &&
+              notification.scrollDelta! < 0 &&
+              !_showFab) {
+            setState(() => _showFab = true);
+          }
+        }
+        return false;
+      },
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+          child: CateringOrderForm(
+            onEdit: () => _showCateringForm(context, ref),
+            onConfirm: _confirmCateringOrder,
+          ),
+        ),
+      ),
     );
   }
 
-  return NotificationListener<ScrollNotification>(
-    onNotification: (notification) {
-      if (notification is ScrollUpdateNotification) {
-        if (notification.scrollDelta != null && notification.scrollDelta! > 0 && _showFab) {
-          setState(() => _showFab = false);
-        } else if (notification.scrollDelta != null && notification.scrollDelta! < 0 && !_showFab) {
-          setState(() => _showFab = true);
-        }
-      }
-      return false;
-    },
-    child: SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-        child: CateringOrderForm(
-          onEdit: () => _showCateringForm(context, ref),
-          onConfirm: _confirmCateringOrder,
-        ),
-      ),
-    ),
-  );
-}
   // Calculate total from items
   String _calculateTotal(List<CateringDish> items) {
     double total = 0;
@@ -404,44 +426,49 @@ Widget _buildCateringOrderForm() {
   }
 
 // UPDATED _buildQuoteOrderForm method for CateringEntryScreen
-/// Builds the quote order form view.
-Widget _buildQuoteOrderForm() {
-  final theme = Theme.of(context);
-  final colorScheme = theme.colorScheme;
-  final quote = ref.watch(manualQuoteProvider);
-  
-  if (quote == null) {
-    return _buildEmptyState(
-      icon: Icons.request_quote,
-      title: 'No hay cotización iniciada',
-      message: 'Inicia una cotización agregando los detalles del evento',
-      onInitialize: () => _handleFabPressed(),
+  /// Builds the quote order form view.
+  Widget _buildQuoteOrderForm() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final quote = ref.watch(manualQuoteProvider);
+
+    if (quote == null) {
+      return _buildEmptyState(
+        icon: Icons.request_quote,
+        title: 'No hay cotización iniciada',
+        message: 'Inicia una cotización agregando los detalles del evento',
+        onInitialize: () => _handleFabPressed(),
+      );
+    }
+
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification is ScrollUpdateNotification) {
+          if (notification.scrollDelta != null &&
+              notification.scrollDelta! > 0 &&
+              _showFab) {
+            setState(() => _showFab = false);
+          } else if (notification.scrollDelta != null &&
+              notification.scrollDelta! < 0 &&
+              !_showFab) {
+            setState(() => _showFab = true);
+          }
+        }
+        return false;
+      },
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+          child: QuoteOrderFormView(
+            quote: quote,
+            onEdit: () => _showQuoteForm(context, ref),
+            onConfirm: _confirmQuoteOrder,
+          ),
+        ),
+      ),
     );
   }
 
-  return NotificationListener<ScrollNotification>(
-    onNotification: (notification) {
-      if (notification is ScrollUpdateNotification) {
-        if (notification.scrollDelta != null && notification.scrollDelta! > 0 && _showFab) {
-          setState(() => _showFab = false);
-        } else if (notification.scrollDelta != null && notification.scrollDelta! < 0 && !_showFab) {
-          setState(() => _showFab = true);
-        }
-      }
-      return false;
-    },
-    child: SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-        child: QuoteOrderFormView(
-          quote: quote,
-          onEdit: () => _showQuoteForm(context, ref),
-          onConfirm: _confirmQuoteOrder,
-        ),
-      ),
-    ),
-  );
-}
   // Empty state builder with initialize button
   Widget _buildEmptyState({
     required IconData icon,
@@ -451,7 +478,7 @@ Widget _buildQuoteOrderForm() {
   }) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -527,13 +554,14 @@ Widget _buildQuoteOrderForm() {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
-    final cateringOrder = ref.watch(cateringOrderProvider);
+
+    final cateringOrder = ref.watch(cateringOrderNotifierProvider);
     final quoteOrder = ref.watch(manualQuoteProvider);
     final currentOrder = _tabController.index == 0 ? cateringOrder : quoteOrder;
-    final hasItems = currentOrder != null && 
-                     ((currentOrder.dishes.isNotEmpty) || 
-                     ((currentOrder.peopleCount ?? 0) > 0 && currentOrder.eventType.isNotEmpty));
+    final hasItems = currentOrder != null &&
+        ((currentOrder.dishes.isNotEmpty) ||
+            ((currentOrder.peopleCount ?? 0) > 0 &&
+                currentOrder.eventType.isNotEmpty));
 
     return Scaffold(
       appBar: AppBar(

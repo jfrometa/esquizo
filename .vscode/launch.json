@@ -2,18 +2,38 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Flutter",
-      "type": "dart",
+      "name": "Run (web)",
       "request": "launch",
-      "program": "lib/main.dart"
-    },
-    {
-      "name": "client (Flutter Web Server)",
+      "type": "dart",
       "program": "lib/main.dart",
       "cwd": "client",
-      "deviceId": "web-server",
+      "args": ["-d", "chrome", "--wasm", "-v"]
+    },
+    {
+      "name": "Run (Android)",
       "request": "launch",
-      "type": "dart"
+      "type": "dart",
+      "program": "lib/main.dart",
+      "cwd": "client",
+      "deviceId": "sdk gphone64 arm64 (mobile)",
+      "preLaunchTask": "start-android-emulator"
+    },
+    {
+      "name": "Run iOS Simulator",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "cwd": "client",
+      "args": ["-d", "apple_ios_simulator"],
+      "preLaunchTask": "start-ios-simulator"
+    },
+    {
+      "name": "client (auto renderer)",
+      "program": "lib/main.dart",
+      "cwd": "client",
+      "request": "launch",
+      "type": "dart",
+      "args": ["-d", "chrome"]
     }
   ],
   "tasks": {
@@ -35,10 +55,7 @@
       },
       {
         "label": "Start Docker and Prisma Migrate",
-        "dependsOn": [
-          "Start Docker",
-          "Run Prisma Migrate"
-        ],
+        "dependsOn": ["Start Docker", "Run Prisma Migrate"],
         "dependsOrder": "sequence",
         "problemMatcher": []
       }

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/user_preference/user_preference_provider.dart';
 
- 
 // App theme configuration using Material 3 design system with brand colors
 class AppTheme {
   // Private constructor to prevent instantiation
@@ -10,51 +9,61 @@ class AppTheme {
 
   // Primary color palette - Brand colors
   // PANTONE Bright Red C
-  static const Color brandPrimaryDark = Color(0xFFD12D14);    // Darker variant of primary
-  static const Color brandPrimary = Color(0xFFFF3A1D);        // Primary brand color #ff3a1d
-  static const Color brandPrimaryMedium = Color(0xFFFF5A40);  // Medium variant
-  static const Color brandPrimaryLight = Color(0xFFFF8A78);   // Light variant
-  static const Color brandPrimaryLightest = Color(0xFFFFEDE9); // Lightest variant for backgrounds
-  
+  static const Color brandPrimaryDark =
+      Color(0xFFD12D14); // Darker variant of primary
+  static const Color brandPrimary =
+      Color(0xFFFF3A1D); // Primary brand color #ff3a1d
+  static const Color brandPrimaryMedium = Color(0xFFFF5A40); // Medium variant
+  static const Color brandPrimaryLight = Color(0xFFFF8A78); // Light variant
+  static const Color brandPrimaryLightest =
+      Color(0xFFFFEDE9); // Lightest variant for backgrounds
+
   // Secondary color palette
   // PANTONE 151C
-  static const Color brandSecondaryDark = Color(0xFFCC6800);    // Darker variant of secondary
-  static const Color brandSecondary = Color(0xFFFF8300);        // Secondary brand color #ff8300
-  static const Color brandSecondaryMedium = Color(0xFFFF9E3A);  // Medium variant
-  static const Color brandSecondaryLight = Color(0xFFFFBB78);   // Light variant
-  static const Color brandSecondaryLightest = Color(0xFFFFEFDC); // Lightest variant for backgrounds
-  
+  static const Color brandSecondaryDark =
+      Color(0xFFCC6800); // Darker variant of secondary
+  static const Color brandSecondary =
+      Color(0xFFFF8300); // Secondary brand color #ff8300
+  static const Color brandSecondaryMedium = Color(0xFFFF9E3A); // Medium variant
+  static const Color brandSecondaryLight = Color(0xFFFFBB78); // Light variant
+  static const Color brandSecondaryLightest =
+      Color(0xFFFFEFDC); // Lightest variant for backgrounds
+
   // Neutral color palette - for backgrounds and surfaces
-  static const Color neutralDark = Color(0xFF1E1E1E);        // Dark neutral for text
-  static const Color neutralMedium = Color(0xFF757575);      // Medium neutral for secondary text
-  static const Color neutralLight = Color(0xFFE0E0E0);       // Light neutral for borders
-  static const Color neutralLightest = Color(0xFFF8F8F8);    // Lightest neutral for backgrounds
-  
+  static const Color neutralDark = Color(0xFF1E1E1E); // Dark neutral for text
+  static const Color neutralMedium =
+      Color(0xFF757575); // Medium neutral for secondary text
+  static const Color neutralLight =
+      Color(0xFFE0E0E0); // Light neutral for borders
+  static const Color neutralLightest =
+      Color(0xFFF8F8F8); // Lightest neutral for backgrounds
+
   // Text colors
-  static const Color textPrimary = Color(0xFF1E1E1E);         // Main text color
-  static const Color textSecondary = Color(0xFF757575);       // Secondary text
-  static const Color textOnPrimary = Colors.white;            // Text on primary
-  static const Color textOnSecondary = Colors.white;          // Text on secondary
-  
+  static const Color textPrimary = Color(0xFF1E1E1E); // Main text color
+  static const Color textSecondary = Color(0xFF757575); // Secondary text
+  static const Color textOnPrimary = Colors.white; // Text on primary
+  static const Color textOnSecondary = Colors.white; // Text on secondary
+
   // Status colors
-  static const Color successColor = Color(0xFF4CAF50);        // Success
-  static const Color warningColor = Color(0xFFFFC107);        // Warning
-  static const Color errorColor = Color(0xFFE53935);          // Error
-  static const Color infoColor = Color(0xFF2196F3);           // Info
-  
+  static const Color successColor = Color(0xFF4CAF50); // Success
+  static const Color warningColor = Color(0xFFFFC107); // Warning
+  static const Color errorColor = Color(0xFFE53935); // Error
+  static const Color infoColor = Color(0xFF2196F3); // Info
+
   // Error and warning colors
-  static const Color errorMain = Color(0xFFE53935);           // Error
-  static const Color errorLight = Color(0xFFFFCDD2);          // Light error
-  static const Color errorDark = Color(0xFFB71C1C);           // Dark error
-  
+  static const Color errorMain = Color(0xFFE53935); // Error
+  static const Color errorLight = Color(0xFFFFCDD2); // Light error
+  static const Color errorDark = Color(0xFFB71C1C); // Dark error
+
   // Border and decoration colors
-  static const Color outlineMain = Color(0xFFBDBDBD);         // Outline
-  static const Color outlineLight = Color(0xFFE0E0E0);        // Light outline
-  
+  static const Color outlineMain = Color(0xFFBDBDBD); // Outline
+  static const Color outlineLight = Color(0xFFE0E0E0); // Light outline
+
   // System colors
-  static const Color shadowColor = Color(0x40000000);         // Shadows with 25% opacity
-  static const Color scrimColor = Color(0x80000000);          // Scrim with 50% opacity
-  
+  static const Color shadowColor =
+      Color(0x40000000); // Shadows with 25% opacity
+  static const Color scrimColor = Color(0x80000000); // Scrim with 50% opacity
+
   // Inverse colors (for dark mode/contrast)
   static const Color inverseSurface = Color(0xFF1E1E1E);
   static const Color inverseOnSurface = Color(0xFFF8F8F8);
@@ -65,12 +74,12 @@ class AppTheme {
   static const Color darkModeOnPrimary = Color(0xFF690002);
   static const Color darkModePrimaryContainer = Color(0xFF930005);
   static const Color darkModeOnPrimaryContainer = Color(0xFFFFDAD5);
-  
+
   static const Color darkModeSecondary = Color(0xFFFFB77D);
   static const Color darkModeOnSecondary = Color(0xFF4B2800);
   static const Color darkModeSecondaryContainer = Color(0xFF6B3C00);
   static const Color darkModeOnSecondaryContainer = Color(0xFFFFDCC1);
-  
+
   static const Color darkModeBackground = Color(0xFF1E1E1E);
   static const Color darkModeOnBackground = Color(0xFFE0E0E0);
   static const Color darkModeSurface = Color(0xFF2D2D2D);
@@ -81,24 +90,24 @@ class AppTheme {
   /// Typography configuration - keeping Montserrat for headings and Roboto for body
   static const String fontHeadings = 'Montserrat';
   static const String fontBody = 'Roboto';
-  
+
   // Font sizes
   static const double displayLargeSize = 57.0;
   static const double displayMediumSize = 45.0;
   static const double displaySmallSize = 36.0;
-  
+
   static const double headlineLargeSize = 32.0;
   static const double headlineMediumSize = 28.0;
   static const double headlineSmallSize = 24.0;
-  
+
   static const double titleLargeSize = 22.0;
   static const double titleMediumSize = 16.0;
   static const double titleSmallSize = 14.0;
-  
+
   static const double bodyLargeSize = 16.0;
   static const double bodyMediumSize = 14.0;
   static const double bodySmallSize = 12.0;
-  
+
   static const double labelLargeSize = 14.0;
   static const double labelMediumSize = 12.0;
   static const double labelSmallSize = 11.0;
@@ -117,15 +126,15 @@ class AppTheme {
   // Fix the rendering issue by ensuring proper constraints in the ThemeData
   static ThemeData _buildThemeData(Brightness brightness) {
     final ColorScheme colorScheme = _getColorScheme(brightness);
-    
+
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
       colorScheme: colorScheme,
-      
+
       // Apply text theme
       textTheme: _createTextTheme(colorScheme),
-      
+
       // Apply component themes
       appBarTheme: _createAppBarTheme(colorScheme),
       cardTheme: _createCardTheme(),
@@ -148,15 +157,15 @@ class AppTheme {
           color: colorScheme.onInverseSurface,
         ),
       ),
-      
+
       // Material 3 component theming
       navigationRailTheme: _createNavigationRailTheme(colorScheme),
       chipTheme: _createChipTheme(colorScheme),
       navigationBarTheme: _createNavigationBarTheme(colorScheme),
-      
+
       // Adaptive properties for cross-platform
       visualDensity: VisualDensity.adaptivePlatformDensity,
-      
+
       // Scrollbars for desktop
       scrollbarTheme: const ScrollbarThemeData(
         thickness: WidgetStatePropertyAll(8.0),
@@ -237,7 +246,7 @@ class AppTheme {
   /// Creates text theme based on color scheme
   static TextTheme _createTextTheme(ColorScheme colorScheme) {
     final Color textColor = colorScheme.onSurface;
-    
+
     return TextTheme(
       // Display styles
       displayLarge: TextStyle(
@@ -261,7 +270,7 @@ class AppTheme {
         color: textColor,
         letterSpacing: 0,
       ),
-      
+
       // Headline styles
       headlineLarge: TextStyle(
         fontFamily: fontHeadings,
@@ -284,7 +293,7 @@ class AppTheme {
         color: textColor,
         letterSpacing: 0,
       ),
-      
+
       // Title styles
       titleLarge: TextStyle(
         fontFamily: fontHeadings,
@@ -307,7 +316,7 @@ class AppTheme {
         color: textColor,
         letterSpacing: 0.1,
       ),
-      
+
       // Body styles
       bodyLarge: TextStyle(
         fontFamily: fontBody,
@@ -330,7 +339,7 @@ class AppTheme {
         color: textColor,
         letterSpacing: 0.4,
       ),
-      
+
       // Label styles
       labelLarge: TextStyle(
         fontFamily: fontBody,
@@ -377,8 +386,8 @@ class AppTheme {
   }
 
   /// Creates card theme
-  static CardTheme _createCardTheme() {
-    return const CardTheme(
+  static CardThemeData _createCardTheme() {
+    return const CardThemeData(
       elevation: 2,
       margin: EdgeInsets.all(8),
       shape: RoundedRectangleBorder(
@@ -388,7 +397,8 @@ class AppTheme {
   }
 
   /// Creates elevated button theme
-  static ElevatedButtonThemeData _createElevatedButtonTheme(ColorScheme colorScheme) {
+  static ElevatedButtonThemeData _createElevatedButtonTheme(
+      ColorScheme colorScheme) {
     return ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         foregroundColor: colorScheme.onPrimary,
@@ -410,7 +420,8 @@ class AppTheme {
   }
 
   /// Creates outlined button theme
-  static OutlinedButtonThemeData _createOutlinedButtonTheme(ColorScheme colorScheme) {
+  static OutlinedButtonThemeData _createOutlinedButtonTheme(
+      ColorScheme colorScheme) {
     return OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: colorScheme.primary,
@@ -451,7 +462,8 @@ class AppTheme {
   }
 
   /// Creates floating action button theme
-  static FloatingActionButtonThemeData _createFabTheme(ColorScheme colorScheme) {
+  static FloatingActionButtonThemeData _createFabTheme(
+      ColorScheme colorScheme) {
     return FloatingActionButtonThemeData(
       backgroundColor: colorScheme.primaryContainer,
       foregroundColor: colorScheme.onPrimaryContainer,
@@ -464,8 +476,8 @@ class AppTheme {
   }
 
   /// Creates tab bar theme
-  static TabBarTheme _createTabBarTheme(ColorScheme colorScheme) {
-    return TabBarTheme(
+  static TabBarThemeData _createTabBarTheme(ColorScheme colorScheme) {
+    return TabBarThemeData(
       labelColor: colorScheme.primary,
       unselectedLabelColor: colorScheme.onSurfaceVariant,
       indicator: UnderlineTabIndicator(
@@ -488,7 +500,8 @@ class AppTheme {
   }
 
   /// Creates bottom navigation bar theme
-  static BottomNavigationBarThemeData _createBottomNavBarTheme(ColorScheme colorScheme) {
+  static BottomNavigationBarThemeData _createBottomNavBarTheme(
+      ColorScheme colorScheme) {
     return BottomNavigationBarThemeData(
       backgroundColor: colorScheme.surface,
       selectedItemColor: colorScheme.primary,
@@ -511,8 +524,8 @@ class AppTheme {
   }
 
   /// Creates dialog theme
-  static DialogTheme _createDialogTheme(ColorScheme colorScheme) {
-    return DialogTheme(
+  static DialogThemeData _createDialogTheme(ColorScheme colorScheme) {
+    return DialogThemeData(
       backgroundColor: colorScheme.surface,
       elevation: 24,
       shape: RoundedRectangleBorder(
@@ -534,7 +547,8 @@ class AppTheme {
   }
 
   /// Creates navigation rail theme (for tablets/desktop)
-  static NavigationRailThemeData _createNavigationRailTheme(ColorScheme colorScheme) {
+  static NavigationRailThemeData _createNavigationRailTheme(
+      ColorScheme colorScheme) {
     return NavigationRailThemeData(
       backgroundColor: colorScheme.surface,
       selectedIconTheme: IconThemeData(
@@ -588,7 +602,8 @@ class AppTheme {
   }
 
   /// Creates navigation bar theme (for bottom navigation in Material 3)
-  static NavigationBarThemeData _createNavigationBarTheme(ColorScheme colorScheme) {
+  static NavigationBarThemeData _createNavigationBarTheme(
+      ColorScheme colorScheme) {
     return NavigationBarThemeData(
       backgroundColor: colorScheme.surface,
       indicatorColor: colorScheme.primaryContainer,
@@ -631,13 +646,13 @@ class AppTheme {
 extension ThemeHelpers on BuildContext {
   // Easy access to current theme
   ThemeData get theme => Theme.of(this);
-  
+
   // Easy access to current color scheme
   ColorScheme get colorScheme => Theme.of(this).colorScheme;
-  
+
   // Easy access to current text theme
   TextTheme get textTheme => Theme.of(this).textTheme;
-  
+
   // Check if current theme is dark
   bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
 }
@@ -645,18 +660,18 @@ extension ThemeHelpers on BuildContext {
 // Theme provider that integrates with UserPreferencesRepository
 final appThemeProvider = Provider<ThemeData>((ref) {
   final themeMode = ref.watch(themeProvider);
-  
+
   switch (themeMode) {
     case ThemeMode.light:
       return AppTheme.lightTheme;
     case ThemeMode.dark:
       return AppTheme.darkTheme;
     case ThemeMode.system:
-    default:
       // For system mode, let's determine based on platform brightness
-      final platformBrightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
-      return platformBrightness == Brightness.dark 
-          ? AppTheme.darkTheme 
+      final platformBrightness =
+          WidgetsBinding.instance.platformDispatcher.platformBrightness;
+      return platformBrightness == Brightness.dark
+          ? AppTheme.darkTheme
           : AppTheme.lightTheme;
   }
 });

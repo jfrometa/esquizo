@@ -53,8 +53,9 @@ void main() {
 /// Helper function to test slug validation (copied from business_routing_provider.dart)
 bool _isValidBusinessSlug(String slug) {
   if (slug.length < 2 || slug.length > 50) return false;
-  if (slug.contains(' ') || slug.contains('?') || slug.contains('#'))
+  if (slug.contains(' ') || slug.contains('?') || slug.contains('#')) {
     return false;
+  }
   if (slug.startsWith('-') || slug.endsWith('-')) return false;
   if (slug.contains('--')) return false;
 

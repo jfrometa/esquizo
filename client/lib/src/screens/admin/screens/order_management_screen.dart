@@ -279,7 +279,7 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
           } else {
             // For mobile, navigate to detail page using named route
             context.goNamed(
-              AdminRoutes.namePdOrderDetails,
+              AdminRoutes.nameOrderDetails,
               pathParameters: {'orderId': order.id},
             );
           }
@@ -463,7 +463,7 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
             onSuccess: (order) {
               Navigator.pop(context);
               context.goNamed(
-                AdminRoutes.namePdOrderDetails,
+                AdminRoutes.nameOrderDetails,
                 pathParameters: {'orderId': order.id},
               );
             },
@@ -536,4 +536,3 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
     return text[0].toUpperCase() + text.substring(1);
   }
 }
-

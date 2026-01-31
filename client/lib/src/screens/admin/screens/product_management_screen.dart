@@ -210,6 +210,8 @@ class _ProductManagementScreenState
               return Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: ResponsiveGridView(
+                  childAspectRatio:
+                      16 / 9, // Adjust this based on your card's aspect ratio
                   children: filteredProducts
                       .map((product) => _buildProductCard(product))
                       .toList(),
@@ -245,6 +247,8 @@ class _ProductManagementScreenState
         return Padding(
           padding: const EdgeInsets.all(16.0),
           child: ResponsiveGridView(
+            childAspectRatio:
+                4 / 3, // Adjust this based on your card's aspect ratio
             children: filteredCategories
                 .map((category) => _buildCategoryCard(category))
                 .toList(),

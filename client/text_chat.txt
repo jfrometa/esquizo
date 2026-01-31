@@ -1,0 +1,46 @@
+ib/src/screens/location/location_web_bridge_web.dart:74:33: Error: Member has a JS interop annotation but the enclosing class does not.
+location_web_bridge_web.dart:74
+Try adding the annotation to the enclosing class.
+  external js_interop.JSPromise _initMapsWhenNeededJS();
+                                ^
+lib/src/screens/location/location_web_bridge_web.dart:34:7: Context: This is the enclosing class.
+location_web_bridge_web.dart:34
+class LocationWebBridge {
+      ^^^^^^^^^^^^^^^^^
+lib/src/screens/location/location_web_bridge_web.dart:77:33: Error: Member has a JS interop annotation but the enclosing class does not.
+location_web_bridge_web.dart:77
+Try adding the annotation to the enclosing class.
+  external js_interop.JSPromise _initializeAdvancedMapJS(
+                                ^
+lib/src/screens/location/location_web_bridge_web.dart:34:7: Context: This is the enclosing class.
+location_web_bridge_web.dart:34
+class LocationWebBridge {
+      ^^^^^^^^^^^^^^^^^
+lib/src/screens/location/location_web_bridge_web.dart:85:17: Error: Member has a JS interop annotation but the enclosing class does not.
+location_web_bridge_web.dart:85
+Try adding the annotation to the enclosing class.
+  external void _setMapDraggingJS(bool dragging);
+                ^
+lib/src/screens/location/location_web_bridge_web.dart:34:7: Context: This is the enclosing class.
+location_web_bridge_web.dart:34
+class LocationWebBridge {
+      ^^^^^^^^^^^^^^^^^
+lib/src/screens/location/location_web_bridge_web.dart:88:20: Error: Member has a JS interop annotation but the enclosing class does not.
+location_web_bridge_web.dart:88
+Try adding the annotation to the enclosing class.
+  external Object? _getMarkerPositionJS();
+                   ^
+lib/src/screens/location/location_web_bridge_web.dart:34:7: Context: This is the enclosing class.
+location_web_bridge_web.dart:34
+class LocationWebBridge {
+      ^^^^^^^^^^^^^^^^^
+lib/src/screens/location/location_web_bridge_web.dart:91:33: Error: Member has a JS interop annotation but the enclosing class does not.
+location_web_bridge_web.dart:91
+Try adding the annotation to the enclosing class.
+  external js_interop.JSPromise _getCurrentLocationJS();
+                                ^
+lib/src/screens/location/location_web_bridge_web.dart:34:7: Context: This is the enclosing class.
+location_web_bridge_web.dart:34
+class LocationWebBridge {
+      ^^^^^^^^^^^^^^^^^
+Failed to compile application

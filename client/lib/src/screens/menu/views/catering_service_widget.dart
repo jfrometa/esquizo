@@ -12,13 +12,13 @@ import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dar
 class CateringServiceWidget extends ConsumerStatefulWidget {
   /// Optional custom title for the widget
   final String? title;
-  
+
   /// Optional description text
   final String? description;
-  
+
   /// Callback when a quote is submitted
   final Function(dynamic)? onQuoteSubmitted;
-  
+
   /// Callback when a package is selected
   final Function(Map<String, dynamic>)? onPackageSelected;
 
@@ -31,15 +31,17 @@ class CateringServiceWidget extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<CateringServiceWidget> createState() => _CateringServiceWidgetState();
+  ConsumerState<CateringServiceWidget> createState() =>
+      _CateringServiceWidgetState();
 }
 
 class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
   final TextEditingController _itemNameController = TextEditingController();
-  final TextEditingController _itemDescriptionController = TextEditingController();
+  final TextEditingController _itemDescriptionController =
+      TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  
+
   // Catering packages data
   final List<Map<String, dynamic>> _cateringPackages = [
     {
@@ -56,13 +58,15 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
     },
     {
       'title': 'Wedding Reception',
-      'description': 'Make your special day unforgettable with our gourmet service',
+      'description':
+          'Make your special day unforgettable with our gourmet service',
       'price': 'S/ 1500.00',
       'icon': Icons.celebration,
     },
     {
       'title': 'Custom Package',
-      'description': 'Tell us your requirements for a personalized catering experience',
+      'description':
+          'Tell us your requirements for a personalized catering experience',
       'price': 'Starting at S/ 2000.00',
       'icon': Icons.settings,
     },
@@ -77,10 +81,11 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
     super.dispose();
   }
 
-  void _showCateringForm(BuildContext context, WidgetRef ref, Map<String, dynamic> package) {
+  void _showCateringForm(
+      BuildContext context, WidgetRef ref, Map<String, dynamic> package) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -120,21 +125,25 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                   Expanded(
                     child: CateringForm(
                       title: 'Detalles del ${package['title']}',
-                      initialData: ref.read(cateringOrderProvider),
+                      initialData: ref.read(cateringOrderNotifierProvider),
                       onSubmit: (formData) {
-                        final currentOrder = ref.read(cateringOrderProvider);
-                        ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(
+                        final currentOrder =
+                            ref.read(cateringOrderNotifierProvider);
+                        ref
+                            .read(cateringOrderNotifierProvider.notifier)
+                            .finalizeCateringOrder(
                               title: package['title'],
                               img: '',
                               description: package['description'],
                               hasChef: formData.hasChef,
                               alergias: formData.allergies.join(','),
                               eventType: formData.eventType,
-                              preferencia: currentOrder?.preferencia ?? 'salado',
+                              preferencia:
+                                  currentOrder?.preferencia ?? 'salado',
                               adicionales: formData.additionalNotes,
                               cantidadPersonas: formData.peopleCount,
                             );
-                            
+
                         if (widget.onPackageSelected != null) {
                           widget.onPackageSelected!(package);
                         }
@@ -143,7 +152,8 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                           SnackBar(
                             content: Row(
                               children: [
-                                Icon(Icons.check_circle, color: colorScheme.onPrimaryContainer),
+                                Icon(Icons.check_circle,
+                                    color: colorScheme.onPrimaryContainer),
                                 const SizedBox(width: 12),
                                 Text('Paquete ${package['title']} añadido'),
                               ],
@@ -157,7 +167,8 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                           ),
                         );
                         Navigator.pop(context);
-                        GoRouter.of(context).pushNamed(AppRoute.homecart.name, extra: 'catering');
+                        GoRouter.of(context).pushNamed(AppRoute.homecart.name,
+                            extra: 'catering');
                       },
                     ),
                   ),
@@ -173,7 +184,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
   void _showQuoteForm(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -216,7 +227,9 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                       initialData: ref.read(manualQuoteProvider),
                       onSubmit: (formData) {
                         final currentQuote = ref.read(manualQuoteProvider);
-                        ref.read(manualQuoteProvider.notifier).finalizeManualQuote(
+                        ref
+                            .read(manualQuoteProvider.notifier)
+                            .finalizeManualQuote(
                               title: currentQuote?.title ?? 'Cotización',
                               img: currentQuote?.img ?? '',
                               description: currentQuote?.description ?? '',
@@ -227,16 +240,18 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                               adicionales: formData.additionalNotes,
                               cantidadPersonas: formData.peopleCount,
                             );
-                        
+
                         if (widget.onQuoteSubmitted != null) {
-                          widget.onQuoteSubmitted!(ref.read(manualQuoteProvider));
+                          widget
+                              .onQuoteSubmitted!(ref.read(manualQuoteProvider));
                         }
-                        
+
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Row(
                               children: [
-                                Icon(Icons.check_circle, color: colorScheme.onPrimaryContainer),
+                                Icon(Icons.check_circle,
+                                    color: colorScheme.onPrimaryContainer),
                                 const SizedBox(width: 12),
                                 const Text('Se actualizó la Cotización'),
                               ],
@@ -262,11 +277,11 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
       },
     );
   }
-  
+
   void _showAddItemDialog() {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -284,7 +299,8 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                   labelText: 'Nombre del Item',
                   border: const OutlineInputBorder(),
                   filled: true,
-                  fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                  fillColor:
+                      colorScheme.surfaceContainerHighest.withOpacity(0.3),
                 ),
               ),
               const SizedBox(height: 16),
@@ -294,7 +310,8 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                   labelText: 'Descripción (Opcional)',
                   border: const OutlineInputBorder(),
                   filled: true,
-                  fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                  fillColor:
+                      colorScheme.surfaceContainerHighest.withOpacity(0.3),
                 ),
                 maxLines: 2,
               ),
@@ -305,7 +322,8 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                   labelText: 'Cantidad (Opcional)',
                   border: const OutlineInputBorder(),
                   filled: true,
-                  fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                  fillColor:
+                      colorScheme.surfaceContainerHighest.withOpacity(0.3),
                   prefixIcon: const Icon(Icons.numbers),
                 ),
                 keyboardType: TextInputType.number,
@@ -330,41 +348,42 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
       ),
     );
   }
-  
+
   void _addItem() {
     if (_itemNameController.text.trim().isEmpty) return;
-    
+
     final quantity = int.tryParse(_quantityController.text) ?? 1;
     final quoteOrder = ref.read(manualQuoteProvider);
-    
+
     if (quoteOrder == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Primero debes completar los detalles de la cotización'),
+          content:
+              Text('Primero debes completar los detalles de la cotización'),
           behavior: SnackBarBehavior.floating,
         ),
       );
       return;
     }
-    
+
     ref.read(manualQuoteProvider.notifier).addManualItem(
-      CateringDish(
-        title: _itemNameController.text.trim(),
-        quantity: quantity,
-        hasUnitSelection: false,
-        peopleCount: quoteOrder.peopleCount ?? 0,
-        pricePerUnit: 0,
-        pricePerPerson: 0,
-        ingredients: [],
-        pricing: 0,
-      ),
-    );
-    
+          CateringDish(
+            title: _itemNameController.text.trim(),
+            quantity: quantity,
+            hasUnitSelection: false,
+            peopleCount: quoteOrder.peopleCount ?? 0,
+            pricePerUnit: 0,
+            pricePerPerson: 0,
+            ingredients: [],
+            pricing: 0,
+          ),
+        );
+
     // Clear the controllers
     _itemNameController.clear();
     _itemDescriptionController.clear();
     _quantityController.clear();
-    
+
     // Show success message
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -376,12 +395,12 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
       ),
     );
   }
-  
+
   void _confirmQuoteOrder() {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final quote = ref.read(manualQuoteProvider);
-    
+
     if (quote == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -392,7 +411,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
       );
       return;
     }
-    
+
     if ((quote.peopleCount ?? 0) <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -403,7 +422,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
       );
       return;
     }
-    
+
     if (quote.eventType.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -414,7 +433,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
       );
       return;
     }
-    
+
     if (quote.dishes.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -425,11 +444,11 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
       );
       return;
     }
-    
+
     if (widget.onQuoteSubmitted != null) {
       widget.onQuoteSubmitted!(quote);
     }
-    
+
     GoRouter.of(context).goNamed(AppRoute.homecart.name, extra: 'quote');
   }
 
@@ -439,14 +458,15 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
     final colorScheme = theme.colorScheme;
     final size = MediaQuery.of(context).size;
     final isTablet = size.width >= 600;
-    
+
     // Get the appropriate quote object based on the tab
     final manualQuote = ref.watch(manualQuoteProvider);
-    final cateringOrder = ref.watch(cateringOrderProvider);
-    
-    final hasActiveQuote = manualQuote != null && 
-                         ((manualQuote.dishes.isNotEmpty) || 
-                         ((manualQuote.peopleCount ?? 0) > 0 && manualQuote.eventType.isNotEmpty));
+    final cateringOrder = ref.watch(cateringOrderNotifierProvider);
+
+    final hasActiveQuote = manualQuote != null &&
+        ((manualQuote.dishes.isNotEmpty) ||
+            ((manualQuote.peopleCount ?? 0) > 0 &&
+                manualQuote.eventType.isNotEmpty));
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -456,10 +476,11 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Custom quote section (top)
-              _buildQuoteSection(colorScheme, theme, hasActiveQuote, manualQuote),
-              
+              _buildQuoteSection(
+                  colorScheme, theme, hasActiveQuote, manualQuote),
+
               const SizedBox(height: 24),
-              
+
               // Divider with "OR" in the middle
               Row(
                 children: [
@@ -476,9 +497,9 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                   Expanded(child: Divider(color: colorScheme.outlineVariant)),
                 ],
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Catering packages section (bottom)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -489,26 +510,27 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
-                  widget.description ?? 'Choose from our pre-designed packages for your event',
+                  widget.description ??
+                      'Choose from our pre-designed packages for your event',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Catering packages grid or list
-              isTablet 
+              isTablet
                   ? _buildTabletPackagesGrid(theme, colorScheme)
                   : _buildMobilePackagesList(theme, colorScheme),
-                  
+
               // Bottom padding
               const SizedBox(height: 32),
             ],
@@ -517,8 +539,9 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
       },
     );
   }
-  
-  Widget _buildQuoteSection(ColorScheme colorScheme, ThemeData theme, bool hasQuoteItems, dynamic quote) {
+
+  Widget _buildQuoteSection(ColorScheme colorScheme, ThemeData theme,
+      bool hasQuoteItems, dynamic quote) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -554,9 +577,9 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                 ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Quote content or empty state
           if (quote == null)
             // Empty state
@@ -568,7 +591,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                   style: theme.textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Quote request box
                 GestureDetector(
                   onTap: () => _showQuoteForm(context, ref),
@@ -664,7 +687,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                             Row(
                               children: [
                                 Icon(
-                                  Icons.receipt_long, 
+                                  Icons.receipt_long,
                                   color: colorScheme.secondary,
                                 ),
                                 const SizedBox(width: 8),
@@ -684,9 +707,9 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                           ],
                         ),
                       ),
-                      
+
                       const Divider(height: 1),
-                      
+
                       // Quote info - Handle both types of objects safely
                       Padding(
                         padding: const EdgeInsets.all(16),
@@ -695,46 +718,46 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                           children: [
                             // Check for different quote object structures and use properties safely
                             _buildInfoRow(
-                              theme, 
-                              'Event Type:', 
+                              theme,
+                              'Event Type:',
                               _getEventType(quote),
                             ),
                             const SizedBox(height: 8),
                             _buildInfoRow(
-                              theme, 
-                              'People Count:', 
+                              theme,
+                              'People Count:',
                               _getPeopleCount(quote),
                             ),
                             const SizedBox(height: 8),
                             _buildInfoRow(
-                              theme, 
-                              'Chef Required:', 
+                              theme,
+                              'Chef Required:',
                               _getHasChef(quote) ? 'Yes' : 'No',
                             ),
-                            
+
                             // Only show allergies if they exist
                             if (_getAllergies(quote).isNotEmpty) ...[
                               const SizedBox(height: 8),
                               _buildInfoRow(
-                                theme, 
-                                'Allergies:', 
+                                theme,
+                                'Allergies:',
                                 _getAllergies(quote),
                               ),
                             ],
-                            
+
                             // Only show notes if they exist
                             if (_getAdditionalNotes(quote).isNotEmpty) ...[
                               const SizedBox(height: 8),
                               _buildInfoRow(
-                                theme, 
-                                'Notes:', 
+                                theme,
+                                'Notes:',
                                 _getAdditionalNotes(quote),
                               ),
                             ],
                           ],
                         ),
                       ),
-                      
+
                       // Items list if any
                       if (_getDishes(quote).isNotEmpty) ...[
                         const Divider(height: 1),
@@ -744,7 +767,8 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     'Items (${_getDishes(quote).length})',
@@ -765,9 +789,16 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                                 ],
                               ),
                               const SizedBox(height: 8),
-                            ...quote.dishes.asMap().entries.map((entry) => 
-                                _buildDishItem(entry.value, theme, entry.key, colorScheme, )
-                              ).toList(),
+                              ...quote.dishes
+                                  .asMap()
+                                  .entries
+                                  .map((entry) => _buildDishItem(
+                                        entry.value,
+                                        theme,
+                                        entry.key,
+                                        colorScheme,
+                                      ))
+                                  .toList(),
                             ],
                           ),
                         ),
@@ -782,7 +813,8 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                                 Icon(
                                   Icons.restaurant_menu,
                                   size: 32,
-                                  color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+                                  color: colorScheme.onSurfaceVariant
+                                      .withOpacity(0.5),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
@@ -797,8 +829,10 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
                                   icon: const Icon(Icons.add),
                                   label: const Text('Add Item'),
                                   style: FilledButton.styleFrom(
-                                    backgroundColor: colorScheme.secondaryContainer,
-                                    foregroundColor: colorScheme.onSecondaryContainer,
+                                    backgroundColor:
+                                        colorScheme.secondaryContainer,
+                                    foregroundColor:
+                                        colorScheme.onSecondaryContainer,
                                   ),
                                 ),
                               ],
@@ -815,7 +849,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
       ),
     );
   }
-  
+
   // Safe property getter methods that handle both types of objects
   String _getEventType(dynamic quote) {
     try {
@@ -831,12 +865,14 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
       return 'Not specified';
     }
   }
-  
+
   String _getPeopleCount(dynamic quote) {
     try {
       if (quote is CateringOrderItem) {
         // For CateringOrderItem objects
-        return (quote.peopleCount ?? 0) == 0 ? 'Not specified' : '${quote.peopleCount}';
+        return (quote.peopleCount ?? 0) == 0
+            ? 'Not specified'
+            : '${quote.peopleCount}';
       } else {
         // For ManualQuoteItem or other objects
         final peopleCount = quote.peopleCount ?? 0;
@@ -846,7 +882,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
       return 'Not specified';
     }
   }
-  
+
   bool _getHasChef(dynamic quote) {
     try {
       if (quote is CateringOrderItem) {
@@ -860,7 +896,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
       return false;
     }
   }
-  
+
   String _getAllergies(dynamic quote) {
     try {
       if (quote is CateringOrderItem) {
@@ -882,7 +918,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
       return '';
     }
   }
-  
+
   String _getAdditionalNotes(dynamic quote) {
     try {
       if (quote is CateringOrderItem) {
@@ -904,12 +940,12 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
       return '';
     }
   }
-  
+
   List<CateringDish> _getDishes(dynamic quote) {
     try {
       if (quote is CateringOrderItem) {
         // For CateringOrderItem objects
-        return [];  // CateringOrderItem might not have dishes
+        return []; // CateringOrderItem might not have dishes
       } else {
         // For ManualQuoteItem or other objects
         return quote.dishes ?? [];
@@ -918,7 +954,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
       return [];
     }
   }
-  
+
   Widget _buildInfoRow(ThemeData theme, String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -941,8 +977,9 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
       ],
     );
   }
-  
-  Widget _buildDishItem(CateringDish dish, ThemeData theme, int index, ColorScheme colorScheme) {
+
+  Widget _buildDishItem(
+      CateringDish dish, ThemeData theme, int index, ColorScheme colorScheme) {
     return Card(
       elevation: 0,
       color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
@@ -1019,7 +1056,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
         itemCount: _cateringPackages.length,
         itemBuilder: (context, index) {
           final package = _cateringPackages[index];
-          
+
           return Card(
             elevation: 0,
             clipBehavior: Clip.antiAlias,
@@ -1097,7 +1134,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
       ),
     );
   }
-  
+
   Widget _buildMobilePackagesList(ThemeData theme, ColorScheme colorScheme) {
     return ListView.builder(
       shrinkWrap: true,
@@ -1106,7 +1143,7 @@ class _CateringServiceWidgetState extends ConsumerState<CateringServiceWidget> {
       itemCount: _cateringPackages.length,
       itemBuilder: (context, index) {
         final package = _cateringPackages[index];
-        
+
         return Card(
           elevation: 0,
           clipBehavior: Clip.antiAlias,

@@ -14,10 +14,11 @@ void showCateringFormSheet({
   Map<String, dynamic>? package,
   Function(Map<String, dynamic>)? onSuccess,
   bool isQuote = false,
+  String? initialFlow,
 }) {
   final theme = Theme.of(context);
   final colorScheme = theme.colorScheme;
-  
+
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -57,14 +58,18 @@ void showCateringFormSheet({
                 Expanded(
                   child: CateringForm(
                     title: title,
-                    initialData: isQuote 
+                    controller: scrollController,
+                    initialFlow: initialFlow,
+                    initialData: isQuote
                         ? ref.read(manualQuoteProvider)
-                        : ref.read(cateringOrderProvider),
+                        : ref.read(cateringOrderNotifierProvider),
                     onSubmit: (formData) {
                       if (isQuote) {
                         // Handle quote submission
                         final currentQuote = ref.read(manualQuoteProvider);
-                        ref.read(manualQuoteProvider.notifier).finalizeManualQuote(
+                        ref
+                            .read(manualQuoteProvider.notifier)
+                            .finalizeManualQuote(
                               title: currentQuote?.title ?? 'Cotización',
                               img: currentQuote?.img ?? '',
                               description: currentQuote?.description ?? '',
@@ -75,41 +80,54 @@ void showCateringFormSheet({
                               adicionales: formData.additionalNotes,
                               cantidadPersonas: formData.peopleCount,
                             );
-                        
+
                         _showSuccessSnackBar(
-                          context: context, 
+                          context: context,
                           message: 'Se actualizó la Cotización',
                           colorScheme: colorScheme,
                         );
                       } else {
                         // Handle package submission
-                        final currentOrder = ref.read(cateringOrderProvider);
-                        ref.read(cateringOrderProvider.notifier).finalizeCateringOrder(
+                        final currentOrder =
+                            ref.read(cateringOrderNotifierProvider);
+                        ref
+                            .read(cateringOrderNotifierProvider.notifier)
+                            .finalizeCateringOrder(
                               title: package?['title'] ?? '',
                               img: '',
                               description: package?['description'] ?? '',
                               hasChef: formData.hasChef,
                               alergias: formData.allergies.join(','),
                               eventType: formData.eventType,
-                              preferencia: currentOrder?.preferencia ?? 'salado',
+                              preferencia:
+                                  currentOrder?.preferencia ?? 'salado',
                               adicionales: formData.additionalNotes,
                               cantidadPersonas: formData.peopleCount,
                             );
-                        
+
                         if (onSuccess != null && package != null) {
                           onSuccess(package);
                         }
-                        
+
                         _showSuccessSnackBar(
-                          context: context, 
-                          message: 'Paquete ${package?['title'] ?? 'de catering'} añadido',
+                          context: context,
+                          message:
+                              'Paquete ${package?['title'] ?? 'de catering'} añadido',
                           colorScheme: colorScheme,
                         );
-                        
-                        GoRouter.of(context).pushNamed(AppRoute.homecart.name, extra: 'catering');
                       }
-                      
+
                       Navigator.pop(context);
+
+                      if (formData.cateringFlow == 'menu') {
+                        // Navigate to menu selection
+                        GoRouter.of(context)
+                            .pushNamed(AppRoute.cateringSelection.name);
+                      } else {
+                        // Navigate to manual quote
+                        GoRouter.of(context)
+                            .pushNamed(AppRoute.manualQuote.name);
+                      }
                     },
                   ),
                 ),

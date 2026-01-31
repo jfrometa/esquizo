@@ -6,10 +6,72 @@ part of 'business_routing_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+String _$currentRouteLocationHash() =>
+    r'62b54eb9ecfe238c45aa8343eb229a19794b41cf';
+
+/// Provider that gets the current route location
+/// SIMPLIFIED: Direct WebUtils access - reactivity handled at app level
+///
+/// Copied from [currentRouteLocation].
+@ProviderFor(currentRouteLocation)
+final currentRouteLocationProvider = AutoDisposeProvider<String>.internal(
+  currentRouteLocation,
+  name: r'currentRouteLocationProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$currentRouteLocationHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef CurrentRouteLocationRef = AutoDisposeProviderRef<String>;
+String _$initialUrlPathHash() => r'75fc4ac43cc13a500761048641d2845ff6bd1c5c';
+
+/// Provider for immediate URL detection during app startup
+/// This runs once at startup to capture the initial URL before routing begins
+///
+/// Copied from [initialUrlPath].
+@ProviderFor(initialUrlPath)
+final initialUrlPathProvider = AutoDisposeProvider<String>.internal(
+  initialUrlPath,
+  name: r'initialUrlPathProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$initialUrlPathHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef InitialUrlPathRef = AutoDisposeProviderRef<String>;
+String _$earlyBusinessSlugHash() => r'fe39ce531ded36da86708d63e23581a769a04407';
+
+/// Provider for early business slug detection during app startup
+/// This provides immediate business context before routing is fully initialized
+///
+/// Copied from [earlyBusinessSlug].
+@ProviderFor(earlyBusinessSlug)
+final earlyBusinessSlugProvider = AutoDisposeProvider<String?>.internal(
+  earlyBusinessSlug,
+  name: r'earlyBusinessSlugProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$earlyBusinessSlugHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef EarlyBusinessSlugRef = AutoDisposeProviderRef<String?>;
 String _$businessSlugFromUrlHash() =>
-    r'1c84a878a91d4398c0f970fcce6e87b3f0bcba24';
+    r'086f5dc072b77ca905a4c2f40efc61b44e4be37d';
 
 /// Provider that extracts business slug from the current URL path
+/// Now reactive to route changes via currentRouteLocation AND detects initial URL
 ///
 /// Copied from [businessSlugFromUrl].
 @ProviderFor(businessSlugFromUrl)
@@ -68,7 +130,7 @@ final businessRoutePrefixProvider = AutoDisposeProvider<String?>.internal(
 // ignore: unused_element
 typedef BusinessRoutePrefixRef = AutoDisposeProviderRef<String?>;
 String _$currentBusinessSlugHash() =>
-    r'3cb2fc8802bc56c046a3585ef93d1851350f8b35';
+    r'5c75cc882fbd7b707fe1fde730fdc25fd07daa61';
 
 /// Provider to get the current business slug from URL
 /// This is an alias for businessSlugFromUrlProvider for clearer usage
@@ -89,10 +151,11 @@ final currentBusinessSlugProvider = AutoDisposeProvider<String?>.internal(
 // ignore: unused_element
 typedef CurrentBusinessSlugRef = AutoDisposeProviderRef<String?>;
 String _$urlAwareBusinessIdHash() =>
-    r'da54e379f98cd949616db3db916fd3c6a45fe478';
+    r'61376ee6f244179f78ce90d929f1c18aa3554ccf';
 
 /// Provider for URL-aware business ID
 /// This provider combines URL-based business slug with fallback to local storage
+/// OPTIMIZED: Reduces unnecessary rebuilds by using ref.read for services
 ///
 /// Copied from [UrlAwareBusinessId].
 @ProviderFor(UrlAwareBusinessId)

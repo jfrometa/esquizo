@@ -144,28 +144,40 @@ class _BusinessSetupDetectorState extends ConsumerState<BusinessSetupDetector> {
         // If no business config or inactive, show setup screen
         return widget.setupScreen;
       },
-      loading: () => Directionality(
-        textDirection: TextDirection.ltr,
-        child: Material(
-          color: Colors.white,
-          child: const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text(
-                  'Loading business configuration...',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black87,
+      loading: () {
+        // OPTIMIZATION: If we already have a previous value, keep showing the child
+        // to prevent unmounting the entire MaterialApp/GoRouter and causing loops.
+        if (businessConfigAsync.hasValue &&
+            businessConfigAsync.value != null &&
+            businessConfigAsync.value!.isActive) {
+          debugPrint(
+              '🔄 Business context refreshing in background, keeping UI mounted');
+          return widget.child;
+        }
+
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            color: Colors.white,
+            child: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text(
+                    'Loading business configuration...',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
       error: (error, stackTrace) => Directionality(
         textDirection: TextDirection.ltr,
         child: Material(

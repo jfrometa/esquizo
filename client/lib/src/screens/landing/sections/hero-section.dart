@@ -1,32 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
-
 class EnhancedHeroSection extends ConsumerWidget {
   final double scrollOffset;
-  
+
   const EnhancedHeroSection({
     super.key,
     required this.scrollOffset,
   });
-  
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final size = MediaQuery.sizeOf(context);
     final isMobile = size.width < 600;
-    
+
     // Get business config for restaurant name and logo
     final businessConfigAsync = ref.watch(businessConfigProvider);
-    
+
     // Height calculation with parallax effect
     final heroHeight = isMobile ? size.height * 0.85 : size.height * 0.75;
     final parallaxOffset = scrollOffset * 0.4;
-    
+
     return Container(
       width: double.infinity,
       height: heroHeight,
@@ -44,22 +42,21 @@ class EnhancedHeroSection extends ConsumerWidget {
             height: heroHeight + 100, // Extra height for parallax
             child: RepaintBoundary(
               child: ShaderMask(
-                shaderCallback: (Rect bounds) {
-                  return LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withOpacity(0.7),
-                      Colors.black.withOpacity(0.5),
-                    ],
-                  ).createShader(bounds);
-                },
-                blendMode: BlendMode.srcOver,
-                child: const SizedBox.shrink()
-              ),
+                  shaderCallback: (Rect bounds) {
+                    return LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.7),
+                        Colors.black.withOpacity(0.5),
+                      ],
+                    ).createShader(bounds);
+                  },
+                  blendMode: BlendMode.srcOver,
+                  child: const SizedBox.shrink()),
             ),
           ),
-          
+
           // Gradient overlay
           Container(
             decoration: BoxDecoration(
@@ -73,7 +70,7 @@ class EnhancedHeroSection extends ConsumerWidget {
               ),
             ),
           ),
-          
+
           // Content
           Center(
             child: Padding(
@@ -98,7 +95,8 @@ class EnhancedHeroSection extends ConsumerWidget {
                     ),
                     child: businessConfigAsync.when(
                       data: (config) {
-                        if (config?.logoUrl != null && config!.logoUrl.isNotEmpty) {
+                        if (config?.logoUrl != null &&
+                            config!.logoUrl.isNotEmpty) {
                           return ClipOval(
                             child: Image.network(
                               config.logoUrl,
@@ -113,7 +111,7 @@ class EnhancedHeroSection extends ConsumerWidget {
                         } else {
                           return ClipOval(
                             child: Image.asset(
-                            'assets/appIcon.png',  // config.logoUrl,
+                              'assets/appIcon.png', // config.logoUrl,
                               width: 80,
                               height: 80,
                               fit: BoxFit.cover,
@@ -153,7 +151,8 @@ class EnhancedHeroSection extends ConsumerWidget {
                   const SizedBox(height: 16),
                   businessConfigAsync.when(
                     data: (config) => Text(
-                      config?.description ?? 'Experiencia Gastronómica Excepcional',
+                      config?.description ??
+                          'Experiencia Gastronómica Excepcional',
                       style: textTheme.headlineSmall?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w300,
@@ -186,13 +185,14 @@ class EnhancedHeroSection extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ElevatedButton.icon(
-                        onPressed: () => GoRouter.of(context).goNamed(AppRoute.home.name),
+                        onPressed: () => context.goToBusinessHome(),
                         icon: const Icon(Icons.restaurant_menu),
                         label: const Text('Ver Menú'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: colorScheme.primary,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 16),
                           elevation: 4,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
@@ -205,7 +205,7 @@ class EnhancedHeroSection extends ConsumerWidget {
               ),
             ),
           ),
-          
+
           // Scroll indicator at bottom
           if (scrollOffset < 10)
             Positioned(
@@ -240,4 +240,3 @@ class EnhancedHeroSection extends ConsumerWidget {
     );
   }
 }
-

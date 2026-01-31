@@ -43,9 +43,17 @@ class _KakoAppState extends ConsumerState<KakoApp> with WidgetsBindingObserver {
   }
 
   // Check if the browser URL has changed while app was in background
+  // DISABLED: This method was causing conflicts with browser navigation
+  // Browser navigation should work naturally with GoRouter and path URL strategy
   void _checkForUrlChanges() {
     if (!kIsWeb) return;
 
+    debugPrint(
+        '🧭 App lifecycle: URL check disabled to prevent navigation conflicts');
+
+    // DISABLED: Commenting out the sync logic that was causing Flutter engine restarts
+    // The GoRouter with path URL strategy should handle browser navigation naturally
+    /*
     try {
       final router = ref.read(goRouterProvider);
 
@@ -72,6 +80,7 @@ class _KakoAppState extends ConsumerState<KakoApp> with WidgetsBindingObserver {
     } catch (e) {
       debugPrint('🔥 Error checking URL changes: $e');
     }
+    */
   }
 
   @override
@@ -132,6 +141,14 @@ class _KakoAppState extends ConsumerState<KakoApp> with WidgetsBindingObserver {
         debugShowCheckedModeBanner: false,
         title: 'KakoApp',
         restorationScopeId: 'app',
+        // Performance optimizations
+        scrollBehavior: const MaterialScrollBehavior().copyWith(
+          // Enable smooth scrolling on web
+          scrollbars: kIsWeb,
+          physics: kIsWeb
+              ? const BouncingScrollPhysics()
+              : const ClampingScrollPhysics(),
+        ),
         // Error widget for Flutter framework errors
         builder: (context, child) {
           // Add your global error handling widgets here

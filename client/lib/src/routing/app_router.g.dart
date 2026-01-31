@@ -6,7 +6,7 @@ part of 'app_router.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$goRouterHash() => r'a894a7478435e4846009af4fa81c36198477a9ce';
+String _$goRouterHash() => r'0da4d39e82f876b37c5fe0c76f6707115a0ba8ef';
 
 /// See also [goRouter].
 @ProviderFor(goRouter)
@@ -22,5 +22,22 @@ final goRouterProvider = AutoDisposeProvider<GoRouter>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef GoRouterRef = AutoDisposeProviderRef<GoRouter>;
+String _$routerErrorNotifierHash() =>
+    r'72d69685875c0d66e9b1424af7ca72d41d04c12e';
+
+/// See also [RouterErrorNotifier].
+@ProviderFor(RouterErrorNotifier)
+final routerErrorNotifierProvider =
+    AutoDisposeNotifierProvider<RouterErrorNotifier, String?>.internal(
+  RouterErrorNotifier.new,
+  name: r'routerErrorNotifierProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$routerErrorNotifierHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$RouterErrorNotifier = AutoDisposeNotifier<String?>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

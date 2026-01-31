@@ -10,6 +10,7 @@ class KakoText extends StatelessWidget {
   final String data;
 
   // Pass-through all the properties of the standard Text widget.
+  @override
   final Key? key;
   final TextStyle? style;
   final StrutStyle? strutStyle;

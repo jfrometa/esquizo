@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-import 'package:starter_architecture_flutter_firebase/src/constants/app_sizes.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
 
 import 'package:starter_architecture_flutter_firebase/src/screens/authentication/presentation/location_management/locations_management_section.dart';
@@ -60,7 +59,7 @@ class _AuthenticatedProfileScreenState
 
     try {
       // Reset admin status in cache before signing out
-      ref.read(cachedAdminStatusProvider.notifier).state = false;
+      ref.read(cachedAdminStatusProvider.notifier).updateStatus(false);
 
       // Force refresh the admin provider
       ref.invalidate(isAdminProvider);
@@ -94,19 +93,169 @@ class _AuthenticatedProfileScreenState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mi Perfil'),
-        forceMaterialTransparency: true,
-        actions: [
-          _buildSignOutButton(context),
+      body: CustomScrollView(
+        controller: _scrollController,
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 260,
+            pinned: true,
+            stretch: true,
+            forceMaterialTransparency: false,
+            backgroundColor: colorScheme.surface,
+            surfaceTintColor: Colors.transparent,
+            leading: BackButton(color: colorScheme.onSurface),
+            flexibleSpace: FlexibleSpaceBar(
+              centerTitle: true,
+              titlePadding: const EdgeInsets.only(bottom: 16),
+              title: AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: _isTabBarVisible ? 0.0 : 1.0,
+                child: Text(
+                  'Mi Perfil',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              background: _buildPremiumHeader(context),
+              stretchModes: const [
+                StretchMode.blurBackground,
+                StretchMode.zoomBackground,
+              ],
+            ),
+            actions: [
+              _buildSignOutButton(context),
+            ],
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Configuración',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Profile Edit Section
+                  ProfileEditSection(user: widget.user),
+                  const SizedBox(height: 16),
+
+                  // Saved Locations Section
+                  LocationsSection(userId: widget.user.uid),
+                  const SizedBox(height: 16),
+
+                  // Theme Settings Section
+                  const ThemeSettingsSection(),
+
+                  const SizedBox(height: 40),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
-      body: Column(
+    );
+  }
+
+  Widget _buildPremiumHeader(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            colorScheme.primaryContainer.withOpacity(0.8),
+            colorScheme.secondaryContainer.withOpacity(0.5),
+            colorScheme.surface,
+          ],
+        ),
+      ),
+      child: Stack(
         children: [
-          _buildUserInfo(context),
-          Expanded(
-            child: SettingsTabContent(user: widget.user),
+          // Subtle decorative elements
+          Positioned(
+            right: -60,
+            top: -20,
+            child: CircleAvatar(
+              radius: 100,
+              backgroundColor: colorScheme.primary.withOpacity(0.08),
+            ),
+          ),
+          Positioned(
+            left: -30,
+            bottom: 40,
+            child: CircleAvatar(
+              radius: 60,
+              backgroundColor: colorScheme.secondary.withOpacity(0.05),
+            ),
+          ),
+
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 40),
+                Hero(
+                  tag: 'profile_avatar',
+                  child: _buildProfileAvatar(),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  widget.user.displayName ?? widget.user.email ?? 'Usuario',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceVariant.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    widget.user.email ?? '',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                if (widget.user.phoneNumber != null) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.phone_outlined,
+                          size: 14, color: colorScheme.onSurfaceVariant),
+                      const SizedBox(width: 4),
+                      Text(
+                        widget.user.phoneNumber!,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
           ),
         ],
       ),
@@ -114,121 +263,84 @@ class _AuthenticatedProfileScreenState
   }
 
   Widget _buildSignOutButton(BuildContext context) {
-    return IconButton(
-      icon: _isSigningOut
-          ? const SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(strokeWidth: 2))
-          : Icon(Icons.logout, color: Theme.of(context).colorScheme.error),
-      onPressed: _isSigningOut ? null : () => _signOut(context, ref),
-      tooltip: 'Cerrar Sesión',
-    );
-  }
-
-  Widget _buildUserInfo(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.all(8.0),
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            _buildProfileAvatar(),
-            const SizedBox(width: Sizes.p16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.user.displayName ?? widget.user.email ?? 'Usuario',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: Sizes.p8),
-                  Text(
-                    widget.user.email ?? 'Correo no disponible',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  // Show phone number if available
-                  if (widget.user.phoneNumber != null) ...[
-                    const SizedBox(height: Sizes.p4),
-                    Text(
-                      widget.user.phoneNumber!,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
-                ],
+    return Container(
+      margin: const EdgeInsets.only(right: 8),
+      child: _isSigningOut
+          ? const Center(
+              child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2)))
+          : IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .errorContainer
+                      .withOpacity(0.7),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.logout,
+                  color: Theme.of(context).colorScheme.onErrorContainer,
+                  size: 20,
+                ),
               ),
+              onPressed: () => _signOut(context, ref),
+              tooltip: 'Cerrar Sesión',
             ),
-          ],
-        ),
-      ),
     );
   }
 
   Widget _buildProfileAvatar() {
     final theme = Theme.of(context);
-    return CircleAvatar(
-      backgroundColor: theme.colorScheme.primary,
-      radius: 40,
-      child: widget.user.photoURL != null
-          ? ClipOval(
-              child: CachedNetworkImage(
-                imageUrl: widget.user.photoURL!,
-                fit: BoxFit.cover,
-                width: 80,
-                height: 80,
-                placeholder: (context, url) =>
-                    const CircularProgressIndicator(),
-                errorWidget: (context, url, error) => Icon(
-                  Icons.person,
-                  size: 40,
-                  color: theme.colorScheme.onPrimary,
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: colorScheme.surface,
+          width: 4,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.shadow.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: CircleAvatar(
+        backgroundColor: colorScheme.primary,
+        radius: 48,
+        child: widget.user.photoURL != null
+            ? ClipOval(
+                child: CachedNetworkImage(
+                  imageUrl: widget.user.photoURL!,
+                  fit: BoxFit.cover,
+                  width: 96,
+                  height: 96,
+                  placeholder: (context, url) =>
+                      const CircularProgressIndicator(),
+                  errorWidget: (context, url, error) => Icon(
+                    Icons.person,
+                    size: 48,
+                    color: colorScheme.onPrimary,
+                  ),
                 ),
-              ),
-            )
-          : Icon(Icons.person, size: 40, color: theme.colorScheme.onPrimary),
+              )
+            : Icon(Icons.person, size: 48, color: colorScheme.onPrimary),
+      ),
     );
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
     super.dispose();
-  }
-}
-
-// A component for the Settings tab content
-class SettingsTabContent extends ConsumerStatefulWidget {
-  final User user;
-
-  const SettingsTabContent({
-    required this.user,
-    super.key,
-  });
-
-  @override
-  ConsumerState<SettingsTabContent> createState() => _SettingsTabContentState();
-}
-
-class _SettingsTabContentState extends ConsumerState<SettingsTabContent> {
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(16.0),
-      children: [
-        // Profile Edit Section
-        ProfileEditSection(user: widget.user),
-        const SizedBox(height: 16),
-        // Saved Locations Section
-        LocationsSection(userId: widget.user.uid),
-        const SizedBox(height: 16),
-        // Theme Settings Section
-        const ThemeSettingsSection(),
-      ],
-    );
   }
 }
 

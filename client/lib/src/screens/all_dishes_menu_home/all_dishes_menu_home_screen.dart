@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+// import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/cart/cart_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catalog/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
@@ -35,7 +35,7 @@ class _AllDishesMenuHomeScreenState
                 IconButton(
                   icon: const Icon(Icons.shopping_cart),
                   onPressed: () {
-                    context.goNamed(
+                    context.goNamedSafe(
                       AppRoute.homecart.name,
                     );
                   },

@@ -12,7 +12,8 @@ import 'package:starter_architecture_flutter_firebase/src/core/local_storange/lo
 part 'app_config_services.g.dart';
 
 // Firebase initialization provider
-final firebaseInitializationProvider = FutureProvider<FirebaseApp>((ref) async {
+@riverpod
+Future<FirebaseApp> firebaseInitialization(Ref ref) async {
   if (Firebase.apps.isNotEmpty) {
     return Firebase.apps[0];
   }
@@ -20,24 +21,32 @@ final firebaseInitializationProvider = FutureProvider<FirebaseApp>((ref) async {
   final app = await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform);
 
-  ref.read(isFirebaseInitializedProvider.notifier).state = true;
+  ref.read(isFirebaseInitializedProvider.notifier).setInitialized(true);
 
   return app;
-});
+}
 
-final isFirebaseInitializedProvider = StateProvider<bool>((ref) => false);
+@Riverpod(keepAlive: true)
+class IsFirebaseInitialized extends _$IsFirebaseInitialized {
+  @override
+  bool build() => false;
+
+  void setInitialized(bool value) => state = value;
+}
 
 // Local storage initialization provider
-final localStorageInitProvider = FutureProvider<void>((ref) async {
+@riverpod
+Future<void> localStorageInit(Ref ref) async {
   final localStorageService = ref.read(localStorageServiceProvider);
   await localStorageService.init();
 
   // Note: Business ID is now handled by URL-aware routing system
   // The stored business ID is read by initBusinessIdProvider when needed
-});
+}
 
 // Business configuration initialization provider
-final businessConfigInitProvider = FutureProvider<BusinessConfig?>((ref) async {
+@riverpod
+Future<BusinessConfig?> businessConfigInit(Ref ref) async {
   // Wait for Firebase to be initialized first
   await ref.watch(firebaseInitializationProvider.future);
 
@@ -52,7 +61,7 @@ final businessConfigInitProvider = FutureProvider<BusinessConfig?>((ref) async {
   final config = await configService.getBusinessConfig(businessId);
 
   return config;
-});
+}
 
 // Result class to handle setup check outcome
 class AppStartupResult {
@@ -68,14 +77,17 @@ class AppStartupResult {
 }
 
 // This provider will hold the startup result without modifying other providers
-final appStartupResultProvider =
-    StateProvider<AppStartupResult?>((ref) => null);
+@Riverpod(keepAlive: true)
+class AppStartupResultStatus extends _$AppStartupResultStatus {
+  @override
+  AppStartupResult? build() => null;
 
-// Remove the problematic checkSetupScreenProvider and handle setup screen state differently
+  void setResult(AppStartupResult? result) => state = result;
+}
 
 // Main app startup provider - refactored to avoid modifying providers during init
 @Riverpod(keepAlive: true)
-Future<void> appStartup(AppStartupRef ref) async {
+Future<void> appStartup(Ref ref) async {
   ref.onDispose(() {
     // ensure dependent providers are disposed as well
     ref.invalidate(onboardingRepositoryProvider);
@@ -98,11 +110,11 @@ Future<void> appStartup(AppStartupRef ref) async {
     final shouldShowSetup = isAdmin && businessConfig == null;
 
     // Store the result so other providers can react to it
-    ref.read(appStartupResultProvider.notifier).state = AppStartupResult(
-      isAdmin: isAdmin,
-      showSetupScreen: shouldShowSetup,
-      businessConfig: businessConfig,
-    );
+    ref.read(appStartupResultProvider.notifier).setResult(AppStartupResult(
+          isAdmin: isAdmin,
+          showSetupScreen: shouldShowSetup,
+          businessConfig: businessConfig,
+        ));
 
     // Wait for all initialization code to be complete before returning
     await ref.read(onboardingRepositoryProvider.future);
@@ -116,13 +128,17 @@ Future<void> appStartup(AppStartupRef ref) async {
 }
 
 // Convenience method to check if setup is complete
-final isSetupCompleteProvider = Provider<bool>((ref) {
+@riverpod
+bool isSetupComplete(Ref ref) {
   final result = ref.watch(appStartupResultProvider);
   return result != null && result.businessConfig != null;
-});
+}
 
 // Add a new provider that can be used in the UI to determine if setup screen should be shown
-final shouldShowSetupScreenProvider = Provider<bool>((ref) {
+@riverpod
+bool shouldShowSetupScreen(Ref ref) {
   final result = ref.watch(appStartupResultProvider);
   return result != null && result.showSetupScreen;
-});
+}
+
+final appStartupResultProvider = appStartupResultStatusProvider;

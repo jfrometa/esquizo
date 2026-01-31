@@ -34,7 +34,7 @@ Future<Response> onRequest(RequestContext context, String id) async {
     }
   } else if (context.request.method == HttpMethod.put ||
       context.request.method == HttpMethod.patch) {
-    final body = await context.request.json();
+    final body = await context.request.json() as Map<String, dynamic>;
     final email = body['email'] as String?;
     final name = body['name'] as String?;
 

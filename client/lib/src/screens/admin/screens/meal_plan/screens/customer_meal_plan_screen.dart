@@ -625,7 +625,7 @@ class _CustomerMealPlanScreenState
                 const SizedBox(height: 16),
                 StatefulBuilder(builder: (context, setState) {
                   return DropdownButtonFormField<MealPlanItem>(
-                    value: selectedItem,
+                    initialValue: selectedItem,
                     decoration: const InputDecoration(
                       labelText: 'Select Item',
                       border: OutlineInputBorder(),

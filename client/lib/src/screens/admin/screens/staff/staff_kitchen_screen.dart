@@ -217,7 +217,7 @@ class _StaffKitchenScreenState extends ConsumerState<StaffKitchenScreen>
             setState(() => _selectedOrderId = order.id);
           } else {
             context.goNamed(
-              AdminRoutes.namePdOrderDetails,
+              AdminRoutes.nameOrderDetails,
               pathParameters: {'orderId': order.id},
             );
           }

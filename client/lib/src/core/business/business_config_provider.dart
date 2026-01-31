@@ -1,109 +1,128 @@
-// File: lib/src/core/business/business_config_provider.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'business_config_service.dart';
+import 'business_constants.dart';
 import '../local_storange/local_storage_service.dart';
 import '../firebase/firebase_providers.dart';
 import '../../routing/business_routing_provider.dart';
 
-// Provider for business ID - now URL-aware
-final currentBusinessIdProvider = Provider<String>((ref) {
-  // Watch the URL-aware business ID provider
-  final urlAwareBusinessIdAsync = ref.watch(urlAwareBusinessIdProvider);
+part 'business_config_provider.g.dart';
 
-  return urlAwareBusinessIdAsync.when(
-    data: (businessId) => businessId,
-    loading: () => 'default', // Fallback while loading
-    error: (_, __) => 'default', // Fallback on error
-  );
-});
+// OPTIMIZED: Provider for business ID with better rebuild control
+@riverpod
+class CurrentBusinessId extends _$CurrentBusinessId {
+  @override
+  String build() {
+    final urlAwareAsync = ref.watch(urlAwareBusinessIdProvider);
+    return urlAwareAsync.maybeWhen(
+      data: (businessId) => businessId,
+      orElse: () => BusinessConstants.defaultBusinessId,
+    );
+  }
+
+  // Public method to set the business ID from outside the notifier
+  void setBusinessId(String businessId) {
+    if (state == businessId) return;
+    state = businessId;
+  }
+}
 
 // Provider to initialize business ID from storage (now used by URL-aware provider)
-final initBusinessIdProvider = FutureProvider<String>((ref) async {
+@riverpod
+Future<String> initBusinessId(Ref ref) async {
   final localStorage = ref.watch(localStorageServiceProvider);
   final businessId = await localStorage.getString('businessId');
 
-  // Return the business ID or default
-  return businessId ?? 'default';
-});
+  // Return the business ID or default (kako)
+  return businessId ?? BusinessConstants.defaultBusinessId;
+}
 
 // Provider for business config service
-final businessConfigServiceProvider = Provider<BusinessConfigService>((ref) {
+@riverpod
+BusinessConfigService businessConfigService(Ref ref) {
   final firestore = ref.watch(firebaseFirestoreProvider);
-  return BusinessConfigService(firestore: firestore);
-});
+  final database = ref.watch(firebaseDatabaseProvider);
+  return BusinessConfigService(firestore: firestore, database: database);
+}
 
 // Provider for business configuration
-final businessConfigProvider = StreamProvider<BusinessConfig?>((ref) {
+@riverpod
+Stream<BusinessConfig?> businessConfig(Ref ref) {
   final businessId = ref.watch(currentBusinessIdProvider);
   final configService = ref.watch(businessConfigServiceProvider);
   return configService.streamBusinessConfig(businessId);
-});
+}
 
 // Provider to fetch business config once (useful for initial check)
-final businessConfigOnceProvider = FutureProvider<BusinessConfig?>((ref) async {
+@riverpod
+Future<BusinessConfig?> businessConfigOnce(Ref ref) async {
   final businessId = ref.watch(currentBusinessIdProvider);
   final configService = ref.watch(businessConfigServiceProvider);
   return await configService.getBusinessConfig(businessId);
-});
+}
 
 // Provider for business type
-final businessTypeProvider = Provider<String>((ref) {
+@riverpod
+String businessType(Ref ref) {
   final configAsync = ref.watch(businessConfigProvider);
   return configAsync.when(
     data: (config) => config?.type ?? 'restaurant',
     loading: () => 'restaurant',
     error: (_, __) => 'restaurant',
   );
-});
+}
 
 // Provider for business name
-final businessNameProvider = Provider<String>((ref) {
+@riverpod
+String businessName(Ref ref) {
   final configAsync = ref.watch(businessConfigProvider);
   return configAsync.when(
     data: (config) => config?.name ?? 'Restaurant App',
     loading: () => 'Restaurant App',
     error: (_, __) => 'Restaurant App',
   );
-});
+}
 
 // Provider for business features
-final businessFeaturesProvider = Provider<List<String>>((ref) {
+@riverpod
+List<String> businessFeatures(Ref ref) {
   final configAsync = ref.watch(businessConfigProvider);
   return configAsync.when(
     data: (config) => config?.features ?? [],
     loading: () => [],
     error: (_, __) => [],
   );
-});
+}
 
 // Provider to check if a specific feature is enabled
-final hasFeatureProvider = Provider.family<bool, String>((ref, feature) {
+@riverpod
+bool hasFeature(Ref ref, String feature) {
   final features = ref.watch(businessFeaturesProvider);
   return features.contains(feature);
-});
+}
 
 // Provider for business settings
-final businessSettingsProvider = Provider<Map<String, dynamic>>((ref) {
+@riverpod
+Map<String, dynamic> businessSettings(Ref ref) {
   final configAsync = ref.watch(businessConfigProvider);
   return configAsync.when(
     data: (config) => config?.settings ?? {},
     loading: () => {},
     error: (_, __) => {},
   );
-});
+}
 
 // Provider for a specific business setting with default value
-final businessSettingProvider =
-    Provider.family<dynamic, ({String key, dynamic defaultValue})>(
-        (ref, params) {
+@riverpod
+dynamic businessSetting(Ref ref, String key, dynamic defaultValue) {
   final settings = ref.watch(businessSettingsProvider);
-  return settings[params.key] ?? params.defaultValue;
-});
+  return settings[key] ?? defaultValue;
+}
 
 // Provider for primary color from business settings
-final primaryColorProvider = Provider<Color>((ref) {
+@riverpod
+Color primaryColor(Ref ref) {
   final settings = ref.watch(businessSettingsProvider);
   final colorHex = settings['primaryColor'] as String?;
   if (colorHex != null && colorHex.isNotEmpty) {
@@ -114,10 +133,10 @@ final primaryColorProvider = Provider<Color>((ref) {
     }
   }
   return Colors.deepPurple; // Default primary color
-});
+}
 
-// Provider for secondary color from business settings
-final secondaryColorProvider = Provider<Color>((ref) {
+@riverpod
+Color secondaryColor(Ref ref) {
   final settings = ref.watch(businessSettingsProvider);
   final colorHex = settings['secondaryColor'] as String?;
   if (colorHex != null && colorHex.isNotEmpty) {
@@ -128,10 +147,10 @@ final secondaryColorProvider = Provider<Color>((ref) {
     }
   }
   return Colors.teal; // Default secondary color
-});
+}
 
-// Provider for tertiary color from business settings
-final tertiaryColorProvider = Provider<Color>((ref) {
+@riverpod
+Color tertiaryColor(Ref ref) {
   final settings = ref.watch(businessSettingsProvider);
   final colorHex = settings['tertiaryColor'] as String?;
   if (colorHex != null && colorHex.isNotEmpty) {
@@ -142,10 +161,10 @@ final tertiaryColorProvider = Provider<Color>((ref) {
     }
   }
   return Colors.amber; // Default tertiary color
-});
+}
 
-// Provider for accent color from business settings
-final accentColorProvider = Provider<Color>((ref) {
+@riverpod
+Color accentColor(Ref ref) {
   final settings = ref.watch(businessSettingsProvider);
   final colorHex = settings['accentColor'] as String?;
   if (colorHex != null && colorHex.isNotEmpty) {
@@ -156,32 +175,32 @@ final accentColorProvider = Provider<Color>((ref) {
     }
   }
   return Colors.pinkAccent; // Default accent color
-});
+}
 
-// Provider for checking if dark mode is enabled
-final isDarkModeEnabledProvider = Provider<bool>((ref) {
+@riverpod
+bool isDarkModeEnabled(Ref ref) {
   final settings = ref.watch(businessSettingsProvider);
   return settings['darkMode'] as bool? ?? false;
-});
+}
 
-// Provider for checking if system theme should be used
-final useSystemThemeProvider = Provider<bool>((ref) {
+@riverpod
+bool useSystemTheme(Ref ref) {
   final settings = ref.watch(businessSettingsProvider);
   return settings['useSystemTheme'] as bool? ?? true;
-});
+}
 
-// Provider for business logo URL
-final businessLogoUrlProvider = Provider<String>((ref) {
+@riverpod
+String businessLogoUrl(Ref ref) {
   final configAsync = ref.watch(businessConfigProvider);
   return configAsync.when(
     data: (config) => config?.logoUrl ?? '',
     loading: () => '',
     error: (_, __) => '',
   );
-});
+}
 
-// Provider for business dark logo URL
-final businessDarkLogoUrlProvider = Provider<String>((ref) {
+@riverpod
+String businessDarkLogoUrl(Ref ref) {
   final configAsync = ref.watch(businessConfigProvider);
   return configAsync.when(
     data: (config) =>
@@ -189,80 +208,80 @@ final businessDarkLogoUrlProvider = Provider<String>((ref) {
     loading: () => '',
     error: (_, __) => '',
   );
-});
+}
 
-// Provider for business cover image URL
-final businessCoverImageUrlProvider = Provider<String>((ref) {
+@riverpod
+String businessCoverImageUrl(Ref ref) {
   final configAsync = ref.watch(businessConfigProvider);
   return configAsync.when(
     data: (config) => config?.coverImageUrl ?? '',
     loading: () => '',
     error: (_, __) => '',
   );
-});
+}
 
-// Provider for checking if business is properly set up
-final isBusinessConfiguredProvider = Provider<bool>((ref) {
+@riverpod
+bool isBusinessConfigured(Ref ref) {
   final configAsync = ref.watch(businessConfigProvider);
   return configAsync.when(
     data: (config) => config != null,
     loading: () => false,
     error: (_, __) => false,
   );
-});
+}
 
-// Provider for contact info
-final businessContactInfoProvider = Provider<Map<String, dynamic>>((ref) {
+@riverpod
+Map<String, dynamic> businessContactInfo(Ref ref) {
   final configAsync = ref.watch(businessConfigProvider);
   return configAsync.when(
     data: (config) => config?.contactInfo ?? {},
     loading: () => {},
     error: (_, __) => {},
   );
-});
+}
 
-// Provider for business address
-final businessAddressProvider = Provider<Map<String, dynamic>>((ref) {
+@riverpod
+Map<String, dynamic> businessAddress(Ref ref) {
   final configAsync = ref.watch(businessConfigProvider);
   return configAsync.when(
     data: (config) => config?.address ?? {},
     loading: () => {},
     error: (_, __) => {},
   );
-});
+}
 
-// Provider for business hours
-final businessHoursProvider = Provider<Map<String, dynamic>>((ref) {
+@riverpod
+Map<String, dynamic> businessHours(Ref ref) {
   final configAsync = ref.watch(businessConfigProvider);
   return configAsync.when(
     data: (config) => config?.hours ?? {},
     loading: () => {},
     error: (_, __) => {},
   );
-});
+}
 
-// Provider for business description
-final businessDescriptionProvider = Provider<String>((ref) {
+@riverpod
+String businessDescription(Ref ref) {
   final configAsync = ref.watch(businessConfigProvider);
   return configAsync.when(
     data: (config) => config?.description ?? '',
     loading: () => '',
     error: (_, __) => '',
   );
-});
+}
 
-// Provider for business active status
-final businessIsActiveProvider = Provider<bool>((ref) {
+@riverpod
+bool businessIsActive(Ref ref) {
   final configAsync = ref.watch(businessConfigProvider);
   return configAsync.when(
     data: (config) => config?.isActive ?? true,
     loading: () => true,
     error: (_, __) => true,
   );
-});
+}
 
-// Provider for all business theme colors
-final businessThemeColorsProvider = Provider<Map<String, Color>>((ref) {
+@riverpod
+Map<String, Color> businessThemeColors(Ref ref) {
   final primaryColor = ref.watch(primaryColorProvider);
   final secondaryColor = ref.watch(secondaryColorProvider);
   final tertiaryColor = ref.watch(tertiaryColorProvider);
@@ -274,7 +293,7 @@ final businessThemeColorsProvider = Provider<Map<String, Color>>((ref) {
     'tertiary': tertiaryColor,
     'accent': accentColor,
   };
-});
+}
 
 // Helper function to convert hex color to Color
 Color _hexToColor(String hex) {

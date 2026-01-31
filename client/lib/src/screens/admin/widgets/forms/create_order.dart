@@ -727,7 +727,7 @@ class _CreateOrderFormState extends ConsumerState<CreateOrderForm> {
                           labelText: 'Select Table',
                           border: OutlineInputBorder(),
                         ),
-                        value: _selectedTableId,
+                        initialValue: _selectedTableId,
                         items: availableTables.map((table) {
                           // Fix: Add null checks for table attributes
                           final tableName = table.name.replaceAll('Table ', '');

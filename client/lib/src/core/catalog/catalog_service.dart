@@ -1133,6 +1133,8 @@ final catalogCategoryProvider = FutureProvider.family<CatalogCategory?,
 /// Provider for all items in a catalog type
 final catalogItemsProvider =
     StreamProvider.family<List<CatalogItem>, String>((ref, catalogType) {
+  debugPrint('📦 Fetching catalog items for business: '
+      '[32m${ref.watch(currentBusinessIdProvider)}[0m, type: $catalogType');
   final catalogService = ref.watch(catalogServiceProvider(catalogType));
   return catalogService.getItems(catalogType);
 });

@@ -166,7 +166,7 @@ class _TableFormState extends ConsumerState<TableForm> {
                         const SizedBox(height: 16),
                         // Status dropdown
                         DropdownButtonFormField<TableStatusEnum>(
-                          value: _status,
+                          initialValue: _status,
                           decoration: const InputDecoration(
                             labelText: 'Status',
                             border: OutlineInputBorder(),

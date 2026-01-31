@@ -1,19 +1,28 @@
 // Unified business context provider that handles business slug changes and context switching
 // This provider coordinates between URL routing and business data fetching
+// REFACTORED: Consolidated UnifiedBusinessContext and ExplicitBusinessContext into single provider
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_config_provider.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/business/business_constants.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/business/business_slug_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catering/unified_catering_system.dart';
-import 'package:starter_architecture_flutter_firebase/src/core/local_storange/local_storage_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/business_routing_provider.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catalog/catalog_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/catalog/product_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/cart/cart_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/order/unified_order_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/restaurant/table_service.dart';
+import 'package:starter_architecture_flutter_firebase/src/core/admin_panel/admin_stats_provider.dart'
+    as admin_stats;
 
 part 'unified_business_context_provider.g.dart';
+
+// =============================================================================
+// Business Context State
+// =============================================================================
 
 /// Business context state that tracks current business and slug changes
 @immutable
@@ -62,35 +71,182 @@ class BusinessContext {
       'BusinessContext(businessId: $businessId, businessSlug: $businessSlug, isDefault: $isDefault)';
 }
 
+// =============================================================================
+// Shared Helper Functions (extracted to avoid duplication)
+// =============================================================================
+
+/// Build default business context
+Future<BusinessContext> buildDefaultBusinessContext({
+  required Ref ref,
+  required bool shouldInvalidate,
+  bool fullInvalidation = true,
+}) async {
+  try {
+    debugPrint('🏢 Building default business context');
+
+    final defaultBusinessId = BusinessConstants.defaultBusinessId;
+
+    if (shouldInvalidate) {
+      await invalidateBusinessProviders(ref,
+          fullInvalidation: fullInvalidation);
+      debugPrint('🔄 Providers invalidated due to business change to default');
+    }
+
+    return BusinessContext(
+      businessId: defaultBusinessId,
+      businessSlug: null,
+      isDefault: true,
+      lastUpdated: DateTime.now(),
+    );
+  } catch (e) {
+    debugPrint('❌ Error building default context: $e');
+    return BusinessContext(
+      businessId: BusinessConstants.defaultBusinessId,
+      businessSlug: null,
+      isDefault: true,
+      lastUpdated: DateTime.now(),
+    );
+  }
+}
+
+/// Invalidate business-dependent providers
+/// [fullInvalidation] - if true, invalidates all 20+ providers; if false, only core data providers
+Future<void> invalidateBusinessProviders(Ref ref,
+    {bool fullInvalidation = true}) async {
+  debugPrint(
+      '🔄 Invalidating business-dependent providers (full: $fullInvalidation)...');
+
+  try {
+    // Core data providers - always invalidated
+    ref.invalidate(catalogItemsProvider);
+    ref.invalidate(menuProductsProvider);
+    ref.invalidate(menuCategoriesProvider);
+    ref.invalidate(cartProvider);
+
+    if (fullInvalidation) {
+      // Catering providers
+      ref.invalidate(cateringItemRepositoryProvider);
+      ref.invalidate(cateringCategoryRepositoryProvider);
+
+      // Order providers
+      ref.invalidate(activeOrdersStreamProvider);
+      ref.invalidate(allOrdersStreamProvider);
+      ref.invalidate(pendingOrdersProvider);
+      ref.invalidate(preparingOrdersProvider);
+      ref.invalidate(readyOrdersProvider);
+      ref.invalidate(admin_stats.orderStatsProvider);
+
+      // Table management providers
+      ref.invalidate(tablesStreamProvider);
+      ref.invalidate(activeTablesProvider);
+      ref.invalidate(availableTablesProvider);
+
+      // Admin stats providers
+      ref.invalidate(admin_stats.combinedAdminStatsProvider);
+      ref.invalidate(admin_stats.tableStatsProvider);
+      ref.invalidate(admin_stats.productStatsProvider);
+      ref.invalidate(admin_stats.recentOrdersProvider);
+      ref.invalidate(admin_stats.salesStatsProvider);
+
+      // Restaurant service providers
+      ref.invalidate(tableServiceProvider);
+      ref.invalidate(orderServiceProvider);
+
+      // Business configuration providers
+      ref.invalidate(businessConfigProvider);
+      ref.invalidate(businessTypeProvider);
+      ref.invalidate(businessNameProvider);
+      ref.invalidate(businessFeaturesProvider);
+      ref.invalidate(businessSettingsProvider);
+    }
+
+    debugPrint('✅ Business-dependent providers invalidated successfully');
+  } catch (e) {
+    debugPrint('⚠️ Error invalidating some providers: $e');
+  }
+}
+
+// =============================================================================
+// Unified Business Context Provider (URL-based, automatic)
+// =============================================================================
+
 /// Unified business context provider that watches for slug changes and manages business context
 @riverpod
 class UnifiedBusinessContext extends _$UnifiedBusinessContext {
+  String? _lastProcessedSlug;
+  String? _lastProcessedBusinessId;
+  BusinessContext? _cachedContext;
+
   @override
   Future<BusinessContext> build() async {
-    // Watch for URL-based business slug changes
     final urlBusinessSlug = ref.watch(businessSlugFromUrlProvider);
+
+    final slugChanged = _lastProcessedSlug != urlBusinessSlug;
+
+    if (!slugChanged && _cachedContext != null) {
+      final currentBusinessId =
+          await ref.watch(urlAwareBusinessIdProvider.future);
+
+      if (_lastProcessedBusinessId == currentBusinessId) {
+        debugPrint(
+            '⚡ Using cached context for ${urlBusinessSlug ?? 'default'} (ID: $currentBusinessId)');
+        return _cachedContext!;
+      } else {
+        debugPrint(
+            '🔄 Business ID changed: $_lastProcessedBusinessId -> $currentBusinessId');
+        _lastProcessedBusinessId = currentBusinessId;
+      }
+    }
 
     debugPrint('🏢 Building unified business context...');
     debugPrint('🌐 URL business slug: $urlBusinessSlug');
 
+    _lastProcessedSlug = urlBusinessSlug;
+    final context = await _buildContextForSlug(urlBusinessSlug);
+    _cachedContext = context;
+    _lastProcessedBusinessId = context.businessId;
+
+    return context;
+  }
+
+  Future<BusinessContext> _buildContextForSlug(String? urlBusinessSlug) async {
     if (urlBusinessSlug != null && urlBusinessSlug.isNotEmpty) {
-      // Business-specific routing (e.g., /g3, /kako)
-      debugPrint(
-          '🏢 Using business-specific routing for slug: $urlBusinessSlug');
       return await _buildBusinessContext(urlBusinessSlug);
     } else {
-      // Default business routing (e.g., /, /menu, /carrito)
-      debugPrint('🏠 Using default business routing');
-      return await _buildDefaultContext();
+      final shouldInvalidate =
+          await _shouldInvalidateProviders(BusinessConstants.defaultBusinessId);
+      return await buildDefaultBusinessContext(
+        ref: ref,
+        shouldInvalidate: shouldInvalidate,
+        fullInvalidation: true,
+      );
     }
   }
 
-  /// Build business context for specific business slug
+  Future<bool> _shouldInvalidateProviders(String newBusinessId) async {
+    try {
+      if (newBusinessId == BusinessConstants.defaultBusinessId ||
+          _cachedContext?.businessId == BusinessConstants.defaultBusinessId) {
+        return true;
+      }
+
+      if (_cachedContext != null &&
+          _cachedContext!.businessId != newBusinessId) {
+        return true;
+      }
+
+      final currentBusinessId = ref.read(currentBusinessIdProvider);
+      return currentBusinessId != newBusinessId;
+    } catch (e) {
+      debugPrint('⚠️ Error checking if providers should be invalidated: $e');
+      return true;
+    }
+  }
+
   Future<BusinessContext> _buildBusinessContext(String businessSlug) async {
     try {
       debugPrint('🏢 Building context for business slug: $businessSlug');
 
-      // Get business ID from slug
       final slugService = ref.read(businessSlugServiceProvider);
       final businessId = await slugService.getBusinessIdFromSlug(businessSlug);
 
@@ -98,116 +254,52 @@ class UnifiedBusinessContext extends _$UnifiedBusinessContext {
         debugPrint(
             '🏢 Resolved business ID: $businessId for slug: $businessSlug');
 
-        // Update local storage to maintain persistence
-        final localStorage = ref.read(localStorageServiceProvider);
-        await localStorage.setString('businessId', businessId);
+        final shouldInvalidate = await _shouldInvalidateProviders(businessId);
 
-        // Invalidate all business-dependent providers
-        await _invalidateBusinessDependentProviders();
+        if (shouldInvalidate) {
+          await invalidateBusinessProviders(ref, fullInvalidation: true);
+          debugPrint('🔄 Providers invalidated due to business change');
+        }
 
-        final context = BusinessContext(
+        return BusinessContext(
           businessId: businessId,
           businessSlug: businessSlug,
           isDefault: false,
           lastUpdated: DateTime.now(),
         );
-
-        debugPrint('✅ Business context built: $context');
-        return context;
       } else {
         debugPrint(
             '⚠️ Business slug not found: $businessSlug, falling back to default');
-        return await _buildDefaultContext();
+        return await buildDefaultBusinessContext(
+          ref: ref,
+          shouldInvalidate: true,
+          fullInvalidation: true,
+        );
       }
     } catch (e) {
       debugPrint('❌ Error building business context: $e');
-      return await _buildDefaultContext();
-    }
-  }
-
-  /// Build default business context
-  Future<BusinessContext> _buildDefaultContext() async {
-    try {
-      debugPrint('🏢 Building default business context');
-
-      // Get default business ID from storage or use fallback
-      final storedBusinessId = await ref.read(initBusinessIdProvider.future);
-
-      final context = BusinessContext(
-        businessId: storedBusinessId,
-        businessSlug: null,
-        isDefault: true,
-        lastUpdated: DateTime.now(),
-      );
-
-      debugPrint('✅ Default business context built: $context');
-      return context;
-    } catch (e) {
-      debugPrint('❌ Error building default context: $e');
-      // Fallback to hardcoded default
-      return BusinessContext(
-        businessId: 'default',
-        businessSlug: null,
-        isDefault: true,
-        lastUpdated: DateTime.now(),
+      return await buildDefaultBusinessContext(
+        ref: ref,
+        shouldInvalidate: false,
+        fullInvalidation: true,
       );
     }
   }
 
-  /// Invalidate all business-dependent providers when business context changes
-  Future<void> _invalidateBusinessDependentProviders() async {
-    debugPrint('🔄 Invalidating business-dependent providers...');
-
-    try {
-      // Core business providers
-      ref.invalidate(currentBusinessIdProvider);
-      ref.invalidate(businessConfigProvider);
-      ref.invalidate(urlAwareBusinessIdProvider);
-
-      // Catalog and menu providers
-      ref.invalidate(catalogItemsProvider);
-      ref.invalidate(menuProductsProvider);
-      ref.invalidate(menuCategoriesProvider);
-
-      // Catering providers
-      ref.invalidate(cateringItemRepositoryProvider);
-      ref.invalidate(cateringCategoryRepositoryProvider);
-      // ref.invalidate(allCateringItemsProvider);
-      // ref.invalidate(allCateringCategoriesProvider);
-
-      // Cart provider (business-specific cart)
-      ref.invalidate(cartProvider);
-
-      debugPrint('✅ All business-dependent providers invalidated');
-    } catch (e) {
-      debugPrint('⚠️ Error invalidating some providers: $e');
-    }
-  }
-
-  /// Force refresh the business context (useful for manual context switching)
   void refresh() {
-    ref.invalidateSelf();
-  }
-
-  /// Switch to a specific business slug
-  Future<void> switchToBusiness(String businessSlug) async {
-    debugPrint('🔄 Switching to business: $businessSlug');
-
-    // This will be handled by the URL routing, but we can force a refresh
-    ref.invalidateSelf();
-  }
-
-  /// Switch to default business context
-  Future<void> switchToDefault() async {
-    debugPrint('🔄 Switching to default business');
-
-    // This will be handled by the URL routing, but we can force a refresh
+    _lastProcessedSlug = null;
+    _lastProcessedBusinessId = null;
+    _cachedContext = null;
     ref.invalidateSelf();
   }
 }
 
+// =============================================================================
+// Explicit Business Context Provider (slug-based, programmatic)
+// =============================================================================
+
 /// Explicit business context provider that works with a specific business slug
-/// This avoids race conditions with URL detection during navigation
+/// Use this during programmatic navigation to avoid race conditions with URL detection
 @riverpod
 class ExplicitBusinessContext extends _$ExplicitBusinessContext {
   @override
@@ -215,7 +307,6 @@ class ExplicitBusinessContext extends _$ExplicitBusinessContext {
     debugPrint('🏢 Building explicit business context for slug: $businessSlug');
 
     try {
-      // Get business ID from slug
       final slugService = ref.read(businessSlugServiceProvider);
       final businessId = await slugService.getBusinessIdFromSlug(businessSlug);
 
@@ -223,113 +314,47 @@ class ExplicitBusinessContext extends _$ExplicitBusinessContext {
         debugPrint(
             '🏢 Resolved business ID: $businessId for slug: $businessSlug');
 
-        // Update local storage to maintain persistence
-        final localStorage = ref.read(localStorageServiceProvider);
-        await localStorage.setString('businessId', businessId);
+        final currentBusinessId = ref.read(currentBusinessIdProvider);
+        final shouldInvalidate = currentBusinessId != businessId;
 
-        // Invalidate all business-dependent providers
-        await _invalidateBusinessDependentProviders();
+        if (shouldInvalidate) {
+          await invalidateBusinessProviders(ref, fullInvalidation: false);
+          debugPrint('🔄 Providers invalidated (explicit)');
+        }
 
-        final context = BusinessContext(
+        return BusinessContext(
           businessId: businessId,
           businessSlug: businessSlug,
           isDefault: false,
           lastUpdated: DateTime.now(),
         );
-
-        debugPrint('✅ Explicit business context built: $context');
-        return context;
       } else {
         debugPrint(
             '⚠️ Business slug not found: $businessSlug, falling back to default');
-        return await _buildDefaultContext();
+        return await buildDefaultBusinessContext(
+          ref: ref,
+          shouldInvalidate: true,
+          fullInvalidation: false,
+        );
       }
     } catch (e) {
       debugPrint('❌ Error building explicit business context: $e');
-      return await _buildDefaultContext();
-    }
-  }
-
-  /// Build default business context (shared with UnifiedBusinessContext)
-  Future<BusinessContext> _buildDefaultContext() async {
-    try {
-      debugPrint('🏢 Building default business context from explicit provider');
-
-      // Get default business ID from storage or use fallback
-      final storedBusinessId = await ref.read(initBusinessIdProvider.future);
-
-      final context = BusinessContext(
-        businessId: storedBusinessId,
-        businessSlug: null,
-        isDefault: true,
-        lastUpdated: DateTime.now(),
-      );
-
-      debugPrint('✅ Default business context built: $context');
-      return context;
-    } catch (e) {
-      debugPrint('❌ Error building default context: $e');
-      // Fallback to hardcoded default
-      return BusinessContext(
-        businessId: 'default',
-        businessSlug: null,
-        isDefault: true,
-        lastUpdated: DateTime.now(),
+      return await buildDefaultBusinessContext(
+        ref: ref,
+        shouldInvalidate: false,
+        fullInvalidation: false,
       );
     }
   }
 
-  /// Invalidate all business-dependent providers when business context changes
-  Future<void> _invalidateBusinessDependentProviders() async {
-    debugPrint('🔄 Invalidating business-dependent providers...');
-
-    try {
-      // Core business providers
-      ref.invalidate(currentBusinessIdProvider);
-      ref.invalidate(businessConfigProvider);
-      ref.invalidate(urlAwareBusinessIdProvider);
-
-      // Catalog and menu providers
-      ref.invalidate(catalogItemsProvider);
-      ref.invalidate(menuProductsProvider);
-      ref.invalidate(menuCategoriesProvider);
-
-      // Catering providers
-      // ref.invalidate(cateringItemRepositoryProvider);
-      // ref.invalidate(cateringCategoryRepositoryProvider);
-      // ref.invalidate(allCateringItemsProvider);
-      // ref.invalidate(allCateringCategoriesProvider);
-
-      // Cart provider (business-specific cart)
-      ref.invalidate(cartProvider);
-
-      debugPrint('✅ All business-dependent providers invalidated');
-    } catch (e) {
-      debugPrint('⚠️ Error invalidating some providers: $e');
-    }
-  }
-
-  /// Force refresh the business context (useful for manual context switching)
   void refresh() {
     ref.invalidateSelf();
   }
-
-  /// Switch to a specific business slug
-  Future<void> switchToBusiness(String businessSlug) async {
-    debugPrint('🔄 Switching to business: $businessSlug');
-
-    // This will be handled by the URL routing, but we can force a refresh
-    ref.invalidateSelf();
-  }
-
-  /// Switch to default business context
-  Future<void> switchToDefault() async {
-    debugPrint('🔄 Switching to default business');
-
-    // This will be handled by the URL routing, but we can force a refresh
-    ref.invalidateSelf();
-  }
 }
+
+// =============================================================================
+// Derived Providers (simplified access)
+// =============================================================================
 
 /// Provider for current business ID (simplified access)
 @riverpod
@@ -337,8 +362,8 @@ String currentBusinessIdFromContext(Ref ref) {
   final contextAsync = ref.watch(unifiedBusinessContextProvider);
   return contextAsync.when(
     data: (context) => context.businessId,
-    loading: () => 'default',
-    error: (_, __) => 'default',
+    loading: () => BusinessConstants.defaultBusinessId,
+    error: (_, __) => BusinessConstants.defaultBusinessId,
   );
 }
 
@@ -376,8 +401,6 @@ bool isBusinessSpecificContext(Ref ref) {
 }
 
 /// Provider that returns the current business ID based on routing context
-/// - If on business-specific route (e.g., /g3), returns the business ID for that slug
-/// - If on default route (e.g., /menu), returns the default business ID
 @riverpod
 Future<String> currentRoutingBusinessId(Ref ref) async {
   final unifiedContext = await ref.watch(unifiedBusinessContextProvider.future);

@@ -12,7 +12,7 @@ import 'package:starter_architecture_flutter_firebase/src/screens/menu/views/cat
 class CustomQuoteView extends ConsumerStatefulWidget {
   /// Scroll controller for the list view
   final ScrollController scrollController;
-  
+
   /// Callback when a quote is submitted
   final Function(dynamic)? onQuoteSubmitted;
 
@@ -32,12 +32,12 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final quote = ref.watch(manualQuoteProvider);
-    
+
     // No active quote or no dishes
     if (quote == null || quote.dishes.isEmpty) {
       return _buildEmptyState(context, ref, theme, colorScheme);
     }
-    
+
     // Active quote exists
     return ListView(
       controller: widget.scrollController,
@@ -59,7 +59,7 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
           ),
         ),
         const SizedBox(height: 16),
-        
+
         // Quote summary card
         Card(
           elevation: 2,
@@ -83,7 +83,9 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            quote.title.isNotEmpty ? quote.title : 'Custom Quote',
+                            quote.title.isNotEmpty
+                                ? quote.title
+                                : 'Custom Quote',
                             style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: colorScheme.onSecondaryContainer,
@@ -93,14 +95,17 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
                           Text(
                             'Event Type: ${quote.eventType.isNotEmpty ? quote.eventType : "Not specified"}',
                             style: TextStyle(
-                              color: colorScheme.onSecondaryContainer.withOpacity(0.8),
+                              color: colorScheme.onSecondaryContainer
+                                  .withOpacity(0.8),
                             ),
                           ),
-                          if (quote.peopleCount != null && quote.peopleCount! > 0)
+                          if (quote.peopleCount != null &&
+                              quote.peopleCount! > 0)
                             Text(
                               'People: ${quote.peopleCount}',
                               style: TextStyle(
-                                color: colorScheme.onSecondaryContainer.withOpacity(0.8),
+                                color: colorScheme.onSecondaryContainer
+                                    .withOpacity(0.8),
                               ),
                             ),
                         ],
@@ -110,7 +115,18 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         FilledButton.icon(
-                          onPressed: () => _showQuoteForm(context, ref),
+                          onPressed: () {
+                            showCateringFormSheet(
+                              context: context,
+                              ref: ref,
+                              title: 'Detalles de la Cotización',
+                              isQuote: true,
+                              onSuccess: (data) {
+                                // Force UI refresh
+                                setState(() {});
+                              },
+                            );
+                          },
                           icon: const Icon(Icons.edit),
                           label: const Text('Edit Quote'),
                           style: FilledButton.styleFrom(
@@ -123,10 +139,10 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
                   ],
                 ),
               ),
-              
+
               // Divider
               Divider(height: 1, color: colorScheme.outlineVariant),
-              
+
               // Quote items summary
               Padding(
                 padding: const EdgeInsets.all(16),
@@ -150,21 +166,23 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    
+
                     // List of items (limited to first 3 with "more" indicator)
-                    ...quote.dishes.take(3).map((dish) => _buildQuoteItemTile(context, dish, theme, colorScheme)),
-                    
+                    ...quote.dishes.take(3).map((dish) =>
+                        _buildQuoteItemTile(context, dish, theme, colorScheme)),
+
                     if (quote.dishes.length > 3)
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
                         child: TextButton(
                           onPressed: () => _viewQuoteDetails(context, ref),
-                          child: Text('${quote.dishes.length - 3} more items...'),
+                          child:
+                              Text('${quote.dishes.length - 3} more items...'),
                         ),
                       ),
-                      
+
                     const SizedBox(height: 16),
-                    
+
                     // Totals and checkout button
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -209,9 +227,9 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Chef service option
         Card(
           elevation: 1,
@@ -227,30 +245,31 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
                 const Text('Chef Service Required'),
               ],
             ),
-            subtitle: const Text('Professional chef will prepare and serve the food'),
+            subtitle:
+                const Text('Professional chef will prepare and serve the food'),
             value: quote.hasChef ?? false,
             onChanged: (value) {
               // Update hasChef property
               final currentQuote = ref.read(manualQuoteProvider);
               if (currentQuote == null) return;
-              
+
               ref.read(manualQuoteProvider.notifier).finalizeManualQuote(
-                title: currentQuote.title,
-                img: currentQuote.img,
-                description: currentQuote.description,
-                hasChef: value,
-                alergias: currentQuote.alergias,
-                eventType: currentQuote.eventType,
-                preferencia: currentQuote.preferencia,
-                adicionales: currentQuote.adicionales,
-                cantidadPersonas: currentQuote.peopleCount ?? 1,
-              );
+                    title: currentQuote.title,
+                    img: currentQuote.img,
+                    description: currentQuote.description,
+                    hasChef: value,
+                    alergias: currentQuote.alergias,
+                    eventType: currentQuote.eventType,
+                    preferencia: currentQuote.preferencia,
+                    adicionales: currentQuote.adicionales,
+                    cantidadPersonas: currentQuote.peopleCount ?? 1,
+                  );
             },
           ),
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Suggestions section
         Card(
           elevation: 1,
@@ -274,10 +293,13 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    _buildSuggestionChip(context, ref, 'Appetizers', Icons.tapas),
+                    _buildSuggestionChip(
+                        context, ref, 'Appetizers', Icons.tapas),
                     _buildSuggestionChip(context, ref, 'Desserts', Icons.cake),
-                    _buildSuggestionChip(context, ref, 'Beverages', Icons.local_bar),
-                    _buildSuggestionChip(context, ref, 'Side Dishes', Icons.dinner_dining),
+                    _buildSuggestionChip(
+                        context, ref, 'Beverages', Icons.local_bar),
+                    _buildSuggestionChip(
+                        context, ref, 'Side Dishes', Icons.dinner_dining),
                   ],
                 ),
               ],
@@ -287,8 +309,9 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
       ],
     );
   }
-  
-  Widget _buildEmptyState(BuildContext context, WidgetRef ref, ThemeData theme, ColorScheme colorScheme) {
+
+  Widget _buildEmptyState(BuildContext context, WidgetRef ref, ThemeData theme,
+      ColorScheme colorScheme) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -325,7 +348,7 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
                   // Switch to catering packages tab
                   final tabController = DefaultTabController.of(context);
                   tabController.animateTo(0);
-                                },
+                },
                 icon: const Icon(Icons.restaurant_menu),
                 label: const Text('Browse Packages'),
                 style: ElevatedButton.styleFrom(
@@ -335,7 +358,15 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
               ),
               const SizedBox(width: 16),
               FilledButton.icon(
-                onPressed: () => _initializeQuote(context, ref),
+                onPressed: () {
+                  showCateringFormSheet(
+                    context: context,
+                    ref: ref,
+                    title: 'Detalles de la Cotización',
+                    isQuote: true,
+                    initialFlow: 'custom',
+                  );
+                },
                 icon: const Icon(Icons.add),
                 label: const Text('Start Quote'),
                 style: FilledButton.styleFrom(
@@ -349,8 +380,9 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
       ),
     );
   }
-  
-  Widget _buildQuoteItemTile(BuildContext context, CateringDish dish, ThemeData theme, ColorScheme colorScheme) {
+
+  Widget _buildQuoteItemTile(BuildContext context, CateringDish dish,
+      ThemeData theme, ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(
@@ -401,8 +433,9 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
       ),
     );
   }
-  
-  Widget _buildSuggestionChip(BuildContext context, WidgetRef ref, String label, IconData icon) {
+
+  Widget _buildSuggestionChip(
+      BuildContext context, WidgetRef ref, String label, IconData icon) {
     return ActionChip(
       avatar: Icon(icon, size: 18),
       label: Text(label),
@@ -411,114 +444,95 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
       },
     );
   }
-  
-  void _initializeQuote(BuildContext context, WidgetRef ref) {
-    // Initialize a new quote if needed
-    if (ref.read(manualQuoteProvider) == null) {
-      ref.read(manualQuoteProvider.notifier).createEmptyQuote();
-    }
-    
-    // Show the quote form
-    _showQuoteForm(context, ref);
-  }
-  
-  void _showQuoteForm(BuildContext context, WidgetRef ref) {
-    showCateringFormSheet(
-      context: context,
-      ref: ref,
-      title: 'Detalles de la Cotización',
-      isQuote: true,
-      onSuccess: (data) {
-        if (widget.onQuoteSubmitted != null) {
-          widget.onQuoteSubmitted!(ref.read(manualQuoteProvider));
-        }
-        // Force UI refresh
-        setState(() {});
-      },
-    );
-  }
-  
-  void _showAddItemDialog(BuildContext context, WidgetRef ref, [String? categoryName]) {
+
+  void _showAddItemDialog(BuildContext context, WidgetRef ref,
+      [String? categoryName]) {
     showAddQuoteItemDialog(
       context: context,
       ref: ref,
       onItemAdded: (item) {
         final quoteOrder = ref.read(manualQuoteProvider);
         if (quoteOrder == null) return;
-        
+
         // If category was provided, add it to the title
         String itemTitle = item.title;
-        if (categoryName != null && !itemTitle.toLowerCase().contains(categoryName.toLowerCase())) {
+        if (categoryName != null &&
+            !itemTitle.toLowerCase().contains(categoryName.toLowerCase())) {
           itemTitle = '$categoryName: $itemTitle';
         }
-        
+
         ref.read(manualQuoteProvider.notifier).addManualItem(
-          CateringDish(
-            title: itemTitle,
-            quantity: item.quantity,
-            hasUnitSelection: false,
-            peopleCount: quoteOrder.peopleCount ?? 0,
-            pricePerUnit: 0,
-            pricePerPerson: 0,
-            ingredients: [],
-            pricing: 0,
-          ),
-        );
-        
+              CateringDish(
+                title: itemTitle,
+                quantity: item.quantity,
+                hasUnitSelection: false,
+                peopleCount: quoteOrder.peopleCount ?? 0,
+                pricePerUnit: 0,
+                pricePerPerson: 0,
+                ingredients: [],
+                pricing: 0,
+              ),
+            );
+
         // Force UI to refresh
         setState(() {});
       },
     );
   }
-  
+
   void _viewQuoteDetails(BuildContext context, WidgetRef ref) {
     // Show a detailed view of the quote
     // Using a similar screen as order details, but could be customized further
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const CateringOrderDetailsScreen(orderId: '',), // TODO: Replace with actual order ID
+        builder: (context) => const CateringOrderDetailsScreen(
+          orderId: '',
+        ), // TODO: Replace with actual order ID
       ),
     );
   }
-  
+
   void _proceedToCheckout(BuildContext context, WidgetRef ref) {
     // Validate quote
     final quote = ref.read(manualQuoteProvider);
-            final theme = Theme.of(context);
+    final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     if (quote == null) {
-      _showErrorSnackBar(context, 'Error: No hay datos de la cotización', colorScheme);
+      _showErrorSnackBar(
+          context, 'Error: No hay datos de la cotización', colorScheme);
       return;
     }
-    
+
     if ((quote.peopleCount ?? 0) <= 0) {
-      _showErrorSnackBar(context, 'La cantidad de personas es requerida', colorScheme);
+      _showErrorSnackBar(
+          context, 'La cantidad de personas es requerida', colorScheme);
       return;
     }
-    
+
     if (quote.eventType.isEmpty) {
-      _showErrorSnackBar(context, 'El tipo de evento es requerido',  colorScheme);
+      _showErrorSnackBar(
+          context, 'El tipo de evento es requerido', colorScheme);
       return;
     }
-    
+
     if (quote.dishes.isEmpty) {
-      _showErrorSnackBar(context, 'Debe agregar al menos un item',  colorScheme);
+      _showErrorSnackBar(context, 'Debe agregar al menos un item', colorScheme);
       return;
     }
-    
+
     // All validation passed, submit the quote
     if (widget.onQuoteSubmitted != null) {
       widget.onQuoteSubmitted!(quote);
     }
-    
+
     // Navigate to cart with quote
     GoRouter.of(context).pushNamed(AppRoute.homecart.name, extra: 'quote');
   }
-  
+
   double _calculateTotalPrice(dynamic quote) {
     double total = 0;
-    
+
     // Sum up the prices of all dishes
     try {
       if (quote.dishes is List) {
@@ -530,11 +544,12 @@ class _CustomQuoteViewState extends ConsumerState<CustomQuoteView> {
       // If there's an error in calculation, return 0
       return 0;
     }
-    
+
     return total;
   }
-  
-  void _showErrorSnackBar(BuildContext context, String message, ColorScheme colorScheme) {
+
+  void _showErrorSnackBar(
+      BuildContext context, String message, ColorScheme colorScheme) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),

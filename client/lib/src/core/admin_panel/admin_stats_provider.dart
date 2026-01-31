@@ -1,5 +1,5 @@
-// Providers for dashboard stats - FIXED
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/order/unified_order_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/order_status_enum.dart';
@@ -10,17 +10,22 @@ import 'package:starter_architecture_flutter_firebase/src/core/business/business
 import 'package:cloud_firestore/cloud_firestore.dart' as cloud_firestore;
 import 'package:flutter/foundation.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/table_model.dart';
+import 'dart:async';
 
-// Optimized admin statistics service
-class AdminStatsService {
-  final cloud_firestore.FirebaseFirestore _firestore;
-  final String _businessId;
+part 'admin_stats_provider.g.dart';
 
-  AdminStatsService({
-    cloud_firestore.FirebaseFirestore? firestore,
-    required String businessId,
-  }) : _firestore = firestore ?? cloud_firestore.FirebaseFirestore.instance,
-       _businessId = businessId;
+// Optimized admin statistics service using Riverpod annotations
+@riverpod
+class AdminStatsService extends _$AdminStatsService {
+  late final cloud_firestore.FirebaseFirestore _firestore;
+  late final String _businessId;
+
+  @override
+  AdminStatsService build() {
+    _firestore = ref.watch(firebaseFirestoreProvider);
+    _businessId = ref.watch(currentBusinessIdProvider);
+    return this;
+  }
 
   // Get all stats in a single batch operation
   Future<Map<String, dynamic>> getAllStats() async {
@@ -61,9 +66,6 @@ class AdminStatsService {
   Future<OrderStats> _getOrderStats(
       DateTime todayStart, DateTime todayEnd) async {
     try {
-      // Use aggregate queries for better performance
-      final batch = _firestore.batch();
-
       // Query for orders for all stats - filtered by business ID
       final ordersQuery = await _firestore
           .collection('businesses')
@@ -241,58 +243,53 @@ class AdminStatsService {
   }
 }
 
-// Providers
-final adminStatsServiceProvider = Provider<AdminStatsService>((ref) {
-  final firestore = ref.watch(firebaseFirestoreProvider);
-  final businessId = ref.watch(currentBusinessIdProvider);
-  return AdminStatsService(firestore: firestore, businessId: businessId);
-});
+@riverpod
+Future<Map<String, dynamic>> combinedAdminStats(Ref ref) async {
+  final adminStatsService = ref.watch(adminStatsServiceProvider.notifier);
 
-// Combined admin stats provider with cache invalidation
-final combinedAdminStatsProvider =
-    FutureProvider<Map<String, dynamic>>((ref) async {
-  final adminStatsService = ref.watch(adminStatsServiceProvider);
-
-  // Set up cache invalidation based on time (refresh every 5 minutes)
-  ref.onDispose(() {
-    Future.delayed(const Duration(minutes: 5), () {
-      ref.invalidateSelf();
-    });
+  // Set up periodic cache invalidation using a Timer
+  final timer = Timer(const Duration(minutes: 5), () {
+    ref.invalidateSelf();
   });
+  ref.onDispose(timer.cancel);
 
   return adminStatsService.getAllStats();
-});
+}
 
 // Individual stats providers that depend on the combined stats
-final orderStatsProvider = FutureProvider<OrderStats>((ref) async {
+@riverpod
+Future<OrderStats> orderStats(Ref ref) async {
   final allStats = await ref.watch(combinedAdminStatsProvider.future);
   return allStats['orderStats'] as OrderStats;
-});
+}
 
-final tableStatsProvider = FutureProvider<TableStats>((ref) async {
+@riverpod
+Future<TableStats> tableStats(Ref ref) async {
   final allStats = await ref.watch(combinedAdminStatsProvider.future);
   return allStats['tableStats'] as TableStats;
-});
+}
 
-final productStatsProvider = FutureProvider<ProductStats>((ref) async {
+@riverpod
+Future<ProductStats> productStats(Ref ref) async {
   final allStats = await ref.watch(combinedAdminStatsProvider.future);
   return allStats['productStats'] as ProductStats;
-});
+}
 
-// Recent orders provider - this uses a stream for real-time updates
-final recentOrdersProvider = StreamProvider<List<Order>>((ref) {
-  final adminStatsService = ref.watch(adminStatsServiceProvider);
+// Recent orders provider - rewritten using StreamProvider annotation
+@riverpod
+Stream<List<Order>> recentOrders(Ref ref) {
+  final adminStatsService = ref.watch(adminStatsServiceProvider.notifier);
   return adminStatsService.getRecentOrdersStream();
-});
+}
 
 // Sales stats derived from order stats
-final salesStatsProvider = FutureProvider<SalesStats>((ref) async {
-  final orderStats = await ref.watch(orderStatsProvider.future);
+@riverpod
+Future<SalesStats> salesStats(Ref ref) async {
+  final orderStatsValue = await ref.watch(orderStatsProvider.future);
 
   return SalesStats(
-    totalSales: orderStats
-        .dailySales, // This would need to be expanded for historical data
-    todaySales: orderStats.dailySales,
-    orderCount: orderStats.totalOrders,
+    totalSales: orderStatsValue.dailySales,
+    todaySales: orderStatsValue.dailySales,
+    orderCount: orderStatsValue.totalOrders,
   );
-});
+}

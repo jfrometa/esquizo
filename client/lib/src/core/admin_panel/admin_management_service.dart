@@ -2,46 +2,60 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/firebase/firebase_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/auth_services/auth_providers.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/models/admin_user.dart';
 
-/// Unified admin service that handles all admin-related operations.
-/// Consolidates functionality from both AdminManagementService and AdminService.
-class UnifiedAdminService {
-  final FirebaseFirestore _firestore;
-  final FirebaseAuth _auth;
+part 'admin_management_service.g.dart';
 
-  // Private constructor for dependency injection
-  UnifiedAdminService({FirebaseFirestore? firestore, FirebaseAuth? auth})
-      : _firestore = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+/// Unified admin service that handles all admin-related operations.
+@riverpod
+class UnifiedAdminService extends _$UnifiedAdminService {
+  late final FirebaseFirestore _firestore;
+  late final FirebaseAuth _auth;
+
+  @override
+  UnifiedAdminService build() {
+    _firestore = ref.watch(firebaseFirestoreProvider);
+    _auth = FirebaseAuth.instance;
+    return this;
+  }
 
   // Check if current user is admin with optimized caching
   Future<bool> isCurrentUserAdmin() async {
     try {
       final user = _auth.currentUser;
-      if (user == null) return false;
+      debugPrint('🔍 Checking admin status for user: ${user?.uid ?? 'null'}');
+      if (user == null) {
+        debugPrint('❌ No authenticated user found');
+        return false;
+      }
 
       // Cache option for better performance
       const cacheOption = GetOptions(source: Source.serverAndCache);
 
       // Check admin document in Firestore
+      debugPrint('🔍 Checking admin document in Firestore...');
       final adminDoc =
           await _firestore.collection('admins').doc(user.uid).get(cacheOption);
+      debugPrint('📄 Admin document exists: ${adminDoc.exists}');
 
       // Check admin claims in user's token as fallback
       bool isAdminClaim = false;
       try {
+        debugPrint('🔍 Checking admin claims in token...');
         final idTokenResult = await user.getIdTokenResult(true);
         isAdminClaim = idTokenResult.claims?['admin'] == true;
+        debugPrint('🎫 Admin claim in token: $isAdminClaim');
       } catch (tokenError) {
-        debugPrint('Error getting token claims: $tokenError');
+        debugPrint('❌ Error getting token claims: $tokenError');
       }
 
       // Check if user is a business owner
       bool isBusinessOwner = false;
       try {
+        debugPrint('🔍 Checking business ownership...');
         final ownershipQuery = await _firestore
             .collection('business_relationships')
             .where('userId', isEqualTo: user.uid)
@@ -50,15 +64,20 @@ class UnifiedAdminService {
             .get(cacheOption);
 
         isBusinessOwner = ownershipQuery.docs.isNotEmpty;
+        debugPrint('🏢 Is business owner: $isBusinessOwner');
 
         if (isBusinessOwner) {
           debugPrint('🔐 User ${user.uid} has business owner privileges');
         }
       } catch (businessError) {
-        debugPrint('Error checking business ownership: $businessError');
+        debugPrint('❌ Error checking business ownership: $businessError');
       }
 
-      return adminDoc.exists || isAdminClaim || isBusinessOwner;
+      final isAdmin = adminDoc.exists || isAdminClaim || isBusinessOwner;
+      debugPrint(
+          '🎯 Final admin status: $isAdmin (adminDoc: ${adminDoc.exists}, claims: $isAdminClaim, owner: $isBusinessOwner)');
+
+      return isAdmin;
     } catch (e) {
       debugPrint('Error checking admin status: $e');
       return false;
@@ -194,84 +213,113 @@ class UnifiedAdminService {
       return null;
     }
   }
-
-  // Clear admin cache on logout
-  void clearAdminStatus() {
-    // Method to be called on logout to clear caches
-  }
 }
 
-// Optimized providers with proper caching and dependency management
-final unifiedAdminServiceProvider = Provider<UnifiedAdminService>((ref) {
-  // Get Firestore instance from central Firebase provider
-  final firestore = ref.watch(firebaseFirestoreProvider);
-  return UnifiedAdminService(firestore: firestore);
-});
-
-// Stream provider with error handling
-final adminsStreamProvider = StreamProvider<List<AdminUser>>((ref) {
-  final adminService = ref.watch(unifiedAdminServiceProvider);
-  return adminService.getAdmins();
-});
-
-// Admin status provider with proper caching
-final isAdminProvider = FutureProvider<bool>((ref) async {
+// Admin status provider with proper caching and generated syntax
+@riverpod
+Future<bool> isAdmin(Ref ref) async {
   // Listen to auth state changes for cache invalidation
+  // This is a "safe" use of ref.listen within a provider for reactive invalidation
   ref.listen(authStateChangesProvider, (_, next) {
-    // Clear cache when auth state changes
-    ref.read(cachedAdminStatusProvider.notifier).state = false;
+    debugPrint('🔄 Auth state changed, invalidating admin status cache');
+    // Clear cache when auth state changes by invalidating the state provider
+    ref.invalidate(cachedAdminStatusProvider);
     // Invalidate this provider to re-check admin status
     ref.invalidateSelf();
   });
 
   final authState = ref.watch(authStateChangesProvider);
+  debugPrint(
+      '🔍 isAdminProvider called, auth state: ${authState.value?.uid ?? 'null'}');
 
   // If user is not authenticated, they can't be admin
   if (authState.value == null) {
-    ref.read(cachedAdminStatusProvider.notifier).state = false;
+    debugPrint('❌ User not authenticated, returning false');
     return false;
   }
 
   // Check cached value first for performance
+  // Note: We read the state here, which is fine, but we don't modify other providers
   final cachedStatus = ref.read(cachedAdminStatusProvider);
-  if (cachedStatus) return true;
+  if (cachedStatus) {
+    debugPrint('✅ Using cached admin status: true');
+    return true;
+  }
 
   // If not cached, check from service
-  final adminService = ref.watch(unifiedAdminServiceProvider);
-  final isAdmin = await adminService.isCurrentUserAdmin();
+  debugPrint('🔍 No cached admin status, checking from service...');
+  final adminService = ref.watch(unifiedAdminServiceProvider.notifier);
+  final isAdminResult = await adminService.isCurrentUserAdmin();
 
-  // Update cache with the result
-  ref.read(cachedAdminStatusProvider.notifier).state = isAdmin;
+  debugPrint('🎯 Admin check result: $isAdminResult');
 
-  return isAdmin;
-});
+  return isAdminResult;
+}
 
-// Single, centralized cache provider
-final cachedAdminStatusProvider = StateProvider<bool>((ref) {
-  // Listen to auth state changes to clear cache
-  ref.listen(authStateChangesProvider, (_, next) {
-    // Clear admin status when auth state changes
-    if (next.value == null) {
-      // User logged out, clear admin status
-      // Note: We can't modify state in this callback, it will be handled
-      // by the isAdminProvider instead
-    }
-  });
+// Single, centralized cache provider using generated syntax
+@riverpod
+class CachedAdminStatus extends _$CachedAdminStatus {
+  @override
+  bool build() => false;
 
-  return false;
-});
+  void updateStatus(bool value) => state = value;
+}
+
+// Provider to manually refresh admin status
+@riverpod
+Future<void> refreshAdminStatus(Ref ref) async {
+  debugPrint('🔄 Manual admin status refresh triggered');
+  // Invalidate the admin provider to force a fresh check
+  ref.invalidate(isAdminProvider);
+  // Clear cached status
+  ref.invalidate(cachedAdminStatusProvider);
+  // Wait for the new admin status to be determined
+  await ref.read(isAdminProvider.future);
+}
 
 // Provider that automatically checks admin status when user logs in
-final autoCheckAdminStatusProvider = Provider<void>((ref) {
+@riverpod
+void autoCheckAdminStatus(Ref ref) {
   ref.listen(authStateChangesProvider, (previous, next) async {
+    debugPrint('🔄 Auth state change detected in autoCheckAdminStatusProvider');
+    debugPrint('  Previous: ${previous?.value?.uid ?? 'null'}');
+    debugPrint('  Next: ${next.value?.uid ?? 'null'}');
+
     // When user logs in (from null to authenticated)
     if (previous?.value == null && next.value != null) {
+      debugPrint('🚀 User logged in, forcing admin status check...');
       // Force check admin status
       try {
-        await ref.read(isAdminProvider.future);
+        final adminResult = await ref.read(isAdminProvider.future);
+        debugPrint('✅ Admin status check completed: $adminResult');
+        // Update cache AFTER the async check is complete, in a listener callback
+        ref.read(cachedAdminStatusProvider.notifier).updateStatus(adminResult);
       } catch (e) {
-        debugPrint('Error checking admin status after login: $e');
+        debugPrint('❌ Error checking admin status after login: $e');
       }
     }
+
+    // When user logs out (from authenticated to null)
+    if (previous?.value != null && next.value == null) {
+      debugPrint('🔒 User logged out, clearing admin status');
+      ref.read(cachedAdminStatusProvider.notifier).updateStatus(false);
+    }
   });
-});
+
+  // Also listen to isAdminProvider itself to keep the cache in sync
+  ref.listen(isAdminProvider, (previous, next) {
+    next.whenData((isAdmin) {
+      if (ref.read(cachedAdminStatusProvider) != isAdmin) {
+        debugPrint(
+            '📝 Syncing cachedAdminStatus with isAdminProvider: $isAdmin');
+        ref.read(cachedAdminStatusProvider.notifier).updateStatus(isAdmin);
+      }
+    });
+  });
+}
+
+@riverpod
+Stream<List<AdminUser>> adminsStream(Ref ref) {
+  final adminService = ref.watch(unifiedAdminServiceProvider.notifier);
+  return adminService.getAdmins();
+}

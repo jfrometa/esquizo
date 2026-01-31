@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+// import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/plans/plans.dart';
 
@@ -14,7 +14,7 @@ class MealPlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Card(
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 16),
@@ -73,7 +73,7 @@ class MealPlanCard extends StatelessWidget {
                 OutlinedButton(
                   onPressed: () {
                     // Navigate to plan details
-                    context.goNamed(
+                    context.goNamedSafe(
                       AppRoute.planDetails.name,
                       pathParameters: {'planId': plan.id},
                     );
@@ -85,7 +85,7 @@ class MealPlanCard extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () {
                       // Navigate to customer meal plan screen
-                      context.goNamed(
+                      context.goNamedSafe(
                         AppRoute.mealPlan.name,
                       );
                     },
@@ -103,7 +103,7 @@ class MealPlanCard extends StatelessWidget {
       ),
     );
   }
-  
+
   IconData _getPlanIcon(MealPlanStatus plan) {
     switch (plan) {
       case MealPlanStatus.active:

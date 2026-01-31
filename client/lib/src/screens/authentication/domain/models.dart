@@ -118,6 +118,9 @@ class Order {
   final String? adminName;
   final bool isArchived;
   final Map<String, dynamic>? adminMetadata;
+  final String? serviceType; // Add service type field
+  final bool? isDineIn; // Add dine-in flag
+  final double? serviceCharge; // Add service charge field
 
   Order({
     this.orderNumber = '',
@@ -177,6 +180,9 @@ class Order {
     this.adminName,
     this.isArchived = false,
     this.adminMetadata,
+    this.serviceType,
+    this.isDineIn,
+    this.serviceCharge,
   })  :
         // Initialize orderDate and location with default values if not provided
         timestamp = Timestamp.now(),
@@ -264,6 +270,9 @@ class Order {
       isReviewed: data['isReviewed'] ?? false,
       assignedToId: data['assignedToId'],
       assignedToName: data['assignedToName'],
+      serviceType: data['serviceType'],
+      isDineIn: data['isDineIn'],
+      serviceCharge: (data['serviceCharge'] ?? 0.0).toDouble(),
     );
   }
 
@@ -312,6 +321,9 @@ class Order {
     if (deliveryTime != null) map['deliveryTime'] = deliveryTime;
     if (assignedToId != null) map['assignedToId'] = assignedToId;
     if (assignedToName != null) map['assignedToName'] = assignedToName;
+    if (serviceType != null) map['serviceType'] = serviceType;
+    if (isDineIn != null) map['isDineIn'] = isDineIn;
+    if (serviceCharge != null) map['serviceCharge'] = serviceCharge;
 
     return map;
   }
@@ -459,6 +471,17 @@ class Order {
     bool? isReviewed,
     String? assignedToId,
     String? assignedToName,
+    String? businessId,
+    String? resourceId, // Added to match create_order.dart
+    String? adminNotes,
+    DateTime? adminReviewedAt,
+    String? adminId,
+    String? adminName,
+    bool? isArchived,
+    Map<String, dynamic>? adminMetadata,
+    String? serviceType,
+    bool? isDineIn,
+    double? serviceCharge,
   }) {
     return Order(
       orderNumber: orderNumber ?? this.orderNumber,
@@ -500,6 +523,9 @@ class Order {
       isReviewed: isReviewed ?? this.isReviewed,
       assignedToId: assignedToId ?? this.assignedToId,
       assignedToName: assignedToName ?? this.assignedToName,
+      serviceType: serviceType ?? this.serviceType,
+      isDineIn: isDineIn ?? this.isDineIn,
+      serviceCharge: serviceCharge ?? this.serviceCharge,
     );
   }
 }
@@ -519,6 +545,23 @@ class OrderItem {
   final bool
       isModifiable; // Whether the item can be modified after order is placed
 
+  // Meal plan specific fields
+  final bool? isMealSubscription;
+  final bool? isMealPlanDish;
+  final String? mealPlanId;
+  final int? totalMeals;
+  final int? remainingMeals;
+  final DateTime? mealPlanExpirationDate;
+
+  // Additional fields from CartItem
+  final String? title;
+  final String? description;
+  final String? pricing;
+  final String? offertPricing;
+  final List<String>? ingredients;
+  final bool? isSpicy;
+  final String? foodType;
+
   OrderItem({
     this.id, // Optional id parameter
     required this.productId,
@@ -531,6 +574,21 @@ class OrderItem {
     this.imageUrl,
     this.isPriority = false,
     this.isModifiable = true,
+    // Meal plan fields
+    this.isMealSubscription,
+    this.isMealPlanDish,
+    this.mealPlanId,
+    this.totalMeals,
+    this.remainingMeals,
+    this.mealPlanExpirationDate,
+    // Additional fields
+    this.title,
+    this.description,
+    this.pricing,
+    this.offertPricing,
+    this.ingredients,
+    this.isSpicy,
+    this.foodType,
   });
 
   // Create from map
@@ -547,6 +605,25 @@ class OrderItem {
       imageUrl: map['imageUrl'],
       isPriority: map['isPriority'] ?? false,
       isModifiable: map['isModifiable'] ?? true,
+      // Meal plan fields
+      isMealSubscription: map['isMealSubscription'],
+      isMealPlanDish: map['isMealPlanDish'],
+      mealPlanId: map['mealPlanId'],
+      totalMeals: map['totalMeals'],
+      remainingMeals: map['remainingMeals'],
+      mealPlanExpirationDate: map['mealPlanExpirationDate'] != null
+          ? DateTime.parse(map['mealPlanExpirationDate'])
+          : null,
+      // Additional fields
+      title: map['title'],
+      description: map['description'],
+      pricing: map['pricing']?.toString(),
+      offertPricing: map['offertPricing']?.toString(),
+      ingredients: map['ingredients'] != null
+          ? List<String>.from(map['ingredients'])
+          : null,
+      isSpicy: map['isSpicy'],
+      foodType: map['foodType'],
     );
   }
 
@@ -570,6 +647,27 @@ class OrderItem {
       map['id'] = id;
     }
 
+    // Include meal plan fields if present
+    if (isMealSubscription != null) {
+      map['isMealSubscription'] = isMealSubscription;
+    }
+    if (isMealPlanDish != null) map['isMealPlanDish'] = isMealPlanDish;
+    if (mealPlanId != null) map['mealPlanId'] = mealPlanId;
+    if (totalMeals != null) map['totalMeals'] = totalMeals;
+    if (remainingMeals != null) map['remainingMeals'] = remainingMeals;
+    if (mealPlanExpirationDate != null) {
+      map['mealPlanExpirationDate'] = mealPlanExpirationDate!.toIso8601String();
+    }
+
+    // Include additional fields if present
+    if (title != null) map['title'] = title;
+    if (description != null) map['description'] = description;
+    if (pricing != null) map['pricing'] = pricing;
+    if (offertPricing != null) map['offertPricing'] = offertPricing;
+    if (ingredients != null) map['ingredients'] = ingredients;
+    if (isSpicy != null) map['isSpicy'] = isSpicy;
+    if (foodType != null) map['foodType'] = foodType;
+
     return map;
   }
 
@@ -586,6 +684,21 @@ class OrderItem {
     String? imageUrl,
     bool? isPriority,
     bool? isModifiable,
+    // Meal plan fields
+    bool? isMealSubscription,
+    bool? isMealPlanDish,
+    String? mealPlanId,
+    int? totalMeals,
+    int? remainingMeals,
+    DateTime? mealPlanExpirationDate,
+    // Additional fields
+    String? title,
+    String? description,
+    String? pricing,
+    String? offertPricing,
+    List<String>? ingredients,
+    bool? isSpicy,
+    String? foodType,
   }) {
     return OrderItem(
       id: id ?? this.id, // Use provided id or current id
@@ -599,6 +712,22 @@ class OrderItem {
       imageUrl: imageUrl ?? this.imageUrl,
       isPriority: isPriority ?? this.isPriority,
       isModifiable: isModifiable ?? this.isModifiable,
+      // Meal plan fields
+      isMealSubscription: isMealSubscription ?? this.isMealSubscription,
+      isMealPlanDish: isMealPlanDish ?? this.isMealPlanDish,
+      mealPlanId: mealPlanId ?? this.mealPlanId,
+      totalMeals: totalMeals ?? this.totalMeals,
+      remainingMeals: remainingMeals ?? this.remainingMeals,
+      mealPlanExpirationDate:
+          mealPlanExpirationDate ?? this.mealPlanExpirationDate,
+      // Additional fields
+      title: title ?? this.title,
+      description: description ?? this.description,
+      pricing: pricing ?? this.pricing,
+      offertPricing: offertPricing ?? this.offertPricing,
+      ingredients: ingredients ?? this.ingredients,
+      isSpicy: isSpicy ?? this.isSpicy,
+      foodType: foodType ?? this.foodType,
     );
   }
 }

@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart'; 
-import 'package:go_router/go_router.dart';
-import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart'; 
+import 'package:flutter/material.dart';
+// import 'package:go_router/go_router.dart';
+import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
 
-  // Enum for badge positioning
-  enum BadgePosition { topLeft, topRight }
- 
+// Enum for badge positioning
+enum BadgePosition { topLeft, topRight }
+
 class DishCardSmall extends StatelessWidget {
   final Map<dynamic, dynamic> dish;
   final VoidCallback? onAddToCart;
@@ -27,7 +27,7 @@ class DishCardSmall extends StatelessWidget {
     final isSpicy = dish['isSpicy'] ?? false;
     final foodType = dish['foodType'] ?? '';
     final bestSeller = dish['bestSeller'] ?? false;
-    
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -36,7 +36,7 @@ class DishCardSmall extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
-          context.goNamed(
+          context.goNamedSafe(
             AppRoute.addToOrder.name,
             pathParameters: {"itemId": "0"},
             extra: dish,
@@ -73,12 +73,11 @@ class DishCardSmall extends StatelessWidget {
                           textColor: colorScheme.onSecondary,
                           position: BadgePosition.topLeft,
                         ),
-                      if (isSpicy)
-                        _buildSpicyIndicator(theme),
+                      if (isSpicy) _buildSpicyIndicator(theme),
                     ],
                   ),
                 ),
-                
+
                 // Dish details - use fixed heights to prevent overflow
                 Padding(
                   padding: const EdgeInsets.all(12),
@@ -111,7 +110,6 @@ class DishCardSmall extends StatelessWidget {
       ),
     );
   }
-
 
   // Extract repeated widgets to methods for better readability and maintenance
   Widget _buildTitleRow(ThemeData theme, String title, String foodType) {
@@ -188,8 +186,6 @@ class DishCardSmall extends StatelessWidget {
     );
   }
 
-
-
   Widget _buildBadge({
     required ThemeData theme,
     required String text,
@@ -240,6 +236,4 @@ class DishCardSmall extends StatelessWidget {
       ),
     );
   }
-
 }
-

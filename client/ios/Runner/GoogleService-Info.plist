@@ -30,5 +30,7 @@
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
 	<string>1:1087483483909:ios:ff1d60b319f1a19541096c</string>
+	<key>DATABASE_URL</key>
+	<string>https://mesa-redonda-fb72e-default-rtdb.firebaseio.com</string>
 </dict>
 </plist>

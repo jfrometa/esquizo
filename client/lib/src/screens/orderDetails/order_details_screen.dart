@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:starter_architecture_flutter_firebase/src/common_widgets/primary_button.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/constants.dart';
 import 'package:starter_architecture_flutter_firebase/src/routing/app_router.dart';
@@ -30,7 +29,7 @@ class OrderDetailsScreen extends StatelessWidget {
                 text: "Continue Shopping",
                 onPressed: () {
                   // Navigate to the home screen and replace the current screen
-                  context.goNamed(AppRoute.home.name);
+                  context.goToBusinessHome();
                 },
               ),
             ],

@@ -10,13 +10,96 @@ import 'package:starter_architecture_flutter_firebase/src/utils/web/web_utils.da
 
 part 'business_routing_provider.g.dart';
 
-/// Provider that extracts business slug from the current URL path
+/// Provider that gets the current route location
+/// SIMPLIFIED: Direct WebUtils access - reactivity handled at app level
 @riverpod
-String? businessSlugFromUrl(BusinessSlugFromUrlRef ref) {
+String currentRouteLocation(CurrentRouteLocationRef ref) {
+  if (!kIsWeb) return '/';
+
+  // Use WebUtils.getCurrentPath() - simple and reliable
+  try {
+    final currentPath = WebUtils.getCurrentPath();
+    debugPrint('🧭 Current route location: $currentPath');
+    return currentPath;
+  } catch (e) {
+    debugPrint('⚠️ Error getting current path: $e');
+    return '/';
+  }
+}
+
+/// Provider for immediate URL detection during app startup
+/// This runs once at startup to capture the initial URL before routing begins
+@riverpod
+String initialUrlPath(Ref ref) {
+  if (!kIsWeb) return '/';
+
+  // Get the actual browser URL immediately when this provider is first accessed
+  String initialPath = '/';
+  try {
+    initialPath = WebUtils.getCurrentPath();
+    debugPrint('🌐 Initial URL path detected at startup: $initialPath');
+  } catch (e) {
+    debugPrint('⚠️ Error getting initial URL path: $e');
+  }
+
+  return initialPath;
+}
+
+/// Provider for early business slug detection during app startup
+/// This provides immediate business context before routing is fully initialized
+@riverpod
+String? earlyBusinessSlug(Ref ref) {
   if (!kIsWeb) return null;
 
-  final currentPath = WebUtils.getCurrentPath();
-  return extractBusinessSlugFromPath(currentPath);
+  // Get the initial URL path
+  final initialPath = ref.watch(initialUrlPathProvider);
+
+  final extractedSlug = extractBusinessSlugFromPath(initialPath);
+  debugPrint(
+      '🚀 Early business slug detection: $extractedSlug from initial path: $initialPath');
+
+  return extractedSlug;
+}
+
+/// Provider that extracts business slug from the current URL path
+/// Now reactive to route changes via currentRouteLocation AND detects initial URL
+@riverpod
+String? businessSlugFromUrl(Ref ref) {
+  if (!kIsWeb) return null;
+
+  // Watch the current route location to make this provider reactive
+  final currentPath = ref.watch(currentRouteLocationProvider);
+
+  debugPrint('🏢 Business slug detection from current path: $currentPath');
+
+  // Determine which path to use for business slug extraction
+  String pathToAnalyze = currentPath;
+
+  // Also check browser URL directly for more reliable initial detection
+  if (kIsWeb) {
+    try {
+      // Get the actual browser path for comparison
+      final browserPath = WebUtils.getCurrentPath();
+      debugPrint('🌐 Browser path: $browserPath, Current path: $currentPath');
+
+      // Use browser path if it's different and more specific
+      if (browserPath != currentPath &&
+          browserPath != '/' &&
+          browserPath.isNotEmpty) {
+        pathToAnalyze = browserPath;
+        debugPrint(
+            '🔄 Using browser path for more accurate detection: $pathToAnalyze');
+      }
+    } catch (e) {
+      debugPrint('⚠️ Error getting browser path: $e');
+    }
+  }
+
+  final extractedSlug = extractBusinessSlugFromPath(pathToAnalyze);
+  debugPrint(
+      '🏢 Extracted business slug: $extractedSlug from path: $pathToAnalyze');
+
+  return extractedSlug;
 }
 
 /// Extract business slug from URL path
@@ -26,10 +109,13 @@ String? businessSlugFromUrl(BusinessSlugFromUrlRef ref) {
 /// - /admin -> null (admin doesn't use business routing)
 /// - /signin -> null (auth pages don't use business routing)
 String? extractBusinessSlugFromPath(String path) {
-  // Remove leading slash
-  if (path.startsWith('/')) {
-    path = path.substring(1);
+  // Only handle paths that start with '/'
+  if (!path.startsWith('/')) {
+    return null;
   }
+
+  // Remove leading slash
+  path = path.substring(1);
 
   // Skip empty paths
   if (path.isEmpty) return null;
@@ -39,7 +125,9 @@ String? extractBusinessSlugFromPath(String path) {
   final firstSegment = segments.first;
 
   // Skip system/auth routes that don't represent business slugs
+  // These are all the root-level paths defined in the router
   final systemRoutes = {
+    // System/auth routes
     'admin',
     'signin',
     'signup',
@@ -48,10 +136,29 @@ String? extractBusinessSlugFromPath(String path) {
     'startup',
     'business-setup',
     'admin-setup',
-    'menu', // For default/root access
-    'carrito', // For default/root access
-    'cuenta', // For default/root access
-    'ordenes', // For default/root access
+    'authenticated-profile',
+
+    // Default business routes (when no business slug is present)
+    'menu',
+    'carrito',
+    'cart',
+    'cuenta',
+    'ordenes',
+    'catering-menu',
+    'catering-quote',
+    'subscripciones',
+    'catering',
+    'populares',
+    'categorias',
+    'platos',
+    'completar-orden',
+    'meal-plans',
+
+    // Admin panel routes
+    'dashboard',
+    'products',
+    'orders',
+    'settings',
   };
 
   if (systemRoutes.contains(firstSegment)) {
@@ -75,8 +182,9 @@ bool _isValidBusinessSlug(String slug) {
   // - Only contain lowercase letters, numbers, and hyphens
   // - Not start or end with hyphens
   if (slug.length < 2 || slug.length > 50) return false;
-  if (slug.contains(' ') || slug.contains('?') || slug.contains('#'))
+  if (slug.contains(' ') || slug.contains('?') || slug.contains('#')) {
     return false;
+  }
   if (slug.startsWith('-') || slug.endsWith('-')) return false;
   if (slug.contains('--')) return false; // No consecutive hyphens
 
@@ -89,23 +197,43 @@ bool _isValidBusinessSlug(String slug) {
 
 /// Provider for URL-aware business ID
 /// This provider combines URL-based business slug with fallback to local storage
+/// OPTIMIZED: Reduces unnecessary rebuilds by using ref.read for services
 @riverpod
 class UrlAwareBusinessId extends _$UrlAwareBusinessId {
+  String? _lastProcessedSlug;
+  String? _lastResolvedBusinessId;
+
   @override
   Future<String> build() async {
-    // First, try to get business slug from URL
+    debugPrint('🔄 URL-aware business ID provider building...');
+
+    // First, try to get business slug from URL (reactive detection)
     final urlBusinessSlug = ref.watch(businessSlugFromUrlProvider);
+
+    // Always fetch when slug changes (including null -> slug or slug -> null transitions)
+    final slugChanged = _lastProcessedSlug != urlBusinessSlug;
+
+    if (slugChanged) {
+      debugPrint(
+          '🔄 Business slug changed: $_lastProcessedSlug -> $urlBusinessSlug');
+      _lastProcessedSlug = urlBusinessSlug;
+    }
 
     if (urlBusinessSlug != null && urlBusinessSlug.isNotEmpty) {
       debugPrint('🌐 Found business slug in URL: $urlBusinessSlug');
 
-      // Resolve slug to business ID using the slug service
-      final slugService = ref.watch(businessSlugServiceProvider);
+      // OPTIMIZED: Use ref.read for services to avoid unnecessary rebuilds
+      final slugService = ref.read(businessSlugServiceProvider);
       final businessId =
           await slugService.getBusinessIdFromSlug(urlBusinessSlug);
 
       if (businessId != null) {
-        debugPrint('🌐 Using business ID from URL slug: $businessId');
+        debugPrint(
+            '✅ Business ID resolved: $businessId for slug: $urlBusinessSlug');
+
+        // NO LOCALSTORAGE - business context is purely URL-based
+
+        _lastResolvedBusinessId = businessId;
         _logBusinessAccess(urlBusinessSlug, businessId);
         return businessId;
       } else {
@@ -115,8 +243,15 @@ class UrlAwareBusinessId extends _$UrlAwareBusinessId {
     }
 
     // Fallback to local storage business ID
-    final storedBusinessId = await ref.watch(initBusinessIdProvider.future);
+    final storedBusinessId = await ref.read(initBusinessIdProvider.future);
     debugPrint('💾 Using business ID from storage: $storedBusinessId');
+
+    // Update tracking if business ID changed
+    if (_lastResolvedBusinessId != storedBusinessId) {
+      debugPrint(
+          '💾 Business ID from storage: $_lastResolvedBusinessId -> $storedBusinessId');
+      _lastResolvedBusinessId = storedBusinessId;
+    }
 
     // Log default/root access
     if (storedBusinessId == 'default') {
@@ -128,6 +263,8 @@ class UrlAwareBusinessId extends _$UrlAwareBusinessId {
 
   /// Force refresh the business ID (useful when URL changes)
   void refresh() {
+    _lastProcessedSlug = null;
+    _lastResolvedBusinessId = null;
     ref.invalidateSelf();
   }
 }
@@ -170,6 +307,6 @@ String? businessRoutePrefix(BusinessRoutePrefixRef ref) {
 /// Provider to get the current business slug from URL
 /// This is an alias for businessSlugFromUrlProvider for clearer usage
 @riverpod
-String? currentBusinessSlug(CurrentBusinessSlugRef ref) {
+String? currentBusinessSlug(Ref ref) {
   return ref.watch(businessSlugFromUrlProvider);
 }

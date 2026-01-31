@@ -1,12 +1,17 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/cart/model/cart_item.dart';
 import 'dart:convert';
 
-class MealOrderNotifier extends StateNotifier<List<CartItem>> {
-  MealOrderNotifier() : super([]) {
+part 'meal_plan_cart.g.dart';
+
+@Riverpod(keepAlive: true)
+class MealOrder extends _$MealOrder {
+  @override
+  List<CartItem> build() {
     _loadMeals();
+    return [];
   }
 
   // Load meals from SharedPreferences
@@ -32,10 +37,9 @@ class MealOrderNotifier extends StateNotifier<List<CartItem>> {
     await prefs.setString('mealOrders', serializedMeals);
   }
 
-  // Override state setter to save meals when modified
-  @override
-  set state(List<CartItem> value) {
-    super.state = value;
+  // Set the state and trigger save
+  void _updateState(List<CartItem> newState) {
+    state = newState;
     _saveMeals();
   }
 
@@ -63,14 +67,24 @@ class MealOrderNotifier extends StateNotifier<List<CartItem>> {
       quantity: item['quantity'],
     );
 
-    state = [...state, newMeal];
+    _updateState([...state, newMeal]);
     debugPrint('Meal Subscription added successfully.');
   }
 
   // Deserialize method
   List<CartItem> deserializeCart(String jsonString) {
-    List<dynamic> jsonData = jsonDecode(jsonString);
-    return jsonData.map((item) => CartItem.fromJson(item)).toList();
+    if (jsonString.isEmpty ||
+        jsonString == 'null' ||
+        jsonString == 'undefined') {
+      return [];
+    }
+    try {
+      List<dynamic> jsonData = jsonDecode(jsonString);
+      return jsonData.map((item) => CartItem.fromJson(item)).toList();
+    } catch (e) {
+      debugPrint('Error decoding meal cart JSON: $e');
+      return [];
+    }
   }
 
   // Serialize method
@@ -80,28 +94,23 @@ class MealOrderNotifier extends StateNotifier<List<CartItem>> {
 
   // Remove meal subscription by ID
   void removeFromCart(String id) {
-    state = state.where((meal) => meal.id != id).toList();
+    _updateState(state.where((meal) => meal.id != id).toList());
   }
 
   // Consume a meal from a meal subscription
   void consumeMeal(String title) {
-    state = [
+    _updateState([
       for (final meal in state)
         if (meal.title == title && meal.isMealSubscription)
           meal.copyWith(remainingMeals: meal.remainingMeals - 1)
         else
           meal,
-    ];
+    ]);
   }
 
   // Clear all meal subscriptions from the cart
   void clearCart() {
-    state = [];
+    _updateState([]);
     debugPrint('Meal subscriptions cleared from the cart.');
   }
 }
-
-final mealOrderProvider =
-    StateNotifierProvider<MealOrderNotifier, List<CartItem>>((ref) {
-  return MealOrderNotifier();
-});

@@ -5,36 +5,38 @@ import 'package:flutter/foundation.dart';
 /// using Firebase Analytics with GA4 best practices.
 class AnalyticsService {
   static final AnalyticsService _instance = AnalyticsService._internal();
-  
+
   /// Singleton instance of the analytics service
   static AnalyticsService get instance => _instance;
-  
+
   /// Firebase Analytics instance
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
-  
+
   /// Debug mode flag
   bool _debugMode = false;
 
   /// Private constructor
   AnalyticsService._internal();
-  
+
   /// Initialize the analytics service
   Future<void> init({bool debugMode = false}) async {
     _debugMode = debugMode;
-    
+
     if (_debugMode) {
       // Enable debug logging in debug mode
       await _analytics.setAnalyticsCollectionEnabled(true);
-      await _analytics.setSessionTimeoutDuration(const Duration(minutes: 30));
-      
+      if (!kIsWeb) {
+        await _analytics.setSessionTimeoutDuration(const Duration(minutes: 30));
+      }
+
       if (!kIsWeb) {
         await _analytics.logAppOpen();
       }
-      
+
       debugPrint('📊 AnalyticsService initialized in debug mode');
     }
   }
-  
+
   /// Log debug message if debug mode is enabled
   void _logDebug(String message) {
     if (_debugMode) {
@@ -45,9 +47,9 @@ class AnalyticsService {
   //===========================================================================
   // USER PROPERTIES
   //===========================================================================
-  
+
   /// Set a user property
-  /// 
+  ///
   /// Use user properties to describe segments of your user base, such as
   /// language preference, membership status, or geographic location.
   Future<void> setUserProperty({
@@ -61,9 +63,9 @@ class AnalyticsService {
       debugPrint('❌ Failed to set user property: $e');
     }
   }
-  
+
   /// Set user ID
-  /// 
+  ///
   /// Sets the user ID property. This feature must be used in accordance with
   /// Google's Privacy Policy.
   Future<void> setUserId(String? userId) async {
@@ -74,11 +76,11 @@ class AnalyticsService {
       debugPrint('❌ Failed to set user ID: $e');
     }
   }
-  
+
   //===========================================================================
   // STANDARD E-COMMERCE EVENTS
   //===========================================================================
-  
+
   /// Log when a user views an item
   Future<void> logViewItem({
     required String itemId,
@@ -92,21 +94,22 @@ class AnalyticsService {
       await _analytics.logViewItem(
         currency: currency,
         value: price,
-        items: items ?? [
-          AnalyticsEventItem(
-            itemId: itemId,
-            itemName: itemName,
-            itemCategory: itemCategory,
-            price: price,
-          ),
-        ],
+        items: items ??
+            [
+              AnalyticsEventItem(
+                itemId: itemId,
+                itemName: itemName,
+                itemCategory: itemCategory,
+                price: price,
+              ),
+            ],
       );
       _logDebug('Logged view_item: $itemName');
     } catch (e) {
       debugPrint('❌ Failed to log view_item: $e');
     }
   }
-  
+
   /// Log when a user views an item list
   Future<void> logViewItemList({
     required String listId,
@@ -124,7 +127,7 @@ class AnalyticsService {
       debugPrint('❌ Failed to log view_item_list: $e');
     }
   }
-  
+
   /// Log when a user selects an item from a list
   Future<void> logSelectItem({
     required String itemListId,
@@ -142,7 +145,7 @@ class AnalyticsService {
       debugPrint('❌ Failed to log select_item: $e');
     }
   }
-  
+
   /// Log when a user adds an item to their cart
   Future<void> logAddToCart({
     required List<AnalyticsEventItem> items,
@@ -160,7 +163,7 @@ class AnalyticsService {
       debugPrint('❌ Failed to log add_to_cart: $e');
     }
   }
-  
+
   /// Log when a user removes an item from their cart
   Future<void> logRemoveFromCart({
     required List<AnalyticsEventItem> items,
@@ -178,7 +181,7 @@ class AnalyticsService {
       debugPrint('❌ Failed to log remove_from_cart: $e');
     }
   }
-  
+
   /// Log when a user begins the checkout process
   Future<void> logBeginCheckout({
     required List<AnalyticsEventItem> items,
@@ -198,7 +201,7 @@ class AnalyticsService {
       debugPrint('❌ Failed to log begin_checkout: $e');
     }
   }
-  
+
   /// Log when a user adds shipping info during checkout
   Future<void> logAddShippingInfo({
     required List<AnalyticsEventItem> items,
@@ -220,7 +223,7 @@ class AnalyticsService {
       debugPrint('❌ Failed to log add_shipping_info: $e');
     }
   }
-  
+
   /// Log when a user adds payment information during checkout
   Future<void> logAddPaymentInfo({
     required List<AnalyticsEventItem> items,
@@ -242,7 +245,7 @@ class AnalyticsService {
       debugPrint('❌ Failed to log add_payment_info: $e');
     }
   }
-  
+
   /// Log when a user makes a purchase
   Future<void> logPurchase({
     required String transactionId,
@@ -263,12 +266,13 @@ class AnalyticsService {
         tax: tax,
         shipping: shipping,
       );
-      _logDebug('Logged purchase: $transactionId \$${value.toStringAsFixed(2)}');
+      _logDebug(
+          'Logged purchase: $transactionId \$${value.toStringAsFixed(2)}');
     } catch (e) {
       debugPrint('❌ Failed to log purchase: $e');
     }
   }
-  
+
   /// Log when a user requests a refund
   Future<void> logRefund({
     required String transactionId,
@@ -288,11 +292,11 @@ class AnalyticsService {
       debugPrint('❌ Failed to log refund: $e');
     }
   }
-  
+
   //===========================================================================
   // RESTAURANT-SPECIFIC EVENTS
   //===========================================================================
-  
+
   /// Log when a user views a menu
   Future<void> logViewMenu({
     required String menuId,
@@ -317,7 +321,7 @@ class AnalyticsService {
       debugPrint('❌ Failed to log view_menu: $e');
     }
   }
-  
+
   /// Log when a user places a food order
   Future<void> logOrderFood({
     required String orderId,
@@ -343,11 +347,11 @@ class AnalyticsService {
         'coupon': coupon,
         'special_instructions': specialInstructions,
       };
-      
+
       if (scheduledTime != null) {
         parameters['scheduled_time'] = scheduledTime.toIso8601String();
       }
-      
+
       await _analytics.logEvent(
         name: 'food_order',
         parameters: Map<String, Object>.from(parameters),
@@ -357,7 +361,7 @@ class AnalyticsService {
       debugPrint('❌ Failed to log food_order: $e');
     }
   }
-  
+
   /// Log when a user rates their dining experience
   Future<void> logRateExperience({
     required String orderId,
@@ -384,7 +388,7 @@ class AnalyticsService {
       debugPrint('❌ Failed to log rate_experience: $e');
     }
   }
-  
+
   /// Log when a user makes a reservation
   Future<void> logReservation({
     required String reservationId,
@@ -411,7 +415,7 @@ class AnalyticsService {
       debugPrint('❌ Failed to log reservation: $e');
     }
   }
-  
+
   /// Log when a user subscribes to a meal plan
   Future<void> logSubscribeMealPlan({
     required String subscriptionId,
@@ -432,37 +436,39 @@ class AnalyticsService {
         'value': value,
         'currency': currency,
       };
-      
+
       if (startDate != null) {
         parameters['start_date'] = startDate.toIso8601String();
       }
-      
+
       if (endDate != null) {
         parameters['end_date'] = endDate.toIso8601String();
       }
-      
+
       if (includedCategories != null) {
         parameters['included_categories'] = includedCategories;
       }
-      
+
       if (sampleItems != null) {
-        parameters['sample_items'] = sampleItems.map((item) => item.asMap()).toList();
+        parameters['sample_items'] =
+            sampleItems.map((item) => item.asMap()).toList();
       }
-      
+
       await _analytics.logEvent(
         name: 'subscribe_meal_plan',
         parameters: Map<String, Object>.from(parameters),
       );
-      _logDebug('Logged subscribe_meal_plan: $planType \$${value.toStringAsFixed(2)}');
+      _logDebug(
+          'Logged subscribe_meal_plan: $planType \$${value.toStringAsFixed(2)}');
     } catch (e) {
       debugPrint('❌ Failed to log subscribe_meal_plan: $e');
     }
   }
-  
+
   //===========================================================================
   // ENGAGEMENT EVENTS
   //===========================================================================
-  
+
   /// Log when a user searches for something
   Future<void> logSearch({
     required String searchTerm,
@@ -478,7 +484,7 @@ class AnalyticsService {
       debugPrint('❌ Failed to log search: $e');
     }
   }
-  
+
   /// Log when a user selects content
   Future<void> logSelectContent({
     required String contentType,
@@ -494,7 +500,7 @@ class AnalyticsService {
       debugPrint('❌ Failed to log select_content: $e');
     }
   }
-  
+
   /// Log when a user shares content
   Future<void> logShare({
     required String contentType,
@@ -512,7 +518,7 @@ class AnalyticsService {
       debugPrint('❌ Failed to log share: $e');
     }
   }
-  
+
   /// Log when a user signs up
   Future<void> logSignUp({
     required String method,
@@ -526,7 +532,7 @@ class AnalyticsService {
       debugPrint('❌ Failed to log sign_up: $e');
     }
   }
-  
+
   /// Log when a user logs in
   Future<void> logLogin({
     required String method,
@@ -540,11 +546,11 @@ class AnalyticsService {
       debugPrint('❌ Failed to log login: $e');
     }
   }
-  
+
   //===========================================================================
   // CUSTOM EVENTS
   //===========================================================================
-  
+
   /// Log a custom CTA event
   Future<void> logCTAEvent({
     required String ctaLabel,
@@ -560,11 +566,11 @@ class AnalyticsService {
         'cta_type': ctaType,
         'destination': destination,
       };
-      
+
       if (additionalParams != null) {
         parameters.addAll(Map<String, String?>.from(additionalParams));
       }
-      
+
       await _analytics.logEvent(
         name: 'cta_tap',
         parameters: Map<String, Object>.from(parameters),
@@ -574,11 +580,12 @@ class AnalyticsService {
       debugPrint('❌ Failed to log cta_tap: $e');
     }
   }
-  
+
   /// Log order status update
   Future<void> logOrderStatusUpdate({
     required String orderId,
-    required String status, // 'confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered', 'canceled'
+    required String
+        status, // 'confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered', 'canceled'
     DateTime? timestamp,
     String? updatedBy,
     double? estimatedDeliveryTime, // In minutes
@@ -589,15 +596,16 @@ class AnalyticsService {
         'status': status,
         'updated_by': updatedBy,
       };
-      
+
       if (timestamp != null) {
         parameters['timestamp'] = timestamp.toIso8601String();
       }
-      
+
       if (estimatedDeliveryTime != null) {
-        parameters['estimated_delivery_time'] = estimatedDeliveryTime.toString();
+        parameters['estimated_delivery_time'] =
+            estimatedDeliveryTime.toString();
       }
-      
+
       await _analytics.logEvent(
         name: 'order_status_update',
         parameters: Map<String, Object>.from(parameters),
@@ -607,7 +615,7 @@ class AnalyticsService {
       debugPrint('❌ Failed to log order_status_update: $e');
     }
   }
-  
+
   /// Log any custom event
   Future<void> logCustomEvent({
     required String eventName,
@@ -616,7 +624,8 @@ class AnalyticsService {
     try {
       await _analytics.logEvent(
         name: eventName,
-        parameters: parameters != null ? Map<String, Object>.from(parameters) : null,
+        parameters:
+            parameters != null ? Map<String, Object>.from(parameters) : null,
       );
       _logDebug('Logged custom event: $eventName');
     } catch (e) {

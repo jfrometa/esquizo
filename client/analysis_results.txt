@@ -1,0 +1,225 @@
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 85.0.0 (93.0.0 available)
+  _flutterfire_internals 1.3.59 (1.3.66 available)
+  analyzer 7.6.0 (10.0.1 available)
+  analyzer_plugin 0.13.4 (0.14.1 available)
+  animations 2.1.0 (2.1.1 available)
+  bazel_worker 1.1.4 (1.1.5 available)
+  build 2.5.4 (4.0.4 available)
+  build_config 1.1.2 (1.2.0 available)
+  build_modules 5.1.1 (5.1.6 available)
+  build_resolvers 2.5.4 (3.0.4 available)
+  build_runner 2.5.4 (2.10.5 available)
+  build_runner_core 9.1.2 (9.3.2 available)
+  build_web_compilers 4.4.2 (4.4.7 available)
+  built_value 8.12.0 (8.12.3 available)
+  cel 0.5.3 (0.5.4+1 available)
+  characters 1.4.0 (1.4.1 available)
+  cloud_firestore 5.6.12 (6.1.2 available)
+  cloud_firestore_platform_interface 6.6.12 (7.0.6 available)
+  cloud_firestore_web 4.4.12 (5.1.2 available)
+  code_builder 4.11.0 (4.11.1 available)
+  cross_file 0.3.5 (0.3.5+1 available)
+  custom_lint 0.7.6 (0.8.1 available)
+  custom_lint_builder 0.7.6 (0.8.1 available)
+  custom_lint_core 0.7.5 (0.8.2 available)
+  custom_lint_visitor 1.0.0+7.7.0 (1.0.0+9.0.0 available)
+  dart_style 3.1.1 (3.1.4 available)
+  device_info_plus 11.5.0 (12.3.0 available)
+  email_validator 2.1.17 (3.0.0 available)
+  equatable 2.0.7 (2.0.8 available)
+  fake_cloud_firestore 3.1.0 (4.0.1 available)
+  ffi 2.1.4 (2.1.5 available)
+  file_selector_linux 0.9.3+2 (0.9.4 available)
+  file_selector_macos 0.9.4+5 (0.9.5 available)
+  file_selector_windows 0.9.3+4 (0.9.3+5 available)
+  firebase_ai 2.3.0 (3.7.0 available)
+  firebase_analytics 11.6.0 (12.1.1 available)
+  firebase_analytics_platform_interface 4.4.3 (5.0.6 available)
+  firebase_analytics_web 0.5.10+16 (0.6.1+2 available)
+  firebase_app_check 0.3.2+10 (0.4.1+4 available)
+  firebase_app_check_platform_interface 0.1.1+10 (0.2.1+4 available)
+  firebase_app_check_web 0.2.0+14 (0.2.2+2 available)
+  firebase_auth 5.7.0 (6.1.4 available)
+  firebase_auth_platform_interface 7.7.3 (8.1.6 available)
+  firebase_auth_web 5.15.3 (6.1.2 available)
+  firebase_core 3.15.2 (4.4.0 available)
+  firebase_core_web 2.24.1 (3.4.0 available)
+  firebase_crashlytics 4.3.10 (5.0.7 available)
+  firebase_crashlytics_platform_interface 3.8.10 (3.8.17 available)
+  firebase_database 11.3.10 (12.1.2 available)
+  firebase_database_platform_interface 0.2.6+10 (0.3.0+2 available)
+  firebase_database_web 0.2.6+16 (0.2.7+3 available)
+  firebase_messaging 15.2.10 (16.1.1 available)
+  firebase_messaging_platform_interface 4.6.10 (4.7.6 available)
+  firebase_messaging_web 3.10.10 (4.1.2 available)
+  firebase_storage 12.4.10 (13.0.6 available)
+  firebase_storage_platform_interface 5.2.10 (5.2.17 available)
+  firebase_storage_web 3.10.17 (3.11.2 available)
+  firebase_ui_auth 1.17.0 (3.0.1 available)
+  firebase_ui_firestore 1.7.3 (2.0.1 available)
+  firebase_ui_localizations 1.14.1 (2.0.1 available)
+  firebase_ui_oauth 1.7.0 (2.0.1 available)
+  firebase_ui_oauth_apple 1.3.2 (2.0.1 available)
+  firebase_ui_oauth_google 1.4.2 (2.0.1 available)
+  firebase_vertexai 1.8.3 (discontinued replaced by firebase_ai)
+  fl_chart 0.70.2 (1.1.1 available)
+  flutter_dotenv 5.2.1 (6.0.0 available)
+  flutter_lints 5.0.0 (6.0.0 available)
+  flutter_markdown 0.7.7+1 (discontinued replaced by flutter_markdown_plus)
+  flutter_plugin_android_lifecycle 2.0.32 (2.0.33 available)
+  flutter_riverpod 2.6.1 (3.2.0 available)
+  flutter_svg 2.2.2 (2.2.3 available)
+  geolocator 13.0.4 (14.0.2 available)
+  geolocator_android 4.6.2 (5.0.2 available)
+  getwidget 5.0.0 (7.0.0 available)
+  go_router 14.8.1 (17.0.1 available)
+  google_fonts 6.3.2 (7.1.0 available)
+  google_maps_flutter_android 2.18.4 (2.18.9 available)
+  google_maps_flutter_ios 2.15.5 (2.17.0 available)
+  google_maps_flutter_platform_interface 2.14.0 (2.14.1 available)
+  google_sign_in 6.3.0 (7.2.0 available)
+  google_sign_in_android 6.2.1 (7.2.7 available)
+  google_sign_in_ios 5.9.0 (6.2.5 available)
+  google_sign_in_platform_interface 2.5.0 (3.1.0 available)
+  google_sign_in_web 0.12.4+4 (1.1.0 available)
+  googleapis 13.2.0 (15.0.0 available)
+  googleapis_auth 1.6.0 (2.0.0 available)
+  image 4.5.4 (4.7.2 available)
+  image_picker_android 0.8.13+7 (0.8.13+12 available)
+  image_picker_for_web 3.1.0 (3.1.1 available)
+  image_picker_ios 0.8.13+1 (0.8.13+3 available)
+  js 0.6.7 (discontinued)
+  lints 5.1.1 (6.0.0 available)
+  localstorage 5.0.0 (6.0.0 available)
+  matcher 0.12.17 (0.12.18 available)
+  material_color_utilities 0.11.1 (0.13.0 available)
+  material_symbols_icons 4.2874.0 (4.2892.0 available)
+  meta 1.17.0 (1.18.0 available)
+  mockito 5.4.6 (5.6.3 available)
+  more 4.6.1 (4.7.0 available)
+  path_provider_android 2.2.20 (2.2.22 available)
+  path_provider_foundation 2.4.3 (2.6.0 available)
+  protobuf 5.1.0 (6.0.0 available)
+  riverpod 2.6.1 (3.2.0 available)
+  riverpod_annotation 2.6.1 (4.0.1 available)
+  riverpod_generator 2.6.5 (4.0.2 available)
+  riverpod_lint 2.6.5 (3.1.2 available)
+  rx 0.4.0 (0.5.0 available)
+  share_plus 10.1.4 (12.0.1 available)
+  share_plus_platform_interface 5.0.2 (6.1.0 available)
+  shared_preferences 2.5.3 (2.5.4 available)
+  shared_preferences_android 2.4.15 (2.4.18 available)
+  shared_preferences_foundation 2.5.5 (2.5.6 available)
+  source_gen 2.0.0 (4.2.0 available)
+  test_api 0.7.7 (0.7.9 available)
+  universal_io 2.2.2 (2.3.1 available)
+  url_launcher_android 6.3.24 (6.3.28 available)
+  url_launcher_ios 6.3.5 (6.3.6 available)
+  url_launcher_linux 3.2.1 (3.2.2 available)
+  url_launcher_macos 3.2.4 (3.2.5 available)
+  url_launcher_web 2.4.1 (2.4.2 available)
+  url_launcher_windows 3.1.4 (3.1.5 available)
+  url_strategy 0.3.0 (discontinued)
+  vector_graphics_compiler 1.1.19 (1.1.20 available)
+  watcher 1.1.4 (1.2.1 available)
+Got dependencies!
+4 packages are discontinued.
+122 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing 3 items...                                            
+
+   info • 'IsAdminRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/src/core/admin_panel/admin_management_service.dart:219:22 • deprecated_member_use_from_same_package
+   info • The member 'state' overrides an inherited member but isn't annotated with '@override' • lib/src/core/admin_panel/admin_management_service.dart:265:7 • annotate_overrides
+   info • Unnecessary 'this.' qualifier • lib/src/core/admin_panel/admin_management_service.dart:265:28 • unnecessary_this
+   info • 'RefreshAdminStatusRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/src/core/admin_panel/admin_management_service.dart:270:33 • deprecated_member_use_from_same_package
+   info • 'AutoCheckAdminStatusRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/src/core/admin_panel/admin_management_service.dart:282:27 • deprecated_member_use_from_same_package
+   info • 'AdminsStreamRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/src/core/admin_panel/admin_management_service.dart:309:38 • deprecated_member_use_from_same_package
+   info • The import of 'package:flutter_riverpod/flutter_riverpod.dart' is unnecessary because all of the used elements are also provided by the import of 'package:riverpod_annotation/riverpod_annotation.dart' • lib/src/core/admin_panel/admin_stats_provider.dart:1:8 • unnecessary_import
+   info • 'CombinedAdminStatsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/src/core/admin_panel/admin_stats_provider.dart:248:5 • deprecated_member_use_from_same_package
+  error • 1 positional argument expected by 'exists', but 0 found • lib/src/core/admin_panel/admin_stats_provider.dart:254:22 • not_enough_positional_arguments
+   info • 'OrderStatsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/src/core/admin_panel/admin_stats_provider.dart:265:31 • deprecated_member_use_from_same_package
+   info • 'TableStatsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/src/core/admin_panel/admin_stats_provider.dart:271:31 • deprecated_member_use_from_same_package
+   info • 'ProductStatsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/src/core/admin_panel/admin_stats_provider.dart:277:35 • deprecated_member_use_from_same_package
+   info • 'RecentOrdersRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/src/core/admin_panel/admin_stats_provider.dart:284:34 • deprecated_member_use_from_same_package
+   info • 'SalesStatsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/src/core/admin_panel/admin_stats_provider.dart:291:31 • deprecated_member_use_from_same_package
+   info • Don't use 'BuildContext's across async gaps • lib/src/screens/cart/cart_screen.dart:512:23 • use_build_context_synchronously
+warning • This class (or a class that this class inherits from) is marked as '@immutable', but one or more of its instance fields aren't final: CateringCartItemView.isCustomSelected, CateringCartItemView.isCustomUnitsSelected • lib/src/screens/cart/catering_cart_item_view.dart:7:7 • must_be_immutable
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/cart/catering_cart_item_view.dart:69:60 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/cart/catering_cart_item_view.dart:191:53 • deprecated_member_use
+warning • The declaration '_finalizeAndAddToCart' isn't referenced • lib/src/screens/cart/catering_cart_item_view.dart:385:8 • unused_element
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/cart/manual_quote_cart_item_view.dart:59:60 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/cart/manual_quote_cart_item_view.dart:115:55 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/cart/manual_quote_cart_item_view.dart:141:60 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/cart/meal_subscription_item_view.dart:60:60 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/cart/meal_subscription_item_view.dart:77:59 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/cart/meal_subscription_item_view.dart:112:56 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/cart/meal_subscription_item_view.dart:113:65 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/cart/meal_subscription_item_view.dart:147:60 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/src/screens/cart/widgets/catering_form.dart:261:13 • deprecated_member_use
+  error • Expected to find '}' • lib/src/screens/menu/menu_screen.dart:747:1 • expected_token
+warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/menu/views/category_view.dart:281:51 • dead_null_aware_expression
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/_show_catering_form_sheet.dart:53:57 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/_show_catering_quote_dialog.dart:48:64 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/_show_catering_quote_dialog.dart:58:64 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/_show_catering_quote_dialog.dart:69:64 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/catering_orders_view.dart:49:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/catering_orders_view.dart:68:55 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/catering_orders_view.dart:87:69 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/catering_orders_view.dart:94:71 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/catering_orders_view.dart:206:54 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/catering_orders_view.dart:248:40 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/catering_prackages_view.dart:54:53 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/catering_prackages_view.dart:91:58 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/catering_prackages_view.dart:115:44 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/catering_prackages_view.dart:261:51 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/catering_prackages_view.dart:353:50 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/catering_prackages_view.dart:377:61 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/custom_quote_view.dart:58:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/custom_quote_view.dart:77:57 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/custom_quote_view.dart:96:71 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/custom_quote_view.dart:103:73 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/custom_quote_view.dart:218:54 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/custom_quote_view.dart:257:54 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/custom_quote_view.dart:299:42 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/quote_item_cart.dart:35:50 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/quote_item_cart.dart:94:65 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering/reusable_filter_bottom_sheet.dart:120:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering_service_widget.dart:116:59 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering_service_widget.dart:209:59 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering_service_widget.dart:287:66 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering_service_widget.dart:297:66 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering_service_widget.dart:308:66 • deprecated_member_use
+warning • The value of the local variable 'cateringOrder' isn't used • lib/src/screens/menu/views/catering_service_widget.dart:445:11 • unused_local_variable
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering_service_widget.dart:525:47 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering_service_widget.dart:585:53 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering_service_widget.dart:785:71 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering_service_widget.dart:948:50 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering_service_widget.dart:997:61 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering_service_widget.dart:1029:44 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering_service_widget.dart:1044:61 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering_service_widget.dart:1117:42 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering_service_widget.dart:1131:59 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/catering_view.dart:153:45 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/meal_plans_view.dart:33:48 • deprecated_member_use
+warning • The left operand can't be null, so the right operand is never executed • lib/src/screens/menu/views/search_results_view.dart:112:49 • dead_null_aware_expression
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/special_offers_view.dart:28:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/special_offers_view.dart:75:67 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/views/special_offers_view.dart:93:71 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/widget/menu_header.dart:71:43 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/widget/menu_header.dart:78:42 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/widget/menu_header.dart:138:53 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/widget/menu_search_interface.dart:20:32 • deprecated_member_use
+   info • The constant name '_DragHandle' isn't a lowerCamelCase identifier • lib/src/screens/menu/widget/menu_search_interface.dart:37:7 • constant_identifier_names
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/widget/menu_search_interface.dart:112:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/widget/menu_search_interface.dart:207:54 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/widget/menu_tab_bar.dart:125:40 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/widget/menu_tab_bar.dart:127:38 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/widget/menu_tab_bar.dart:135:41 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/widget/menu_tab_bar.dart:145:54 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/widget/menu_tab_bar.dart:149:40 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/widget/menu_tab_bar.dart:190:46 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/src/screens/menu/widget/menu_tab_bar.dart:193:46 • deprecated_member_use
+
+91 issues found. (ran in 2.3s)

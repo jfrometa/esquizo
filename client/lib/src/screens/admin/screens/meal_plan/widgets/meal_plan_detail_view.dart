@@ -4,42 +4,42 @@ import 'package:intl/intl.dart';
 import 'package:starter_architecture_flutter_firebase/src/core/subscriptions/meal_plan_service.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/meal_plan/form/meal_plan_form.dart';
 import 'package:starter_architecture_flutter_firebase/src/screens/plans/plans.dart';
- 
 
 class MealPlanDetailView extends ConsumerStatefulWidget {
   final String mealPlanId;
   final VoidCallback onClose;
-  
+
   const MealPlanDetailView({
     super.key,
     required this.mealPlanId,
     required this.onClose,
   });
-  
+
   @override
   ConsumerState<MealPlanDetailView> createState() => _MealPlanDetailViewState();
 }
 
-class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with SingleTickerProviderStateMixin {
+class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
   }
-  
+
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final mealPlanAsync = ref.watch(mealPlanProvider(widget.mealPlanId));
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Meal Plan Details'),
@@ -66,7 +66,7 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
               child: Text('Meal plan not found'),
             );
           }
-          
+
           return TabBarView(
             controller: _tabController,
             children: [
@@ -81,15 +81,17 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddItemDialog(),
-        tooltip: _tabController.index == 1 ? 'Record consumed item' : 'Add allowed item',
+        tooltip: _tabController.index == 1
+            ? 'Record consumed item'
+            : 'Add allowed item',
         child: const Icon(Icons.add),
       ),
     );
   }
-  
+
   Widget _buildOverviewTab(MealPlan mealPlan) {
     final theme = Theme.of(context);
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -115,9 +117,9 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
                 ),
               ),
             ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Title and price
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,9 +168,9 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
               ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Description
           Card(
             elevation: 0,
@@ -193,9 +195,9 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
               ),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Features list
           Card(
             elevation: 0,
@@ -236,9 +238,9 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
               ),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // How it works
           Card(
             elevation: 0,
@@ -263,9 +265,9 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
               ),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Meal plan stats
           Card(
             elevation: 0,
@@ -282,31 +284,31 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   _buildStatRow(
                     icon: Icons.restaurant_menu,
                     label: 'Total Meals',
                     value: '${mealPlan.totalMeals}',
                   ),
-                  
+
                   const Divider(height: 24),
-                  
+
                   _buildStatRow(
                     icon: Icons.check_circle,
                     label: 'Meals Used',
                     value: '${mealPlan.totalMeals - mealPlan.mealsRemaining}',
                   ),
-                  
+
                   const Divider(height: 24),
-                  
+
                   _buildStatRow(
                     icon: Icons.pending_actions,
                     label: 'Meals Remaining',
                     value: '${mealPlan.mealsRemaining}',
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Progress bar
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -321,7 +323,8 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
                             ? (mealPlan.totalMeals - mealPlan.mealsRemaining) /
                                 mealPlan.totalMeals
                             : 0.0,
-                        backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                        backgroundColor:
+                            theme.colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       const SizedBox(height: 4),
@@ -335,9 +338,9 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
               ),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Date information
           Card(
             elevation: 0,
@@ -354,57 +357,54 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
                   _buildStatRow(
                     icon: Icons.event_available,
                     label: 'Created Date',
                     value: DateFormat.yMMMd().format(mealPlan.createdAt),
                   ),
-                  
                   if (mealPlan.updatedAt != null) ...[
                     const Divider(height: 24),
                     _buildStatRow(
                       icon: Icons.update,
                       label: 'Last Updated',
-                      value: DateFormat.yMMMd().add_jm().format(mealPlan.updatedAt!),
+                      value: DateFormat.yMMMd()
+                          .add_jm()
+                          .format(mealPlan.updatedAt!),
                     ),
                   ],
-                  
                   if (mealPlan.expiryDate != null) ...[
                     const Divider(height: 24),
                     _buildStatRow(
                       icon: Icons.event_busy,
                       label: 'Expiry Date',
                       value: DateFormat.yMMMd().format(mealPlan.expiryDate!),
-                      valueColor: mealPlan.isExpired ? theme.colorScheme.error : null,
+                      valueColor:
+                          mealPlan.isExpired ? theme.colorScheme.error : null,
                     ),
                   ],
-                  
                   const Divider(height: 24),
-                  
                   _buildStatRow(
                     icon: Icons.visibility,
                     label: 'Availability',
                     value: mealPlan.isAvailable ? 'Available' : 'Unavailable',
-                    valueColor: mealPlan.isAvailable ? Colors.green : Colors.red,
+                    valueColor:
+                        mealPlan.isAvailable ? Colors.green : Colors.red,
                   ),
-                  
                   const Divider(height: 24),
-                  
                   _buildStatRow(
                     icon: Icons.info,
                     label: 'Status',
-                    value: mealPlan.status.name[0].toUpperCase() + 
-                           mealPlan.status.name.substring(1),
+                    value: mealPlan.status.name[0].toUpperCase() +
+                        mealPlan.status.name.substring(1),
                     valueColor: _getStatusColor(mealPlan.status),
                   ),
                 ],
               ),
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Action buttons
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -417,10 +417,14 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
               const SizedBox(width: 16),
               OutlinedButton.icon(
                 icon: Icon(
-                  mealPlan.isAvailable ? Icons.visibility_off : Icons.visibility,
+                  mealPlan.isAvailable
+                      ? Icons.visibility_off
+                      : Icons.visibility,
                 ),
                 label: Text(
-                  mealPlan.isAvailable ? 'Mark as Unavailable' : 'Mark as Available',
+                  mealPlan.isAvailable
+                      ? 'Mark as Unavailable'
+                      : 'Mark as Available',
                 ),
                 onPressed: () => _toggleAvailability(mealPlan),
               ),
@@ -430,10 +434,10 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
       ),
     );
   }
-  
+
   Widget _buildConsumedItemsTab(MealPlan mealPlan) {
     final consumedItemsAsync = ref.watch(consumedItemsProvider(mealPlan.id));
-    
+
     return consumedItemsAsync.when(
       data: (items) {
         if (items.isEmpty) {
@@ -441,7 +445,7 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
             child: Text('No consumed items recorded yet'),
           );
         }
-        
+
         return ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: items.length,
@@ -451,7 +455,8 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
               margin: const EdgeInsets.only(bottom: 8),
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                  backgroundColor:
+                      Theme.of(context).colorScheme.primary.withOpacity(0.2),
                   child: Icon(
                     Icons.restaurant,
                     color: Theme.of(context).colorScheme.primary,
@@ -461,9 +466,9 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Consumed on: ${DateFormat.yMMMd().add_jm().format(item.consumedAt)}'),
-                    if (item.notes.isNotEmpty)
-                      Text('Notes: ${item.notes}'),
+                    Text(
+                        'Consumed on: ${DateFormat.yMMMd().add_jm().format(item.consumedAt)}'),
+                    if (item.notes.isNotEmpty) Text('Notes: ${item.notes}'),
                   ],
                 ),
                 trailing: IconButton(
@@ -479,23 +484,23 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
       error: (error, _) => Center(child: Text('Error: $error')),
     );
   }
-  
+
   Widget _buildAllowedItemsTab(MealPlan mealPlan) {
     final allItemsAsync = ref.watch(mealPlanItemsProvider);
-    
+
     return allItemsAsync.when(
       data: (allItems) {
         // Filter to get only allowed items
-        final allowedItems = allItems.where(
-          (item) => mealPlan.allowedItemIds.contains(item.id)
-        ).toList();
-        
+        final allowedItems = allItems
+            .where((item) => mealPlan.allowedItemIds.contains(item.id))
+            .toList();
+
         if (allowedItems.isEmpty) {
           return const Center(
             child: Text('No allowed items set for this meal plan'),
           );
         }
-        
+
         return ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: allowedItems.length,
@@ -507,10 +512,14 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
                 leading: item.imageUrl.isNotEmpty
                     ? CircleAvatar(
                         backgroundImage: NetworkImage(item.imageUrl),
-                        onBackgroundImageError: (_, __) => const Icon(Icons.error),
+                        onBackgroundImageError: (_, __) =>
+                            const Icon(Icons.error),
                       )
                     : CircleAvatar(
-                        backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                        backgroundColor: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withOpacity(0.2),
                         child: Icon(
                           Icons.restaurant_menu,
                           color: Theme.of(context).colorScheme.primary,
@@ -520,9 +529,12 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(item.description, maxLines: 2, overflow: TextOverflow.ellipsis),
-                    Text('\$${item.price.toStringAsFixed(2)}', 
-                      style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
+                    Text(item.description,
+                        maxLines: 2, overflow: TextOverflow.ellipsis),
+                    Text('\$${item.price.toStringAsFixed(2)}',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary)),
                   ],
                 ),
                 trailing: Row(
@@ -530,7 +542,8 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
                   children: [
                     Switch(
                       value: item.isAvailable,
-                      onChanged: (value) => _toggleItemAvailability(item, value),
+                      onChanged: (value) =>
+                          _toggleItemAvailability(item, value),
                     ),
                     IconButton(
                       icon: const Icon(Icons.remove_circle_outline),
@@ -549,7 +562,7 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
       error: (error, _) => Center(child: Text('Error: $error')),
     );
   }
-  
+
   Widget _buildStatRow({
     required IconData icon,
     required String label,
@@ -569,14 +582,14 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
         Text(
           value,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: valueColor,
-          ),
+                fontWeight: FontWeight.bold,
+                color: valueColor,
+              ),
         ),
       ],
     );
   }
-  
+
   Color _getStatusColor(MealPlanStatus status) {
     switch (status) {
       case MealPlanStatus.active:
@@ -587,7 +600,7 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
         return Colors.red;
     }
   }
-  
+
   void _showEditMealPlanDialog(MealPlan mealPlan) {
     showDialog(
       context: context,
@@ -606,7 +619,7 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
       ),
     );
   }
-  
+
   void _showAddItemDialog() {
     if (_tabController.index == 1) {
       _showAddConsumedItemDialog();
@@ -614,33 +627,35 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
       _showAddAllowedItemDialog();
     }
   }
-  
+
   void _showAddConsumedItemDialog() {
     final mealPlanAsync = ref.read(mealPlanProvider(widget.mealPlanId));
-    
+
     mealPlanAsync.whenData((mealPlan) {
       if (mealPlan == null) return;
-      
+
       final allItemsAsync = ref.read(mealPlanItemsProvider.future);
-      
+
       allItemsAsync.then((allItems) {
         // Filter to only show allowed items that are available
-        final allowedItems = allItems.where(
-          (item) => mealPlan.allowedItemIds.contains(item.id) && item.isAvailable
-        ).toList();
-        
+        final allowedItems = allItems
+            .where((item) =>
+                mealPlan.allowedItemIds.contains(item.id) && item.isAvailable)
+            .toList();
+
         if (allowedItems.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('No available items for this meal plan. Please add allowed items first.'),
+              content: Text(
+                  'No available items for this meal plan. Please add allowed items first.'),
             ),
           );
           return;
         }
-        
+
         MealPlanItem? selectedItem = allowedItems.first;
         final notesController = TextEditingController();
-        
+
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -652,7 +667,7 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   DropdownButtonFormField<MealPlanItem>(
-                    value: selectedItem,
+                    initialValue: selectedItem,
                     decoration: const InputDecoration(
                       labelText: 'Select Item',
                       border: OutlineInputBorder(),
@@ -698,7 +713,7 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
                       consumedBy: 'admin', // Replace with actual user ID
                       notes: notesController.text.trim(),
                     );
-                    
+
                     Navigator.pop(context);
                     _addConsumedItem(consumedItem);
                   }
@@ -711,33 +726,34 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
       });
     });
   }
-  
+
   void _showAddAllowedItemDialog() {
     final mealPlanAsync = ref.read(mealPlanProvider(widget.mealPlanId));
-    
+
     mealPlanAsync.whenData((mealPlan) {
       if (mealPlan == null) return;
-      
+
       final allItemsAsync = ref.read(mealPlanItemsProvider.future);
-      
+
       allItemsAsync.then((allItems) {
         // Filter out items that are already allowed
-        final availableItems = allItems.where(
-          (item) => !mealPlan.allowedItemIds.contains(item.id)
-        ).toList();
-        
+        final availableItems = allItems
+            .where((item) => !mealPlan.allowedItemIds.contains(item.id))
+            .toList();
+
         if (availableItems.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('All items are already allowed for this meal plan.'),
+              content:
+                  Text('All items are already allowed for this meal plan.'),
             ),
           );
           return;
         }
-        
+
         // Allow multiple selection
         final selectedItems = <MealPlanItem>[];
-        
+
         showDialog(
           context: context,
           builder: (context) => StatefulBuilder(
@@ -752,7 +768,7 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
                     itemBuilder: (context, index) {
                       final item = availableItems[index];
                       final isSelected = selectedItems.contains(item);
-                      
+
                       return CheckboxListTile(
                         title: Text(item.name),
                         subtitle: Text('\$${item.price.toStringAsFixed(2)}'),
@@ -792,7 +808,7 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
       });
     });
   }
-  
+
   void _confirmDeleteConsumedItem(ConsumedItem item) {
     showDialog(
       context: context,
@@ -819,13 +835,13 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
       ),
     );
   }
-  
+
   // CRUD Operations
   Future<void> _updateMealPlan(MealPlan mealPlan) async {
     try {
       final service = ref.read(mealPlanServiceProvider);
       await service.updateMealPlan(mealPlan);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Meal plan updated successfully')),
       );
@@ -835,19 +851,18 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
       );
     }
   }
-  
+
   Future<void> _toggleAvailability(MealPlan mealPlan) async {
     try {
       final service = ref.read(mealPlanServiceProvider);
-      await service.toggleMealPlanAvailability(mealPlan.id, !mealPlan.isAvailable);
-      
+      await service.toggleMealPlanAvailability(
+          mealPlan.id, !mealPlan.isAvailable);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            mealPlan.isAvailable
-                ? 'Meal plan marked as unavailable'
-                : 'Meal plan marked as available'
-          ),
+          content: Text(mealPlan.isAvailable
+              ? 'Meal plan marked as unavailable'
+              : 'Meal plan marked as available'),
         ),
       );
     } catch (e) {
@@ -856,12 +871,12 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
       );
     }
   }
-  
+
   Future<void> _addConsumedItem(ConsumedItem item) async {
     try {
       final service = ref.read(mealPlanServiceProvider);
       await service.addConsumedItem(item);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Consumed item recorded successfully')),
       );
@@ -871,12 +886,12 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
       );
     }
   }
-  
+
   Future<void> _deleteConsumedItem(ConsumedItem item) async {
     try {
       final service = ref.read(mealPlanServiceProvider);
       await service.deleteConsumedItem(item.id, item.mealPlanId);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Consumed item deleted successfully')),
       );
@@ -886,24 +901,25 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
       );
     }
   }
-  
-  Future<void> _addAllowedItems(MealPlan mealPlan, List<MealPlanItem> items) async {
+
+  Future<void> _addAllowedItems(
+      MealPlan mealPlan, List<MealPlanItem> items) async {
     try {
       final service = ref.read(mealPlanServiceProvider);
-      
+
       final newAllowedIds = List<String>.from(mealPlan.allowedItemIds);
       for (final item in items) {
         if (!newAllowedIds.contains(item.id)) {
           newAllowedIds.add(item.id);
         }
       }
-      
+
       final updatedMealPlan = mealPlan.copyWith(
         allowedItemIds: newAllowedIds,
       );
-      
+
       await service.updateMealPlan(updatedMealPlan);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('${items.length} items added to allowed items')),
       );
@@ -913,20 +929,20 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
       );
     }
   }
-  
+
   Future<void> _removeAllowedItem(MealPlan mealPlan, MealPlanItem item) async {
     try {
       final service = ref.read(mealPlanServiceProvider);
-      
+
       final newAllowedIds = List<String>.from(mealPlan.allowedItemIds);
       newAllowedIds.remove(item.id);
-      
+
       final updatedMealPlan = mealPlan.copyWith(
         allowedItemIds: newAllowedIds,
       );
-      
+
       await service.updateMealPlan(updatedMealPlan);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('${item.name} removed from allowed items')),
       );
@@ -936,19 +952,18 @@ class _MealPlanDetailViewState extends ConsumerState<MealPlanDetailView> with Si
       );
     }
   }
-  
-  Future<void> _toggleItemAvailability(MealPlanItem item, bool isAvailable) async {
+
+  Future<void> _toggleItemAvailability(
+      MealPlanItem item, bool isAvailable) async {
     try {
       final service = ref.read(mealPlanServiceProvider);
       await service.toggleMealPlanItemAvailability(item.id, isAvailable);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            isAvailable
-                ? '${item.name} marked as available'
-                : '${item.name} marked as unavailable'
-          ),
+          content: Text(isAvailable
+              ? '${item.name} marked as available'
+              : '${item.name} marked as unavailable'),
         ),
       );
     } catch (e) {

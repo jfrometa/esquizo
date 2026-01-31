@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_item_model.dart'; 
+import 'package:starter_architecture_flutter_firebase/src/screens/admin/screens/catering_management/models/catering_item_model.dart';
 
 class CateringItemCard extends StatefulWidget {
   final CateringItem item;
@@ -80,7 +80,7 @@ class CateringItemCardState extends State<CateringItemCard> {
                       style: TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<int>(
-                    value: isCustomUnitsSelected ? null : selectedUnits,
+                    initialValue: isCustomUnitsSelected ? null : selectedUnits,
                     dropdownColor: Colors.white,
                     decoration: InputDecoration(
                       labelText: isCustomUnitsSelected
